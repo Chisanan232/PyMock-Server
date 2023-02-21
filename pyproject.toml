@@ -21,6 +21,7 @@ coveralls = "^3.3.1"
 tox = "^3.25.1"
 Flask = "^2.2.3"
 pre-commit = "^3.0.4"
+pylint = "^2.16.2"
 
 [build-system]
 requires = ["poetry-core"]
