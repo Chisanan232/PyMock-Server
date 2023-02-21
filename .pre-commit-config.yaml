@@ -1,0 +1,36 @@
+exclude: '.github/|docs/|requirements/'
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.3.0
+  hooks:
+    - id: check-yaml
+    - id: debug-statements
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+- repo: https://github.com/PyCQA/isort
+  rev: 5.12.0
+  hooks:
+    - id: isort
+      args: # arguments to configure black
+        - --profile=black
+- repo: https://github.com/psf/black
+  rev: 22.10.0
+  hooks:
+    - id: black
+      args: # arguments to configure black
+        - --line-length=120
+
+        # these folders won't be formatted by black
+        - --exclude="""\.git |
+          \.__pycache__|
+          \**.egg-info|
+          \.mypy_cache|
+          \.pytest_cache|
+          \.tox|
+          \.venv|
+          _build|
+          build|
+          dist"""
+
+      language_version: python3.10
