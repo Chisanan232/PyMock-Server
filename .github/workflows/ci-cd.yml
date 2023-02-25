@@ -1,0 +1,169 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "develop/**"
+      - "release"
+      - "release-**"
+      - "release/**"
+      - "master"
+    paths-ignore:
+      - "docs/**"
+      - "example/**"
+      - ".gitcommitrules"
+      - ".gitignore"
+      - "LICENSE"
+      - "README.md"
+      - "poetry.lock"
+      - "pyproject.toml"
+
+  pull_request:
+    branches:
+      - "develop/**"
+      - "release"
+      - "release-**"
+      - "release/**"
+      - "master"
+    paths-ignore:
+      - "docs/**"
+      - "example/**"
+      - ".gitcommitrules"
+      - ".gitignore"
+      - "LICENSE"
+      - "README.md"
+      - "poetry.lock"
+      - "pyproject.toml"
+
+jobs:
+  prep-testbed_unit-test:
+#    name: Prepare all unit test items
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/prepare_test_items.yaml@v4
+    with:
+      shell_path: scripts/ci/get-unit-test-paths.sh
+      shell_arg: unix
+
+
+#  prep-testbed_integration-test:
+##    name: Prepare all integration test items
+#    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/prepare_test_items.yaml@v4
+#    with:
+#      shell_path: scripts/ci/get-integration-test-paths.sh
+#      shell_arg: unix
+
+
+  run_unit-test:
+#    name: Run all unit test items
+    needs: prep-testbed_unit-test
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/run_test_items_via_pytest.yaml@v4
+    with:
+      test_type: unit-test
+      all_test_items_paths: ${{needs.prep-testbed_unit-test.outputs.all_test_items}}
+
+
+#  run_integration-test:
+##    name: Run all integration test items
+#    needs: prep-testbed_integration-test
+#    uses: ./.github/workflows/run_test_items_via_pytest_with_msg_queue_sys.yaml
+#    with:
+#      test_type: integration-test
+#      all_test_items_paths: ${{needs.prep-testbed_integration-test.outputs.all_test_items}}
+#      setup_http_server: true
+#      http_server_host: 0.0.0.0
+#      http_server_port: 12345
+#      http_server_app_module: test._http_server.app
+#      http_server_enter_point: app
+##      debug_mode: true
+
+
+  all-test_codecov:
+#    name: Organize and generate the testing report and upload it to Codecov
+    if: ${{ github.event_name == 'push' }}
+    needs: run_unit-test
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/organize_and_generate_test_cov_reports.yaml@v4
+    with:
+      test_type: unit-test
+
+
+  codecov_finish:
+#    name: Organize and generate the testing report and upload it to Codecov
+    needs: all-test_codecov
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/upload_test_cov_report.yaml@v4
+    secrets:
+      codecov_token: ${{ secrets.CODECOV_TOKEN }}
+    with:
+      test_type: unit-test
+      upload-to-codecov: true
+      codecov_flags: unit  # Required if 'upload-to-codecov' is true
+      codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
+
+
+#  coveralls_finish:
+##    name: Organize and generate the testing report and upload it to Coveralls
+#    needs: all-test_codecov
+#    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/upload_test_cov_report.yaml@v4
+#    secrets:
+#      coveralls_token: ${{ secrets.COVERALLS_TOKEN }}
+#    with:
+#      test_type: unit-test
+#      upload-to-coveralls: true
+
+
+  sonarcloud_finish:
+#    name: SonarCloud Scan
+    needs: all-test_codecov
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Download code coverage result files which has be handled by different test type process
+        uses: actions/download-artifact@v3
+        with:
+          name: test_coverage_xml_report
+          path: ${{ inputs.download_path }}
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+#  pre-building_test:
+##    name: Check about it could work finely by installing the Python package with setup.py file
+#    needs: [codecov_finish, coveralls_finish, codacy_finish]
+#    if: ${{ github.ref_name == 'release' || github.ref_name == 'master' && github.event_name == 'push' }}
+#    uses: ./.github/workflows/pre-building_test.yaml
+#    with:
+#      python_package_name: pymock-api
+#      test_import_package_code_1: import pymock_api
+#      test_import_package_code_2: from pymock_api.model import APIConfig
+#      test_python_script: ./scripts/pycode/crawler_main.py
+#
+#
+#  build_git-tag_and_create_github-release:
+##    name: Build git tag and GitHub release if it needs
+#    needs: pre-building_test
+#    if: ${{ github.ref_name == 'master' && github.event_name == 'push' }}
+#    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/build_git-tag_and_create_github-release.yaml@v4
+#    secrets:
+#      github_auth_token: ${{ secrets.GITHUB_TOKEN }}
+#    with:
+#      project_type: python-package
+#      project_name: pymock_api
+#      software_version_format: general-3
+#
+#
+#  push_python_pkg_to_pypi:
+##    name: Check about it could work finely by installing the Python package with setup.py file
+#    needs: build_git-tag_and_create_github-release
+#    if: ${{ github.ref_name == 'master' && github.event_name == 'push' }}
+#    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/push_pkg_to_pypi.yaml@v4
+#    with:
+#      release-type: ${{ needs.build_git-tag_and_create_github-release.outputs.python_release_version }}
+#      push-to-PyPI: official
+#    secrets:
+#      pypi_user: ${{ secrets.PYPI_USERNAME }}
+#      pypi_token: ${{ secrets.PYPI_PASSWORD }}
+

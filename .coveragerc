@@ -1,7 +1,7 @@
 [run]
 parallel = True
 relative_files = True
-source=./pymock_api
+include=./pymock_api
 
 omit =
 #    */__init__.py
