@@ -64,7 +64,7 @@ jobs:
   run_integration-test:
 #    name: Run all integration test items
     needs: prep-testbed_integration-test
-    uses: ./.github/workflows/run_test_items_via_pytest_with_msg_queue_sys.yaml
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/run_test_items_via_pytest.yaml@v4
     with:
       test_type: integration-test
       all_test_items_paths: ${{needs.prep-testbed_integration-test.outputs.all_test_items}}

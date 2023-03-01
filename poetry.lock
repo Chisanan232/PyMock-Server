@@ -454,7 +454,7 @@ pytest = ">=5.3"
 name = "PyYAML"
 version = "6.0"
 description = "YAML parser and emitter for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -610,7 +610,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "1345fdfd5e63a796a9c20e2d4192e42fdb935e0ebb48b94f09f2a81ccb829173"
+content-hash = "948ce93643489ea6e7cfcd2fa375101be8fb8e796b0c5e6fce0a59f7c29b7919"
 
 [metadata.files]
 astroid = [
