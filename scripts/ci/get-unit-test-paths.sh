@@ -41,12 +41,12 @@ getalltests() {
 }
 
 init_path=./test/unit_test/
-#utils_path=./test/unit_test/_utils/
+utils_path=./test/unit_test/_utils/
 model_path=./test/unit_test/model/
 #crawler_path=./test/unit_test/crawler/
 
 getalltests $init_path
-#getalltests $utils_path
+getalltests $utils_path
 getalltests $model_path
 #getalltests $crawler_path
 
