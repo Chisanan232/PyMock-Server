@@ -77,7 +77,7 @@ jobs:
     needs: [run_unit-test, run_integration-test]
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/organize_and_generate_test_cov_reports.yaml@v4
     with:
-      test_type: unit-test,integration-test
+      test_type: all-test
 
 
   codecov_finish:
@@ -87,9 +87,9 @@ jobs:
     secrets:
       codecov_token: ${{ secrets.CODECOV_TOKEN }}
     with:
-      test_type: unit-test
+      test_type: all-test
       upload-to-codecov: true
-      codecov_flags: unit  # Required if 'upload-to-codecov' is true
+      codecov_flags: unit,integration  # Required if 'upload-to-codecov' is true
       codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
 
 
