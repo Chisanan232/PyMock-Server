@@ -37,6 +37,23 @@ class ReaderTestSpec(metaclass=ABCMeta):
 
     @staticmethod
     def _test_with_file(function):
+        def _(self):
+            # Ensure that it doesn't have file
+            self._delete_file()
+            # Create the target file before run test
+            self._write_test_file()
+
+            try:
+                # Run the test item
+                function(self)
+            finally:
+                # Delete file finally
+                self._delete_file()
+
+        return _
+
+    @staticmethod
+    def _test_with_file_with_reader(function):
         def _(self, reader):
             # Ensure that it doesn't have file
             self._delete_file()
@@ -62,7 +79,7 @@ class TestYAMLReader(ReaderTestSpec):
     def file_path(self) -> str:
         return "./test.yaml"
 
-    @ReaderTestSpec._test_with_file
+    @ReaderTestSpec._test_with_file_with_reader
     def test_open_and_read(self, reader: YAMLReader):
         # Run target function
         reading_data = reader.read(config=self.file_path)
@@ -78,7 +95,7 @@ class TestYAMLReader(ReaderTestSpec):
         # Verify result
         assert isinstance(deserialized_data, APIConfig) and len(deserialized_data) != 0, ""
 
-    @ReaderTestSpec._test_with_file
+    @ReaderTestSpec._test_with_file_with_reader
     def test_load(self, reader: YAMLReader):
         # Run target function
         loaded_data = reader.load(config=self.file_path)
