@@ -3,6 +3,7 @@
 Read the configuration and parse its content to a specific data object so that it could be convenience to use it.
 """
 
+import os
 from abc import ABCMeta, abstractmethod
 
 from yaml import load
@@ -12,8 +13,8 @@ try:
 except ImportError:
     from yaml import Loader
 
-from pymock_api._utils.converter import Convert
-from pymock_api.model.api_config import APIConfig
+from ..model import APIConfig
+from .converter import Convert
 
 
 class Reader(metaclass=ABCMeta):
@@ -67,6 +68,10 @@ class YAMLReader(Reader):
         return self.deserialize(reading_data)
 
     def read(self, config: str) -> dict:
+        exist_file = os.path.exists(config)
+        if not exist_file:
+            raise FileNotFoundError(f"The target configuration file {config} doesn't exist.")
+
         with open(config, "r", encoding="utf-8") as file_stream:
             data: dict = load(stream=file_stream, Loader=Loader)
         return data
