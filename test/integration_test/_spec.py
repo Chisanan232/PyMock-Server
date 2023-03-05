@@ -43,20 +43,3 @@ class SpecWithFileOpt(metaclass=ABCMeta):
                 self._delete_file()
 
         return _
-
-    # @staticmethod
-    # def _test_with_file_with_reader(function):
-    #     def _(self, reader):
-    #         # Ensure that it doesn't have file
-    #         self._delete_file()
-    #         # Create the target file before run test
-    #         self._write_test_file()
-    #
-    #         try:
-    #             # Run the test item
-    #             function(self, reader)
-    #         finally:
-    #             # Delete file finally
-    #             self._delete_file()
-    #
-    #     return _
