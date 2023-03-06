@@ -52,18 +52,20 @@ class TestMockHTTPServer:
         class InvalidServer:
             pass
 
-        invalid_server = InvalidServer()
-        try:
-            MockHTTPServer(app_server=invalid_server)
-        except TypeError as e:
-            # Verify result
-            expected_err_msg = (
-                f"The instance {invalid_server} must be *pymock_api.application.BaseAppServer* type object."
-            )
-            assert str(e) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
-        else:
-            # Verify result
-            assert False, "It should raise an exception about 'TypeError'."
+        with patch("pymock_api.server.mock.load_config") as mock_load_config:
+            invalid_server = InvalidServer()
+            try:
+                MockHTTPServer(app_server=invalid_server)
+            except TypeError as e:
+                # Verify result
+                expected_err_msg = (
+                    f"The instance {invalid_server} must be *pymock_api.application.BaseAppServer* type object."
+                )
+                assert str(e) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
+                mock_load_config.assert_called_once_with(config_path="api.yaml")
+            else:
+                # Verify result
+                assert False, "It should raise an exception about 'TypeError'."
 
     def test_instantiate_arg_auto_setup(self):
         def _instantiate() -> MockHTTPServer:
