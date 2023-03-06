@@ -103,7 +103,7 @@ class _HTTPResponse:
         """
         try:
             return json.loads(data)
-        except:  # pylint: disable=broad-except
+        except:  # pylint: disable=broad-except, bare-except
             if cls._is_file(path=data):
                 return cls._read_file(path=data)
         return data
