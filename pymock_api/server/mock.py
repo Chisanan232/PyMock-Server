@@ -15,6 +15,8 @@ class MockHTTPServer:
         self._config_path = config_path
         self._api_config: APIConfig = load_config(config_path=self._config_path)
 
+        if app_server and not isinstance(app_server, BaseAppServer):
+            raise TypeError(f"The instance {app_server} must be *pymock_api.application.BaseAppServer* type object.")
         if not app_server:
             app_server = FlaskServer()
         self._app_server = app_server
