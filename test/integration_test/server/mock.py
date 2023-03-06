@@ -46,16 +46,6 @@ class MockHTTPServerTestSpec(SpecWithFileOpt):
     def file_path(self) -> str:
         return "./api.yaml"
 
-
-class TestMockHTTPServerWithFlaskApp(MockHTTPServerTestSpec):
-    @pytest.fixture(scope="class")
-    def server_app_type(self) -> FlaskServer:
-        return FlaskServer()
-
-    @pytest.fixture(scope="function")
-    def client(self, mock_server_app):
-        return mock_server_app.test_client()
-
     def test_mock_apis(self, client, api_config: APIConfig):
         for one_api_name, one_api_config in api_config.apis.apis.items():
             # Send HTTP request to target API and get its response data
@@ -74,3 +64,13 @@ class TestMockHTTPServerWithFlaskApp(MockHTTPServerTestSpec):
             assert (
                 under_test_http_resp == expected_http_resp
             ), f"The response data should be the same at mocked API '{one_api_name}'."
+
+
+class TestMockHTTPServerWithFlaskApp(MockHTTPServerTestSpec):
+    @pytest.fixture(scope="class")
+    def server_app_type(self) -> FlaskServer:
+        return FlaskServer()
+
+    @pytest.fixture(scope="function")
+    def client(self, mock_server_app):
+        return mock_server_app.test_client()
