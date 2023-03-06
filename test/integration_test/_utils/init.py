@@ -1,10 +1,10 @@
 from pymock_api._utils import load_config
 from pymock_api.model import APIConfig
 
-from .reader import ReaderTestSpec
+from .._spec import SpecWithFileOpt
 
 
-class TestInitFunctions(ReaderTestSpec):
+class TestInitFunctions(SpecWithFileOpt):
     @property
     def file_path(self) -> str:
         return "./test.yaml"
@@ -13,7 +13,7 @@ class TestInitFunctions(ReaderTestSpec):
     def not_exist_file_path(self) -> str:
         return "./file_not_exist.yaml"
 
-    @ReaderTestSpec._test_with_file
+    @SpecWithFileOpt._test_with_file
     def test_load_config(self):
         # Run target function
         loaded_data = load_config(config_path=self.file_path)
@@ -22,7 +22,7 @@ class TestInitFunctions(ReaderTestSpec):
         assert isinstance(loaded_data, APIConfig) and len(loaded_data) != 0, ""
         return "./file_not_exist.yaml"
 
-    @ReaderTestSpec._test_with_file
+    @SpecWithFileOpt._test_with_file
     def test_load_config_with_not_exist_file(self):
         try:
             # Run target function to test

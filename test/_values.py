@@ -35,6 +35,8 @@ _YouTube_Home_Value: dict = {
     "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
 }
 
+_YouTube_API_Content: dict = {"responseCode": "200", "errorMessage": "OK", "content": "This is YouTube home."}
+
 _Google_Home_Value: dict = {
     "url": "/google",
     "http": {
