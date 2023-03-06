@@ -54,7 +54,7 @@ class _HTTPResponse:
     def generate(cls, data: str) -> Union[str, dict]:
         try:
             return json.loads(data)
-        except:
+        except:  # pylint: disable=broad-except
             if cls._is_file(path=data):
                 return cls._read_file(path=data)
         return data
