@@ -1,5 +1,5 @@
 import json
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 
 import pytest
 
@@ -8,8 +8,11 @@ from pymock_api.model.api_config import APIConfig
 from pymock_api.server.application import FlaskServer
 from pymock_api.server.mock import MockHTTPServer, _HTTPResponse
 
+from ..._values import _YouTube_API_Content
+from .._spec import SpecWithFileOpt
 
-class MockHTTPServerTestSpec(metaclass=ABCMeta):
+
+class MockHTTPServerTestSpec(SpecWithFileOpt):
     @pytest.fixture(scope="class")
     @abstractmethod
     def server_app_type(self) -> FlaskServer:
@@ -24,9 +27,20 @@ class MockHTTPServerTestSpec(metaclass=ABCMeta):
     def client(self, mock_server_app):
         return mock_server_app.test_client()
 
-    @pytest.fixture(scope="session")
+    @pytest.fixture(scope="session", autouse=True)
     def api_config(self) -> APIConfig:
-        return load_config(self.file_path)
+        # Ensure that it doesn't have file
+        self._delete_file()
+        # Create the target file before run test
+        self._write_test_file()
+        # Create the example extended file for one of mocked APIs
+        self._write_json_file(path="youtube.json", content=_YouTube_API_Content)
+
+        yield load_config(self.file_path)
+
+        # Delete file finally
+        self._delete_file()
+        self._delete_file("youtube.json")
 
     @property
     def file_path(self) -> str:
