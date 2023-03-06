@@ -67,11 +67,13 @@ class MockHTTPServer:
 
         """
         for api_name, api_config in mocked_apis.apis.items():
+            # pylint: disable=exec-used
             exec(
                 f"""def {api_name}() -> Union[str, dict]:
                 return _HTTPResponse.generate(data='{api_config.http.response.value}')
             """
             )
+            # pylint: disable=exec-used
             exec(
                 f"""self.web_app.route(
                     "{mocked_apis.base.url}{api_config.url}", methods=["{api_config.http.request.method}"]
