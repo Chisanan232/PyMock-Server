@@ -1,5 +1,4 @@
-from typing import Type
-from unittest.mock import patch
+from typing import Any, Type
 
 import pytest
 from gunicorn.app.wsgiapp import WSGIApplication
@@ -23,6 +22,13 @@ class TestWSGIApp(AppServerTestSpec):
     def web_app_object_type(self) -> Type[WSGIApplication]:
         return WSGIApplication
 
+    @property
+    def mocker(self) -> str:
+        return "gunicorn.app.wsgiapp.WSGIApplication"
+
+    @property
+    def mocker_return_value(self) -> Any:
+        return FakeWSGIApp()
+
     def run_target_function(self, app_server: BaseSGI) -> WSGIApplication:
-        with patch.object(app_server, "server", return_value=FakeWSGIApp()):
-            return app_server.server()
+        return app_server.server()
