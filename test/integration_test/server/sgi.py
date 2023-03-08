@@ -5,7 +5,7 @@ from gunicorn.app.wsgiapp import WSGIApplication
 
 from pymock_api.server.sgi import WSGI, BaseSGI
 
-from ._spec import AppServerTestSpec
+from ._spec import AppServerTestSpec, MockerModule
 
 
 class FakeWSGIApp(WSGIApplication):
@@ -23,12 +23,8 @@ class TestWSGIApp(AppServerTestSpec):
         return WSGIApplication
 
     @property
-    def mocker(self) -> str:
-        return "gunicorn.app.wsgiapp.WSGIApplication"
-
-    @property
-    def mocker_return_value(self) -> Any:
-        return FakeWSGIApp()
+    def mocker(self) -> MockerModule:
+        return MockerModule(module_path="gunicorn.app.wsgiapp.WSGIApplication", return_value=FakeWSGIApp())
 
     def run_target_function(self, app_server: BaseSGI) -> WSGIApplication:
         return app_server.server()

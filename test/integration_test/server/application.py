@@ -5,7 +5,7 @@ from flask import Flask
 
 from pymock_api.server.application import BaseAppServer, FlaskServer
 
-from ._spec import AppServerTestSpec
+from ._spec import AppServerTestSpec, MockerModule
 
 
 class FakeFlask(Flask):
@@ -22,12 +22,8 @@ class TestFlaskServer(AppServerTestSpec):
         return Flask
 
     @property
-    def mocker(self) -> str:
-        return "flask.Flask"
-
-    @property
-    def mocker_return_value(self) -> Any:
-        return FakeFlask("PyTest-Used")
+    def mocker(self) -> MockerModule:
+        return MockerModule(module_path="flask.Flask", return_value=FakeFlask("PyTest-Used"))
 
     def run_target_function(self, app_server: BaseAppServer) -> Flask:
         return app_server.setup()
