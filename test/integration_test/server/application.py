@@ -14,7 +14,7 @@ class FakeFlask(Flask):
 
 class TestFlaskServer(AppServerTestSpec):
     @pytest.fixture(scope="function")
-    def app_server(self) -> FlaskServer:
+    def sut(self) -> FlaskServer:
         return FlaskServer()
 
     @property
@@ -25,5 +25,5 @@ class TestFlaskServer(AppServerTestSpec):
     def mocker(self) -> MockerModule:
         return MockerModule(module_path="flask.Flask", return_value=FakeFlask("PyTest-Used"))
 
-    def run_target_function(self, app_server: BaseAppServer) -> Flask:
-        return app_server.setup()
+    def run_target_function(self, sut: FlaskServer) -> Flask:
+        return sut.setup()

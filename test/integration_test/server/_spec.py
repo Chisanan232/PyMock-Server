@@ -14,7 +14,7 @@ MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
 class AppServerTestSpec(metaclass=ABCMeta):
     @pytest.fixture(scope="function")
     @abstractmethod
-    def app_server(self) -> Union[BaseAppServer, BaseSGI]:
+    def sut(self) -> Union[BaseAppServer, BaseSGI]:
         pass
 
     @property
@@ -23,7 +23,7 @@ class AppServerTestSpec(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def run_target_function(self, app_server: Union[BaseAppServer, BaseSGI]) -> Any:
+    def run_target_function(self, sut: Union[BaseAppServer, BaseSGI]) -> Any:
         pass
 
     @property
@@ -31,9 +31,9 @@ class AppServerTestSpec(metaclass=ABCMeta):
     def mocker(self) -> MockerModule:
         pass
 
-    def test_generating_instance_function(self, app_server: Union[BaseAppServer, BaseSGI]):
+    def test_generating_instance_function(self, sut: Union[BaseAppServer, BaseSGI]):
         with patch(self.mocker.module_path, return_value=self.mocker.return_value) as instantiate_ps:
-            web_app = self.run_target_function(app_server)
+            web_app = self.run_target_function(sut)
             instantiate_ps.assert_called_once()
             assert isinstance(
                 web_app, self.web_app_object_type

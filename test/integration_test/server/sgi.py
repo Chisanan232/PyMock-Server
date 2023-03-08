@@ -15,7 +15,7 @@ class FakeWSGIApp(WSGIApplication):
 
 class TestWSGIApp(AppServerTestSpec):
     @pytest.fixture(scope="function")
-    def app_server(self) -> WSGI:
+    def sut(self) -> WSGI:
         return WSGI()
 
     @property
@@ -26,5 +26,5 @@ class TestWSGIApp(AppServerTestSpec):
     def mocker(self) -> MockerModule:
         return MockerModule(module_path="gunicorn.app.wsgiapp.WSGIApplication", return_value=FakeWSGIApp())
 
-    def run_target_function(self, app_server: BaseSGI) -> WSGIApplication:
-        return app_server.server()
+    def run_target_function(self, sut: WSGI) -> WSGIApplication:
+        return sut.server()
