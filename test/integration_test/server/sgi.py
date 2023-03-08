@@ -19,7 +19,7 @@ class TestWSGIApp(AppServerTestSpec):
         return WSGI()
 
     @property
-    def web_app_object_type(self) -> Type[WSGIApplication]:
+    def expected_sut_type(self) -> Type[WSGIApplication]:
         return WSGIApplication
 
     @property

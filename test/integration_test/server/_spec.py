@@ -19,7 +19,7 @@ class AppServerTestSpec(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def web_app_object_type(self) -> Any:
+    def expected_sut_type(self) -> Any:
         pass
 
     @abstractmethod
@@ -36,5 +36,5 @@ class AppServerTestSpec(metaclass=ABCMeta):
             web_app = self.run_target_function(sut)
             instantiate_ps.assert_called_once()
             assert isinstance(
-                web_app, self.web_app_object_type
-            ), f"The web application server it generates should be *{self.web_app_object_type}* type object."
+                web_app, self.expected_sut_type
+            ), f"The web application server it generates should be *{self.expected_sut_type}* type object."

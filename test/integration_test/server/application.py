@@ -18,7 +18,7 @@ class TestFlaskServer(AppServerTestSpec):
         return FlaskServer()
 
     @property
-    def web_app_object_type(self) -> Type[Flask]:
+    def expected_sut_type(self) -> Type[Flask]:
         return Flask
 
     @property
