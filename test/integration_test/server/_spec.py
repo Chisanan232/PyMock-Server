@@ -22,7 +22,7 @@ class AppServerTestSpec(metaclass=ABCMeta):
     def run_target_function(self, app_server: Union[BaseAppServer, BaseSGI]) -> Any:
         pass
 
-    def test_setup(self, app_server: Union[BaseAppServer, BaseSGI]):
+    def test_generating_instance_function(self, app_server: Union[BaseAppServer, BaseSGI]):
         web_app = self.run_target_function(app_server)
         assert isinstance(
             web_app, self.web_app_object_type
