@@ -54,18 +54,15 @@ class TestMockHTTPServer:
 
         with patch("pymock_api.server.mock.load_config") as mock_load_config:
             invalid_server = InvalidServer()
-            try:
+            with pytest.raises(TypeError) as exc_info:
+                # Run target function to test
                 MockHTTPServer(app_server=invalid_server)
-            except TypeError as e:
                 # Verify result
                 expected_err_msg = (
                     f"The instance {invalid_server} must be *pymock_api.application.BaseAppServer* type object."
                 )
-                assert str(e) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
+                assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
                 mock_load_config.assert_called_once_with(config_path="api.yaml")
-            else:
-                # Verify result
-                assert False, "It should raise an exception about 'TypeError'."
 
     def test_instantiate_arg_auto_setup(self):
         def _instantiate() -> MockHTTPServer:
@@ -152,28 +149,20 @@ class TestInnerHTTPResponse:
 
     def test_response_with_not_exist_json_file_name(self, http_resp: Type[_HTTPResponse]):
         with patch("builtins.open", mock_open(read_data=None)) as mock_file_stream:
-            try:
+            with pytest.raises(FileNotFoundError) as exc_info:
                 # Run target function to test
                 http_resp.generate(data=_Not_Exist_File_Name)
-            except FileNotFoundError as e:
                 # Verify result
                 expected_err_msg = f"The target configuration file {_Not_Exist_File_Name} doesn't exist."
-                assert str(e) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
+                assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
                 mock_file_stream.assert_not_called()
-            else:
-                # Verify result
-                assert False, "It should raise an exception about 'FileNotFoundError'."
 
     def test_response_with_not_json_file_name(self, http_resp: Type[_HTTPResponse]):
         with patch("builtins.open", mock_open(read_data=None)) as mock_file_stream:
-            try:
+            with pytest.raises(FileFormatNotSupport) as exc_info:
                 # Run target function to test
                 http_resp.generate(data=_Not_Json_File_Name)
-            except FileFormatNotSupport as e:
                 # Verify result
                 expected_err_msg = f"It doesn't support reading '{', '.join(http_resp.valid_file_format)}' format file."
-                assert str(e) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
+                assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
                 mock_file_stream.assert_not_called()
-            else:
-                # Verify result
-                assert False, "It should raise an exception about 'FileNotFoundError'."
