@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Generic, TypeVar
 
 
-class BaseCommandLineOption(metaclass=ABCMeta):
+class BaseCommandOption(metaclass=ABCMeta):
     """*Define what command line options it would have be converted from the arguments by PyMock-API command*"""
 
     @abstractmethod
@@ -61,7 +61,7 @@ class BaseCommandLineOption(metaclass=ABCMeta):
         pass
 
 
-Base_Command_Line_Option = TypeVar("Base_Command_Line_Option", bound=BaseCommandLineOption)
+Base_Command_Option_Type = TypeVar("Base_Command_Option_Type", bound=BaseCommandOption)
 
 
 class BaseSGI(metaclass=ABCMeta):
@@ -91,7 +91,7 @@ class BaseSGI(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def cmd_options(self) -> Generic[Base_Command_Line_Option]:
+    def cmd_options(self) -> Generic[Base_Command_Option_Type]:
         """The command line options.
 
         Returns:
@@ -101,7 +101,7 @@ class BaseSGI(metaclass=ABCMeta):
         pass
 
 
-class WSGICmdOption(BaseCommandLineOption):
+class WSGICmdOption(BaseCommandOption):
     """*WSGI tool *gunicorn* command line options*
 
     Note:
