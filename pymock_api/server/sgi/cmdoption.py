@@ -1,10 +1,5 @@
-"""*The wrapper of application which ruled by SGI (server gateway interface)*
-
-The factory to generate SGI application instance to run Python web framework.
-"""
-
 from abc import ABCMeta, abstractmethod
-from typing import Generic, TypeVar
+from typing import TypeVar
 
 
 class BaseCommandOption(metaclass=ABCMeta):
@@ -64,32 +59,6 @@ class BaseCommandOption(metaclass=ABCMeta):
 Base_Command_Option_Type = TypeVar("Base_Command_Option_Type", bound=BaseCommandOption)
 
 
-class BaseSGICmd(metaclass=ABCMeta):
-    """*Base class of SGI*"""
-
-    @property
-    @abstractmethod
-    def entry_point(self) -> str:
-        """The command line program name.
-
-        Returns:
-            A string value about the command line.
-
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def options(self) -> Generic[Base_Command_Option_Type]:
-        """The command line options.
-
-        Returns:
-            An implementation of subclass of BaseCommandLineOption which has its options.
-
-        """
-        pass
-
-
 class WSGICmdOption(BaseCommandOption):
     """*WSGI tool *gunicorn* command line options*
 
@@ -125,18 +94,3 @@ class WSGICmdOption(BaseCommandOption):
 
     def log_level(self, level: str) -> str:
         return f"--log-level {level}"
-
-
-class WSGICmd(BaseSGICmd):
-    """*WSGI application*
-
-    This module for generating WSGI (Web Server Gateway Interface) application by Python tool *gunicorn*.
-    """
-
-    @property
-    def entry_point(self) -> str:
-        return "gunicorn"
-
-    @property
-    def options(self) -> WSGICmdOption:
-        return WSGICmdOption()
