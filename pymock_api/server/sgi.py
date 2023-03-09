@@ -64,7 +64,7 @@ class BaseCommandOption(metaclass=ABCMeta):
 Base_Command_Option_Type = TypeVar("Base_Command_Option_Type", bound=BaseCommandOption)
 
 
-class BaseSGI(metaclass=ABCMeta):
+class BaseSGICmd(metaclass=ABCMeta):
     """*Base class of SGI*"""
 
     @property
@@ -127,7 +127,7 @@ class WSGICmdOption(BaseCommandOption):
         return f"--log-level {level}"
 
 
-class WSGI(BaseSGI):
+class WSGICmd(BaseSGICmd):
     """*WSGI application*
 
     This module for generating WSGI (Web Server Gateway Interface) application by Python tool *gunicorn*.
