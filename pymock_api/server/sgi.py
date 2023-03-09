@@ -69,7 +69,7 @@ class BaseSGICmd(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def cmd_entry_point(self) -> str:
+    def entry_point(self) -> str:
         """The command line program name.
 
         Returns:
@@ -80,7 +80,7 @@ class BaseSGICmd(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def cmd_options(self) -> Generic[Base_Command_Option_Type]:
+    def options(self) -> Generic[Base_Command_Option_Type]:
         """The command line options.
 
         Returns:
@@ -134,9 +134,9 @@ class WSGICmd(BaseSGICmd):
     """
 
     @property
-    def cmd_entry_point(self) -> str:
+    def entry_point(self) -> str:
         return "gunicorn"
 
     @property
-    def cmd_options(self) -> WSGICmdOption:
+    def options(self) -> WSGICmdOption:
         return WSGICmdOption()
