@@ -38,15 +38,11 @@ class TestYAMLReader:
         yaml.load = MagicMock(return_value=None)
 
         with patch("builtins.open", mock_open(read_data=None)) as mock_file_stream:
-            try:
+            with pytest.raises(FileNotFoundError) as exc_info:
                 # Run target function to test
                 target_test(**target_test_args)
-            except FileNotFoundError as e:
                 # Verify result
                 expected_err_msg = f"The target configuration file {self.not_exist_file} doesn't exist."
-                assert str(e) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
+                assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
                 mock_file_stream.assert_not_called()
                 yaml.load.assert_not_called()
-            else:
-                # Verify result
-                assert False, "It should raise an exception about 'FileNotFoundError'."

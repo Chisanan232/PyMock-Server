@@ -1,3 +1,5 @@
+import pytest
+
 from pymock_api._utils import load_config
 from pymock_api.model import APIConfig
 
@@ -24,13 +26,9 @@ class TestInitFunctions(SpecWithFileOpt):
 
     @SpecWithFileOpt._test_with_file
     def test_load_config_with_not_exist_file(self):
-        try:
+        with pytest.raises(FileNotFoundError) as exc_info:
             # Run target function to test
             load_config(config_path=self.not_exist_file_path)
-        except FileNotFoundError as e:
             # Verify result
             expected_err_msg = f"The target configuration file {self.not_exist_file_path} doesn't exist."
-            assert str(e) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
-        else:
-            # Verify result
-            assert False, "It should raise an exception about 'FileNotFoundError'."
+            assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
