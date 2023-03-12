@@ -86,7 +86,7 @@ class WSGICmdOption(BaseCommandOption):
         elif host and port:
             binding_addr = f"{host}:{port}"
         else:
-            raise ValueError("")
+            raise ValueError("There are 2 ways to pass arguments: using *address* or using *host* and *port*.")
         return f"--bind {binding_addr}"
 
     def workers(self, w: int) -> str:
