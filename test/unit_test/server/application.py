@@ -1,11 +1,43 @@
+from abc import ABCMeta, abstractmethod
+from collections import namedtuple
 from typing import Any, Type
+from unittest.mock import patch
 
 import pytest
 from flask import Flask
 
 from pymock_api.server.application import BaseAppServer, FlaskServer
 
-from ._spec import AppServerTestSpec, MockerModule
+MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
+
+
+class AppServerTestSpec(metaclass=ABCMeta):
+    @pytest.fixture(scope="function")
+    @abstractmethod
+    def sut(self) -> BaseAppServer:
+        pass
+
+    @property
+    @abstractmethod
+    def expected_sut_type(self) -> Any:
+        pass
+
+    @abstractmethod
+    def run_target_function(self, sut: BaseAppServer) -> Any:
+        pass
+
+    @property
+    @abstractmethod
+    def mocker(self) -> MockerModule:
+        pass
+
+    def test_generating_instance_function(self, sut: BaseAppServer):
+        with patch(self.mocker.module_path, return_value=self.mocker.return_value) as instantiate_ps:
+            web_app = self.run_target_function(sut)
+            instantiate_ps.assert_called_once()
+            assert isinstance(
+                web_app, self.expected_sut_type
+            ), f"The web application server it generates should be *{self.expected_sut_type}* type object."
 
 
 class FakeFlask(Flask):
