@@ -26,7 +26,7 @@ def _generate_cmd_option(option: _Cmd_Option) -> str:
     return f"{option.option_name} {option.value}"
 
 
-def _get_cmd_options() -> tuple[str, str, str]:
+def _get_cmd_options() -> (str, str, str):
     host_and_port = _generate_cmd_option(_Bind_Host_And_Port)
     workers = _generate_cmd_option(_Workers_Amount)
     log_level = _generate_cmd_option(_Log_Level)
