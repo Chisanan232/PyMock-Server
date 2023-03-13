@@ -30,7 +30,7 @@ class BaseSGICmdTestSpec(metaclass=ABCMeta):
     @patch("pymock_api.server.sgi.cmd.CommandOptions", return_value=mock_cmd_option_obj)
     @patch("pymock_api.server.sgi.cmd.Command", return_value=mock_cmd_obj)
     def test_generate(self, mock_command: Mock, mock_command_option: Mock, sgi_cmd: Generic[BaseSGICmdType]):
-        sgi_cmd.generate(parser_args=mock_parser_arg)
+        command = sgi_cmd.generate(parser_args=mock_parser_arg)
 
         mock_command.assert_called_once_with(
             entry_point=sgi_cmd.entry_point,
@@ -41,6 +41,7 @@ class BaseSGICmdTestSpec(metaclass=ABCMeta):
             workers=sgi_cmd.options.workers(w=mock_parser_arg.workers),
             log_level=sgi_cmd.options.log_level(level=mock_parser_arg.log_level),
         )
+        assert isinstance(command, Command)
 
     def test_entry_point(self, sgi_cmd: Generic[BaseSGICmdType]):
         assert sgi_cmd.entry_point == self._expected_entry_point
