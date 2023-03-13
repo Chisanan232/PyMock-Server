@@ -1,3 +1,4 @@
+from collections import namedtuple
 from unittest.mock import Mock
 
 
@@ -67,3 +68,15 @@ _Test_Config_Value: dict = {
     "auth_cookie": [{"USERNAME": "test"}, {"PASSWORD": "test"}],
     "mocked_apis": _Mocked_APIs,
 }
+
+_Cmd_Option = namedtuple("_Cmd_Option", ["option_name", "value"])
+
+# For testing data objects in *.server.sgi._model*
+_Test_Entry_Point: str = "entry-point"
+_Bind_Host_And_Port: _Cmd_Option = _Cmd_Option(option_name="--bind", value="127.0.0.1:8080")
+_Workers_Amount: _Cmd_Option = _Cmd_Option(option_name="--workers", value=3)
+_Log_Level: _Cmd_Option = _Cmd_Option(option_name="--log-level", value="info")
+
+# Test command line options
+_Test_Config: str = "test-api.yaml"
+_Test_App_Type: str = "flask"
