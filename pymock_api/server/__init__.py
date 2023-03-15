@@ -7,8 +7,6 @@ Interface) tool, e.g., *gunicorn*, etc.
 import os
 from typing import Callable
 
-import flask
-
 from .application import BaseAppServer, FlaskServer
 from .mock import MockHTTPServer
 from .sgi.cmd import WSGICmd
@@ -63,9 +61,13 @@ class load_app:
         """
         try:
             import_callback()
-        except ImportError as e:
+        except (ImportError, ModuleNotFoundError) as e:
             if import_err_callback:
                 import_err_callback(e)
+            module = str(e).split(" ")[-1]
+            raise RuntimeError(
+                f"Cannot load mocked application because current Python runtime environment cannot import '{module}'."
+            ) from e
         else:
             import_success_callback()
 
