@@ -1,14 +1,30 @@
+"""*Web application with Python web framework*
+
+This module provides which library of Python web framework you could use to set up a web application.
+"""
+
 from abc import ABCMeta, abstractmethod
+from typing import Any
 
 
 class BaseAppServer(metaclass=ABCMeta):
+    """*Base class for set up web application*"""
+
     @abstractmethod
-    def setup(self):
+    def setup(self) -> Any:
+        """Initial object for setting up web application.
+
+        Returns:
+            An object which should be an instance of loading web application server.
+
+        """
         pass
 
 
 class FlaskServer(BaseAppServer):
-    def setup(self):
+    """*Build a web application with *Flask**"""
+
+    def setup(self) -> "flask.Flask":
         from flask import Flask
 
         app: Flask = Flask(__name__)

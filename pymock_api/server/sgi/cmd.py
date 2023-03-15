@@ -55,6 +55,15 @@ class WSGICmd(BaseSGICmd):
     """*WSGI application*
 
     This module for generating WSGI (Web Server Gateway Interface) application by Python tool *gunicorn*.
+
+    .. note: Example usage of WSGI tool *gunicorn*
+
+        PyMock-API would generate the command line as string value which is valid to run as following:
+
+        .. code-block: python
+
+            >>> gunicorn --bind 127.0.0.1:9672 'pymock_api.server:flask_app'
+
     """
 
     @property

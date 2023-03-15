@@ -45,7 +45,7 @@ class Command:
 
     entry_point: str = None
     options: CommandOptions = None
-    app: str = "pymock_api.server:flask_app"
+    app: str = "'pymock_api.server:create_flask_app()'"
 
     @property
     def line(self) -> str:
