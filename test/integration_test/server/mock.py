@@ -32,7 +32,7 @@ class MockHTTPServerTestSpec(ConfigFile):
         # Ensure that it doesn't have file
         self._delete_file()
         # Create the target file before run test
-        self._write_test_file()
+        self.generate()
         # Create the example extended file for one of mocked APIs
         file.write(path="youtube.json", content=_YouTube_API_Content, serialize=lambda content: json.dumps(content))
 

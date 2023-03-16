@@ -29,7 +29,7 @@ class ServerInitTestSpec(ConfigFile):
             # Ensure that it doesn't have file
             self._delete_file()
             # Create the target file before run test
-            self._write_test_file()
+            self.generate()
 
             try:
                 # Run the test item

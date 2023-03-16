@@ -35,7 +35,7 @@ class ConfigFile(metaclass=ABCMeta):
     def file_path(self) -> str:
         pass
 
-    def _write_test_file(self) -> None:
+    def generate(self) -> None:
         file.write(self.file_path, content=_Test_Config_Value, serialize=lambda content: dump(content, Dumper=Dumper))
 
     def _delete_file(self, path: Optional[str] = None) -> None:
@@ -57,7 +57,7 @@ class ConfigFile(metaclass=ABCMeta):
             # Ensure that it doesn't have file
             self._delete_file()
             # Create the target file before run test
-            self._write_test_file()
+            self.generate()
 
             try:
                 # Run the test item
