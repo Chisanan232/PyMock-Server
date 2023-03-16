@@ -9,7 +9,7 @@ from pymock_api.server.application import FlaskServer
 from pymock_api.server.mock import MockHTTPServer, _HTTPResponse
 
 from ..._values import _YouTube_API_Content
-from .._spec import ConfigFile
+from .._spec import ConfigFile, file
 
 
 class MockHTTPServerTestSpec(ConfigFile):
@@ -34,7 +34,7 @@ class MockHTTPServerTestSpec(ConfigFile):
         # Create the target file before run test
         self._write_test_file()
         # Create the example extended file for one of mocked APIs
-        self._write_json_file(path="youtube.json", content=_YouTube_API_Content)
+        file.write(path="youtube.json", content=_YouTube_API_Content, serialize=lambda content: json.dumps(content))
 
         yield load_config(self.file_path)
 

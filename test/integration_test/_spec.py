@@ -1,12 +1,32 @@
-import json
 import os
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Union
+from typing import Callable, Optional, Union
 
 from yaml import CDumper as Dumper
 from yaml import dump
 
 from .._values import _Test_Config_Value
+
+
+class file:
+    @classmethod
+    def write(cls, path: str, content: Union[str, dict], serialize: Callable = None) -> None:
+        if not serialize:
+            serialize = lambda dataraw: dataraw
+        with open(path, "a+", encoding="utf-8") as file_stream:
+            output = serialize(content)
+            file_stream.writelines(output)
+
+    @classmethod
+    def delete(cls, path: str) -> None:
+        if cls.exist(path):
+            os.remove(path)
+        exist_file = cls.exist(path)
+        assert exist_file is False, "File should already be removed."
+
+    @classmethod
+    def exist(cls, path: str) -> bool:
+        return os.path.exists(path)
 
 
 class ConfigFile(metaclass=ABCMeta):
@@ -16,14 +36,7 @@ class ConfigFile(metaclass=ABCMeta):
         pass
 
     def _write_test_file(self) -> None:
-        with open(self.file_path, "a+", encoding="utf-8") as file_stream:
-            output = dump(_Test_Config_Value, Dumper=Dumper)
-            file_stream.writelines(output)
-
-    def _write_json_file(self, path: str, content: Union[str, dict]) -> None:
-        with open(path, "a+", encoding="utf-8") as file_stream:
-            output = json.dumps(content)
-            file_stream.writelines(output)
+        file.write(self.file_path, content=_Test_Config_Value, serialize=lambda content: dump(content, Dumper=Dumper))
 
     def _delete_file(self, path: Optional[str] = None) -> None:
         if not path:
