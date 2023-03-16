@@ -8,12 +8,12 @@ import pytest
 
 import pymock_api.server as mock_server
 
-from .._spec import SpecWithFileOpt
+from .._spec import ConfigFile
 
 LOAD_APP_TYPE = Type[mock_server.load_app]
 
 
-class ServerInitTestSpec(SpecWithFileOpt):
+class ServerInitTestSpec(ConfigFile):
     @pytest.fixture(scope="function")
     @abstractmethod
     def initial_app(self) -> LOAD_APP_TYPE:
@@ -51,7 +51,7 @@ class TestLoadApp(ServerInitTestSpec):
         initial_app.by_flask()
         assert isinstance(mock_server.flask_app, flask.Flask)
 
-    @SpecWithFileOpt._test_with_file
+    @ConfigFile._test_with_file
     @patch.object(mock_server.FlaskServer, "setup", side_effect=RuntimeError("Import error for PyTest"))
     def test_by_flask_when_cannot_import(self, mock_flask_server: Mock):
         with pytest.raises(RuntimeError) as exc_info:

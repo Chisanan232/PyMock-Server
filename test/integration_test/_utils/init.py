@@ -3,10 +3,10 @@ import pytest
 from pymock_api._utils import load_config
 from pymock_api.model import APIConfig
 
-from .._spec import SpecWithFileOpt
+from .._spec import ConfigFile
 
 
-class TestInitFunctions(SpecWithFileOpt):
+class TestInitFunctions(ConfigFile):
     @property
     def file_path(self) -> str:
         return "./test.yaml"
@@ -15,7 +15,7 @@ class TestInitFunctions(SpecWithFileOpt):
     def not_exist_file_path(self) -> str:
         return "./file_not_exist.yaml"
 
-    @SpecWithFileOpt._test_with_file
+    @ConfigFile._test_with_file
     def test_load_config(self):
         # Run target function
         loaded_data = load_config(config_path=self.file_path)
@@ -24,7 +24,7 @@ class TestInitFunctions(SpecWithFileOpt):
         assert isinstance(loaded_data, APIConfig) and len(loaded_data) != 0, ""
         return "./file_not_exist.yaml"
 
-    @SpecWithFileOpt._test_with_file
+    @ConfigFile._test_with_file
     def test_load_config_with_not_exist_file(self):
         with pytest.raises(FileNotFoundError) as exc_info:
             # Run target function to test

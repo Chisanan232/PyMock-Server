@@ -2,7 +2,7 @@ from abc import ABC
 
 import pytest
 
-from .._spec import SpecWithFileOpt
+from .._spec import ConfigFile
 
 try:
     from yaml import CDumper as Dumper
@@ -15,7 +15,7 @@ from pymock_api.model.api_config import APIConfig
 from ..._values import _Test_Config_Value
 
 
-class ReaderTestSpec(SpecWithFileOpt, ABC):
+class ReaderTestSpec(ConfigFile, ABC):
     @staticmethod
     def _test_with_file(function):
         def _(self, reader):

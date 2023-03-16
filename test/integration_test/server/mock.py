@@ -9,10 +9,10 @@ from pymock_api.server.application import FlaskServer
 from pymock_api.server.mock import MockHTTPServer, _HTTPResponse
 
 from ..._values import _YouTube_API_Content
-from .._spec import SpecWithFileOpt
+from .._spec import ConfigFile
 
 
-class MockHTTPServerTestSpec(SpecWithFileOpt):
+class MockHTTPServerTestSpec(ConfigFile):
     @pytest.fixture(scope="class")
     @abstractmethod
     def server_app_type(self) -> FlaskServer:

@@ -9,7 +9,7 @@ from yaml import dump
 from .._values import _Test_Config_Value
 
 
-class SpecWithFileOpt(metaclass=ABCMeta):
+class ConfigFile(metaclass=ABCMeta):
     @property
     @abstractmethod
     def file_path(self) -> str:
