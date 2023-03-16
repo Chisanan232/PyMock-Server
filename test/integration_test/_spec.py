@@ -38,18 +38,11 @@ class ConfigFile(metaclass=ABCMeta):
     def generate(self) -> None:
         file.write(self.file_path, content=_Test_Config_Value, serialize=lambda content: dump(content, Dumper=Dumper))
 
-    def _delete_file(self, path: Optional[str] = None) -> None:
-        if not path:
-            path = self.file_path
-        if self._exist_file(path):
-            os.remove(path)
-        exist_file = self._exist_file(path)
-        assert exist_file is False, "File should already be removed."
+    def _delete_file(self) -> None:
+        file.delete(self.file_path)
 
-    def _exist_file(self, path: Optional[str] = None) -> bool:
-        if not path:
-            path = self.file_path
-        return os.path.exists(path)
+    def _exist_file(self) -> bool:
+        return file.exist(self.file_path)
 
     @staticmethod
     def _test_with_file(function):
