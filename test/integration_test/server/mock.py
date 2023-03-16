@@ -40,7 +40,7 @@ class MockHTTPServerTestSpec(ConfigFile):
 
         # Delete file finally
         self._delete_file()
-        self._delete_file("youtube.json")
+        file.delete("youtube.json")
 
     @property
     def file_path(self) -> str:
