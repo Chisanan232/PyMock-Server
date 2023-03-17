@@ -1,7 +1,10 @@
 import os
 from typing import Any, Callable, Union
 
-from yaml import CDumper as Dumper
+try:
+    from yaml import CDumper as Dumper
+except ImportError:
+    from yaml import Dumper
 from yaml import dump
 
 from .._values import _Test_Config_Value
