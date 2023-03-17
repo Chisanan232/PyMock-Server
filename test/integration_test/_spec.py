@@ -39,10 +39,10 @@ class ConfigFile:
     def generate(self) -> None:
         file.write(self.file_path, content=_Test_Config_Value, serialize=lambda content: dump(content, Dumper=Dumper))
 
-    def _delete_file(self) -> None:
+    def delete(self) -> None:
         file.delete(self.file_path)
 
-    def _exist_file(self) -> bool:
+    def exist(self) -> bool:
         return file.exist(self.file_path)
 
 
@@ -54,7 +54,7 @@ class run_test:
         def _test_wrapper(function: Callable) -> Callable:
             def _(self) -> Any:
                 # Ensure that it doesn't have file
-                cls.config_file._delete_file()
+                cls.config_file.delete()
                 # Create the target file before run test
                 cls.config_file.generate()
 
@@ -63,7 +63,7 @@ class run_test:
                     return_value = function(self, fixture)
                 finally:
                     # Delete file finally
-                    cls.config_file._delete_file()
+                    cls.config_file.delete()
                 return return_value
 
             return _
