@@ -1,6 +1,5 @@
 import os
-from abc import ABCMeta, abstractmethod
-from typing import Callable, Optional, Union
+from typing import Any, Callable, Union
 
 from yaml import CDumper as Dumper
 from yaml import dump
@@ -29,11 +28,13 @@ class file:
         return os.path.exists(path)
 
 
-class ConfigFile(metaclass=ABCMeta):
+MockAPI_Config_Path: str = "./pytest-api.yaml"
+
+
+class ConfigFile:
     @property
-    @abstractmethod
     def file_path(self) -> str:
-        pass
+        return MockAPI_Config_Path
 
     def generate(self) -> None:
         file.write(self.file_path, content=_Test_Config_Value, serialize=lambda content: dump(content, Dumper=Dumper))
@@ -44,19 +45,27 @@ class ConfigFile(metaclass=ABCMeta):
     def _exist_file(self) -> bool:
         return file.exist(self.file_path)
 
-    @staticmethod
-    def _test_with_file(function):
-        def _(self):
-            # Ensure that it doesn't have file
-            self._delete_file()
-            # Create the target file before run test
-            self.generate()
 
-            try:
-                # Run the test item
-                function(self)
-            finally:
-                # Delete file finally
-                self._delete_file()
+class run_test:
+    config_file: ConfigFile = ConfigFile()
 
-        return _
+    @classmethod
+    def with_file(cls, fixture: Any = None) -> Callable:
+        def _test_wrapper(function: Callable) -> Callable:
+            def _(self) -> Any:
+                # Ensure that it doesn't have file
+                cls.config_file._delete_file()
+                # Create the target file before run test
+                cls.config_file.generate()
+
+                try:
+                    # Run the test item
+                    return_value = function(self, fixture)
+                finally:
+                    # Delete file finally
+                    cls.config_file._delete_file()
+                return return_value
+
+            return _
+
+        return _test_wrapper
