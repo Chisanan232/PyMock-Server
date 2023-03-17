@@ -6,6 +6,8 @@ This module provides which library of Python web framework you could use to set 
 from abc import ABCMeta, abstractmethod
 from typing import Any
 
+from .._utils.importing import import_web_lib
+
 
 class BaseAppServer(metaclass=ABCMeta):
     """*Base class for set up web application*"""
@@ -25,7 +27,6 @@ class FlaskServer(BaseAppServer):
     """*Build a web application with *Flask**"""
 
     def setup(self) -> "flask.Flask":
-        from flask import Flask
-
-        app: Flask = Flask(__name__)
+        flask_pkg: "flask" = import_web_lib.flask()
+        app: "flask.Flask" = flask_pkg.Flask(__name__)
         return app
