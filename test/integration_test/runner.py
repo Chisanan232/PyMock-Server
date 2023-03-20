@@ -1,14 +1,11 @@
 import io
 import json
 import re
-import signal
 import subprocess
 import sys
 import threading
-import time
 from abc import ABC, ABCMeta, abstractmethod
 from typing import List
-from unittest.mock import Mock, patch
 
 import pytest
 
