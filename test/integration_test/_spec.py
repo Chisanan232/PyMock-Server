@@ -1,13 +1,16 @@
+import json
 import os
+from functools import wraps
 from typing import Any, Callable, Union
 
 try:
     from yaml import CDumper as Dumper
 except ImportError:
     from yaml import Dumper
+
 from yaml import dump
 
-from .._values import _Test_Config_Value
+from .._values import _Test_Config_Value, _YouTube_API_Content
 
 
 class file:
@@ -53,22 +56,21 @@ class run_test:
     config_file: ConfigFile = ConfigFile()
 
     @classmethod
-    def with_file(cls, fixture: Any = None) -> Callable:
-        def _test_wrapper(function: Callable) -> Callable:
-            def _(self) -> Any:
-                # Ensure that it doesn't have file
+    def with_file(cls, function: Callable) -> Callable:
+        @wraps(function)
+        def _(self, *args, **kwargs) -> Any:
+            # Ensure that it doesn't have file
+            cls.config_file.delete()
+            # Create the target file before run test
+            cls.config_file.generate()
+            file.write(path="youtube.json", content=_YouTube_API_Content, serialize=lambda content: json.dumps(content))
+
+            try:
+                # Run the test item
+                function(self, *args, **kwargs)
+            finally:
+                # Delete file finally
                 cls.config_file.delete()
-                # Create the target file before run test
-                cls.config_file.generate()
+                file.delete("youtube.json")
 
-                try:
-                    # Run the test item
-                    return_value = function(self, fixture)
-                finally:
-                    # Delete file finally
-                    cls.config_file.delete()
-                return return_value
-
-            return _
-
-        return _test_wrapper
+        return _
