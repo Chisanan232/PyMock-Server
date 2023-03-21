@@ -2,6 +2,7 @@ import os
 import sys
 from argparse import Namespace
 from pathlib import Path
+from typing import List
 
 try:
     import pymock_api.cmd
@@ -23,7 +24,7 @@ class CommandRunner:
         command = self.sgi_cmd.generate(args)
         command.run()
 
-    def parse(self, cmd_args=None) -> ParserArguments:
+    def parse(self, cmd_args: List[str] = None) -> ParserArguments:
         args = self._load_parser(cmd_args)
         parser_options = deserialize_parser_args(args)
         self._process_option(parser_options)
