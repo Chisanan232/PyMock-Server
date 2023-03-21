@@ -1,5 +1,6 @@
 import json
 import os
+from functools import wraps
 from typing import Any, Callable, Union
 
 try:
@@ -55,28 +56,9 @@ class run_test:
     config_file: ConfigFile = ConfigFile()
 
     @classmethod
-    def with_file(cls, fixture: Any = None) -> Callable:
-        def _test_wrapper(function: Callable) -> Callable:
-            def _(self) -> Any:
-                # Ensure that it doesn't have file
-                cls.config_file.delete()
-                # Create the target file before run test
-                cls.config_file.generate()
-
-                try:
-                    # Run the test item
-                    return function(self, fixture)
-                finally:
-                    # Delete file finally
-                    cls.config_file.delete()
-
-            return _
-
-        return _test_wrapper
-
-    @classmethod
-    def with_file_v2(cls, function: Callable) -> Callable:
-        def _(self, capsys, runner) -> Any:
+    def with_file(cls, function: Callable) -> Callable:
+        @wraps(function)
+        def _(self, *args, **kwargs) -> Any:
             # Ensure that it doesn't have file
             cls.config_file.delete()
             # Create the target file before run test
@@ -85,7 +67,7 @@ class run_test:
 
             try:
                 # Run the test item
-                return function(self, capsys, runner)
+                return function(self, *args, **kwargs)
             finally:
                 # Delete file finally
                 cls.config_file.delete()
