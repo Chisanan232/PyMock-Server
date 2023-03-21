@@ -16,6 +16,8 @@ import argparse
 import copy
 from typing import Dict, List, Optional, Tuple, Type
 
+from .__pkg_info__ import __version__
+
 COMMAND_OPTIONS: List[Type["CommandOption"]] = []
 
 
@@ -152,6 +154,27 @@ class CommandOption:
 
 
 CommandOption = MetaCommandOption("CommandOption", (CommandOption,), {})
+
+
+class Version(CommandOption):
+
+    cli_option: str = "-v, --version"
+    name: str = "version"
+    help_description: str = "The version info of PyMock-API."
+    default_value: type = argparse.SUPPRESS
+    action: str = "version"
+    _version_output: str = "%(prog)s (version " + __version__ + ")\n"
+
+    def add_option(self, parser: argparse.ArgumentParser) -> None:
+        # TODO: Should get relation tools or library's version, e.g., flask, gunicorn, etc.
+        cmd_option_args = {
+            "dest": self.name,
+            "help": self.help_description,
+            "default": self.default_value,
+            "action": self.action or "store",
+            "version": self._version_output,
+        }
+        parser.add_argument(*self.cli_option_name, **cmd_option_args)
 
 
 class WebAppType(CommandOption):
