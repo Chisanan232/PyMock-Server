@@ -75,8 +75,8 @@ class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
         cmd_options = " ".join(self.options)
         return f"python3 {self.Server_Running_Entry_Point} {cmd_options}"
 
-    @run_test.with_file_v2
-    def test_command(self, capsys, runner: CommandRunner) -> None:
+    @run_test.with_file
+    def test_command(self, runner: CommandRunner) -> None:
         try:
             with Capturing() as mock_server_output:
                 self._run_as_thread(target=self.run_mock_api_server)
