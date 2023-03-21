@@ -42,11 +42,13 @@ class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
 
     def verify_apis(self) -> None:
         self._curl_and_chk_resp_content(
-            api=f"{_Base_URL}/google", expected_resp_content="google", resp_is_json_format=False
+            api=f"{_Base_URL}{_Google_Home_Value['url']}", expected_resp_content="google", resp_is_json_format=False
         )
-        self._curl_and_chk_resp_content(api=f"{_Base_URL}/test", expected_resp_content="test", resp_is_json_format=True)
         self._curl_and_chk_resp_content(
-            api=f"{_Base_URL}/youtube", expected_resp_content="youtube", resp_is_json_format=True
+            api=f"{_Base_URL}{_Test_Home['url']}", expected_resp_content="test", resp_is_json_format=True
+        )
+        self._curl_and_chk_resp_content(
+            api=f"{_Base_URL}{_YouTube_Home_Value['url']}", expected_resp_content="youtube", resp_is_json_format=True
         )
 
     @classmethod
