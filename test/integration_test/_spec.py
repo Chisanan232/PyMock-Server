@@ -67,7 +67,7 @@ class run_test:
 
             try:
                 # Run the test item
-                return function(self, *args, **kwargs)
+                function(self, *args, **kwargs)
             finally:
                 # Delete file finally
                 cls.config_file.delete()
