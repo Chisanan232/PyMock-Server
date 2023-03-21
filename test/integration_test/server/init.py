@@ -1,3 +1,4 @@
+import os
 import re
 from typing import Type
 from unittest.mock import Mock, patch
@@ -7,7 +8,7 @@ import pytest
 
 import pymock_api.server as mock_server
 
-from .._spec import run_test
+from .._spec import MockAPI_Config_Path, run_test
 
 LOAD_APP_TYPE = Type[mock_server.load_app]
 
@@ -15,6 +16,7 @@ LOAD_APP_TYPE = Type[mock_server.load_app]
 class TestLoadApp:
     @pytest.fixture(scope="function")
     def load_app(self) -> LOAD_APP_TYPE:
+        os.environ["MockAPI_Config"] = MockAPI_Config_Path
         return mock_server.load_app
 
     @run_test.with_file
