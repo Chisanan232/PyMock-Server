@@ -42,8 +42,11 @@ class CommandFunctionTestSpec(metaclass=ABCMeta):
         pass
 
     @classmethod
-    def _should_contains_chars_in_result(self, target: str, expected_char: str) -> None:
-        assert re.search(re.escape(expected_char), target, re.IGNORECASE)
+    def _should_contains_chars_in_result(self, target: str, expected_char, translate: bool = True) -> None:
+        if translate:
+            assert re.search(re.escape(expected_char), target, re.IGNORECASE)
+        else:
+            assert re.search(expected_char, target, re.IGNORECASE)
 
 
 class TestHelp(CommandFunctionTestSpec):
@@ -58,3 +61,15 @@ class TestHelp(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "-b BIND, --bind BIND")
         self._should_contains_chars_in_result(cmd_running_result, "-w WORKERS, --workers WORKERS")
         self._should_contains_chars_in_result(cmd_running_result, "--log-level LOG_LEVEL")
+
+
+class TestVersion(CommandFunctionTestSpec):
+    @property
+    def options(self) -> List[str]:
+        return ["--version"]
+
+    def verify_running_output(self, cmd_running_result) -> None:
+        software_version_format = r".{0,32}([0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4}).{0,8}"
+        self._should_contains_chars_in_result(
+            cmd_running_result, re.escape("pymock-api") + software_version_format, translate=False
+        )
