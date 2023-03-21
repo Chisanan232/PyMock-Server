@@ -11,6 +11,8 @@ from typing import List
 
 from pymock_api.runner import CommandRunner
 
+from .._values import _Base_URL, _Google_Home_Value, _Test_Home, _YouTube_Home_Value
+
 
 class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
 
@@ -40,11 +42,11 @@ class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
 
     def verify_apis(self) -> None:
         self._curl_and_chk_resp_content(
-            api="/test/v1/google", expected_resp_content="google", resp_is_json_format=False
+            api=f"{_Base_URL}/google", expected_resp_content="google", resp_is_json_format=False
         )
-        self._curl_and_chk_resp_content(api="/test/v1/test", expected_resp_content="test", resp_is_json_format=True)
+        self._curl_and_chk_resp_content(api=f"{_Base_URL}/test", expected_resp_content="test", resp_is_json_format=True)
         self._curl_and_chk_resp_content(
-            api="/test/v1/youtube", expected_resp_content="youtube", resp_is_json_format=True
+            api=f"{_Base_URL}/youtube", expected_resp_content="youtube", resp_is_json_format=True
         )
 
     @classmethod
