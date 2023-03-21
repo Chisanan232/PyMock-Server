@@ -7,7 +7,7 @@ from typing import List
 try:
     import pymock_api.cmd
     from pymock_api.server.sgi import ParserArguments, WSGICmd, deserialize_parser_args
-except (ImportError or ModuleNotFoundError):
+except (ImportError, ModuleNotFoundError):
     runner_dir = os.path.dirname(os.path.abspath(__file__))
     path = str(Path(runner_dir).parent.absolute())
     sys.path.append(path)
