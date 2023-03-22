@@ -28,9 +28,7 @@ class CommandRunner:
         command.run()
 
     def parse(self, cmd_args: List[str] = None) -> ParserArguments:
-        args = self._parse_cmd_arguments(cmd_args)
-        parser_options = deserialize_parser_args(args, subcmd=self.mock_api_parser.subcommand)
-        return parser_options
+        return deserialize_parser_args(self._parse_cmd_arguments(cmd_args), subcmd=self.mock_api_parser.subcommand)
 
     def _parse_cmd_arguments(self, cmd_args: List[str]) -> Namespace:
         return self.cmd_parser.parse_args(cmd_args)
