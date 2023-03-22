@@ -62,6 +62,20 @@ class TestHelp(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "-v, --version")
 
 
+class TestSubCommandRunHelp(CommandFunctionTestSpec):
+    @property
+    def options(self) -> List[str]:
+        return ["run", "--help"]
+
+    def verify_running_output(self, cmd_running_result) -> None:
+        self._should_contains_chars_in_result(cmd_running_result, "mock-api [SUBCOMMAND] [OPTIONS]")
+        self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
+        self._should_contains_chars_in_result(cmd_running_result, "-c CONFIG, --config CONFIG")
+        self._should_contains_chars_in_result(cmd_running_result, "-b BIND, --bind BIND")
+        self._should_contains_chars_in_result(cmd_running_result, "-w WORKERS, --workers WORKERS")
+        self._should_contains_chars_in_result(cmd_running_result, "--log-level LOG_LEVEL")
+
+
 class TestVersion(CommandFunctionTestSpec):
     @property
     def options(self) -> List[str]:
