@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 from argparse import Namespace
 from pathlib import Path
@@ -41,7 +42,7 @@ class CommandRunner:
         os.environ["MockAPI_Config"] = parser_options.config
 
         # Handle *app-type*
-        if parser_options.app_type == "flask":
+        if re.search(r"flask", parser_options.app_type, re.IGNORECASE):
             self.sgi_cmd = WSGICmd()
         else:
             raise ValueError("Invalid value at argument *app-type*. It only supports 'flask' currently.")
