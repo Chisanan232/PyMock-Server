@@ -33,7 +33,7 @@ class CommandFunctionTestSpec(metaclass=ABCMeta):
     def options(self) -> List[str]:
         pass
 
-    def test_command(self, capsys, runner: CommandRunner):
+    def test_command(self, runner: CommandRunner):
         with Capturing() as output:
             with pytest.raises(SystemExit):
                 runner.parse(cmd_args=self.options)
