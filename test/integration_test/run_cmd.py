@@ -75,7 +75,7 @@ class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
 class TestRunApplicationToMockAPIsWithFlaskAndGunicorn(StreamingOutputCommandFunctionTestSpec):
     @property
     def options(self) -> List[str]:
-        return ["--app-type", "flask", "--bind", _Bind_Host_And_Port.value, "--config", MockAPI_Config_Path]
+        return ["run", "--app-type", "flask", "--bind", _Bind_Host_And_Port.value, "--config", MockAPI_Config_Path]
 
     @classmethod
     def _kill_all_server_workers(cls) -> None:

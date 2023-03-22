@@ -22,9 +22,11 @@ class Capturing(list):
 
 
 class CommandFunctionTestSpec(metaclass=ABCMeta):
-    @pytest.fixture(scope="function")
+    _Command_Runner: CommandRunner = CommandRunner()
+
+    @pytest.fixture(scope="module", autouse=True)
     def runner(self) -> CommandRunner:
-        return CommandRunner()
+        return self._Command_Runner
 
     @property
     @abstractmethod
@@ -55,12 +57,9 @@ class TestHelp(CommandFunctionTestSpec):
         return ["--help"]
 
     def verify_running_output(self, cmd_running_result) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "mock-api [OPTIONS]")
+        self._should_contains_chars_in_result(cmd_running_result, "mock-api [SUBCOMMAND] [OPTIONS]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
-        self._should_contains_chars_in_result(cmd_running_result, "-c CONFIG, --config CONFIG")
-        self._should_contains_chars_in_result(cmd_running_result, "-b BIND, --bind BIND")
-        self._should_contains_chars_in_result(cmd_running_result, "-w WORKERS, --workers WORKERS")
-        self._should_contains_chars_in_result(cmd_running_result, "--log-level LOG_LEVEL")
+        self._should_contains_chars_in_result(cmd_running_result, "-v, --version")
 
 
 class TestVersion(CommandFunctionTestSpec):
