@@ -21,14 +21,14 @@ class CommandRunner:
         self.cmd_parser = self.mock_api_parser.parse()
         self.sgi_cmd: WSGICmd = None
 
-    def run(self, args: ParserArguments) -> None:
+    def run_app(self, args: ParserArguments) -> None:
+        self._process_option(args)
         command = self.sgi_cmd.generate(args)
         command.run()
 
     def parse(self, cmd_args: List[str] = None) -> ParserArguments:
         args = self._parse_cmd_arguments(cmd_args)
         parser_options = deserialize_parser_args(args, subcmd=self.mock_api_parser.subcommand)
-        self._process_option(parser_options)
         return parser_options
 
     def _parse_cmd_arguments(self, cmd_args: List[str]) -> Namespace:
@@ -50,7 +50,8 @@ class CommandRunner:
 def run() -> None:
     cmd_runner = CommandRunner()
     arguments = cmd_runner.parse()
-    cmd_runner.run(arguments)
+    if arguments.subparser_name == pymock_api.cmd.SubCommand.Run:
+        cmd_runner.run_app(arguments)
 
 
 if __name__ == "__main__":

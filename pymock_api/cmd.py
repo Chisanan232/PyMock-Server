@@ -17,6 +17,7 @@ import copy
 import re
 import sys
 from collections import namedtuple
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Type
 
 from .__pkg_info__ import __version__
@@ -184,11 +185,17 @@ class CommandOption:
         return copy.copy(self)
 
 
+@dataclass
+class SubCommand:
+
+    Run: str = "run"
+
+
 class SubCommandRunOption(CommandOption):
 
     sub_cmd: SubParserAttr = SubParserAttr(
         title="Running an application",
-        dest="run",
+        dest=SubCommand.Run,
         description="",
         help="Set up APIs and start to run an application.",
     )
