@@ -46,12 +46,17 @@ class Command:
 
     entry_point: str = None
     options: CommandOptions = None
-    app: str = "'pymock_api.server:create_flask_app()'"
+    app_module_path: str = "pymock_api.server"
+    web_pylib: str = None
 
     @property
     def line(self) -> str:
         """:obj:`str`: Properties with only getter for a string value of command line with options."""
-        return " ".join([self.entry_point, str(self.options), self.app])
+        app = self.dispatch_app(self.web_pylib)
+        return " ".join([self.entry_point, str(self.options), app])
+
+    def dispatch_app(self, web_pylib: str) -> str:
+        return f"'{self.app_module_path}:create_{web_pylib}_app()'"
 
     def run(self) -> None:
         """Run the command line.
