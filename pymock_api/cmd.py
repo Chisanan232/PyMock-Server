@@ -94,7 +94,6 @@ class MockAPICommandParser:
         return self.parser
 
 
-SubCommand: str = "subcommand"
 SubParserAttr = namedtuple("SubParserAttr", ["title", "dest", "description", "help"])
 
 
@@ -107,8 +106,7 @@ class MetaCommandOption(type):
     def __new__(cls, name: str, bases: Tuple[type], attrs: dict):
         super_new = super().__new__
         parent = [b for b in bases if isinstance(b, MetaCommandOption)]
-        is_subcommand = re.search(r"'cli_option': '" + re.escape(SubCommand) + "'", str(attrs), re.IGNORECASE)
-        if not parent or is_subcommand:
+        if not parent:
             return super_new(cls, name, bases, attrs)
         parent_is_subcmd = list(filter(lambda b: re.search(r"SubCommand\w{1,10}Option", b.__name__), bases))
         if parent_is_subcmd:
@@ -186,7 +184,18 @@ class CommandOption:
         return copy.copy(self)
 
 
+class SubCommandRunOption(CommandOption):
+
+    sub_cmd: SubParserAttr = SubParserAttr(
+        title="Running an application",
+        dest="run",
+        description="",
+        help="Set up APIs and start to run an application.",
+    )
+
+
 CommandOption = MetaCommandOption("CommandOption", (CommandOption,), {})
+SubCommandRunOption = MetaCommandOption("SubCommandRunOption", (SubCommandRunOption,), {})
 
 
 class Version(CommandOption):
@@ -208,17 +217,6 @@ class Version(CommandOption):
             "version": self._version_output,
         }
         parser.add_argument(*self.cli_option_name, **cmd_option_args)
-
-
-class SubCommandRunOption(CommandOption):
-
-    sub_cmd: SubParserAttr = SubParserAttr(
-        title="Running an application",
-        dest="run",
-        description="",
-        help="Set up APIs and start to run an application.",
-    )
-    cli_option: str = SubCommand
 
 
 class WebAppType(SubCommandRunOption):
