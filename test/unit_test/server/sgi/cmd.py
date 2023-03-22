@@ -13,12 +13,17 @@ from ...._values import _Bind_Host_And_Port, _Log_Level, _Workers_Amount
 BaseSGICmdType = TypeVar("BaseSGICmdType", bound=BaseSGICmd)
 
 mock_parser_arg = Mock(
-    ParserArguments(bind=_Bind_Host_And_Port.value, workers=_Workers_Amount.value, log_level=_Log_Level.value)
+    ParserArguments(
+        app_type="python web library name",
+        bind=_Bind_Host_And_Port.value,
+        workers=_Workers_Amount.value,
+        log_level=_Log_Level.value,
+    )
 )
 mock_cmd_option_obj = Mock(
     CommandOptions(bind=_Bind_Host_And_Port.value, workers=_Workers_Amount.value, log_level=_Log_Level.value)
 )
-mock_cmd_obj = Mock(Command(entry_point="gunicorn", options=mock_cmd_option_obj))
+mock_cmd_obj = Mock(Command(entry_point="gunicorn", web_pylib=mock_parser_arg.app_type, options=mock_cmd_option_obj))
 
 
 class BaseSGICmdTestSpec(metaclass=ABCMeta):
@@ -34,6 +39,7 @@ class BaseSGICmdTestSpec(metaclass=ABCMeta):
 
         mock_command.assert_called_once_with(
             entry_point=sgi_cmd.entry_point,
+            web_pylib=mock_parser_arg.app_type,
             options=mock_cmd_option_obj,
         )
         mock_command_option.assert_called_once_with(

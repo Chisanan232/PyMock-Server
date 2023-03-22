@@ -21,6 +21,7 @@ class BaseSGICmd(metaclass=ABCMeta):
         """
         return Command(
             entry_point=self.entry_point,
+            web_pylib=parser_args.app_type,
             options=CommandOptions(
                 bind=self.options.bind(address=parser_args.bind),
                 workers=self.options.workers(w=parser_args.workers),
