@@ -14,6 +14,8 @@ briefly, It has below major features:
 
 import argparse
 import copy
+import re
+from collections import namedtuple
 from typing import Dict, List, Optional, Tuple, Type
 
 from .__pkg_info__ import __version__
@@ -51,7 +53,7 @@ class MockAPICommandParser:
             description (str):
         """
         self._prog = prog or "pymock-api"
-        self._usage = usage or "mock-api [OPTIONS]"
+        self._usage = usage or "mock-api [SUBCOMMAND] [OPTIONS]"
         self._description = description or "Mock APIs"
         self._parser_args: Dict[str, str] = {
             "prog": self._prog,
@@ -83,6 +85,10 @@ class MockAPICommandParser:
         return self.parser
 
 
+SubCommand: str = "subcommand"
+SubParserAttr = namedtuple("SubParserAttr", ["title", "dest", "description", "help"])
+
+
 class MetaCommandOption(type):
     """*The metaclass for options of PyMock-API command*
 
@@ -92,7 +98,8 @@ class MetaCommandOption(type):
     def __new__(cls, name: str, bases: Tuple[type], attrs: dict):
         super_new = super().__new__
         parent = [b for b in bases if isinstance(b, MetaCommandOption)]
-        if not parent:
+        is_subcommand = re.search(r"'cli_option': '" + re.escape(SubCommand) + "'", str(attrs), re.IGNORECASE)
+        if not parent or is_subcommand:
             return super_new(cls, name, bases, attrs)
         new_class = super_new(cls, name, bases, attrs)
         COMMAND_OPTIONS.append(new_class)
@@ -101,6 +108,7 @@ class MetaCommandOption(type):
 
 class CommandOption:
 
+    sub_cmd: SubParserAttr = None
     cli_option: str = None
     name: str = None
     help_description: str = None
@@ -108,6 +116,8 @@ class CommandOption:
     default_value: type = None
     action: str = None
     _options: List[str] = None
+
+    _cmd_subparser: Dict[str, argparse._ArgumentGroup] = {}
 
     def __init__(self):
         if not self.cli_option:
@@ -147,7 +157,18 @@ class CommandOption:
             "default": self.default_value,
             "action": self.action or "store",
         }
-        parser.add_argument(*self.cli_option_name, **cmd_option_args)
+        if self.sub_cmd:
+            if self.sub_cmd.dest not in self._cmd_subparser.keys():
+                cmd_subparser = parser.add_subparsers(
+                    title=self.sub_cmd.title,
+                    dest=self.sub_cmd.dest,
+                    description=self.sub_cmd.description,
+                    help=self.sub_cmd.help,
+                )
+                self._cmd_subparser[self.sub_cmd.dest] = cmd_subparser.add_parser(self.sub_cmd.dest)
+            self._cmd_subparser[self.sub_cmd.dest].add_argument(*self.cli_option_name, **cmd_option_args)
+        else:
+            parser.add_argument(*self.cli_option_name, **cmd_option_args)
 
     def copy(self) -> "CommandOption":
         return copy.copy(self)
@@ -177,7 +198,18 @@ class Version(CommandOption):
         parser.add_argument(*self.cli_option_name, **cmd_option_args)
 
 
-class WebAppType(CommandOption):
+class SubCommandRunOption(CommandOption):
+
+    sub_cmd: SubParserAttr = SubParserAttr(
+        title="Running an application",
+        dest="run",
+        description="",
+        help="Set up APIs and start to run an application.",
+    )
+    cli_option: str = SubCommand
+
+
+class WebAppType(SubCommandRunOption):
 
     cli_option: str = "--app-type"
     name: str = "app_type"
@@ -186,7 +218,7 @@ class WebAppType(CommandOption):
     _options: List[str] = ["flask"]
 
 
-class Config(CommandOption):
+class Config(SubCommandRunOption):
 
     cli_option: str = "-c, --config"
     name: str = "config"
@@ -194,7 +226,7 @@ class Config(CommandOption):
     default_value: str = "api.yaml"
 
 
-class Bind(CommandOption):
+class Bind(SubCommandRunOption):
 
     cli_option: str = "-b, --bind"
     name: str = "bind"
@@ -202,7 +234,7 @@ class Bind(CommandOption):
     default_value: str = "127.0.0.1:9672"
 
 
-class Workers(CommandOption):
+class Workers(SubCommandRunOption):
 
     cli_option: str = "-w, --workers"
     name: str = "workers"
@@ -210,7 +242,7 @@ class Workers(CommandOption):
     default_value: int = 1
 
 
-class LegLevel(CommandOption):
+class LegLevel(SubCommandRunOption):
 
     cli_option: str = "--log-level"
     name: str = "log_level"
