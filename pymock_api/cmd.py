@@ -15,12 +15,18 @@ briefly, It has below major features:
 import argparse
 import copy
 import re
+import sys
 from collections import namedtuple
 from typing import Dict, List, Optional, Tuple, Type
 
 from .__pkg_info__ import __version__
 
+SUBCOMMAND: List[str] = []
 COMMAND_OPTIONS: List[Type["CommandOption"]] = []
+
+
+def get_all_subcommands() -> List[str]:
+    return list(set(SUBCOMMAND))
 
 
 def make_options() -> List["CommandOption"]:
@@ -44,17 +50,10 @@ class MockAPICommandParser:
     line.
     """
 
-    def __init__(self, prog: Optional[str] = None, usage: Optional[str] = None, description: Optional[str] = None):
-        """
-
-        Args:
-            prog (str):
-            usage (str):
-            description (str):
-        """
-        self._prog = prog or "pymock-api"
-        self._usage = usage or "mock-api [SUBCOMMAND] [OPTIONS]"
-        self._description = description or "Mock APIs"
+    def __init__(self):
+        self._prog = "pymock-api"
+        self._usage = "mock-api" if self.is_running_subcmd else "mock-api [SUBCOMMAND] [OPTIONS]"
+        self._description = "Mock APIs"
         self._parser_args: Dict[str, str] = {
             "prog": self._prog,
             "usage": self._usage,
@@ -68,6 +67,16 @@ class MockAPICommandParser:
     @property
     def parser(self) -> argparse.ArgumentParser:
         return self._parser
+
+    @property
+    def subcommand(self) -> Optional[str]:
+        if self.is_running_subcmd:
+            return sys.argv[1]
+        return None
+
+    @property
+    def is_running_subcmd(self) -> bool:
+        return True in [arg in get_all_subcommands() for arg in sys.argv]
 
     def parse(self) -> argparse.ArgumentParser:
         """Initial and parse the arguments of current running command line.
@@ -101,6 +110,9 @@ class MetaCommandOption(type):
         is_subcommand = re.search(r"'cli_option': '" + re.escape(SubCommand) + "'", str(attrs), re.IGNORECASE)
         if not parent or is_subcommand:
             return super_new(cls, name, bases, attrs)
+        parent_is_subcmd = list(filter(lambda b: re.search(r"SubCommand\w{1,10}Option", b.__name__), bases))
+        if parent_is_subcmd:
+            SUBCOMMAND.extend([b.__name__.replace("SubCommand", "").replace("Option", "").lower() for b in bases])
         new_class = super_new(cls, name, bases, attrs)
         COMMAND_OPTIONS.append(new_class)
         return new_class
