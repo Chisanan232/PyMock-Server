@@ -2,13 +2,14 @@ import logging
 import subprocess
 from argparse import Namespace
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 
 @dataclass
 class ParserArguments:
     """*The data object for the arguments from parsing the command line of PyMock-API program*"""
 
+    subparser_name: str = None
     config: str = None
     app_type: str = None
     bind: str = None
@@ -67,7 +68,13 @@ class Deserialize:
     """*Deserialize the object *argparse.Namespace* to *ParserArguments*"""
 
     @classmethod
-    def parser_arguments(cls, args: Namespace) -> ParserArguments:
+    def parser_arguments(cls, args: Namespace, subcmd: Optional[str] = None) -> ParserArguments:
+        subparser_name = getattr(args, subcmd) if subcmd else None
         return ParserArguments(
-            config=args.config, app_type=args.app_type, bind=args.bind, workers=args.workers, log_level=args.log_level
+            subparser_name=subparser_name,
+            config=args.config,
+            app_type=args.app_type,
+            bind=args.bind,
+            workers=args.workers,
+            log_level=args.log_level,
         )

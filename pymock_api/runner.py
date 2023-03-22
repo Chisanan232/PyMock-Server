@@ -17,7 +17,8 @@ except (ImportError, ModuleNotFoundError):
 
 class CommandRunner:
     def __init__(self):
-        self.cmd_parser = pymock_api.cmd.MockAPICommandParser().parse()
+        self.mock_api_parser = pymock_api.cmd.MockAPICommandParser()
+        self.cmd_parser = self.mock_api_parser.parse()
         self.sgi_cmd: WSGICmd = None
 
     def run(self, args: ParserArguments) -> None:
@@ -26,7 +27,7 @@ class CommandRunner:
 
     def parse(self, cmd_args: List[str] = None) -> ParserArguments:
         args = self._parse_cmd_arguments(cmd_args)
-        parser_options = deserialize_parser_args(args)
+        parser_options = deserialize_parser_args(args, subcmd=self.mock_api_parser.subcommand)
         self._process_option(parser_options)
         return parser_options
 
