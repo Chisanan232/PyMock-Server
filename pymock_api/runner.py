@@ -44,7 +44,7 @@ class CommandRunner:
         if parser_options.app_type == "flask":
             self.sgi_cmd = WSGICmd()
         else:
-            raise ValueError("Invalid value at argument *app-type*. It only supports 'fldask' currently.")
+            raise ValueError("Invalid value at argument *app-type*. It only supports 'flask' currently.")
 
 
 def run() -> None:
