@@ -18,6 +18,7 @@ from ...._values import (
     _Test_App_Type,
     _Test_Config,
     _Test_Entry_Point,
+    _Test_SubCommand,
     _Workers_Amount,
 )
 
@@ -86,15 +87,18 @@ class TestDeserialize:
         return Deserialize
 
     def test_parser_arguments(self, deserialize: Type[Deserialize]):
-        namespace = Namespace(
-            config=_Test_Config,
-            app_type=_Test_App_Type,
-            bind=_Bind_Host_And_Port.value,
-            workers=_Workers_Amount.value,
-            log_level=_Log_Level.value,
-        )
-        arguments = deserialize.parser_arguments(namespace)
+        namespace_args = {
+            _Test_SubCommand: _Test_SubCommand,
+            "config": _Test_Config,
+            "app_type": _Test_App_Type,
+            "bind": _Bind_Host_And_Port.value,
+            "workers": _Workers_Amount.value,
+            "log_level": _Log_Level.value,
+        }
+        namespace = Namespace(**namespace_args)
+        arguments = deserialize.parser_arguments(namespace, subcmd=_Test_SubCommand)
         assert isinstance(arguments, ParserArguments)
+        assert arguments.subparser_name == _Test_SubCommand
         assert arguments.config == _Test_Config
         assert arguments.app_type == _Test_App_Type
         assert arguments.bind == _Bind_Host_And_Port.value
