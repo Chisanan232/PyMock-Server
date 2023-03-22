@@ -56,11 +56,14 @@ class TestCommandOptions:
 
 
 class TestCommand:
+    Web_Lib_Name = "python web library name"
+
     @pytest.fixture(scope="function")
     def command(self) -> Command:
         host_and_port, workers, log_level = _get_cmd_options()
         return Command(
             entry_point=_Test_Entry_Point,
+            web_pylib=self.Web_Lib_Name,
             options=CommandOptions(bind=host_and_port, workers=workers, log_level=log_level),
         )
 
@@ -74,10 +77,12 @@ class TestCommand:
         command.run()
         mock_subprocess_run.assert_called_once_with(expected_cmd, shell=True)
 
-    @staticmethod
-    def expected_cmd_line(command: Command) -> str:
+    @classmethod
+    def expected_cmd_line(cls, command: Command) -> str:
         host_and_port, workers, log_level = _get_cmd_options()
-        cmd = " ".join([command.entry_point, host_and_port, workers, log_level, command.app])
+        cmd = " ".join(
+            [command.entry_point, host_and_port, workers, log_level, command.dispatch_app(web_pylib=cls.Web_Lib_Name)]
+        )
         return cmd
 
 
