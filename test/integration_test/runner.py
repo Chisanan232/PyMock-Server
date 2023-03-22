@@ -22,16 +22,18 @@ class Capturing(list):
 
 
 class CommandFunctionTestSpec(metaclass=ABCMeta):
-    @pytest.fixture(scope="function")
+    _Command_Runner: CommandRunner = CommandRunner()
+
+    @pytest.fixture(scope="module", autouse=True)
     def runner(self) -> CommandRunner:
-        return CommandRunner()
+        return self._Command_Runner
 
     @property
     @abstractmethod
     def options(self) -> List[str]:
         pass
 
-    def test_command(self, capsys, runner: CommandRunner):
+    def test_command(self, runner: CommandRunner):
         with Capturing() as output:
             with pytest.raises(SystemExit):
                 runner.parse(cmd_args=self.options)
@@ -55,7 +57,18 @@ class TestHelp(CommandFunctionTestSpec):
         return ["--help"]
 
     def verify_running_output(self, cmd_running_result) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "mock-api [OPTIONS]")
+        self._should_contains_chars_in_result(cmd_running_result, "mock-api [SUBCOMMAND] [OPTIONS]")
+        self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
+        self._should_contains_chars_in_result(cmd_running_result, "-v, --version")
+
+
+class TestSubCommandRunHelp(CommandFunctionTestSpec):
+    @property
+    def options(self) -> List[str]:
+        return ["run", "--help"]
+
+    def verify_running_output(self, cmd_running_result) -> None:
+        self._should_contains_chars_in_result(cmd_running_result, "mock-api [SUBCOMMAND] [OPTIONS]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "-c CONFIG, --config CONFIG")
         self._should_contains_chars_in_result(cmd_running_result, "-b BIND, --bind BIND")

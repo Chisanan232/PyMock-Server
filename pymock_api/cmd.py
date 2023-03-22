@@ -14,11 +14,19 @@ briefly, It has below major features:
 
 import argparse
 import copy
+import re
+import sys
+from collections import namedtuple
 from typing import Dict, List, Optional, Tuple, Type
 
 from .__pkg_info__ import __version__
 
+SUBCOMMAND: List[str] = []
 COMMAND_OPTIONS: List[Type["CommandOption"]] = []
+
+
+def get_all_subcommands() -> List[str]:
+    return list(set(SUBCOMMAND))
 
 
 def make_options() -> List["CommandOption"]:
@@ -42,17 +50,10 @@ class MockAPICommandParser:
     line.
     """
 
-    def __init__(self, prog: Optional[str] = None, usage: Optional[str] = None, description: Optional[str] = None):
-        """
-
-        Args:
-            prog (str):
-            usage (str):
-            description (str):
-        """
-        self._prog = prog or "pymock-api"
-        self._usage = usage or "mock-api [OPTIONS]"
-        self._description = description or "Mock APIs"
+    def __init__(self):
+        self._prog = "pymock-api"
+        self._usage = "mock-api" if self.is_running_subcmd else "mock-api [SUBCOMMAND] [OPTIONS]"
+        self._description = "Mock APIs"
         self._parser_args: Dict[str, str] = {
             "prog": self._prog,
             "usage": self._usage,
@@ -66,6 +67,16 @@ class MockAPICommandParser:
     @property
     def parser(self) -> argparse.ArgumentParser:
         return self._parser
+
+    @property
+    def subcommand(self) -> Optional[str]:
+        if self.is_running_subcmd:
+            return sys.argv[1]
+        return None
+
+    @property
+    def is_running_subcmd(self) -> bool:
+        return True in [arg in get_all_subcommands() for arg in sys.argv]
 
     def parse(self) -> argparse.ArgumentParser:
         """Initial and parse the arguments of current running command line.
@@ -83,6 +94,9 @@ class MockAPICommandParser:
         return self.parser
 
 
+SubParserAttr = namedtuple("SubParserAttr", ["title", "dest", "description", "help"])
+
+
 class MetaCommandOption(type):
     """*The metaclass for options of PyMock-API command*
 
@@ -94,6 +108,9 @@ class MetaCommandOption(type):
         parent = [b for b in bases if isinstance(b, MetaCommandOption)]
         if not parent:
             return super_new(cls, name, bases, attrs)
+        parent_is_subcmd = list(filter(lambda b: re.search(r"SubCommand\w{1,10}Option", b.__name__), bases))
+        if parent_is_subcmd:
+            SUBCOMMAND.extend([b.__name__.replace("SubCommand", "").replace("Option", "").lower() for b in bases])
         new_class = super_new(cls, name, bases, attrs)
         COMMAND_OPTIONS.append(new_class)
         return new_class
@@ -101,6 +118,7 @@ class MetaCommandOption(type):
 
 class CommandOption:
 
+    sub_cmd: SubParserAttr = None
     cli_option: str = None
     name: str = None
     help_description: str = None
@@ -108,6 +126,8 @@ class CommandOption:
     default_value: type = None
     action: str = None
     _options: List[str] = None
+
+    _cmd_subparser: Dict[str, argparse._ArgumentGroup] = {}
 
     def __init__(self):
         if not self.cli_option:
@@ -147,13 +167,35 @@ class CommandOption:
             "default": self.default_value,
             "action": self.action or "store",
         }
-        parser.add_argument(*self.cli_option_name, **cmd_option_args)
+        if self.sub_cmd:
+            if self.sub_cmd.dest not in self._cmd_subparser.keys():
+                cmd_subparser = parser.add_subparsers(
+                    title=self.sub_cmd.title,
+                    dest=self.sub_cmd.dest,
+                    description=self.sub_cmd.description,
+                    help=self.sub_cmd.help,
+                )
+                self._cmd_subparser[self.sub_cmd.dest] = cmd_subparser.add_parser(self.sub_cmd.dest)
+            self._cmd_subparser[self.sub_cmd.dest].add_argument(*self.cli_option_name, **cmd_option_args)
+        else:
+            parser.add_argument(*self.cli_option_name, **cmd_option_args)
 
     def copy(self) -> "CommandOption":
         return copy.copy(self)
 
 
+class SubCommandRunOption(CommandOption):
+
+    sub_cmd: SubParserAttr = SubParserAttr(
+        title="Running an application",
+        dest="run",
+        description="",
+        help="Set up APIs and start to run an application.",
+    )
+
+
 CommandOption = MetaCommandOption("CommandOption", (CommandOption,), {})
+SubCommandRunOption = MetaCommandOption("SubCommandRunOption", (SubCommandRunOption,), {})
 
 
 class Version(CommandOption):
@@ -177,7 +219,7 @@ class Version(CommandOption):
         parser.add_argument(*self.cli_option_name, **cmd_option_args)
 
 
-class WebAppType(CommandOption):
+class WebAppType(SubCommandRunOption):
 
     cli_option: str = "--app-type"
     name: str = "app_type"
@@ -186,7 +228,7 @@ class WebAppType(CommandOption):
     _options: List[str] = ["flask"]
 
 
-class Config(CommandOption):
+class Config(SubCommandRunOption):
 
     cli_option: str = "-c, --config"
     name: str = "config"
@@ -194,7 +236,7 @@ class Config(CommandOption):
     default_value: str = "api.yaml"
 
 
-class Bind(CommandOption):
+class Bind(SubCommandRunOption):
 
     cli_option: str = "-b, --bind"
     name: str = "bind"
@@ -202,7 +244,7 @@ class Bind(CommandOption):
     default_value: str = "127.0.0.1:9672"
 
 
-class Workers(CommandOption):
+class Workers(SubCommandRunOption):
 
     cli_option: str = "-w, --workers"
     name: str = "workers"
@@ -210,7 +252,7 @@ class Workers(CommandOption):
     default_value: int = 1
 
 
-class LegLevel(CommandOption):
+class LegLevel(SubCommandRunOption):
 
     cli_option: str = "--log-level"
     name: str = "log_level"

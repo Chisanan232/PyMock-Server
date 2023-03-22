@@ -4,13 +4,14 @@ The factory to generate SGI application instance to run Python web framework.
 """
 
 from argparse import Namespace
+from typing import Optional
 
 from ._model import Command, CommandOptions, Deserialize, ParserArguments
 from .cmd import WSGICmd
 from .cmdoption import WSGICmdOption
 
 
-def deserialize_parser_args(args: Namespace) -> ParserArguments:
+def deserialize_parser_args(args: Namespace, subcmd: Optional[str] = None) -> ParserArguments:
     """Deserialize the object *argparse.Namespace* to *ParserArguments*.
 
     Args:
@@ -20,4 +21,4 @@ def deserialize_parser_args(args: Namespace) -> ParserArguments:
         A *ParserArguments* type object.
 
     """
-    return Deserialize.parser_arguments(args)
+    return Deserialize.parser_arguments(args, subcmd)
