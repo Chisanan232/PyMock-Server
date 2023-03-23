@@ -3,7 +3,7 @@ import re
 import sys
 from argparse import Namespace
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 try:
     import pymock_api.cmd
@@ -27,10 +27,10 @@ class CommandRunner:
         command = self.sgi_cmd.generate(args)
         command.run()
 
-    def parse(self, cmd_args: List[str] = None) -> ParserArguments:
+    def parse(self, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         return deserialize_parser_args(self._parse_cmd_arguments(cmd_args), subcmd=self.mock_api_parser.subcommand)
 
-    def _parse_cmd_arguments(self, cmd_args: List[str]) -> Namespace:
+    def _parse_cmd_arguments(self, cmd_args: Optional[List[str]] = None) -> Namespace:
         return self.cmd_parser.parse_args(cmd_args)
 
     def _process_option(self, parser_options: ParserArguments) -> None:
