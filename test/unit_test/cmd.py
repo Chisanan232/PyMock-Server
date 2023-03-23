@@ -1,7 +1,7 @@
 import argparse
 import re
 from typing import Optional
-from unittest.mock import MagicMock, Mock, call, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
