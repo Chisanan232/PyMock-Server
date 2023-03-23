@@ -1,3 +1,4 @@
+import re
 from abc import ABCMeta, abstractmethod
 from typing import TypeVar
 
@@ -88,6 +89,53 @@ class WSGICmdOption(BaseCommandOption):
         else:
             raise ValueError("There are 2 ways to pass arguments: using *address* or using *host* and *port*.")
         return f"--bind {binding_addr}"
+
+    def workers(self, w: int) -> str:
+        return f"--workers {w}"
+
+    def log_level(self, level: str) -> str:
+        return f"--log-level {level}"
+
+
+class ASGICmdOption(BaseCommandOption):
+    """*ASGI application*
+
+    This module for generating WSGI (Web Server Gateway Interface) application by Python tool *gunicorn*.
+
+    Note:
+
+    0-1. --help    Show this message and exit.
+    0-2. --version    Display the uvicorn version and exit.
+
+    1. --host TEXT    Bind socket to this host.  [default: 127.0.0.1]
+       --port INTEGER    Bind socket to this port.  [default: 8000]
+
+    2. --workers INTEGER    Number of worker processes. Defaults to the $WEB_CONCURRENCY environment variable if available, or 1. Not valid with --reload
+
+    3. --log-level [critical|error|warning|info|debug|trace] Log level. [default: info]
+    """
+
+    def help(self) -> str:
+        return "--help"
+
+    def version(self) -> str:
+        return "--version"
+
+    def bind(self, address: str = None, host: str = None, port: str = None) -> str:
+        if address:
+            if not re.search(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", str(address)):
+                raise ValueError(
+                    "The address info is invalid. Please entry value format should be as <IPv4 address>:<Port>."
+                )
+            address_info = address.split(":")
+            binding_host = address_info[0]
+            binding_port = address_info[1]
+        elif host and port:
+            binding_host = host
+            binding_port = port
+        else:
+            raise ValueError("There are 2 ways to pass arguments: using *address* or using *host* and *port*.")
+        return f"--host {binding_host} --port {binding_port}"
 
     def workers(self, w: int) -> str:
         return f"--workers {w}"
