@@ -6,7 +6,6 @@ from typing import TypeVar
 class BaseCommandOption(metaclass=ABCMeta):
     """*Define what command line options it would have be converted from the arguments by PyMock-API command*"""
 
-    @abstractmethod
     def help(self) -> str:
         """Option *-h* or *--help* of target command.
 
@@ -14,9 +13,8 @@ class BaseCommandOption(metaclass=ABCMeta):
             A string value which is this option usage.
 
         """
-        pass
+        return "--help"
 
-    @abstractmethod
     def version(self) -> str:
         """Option *-v* or *--version* of target command.
 
@@ -24,7 +22,7 @@ class BaseCommandOption(metaclass=ABCMeta):
             A string value which is this option usage.
 
         """
-        pass
+        return "--version"
 
     @abstractmethod
     def bind(self, address: str = None, host: str = None, port: str = None) -> str:
@@ -82,12 +80,6 @@ class WSGICmdOption(BaseCommandOption):
     3. --log-level LEVEL    The granularity of Error log outputs. [info]
     """
 
-    def help(self) -> str:
-        return "--help"
-
-    def version(self) -> str:
-        return "--version"
-
     def bind(self, address: str = None, host: str = None, port: str = None) -> str:
         if address:
             self._is_valid_address(address)
@@ -122,12 +114,6 @@ class ASGICmdOption(BaseCommandOption):
 
     3. --log-level [critical|error|warning|info|debug|trace] Log level. [default: info]
     """
-
-    def help(self) -> str:
-        return "--help"
-
-    def version(self) -> str:
-        return "--version"
 
     def bind(self, address: str = None, host: str = None, port: str = None) -> str:
         if address:
