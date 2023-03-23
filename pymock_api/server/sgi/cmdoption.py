@@ -56,6 +56,13 @@ class BaseCommandOption(metaclass=ABCMeta):
         """
         pass
 
+    def _is_valid_address(self, address) -> bool:
+        if not re.search(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", str(address)):
+            raise ValueError(
+                "The address info is invalid. Please entry value format should be as <IPv4 address>:<Port>."
+            )
+        return True
+
 
 Base_Command_Option_Type = TypeVar("Base_Command_Option_Type", bound=BaseCommandOption)
 
@@ -83,6 +90,7 @@ class WSGICmdOption(BaseCommandOption):
 
     def bind(self, address: str = None, host: str = None, port: str = None) -> str:
         if address:
+            self._is_valid_address(address)
             binding_addr = address
         elif host and port:
             binding_addr = f"{host}:{port}"
@@ -123,10 +131,7 @@ class ASGICmdOption(BaseCommandOption):
 
     def bind(self, address: str = None, host: str = None, port: str = None) -> str:
         if address:
-            if not re.search(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", str(address)):
-                raise ValueError(
-                    "The address info is invalid. Please entry value format should be as <IPv4 address>:<Port>."
-                )
+            self._is_valid_address(address)
             address_info = address.split(":")
             binding_host = address_info[0]
             binding_port = address_info[1]
