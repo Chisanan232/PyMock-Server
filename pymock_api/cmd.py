@@ -17,6 +17,7 @@ import copy
 import re
 import sys
 from collections import namedtuple
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple, Type
 
 from .__pkg_info__ import __version__
@@ -53,7 +54,10 @@ class MockAPICommandParser:
     def __init__(self):
         self._prog = "pymock-api"
         self._usage = "mock-api" if self.is_running_subcmd else "mock-api [SUBCOMMAND] [OPTIONS]"
-        self._description = "Mock APIs"
+        self._description = """
+        A Python tool for mocking APIs by set up an application easily. PyMock-API bases on Python web framework to set
+        up application, i.e., you could select using *flask* to set up application to mock APIs.
+        """
         self._parser_args: Dict[str, str] = {
             "prog": self._prog,
             "usage": self._usage,
@@ -176,19 +180,29 @@ class CommandOption:
                     help=self.sub_cmd.help,
                 )
                 self._cmd_subparser[self.sub_cmd.dest] = cmd_subparser.add_parser(self.sub_cmd.dest)
-            self._cmd_subparser[self.sub_cmd.dest].add_argument(*self.cli_option_name, **cmd_option_args)
-        else:
+            parser = self._cmd_subparser[self.sub_cmd.dest]
+        try:
             parser.add_argument(*self.cli_option_name, **cmd_option_args)
+        except argparse.ArgumentError as ae:
+            if re.search(r"conflict", str(ae), re.IGNORECASE):
+                return
+            raise ae
 
     def copy(self) -> "CommandOption":
         return copy.copy(self)
+
+
+@dataclass
+class SubCommand:
+
+    Run: str = "run"
 
 
 class SubCommandRunOption(CommandOption):
 
     sub_cmd: SubParserAttr = SubParserAttr(
         title="Running an application",
-        dest="run",
+        dest=SubCommand.Run,
         description="",
         help="Set up APIs and start to run an application.",
     )

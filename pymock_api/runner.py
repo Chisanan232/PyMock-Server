@@ -1,8 +1,9 @@
 import os
+import re
 import sys
 from argparse import Namespace
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 try:
     import pymock_api.cmd
@@ -21,17 +22,15 @@ class CommandRunner:
         self.cmd_parser = self.mock_api_parser.parse()
         self.sgi_cmd: WSGICmd = None
 
-    def run(self, args: ParserArguments) -> None:
+    def run_app(self, args: ParserArguments) -> None:
+        self._process_option(args)
         command = self.sgi_cmd.generate(args)
         command.run()
 
-    def parse(self, cmd_args: List[str] = None) -> ParserArguments:
-        args = self._parse_cmd_arguments(cmd_args)
-        parser_options = deserialize_parser_args(args, subcmd=self.mock_api_parser.subcommand)
-        self._process_option(parser_options)
-        return parser_options
+    def parse(self, cmd_args: Optional[List[str]] = None) -> ParserArguments:
+        return deserialize_parser_args(self._parse_cmd_arguments(cmd_args), subcmd=self.mock_api_parser.subcommand)
 
-    def _parse_cmd_arguments(self, cmd_args: List[str]) -> Namespace:
+    def _parse_cmd_arguments(self, cmd_args: Optional[List[str]] = None) -> Namespace:
         return self.cmd_parser.parse_args(cmd_args)
 
     def _process_option(self, parser_options: ParserArguments) -> None:
@@ -41,16 +40,17 @@ class CommandRunner:
         os.environ["MockAPI_Config"] = parser_options.config
 
         # Handle *app-type*
-        if parser_options.app_type == "flask":
+        if re.search(r"flask", parser_options.app_type, re.IGNORECASE):
             self.sgi_cmd = WSGICmd()
         else:
-            raise ValueError("Invalid value at argument *app-type*. It only supports 'fldask' currently.")
+            raise ValueError("Invalid value at argument *app-type*. It only supports 'flask' currently.")
 
 
 def run() -> None:
     cmd_runner = CommandRunner()
     arguments = cmd_runner.parse()
-    cmd_runner.run(arguments)
+    if arguments.subparser_name == pymock_api.cmd.SubCommand.Run:
+        cmd_runner.run_app(arguments)
 
 
 if __name__ == "__main__":

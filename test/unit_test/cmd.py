@@ -1,7 +1,7 @@
 import argparse
 import re
 from typing import Optional
-from unittest.mock import MagicMock, Mock, call, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -104,6 +104,16 @@ class TestCommandOption:
         option.help_description = "Message for PyTest"
         option.add_option(mock_argparser)
         mock_argparser.add_argument.assert_called_once()
+
+    @patch.object(argparse.ArgumentParser, "add_argument")
+    def test_bad_add_option(self, mock_argparser: Mock, option: CommandOption):
+        mock_argparser.add_argument = MagicMock()
+        mock_argparser.add_argument.side_effect = argparse.ArgumentError(None, "Error for PyTest")
+        option.help_description = "Message for PyTest"
+        with pytest.raises(argparse.ArgumentError) as exc_info:
+            option.add_option(mock_argparser)
+        mock_argparser.add_argument.assert_called_once()
+        assert str(exc_info.value) == "Error for PyTest"
 
     @patch("copy.copy")
     def test_copy(self, mock_copy: Mock, option: CommandOption):
