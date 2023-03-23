@@ -180,9 +180,13 @@ class CommandOption:
                     help=self.sub_cmd.help,
                 )
                 self._cmd_subparser[self.sub_cmd.dest] = cmd_subparser.add_parser(self.sub_cmd.dest)
-            self._cmd_subparser[self.sub_cmd.dest].add_argument(*self.cli_option_name, **cmd_option_args)
-        else:
+            parser = self._cmd_subparser[self.sub_cmd.dest]
+        try:
             parser.add_argument(*self.cli_option_name, **cmd_option_args)
+        except argparse.ArgumentError as ae:
+            if re.search(r"conflict", str(ae), re.IGNORECASE):
+                return
+            raise ae
 
     def copy(self) -> "CommandOption":
         return copy.copy(self)
