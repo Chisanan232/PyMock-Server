@@ -1,10 +1,11 @@
 import argparse
+from typing import Callable
 from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 import pytest
 
 from pymock_api.runner import CommandRunner, run
-from pymock_api.server.sgi import ParserArguments, WSGICmd, deserialize_parser_args
+from pymock_api.server.sgi import ParserArguments, WSGICmd
 from pymock_api.server.sgi._model import Command, CommandOptions
 
 from .._values import (
@@ -40,38 +41,53 @@ def _given_command(app_type: str) -> Command:
     return Command(entry_point="SGI tool command", web_pylib=mock_parser_arg.app_type, options=mock_cmd_option_obj)
 
 
-def test_run():
-    class FakeRunner(CommandRunner):
-        def __init__(self):
-            pass
-
-    mock_parser_arg = _given_parser_args(app_type=_Test_App_Type)
-    fake_runner = FakeRunner()
-    with patch("pymock_api.runner.CommandRunner", return_value=fake_runner) as mock_runner_instance:
-        with patch.object(fake_runner, "parse", return_value=mock_parser_arg) as mock_parse:
-            with patch.object(fake_runner, "run_app") as mock_run_app:
-                run()
-
-                mock_runner_instance.assert_called_once()
-                mock_parse.assert_called_once()
-                mock_run_app.assert_not_called()
+class FakeRunner(CommandRunner):
+    def __init__(self):
+        pass
 
 
-def test_run_with_subcommand_run():
-    class FakeRunner(CommandRunner):
-        def __init__(self):
-            pass
+class TestEntryPoint:
+    def test_run(self):
+        def _give() -> ParserArguments:
+            return _given_parser_args(app_type=_Test_App_Type)
 
-    mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand, app_type=_Test_App_Type)
-    fake_runner = FakeRunner()
-    with patch("pymock_api.runner.CommandRunner", return_value=fake_runner) as mock_runner_instance:
-        with patch.object(fake_runner, "parse", return_value=mock_parser_arg) as mock_parse:
-            with patch.object(fake_runner, "run_app") as mock_run_app:
-                run()
+        def _run_sut() -> None:
+            run()
 
-                mock_runner_instance.assert_called_once()
-                mock_parse.assert_called_once()
-                mock_run_app.assert_called_once_with(mock_parser_arg)
+        def _should_be_called_as(instantiate_runner: Mock, parse_func: Mock, run_app_func: Mock) -> None:
+            instantiate_runner.assert_called_once()
+            parse_func.assert_called_once()
+            run_app_func.assert_not_called()
+
+        self._run_test_within_mock(given=_give, run_uat=_run_sut, should_be=_should_be_called_as)
+
+    def test_run_with_subcommand_run(self):
+        mock_parser_arg: ParserArguments = None
+
+        def _give() -> ParserArguments:
+            nonlocal mock_parser_arg
+            mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand, app_type=_Test_App_Type)
+            return mock_parser_arg
+
+        def _run_sut() -> None:
+            run()
+
+        def _should_be_called_as(instantiate_runner: Mock, parse_func: Mock, run_app_func: Mock) -> None:
+            instantiate_runner.assert_called_once()
+            parse_func.assert_called_once()
+            run_app_func.assert_called_once_with(mock_parser_arg)
+
+        self._run_test_within_mock(given=_give, run_uat=_run_sut, should_be=_should_be_called_as)
+
+    @classmethod
+    def _run_test_within_mock(cls, given: Callable, run_uat: Callable, should_be: Callable) -> None:
+        mock_parser_arg = given()
+        fake_runner = FakeRunner()
+        with patch("pymock_api.runner.CommandRunner", return_value=fake_runner) as mock_runner_instance:
+            with patch.object(fake_runner, "parse", return_value=mock_parser_arg) as mock_parse:
+                with patch.object(fake_runner, "run_app") as mock_run_app:
+                    run_uat()
+                    should_be(mock_runner_instance, mock_parse, mock_run_app)
 
 
 class TestCommandRunner:
