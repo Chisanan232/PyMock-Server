@@ -8,6 +8,8 @@ from .cmdoption import ASGICmdOption, Base_Command_Option_Type, WSGICmdOption
 class BaseSGICmd(metaclass=ABCMeta):
     """*Base class of SGI*"""
 
+    _SGI_Command_Option: Generic[Base_Command_Option_Type] = None
+
     def generate(self, parser_args: ParserArguments) -> Command:
         """Generate an object about command line for running finally.
 
@@ -73,7 +75,9 @@ class WSGICmd(BaseSGICmd):
 
     @property
     def options(self) -> WSGICmdOption:
-        return WSGICmdOption()
+        if not self._SGI_Command_Option:
+            self._SGI_Command_Option = WSGICmdOption()
+        return self._SGI_Command_Option
 
 
 class ASGICmd(BaseSGICmd):
@@ -97,4 +101,6 @@ class ASGICmd(BaseSGICmd):
 
     @property
     def options(self) -> ASGICmdOption:
-        return ASGICmdOption()
+        if not self._SGI_Command_Option:
+            self._SGI_Command_Option = ASGICmdOption()
+        return self._SGI_Command_Option
