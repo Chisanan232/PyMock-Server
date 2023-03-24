@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Generic
 
 from ._model import Command, CommandOptions, ParserArguments
-from .cmdoption import Base_Command_Option_Type, WSGICmdOption
+from .cmdoption import ASGICmdOption, Base_Command_Option_Type, WSGICmdOption
 
 
 class BaseSGICmd(metaclass=ABCMeta):
@@ -61,9 +61,9 @@ class WSGICmd(BaseSGICmd):
 
         PyMock-API would generate the command line as string value which is valid to run as following:
 
-        .. code-block: python
+        .. code-block: shell
 
-            >>> gunicorn --bind 127.0.0.1:9672 'pymock_api.server:flask_app'
+            >>> gunicorn --bind 127.0.0.1:9672 'pymock_api.server:create_flask_app()'
 
     """
 
@@ -74,3 +74,27 @@ class WSGICmd(BaseSGICmd):
     @property
     def options(self) -> WSGICmdOption:
         return WSGICmdOption()
+
+
+class ASGICmd(BaseSGICmd):
+    """*ASGI application*
+
+    This module for generating ASGI (Asynchronous Server Gateway Interface) application by Python tool *uvicorn*.
+
+    .. note: Example usage of WSGI tool *gunicorn*
+
+        PyMock-API would generate the command line as string value which is valid to run as following:
+
+        .. code-block: shell
+
+            >>> uvicorn --host 127.0.0.1 --port 9672 --factory 'pymock_api.server:create_flask_app()'
+
+    """
+
+    @property
+    def entry_point(self) -> str:
+        return "uvicorn --factory"
+
+    @property
+    def options(self) -> ASGICmdOption:
+        return ASGICmdOption()
