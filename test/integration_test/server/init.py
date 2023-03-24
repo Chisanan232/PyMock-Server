@@ -31,9 +31,17 @@ class TestLoadApp:
         assert isinstance(getattr(mock_server, f"{web_lib}_app"), expected)
 
     @run_test.with_file
-    @patch.object(mock_server.FlaskServer, "setup", side_effect=RuntimeError("Import error for PyTest"))
-    def test_by_flask_when_cannot_import(self, mock_flask_server: Mock):
-        with pytest.raises(RuntimeError) as exc_info:
-            mock_server.load_app.by_flask()
-        mock_flask_server.assert_called_once()
-        assert re.search(r"Import error for PyTest", str(exc_info.value))
+    @pytest.mark.parametrize(
+        ("web_lib", "expected"),
+        [
+            ("Flask", flask.Flask),
+        ],
+    )
+    def test_by_flask_when_cannot_import(self, web_lib: str, expected):
+        with patch.object(
+            getattr(mock_server, f"{web_lib}Server"), "setup", side_effect=RuntimeError("Import error for PyTest")
+        ) as mock_web_server:
+            with pytest.raises(RuntimeError) as exc_info:
+                getattr(mock_server.load_app, f"by_{web_lib.lower()}")()
+            mock_web_server.assert_called_once()
+            assert re.search(r"Import error for PyTest", str(exc_info.value))
