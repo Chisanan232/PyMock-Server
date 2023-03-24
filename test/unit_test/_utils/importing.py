@@ -1,6 +1,6 @@
 import re
 from typing import Type
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, _patch, patch
 
 import fastapi
 import flask
@@ -27,7 +27,7 @@ class TestImportWebLib:
 
 @pytest.mark.parametrize("web_lib", ["flask", "fastapi"])
 def test_ensure_importing(web_lib: str):
-    with patch.object(import_web_lib, web_lib) as mock_import_lib:
+    with _given_importing(web_lib) as mock_import_lib:
         import_web_lib_func = getattr(import_web_lib, web_lib)
         fake_function_with_decorator = ensure_importing(import_web_lib_func)(fake_function)
         assert fake_function_with_decorator() == "Fake function for PyTest"
@@ -36,9 +36,7 @@ def test_ensure_importing(web_lib: str):
 
 @pytest.mark.parametrize("web_lib", ["flask", "fastapi"])
 def test_ensure_importing_fail(web_lib: str):
-    with patch.object(
-        import_web_lib, web_lib, side_effect=ImportError(f"No module named '{web_lib}'")
-    ) as mock_import_lib:
+    with _given_importing(web_lib, side_effect=ImportError(f"No module named '{web_lib}'")) as mock_import_lib:
         import_web_lib_func = getattr(import_web_lib, web_lib)
         with pytest.raises(RuntimeError) as exc_info:
             fake_function_with_decorator = ensure_importing(import_web_lib_func)(fake_function)
@@ -50,9 +48,7 @@ def test_ensure_importing_fail(web_lib: str):
 @pytest.mark.parametrize("web_lib", ["flask", "fastapi"])
 def test_ensure_importing_fail_with_error_handle(web_lib: str):
     mock_error_handle = Mock()
-    with patch.object(
-        import_web_lib, web_lib, side_effect=ImportError(f"No module named '{web_lib}'")
-    ) as mock_import_lib:
+    with _given_importing(web_lib, side_effect=ImportError(f"No module named '{web_lib}'")) as mock_import_lib:
         import_web_lib_func = getattr(import_web_lib, web_lib)
         with pytest.raises(RuntimeError) as exc_info:
             fake_function_with_decorator = ensure_importing(import_web_lib_func, import_err_callback=mock_error_handle)(
@@ -62,3 +58,7 @@ def test_ensure_importing_fail_with_error_handle(web_lib: str):
         mock_import_lib.assert_called_once()
         mock_error_handle.assert_called_once()
         assert re.search(r"Cannot load.{0,256}cannot import.{0,256}", str(exc_info.value))
+
+
+def _given_importing(web_lib: str, side_effect=None) -> _patch:
+    return patch.object(import_web_lib, web_lib, side_effect=side_effect)
