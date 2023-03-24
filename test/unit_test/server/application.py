@@ -4,9 +4,10 @@ from typing import Any, Type
 from unittest.mock import patch
 
 import pytest
+from fastapi import FastAPI
 from flask import Flask
 
-from pymock_api.server.application import BaseAppServer, FlaskServer
+from pymock_api.server.application import BaseAppServer, FastAPIServer, FlaskServer
 
 MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
 
@@ -44,6 +45,10 @@ class FakeFlask(Flask):
     pass
 
 
+class FakeFastAPI(FastAPI):
+    pass
+
+
 class TestFlaskServer(AppServerTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> FlaskServer:
@@ -58,4 +63,21 @@ class TestFlaskServer(AppServerTestSpec):
         return MockerModule(module_path="flask.Flask", return_value=FakeFlask("PyTest-Used"))
 
     def run_target_function(self, sut: FlaskServer) -> Flask:
+        return sut.setup()
+
+
+class TestFastAPIServer(AppServerTestSpec):
+    @pytest.fixture(scope="function")
+    def sut(self) -> FastAPIServer:
+        return FastAPIServer()
+
+    @property
+    def expected_sut_type(self) -> Type[FastAPI]:
+        return FastAPI
+
+    @property
+    def mocker(self) -> MockerModule:
+        return MockerModule(module_path="fastapi.FastAPI", return_value=FakeFastAPI())
+
+    def run_target_function(self, sut: FastAPIServer) -> Flask:
         return sut.setup()
