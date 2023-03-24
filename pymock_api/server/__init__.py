@@ -7,16 +7,22 @@ Interface) tool, e.g., *gunicorn*, etc.
 import os
 
 from .._utils.importing import ensure_importing, import_web_lib
-from .application import BaseAppServer, FlaskServer
+from .application import BaseAppServer, FastAPIServer, FlaskServer
 from .mock import MockHTTPServer
 from .sgi.cmd import WSGICmd
 
 flask_app: "flask.Flask" = None
+fastapi_app: "fastapi.FastAPI" = None
 
 
 def create_flask_app() -> "flask.Flask":
     load_app.by_flask()
     return flask_app
+
+
+def create_fastapi_app() -> "fastapi.FastAPI":
+    load_app.by_fastapi()
+    return fastapi_app
 
 
 class load_app:
@@ -39,6 +45,19 @@ class load_app:
         global flask_app
         config = cls._get_config_path()
         flask_app = cls._initial_mock_server(config_path=config, app_server=FlaskServer()).web_app
+
+    @classmethod
+    @ensure_importing(import_web_lib.fastapi)
+    def by_fastapi(cls) -> None:
+        """Set up web application with *FastAPI*.
+
+        Returns:
+            None
+
+        """
+        global fastapi_app
+        config = cls._get_config_path()
+        fastapi_app = cls._initial_mock_server(config_path=config, app_server=FastAPIServer()).web_app
 
     @classmethod
     def _get_config_path(cls) -> str:
