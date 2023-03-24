@@ -20,9 +20,15 @@ class TestLoadApp:
         return mock_server.load_app
 
     @run_test.with_file
-    def test_by_flask(self, load_app: LOAD_APP_TYPE):
-        load_app.by_flask()
-        assert isinstance(mock_server.flask_app, flask.Flask)
+    @pytest.mark.parametrize(
+        ("web_lib", "expected"),
+        [
+            ("flask", flask.Flask),
+        ],
+    )
+    def test_by_flask(self, load_app: LOAD_APP_TYPE, web_lib: str, expected):
+        getattr(load_app, f"by_{web_lib}")()
+        assert isinstance(getattr(mock_server, f"{web_lib}_app"), expected)
 
     @run_test.with_file
     @patch.object(mock_server.FlaskServer, "setup", side_effect=RuntimeError("Import error for PyTest"))
