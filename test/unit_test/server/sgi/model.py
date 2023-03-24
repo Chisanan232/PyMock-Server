@@ -63,7 +63,7 @@ class TestCommand:
         host_and_port, workers, log_level = _get_cmd_options()
         return Command(
             entry_point=_Test_Entry_Point,
-            web_pylib=self.Web_Lib_Name,
+            app="application instance path",
             options=CommandOptions(bind=host_and_port, workers=workers, log_level=log_level),
         )
 
@@ -80,10 +80,7 @@ class TestCommand:
     @classmethod
     def expected_cmd_line(cls, command: Command) -> str:
         host_and_port, workers, log_level = _get_cmd_options()
-        cmd = " ".join(
-            [command.entry_point, host_and_port, workers, log_level, command.dispatch_app(web_pylib=cls.Web_Lib_Name)]
-        )
-        return cmd
+        return " ".join([command.entry_point, host_and_port, workers, log_level, command.app_path])
 
 
 class TestDeserialize:

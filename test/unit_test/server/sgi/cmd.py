@@ -16,6 +16,7 @@ from ...._values import _Bind_Host_And_Port, _Log_Level, _Workers_Amount
 
 BaseSGICmdType = TypeVar("BaseSGICmdType", bound=BaseSGICmd)
 
+app_path: str = "application instance path"
 mock_parser_arg_obj = ParserArguments(
     app_type="python web library name",
     bind=_Bind_Host_And_Port.value,
@@ -25,9 +26,7 @@ mock_parser_arg_obj = ParserArguments(
 mock_cmd_option_obj = CommandOptions(
     bind=_Bind_Host_And_Port.value, workers=_Workers_Amount.value, log_level=_Log_Level.value
 )
-mock_cmd_obj = Command(
-    entry_point="SGI tool command", web_pylib=mock_parser_arg_obj.app_type, options=mock_cmd_option_obj
-)
+mock_cmd_obj = Command(entry_point="SGI tool command", app=app_path, options=mock_cmd_option_obj)
 
 
 class BaseSGICmdTestSpec(metaclass=ABCMeta):
@@ -43,7 +42,7 @@ class BaseSGICmdTestSpec(metaclass=ABCMeta):
 
         mock_command.assert_called_once_with(
             entry_point=sgi_cmd.entry_point,
-            web_pylib=mock_parser_arg_obj.app_type,
+            app=app_path,
             options=mock_cmd_option_obj,
         )
         mock_command_option.assert_called_once_with(
@@ -73,7 +72,7 @@ class BaseSGICmdTestSpec(metaclass=ABCMeta):
 class TestWSGICmd(BaseSGICmdTestSpec):
     @pytest.fixture(scope="function")
     def sgi_cmd(self) -> WSGICmd:
-        return WSGICmd()
+        return WSGICmd(app=app_path)
 
     @property
     def _expected_entry_point(self) -> str:
@@ -87,7 +86,7 @@ class TestWSGICmd(BaseSGICmdTestSpec):
 class TestASGICmd(BaseSGICmdTestSpec):
     @pytest.fixture(scope="function")
     def sgi_cmd(self) -> ASGICmd:
-        return ASGICmd()
+        return ASGICmd(app=app_path)
 
     @property
     def _expected_entry_point(self) -> str:
