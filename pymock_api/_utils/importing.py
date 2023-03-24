@@ -13,6 +13,13 @@ class import_web_lib:
 
         return flask
 
+    @staticmethod
+    def fastapi() -> "fastapi":
+        """Import Python web framework *fastapi*."""
+        import fastapi
+
+        return fastapi
+
 
 def ensure_importing(import_callback: Callable, import_err_callback: Callable = None) -> Callable:
     """Load application if importing works finely without any issue. Or it will do nothing.
