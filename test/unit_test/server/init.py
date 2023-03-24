@@ -73,3 +73,8 @@ class TestCreateAppFunctions:
     def test_create_flask_app(self, mock_load_app: Mock):
         mock_server.create_flask_app()
         mock_load_app.assert_called_once()
+
+    @patch.object(mock_server.load_app, "by_fastapi")
+    def test_create_flask_app(self, mock_load_app: Mock):
+        mock_server.create_fastapi_app()
+        mock_load_app.assert_called_once()
