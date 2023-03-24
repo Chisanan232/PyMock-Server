@@ -1,8 +1,9 @@
 import os
 import re
 from typing import Type
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
+import fastapi
 import flask
 import pytest
 
@@ -24,6 +25,7 @@ class TestLoadApp:
         ("web_lib", "expected"),
         [
             ("flask", flask.Flask),
+            ("fastapi", fastapi.FastAPI),
         ],
     )
     def test_by_flask(self, load_app: LOAD_APP_TYPE, web_lib: str, expected):
@@ -35,6 +37,7 @@ class TestLoadApp:
         ("web_lib", "expected"),
         [
             ("Flask", flask.Flask),
+            ("FastAPI", fastapi.FastAPI),
         ],
     )
     def test_by_flask_when_cannot_import(self, web_lib: str, expected):
