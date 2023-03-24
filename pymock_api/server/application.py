@@ -30,3 +30,12 @@ class FlaskServer(BaseAppServer):
         flask_pkg: "flask" = import_web_lib.flask()
         app: "flask.Flask" = flask_pkg.Flask(__name__)
         return app
+
+
+class FastAPIServer(BaseAppServer):
+    """*Build a web application with *FastAPI**"""
+
+    def setup(self) -> "fastapi.FastAPI":
+        fastapi_pkg: "fastapi" = import_web_lib.fastapi()
+        app: "fastapi.FastAPI" = fastapi_pkg.FastAPI()
+        return app
