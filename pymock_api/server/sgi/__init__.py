@@ -7,7 +7,7 @@ from argparse import Namespace
 from typing import Optional
 
 from ._model import Command, CommandOptions, Deserialize, ParserArguments
-from .cmd import ASGICmd, WSGICmd
+from .cmd import ASGIServer, WSGIServer
 from .cmdoption import ASGICmdOption, WSGICmdOption
 
 

@@ -5,7 +5,7 @@ from ._model import Command, CommandOptions, ParserArguments
 from .cmdoption import ASGICmdOption, Base_Command_Option_Type, WSGICmdOption
 
 
-class BaseSGICmd(metaclass=ABCMeta):
+class BaseSGIServer(metaclass=ABCMeta):
     """*Base class of SGI*"""
 
     _SGI_Command_Option: Generic[Base_Command_Option_Type] = None
@@ -59,7 +59,7 @@ class BaseSGICmd(metaclass=ABCMeta):
         pass
 
 
-class WSGICmd(BaseSGICmd):
+class WSGIServer(BaseSGIServer):
     """*WSGI application*
 
     This module for generating WSGI (Web Server Gateway Interface) application by Python tool *gunicorn*.
@@ -85,7 +85,7 @@ class WSGICmd(BaseSGICmd):
         return self._SGI_Command_Option
 
 
-class ASGICmd(BaseSGICmd):
+class ASGIServer(BaseSGIServer):
     """*ASGI application*
 
     This module for generating ASGI (Asynchronous Server Gateway Interface) application by Python tool *uvicorn*.

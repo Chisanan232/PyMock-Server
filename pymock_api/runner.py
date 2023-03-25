@@ -8,9 +8,9 @@ from typing import List, Optional
 try:
     import pymock_api.cmd
     from pymock_api.server.sgi import (
-        ASGICmd,
+        ASGIServer,
         ParserArguments,
-        WSGICmd,
+        WSGIServer,
         deserialize_parser_args,
     )
 except (ImportError, ModuleNotFoundError):
@@ -19,9 +19,9 @@ except (ImportError, ModuleNotFoundError):
     sys.path.append(path)
     import pymock_api.cmd
     from pymock_api.server.sgi import (
-        ASGICmd,
+        ASGIServer,
         ParserArguments,
-        WSGICmd,
+        WSGIServer,
         deserialize_parser_args,
     )
 
@@ -30,7 +30,7 @@ class CommandRunner:
     def __init__(self):
         self.mock_api_parser = pymock_api.cmd.MockAPICommandParser()
         self.cmd_parser: ArgumentParser = self.mock_api_parser.parse()
-        self.sgi_cmd: WSGICmd = None
+        self.sgi_cmd: WSGIServer = None
 
     def run_app(self, args: ParserArguments) -> None:
         self._process_option(args)
@@ -51,9 +51,9 @@ class CommandRunner:
 
         # Handle *app-type*
         if re.search(r"flask", parser_options.app_type, re.IGNORECASE):
-            self.sgi_cmd = WSGICmd(app="create_flask_app()")
+            self.sgi_cmd = WSGIServer(app="create_flask_app()")
         elif re.search(r"fastapi", parser_options.app_type, re.IGNORECASE):
-            self.sgi_cmd = ASGICmd(app="create_fastapi_app")
+            self.sgi_cmd = ASGIServer(app="create_fastapi_app")
         else:
             raise ValueError("Invalid value at argument *app-type*. It only supports 'flask' or 'fastapi' currently.")
 

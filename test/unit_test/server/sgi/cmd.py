@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from pymock_api.server.sgi._model import Command, CommandOptions, ParserArguments
-from pymock_api.server.sgi.cmd import ASGICmd, BaseSGICmd, WSGICmd
+from pymock_api.server.sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
 from pymock_api.server.sgi.cmdoption import (
     ASGICmdOption,
     BaseCommandOption,
@@ -14,7 +14,7 @@ from pymock_api.server.sgi.cmdoption import (
 
 from ...._values import _Bind_Host_And_Port, _Log_Level, _Workers_Amount
 
-BaseSGICmdType = TypeVar("BaseSGICmdType", bound=BaseSGICmd)
+BaseSGICmdType = TypeVar("BaseSGICmdType", bound=BaseSGIServer)
 
 app_path: str = "application instance path"
 mock_parser_arg_obj = ParserArguments(
@@ -29,7 +29,7 @@ mock_cmd_option_obj = CommandOptions(
 mock_cmd_obj = Command(entry_point="SGI tool command", app=app_path, options=mock_cmd_option_obj)
 
 
-class BaseSGICmdTestSpec(metaclass=ABCMeta):
+class BaseSGIServerTestSpec(metaclass=ABCMeta):
     @pytest.fixture(scope="function")
     @abstractmethod
     def sgi_cmd(self) -> Generic[BaseSGICmdType]:
@@ -69,10 +69,10 @@ class BaseSGICmdTestSpec(metaclass=ABCMeta):
         pass
 
 
-class TestWSGICmd(BaseSGICmdTestSpec):
+class TestWSGIServer(BaseSGIServerTestSpec):
     @pytest.fixture(scope="function")
-    def sgi_cmd(self) -> WSGICmd:
-        return WSGICmd(app=app_path)
+    def sgi_cmd(self) -> WSGIServer:
+        return WSGIServer(app=app_path)
 
     @property
     def _expected_entry_point(self) -> str:
@@ -83,10 +83,10 @@ class TestWSGICmd(BaseSGICmdTestSpec):
         return WSGICmdOption
 
 
-class TestASGICmd(BaseSGICmdTestSpec):
+class TestASGIServer(BaseSGIServerTestSpec):
     @pytest.fixture(scope="function")
-    def sgi_cmd(self) -> ASGICmd:
-        return ASGICmd(app=app_path)
+    def sgi_cmd(self) -> ASGIServer:
+        return ASGIServer(app=app_path)
 
     @property
     def _expected_entry_point(self) -> str:

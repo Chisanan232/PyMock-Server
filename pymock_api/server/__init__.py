@@ -9,7 +9,7 @@ import os
 from .._utils.importing import ensure_importing, import_web_lib
 from .application import BaseAppServer, FastAPIServer, FlaskServer
 from .mock import MockHTTPServer
-from .sgi.cmd import WSGICmd
+from .sgi.cmd import WSGIServer
 
 flask_app: "flask.Flask" = None
 fastapi_app: "fastapi.FastAPI" = None

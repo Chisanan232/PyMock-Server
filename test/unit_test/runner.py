@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, Mock, PropertyMock, patch
 import pytest
 
 from pymock_api.runner import CommandRunner, run
-from pymock_api.server.sgi import ParserArguments, WSGICmd
+from pymock_api.server.sgi import ParserArguments, WSGIServer
 from pymock_api.server.sgi._model import Command, CommandOptions
 
 from .._sut import get_runner
@@ -101,7 +101,7 @@ class TestCommandRunner:
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
 
-        with patch.object(WSGICmd, "generate", return_value=command) as mock_sgi_generate:
+        with patch.object(WSGIServer, "generate", return_value=command) as mock_sgi_generate:
             runner.run_app(mock_parser_arg)
             mock_sgi_generate.assert_called_once_with(mock_parser_arg)
             command.run.assert_called_once()
@@ -112,7 +112,7 @@ class TestCommandRunner:
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
 
-        with patch.object(WSGICmd, "generate", return_value=command) as mock_sgi_generate:
+        with patch.object(WSGIServer, "generate", return_value=command) as mock_sgi_generate:
             with pytest.raises(ValueError) as exc_info:
                 runner.run_app(mock_parser_arg)
             assert "Invalid value" in str(exc_info.value)
