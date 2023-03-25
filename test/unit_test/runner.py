@@ -8,6 +8,7 @@ from pymock_api.runner import CommandRunner, run
 from pymock_api.server.sgi import ParserArguments, WSGICmd
 from pymock_api.server.sgi._model import Command, CommandOptions
 
+from .._sut import get_runner
 from .._values import (
     _Bind_Host_And_Port,
     _Log_Level,
@@ -38,7 +39,7 @@ def _given_command_option() -> CommandOptions:
 def _given_command(app_type: str) -> Command:
     mock_parser_arg = _given_parser_args(app_type)
     mock_cmd_option_obj = _given_command_option()
-    return Command(entry_point="SGI tool command", web_pylib=mock_parser_arg.app_type, options=mock_cmd_option_obj)
+    return Command(entry_point="SGI tool command", app=mock_parser_arg.app_type, options=mock_cmd_option_obj)
 
 
 class FakeRunner(CommandRunner):
@@ -91,15 +92,13 @@ class TestEntryPoint:
 
 
 class TestCommandRunner:
-    _Command_Runner: CommandRunner = CommandRunner()
-
     @pytest.fixture(scope="function")
     def runner(self) -> CommandRunner:
-        return self._Command_Runner
+        return get_runner()
 
     def test_run_app(self, runner: CommandRunner):
         mock_parser_arg = _given_parser_args(app_type=_Test_App_Type)
-        command = _given_command(app_type="flask")
+        command = _given_command(app_type="Python web library")
         command.run = MagicMock()
 
         with patch.object(WSGICmd, "generate", return_value=command) as mock_sgi_generate:
@@ -110,7 +109,7 @@ class TestCommandRunner:
     def test_bad_run_app(self, runner: CommandRunner):
         mock_parser_arg = _given_parser_args(app_type=_Test_App_Type)
         mock_parser_arg.app_type = "invalid app-type which is not a Python web library or framework"
-        command = _given_command(app_type="flask")
+        command = _given_command(app_type="Python web library")
         command.run = MagicMock()
 
         with patch.object(WSGICmd, "generate", return_value=command) as mock_sgi_generate:
