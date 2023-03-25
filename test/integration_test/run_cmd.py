@@ -110,7 +110,7 @@ class TestSubCommandRun(CommandTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "--log-level LOG_LEVEL")
 
 
-class TestRunApplicationToMockAPIsWithFlaskAndGunicorn(CommandTestSpec):
+class TestRunMockApplicationWithFlask(CommandTestSpec):
     @property
     def options(self) -> str:
         return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Path}"
@@ -124,7 +124,7 @@ class TestRunApplicationToMockAPIsWithFlaskAndGunicorn(CommandTestSpec):
         super()._verify_running_output(cmd_running_result)
 
 
-class TestRunApplicationToMockAPIsWithFastAPIAndUvicorn(CommandTestSpec):
+class TestRunMockApplicationWithFastAPI(CommandTestSpec):
     @property
     def options(self) -> str:
         return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Path}"
