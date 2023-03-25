@@ -3,10 +3,8 @@ import re
 import subprocess
 import sys
 import threading
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 from typing import List
-
-from pymock_api.runner import CommandRunner
 
 from .._values import (
     _Base_URL,
@@ -16,10 +14,10 @@ from .._values import (
     _YouTube_Home_Value,
 )
 from ._spec import MockAPI_Config_Path, run_test
-from .runner import Capturing, CommandFunctionTestSpec
+from .runner import Capturing
 
 
-class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
+class CommandTestSpec(metaclass=ABCMeta):
 
     Server_Running_Entry_Point: str = "pymock_api/runner.py"
     Terminate_Command_Running_When_Sniff_IP_Info: bool = True
@@ -29,8 +27,13 @@ class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
         cmd_options = " ".join(self.options)
         return f"python3 {self.Server_Running_Entry_Point} {cmd_options}"
 
+    @property
+    @abstractmethod
+    def options(self) -> List[str]:
+        pass
+
     @run_test.with_file
-    def test_command(self, runner: CommandRunner) -> None:
+    def test_command(self) -> None:
         try:
             with Capturing() as mock_server_output:
                 self._run_as_thread(target=self.run_mock_api_server)
@@ -73,6 +76,13 @@ class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
         pass
 
     @classmethod
+    def _should_contains_chars_in_result(self, target: str, expected_char, translate: bool = True) -> None:
+        if translate:
+            assert re.search(re.escape(expected_char), target, re.IGNORECASE)
+        else:
+            assert re.search(expected_char, target, re.IGNORECASE)
+
+    @classmethod
     def _curl_and_chk_resp_content(cls, api: str, expected_resp_content: str, resp_is_json_format: bool) -> None:
         curl_google_ps = subprocess.Popen(
             f"curl http://{_Bind_Host_And_Port.value}{api}", shell=True, stdout=subprocess.PIPE
@@ -82,7 +92,7 @@ class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
         assert re.search(re.escape(expected_resp_content), resp_content, re.IGNORECASE)
 
 
-class TestSubCommandRun(StreamingOutputCommandFunctionTestSpec):
+class TestSubCommandRun(CommandTestSpec):
 
     Terminate_Command_Running_When_Sniff_IP_Info: bool = False
 
@@ -104,7 +114,7 @@ class TestSubCommandRun(StreamingOutputCommandFunctionTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "--log-level LOG_LEVEL")
 
 
-class TestRunApplicationToMockAPIsWithFlaskAndGunicorn(StreamingOutputCommandFunctionTestSpec):
+class TestRunApplicationToMockAPIsWithFlaskAndGunicorn(CommandTestSpec):
     @property
     def options(self) -> List[str]:
         return ["run", "--app-type", "flask", "--bind", _Bind_Host_And_Port.value, "--config", MockAPI_Config_Path]
@@ -119,7 +129,7 @@ class TestRunApplicationToMockAPIsWithFlaskAndGunicorn(StreamingOutputCommandFun
         super().verify_running_output(cmd_running_result)
 
 
-class TestRunApplicationToMockAPIsWithFastAPIAndUvicorn(StreamingOutputCommandFunctionTestSpec):
+class TestRunApplicationToMockAPIsWithFastAPIAndUvicorn(CommandTestSpec):
     @property
     def options(self) -> List[str]:
         return ["run", "--app-type", "fastapi", "--bind", _Bind_Host_And_Port.value, "--config", MockAPI_Config_Path]
