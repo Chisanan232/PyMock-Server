@@ -36,13 +36,16 @@ class CommandTestSpec(metaclass=ABCMeta):
     def test_command(self) -> None:
         try:
             with Capturing() as mock_server_output:
-                self._run_as_thread(target=self.run_mock_api_server)
-            self.verify_running_output(" ".join(mock_server_output))
+                self._run_as_thread(target=self._run_command_line)
+            self._verify_running_output(" ".join(mock_server_output))
         finally:
-            self._kill_all_server_workers()
+            self._do_finally()
 
-    def run_mock_api_server(self) -> None:
+    def _run_command_line(self) -> None:
         cmd_ps = subprocess.Popen(self.command_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        self._read_streaming_output(cmd_ps)
+
+    def _read_streaming_output(self, cmd_ps: subprocess.Popen) -> None:
         for line in iter(lambda: cmd_ps.stdout.readline(), b""):
             sys.stdout.write(line.decode("utf-8"))
             if self.Terminate_Command_Running_When_Sniff_IP_Info and re.search(
@@ -50,10 +53,10 @@ class CommandTestSpec(metaclass=ABCMeta):
             ):
                 break
 
-    def verify_running_output(self, cmd_running_result: str) -> None:
-        self.verify_apis()
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._verify_apis()
 
-    def verify_apis(self) -> None:
+    def _verify_apis(self) -> None:
         self._curl_and_chk_resp_content(
             api=f"{_Base_URL}{_Google_Home_Value['url']}", expected_resp_content="google", resp_is_json_format=False
         )
@@ -70,13 +73,11 @@ class CommandTestSpec(metaclass=ABCMeta):
         run_cmd_thread.daemon = True
         run_cmd_thread.run()
 
-    @classmethod
-    @abstractmethod
-    def _kill_all_server_workers(cls) -> None:
+    def _do_finally(self) -> None:
         pass
 
     @classmethod
-    def _should_contains_chars_in_result(self, target: str, expected_char, translate: bool = True) -> None:
+    def _should_contains_chars_in_result(cls, target: str, expected_char, translate: bool = True) -> None:
         if translate:
             assert re.search(re.escape(expected_char), target, re.IGNORECASE)
         else:
@@ -100,11 +101,7 @@ class TestSubCommandRun(CommandTestSpec):
     def options(self) -> List[str]:
         return ["run", "--help"]
 
-    @classmethod
-    def _kill_all_server_workers(cls) -> None:
-        pass
-
-    def verify_running_output(self, cmd_running_result: str) -> None:
+    def _verify_running_output(self, cmd_running_result: str) -> None:
         self._should_contains_chars_in_result(cmd_running_result, "mock-api run [-h]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "--app-type APP_TYPE")
@@ -119,14 +116,13 @@ class TestRunApplicationToMockAPIsWithFlaskAndGunicorn(CommandTestSpec):
     def options(self) -> List[str]:
         return ["run", "--app-type", "flask", "--bind", _Bind_Host_And_Port.value, "--config", MockAPI_Config_Path]
 
-    @classmethod
-    def _kill_all_server_workers(cls) -> None:
+    def _do_finally(self) -> None:
         subprocess.run("pkill -f gunicorn", shell=True)
 
-    def verify_running_output(self, cmd_running_result: str) -> None:
+    def _verify_running_output(self, cmd_running_result: str) -> None:
         self._should_contains_chars_in_result(cmd_running_result, "Starting gunicorn")
         self._should_contains_chars_in_result(cmd_running_result, f"Listening at: http://{_Bind_Host_And_Port.value}")
-        super().verify_running_output(cmd_running_result)
+        super()._verify_running_output(cmd_running_result)
 
 
 class TestRunApplicationToMockAPIsWithFastAPIAndUvicorn(CommandTestSpec):
@@ -134,15 +130,14 @@ class TestRunApplicationToMockAPIsWithFastAPIAndUvicorn(CommandTestSpec):
     def options(self) -> List[str]:
         return ["run", "--app-type", "fastapi", "--bind", _Bind_Host_And_Port.value, "--config", MockAPI_Config_Path]
 
-    @classmethod
-    def _kill_all_server_workers(cls) -> None:
+    def _do_finally(self) -> None:
         subprocess.run("pkill -f uvicorn", shell=True)
 
-    def verify_running_output(self, cmd_running_result: str) -> None:
+    def _verify_running_output(self, cmd_running_result: str) -> None:
         self._should_contains_chars_in_result(cmd_running_result, "Started server process")
         self._should_contains_chars_in_result(cmd_running_result, "Waiting for application startup")
         self._should_contains_chars_in_result(cmd_running_result, "Application startup complete")
         self._should_contains_chars_in_result(
             cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}"
         )
-        super().verify_running_output(cmd_running_result)
+        super()._verify_running_output(cmd_running_result)
