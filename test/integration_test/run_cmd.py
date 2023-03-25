@@ -4,14 +4,19 @@ import subprocess
 import sys
 import threading
 from abc import ABC, abstractmethod
-from test._values import _Bind_Host_And_Port
-from test.integration_test._spec import MockAPI_Config_Path, run_test
-from test.integration_test.runner import Capturing, CommandFunctionTestSpec
 from typing import List
 
 from pymock_api.runner import CommandRunner
 
-from .._values import _Base_URL, _Google_Home_Value, _Test_Home, _YouTube_Home_Value
+from .._values import (
+    _Base_URL,
+    _Bind_Host_And_Port,
+    _Google_Home_Value,
+    _Test_Home,
+    _YouTube_Home_Value,
+)
+from ._spec import MockAPI_Config_Path, run_test
+from .runner import Capturing, CommandFunctionTestSpec
 
 
 class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
