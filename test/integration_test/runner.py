@@ -56,7 +56,7 @@ class TestHelp(CommandFunctionTestSpec):
     def options(self) -> List[str]:
         return ["--help"]
 
-    def verify_running_output(self, cmd_running_result) -> None:
+    def verify_running_output(self, cmd_running_result: str) -> None:
         self._should_contains_chars_in_result(cmd_running_result, "mock-api [SUBCOMMAND] [OPTIONS]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "-v, --version")
@@ -67,7 +67,7 @@ class TestVersion(CommandFunctionTestSpec):
     def options(self) -> List[str]:
         return ["--version"]
 
-    def verify_running_output(self, cmd_running_result) -> None:
+    def verify_running_output(self, cmd_running_result: str) -> None:
         software_version_format = r".{0,32}([0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4}).{0,8}"
         self._should_contains_chars_in_result(
             cmd_running_result, re.escape("pymock-api") + software_version_format, translate=False

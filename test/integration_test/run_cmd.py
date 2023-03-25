@@ -42,7 +42,7 @@ class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
             ):
                 break
 
-    def verify_running_output(self, cmd_running_result) -> None:
+    def verify_running_output(self, cmd_running_result: str) -> None:
         self.verify_apis()
 
     def verify_apis(self) -> None:
@@ -89,7 +89,7 @@ class TestSubCommandRun(StreamingOutputCommandFunctionTestSpec):
     def _kill_all_server_workers(cls) -> None:
         pass
 
-    def verify_running_output(self, cmd_running_result) -> None:
+    def verify_running_output(self, cmd_running_result: str) -> None:
         self._should_contains_chars_in_result(cmd_running_result, "mock-api run [-h]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "--app-type APP_TYPE")
@@ -108,7 +108,7 @@ class TestRunApplicationToMockAPIsWithFlaskAndGunicorn(StreamingOutputCommandFun
     def _kill_all_server_workers(cls) -> None:
         subprocess.run("pkill -f gunicorn", shell=True)
 
-    def verify_running_output(self, cmd_running_result) -> None:
+    def verify_running_output(self, cmd_running_result: str) -> None:
         self._should_contains_chars_in_result(cmd_running_result, "Starting gunicorn")
         self._should_contains_chars_in_result(cmd_running_result, f"Listening at: http://{_Bind_Host_And_Port.value}")
         super().verify_running_output(cmd_running_result)
@@ -123,7 +123,7 @@ class TestRunApplicationToMockAPIsWithFastAPIAndUvicorn(StreamingOutputCommandFu
     def _kill_all_server_workers(cls) -> None:
         subprocess.run("pkill -f uvicorn", shell=True)
 
-    def verify_running_output(self, cmd_running_result) -> None:
+    def verify_running_output(self, cmd_running_result: str) -> None:
         self._should_contains_chars_in_result(cmd_running_result, "Started server process")
         self._should_contains_chars_in_result(cmd_running_result, "Waiting for application startup")
         self._should_contains_chars_in_result(cmd_running_result, "Application startup complete")
