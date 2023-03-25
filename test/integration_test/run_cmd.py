@@ -4,7 +4,6 @@ import subprocess
 import sys
 import threading
 from abc import ABCMeta, abstractmethod
-from typing import List
 
 from .._values import (
     _Base_URL,

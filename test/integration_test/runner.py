@@ -2,7 +2,6 @@ import io
 import re
 import sys
 from abc import ABCMeta, abstractmethod
-from typing import List
 
 import pytest
 
