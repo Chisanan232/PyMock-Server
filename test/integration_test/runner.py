@@ -30,13 +30,13 @@ class CommandFunctionTestSpec(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def options(self) -> List[str]:
+    def options(self) -> str:
         pass
 
     def test_command(self, runner: CommandRunner):
         with Capturing() as output:
             with pytest.raises(SystemExit):
-                runner.parse(cmd_args=self.options)
+                runner.parse(cmd_args=self.options.split())
         self.verify_running_output(" ".join(output))
 
     @abstractmethod
@@ -53,8 +53,8 @@ class CommandFunctionTestSpec(metaclass=ABCMeta):
 
 class TestHelp(CommandFunctionTestSpec):
     @property
-    def options(self) -> List[str]:
-        return ["--help"]
+    def options(self) -> str:
+        return "--help"
 
     def verify_running_output(self, cmd_running_result: str) -> None:
         self._should_contains_chars_in_result(cmd_running_result, "mock-api [SUBCOMMAND] [OPTIONS]")
@@ -64,8 +64,8 @@ class TestHelp(CommandFunctionTestSpec):
 
 class TestVersion(CommandFunctionTestSpec):
     @property
-    def options(self) -> List[str]:
-        return ["--version"]
+    def options(self) -> str:
+        return "--version"
 
     def verify_running_output(self, cmd_running_result: str) -> None:
         software_version_format = r".{0,32}([0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4}).{0,8}"

@@ -24,12 +24,11 @@ class CommandTestSpec(metaclass=ABCMeta):
 
     @property
     def command_line(self) -> str:
-        cmd_options = " ".join(self.options)
-        return f"python3 {self.Server_Running_Entry_Point} {cmd_options}"
+        return f"python3 {self.Server_Running_Entry_Point} {self.options}"
 
     @property
     @abstractmethod
-    def options(self) -> List[str]:
+    def options(self) -> str:
         pass
 
     @run_test.with_file
@@ -98,8 +97,8 @@ class TestSubCommandRun(CommandTestSpec):
     Terminate_Command_Running_When_Sniff_IP_Info: bool = False
 
     @property
-    def options(self) -> List[str]:
-        return ["run", "--help"]
+    def options(self) -> str:
+        return "run --help"
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
         self._should_contains_chars_in_result(cmd_running_result, "mock-api run [-h]")
@@ -113,8 +112,8 @@ class TestSubCommandRun(CommandTestSpec):
 
 class TestRunApplicationToMockAPIsWithFlaskAndGunicorn(CommandTestSpec):
     @property
-    def options(self) -> List[str]:
-        return ["run", "--app-type", "flask", "--bind", _Bind_Host_And_Port.value, "--config", MockAPI_Config_Path]
+    def options(self) -> str:
+        return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Path}"
 
     def _do_finally(self) -> None:
         subprocess.run("pkill -f gunicorn", shell=True)
@@ -127,8 +126,8 @@ class TestRunApplicationToMockAPIsWithFlaskAndGunicorn(CommandTestSpec):
 
 class TestRunApplicationToMockAPIsWithFastAPIAndUvicorn(CommandTestSpec):
     @property
-    def options(self) -> List[str]:
-        return ["run", "--app-type", "fastapi", "--bind", _Bind_Host_And_Port.value, "--config", MockAPI_Config_Path]
+    def options(self) -> str:
+        return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Path}"
 
     def _do_finally(self) -> None:
         subprocess.run("pkill -f uvicorn", shell=True)
