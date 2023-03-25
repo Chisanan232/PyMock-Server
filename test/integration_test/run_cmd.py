@@ -3,7 +3,7 @@ import re
 import subprocess
 import sys
 import threading
-from abc import ABCMeta, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 
 from .._values import (
     _Base_URL,
@@ -51,19 +51,9 @@ class CommandTestSpec(metaclass=ABCMeta):
             ):
                 break
 
+    @abstractmethod
     def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._verify_apis()
-
-    def _verify_apis(self) -> None:
-        self._curl_and_chk_resp_content(
-            api=f"{_Base_URL}{_Google_Home_Value['url']}", expected_resp_content="google", resp_is_json_format=False
-        )
-        self._curl_and_chk_resp_content(
-            api=f"{_Base_URL}{_Test_Home['url']}", expected_resp_content="test", resp_is_json_format=True
-        )
-        self._curl_and_chk_resp_content(
-            api=f"{_Base_URL}{_YouTube_Home_Value['url']}", expected_resp_content="youtube", resp_is_json_format=True
-        )
+        pass
 
     @classmethod
     def _run_as_thread(cls, target) -> None:
@@ -80,15 +70,6 @@ class CommandTestSpec(metaclass=ABCMeta):
             assert re.search(re.escape(expected_char), target, re.IGNORECASE)
         else:
             assert re.search(expected_char, target, re.IGNORECASE)
-
-    @classmethod
-    def _curl_and_chk_resp_content(cls, api: str, expected_resp_content: str, resp_is_json_format: bool) -> None:
-        curl_google_ps = subprocess.Popen(
-            f"curl http://{_Bind_Host_And_Port.value}{api}", shell=True, stdout=subprocess.PIPE
-        )
-        resp = curl_google_ps.stdout.readlines()[0]
-        resp_content = json.loads(resp.decode("utf-8"))["content"] if resp_is_json_format else resp.decode("utf-8")
-        assert re.search(re.escape(expected_resp_content), resp_content, re.IGNORECASE)
 
 
 class TestSubCommandRun(CommandTestSpec):
@@ -109,7 +90,32 @@ class TestSubCommandRun(CommandTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "--log-level LOG_LEVEL")
 
 
-class TestRunMockApplicationWithFlask(CommandTestSpec):
+class RunMockApplicationTestSpec(CommandTestSpec, ABC):
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._verify_apis()
+
+    def _verify_apis(self) -> None:
+        self._curl_and_chk_resp_content(
+            api=f"{_Base_URL}{_Google_Home_Value['url']}", expected_resp_content="google", resp_is_json_format=False
+        )
+        self._curl_and_chk_resp_content(
+            api=f"{_Base_URL}{_Test_Home['url']}", expected_resp_content="test", resp_is_json_format=True
+        )
+        self._curl_and_chk_resp_content(
+            api=f"{_Base_URL}{_YouTube_Home_Value['url']}", expected_resp_content="youtube", resp_is_json_format=True
+        )
+
+    @classmethod
+    def _curl_and_chk_resp_content(cls, api: str, expected_resp_content: str, resp_is_json_format: bool) -> None:
+        curl_google_ps = subprocess.Popen(
+            f"curl http://{_Bind_Host_And_Port.value}{api}", shell=True, stdout=subprocess.PIPE
+        )
+        resp = curl_google_ps.stdout.readlines()[0]
+        resp_content = json.loads(resp.decode("utf-8"))["content"] if resp_is_json_format else resp.decode("utf-8")
+        assert re.search(re.escape(expected_resp_content), resp_content, re.IGNORECASE)
+
+
+class TestRunMockApplicationWithFlask(RunMockApplicationTestSpec):
     @property
     def options(self) -> str:
         return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Path}"
@@ -123,7 +129,7 @@ class TestRunMockApplicationWithFlask(CommandTestSpec):
         super()._verify_running_output(cmd_running_result)
 
 
-class TestRunMockApplicationWithFastAPI(CommandTestSpec):
+class TestRunMockApplicationWithFastAPI(RunMockApplicationTestSpec):
     @property
     def options(self) -> str:
         return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Path}"
