@@ -3,7 +3,6 @@ import re
 import subprocess
 import sys
 import threading
-import time
 from abc import ABC, abstractmethod
 from test._values import _Bind_Host_And_Port
 from test.integration_test._spec import MockAPI_Config_Path, run_test
