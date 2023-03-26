@@ -1,9 +1,9 @@
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_api.model.api_config import APIConfig, MockAPIs
+from pymock_api.model.api_config import APIConfig, MockAPI, MockAPIs
 from pymock_api.server.application import BaseAppServer, FlaskServer
 from pymock_api.server.mock import MockHTTPServer
 
@@ -16,7 +16,7 @@ class FakeWebServer(BaseAppServer):
     def setup(self) -> Any:
         pass
 
-    def create_api(self, mocked_apis: MockAPIs) -> None:
+    def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         pass
 
 
