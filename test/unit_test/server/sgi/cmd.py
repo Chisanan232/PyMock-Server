@@ -1,5 +1,6 @@
+import re
 from abc import ABCMeta, abstractmethod
-from typing import Generic, Type, TypeVar
+from typing import Generic, Optional, Type, TypeVar
 from unittest.mock import Mock, patch
 
 import pytest
@@ -28,6 +29,21 @@ mock_cmd_option_obj = CommandOptions(
     bind=_Bind_Host_And_Port.value, workers=_Workers_Amount.value, log_level=_Log_Level.value
 )
 mock_cmd_obj = Command(entry_point="SGI tool command", app=app_path, options=mock_cmd_option_obj)
+
+
+@pytest.mark.parametrize(
+    ("sgi_server", "app", "expected_err"),
+    [
+        (WSGIServer, None, ValueError),
+        (WSGIServer, "", ValueError),
+        (ASGIServer, None, ValueError),
+        (ASGIServer, "", ValueError),
+    ],
+)
+def test_invalid_app_path(sgi_server: Type[BaseSGIServer], app: Optional[str], expected_err: Exception):
+    with pytest.raises(expected_err) as exc_info:
+        sgi_server(app=app)
+    assert re.search(r"cannot be None or empty", str(exc_info.value), re.IGNORECASE)
 
 
 class BaseSGIServerTestSpec(metaclass=ABCMeta):
