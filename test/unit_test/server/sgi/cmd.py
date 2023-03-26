@@ -4,7 +4,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_api.server.sgi._model import Command, CommandOptions, ParserArguments
+from pymock_api.model.cmd_args import ParserArguments
+from pymock_api.server.sgi._model import Command, CommandOptions
 from pymock_api.server.sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
 from pymock_api.server.sgi.cmdoption import (
     ASGICmdOption,

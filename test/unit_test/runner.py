@@ -4,8 +4,9 @@ from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 import pytest
 
+from pymock_api.model.cmd_args import ParserArguments
 from pymock_api.runner import CommandRunner, run
-from pymock_api.server.sgi import ParserArguments, WSGIServer
+from pymock_api.server.sgi import WSGIServer
 from pymock_api.server.sgi._model import Command, CommandOptions
 
 from .._sut import get_runner

@@ -12,8 +12,7 @@ from .._utils.importing import ensure_importing, import_web_lib
 from ..exceptions import FunctionNotFoundError
 from .application import BaseAppServer, FastAPIServer, FlaskServer
 from .mock import MockHTTPServer
-from .sgi import deserialize_parser_args
-from .sgi._model import ParserArguments
+from .sgi._model import Command, CommandOptions
 from .sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
 
 flask_app: "flask.Flask" = None

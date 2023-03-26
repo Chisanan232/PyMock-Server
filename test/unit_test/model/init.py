@@ -1,9 +1,9 @@
 from argparse import Namespace
 from unittest.mock import Mock, patch
 
-from pymock_api.server.sgi import Deserialize, deserialize_parser_args
+from pymock_api.model import Deserialize, deserialize_parser_args
 
-from ...._values import (
+from ..._values import (
     _Bind_Host_And_Port,
     _Log_Level,
     _Test_App_Type,

@@ -98,16 +98,18 @@ class TestSetupServerGateway:
         mock_instantiate_wsgi.assert_called_once_with(app=expected_app)
 
     @pytest.mark.parametrize(
-        ("app", "expected_error"),
+        ("sut_func", "app", "expected_error"),
         [
-            ("create_not_exist_app()", FunctionNotFoundError),
-            (_fake_function, FunctionNotFoundError),
+            ("wsgi", "create_not_exist_app()", FunctionNotFoundError),
+            ("wsgi", _fake_function, FunctionNotFoundError),
         ],
     )
     @patch("pymock_api.server.WSGIServer")
-    def test_bad_setup_wsgi(self, mock_instantiate_wsgi: Mock, app: Union[str, Callable], expected_error: Exception):
+    def test_bad_setup_wsgi(
+        self, mock_instantiate_wsgi: Mock, sut_func: str, app: Union[str, Callable], expected_error: Exception
+    ):
         with pytest.raises(expected_error) as exc_info:
-            mock_server.setup_server_gateway.wsgi(web_app=app)
+            getattr(mock_server.setup_server_gateway, sut_func)(web_app=app)
         assert re.search(r"cannot find .{0,32}function", str(exc_info.value), re.IGNORECASE)
         mock_instantiate_wsgi.assert_not_called()
 

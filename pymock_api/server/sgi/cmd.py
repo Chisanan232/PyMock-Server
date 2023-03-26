@@ -1,7 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import Generic
 
-from ._model import Command, CommandOptions, ParserArguments
+from ...model.cmd_args import ParserArguments
+from ._model import Command, CommandOptions
 from .cmdoption import ASGICmdOption, Base_Command_Option_Type, WSGICmdOption
 
 

@@ -7,25 +7,15 @@ from typing import List, Optional
 
 try:
     import pymock_api.cmd
-    from pymock_api.server import (
-        BaseSGIServer,
-        ParserArguments,
-        deserialize_parser_args,
-        setup_asgi,
-        setup_wsgi,
-    )
+    from pymock_api.model import ParserArguments, deserialize_parser_args
+    from pymock_api.server import BaseSGIServer, setup_asgi, setup_wsgi
 except (ImportError, ModuleNotFoundError):
     runner_dir = os.path.dirname(os.path.abspath(__file__))
     path = str(Path(runner_dir).parent.absolute())
     sys.path.append(path)
     import pymock_api.cmd
-    from pymock_api.server import (
-        BaseSGIServer,
-        ParserArguments,
-        deserialize_parser_args,
-        setup_asgi,
-        setup_wsgi,
-    )
+    from pymock_api.model import ParserArguments, deserialize_parser_args
+    from pymock_api.server import BaseSGIServer, setup_asgi, setup_wsgi
 
 
 class CommandRunner:
