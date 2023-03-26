@@ -5,11 +5,16 @@ Interface) tool, e.g., *gunicorn*, etc.
 """
 
 import os
+import re
+from typing import Callable, Union
 
 from .._utils.importing import ensure_importing, import_web_lib
+from ..exceptions import FunctionNotFoundError
 from .application import BaseAppServer, FastAPIServer, FlaskServer
 from .mock import MockHTTPServer
-from .sgi.cmd import WSGIServer
+from .sgi import deserialize_parser_args
+from .sgi._model import ParserArguments
+from .sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
 
 flask_app: "flask.Flask" = None
 fastapi_app: "fastapi.FastAPI" = None
@@ -23,6 +28,14 @@ def create_flask_app() -> "flask.Flask":
 def create_fastapi_app() -> "fastapi.FastAPI":
     load_app.by_fastapi()
     return fastapi_app
+
+
+def setup_wsgi() -> WSGIServer:
+    return setup_server_gateway.wsgi(web_app=create_flask_app)
+
+
+def setup_asgi() -> ASGIServer:
+    return setup_server_gateway.asgi(web_app=create_fastapi_app)
 
 
 class load_app:
@@ -82,3 +95,25 @@ class load_app:
 
         """
         return MockHTTPServer(config_path=config_path, app_server=app_server, auto_setup=True)
+
+
+class setup_server_gateway:
+    @classmethod
+    def wsgi(cls, web_app: Union[str, Callable]) -> WSGIServer:
+        cls._ensure_function_exists(web_app)
+        web_app = f"{web_app.__qualname__}()" if isinstance(web_app, Callable) else web_app
+        return WSGIServer(app=web_app)
+
+    @classmethod
+    def asgi(cls, web_app: Union[str, Callable]) -> ASGIServer:
+        cls._ensure_function_exists(web_app)
+        web_app = web_app.__name__ if isinstance(web_app, Callable) else web_app
+        return ASGIServer(app=web_app)
+
+    @classmethod
+    def _ensure_function_exists(cls, function: Union[str, Callable]) -> None:
+        function = (
+            function.__qualname__ if isinstance(function, Callable) else re.search(r"\w{0,32}", function).group(0)
+        )
+        if function not in globals().keys():
+            raise FunctionNotFoundError(function=function)
