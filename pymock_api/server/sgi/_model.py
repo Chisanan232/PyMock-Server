@@ -1,20 +1,7 @@
 import logging
 import subprocess
-from argparse import Namespace
 from dataclasses import dataclass
-from typing import List, Optional
-
-
-@dataclass
-class ParserArguments:
-    """*The data object for the arguments from parsing the command line of PyMock-API program*"""
-
-    subparser_name: str = None
-    config: str = None
-    app_type: str = None
-    bind: str = None
-    workers: int = None
-    log_level: str = None
+from typing import List
 
 
 @dataclass
@@ -47,16 +34,16 @@ class Command:
     entry_point: str = None
     options: CommandOptions = None
     app_module_path: str = "pymock_api.server"
-    web_pylib: str = None
+    app: str = None
 
     @property
     def line(self) -> str:
         """:obj:`str`: Properties with only getter for a string value of command line with options."""
-        app = self.dispatch_app(self.web_pylib)
-        return " ".join([self.entry_point, str(self.options), app])
+        return " ".join([self.entry_point, str(self.options), self.app_path])
 
-    def dispatch_app(self, web_pylib: str) -> str:
-        return f"'{self.app_module_path}:create_{web_pylib}_app()'"
+    @property
+    def app_path(self) -> str:
+        return f"'{self.app_module_path}:{self.app}'"
 
     def run(self) -> None:
         """Run the command line.
@@ -67,19 +54,3 @@ class Command:
         """
         logging.info(f"Command line for set up application by SGI tool: {self.line}")
         subprocess.run(self.line, shell=True)
-
-
-class Deserialize:
-    """*Deserialize the object *argparse.Namespace* to *ParserArguments*"""
-
-    @classmethod
-    def parser_arguments(cls, args: Namespace, subcmd: Optional[str] = None) -> ParserArguments:
-        subparser_name = getattr(args, subcmd) if subcmd else None
-        return ParserArguments(
-            subparser_name=subparser_name,
-            config=args.config,
-            app_type=args.app_type,
-            bind=args.bind,
-            workers=args.workers,
-            log_level=args.log_level,
-        )

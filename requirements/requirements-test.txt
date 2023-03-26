@@ -17,6 +17,7 @@ flask >= 2.0.0    # In Python 3.6, its latest version supported is 2.0.0. But it
 gunicorn >= 20.0.0    # In Python 3.6, its latest version supported is 20.0.0. But it supports 20.1.0 version in Python 3.10.
 fastapi >= "0.95.0"
 uvicorn >= "0.21.1"
+httpx >= "0.23.3"
 
 ## For project development workflow like pre-commit
 pre-commit >= 3.0.0; python_version >= '3.8'

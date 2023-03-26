@@ -9,7 +9,9 @@ import os
 from .._utils.importing import ensure_importing, import_web_lib
 from .application import BaseAppServer, FastAPIServer, FlaskServer
 from .mock import MockHTTPServer
-from .sgi.cmd import WSGICmd
+from .sgi import setup_server_gateway
+from .sgi._model import Command, CommandOptions
+from .sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
 
 flask_app: "flask.Flask" = None
 fastapi_app: "fastapi.FastAPI" = None
@@ -23,6 +25,14 @@ def create_flask_app() -> "flask.Flask":
 def create_fastapi_app() -> "fastapi.FastAPI":
     load_app.by_fastapi()
     return fastapi_app
+
+
+def setup_wsgi() -> WSGIServer:
+    return setup_server_gateway.wsgi(web_app=create_flask_app, module_dict=globals())
+
+
+def setup_asgi() -> ASGIServer:
+    return setup_server_gateway.asgi(web_app=create_fastapi_app, module_dict=globals())
 
 
 class load_app:

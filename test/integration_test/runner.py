@@ -2,11 +2,12 @@ import io
 import re
 import sys
 from abc import ABCMeta, abstractmethod
-from typing import List
 
 import pytest
 
 from pymock_api.runner import CommandRunner
+
+from .._sut import get_runner
 
 
 class Capturing(list):
@@ -22,25 +23,23 @@ class Capturing(list):
 
 
 class CommandFunctionTestSpec(metaclass=ABCMeta):
-    _Command_Runner: CommandRunner = CommandRunner()
-
-    @pytest.fixture(scope="module", autouse=True)
+    @pytest.fixture(scope="function")
     def runner(self) -> CommandRunner:
-        return self._Command_Runner
+        return get_runner()
 
     @property
     @abstractmethod
-    def options(self) -> List[str]:
+    def options(self) -> str:
         pass
 
     def test_command(self, runner: CommandRunner):
         with Capturing() as output:
             with pytest.raises(SystemExit):
-                runner.parse(cmd_args=self.options)
+                runner.parse(cmd_args=self.options.split())
         self.verify_running_output(" ".join(output))
 
     @abstractmethod
-    def verify_running_output(self, cmd_running_result) -> None:
+    def verify_running_output(self, cmd_running_result: str) -> None:
         pass
 
     @classmethod
@@ -53,35 +52,21 @@ class CommandFunctionTestSpec(metaclass=ABCMeta):
 
 class TestHelp(CommandFunctionTestSpec):
     @property
-    def options(self) -> List[str]:
-        return ["--help"]
+    def options(self) -> str:
+        return "--help"
 
-    def verify_running_output(self, cmd_running_result) -> None:
+    def verify_running_output(self, cmd_running_result: str) -> None:
         self._should_contains_chars_in_result(cmd_running_result, "mock-api [SUBCOMMAND] [OPTIONS]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "-v, --version")
 
 
-class TestSubCommandRunHelp(CommandFunctionTestSpec):
-    @property
-    def options(self) -> List[str]:
-        return ["run", "--help"]
-
-    def verify_running_output(self, cmd_running_result) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "mock-api [SUBCOMMAND] [OPTIONS]")
-        self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
-        self._should_contains_chars_in_result(cmd_running_result, "-c CONFIG, --config CONFIG")
-        self._should_contains_chars_in_result(cmd_running_result, "-b BIND, --bind BIND")
-        self._should_contains_chars_in_result(cmd_running_result, "-w WORKERS, --workers WORKERS")
-        self._should_contains_chars_in_result(cmd_running_result, "--log-level LOG_LEVEL")
-
-
 class TestVersion(CommandFunctionTestSpec):
     @property
-    def options(self) -> List[str]:
-        return ["--version"]
+    def options(self) -> str:
+        return "--version"
 
-    def verify_running_output(self, cmd_running_result) -> None:
+    def verify_running_output(self, cmd_running_result: str) -> None:
         software_version_format = r".{0,32}([0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4}).{0,8}"
         self._should_contains_chars_in_result(
             cmd_running_result, re.escape("pymock-api") + software_version_format, translate=False

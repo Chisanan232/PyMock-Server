@@ -1,24 +1,14 @@
-from argparse import Namespace
-from typing import Type
 from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_api.server.sgi._model import (
-    Command,
-    CommandOptions,
-    Deserialize,
-    ParserArguments,
-)
+from pymock_api.server.sgi._model import Command, CommandOptions
 
 from ...._values import (
     _Bind_Host_And_Port,
     _Cmd_Option,
     _Log_Level,
-    _Test_App_Type,
-    _Test_Config,
     _Test_Entry_Point,
-    _Test_SubCommand,
     _Workers_Amount,
 )
 
@@ -63,7 +53,7 @@ class TestCommand:
         host_and_port, workers, log_level = _get_cmd_options()
         return Command(
             entry_point=_Test_Entry_Point,
-            web_pylib=self.Web_Lib_Name,
+            app="application instance path",
             options=CommandOptions(bind=host_and_port, workers=workers, log_level=log_level),
         )
 
@@ -80,32 +70,4 @@ class TestCommand:
     @classmethod
     def expected_cmd_line(cls, command: Command) -> str:
         host_and_port, workers, log_level = _get_cmd_options()
-        cmd = " ".join(
-            [command.entry_point, host_and_port, workers, log_level, command.dispatch_app(web_pylib=cls.Web_Lib_Name)]
-        )
-        return cmd
-
-
-class TestDeserialize:
-    @pytest.fixture(scope="function")
-    def deserialize(self) -> Type[Deserialize]:
-        return Deserialize
-
-    def test_parser_arguments(self, deserialize: Type[Deserialize]):
-        namespace_args = {
-            _Test_SubCommand: _Test_SubCommand,
-            "config": _Test_Config,
-            "app_type": _Test_App_Type,
-            "bind": _Bind_Host_And_Port.value,
-            "workers": _Workers_Amount.value,
-            "log_level": _Log_Level.value,
-        }
-        namespace = Namespace(**namespace_args)
-        arguments = deserialize.parser_arguments(namespace, subcmd=_Test_SubCommand)
-        assert isinstance(arguments, ParserArguments)
-        assert arguments.subparser_name == _Test_SubCommand
-        assert arguments.config == _Test_Config
-        assert arguments.app_type == _Test_App_Type
-        assert arguments.bind == _Bind_Host_And_Port.value
-        assert arguments.workers == _Workers_Amount.value
-        assert arguments.log_level == _Log_Level.value
+        return " ".join([command.entry_point, host_and_port, workers, log_level, command.app_path])

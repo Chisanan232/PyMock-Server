@@ -1,28 +1,52 @@
-from argparse import Namespace
+import re
+from typing import Callable, Union
 from unittest.mock import Mock, patch
 
-from pymock_api.server.sgi import Deserialize, deserialize_parser_args
+import pytest
 
-from ...._values import (
-    _Bind_Host_And_Port,
-    _Log_Level,
-    _Test_App_Type,
-    _Test_Config,
-    _Test_SubCommand,
-    _Workers_Amount,
-)
+import pymock_api.server as mock_server
+from pymock_api.exceptions import FunctionNotFoundError
 
 
-@patch.object(Deserialize, "parser_arguments")
-def test_deserialize_parser_args(mock_parser_arguments: Mock):
-    namespace_args = {
-        _Test_SubCommand: _Test_SubCommand,
-        "config": _Test_Config,
-        "app_type": _Test_App_Type,
-        "bind": _Bind_Host_And_Port.value,
-        "workers": _Workers_Amount.value,
-        "log_level": _Log_Level.value,
-    }
-    namespace = Namespace(**namespace_args)
-    deserialize_parser_args(namespace, subcmd=_Test_SubCommand)
-    mock_parser_arguments.assert_called_once_with(namespace, _Test_SubCommand)
+def _fake_function() -> None:
+    # This is fake function for PyTest
+    pass
+
+
+class TestSetupServerGateway:
+    @pytest.mark.parametrize(
+        ("app", "expected_app"),
+        [("create_flask_app()", "create_flask_app()"), (mock_server.create_flask_app, "create_flask_app()")],
+    )
+    @patch("pymock_api.server.sgi.WSGIServer")
+    def test_setup_wsgi(self, mock_instantiate_wsgi: Mock, app: Union[str, Callable], expected_app: str):
+        mock_server.setup_server_gateway.wsgi(web_app=app)
+        mock_instantiate_wsgi.assert_called_once_with(app=expected_app)
+
+    @pytest.mark.parametrize(
+        ("sut_func", "app", "expected_error"),
+        [
+            ("wsgi", "create_not_exist_app()", FunctionNotFoundError),
+            ("wsgi", _fake_function, FunctionNotFoundError),
+        ],
+    )
+    @patch("pymock_api.server.sgi.WSGIServer")
+    def test_bad_setup_wsgi(
+        self, mock_instantiate_wsgi: Mock, sut_func: str, app: Union[str, Callable], expected_error: Exception
+    ):
+        with pytest.raises(expected_error) as exc_info:
+            module_dicts_not_have_target_functions = {"not exist target function": ""}
+            getattr(mock_server.setup_server_gateway, sut_func)(
+                web_app=app, module_dict=module_dicts_not_have_target_functions
+            )
+        assert re.search(r"cannot find .{0,32}function", str(exc_info.value), re.IGNORECASE)
+        mock_instantiate_wsgi.assert_not_called()
+
+    @pytest.mark.parametrize(
+        ("app", "expected_app"),
+        [("create_fastapi_app", "create_fastapi_app"), (mock_server.create_fastapi_app, "create_fastapi_app")],
+    )
+    @patch("pymock_api.server.sgi.ASGIServer")
+    def test_setup_asgi(self, mock_instantiate_asgi: Mock, app: Union[str, Callable], expected_app: str):
+        mock_server.setup_server_gateway.asgi(web_app=app)
+        mock_instantiate_asgi.assert_called_once_with(app=expected_app)

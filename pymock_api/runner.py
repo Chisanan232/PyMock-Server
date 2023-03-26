@@ -1,26 +1,28 @@
 import os
 import re
 import sys
-from argparse import Namespace
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import List, Optional
 
 try:
     import pymock_api.cmd
-    from pymock_api.server.sgi import ParserArguments, WSGICmd, deserialize_parser_args
+    from pymock_api.model import ParserArguments, deserialize_parser_args
+    from pymock_api.server import BaseSGIServer, setup_asgi, setup_wsgi
 except (ImportError, ModuleNotFoundError):
     runner_dir = os.path.dirname(os.path.abspath(__file__))
     path = str(Path(runner_dir).parent.absolute())
     sys.path.append(path)
     import pymock_api.cmd
-    from pymock_api.server.sgi import ParserArguments, WSGICmd, deserialize_parser_args
+    from pymock_api.model import ParserArguments, deserialize_parser_args
+    from pymock_api.server import BaseSGIServer, setup_asgi, setup_wsgi
 
 
 class CommandRunner:
     def __init__(self):
         self.mock_api_parser = pymock_api.cmd.MockAPICommandParser()
-        self.cmd_parser = self.mock_api_parser.parse()
-        self.sgi_cmd: WSGICmd = None
+        self.cmd_parser: ArgumentParser = self.mock_api_parser.parse()
+        self.sgi_cmd: BaseSGIServer = None
 
     def run_app(self, args: ParserArguments) -> None:
         self._process_option(args)
@@ -41,9 +43,11 @@ class CommandRunner:
 
         # Handle *app-type*
         if re.search(r"flask", parser_options.app_type, re.IGNORECASE):
-            self.sgi_cmd = WSGICmd()
+            self.sgi_cmd = setup_wsgi()
+        elif re.search(r"fastapi", parser_options.app_type, re.IGNORECASE):
+            self.sgi_cmd = setup_asgi()
         else:
-            raise ValueError("Invalid value at argument *app-type*. It only supports 'flask' currently.")
+            raise ValueError("Invalid value at argument *app-type*. It only supports 'flask' or 'fastapi' currently.")
 
 
 def run() -> None:

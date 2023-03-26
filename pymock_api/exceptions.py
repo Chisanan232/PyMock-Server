@@ -1,4 +1,4 @@
-from typing import List
+from typing import Callable, List, Union
 
 
 class FileFormatNotSupport(RuntimeError):
@@ -7,3 +7,12 @@ class FileFormatNotSupport(RuntimeError):
 
     def __str__(self):
         return f"It doesn't support reading '{', '.join(self._valid_file_format)}' format file."
+
+
+class FunctionNotFoundError(RuntimeError):
+    def __init__(self, function: Union[str, Callable]):
+        function = function.__qualname__ if isinstance(function, Callable) else function
+        self._function: str = function
+
+    def __str__(self):
+        return f"Cannot find the function {self._function} in current module."

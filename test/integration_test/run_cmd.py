@@ -3,44 +3,98 @@ import re
 import subprocess
 import sys
 import threading
-from abc import ABC, abstractmethod
-from test._values import _Bind_Host_And_Port
-from test.integration_test._spec import MockAPI_Config_Path, run_test
-from test.integration_test.runner import Capturing, CommandFunctionTestSpec
-from typing import List
+from abc import ABC, ABCMeta, abstractmethod
 
-from pymock_api.runner import CommandRunner
+from .._values import (
+    _Base_URL,
+    _Bind_Host_And_Port,
+    _Google_Home_Value,
+    _Test_Home,
+    _YouTube_Home_Value,
+)
+from ._spec import MockAPI_Config_Path, run_test
+from .runner import Capturing
 
-from .._values import _Base_URL, _Google_Home_Value, _Test_Home, _YouTube_Home_Value
 
-
-class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
+class CommandTestSpec(metaclass=ABCMeta):
 
     Server_Running_Entry_Point: str = "pymock_api/runner.py"
+    Terminate_Command_Running_When_Sniff_IP_Info: bool = True
 
     @property
     def command_line(self) -> str:
-        cmd_options = " ".join(self.options)
-        return f"python3 {self.Server_Running_Entry_Point} {cmd_options}"
+        return f"python3 {self.Server_Running_Entry_Point} {self.options}"
+
+    @property
+    @abstractmethod
+    def options(self) -> str:
+        pass
 
     @run_test.with_file
-    def test_command(self, runner: CommandRunner) -> None:
+    def test_command(self) -> None:
         try:
             with Capturing() as mock_server_output:
-                self._run_as_thread(target=self.run_mock_api_server)
-            self.verify_running_output(" ".join(mock_server_output))
-            self.verify_apis()
+                self._run_as_thread(target=self._run_command_line)
+            self._verify_running_output(" ".join(mock_server_output))
         finally:
-            self._kill_all_server_workers()
+            self._do_finally()
 
-    def run_mock_api_server(self) -> None:
+    def _run_command_line(self) -> None:
         cmd_ps = subprocess.Popen(self.command_line, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        self._read_streaming_output(cmd_ps)
+
+    def _read_streaming_output(self, cmd_ps: subprocess.Popen) -> None:
         for line in iter(lambda: cmd_ps.stdout.readline(), b""):
             sys.stdout.write(line.decode("utf-8"))
-            if re.search(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", line.decode("utf-8")):
+            if self.Terminate_Command_Running_When_Sniff_IP_Info and re.search(
+                r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", line.decode("utf-8")
+            ):
                 break
 
-    def verify_apis(self) -> None:
+    @abstractmethod
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        pass
+
+    @classmethod
+    def _run_as_thread(cls, target) -> None:
+        run_cmd_thread = threading.Thread(target=target)
+        run_cmd_thread.daemon = True
+        run_cmd_thread.run()
+
+    def _do_finally(self) -> None:
+        pass
+
+    @classmethod
+    def _should_contains_chars_in_result(cls, target: str, expected_char, translate: bool = True) -> None:
+        if translate:
+            assert re.search(re.escape(expected_char), target, re.IGNORECASE)
+        else:
+            assert re.search(expected_char, target, re.IGNORECASE)
+
+
+class TestSubCommandRun(CommandTestSpec):
+
+    Terminate_Command_Running_When_Sniff_IP_Info: bool = False
+
+    @property
+    def options(self) -> str:
+        return "run --help"
+
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._should_contains_chars_in_result(cmd_running_result, "mock-api run [-h]")
+        self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
+        self._should_contains_chars_in_result(cmd_running_result, "--app-type APP_TYPE")
+        self._should_contains_chars_in_result(cmd_running_result, "-c CONFIG, --config CONFIG")
+        self._should_contains_chars_in_result(cmd_running_result, "-b BIND, --bind BIND")
+        self._should_contains_chars_in_result(cmd_running_result, "-w WORKERS, --workers WORKERS")
+        self._should_contains_chars_in_result(cmd_running_result, "--log-level LOG_LEVEL")
+
+
+class RunMockApplicationTestSpec(CommandTestSpec, ABC):
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._verify_apis()
+
+    def _verify_apis(self) -> None:
         self._curl_and_chk_resp_content(
             api=f"{_Base_URL}{_Google_Home_Value['url']}", expected_resp_content="google", resp_is_json_format=False
         )
@@ -52,17 +106,6 @@ class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
         )
 
     @classmethod
-    def _run_as_thread(cls, target) -> None:
-        run_cmd_thread = threading.Thread(target=target)
-        run_cmd_thread.daemon = True
-        run_cmd_thread.run()
-
-    @classmethod
-    @abstractmethod
-    def _kill_all_server_workers(cls) -> None:
-        pass
-
-    @classmethod
     def _curl_and_chk_resp_content(cls, api: str, expected_resp_content: str, resp_is_json_format: bool) -> None:
         curl_google_ps = subprocess.Popen(
             f"curl http://{_Bind_Host_And_Port.value}{api}", shell=True, stdout=subprocess.PIPE
@@ -72,15 +115,33 @@ class StreamingOutputCommandFunctionTestSpec(CommandFunctionTestSpec, ABC):
         assert re.search(re.escape(expected_resp_content), resp_content, re.IGNORECASE)
 
 
-class TestRunApplicationToMockAPIsWithFlaskAndGunicorn(StreamingOutputCommandFunctionTestSpec):
+class TestRunMockApplicationWithFlask(RunMockApplicationTestSpec):
     @property
-    def options(self) -> List[str]:
-        return ["run", "--app-type", "flask", "--bind", _Bind_Host_And_Port.value, "--config", MockAPI_Config_Path]
+    def options(self) -> str:
+        return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Path}"
 
-    @classmethod
-    def _kill_all_server_workers(cls) -> None:
+    def _do_finally(self) -> None:
         subprocess.run("pkill -f gunicorn", shell=True)
 
-    def verify_running_output(self, cmd_running_result) -> None:
+    def _verify_running_output(self, cmd_running_result: str) -> None:
         self._should_contains_chars_in_result(cmd_running_result, "Starting gunicorn")
         self._should_contains_chars_in_result(cmd_running_result, f"Listening at: http://{_Bind_Host_And_Port.value}")
+        super()._verify_running_output(cmd_running_result)
+
+
+class TestRunMockApplicationWithFastAPI(RunMockApplicationTestSpec):
+    @property
+    def options(self) -> str:
+        return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Path}"
+
+    def _do_finally(self) -> None:
+        subprocess.run("pkill -f uvicorn", shell=True)
+
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._should_contains_chars_in_result(cmd_running_result, "Started server process")
+        self._should_contains_chars_in_result(cmd_running_result, "Waiting for application startup")
+        self._should_contains_chars_in_result(cmd_running_result, "Application startup complete")
+        self._should_contains_chars_in_result(
+            cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}"
+        )
+        super()._verify_running_output(cmd_running_result)

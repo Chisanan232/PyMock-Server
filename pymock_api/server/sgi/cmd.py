@@ -1,14 +1,20 @@
 from abc import ABCMeta, abstractmethod
 from typing import Generic
 
-from ._model import Command, CommandOptions, ParserArguments
+from ...model.cmd_args import ParserArguments
+from ._model import Command, CommandOptions
 from .cmdoption import ASGICmdOption, Base_Command_Option_Type, WSGICmdOption
 
 
-class BaseSGICmd(metaclass=ABCMeta):
+class BaseSGIServer(metaclass=ABCMeta):
     """*Base class of SGI*"""
 
     _SGI_Command_Option: Generic[Base_Command_Option_Type] = None
+
+    def __init__(self, app: str):
+        if not app:
+            raise ValueError("The application instance path cannot be None or empty.")
+        self._app = app
 
     def generate(self, parser_args: ParserArguments) -> Command:
         """Generate an object about command line for running finally.
@@ -23,7 +29,7 @@ class BaseSGICmd(metaclass=ABCMeta):
         """
         return Command(
             entry_point=self.entry_point,
-            web_pylib=parser_args.app_type,
+            app=self._app,
             options=CommandOptions(
                 bind=self.options.bind(address=parser_args.bind),
                 workers=self.options.workers(w=parser_args.workers),
@@ -54,7 +60,7 @@ class BaseSGICmd(metaclass=ABCMeta):
         pass
 
 
-class WSGICmd(BaseSGICmd):
+class WSGIServer(BaseSGIServer):
     """*WSGI application*
 
     This module for generating WSGI (Web Server Gateway Interface) application by Python tool *gunicorn*.
@@ -80,7 +86,7 @@ class WSGICmd(BaseSGICmd):
         return self._SGI_Command_Option
 
 
-class ASGICmd(BaseSGICmd):
+class ASGIServer(BaseSGIServer):
     """*ASGI application*
 
     This module for generating ASGI (Asynchronous Server Gateway Interface) application by Python tool *uvicorn*.
