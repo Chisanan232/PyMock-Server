@@ -22,12 +22,11 @@ class CommandRunner:
     def __init__(self):
         self.mock_api_parser = pymock_api.cmd.MockAPICommandParser()
         self.cmd_parser: ArgumentParser = self.mock_api_parser.parse()
-        self.sgi_cmd: BaseSGIServer = None
+        self._server_gateway: BaseSGIServer = None
 
     def run_app(self, args: ParserArguments) -> None:
         self._process_option(args)
-        command = self.sgi_cmd.generate(args)
-        command.run()
+        self._server_gateway.run(args)
 
     def parse(self, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         return deserialize_parser_args(self._parse_cmd_arguments(cmd_args), subcmd=self.mock_api_parser.subcommand)
@@ -43,9 +42,9 @@ class CommandRunner:
 
         # Handle *app-type*
         if re.search(r"flask", parser_options.app_type, re.IGNORECASE):
-            self.sgi_cmd = setup_wsgi()
+            self._server_gateway = setup_wsgi()
         elif re.search(r"fastapi", parser_options.app_type, re.IGNORECASE):
-            self.sgi_cmd = setup_asgi()
+            self._server_gateway = setup_asgi()
         else:
             raise ValueError("Invalid value at argument *app-type*. It only supports 'flask' or 'fastapi' currently.")
 
