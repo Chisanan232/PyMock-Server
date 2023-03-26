@@ -16,6 +16,10 @@ class BaseSGIServer(metaclass=ABCMeta):
             raise ValueError("The application instance path cannot be None or empty.")
         self._app = app
 
+    def run(self, parser_args: ParserArguments) -> None:
+        command_line = self.generate(parser_args)
+        command_line.run()
+
     def generate(self, parser_args: ParserArguments) -> Command:
         """Generate an object about command line for running finally.
 

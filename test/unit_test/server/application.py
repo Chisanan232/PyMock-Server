@@ -2,14 +2,15 @@ import json
 import os
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
-from typing import Any, Type
-from unittest.mock import mock_open, patch
+from typing import Any, Optional, Type
+from unittest.mock import Mock, mock_open, patch
 
 import pytest
 from fastapi import FastAPI
 from flask import Flask
 
 from pymock_api.exceptions import FileFormatNotSupport
+from pymock_api.model.api_config import MockAPI
 from pymock_api.server.application import (
     BaseAppServer,
     FastAPIServer,
@@ -57,6 +58,30 @@ class AppServerTestSpec(metaclass=ABCMeta):
             assert isinstance(
                 web_app, self.expected_sut_type
             ), f"The web application server it generates should be *{self.expected_sut_type}* type object."
+
+    def test_generate_pycode_about_annotating_function(self, sut: BaseAppServer):
+        for_test_api_name = "Function name"
+        for_test_resp = "Response value for PyTest."
+        api = Mock(MockAPI(url=Mock(), http=Mock()))
+        api.http.response.value = for_test_resp
+
+        annotate_function_pycode = sut._annotate_function(api_name=for_test_api_name, api_config=api)
+
+        assert for_test_api_name in annotate_function_pycode and for_test_resp in annotate_function_pycode
+
+    @pytest.mark.parametrize("base_url", [None, "Has base URL"])
+    def test_generate_pycode_about_adding_api(self, sut: BaseAppServer, base_url: Optional[str]):
+        for_test_api_name = "Function name"
+        for_test_url = "this is an url path"
+        for_test_req_method = "HTTP method"
+        api = Mock(MockAPI(url=Mock(), http=Mock()))
+        api.url = for_test_url
+        api.http.request.method = for_test_req_method
+
+        add_api_pycode = sut._add_api(api_name=for_test_api_name, api_config=api, base_url=base_url)
+
+        expected_url = f"{base_url}{for_test_url}" if base_url else for_test_url
+        assert expected_url in add_api_pycode and for_test_req_method in add_api_pycode
 
 
 class TestFlaskServer(AppServerTestSpec):
