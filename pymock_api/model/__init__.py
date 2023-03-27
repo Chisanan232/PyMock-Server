@@ -4,13 +4,12 @@ content ...
 """
 
 from argparse import Namespace
-from typing import Optional
 
 from .api_config import APIConfig
-from .cmd_args import Deserialize, ParserArguments
+from .cmd_args import DeserializeParsedArgs, ParserArguments
 
 
-def deserialize_parser_args(args: Namespace, subcmd: Optional[str] = None) -> ParserArguments:
+def deserialize_subcommand_run_args(args: Namespace) -> ParserArguments:
     """Deserialize the object *argparse.Namespace* to *ParserArguments*.
 
     Args:
@@ -20,4 +19,4 @@ def deserialize_parser_args(args: Namespace, subcmd: Optional[str] = None) -> Pa
         A *ParserArguments* type object.
 
     """
-    return Deserialize.parser_arguments(args, subcmd)
+    return DeserializeParsedArgs.subcommand_run(args)

@@ -1,7 +1,7 @@
 from argparse import Namespace
 from unittest.mock import Mock, patch
 
-from pymock_api.model import Deserialize, deserialize_parser_args
+from pymock_api.model import DeserializeParsedArgs, deserialize_subcommand_run_args
 
 from ..._values import (
     _Bind_Host_And_Port,
@@ -13,10 +13,10 @@ from ..._values import (
 )
 
 
-@patch.object(Deserialize, "parser_arguments")
+@patch.object(DeserializeParsedArgs, "subcommand_run")
 def test_deserialize_parser_args(mock_parser_arguments: Mock):
     namespace_args = {
-        _Test_SubCommand: _Test_SubCommand,
+        "subcommand": _Test_SubCommand,
         "config": _Test_Config,
         "app_type": _Test_App_Type,
         "bind": _Bind_Host_And_Port.value,
@@ -24,5 +24,5 @@ def test_deserialize_parser_args(mock_parser_arguments: Mock):
         "log_level": _Log_Level.value,
     }
     namespace = Namespace(**namespace_args)
-    deserialize_parser_args(namespace, subcmd=_Test_SubCommand)
-    mock_parser_arguments.assert_called_once_with(namespace, _Test_SubCommand)
+    deserialize_subcommand_run_args(namespace)
+    mock_parser_arguments.assert_called_once_with(namespace)

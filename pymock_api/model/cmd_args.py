@@ -1,6 +1,5 @@
 from argparse import Namespace
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -15,14 +14,13 @@ class ParserArguments:
     log_level: str = None
 
 
-class Deserialize:
+class DeserializeParsedArgs:
     """*Deserialize the object *argparse.Namespace* to *ParserArguments*"""
 
     @classmethod
-    def parser_arguments(cls, args: Namespace, subcmd: Optional[str] = None) -> ParserArguments:
-        subparser_name = getattr(args, subcmd) if subcmd else None
+    def subcommand_run(cls, args: Namespace) -> ParserArguments:
         return ParserArguments(
-            subparser_name=subparser_name,
+            subparser_name=args.subcommand,
             config=args.config,
             app_type=args.app_type,
             bind=args.bind,

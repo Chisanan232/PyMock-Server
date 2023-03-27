@@ -120,12 +120,10 @@ class TestCommandRunner:
             mock_sgi_generate.assert_not_called()
             command.run.assert_not_called()
 
-    @patch("pymock_api.cmd.MockAPICommandParser.subcommand", new_callable=PropertyMock, return_value=_Test_SubCommand)
     @patch.object(argparse.ArgumentParser, "parse_args", return_value=MOCK_ARGS_PARSE_RESULT)
-    @patch("pymock_api.runner.deserialize_parser_args")
-    def test_parse(self, mock_deserialize: Mock, mock_parse_args: Mock, mock_prop: Mock, runner: CommandRunner):
+    @patch("pymock_api.runner.deserialize_subcommand_run_args")
+    def test_parse(self, mock_deserialize: Mock, mock_parse_args: Mock, runner: CommandRunner):
         runner.parse()
 
         mock_parse_args.assert_called_once_with(None)
-        mock_prop.assert_called_once()
-        mock_deserialize.assert_called_once_with(MOCK_ARGS_PARSE_RESULT, subcmd=_Test_SubCommand)
+        mock_deserialize.assert_called_once_with(MOCK_ARGS_PARSE_RESULT)

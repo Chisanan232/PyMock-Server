@@ -3,7 +3,7 @@ from typing import Type
 
 import pytest
 
-from pymock_api.model.cmd_args import Deserialize, ParserArguments
+from pymock_api.model.cmd_args import DeserializeParsedArgs, ParserArguments
 
 from ..._values import (
     _Bind_Host_And_Port,
@@ -17,12 +17,12 @@ from ..._values import (
 
 class TestDeserialize:
     @pytest.fixture(scope="function")
-    def deserialize(self) -> Type[Deserialize]:
-        return Deserialize
+    def deserialize(self) -> Type[DeserializeParsedArgs]:
+        return DeserializeParsedArgs
 
-    def test_parser_arguments(self, deserialize: Type[Deserialize]):
+    def test_parser_arguments(self, deserialize: Type[DeserializeParsedArgs]):
         namespace_args = {
-            _Test_SubCommand: _Test_SubCommand,
+            "subcommand": _Test_SubCommand,
             "config": _Test_Config,
             "app_type": _Test_App_Type,
             "bind": _Bind_Host_And_Port.value,
@@ -30,7 +30,7 @@ class TestDeserialize:
             "log_level": _Log_Level.value,
         }
         namespace = Namespace(**namespace_args)
-        arguments = deserialize.parser_arguments(namespace, subcmd=_Test_SubCommand)
+        arguments = deserialize.subcommand_run(namespace)
         assert isinstance(arguments, ParserArguments)
         assert arguments.subparser_name == _Test_SubCommand
         assert arguments.config == _Test_Config
