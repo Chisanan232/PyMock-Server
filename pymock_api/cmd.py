@@ -74,9 +74,7 @@ class MockAPICommandParser:
 
     @property
     def subcommand(self) -> Optional[str]:
-        if self.is_running_subcmd:
-            return sys.argv[1]
-        return None
+        return sys.argv[1] if self.is_running_subcmd else None
 
     @property
     def is_running_subcmd(self) -> bool:
@@ -98,7 +96,8 @@ class MockAPICommandParser:
         return self.parser
 
 
-SubParserAttr = namedtuple("SubParserAttr", ["title", "dest", "description", "help"])
+SubCommandAttr = namedtuple("SubCommandAttr", ["title", "dest", "description", "help"])
+SubParserAttr = namedtuple("SubParserAttr", ["name", "help"])
 
 
 class MetaCommandOption(type):
@@ -122,7 +121,8 @@ class MetaCommandOption(type):
 
 class CommandOption:
 
-    sub_cmd: SubParserAttr = None
+    sub_cmd: SubCommandAttr = None
+    sub_parser: SubParserAttr = None
     cli_option: str = None
     name: str = None
     help_description: str = None
@@ -131,7 +131,8 @@ class CommandOption:
     action: str = None
     _options: List[str] = None
 
-    _cmd_subparser: Dict[str, argparse._ArgumentGroup] = {}
+    _subparser: List[argparse._SubParsersAction] = []
+    _parser_of_subparser: Dict[str, argparse._ArgumentGroup] = {}
 
     def __init__(self):
         if not self.cli_option:
@@ -163,26 +164,24 @@ class CommandOption:
 
         return " ".join(all_help_desps)
 
-    def add_option(self, parser: argparse.ArgumentParser) -> None:
+    @property
+    def option_args(self) -> dict:
         cmd_option_args = {
             "dest": self.name,
             "help": self.help_description_content,
-            "type": self.option_value_type or str,
+            "type": self.option_value_type,
             "default": self.default_value,
             "action": self.action or "store",
         }
-        if self.sub_cmd:
-            if self.sub_cmd.dest not in self._cmd_subparser.keys():
-                cmd_subparser = parser.add_subparsers(
-                    title=self.sub_cmd.title,
-                    dest=self.sub_cmd.dest,
-                    description=self.sub_cmd.description,
-                    help=self.sub_cmd.help,
-                )
-                self._cmd_subparser[self.sub_cmd.dest] = cmd_subparser.add_parser(self.sub_cmd.dest)
-            parser = self._cmd_subparser[self.sub_cmd.dest]
+        cmd_option_args_clone = copy.copy(cmd_option_args)
+        for arg_name, arg_val in cmd_option_args.items():
+            if not arg_val:
+                cmd_option_args_clone.pop(arg_name)
+        return cmd_option_args_clone
+
+    def add_option(self, parser: argparse.ArgumentParser) -> None:
         try:
-            parser.add_argument(*self.cli_option_name, **cmd_option_args)
+            self._dispatch_parser(parser).add_argument(*self.cli_option_name, **self.option_args)
         except argparse.ArgumentError as ae:
             if re.search(r"conflict", str(ae), re.IGNORECASE):
                 return
@@ -191,25 +190,63 @@ class CommandOption:
     def copy(self) -> "CommandOption":
         return copy.copy(self)
 
+    def _dispatch_parser(self, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+        if self.sub_cmd and self.sub_parser:
+            if not self._subparser:
+                self._subparser.append(
+                    parser.add_subparsers(
+                        title=self.sub_cmd.title,
+                        dest=self.sub_cmd.dest,
+                        description=self.sub_cmd.description,
+                        help=self.sub_cmd.help,
+                    )
+                )
+            if self.sub_parser.name not in self._parser_of_subparser.keys():
+                self._parser_of_subparser[self.sub_parser.name] = self._subparser[0].add_parser(
+                    name=self.sub_parser.name, help=self.sub_parser.help
+                )
+            parser = self._parser_of_subparser[self.sub_parser.name]
+        return parser
+
 
 @dataclass
 class SubCommand:
 
+    Base: str = "subcommand"
     Run: str = "run"
+    Config: str = "config"
 
 
-class SubCommandRunOption(CommandOption):
+class BaseSubCommand(CommandOption):
 
-    sub_cmd: SubParserAttr = SubParserAttr(
-        title="Running an application",
-        dest=SubCommand.Run,
+    sub_cmd: SubCommandAttr = SubCommandAttr(
+        title="Subcommands",
+        dest=SubCommand.Base,
         description="",
-        help="Set up APIs and start to run an application.",
+        help="",
+    )
+
+
+class SubCommandRunOption(BaseSubCommand):
+
+    sub_parser: SubParserAttr = SubParserAttr(
+        name=SubCommand.Run,
+        help="Set up APIs with configuration and run a web application to mock them.",
+    )
+    option_value_type: type = str
+
+
+class SubCommandConfigOption(BaseSubCommand):
+
+    sub_parser: SubParserAttr = SubParserAttr(
+        name=SubCommand.Config,
+        help="Something processing about configuration, i.e., generate a sample configuration or validate configuration content.",
     )
 
 
 CommandOption = MetaCommandOption("CommandOption", (CommandOption,), {})
 SubCommandRunOption = MetaCommandOption("SubCommandRunOption", (SubCommandRunOption,), {})
+SubCommandConfigOption = MetaCommandOption("SubCommandConfigOption", (SubCommandConfigOption,), {})
 
 
 class Version(CommandOption):
@@ -273,3 +310,12 @@ class LegLevel(SubCommandRunOption):
     help_description: str = "The log level."
     default_value: str = "info"
     _options: List[str] = ["critical", "error", "warning", "info", "debug", "trace"]
+
+
+class Initial(SubCommandConfigOption):
+
+    cli_option: str = "--generate-sample"
+    name: str = "generate_sample"
+    help_description: str = "Create a configuration file."
+    action: str = "store_true"
+    option_value_type: type = None
