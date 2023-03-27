@@ -6,10 +6,10 @@ content ...
 from argparse import Namespace
 
 from .api_config import APIConfig
-from .cmd_args import DeserializeParsedArgs, ParserArguments
+from .cmd_args import DeserializeParsedArgs, SubcmdRunArguments
 
 
-def deserialize_subcommand_run_args(args: Namespace) -> ParserArguments:
+def deserialize_subcommand_run_args(args: Namespace) -> SubcmdRunArguments:
     """Deserialize the object *argparse.Namespace* to *ParserArguments*.
 
     Args:

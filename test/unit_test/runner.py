@@ -1,10 +1,10 @@
 import argparse
 from typing import Callable
-from unittest.mock import MagicMock, Mock, PropertyMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from pymock_api.model.cmd_args import ParserArguments
+from pymock_api.model.cmd_args import SubcmdRunArguments
 from pymock_api.runner import CommandRunner, run
 from pymock_api.server.sgi import WSGIServer
 from pymock_api.server.sgi._model import Command, CommandOptions
@@ -22,8 +22,8 @@ from .._values import (
 MOCK_ARGS_PARSE_RESULT = Mock()
 
 
-def _given_parser_args(subcommand: str = None, app_type: str = None) -> ParserArguments:
-    return ParserArguments(
+def _given_parser_args(subcommand: str = None, app_type: str = None) -> SubcmdRunArguments:
+    return SubcmdRunArguments(
         subparser_name=subcommand,
         app_type=app_type,
         config=_Test_Config,
@@ -50,7 +50,7 @@ class FakeRunner(CommandRunner):
 
 class TestEntryPoint:
     def test_run(self):
-        def _give() -> ParserArguments:
+        def _give() -> SubcmdRunArguments:
             return _given_parser_args(app_type=_Test_App_Type)
 
         def _run_sut() -> None:
@@ -64,9 +64,9 @@ class TestEntryPoint:
         self._run_test_within_mock(given=_give, run_uat=_run_sut, should_be=_should_be_called_as)
 
     def test_run_with_subcommand_run(self):
-        mock_parser_arg: ParserArguments = None
+        mock_parser_arg: SubcmdRunArguments = None
 
-        def _give() -> ParserArguments:
+        def _give() -> SubcmdRunArguments:
             nonlocal mock_parser_arg
             mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand, app_type=_Test_App_Type)
             return mock_parser_arg
@@ -108,8 +108,7 @@ class TestCommandRunner:
             command.run.assert_called_once()
 
     def test_bad_run_app(self, runner: CommandRunner):
-        mock_parser_arg = _given_parser_args(app_type=_Test_App_Type)
-        mock_parser_arg.app_type = "invalid app-type which is not a Python web library or framework"
+        mock_parser_arg = _given_parser_args(app_type="invalid app-type which is not a Python web library or framework")
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
 

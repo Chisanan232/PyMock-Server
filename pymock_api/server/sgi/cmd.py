@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Generic
 
-from ...model.cmd_args import ParserArguments
+from ...model.cmd_args import SubcmdRunArguments
 from ._model import Command, CommandOptions
 from .cmdoption import ASGICmdOption, Base_Command_Option_Type, WSGICmdOption
 
@@ -16,11 +16,11 @@ class BaseSGIServer(metaclass=ABCMeta):
             raise ValueError("The application instance path cannot be None or empty.")
         self._app = app
 
-    def run(self, parser_args: ParserArguments) -> None:
+    def run(self, parser_args: SubcmdRunArguments) -> None:
         command_line = self.generate(parser_args)
         command_line.run()
 
-    def generate(self, parser_args: ParserArguments) -> Command:
+    def generate(self, parser_args: SubcmdRunArguments) -> Command:
         """Generate an object about command line for running finally.
 
         Args:

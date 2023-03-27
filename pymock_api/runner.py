@@ -7,14 +7,14 @@ from typing import List, Optional
 
 try:
     import pymock_api.cmd
-    from pymock_api.model import ParserArguments, deserialize_subcommand_run_args
+    from pymock_api.model import SubcmdRunArguments, deserialize_subcommand_run_args
     from pymock_api.server import BaseSGIServer, setup_asgi, setup_wsgi
 except (ImportError, ModuleNotFoundError):
     runner_dir = os.path.dirname(os.path.abspath(__file__))
     path = str(Path(runner_dir).parent.absolute())
     sys.path.append(path)
     import pymock_api.cmd
-    from pymock_api.model import ParserArguments, deserialize_subcommand_run_args
+    from pymock_api.model import SubcmdRunArguments, deserialize_subcommand_run_args
     from pymock_api.server import BaseSGIServer, setup_asgi, setup_wsgi
 
 
@@ -24,17 +24,17 @@ class CommandRunner:
         self.cmd_parser: ArgumentParser = self.mock_api_parser.parse()
         self._server_gateway: BaseSGIServer = None
 
-    def run_app(self, args: ParserArguments) -> None:
+    def run_app(self, args: SubcmdRunArguments) -> None:
         self._process_option(args)
         self._server_gateway.run(args)
 
-    def parse(self, cmd_args: Optional[List[str]] = None) -> ParserArguments:
+    def parse(self, cmd_args: Optional[List[str]] = None) -> SubcmdRunArguments:
         return deserialize_subcommand_run_args(self._parse_cmd_arguments(cmd_args))
 
     def _parse_cmd_arguments(self, cmd_args: Optional[List[str]] = None) -> Namespace:
         return self.cmd_parser.parse_args(cmd_args)
 
-    def _process_option(self, parser_options: ParserArguments) -> None:
+    def _process_option(self, parser_options: SubcmdRunArguments) -> None:
         # Note: It's possible that it should separate the functions to be multiple objects to implement and manage the
         # behaviors of command line with different options.
         # Handle *config*

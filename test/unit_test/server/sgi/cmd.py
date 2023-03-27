@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_api.model.cmd_args import ParserArguments
+from pymock_api.model.cmd_args import SubcmdRunArguments
 from pymock_api.server.sgi._model import Command, CommandOptions
 from pymock_api.server.sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
 from pymock_api.server.sgi.cmdoption import (
@@ -19,7 +19,7 @@ from ...._values import _Bind_Host_And_Port, _Log_Level, _Workers_Amount
 BaseSGICmdType = TypeVar("BaseSGICmdType", bound=BaseSGIServer)
 
 app_path: str = "application instance path"
-mock_parser_arg_obj = ParserArguments(
+mock_parser_arg_obj = SubcmdRunArguments(
     app_type="python web library name",
     bind=_Bind_Host_And_Port.value,
     workers=_Workers_Amount.value,
