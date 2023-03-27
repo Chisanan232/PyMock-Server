@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
+from pymock_api.model import deserialize_args
 from pymock_api.model.cmd_args import SubcmdRunArguments
 from pymock_api.runner import CommandRunner, run
 from pymock_api.server.sgi import WSGIServer
@@ -120,7 +121,7 @@ class TestCommandRunner:
             command.run.assert_not_called()
 
     @patch.object(argparse.ArgumentParser, "parse_args", return_value=MOCK_ARGS_PARSE_RESULT)
-    @patch("pymock_api.runner.deserialize_subcommand_run_args")
+    @patch.object(deserialize_args, "subcmd_run")
     def test_parse(self, mock_deserialize: Mock, mock_parse_args: Mock, runner: CommandRunner):
         runner.parse()
 
