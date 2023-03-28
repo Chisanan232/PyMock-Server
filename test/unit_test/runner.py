@@ -16,7 +16,7 @@ from .._values import (
     _Log_Level,
     _Test_App_Type,
     _Test_Config,
-    _Test_SubCommand,
+    _Test_SubCommand_Run,
     _Workers_Amount,
 )
 
@@ -69,7 +69,7 @@ class TestEntryPoint:
 
         def _give() -> SubcmdRunArguments:
             nonlocal mock_parser_arg
-            mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand, app_type=_Test_App_Type)
+            mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Run, app_type=_Test_App_Type)
             return mock_parser_arg
 
         def _run_sut() -> None:
@@ -123,7 +123,7 @@ class TestCommandRunner:
     @patch.object(argparse.ArgumentParser, "parse_args", return_value=MOCK_ARGS_PARSE_RESULT)
     @patch.object(deserialize_args, "subcmd_run")
     def test_parse(self, mock_deserialize: Mock, mock_parse_args: Mock, runner: CommandRunner):
-        runner.parse()
+        runner.parse_subcmd_run()
 
         mock_parse_args.assert_called_once_with(None)
         mock_deserialize.assert_called_once_with(MOCK_ARGS_PARSE_RESULT)
