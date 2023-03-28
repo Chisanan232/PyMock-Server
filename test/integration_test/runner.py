@@ -35,7 +35,7 @@ class CommandFunctionTestSpec(metaclass=ABCMeta):
     def test_command(self, runner: CommandRunner):
         with Capturing() as output:
             with pytest.raises(SystemExit):
-                runner.parse(cmd_args=self.options.split())
+                runner.parse_subcmd_run(cmd_args=self.options.split())
         self.verify_running_output(" ".join(output))
 
     @abstractmethod
@@ -43,7 +43,7 @@ class CommandFunctionTestSpec(metaclass=ABCMeta):
         pass
 
     @classmethod
-    def _should_contains_chars_in_result(self, target: str, expected_char, translate: bool = True) -> None:
+    def _should_contains_chars_in_result(cls, target: str, expected_char, translate: bool = True) -> None:
         if translate:
             assert re.search(re.escape(expected_char), target, re.IGNORECASE)
         else:
@@ -59,6 +59,10 @@ class TestHelp(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "mock-api [SUBCOMMAND] [OPTIONS]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "-v, --version")
+        self._should_contains_chars_in_result(cmd_running_result, "Subcommands:")
+        self._should_contains_chars_in_result(cmd_running_result, "{run,config}")
+        self._should_contains_chars_in_result(cmd_running_result, "run")
+        self._should_contains_chars_in_result(cmd_running_result, "config")
 
 
 class TestVersion(CommandFunctionTestSpec):
