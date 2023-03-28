@@ -6,12 +6,13 @@ Read the configuration and parse its content to a specific data object so that i
 import os
 from abc import ABCMeta, abstractmethod
 
-from yaml import load
+from yaml import dump, load
 
 try:
+    from yaml import CDumper as Dumper
     from yaml import CLoader as Loader
 except ImportError:
-    from yaml import Loader
+    from yaml import Loader, Dumper
 
 from ..model import APIConfig
 from .converter import Convert
@@ -78,3 +79,12 @@ class YAMLReader(Reader):
 
     def deserialize(self, data: dict) -> APIConfig:
         return Convert.api_config(data)
+
+
+class YAMLWriter:
+    def serialize(self, config: dict) -> str:
+        return dump(config, Dumper=Dumper)
+
+    def write(self, config: str, path: str = None) -> None:
+        with open(path, "a+", encoding="utf-8") as file_stream:
+            file_stream.writelines(config)
