@@ -22,11 +22,9 @@ class SubcmdRunArguments(ParserArguments):
 @dataclass(frozen=True)
 class SubcmdConfigArguments(ParserArguments):
 
-    config: str = None
-    app_type: str = None
-    bind: str = None
-    workers: int = None
-    log_level: str = None
+    generate_sample: bool = None
+    print_sample: bool = None
+    sample_output_path: str = ""
 
 
 class DeserializeParsedArgs:
@@ -44,12 +42,10 @@ class DeserializeParsedArgs:
         )
 
     @classmethod
-    def subcommand_config(cls, args: Namespace) -> SubcmdRunArguments:
-        return SubcmdRunArguments(
+    def subcommand_config(cls, args: Namespace) -> SubcmdConfigArguments:
+        return SubcmdConfigArguments(
             subparser_name=args.subcommand,
-            config=args.config,
-            app_type=args.app_type,
-            bind=args.bind,
-            workers=args.workers,
-            log_level=args.log_level,
+            generate_sample=args.generate_sample,
+            print_sample=args.print_sample,
+            sample_output_path=args.file_path,
         )
