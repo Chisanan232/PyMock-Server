@@ -240,7 +240,8 @@ class SubCommandConfigOption(BaseSubCommand):
 
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommand.Config,
-        help="Something processing about configuration, i.e., generate a sample configuration or validate configuration content.",
+        help="Something processing about configuration, i.e., generate a sample configuration or validate configuration"
+        " content.",
     )
 
 
@@ -312,10 +313,33 @@ class LegLevel(SubCommandRunOption):
     _options: List[str] = ["critical", "error", "warning", "info", "debug", "trace"]
 
 
-class Initial(SubCommandConfigOption):
+class PrintSample(SubCommandConfigOption):
 
-    cli_option: str = "--generate-sample"
-    name: str = "generate_sample"
-    help_description: str = "Create a configuration file."
+    cli_option: str = "-p, --print-sample"
+    name: str = "print_sample"
+    help_description: str = "Print the sample configuration content."
     action: str = "store_true"
     option_value_type: type = None
+    default_value: bool = False
+
+
+class GenerateSample(SubCommandConfigOption):
+
+    cli_option: str = "-g, --generate-sample"
+    name: str = "generate_sample"
+    help_description: str = "Create a sample configuration file."
+    action: str = "store_true"
+    option_value_type: type = None
+    default_value: bool = False
+
+
+class Output(SubCommandConfigOption):
+
+    cli_option: str = "-o, --output"
+    name: str = "file_path"
+    help_description: str = (
+        "Save the sample configuration to this path. In generally, this option would be used with"
+        " option *-g* (aka *--generate-sample*)."
+    )
+    option_value_type: type = str
+    default_value: int = "sample-api.yaml"
