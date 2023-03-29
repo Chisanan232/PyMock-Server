@@ -85,6 +85,6 @@ class YAMLWriter:
     def serialize(self, config: dict) -> str:
         return dump(config, Dumper=Dumper)
 
-    def write(self, config: str, path: str = None) -> None:
+    def write(self, path: str, config: str) -> None:
         with open(path, "a+", encoding="utf-8") as file_stream:
             file_stream.writelines(config)
