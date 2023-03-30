@@ -1,10 +1,16 @@
 import argparse
-from typing import Callable
-from unittest.mock import MagicMock, Mock, PropertyMock, patch
+from typing import Callable, Union
+from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
 
-from pymock_api.model.cmd_args import ParserArguments
+from pymock_api._utils.reader import YAMLWriter
+from pymock_api.model import deserialize_args
+from pymock_api.model.cmd_args import (
+    ParserArguments,
+    SubcmdConfigArguments,
+    SubcmdRunArguments,
+)
 from pymock_api.runner import CommandRunner, run
 from pymock_api.server.sgi import WSGIServer
 from pymock_api.server.sgi._model import Command, CommandOptions
@@ -12,25 +18,40 @@ from pymock_api.server.sgi._model import Command, CommandOptions
 from .._sut import get_runner
 from .._values import (
     _Bind_Host_And_Port,
+    _Generate_Sample,
     _Log_Level,
+    _Print_Sample,
+    _Sample_File_Path,
     _Test_App_Type,
     _Test_Config,
-    _Test_SubCommand,
+    _Test_SubCommand_Run,
     _Workers_Amount,
 )
 
 MOCK_ARGS_PARSE_RESULT = Mock()
 
 
-def _given_parser_args(subcommand: str = None, app_type: str = None) -> ParserArguments:
-    return ParserArguments(
-        subparser_name=subcommand,
-        app_type=app_type,
-        config=_Test_Config,
-        bind=_Bind_Host_And_Port.value,
-        workers=_Workers_Amount.value,
-        log_level=_Log_Level.value,
-    )
+def _given_parser_args(
+    subcommand: str = None, app_type: str = None
+) -> Union[SubcmdRunArguments, SubcmdConfigArguments, ParserArguments]:
+    if subcommand == "run":
+        return SubcmdRunArguments(
+            subparser_name=subcommand,
+            app_type=app_type,
+            config=_Test_Config,
+            bind=_Bind_Host_And_Port.value,
+            workers=_Workers_Amount.value,
+            log_level=_Log_Level.value,
+        )
+    elif subcommand == "config":
+        return SubcmdConfigArguments(
+            subparser_name=subcommand,
+            print_sample=_Print_Sample,
+            generate_sample=_Generate_Sample,
+            sample_output_path=_Sample_File_Path,
+        )
+    else:
+        return ParserArguments()
 
 
 def _given_command_option() -> CommandOptions:
@@ -38,7 +59,7 @@ def _given_command_option() -> CommandOptions:
 
 
 def _given_command(app_type: str) -> Command:
-    mock_parser_arg = _given_parser_args(app_type)
+    mock_parser_arg = _given_parser_args(subcommand="run", app_type=app_type)
     mock_cmd_option_obj = _given_command_option()
     return Command(entry_point="SGI tool command", app=mock_parser_arg.app_type, options=mock_cmd_option_obj)
 
@@ -48,9 +69,13 @@ class FakeRunner(CommandRunner):
         pass
 
 
+class FakeYAMLWriter(YAMLWriter):
+    pass
+
+
 class TestEntryPoint:
     def test_run(self):
-        def _give() -> ParserArguments:
+        def _give() -> SubcmdRunArguments:
             return _given_parser_args(app_type=_Test_App_Type)
 
         def _run_sut() -> None:
@@ -64,11 +89,11 @@ class TestEntryPoint:
         self._run_test_within_mock(given=_give, run_uat=_run_sut, should_be=_should_be_called_as)
 
     def test_run_with_subcommand_run(self):
-        mock_parser_arg: ParserArguments = None
+        mock_parser_arg: SubcmdRunArguments = None
 
-        def _give() -> ParserArguments:
+        def _give() -> SubcmdRunArguments:
             nonlocal mock_parser_arg
-            mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand, app_type=_Test_App_Type)
+            mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Run, app_type=_Test_App_Type)
             return mock_parser_arg
 
         def _run_sut() -> None:
@@ -98,7 +123,7 @@ class TestCommandRunner:
         return get_runner()
 
     def test_run_app(self, runner: CommandRunner):
-        mock_parser_arg = _given_parser_args(app_type=_Test_App_Type)
+        mock_parser_arg = _given_parser_args(subcommand="run", app_type=_Test_App_Type)
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
 
@@ -108,8 +133,9 @@ class TestCommandRunner:
             command.run.assert_called_once()
 
     def test_bad_run_app(self, runner: CommandRunner):
-        mock_parser_arg = _given_parser_args(app_type=_Test_App_Type)
-        mock_parser_arg.app_type = "invalid app-type which is not a Python web library or framework"
+        mock_parser_arg = _given_parser_args(
+            subcommand="run", app_type="invalid app-type which is not a Python web library or framework"
+        )
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
 
@@ -120,12 +146,57 @@ class TestCommandRunner:
             mock_sgi_generate.assert_not_called()
             command.run.assert_not_called()
 
-    @patch("pymock_api.cmd.MockAPICommandParser.subcommand", new_callable=PropertyMock, return_value=_Test_SubCommand)
+    @pytest.mark.parametrize(
+        ("oprint", "generate", "output"),
+        [
+            (False, False, "test-api.yaml"),
+            (True, False, "test-api.yaml"),
+            (False, True, "test-api.yaml"),
+            (True, True, "test-api.yaml"),
+        ],
+    )
+    @patch("builtins.print", autospec=True, side_effect=print)
+    @patch("pymock_api.runner.YAMLWriter", return_value=FakeYAMLWriter)
+    def test_run_config(
+        self,
+        mock_instantiate_writer: Mock,
+        mock_print: Mock,
+        oprint: bool,
+        generate: bool,
+        output: bool,
+        runner: CommandRunner,
+    ):
+        FakeYAMLWriter.serialize = MagicMock()
+        FakeYAMLWriter.write = MagicMock()
+        mock_parser_arg = SubcmdConfigArguments(
+            subparser_name="config",
+            print_sample=oprint,
+            generate_sample=generate,
+            sample_output_path=output,
+        )
+        runner.run_config(mock_parser_arg)
+
+        if oprint or generate:
+            mock_instantiate_writer.assert_called_once()
+            FakeYAMLWriter.serialize.assert_called_once()
+        else:
+            mock_instantiate_writer.assert_not_called()
+            FakeYAMLWriter.serialize.assert_not_called()
+
+        if oprint:
+            mock_print.assert_has_calls([call(f"It will write below content into file {output}:")])
+        else:
+            mock_print.assert_not_called()
+
+        if generate:
+            FakeYAMLWriter.write.assert_called_once()
+        else:
+            FakeYAMLWriter.write.assert_not_called()
+
     @patch.object(argparse.ArgumentParser, "parse_args", return_value=MOCK_ARGS_PARSE_RESULT)
-    @patch("pymock_api.runner.deserialize_parser_args")
-    def test_parse(self, mock_deserialize: Mock, mock_parse_args: Mock, mock_prop: Mock, runner: CommandRunner):
-        runner.parse()
+    @patch.object(deserialize_args, "subcmd_run")
+    def test_parse(self, mock_deserialize: Mock, mock_parse_args: Mock, runner: CommandRunner):
+        runner.parse_subcmd_run()
 
         mock_parse_args.assert_called_once_with(None)
-        mock_prop.assert_called_once()
-        mock_deserialize.assert_called_once_with(MOCK_ARGS_PARSE_RESULT, subcmd=_Test_SubCommand)
+        mock_deserialize.assert_called_once_with(MOCK_ARGS_PARSE_RESULT)

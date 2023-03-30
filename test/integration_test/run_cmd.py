@@ -1,9 +1,16 @@
 import json
+import os
 import re
 import subprocess
 import sys
 import threading
+import time
 from abc import ABC, ABCMeta, abstractmethod
+
+import pytest
+
+from pymock_api._utils.reader import YAMLReader
+from pymock_api.model._sample import Mocked_APIs, Sample_Config_Value
 
 from .._values import (
     _Base_URL,
@@ -35,7 +42,7 @@ class CommandTestSpec(metaclass=ABCMeta):
         try:
             with Capturing() as mock_server_output:
                 self._run_as_thread(target=self._run_command_line)
-            self._verify_running_output(" ".join(mock_server_output))
+            self._verify_running_output(" ".join(mock_server_output).replace("\n", "").replace("  ", ""))
         finally:
             self._do_finally()
 
@@ -88,6 +95,69 @@ class TestSubCommandRun(CommandTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "-b BIND, --bind BIND")
         self._should_contains_chars_in_result(cmd_running_result, "-w WORKERS, --workers WORKERS")
         self._should_contains_chars_in_result(cmd_running_result, "--log-level LOG_LEVEL")
+
+
+class TestSubCommandConfig(CommandTestSpec):
+
+    Terminate_Command_Running_When_Sniff_IP_Info: bool = False
+
+    @property
+    def options(self) -> str:
+        return "config --help"
+
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
+        self._should_contains_chars_in_result(cmd_running_result, "-p, --print-sample")
+        self._should_contains_chars_in_result(cmd_running_result, "-g, --generate-sample")
+        self._should_contains_chars_in_result(cmd_running_result, "-o FILE_PATH, --output FILE_PATH")
+
+
+class TestShowSampleConfiguration(CommandTestSpec):
+
+    Terminate_Command_Running_When_Sniff_IP_Info: bool = False
+
+    @property
+    def options(self) -> str:
+        return "config -p"
+
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        for api_name, api_config in Mocked_APIs.items():
+            self._should_contains_chars_in_result(cmd_running_result, api_name)
+            self._should_contains_chars_in_result(cmd_running_result, api_config["url"])
+            if api_name != "base":
+                self._should_contains_chars_in_result(cmd_running_result, api_config["http"]["request"]["method"])
+                self._should_contains_chars_in_result(cmd_running_result, str(api_config["http"]["response"]["value"]))
+
+
+class TestGenerateSampleConfiguration(CommandTestSpec):
+
+    Terminate_Command_Running_When_Sniff_IP_Info: bool = False
+    _Default_Path: str = "sample-api.yaml"
+    _Under_Test_Path: str = None
+
+    @property
+    def options(self) -> str:
+        return f"config -g -o {self._Under_Test_Path}" if self._Under_Test_Path else "config -g"
+
+    @pytest.mark.parametrize("config_path", [None, "output-test-api.yaml"])
+    def test_command(self, config_path: str) -> None:
+        self._Under_Test_Path = config_path or self._Default_Path
+
+        # Check and clean file
+        if os.path.exists(self._Under_Test_Path):
+            os.remove(self._Under_Test_Path)
+
+        try:
+            super().test_command()
+        finally:
+            # clean file
+            if os.path.exists(self._Under_Test_Path):
+                os.remove(self._Under_Test_Path)
+
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        assert os.path.exists(self._Under_Test_Path)
+        config_data = YAMLReader().read(self._Under_Test_Path)
+        assert config_data == Sample_Config_Value
 
 
 class RunMockApplicationTestSpec(CommandTestSpec, ABC):

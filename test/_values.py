@@ -78,6 +78,12 @@ _Workers_Amount: _Cmd_Option = _Cmd_Option(option_name="--workers", value=3)
 _Log_Level: _Cmd_Option = _Cmd_Option(option_name="--log-level", value="info")
 
 # Test command line options
-_Test_SubCommand: str = "run"
+_Test_SubCommand_Run: str = "run"
 _Test_Config: str = "test-api.yaml"
 _Test_App_Type: str = "flask"
+
+# Test subcommand *config* options
+_Test_SubCommand_Config: str = "config"
+_Generate_Sample: bool = True
+_Print_Sample: bool = True
+_Sample_File_Path: str = "pytest-api.yaml"
