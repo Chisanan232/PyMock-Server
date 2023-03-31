@@ -14,6 +14,8 @@ class BaseConfig:
     url: str = field(default_factory=str)
 
     def __eq__(self, other: "BaseConfig") -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError("")
         return self.url == other.url
 
     def serialize(self, data: Optional["BaseConfig"] = None) -> Optional[Dict[str, Any]]:
@@ -59,12 +61,14 @@ class HTTPRequest:
     parameters: dict = field(default_factory=dict)
 
     def __eq__(self, other: "HTTPRequest") -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError("")
         return self.method == other.method and self.parameters == other.parameters
 
     def serialize(self, data: "HTTPRequest" = None) -> Optional[Dict[str, Any]]:
         method = (data.method if data else None) or self.method
         parameters = (data.parameters if data else None) or self.parameters
-        if not method or not parameters:
+        if not (method and parameters):
             return None
         return {
             "method": method,
@@ -95,7 +99,7 @@ class HTTPRequest:
         """
         self.method = data.get("method", None)
         self.parameters = data.get("parameters", None)
-        if not self.method or not self.parameters:
+        if not (self.method and self.parameters):
             return None
         return self
 
@@ -107,6 +111,8 @@ class HTTPResponse:
     value: str = field(default_factory=str)
 
     def __eq__(self, other: "HTTPResponse") -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError("")
         return self.value == other.value
 
     def serialize(self, data: "HTTPResponse" = None) -> Optional[Dict[str, Any]]:
@@ -155,6 +161,8 @@ class HTTP:
         self._response = response
 
     def __eq__(self, other: "HTTP") -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError("")
         return self.request == other.request and self.response == other.response
 
     @property
@@ -234,7 +242,7 @@ class HTTP:
         resp = data.get("response", None)
         self._request = HTTPRequest().deserialize(data=req) if req else None
         self._response = HTTPResponse().deserialize(data=resp) if resp else None
-        if not self._request or not self._response:
+        if not (self._request and self._response):
             return None
         return self
 
@@ -250,6 +258,8 @@ class MockAPI:
         self._http = http
 
     def __eq__(self, other: "MockAPI") -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError("")
         return self.url == other.url and self.http == other.http
 
     @property
@@ -274,9 +284,9 @@ class MockAPI:
             raise TypeError("")
 
     def serialize(self, data: "MockAPI" = None) -> Optional[Dict[str, Any]]:
-        url = data.url or self._url
-        http = data.http or self.http
-        if not url or not http:
+        url = (data.url if data else None) or self._url
+        http = (data.http if data else None) or self.http
+        if not (url and http):
             return None
         return {
             "url": url,
@@ -315,7 +325,7 @@ class MockAPI:
         """
         self._url = data.get("url", None)
         self._http = HTTP().deserialize(data=data.get("http", None))
-        if not self._url or self._http:
+        if not (self._url and self._http):
             return None
         return self
 
@@ -334,6 +344,8 @@ class MockAPIs:
         return len(self.apis.keys())
 
     def __eq__(self, other: "MockAPIs") -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError("")
         return self.base == other.base and self.apis == other.apis
 
     @property
@@ -367,12 +379,12 @@ class MockAPIs:
             raise TypeError("")
 
     def serialize(self, data: "MockAPIs" = None) -> Optional[Dict[str, Any]]:
-        url = data.base or self.base
-        apis = data.apis or self.apis
-        if not url or not apis:
+        base = (data.base if data else None) or self.base
+        apis = (data.apis if data else None) or self.apis
+        if not (base and apis):
             return None
         api_info = {
-            "base": url,
+            "base": BaseConfig().serialize(data=base),
         }
         for api_name, api_config in apis.items():
             api_info[api_name] = MockAPI().serialize(data=api_config)
@@ -439,6 +451,8 @@ class MockAPIs:
             if mock_api_name == "base":
                 continue
             self.apis[mock_api_name] = MockAPI().deserialize(data=data.get(mock_api_name, None))
+        if not (self.base and self.apis):
+            return None
         return self
 
 
@@ -458,6 +472,8 @@ class APIConfig:
         return len(self._apis) if self._apis else 0
 
     def __eq__(self, other: "APIConfig") -> bool:
+        if not isinstance(other, self.__class__):
+            raise TypeError("")
         return self.name == other.name and self.description == other.description and self.apis == other.apis
 
     def has_apis(self) -> bool:
@@ -493,10 +509,10 @@ class APIConfig:
             raise TypeError("")
 
     def serialize(self, data: "APIConfig" = None) -> Optional[Dict[str, Any]]:
-        name = data.name or self.name
-        description = data.description or self.description
-        apis = data.apis or self.apis
-        if not name or not description or not apis:
+        name = (data.name if data else None) or self.name
+        description = (data.description if data else None) or self.description
+        apis = (data.apis if data else None) or self.apis
+        if not (name and description and apis):
             return None
         return {
             "name": name,
@@ -568,6 +584,6 @@ class APIConfig:
         self.name = data.get("name", None)
         self.description = data.get("description", None)
         self.apis = MockAPIs().deserialize(data=data.get("mocked_apis", None))
-        if self.name or self.description or self.apis:
+        if not (self.name and self.description and self.apis):
             return None
         return self
