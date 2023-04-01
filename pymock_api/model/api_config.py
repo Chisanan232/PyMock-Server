@@ -198,7 +198,7 @@ class HTTP(_Config):
             else:
                 raise TypeError("Setter *HTTP.request* only accepts dict or HTTPRequest type object.")
         else:
-            self._request = None
+            self._request = req
 
     @property
     def response(self) -> HTTPResponse:
@@ -214,7 +214,7 @@ class HTTP(_Config):
             else:
                 raise TypeError("Setter *HTTP.response* only accepts dict or HTTPResponse type object.")
         else:
-            self._response = None
+            self._response = resp
 
     def serialize(self, data: "HTTP" = None) -> Optional[Dict[str, Any]]:
         if data and data.request:
@@ -308,7 +308,7 @@ class MockAPI(_Config):
             else:
                 raise TypeError("Setter *MockAPI.http* only accepts dict or HTTP type object.")
         else:
-            self._http = None
+            self._http = http
 
     def serialize(self, data: "MockAPI" = None) -> Optional[Dict[str, Any]]:
         url = (data.url if data else None) or self._url
@@ -389,7 +389,7 @@ class MockAPIs(_Config):
             else:
                 raise TypeError("Setter *MockAPIs.base* only accepts dict or BaseConfig type object.")
         else:
-            self._base = None
+            self._base = base
 
     @property
     def apis(self) -> Dict[str, MockAPI]:
@@ -397,7 +397,7 @@ class MockAPIs(_Config):
 
     @apis.setter
     def apis(self, apis: Dict[str, Union[dict, MockAPI]]) -> None:
-        if apis is not None:
+        if apis:
             if isinstance(apis, dict):
                 ele_types = list(map(lambda v: isinstance(v, MockAPI), apis.values()))
                 if False in ele_types:
@@ -409,7 +409,7 @@ class MockAPIs(_Config):
             else:
                 raise TypeError("Setter *MockAPIs.apis* only accepts dict or MockAPI type object.")
         else:
-            self._apis = None
+            self._apis = apis
 
     def serialize(self, data: "MockAPIs" = None) -> Union[Dict[str, Any]]:
         base = (data.base if data else None) or self.base
