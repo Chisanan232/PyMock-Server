@@ -1,7 +1,6 @@
 import pytest
 
-from pymock_api._utils import load_config
-from pymock_api.model import APIConfig
+from pymock_api.model import APIConfig, load_config
 
 from .._spec import MockAPI_Config_Path, run_test
 
@@ -14,7 +13,7 @@ class TestInitFunctions:
     @run_test.with_file
     def test_load_config(self):
         # Run target function
-        loaded_data = load_config(config_path=MockAPI_Config_Path)
+        loaded_data = load_config(path=MockAPI_Config_Path)
 
         # Verify result
         assert isinstance(loaded_data, APIConfig) and len(loaded_data) != 0, ""
@@ -24,7 +23,7 @@ class TestInitFunctions:
     def test_load_config_with_not_exist_file(self):
         with pytest.raises(FileNotFoundError) as exc_info:
             # Run target function to test
-            load_config(config_path=self.not_exist_file_path)
+            load_config(path=self.not_exist_file_path)
             # Verify result
             expected_err_msg = f"The target configuration file {self.not_exist_file_path} doesn't exist."
             assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
