@@ -532,12 +532,15 @@ class APIConfig(_Config):
 
     @apis.setter
     def apis(self, apis: Union[dict, MockAPIs]) -> None:
-        if isinstance(apis, dict):
-            self._apis = MockAPIs().deserialize(data=apis)
-        elif isinstance(apis, MockAPIs):
-            self._apis = apis
+        if apis:
+            if isinstance(apis, dict):
+                self._apis = MockAPIs().deserialize(data=apis)
+            elif isinstance(apis, MockAPIs):
+                self._apis = apis
+            else:
+                raise TypeError("Setter *APIConfig.apis* only accepts dict or MockAPIs type object.")
         else:
-            raise TypeError("Setter *APIConfig.apis* only accepts dict or MockAPIs type object.")
+            self._apis = apis
 
     def serialize(self, data: "APIConfig" = None) -> Union[Dict[str, Any]]:
         name = (data.name if data else None) or self.name
