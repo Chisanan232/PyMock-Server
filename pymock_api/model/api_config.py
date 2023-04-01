@@ -406,7 +406,7 @@ class MockAPIs(_Config):
         else:
             self._apis = apis
 
-    def serialize(self, data: "MockAPIs" = None) -> Union[Dict[str, Any]]:
+    def serialize(self, data: "MockAPIs" = None) -> Optional[Dict[str, Any]]:
         base = (data.base if data else None) or self.base
         apis = (data.apis if data else None) or self.apis
         if not (base and apis):
@@ -542,7 +542,7 @@ class APIConfig(_Config):
         else:
             self._apis = apis
 
-    def serialize(self, data: "APIConfig" = None) -> Union[Dict[str, Any]]:
+    def serialize(self, data: "APIConfig" = None) -> Optional[Dict[str, Any]]:
         name = (data.name if data else None) or self.name
         description = (data.description if data else None) or self.description
         apis = (data.apis if data else None) or self.apis
