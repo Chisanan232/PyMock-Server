@@ -5,6 +5,7 @@ Read the configuration and parse its content to a specific data object so that i
 
 import os
 from abc import ABCMeta, abstractmethod
+from typing import Union
 
 from yaml import dump, load
 
@@ -99,3 +100,11 @@ class YAML:
         with open(path, "r", encoding="utf-8") as file_stream:
             data: dict = load(stream=file_stream, Loader=Loader)
         return data
+
+    def write(self, path: str, config: Union[str, dict]) -> None:
+        yaml_content = self.serialize(config) if isinstance(config, dict) else config
+        with open(path, "a+", encoding="utf-8") as file_stream:
+            file_stream.writelines(yaml_content)
+
+    def serialize(self, config: dict) -> str:
+        return dump(config, Dumper=Dumper)
