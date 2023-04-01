@@ -196,7 +196,7 @@ class HTTP(_Config):
             elif isinstance(req, HTTPRequest):
                 self._request = req
             else:
-                raise TypeError("")
+                raise TypeError("Setter *HTTP.request* only accepts dict or HTTPRequest type object.")
         else:
             self._request = None
 
@@ -212,7 +212,7 @@ class HTTP(_Config):
             elif isinstance(resp, HTTPResponse):
                 self._response = resp
             else:
-                raise TypeError("")
+                raise TypeError("Setter *HTTP.response* only accepts dict or HTTPResponse type object.")
         else:
             self._response = None
 
@@ -306,7 +306,7 @@ class MockAPI(_Config):
             elif isinstance(http, HTTP):
                 self._http = http
             else:
-                raise TypeError("")
+                raise TypeError("Setter *MockAPI.http* only accepts dict or HTTP type object.")
         else:
             self._http = None
 
@@ -387,7 +387,7 @@ class MockAPIs(_Config):
             elif isinstance(base, BaseConfig):
                 self._base = base
             else:
-                raise TypeError("")
+                raise TypeError("Setter *MockAPIs.base* only accepts dict or BaseConfig type object.")
         else:
             self._base = None
 
@@ -407,7 +407,7 @@ class MockAPIs(_Config):
                 else:
                     self._apis = apis
             else:
-                raise TypeError("")
+                raise TypeError("Setter *MockAPIs.apis* only accepts dict or MockAPI type object.")
         else:
             self._apis = None
 
@@ -543,7 +543,7 @@ class APIConfig(_Config):
         elif isinstance(apis, MockAPIs):
             self._apis = apis
         else:
-            raise TypeError("")
+            raise TypeError("Setter *APIConfig.apis* only accepts dict or MockAPIs type object.")
 
     def serialize(self, data: "APIConfig" = None) -> Union[Dict[str, Any]]:
         name = (data.name if data else None) or self.name
