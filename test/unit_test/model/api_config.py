@@ -194,6 +194,90 @@ class TestMockAPIs(ConfigTestSpec):
         assert sut.base == self.mock_base_config, _assertion_msg
         assert sut.apis == self.mock_mock_api, _assertion_msg
 
+    @pytest.mark.parametrize(
+        ("setting_val", "should_call_deserialize"),
+        [
+            ({}, False),
+            ({"test": "test"}, True),
+            (Mock(BaseConfig()), False),
+        ],
+    )
+    @patch.object(BaseConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_base_with_valid_obj(
+        self,
+        mock_deserialize: Mock,
+        setting_val: Union[dict, BaseConfig],
+        should_call_deserialize: bool,
+        sut_with_nothing: MockAPIs,
+    ):
+        # Run target function
+        sut_with_nothing.base = setting_val
+        # Verify the running result
+        if should_call_deserialize:
+            mock_deserialize.assert_called_once_with(data=setting_val)
+            assert sut_with_nothing.base == MOCK_RETURN_VALUE
+        else:
+            mock_deserialize.assert_not_called()
+            assert sut_with_nothing.base == setting_val
+
+    @patch.object(BaseConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_base_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: MockAPIs):
+        with pytest.raises(TypeError) as exc_info:
+            sut_with_nothing.base = "Invalid object"
+        mock_deserialize.assert_not_called()
+        assert re.search(r"Setter .{1,32} only accepts .{1,32} type object.", str(exc_info.value), re.IGNORECASE)
+
+    @pytest.mark.parametrize(
+        ("setting_val", "should_call_deserialize"),
+        [
+            ({}, False),
+            ({"test": "test"}, True),
+            ({"test": Mock(MockAPI())}, False),
+        ],
+    )
+    @patch.object(MockAPI, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_apis_with_valid_obj(
+        self,
+        mock_deserialize: Mock,
+        setting_val: Union[dict, BaseConfig],
+        should_call_deserialize: bool,
+        sut_with_nothing: MockAPIs,
+    ):
+        # Run target function
+        sut_with_nothing.apis = setting_val
+        # Verify the running result
+        if should_call_deserialize:
+            expected_apis = {}
+            for api_name, api_value in setting_val.items():
+                mock_deserialize.assert_called_once_with(data=api_value)
+                expected_apis[api_name] = MOCK_RETURN_VALUE
+                assert sut_with_nothing.apis[api_name] == MOCK_RETURN_VALUE
+            assert sut_with_nothing.apis == expected_apis
+        else:
+            mock_deserialize.assert_not_called()
+            assert sut_with_nothing.apis == setting_val
+
+    @pytest.mark.parametrize(
+        ("setting_val", "expected_err", "err_msg_regex"),
+        [
+            ("Invalid object", TypeError, r"Setter .{1,32} only accepts .{1,32} type object."),
+            ({"t1": "test", "t2": Mock(MockAPI())}, ValueError, r".{1,32} multiple types .{1,64} unify .{1,32} type"),
+        ],
+    )
+    @patch.object(MockAPI, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_apis_with_invalid_obj(
+        self,
+        mock_deserialize: Mock,
+        setting_val: Union[str, dict],
+        expected_err: Exception,
+        err_msg_regex,
+        sut_with_nothing: MockAPIs,
+    ):
+        with pytest.raises(expected_err) as exc_info:
+            sut_with_nothing.apis = setting_val
+        mock_deserialize.assert_not_called()
+        assert re.search(err_msg_regex, str(exc_info.value), re.IGNORECASE)
+
     def _expected_serialize_value(self) -> Any:
         return _TestConfig.Mock_APIs
 
@@ -263,7 +347,7 @@ class TestMockAPI(ConfigTestSpec):
         ],
     )
     @patch.object(HTTP, "deserialize", return_value=MOCK_RETURN_VALUE)
-    def test_prop_request_with_valid_obj(
+    def test_prop_http_with_valid_obj(
         self,
         mock_deserialize: Mock,
         setting_val: Union[dict, HTTP],
@@ -281,7 +365,7 @@ class TestMockAPI(ConfigTestSpec):
             assert sut_with_nothing.http == setting_val
 
     @patch.object(HTTP, "deserialize", return_value=MOCK_RETURN_VALUE)
-    def test_prop_request_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: MockAPI):
+    def test_prop_http_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: MockAPI):
         with pytest.raises(TypeError) as exc_info:
             sut_with_nothing.http = "Invalid object"
         mock_deserialize.assert_not_called()
