@@ -41,6 +41,9 @@ class ConfigTestSpec(metaclass=ABCMeta):
     def sut_with_nothing(self) -> _Config:
         pass
 
+    def test_eq_operation_with_valid_object(self, sut: _Config, sut_with_nothing: _Config):
+        assert sut != sut_with_nothing
+
     def test_eq_operation_with_invalid_object(self, sut: _Config):
         with pytest.raises(TypeError) as exc_info:
             sut == "Invalid object"

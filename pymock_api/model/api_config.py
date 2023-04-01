@@ -9,12 +9,19 @@ from typing import Any, Dict, Optional, Union
 
 
 class _Config(metaclass=ABCMeta):
-    @abstractmethod
     def __eq__(self, other: "_Config") -> bool:
+        if other is None:
+            return False
         if not isinstance(other, self.__class__):
             raise TypeError(
-                f"Cannot run equal operation between these 2 objects because of their data types is different. Be operated object: {type(self)}, another object: {type(other)}."
+                f"Cannot run equal operation between these 2 objects because of their data types is different. Be "
+                f"operated object: {type(self)}, another object: {type(other)}."
             )
+        return self._compare(other)
+
+    @abstractmethod
+    def _compare(self, other: "_Config") -> bool:
+        pass
 
     @abstractmethod
     def serialize(self, data: Optional["_Config"] = None) -> Optional[Dict[str, Any]]:
@@ -30,14 +37,13 @@ class _Config(metaclass=ABCMeta):
         return (getattr(data, prop) if data else None) or getattr(self, prop)
 
 
-@dataclass
+@dataclass(eq=False)
 class BaseConfig(_Config):
     """*The **base** section in **mocked_apis***"""
 
     url: str = field(default_factory=str)
 
-    def __eq__(self, other: "BaseConfig") -> bool:
-        super().__eq__(other)
+    def _compare(self, other: "BaseConfig") -> bool:
         return self.url == other.url
 
     def serialize(self, data: Optional["BaseConfig"] = None) -> Optional[Dict[str, Any]]:
@@ -75,15 +81,14 @@ class BaseConfig(_Config):
         return self
 
 
-@dataclass
+@dataclass(eq=False)
 class HTTPRequest(_Config):
     """*The **http.request** section in **mocked_apis.<api>***"""
 
     method: str = field(default_factory=str)
     parameters: dict = field(default_factory=dict)
 
-    def __eq__(self, other: "HTTPRequest") -> bool:
-        super().__eq__(other)
+    def _compare(self, other: "HTTPRequest") -> bool:
         return self.method == other.method and self.parameters == other.parameters
 
     def serialize(self, data: "HTTPRequest" = None) -> Optional[Dict[str, Any]]:
@@ -125,14 +130,13 @@ class HTTPRequest(_Config):
         return self
 
 
-@dataclass
+@dataclass(eq=False)
 class HTTPResponse(_Config):
     """*The **http.response** section in **mocked_apis.<api>***"""
 
     value: str = field(default_factory=str)
 
-    def __eq__(self, other: "HTTPResponse") -> bool:
-        super().__eq__(other)
+    def _compare(self, other: "HTTPResponse") -> bool:
         return self.value == other.value
 
     def serialize(self, data: "HTTPResponse" = None) -> Optional[Dict[str, Any]]:
@@ -180,8 +184,7 @@ class HTTP(_Config):
         self._request = request
         self._response = response
 
-    def __eq__(self, other: "HTTP") -> bool:
-        super().__eq__(other)
+    def _compare(self, other: "HTTP") -> bool:
         return self.request == other.request and self.response == other.response
 
     @property
@@ -273,8 +276,7 @@ class MockAPI(_Config):
         self._url = url
         self._http = http
 
-    def __eq__(self, other: "MockAPI") -> bool:
-        super().__eq__(other)
+    def _compare(self, other: "MockAPI") -> bool:
         return self.url == other.url and self.http == other.http
 
     @property
@@ -362,8 +364,7 @@ class MockAPIs(_Config):
     def __len__(self):
         return len(self.apis.keys())
 
-    def __eq__(self, other: "MockAPIs") -> bool:
-        super().__eq__(other)
+    def _compare(self, other: "MockAPIs") -> bool:
         return self.base == other.base and self.apis == other.apis
 
     @property
@@ -503,8 +504,7 @@ class APIConfig(_Config):
     def __len__(self):
         return len(self._apis) if self._apis else 0
 
-    def __eq__(self, other: "APIConfig") -> bool:
-        super().__eq__(other)
+    def _compare(self, other: "APIConfig") -> bool:
         return self.name == other.name and self.description == other.description and self.apis == other.apis
 
     def has_apis(self) -> bool:
