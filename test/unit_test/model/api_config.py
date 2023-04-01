@@ -138,6 +138,39 @@ class TestAPIConfig(ConfigTestSpec):
         assert sut.apis.base.url == _TestConfig.API_Config.get("mocked_apis").get("base").get("url"), _assertion_msg
         assert list(sut.apis.apis.keys())[0] in _TestConfig.API_Config.get("mocked_apis").keys(), _assertion_msg
 
+    @pytest.mark.parametrize(
+        ("setting_val", "should_call_deserialize"),
+        [
+            ({}, False),
+            ({"test": "test"}, True),
+            (Mock(MockAPIs()), False),
+        ],
+    )
+    @patch.object(MockAPIs, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_apiswith_valid_obj(
+        self,
+        mock_deserialize: Mock,
+        setting_val: Union[dict, BaseConfig],
+        should_call_deserialize: bool,
+        sut_with_nothing: APIConfig,
+    ):
+        # Run target function
+        sut_with_nothing.apis = setting_val
+        # Verify the running result
+        if should_call_deserialize:
+            mock_deserialize.assert_called_once_with(data=setting_val)
+            assert sut_with_nothing.apis == MOCK_RETURN_VALUE
+        else:
+            mock_deserialize.assert_not_called()
+            assert sut_with_nothing.apis == setting_val
+
+    @patch.object(MockAPIs, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_apis_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: APIConfig):
+        with pytest.raises(TypeError) as exc_info:
+            sut_with_nothing.apis = "Invalid object"
+        mock_deserialize.assert_not_called()
+        assert re.search(r"Setter .{1,32} only accepts .{1,32} type object.", str(exc_info.value), re.IGNORECASE)
+
     def _expected_serialize_value(self) -> dict:
         return _TestConfig.API_Config
 
