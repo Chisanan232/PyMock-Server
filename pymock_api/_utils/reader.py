@@ -88,3 +88,14 @@ except ImportError:
 #     def write(self, path: str, config: str) -> None:
 #         with open(path, "a+", encoding="utf-8") as file_stream:
 #             file_stream.writelines(config)
+
+
+class YAML:
+    def read(self, path: str) -> dict:
+        exist_file = os.path.exists(path)
+        if not exist_file:
+            raise FileNotFoundError(f"The target configuration file {path} doesn't exist.")
+
+        with open(path, "r", encoding="utf-8") as file_stream:
+            data: dict = load(stream=file_stream, Loader=Loader)
+        return data
