@@ -1,4 +1,5 @@
 from collections import namedtuple
+from typing import Dict
 from unittest.mock import Mock
 
 
@@ -16,6 +17,8 @@ class APIConfigValue:
         return _Mock_APIs
 
 
+_Config_Name: str = "pytest name"
+_Config_Description: str = "pytest description"
 _Base_URL: str = "/test/v1"
 _Test_URL: str = "/test-url"
 _Test_HTTP_Method: str = "GET"
@@ -70,6 +73,22 @@ _Test_Config_Value: dict = {
 }
 
 _Cmd_Option = namedtuple("_Cmd_Option", ["option_name", "value"])
+
+
+# Sample configuration content
+class _TestConfig:
+    Request: Dict[str, str] = {"method": "GET", "parameters": {"param1": "val1"}}
+    Response: Dict[str, str] = {"value": _Test_HTTP_Resp}
+    Http: dict = {"request": Request, "response": Response}
+    Mock_API: dict = {"url": _Test_URL, "http": Http}
+    Base: dict = {"url": _Base_URL}
+    Mock_APIs: dict = {"base": Base, "test_config": Mock_API}
+    API_Config: dict = {
+        "name": _Config_Name,
+        "description": _Config_Description,
+        "mocked_apis": Mock_APIs,
+    }
+
 
 # For testing data objects in *.server.sgi._model*
 _Test_Entry_Point: str = "entry-point"
