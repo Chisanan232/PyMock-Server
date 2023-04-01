@@ -281,6 +281,26 @@ class TestMockAPIs(ConfigTestSpec):
         mock_deserialize.assert_not_called()
         assert re.search(err_msg_regex, str(exc_info.value), re.IGNORECASE)
 
+    @pytest.mark.parametrize(
+        "test_data",
+        [
+            {"base": "base_info"},
+            {"base": "base_info", "api_name": "api_info"},
+        ],
+    )
+    @patch.object(MockAPI, "deserialize", return_value=None)
+    @patch.object(BaseConfig, "deserialize", return_value=None)
+    def test_deserialize_with_nonideal_value(
+        self, mock_deserialize_base: Mock, mock_deserialize_mock_api: Mock, test_data: dict, sut_with_nothing: MockAPIs
+    ):
+        assert sut_with_nothing.deserialize(data=test_data) is None
+        if len(test_data.keys()) > 1:
+            mock_deserialize_base.assert_called_once_with(data="base_info")
+            mock_deserialize_mock_api.assert_called_once_with(data="api_info")
+        else:
+            mock_deserialize_base.assert_not_called()
+            mock_deserialize_mock_api.assert_not_called()
+
     def _expected_serialize_value(self) -> Any:
         return _TestConfig.Mock_APIs
 
