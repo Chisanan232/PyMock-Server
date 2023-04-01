@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
 
-from pymock_api._utils.reader import YAMLWriter
+from pymock_api._utils.file_opt import YAML
 from pymock_api.model import deserialize_args
 from pymock_api.model.cmd_args import (
     ParserArguments,
@@ -69,7 +69,7 @@ class FakeRunner(CommandRunner):
         pass
 
 
-class FakeYAMLWriter(YAMLWriter):
+class FakeYAML(YAML):
     pass
 
 
@@ -156,7 +156,7 @@ class TestCommandRunner:
         ],
     )
     @patch("builtins.print", autospec=True, side_effect=print)
-    @patch("pymock_api.runner.YAMLWriter", return_value=FakeYAMLWriter)
+    @patch("pymock_api.runner.YAML", return_value=FakeYAML)
     def test_run_config(
         self,
         mock_instantiate_writer: Mock,
@@ -166,8 +166,8 @@ class TestCommandRunner:
         output: bool,
         runner: CommandRunner,
     ):
-        FakeYAMLWriter.serialize = MagicMock()
-        FakeYAMLWriter.write = MagicMock()
+        FakeYAML.serialize = MagicMock()
+        FakeYAML.write = MagicMock()
         mock_parser_arg = SubcmdConfigArguments(
             subparser_name="config",
             print_sample=oprint,
@@ -178,10 +178,10 @@ class TestCommandRunner:
 
         if oprint or generate:
             mock_instantiate_writer.assert_called_once()
-            FakeYAMLWriter.serialize.assert_called_once()
+            FakeYAML.serialize.assert_called_once()
         else:
             mock_instantiate_writer.assert_not_called()
-            FakeYAMLWriter.serialize.assert_not_called()
+            FakeYAML.serialize.assert_not_called()
 
         if oprint:
             mock_print.assert_has_calls([call(f"It will write below content into file {output}:")])
@@ -189,9 +189,9 @@ class TestCommandRunner:
             mock_print.assert_not_called()
 
         if generate:
-            FakeYAMLWriter.write.assert_called_once()
+            FakeYAML.write.assert_called_once()
         else:
-            FakeYAMLWriter.write.assert_not_called()
+            FakeYAML.write.assert_not_called()
 
     @patch.object(argparse.ArgumentParser, "parse_args", return_value=MOCK_ARGS_PARSE_RESULT)
     @patch.object(deserialize_args, "subcmd_run")

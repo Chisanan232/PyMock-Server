@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, Union
 
-from .._utils.reader import YAML, _BaseFileOperation
+from .._utils.file_opt import YAML, _BaseFileOperation
 
 
 class _Config(metaclass=ABCMeta):

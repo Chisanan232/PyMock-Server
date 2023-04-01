@@ -9,38 +9,25 @@ try:
 except ImportError:
     from yaml import Loader
 
-from pymock_api._utils.reader import YAMLReader
+from pymock_api._utils.file_opt import YAML
 
 
 class TestYAMLReader:
     @pytest.fixture(scope="function")
-    def reader(self) -> YAMLReader:
-        return YAMLReader()
+    def yaml_opt(self) -> YAML:
+        return YAML()
 
     @property
     def not_exist_file(self) -> str:
         return "file_not_found.yaml"
 
-    def test_read_with_not_exist_file(self, reader: YAMLReader):
-        self._template_test_raise_file_not_found_error(
-            reader=reader, target_test=reader.read, target_test_args={"config": self.not_exist_file}
-        )
-
-    def test_load_with_not_exist_file(self, reader: YAMLReader):
-        self._template_test_raise_file_not_found_error(
-            reader=reader, target_test=reader.load, target_test_args={"config": self.not_exist_file}
-        )
-
-    def _template_test_raise_file_not_found_error(
-        self, reader: YAMLReader, target_test: Callable, target_test_args: dict
-    ) -> None:
+    def test_read_with_not_exist_file(self, yaml_opt: YAML):
         # Mock functions
         yaml.load = MagicMock(return_value=None)
-
         with patch("builtins.open", mock_open(read_data=None)) as mock_file_stream:
             with pytest.raises(FileNotFoundError) as exc_info:
                 # Run target function to test
-                target_test(**target_test_args)
+                yaml_opt.read(path=self.not_exist_file)
                 # Verify result
                 expected_err_msg = f"The target configuration file {self.not_exist_file} doesn't exist."
                 assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."

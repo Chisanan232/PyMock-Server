@@ -4,12 +4,11 @@ import re
 import subprocess
 import sys
 import threading
-import time
 from abc import ABC, ABCMeta, abstractmethod
 
 import pytest
 
-from pymock_api._utils.reader import YAMLReader
+from pymock_api._utils.file_opt import YAML
 from pymock_api.model._sample import Mocked_APIs, Sample_Config_Value
 
 from .._values import (
@@ -156,7 +155,7 @@ class TestGenerateSampleConfiguration(CommandTestSpec):
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
         assert os.path.exists(self._Under_Test_Path)
-        config_data = YAMLReader().read(self._Under_Test_Path)
+        config_data = YAML().read(self._Under_Test_Path)
         assert config_data == Sample_Config_Value
 
 
