@@ -636,3 +636,6 @@ class APIConfig(_Config):
 
     def from_yaml(self, path: str) -> "_Config":
         return self.deserialize(data=self._config_operation.read(path))
+
+    def to_yaml(self, path: str) -> None:
+        self._config_operation.write(path=path, config=self.serialize())
