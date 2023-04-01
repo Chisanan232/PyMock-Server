@@ -1,7 +1,7 @@
 import re
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict
-from unittest.mock import Mock
+from typing import Any, Dict, Union
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -27,6 +27,7 @@ from ..._values import (
 )
 
 _assertion_msg = "Its property's value should be same as we set."
+MOCK_RETURN_VALUE: Mock = Mock()
 
 
 class ConfigTestSpec(metaclass=ABCMeta):
@@ -299,6 +300,70 @@ class TestHTTP(ConfigTestSpec):
     def test_value_attributes(self, sut: HTTP):
         assert sut.request == self.mock_http_req, _assertion_msg
         assert sut.response == self.mock_http_resp, _assertion_msg
+
+    @pytest.mark.parametrize(
+        ("setting_val", "should_call_deserialize"),
+        [
+            ({"test": "test"}, True),
+            (Mock(HTTPRequest()), False),
+        ],
+    )
+    @patch.object(HTTPRequest, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_request_with_valid_obj(
+        self,
+        mock_deserialize: Mock,
+        setting_val: Union[dict, HTTPRequest],
+        should_call_deserialize: bool,
+        sut_with_nothing: HTTP,
+    ):
+        # Run target function
+        sut_with_nothing.request = setting_val
+        # Verify the running result
+        if should_call_deserialize:
+            mock_deserialize.assert_called_once_with(data=setting_val)
+            assert sut_with_nothing.request == MOCK_RETURN_VALUE
+        else:
+            mock_deserialize.assert_not_called()
+            assert sut_with_nothing.request == setting_val
+
+    @patch.object(HTTPRequest, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_request_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: HTTP):
+        with pytest.raises(TypeError) as exc_info:
+            sut_with_nothing.request = "Invalid object"
+        mock_deserialize.assert_not_called()
+        assert re.search(r"Setter .{1,32} only accepts .{1,32} type object.", str(exc_info.value), re.IGNORECASE)
+
+    @pytest.mark.parametrize(
+        ("setting_val", "should_call_deserialize"),
+        [
+            ({"test": "test"}, True),
+            (Mock(HTTPResponse()), False),
+        ],
+    )
+    @patch.object(HTTPResponse, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_response_with_valid_obj(
+        self,
+        mock_deserialize: Mock,
+        setting_val: Union[dict, HTTPResponse],
+        should_call_deserialize: bool,
+        sut_with_nothing: HTTP,
+    ):
+        # Run target function
+        sut_with_nothing.response = setting_val
+        # Verify the running result
+        if should_call_deserialize:
+            mock_deserialize.assert_called_once_with(data=setting_val)
+            assert sut_with_nothing.response == MOCK_RETURN_VALUE
+        else:
+            mock_deserialize.assert_not_called()
+            assert sut_with_nothing.response == setting_val
+
+    @patch.object(HTTPResponse, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_response_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: HTTP):
+        with pytest.raises(TypeError) as exc_info:
+            sut_with_nothing.response = "Invalid object"
+        mock_deserialize.assert_not_called()
+        assert re.search(r"Setter .{1,32} only accepts .{1,32} type object.", str(exc_info.value), re.IGNORECASE)
 
     def _expected_serialize_value(self) -> dict:
         return _TestConfig.Http
