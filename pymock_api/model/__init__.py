@@ -40,3 +40,7 @@ class deserialize_args:
 
         """
         return DeserializeParsedArgs.subcommand_config(args)
+
+
+def load_config(path: str) -> APIConfig:
+    return APIConfig().from_yaml(path=path)

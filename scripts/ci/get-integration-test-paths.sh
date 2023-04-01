@@ -5,6 +5,7 @@ runtime_os=$1
 
 declare -a init_tests
 declare -a utils_tests
+declare -a model_tests
 declare -a server_tests
 
 getalltests() {
@@ -22,6 +23,11 @@ getalltests() {
         # shellcheck disable=SC2124
         # shellcheck disable=SC2178
         utils_tests=${alltestpaths[@]}
+    elif echo "$1" | grep -q "model";
+    then
+        # shellcheck disable=SC2124
+        # shellcheck disable=SC2178
+        model_tests=${alltestpaths[@]}
     elif echo "$1" | grep -q "server";
     then
         # shellcheck disable=SC2124
@@ -36,13 +42,15 @@ getalltests() {
 
 init_path=./test/integration_test/
 utils_path=./test/integration_test/_utils/
+model_path=./test/integration_test/model/
 server_path=./test/integration_test/server/
 
 getalltests $init_path
 getalltests $utils_path
+getalltests $model_path
 getalltests $server_path
 
-dest=( "${init_tests[@]} ${utils_tests[@]} ${server_tests[@]}" )
+dest=( "${init_tests[@]} ${utils_tests[@]} ${model_tests[@]} ${server_tests[@]}" )
 
 if echo "$runtime_os" | grep -q "windows";
 then

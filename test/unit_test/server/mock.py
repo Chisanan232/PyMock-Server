@@ -65,7 +65,7 @@ class TestMockHTTPServer:
                     f"The instance {invalid_server} must be *pymock_api.application.BaseAppServer* type object."
                 )
                 assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
-                mock_load_config.assert_called_once_with(config_path="api.yaml")
+                mock_load_config.assert_called_once_with(path="api.yaml")
 
     def test_instantiate_arg_auto_setup(self):
         def _instantiate() -> MockHTTPServer:
@@ -82,7 +82,7 @@ class TestMockHTTPServer:
         mock_server = MockHTTPServer(config_path=_Test_Config, app_server=FakeWebServer(), auto_setup=False)
         mock_server.create_apis(apis)
         mock_create_apis.assert_called_once_with(apis)
-        mock_load_config.assert_called_once_with(config_path=_Test_Config)
+        mock_load_config.assert_called_once_with(path=_Test_Config)
 
     @staticmethod
     def _template_test(
@@ -97,7 +97,7 @@ class TestMockHTTPServer:
                 instantiate_callback()
 
                 # Verify running result
-                mock_load_config.assert_called_once_with(config_path=assert_config_path)
+                mock_load_config.assert_called_once_with(path=assert_config_path)
 
                 if instantiate_flask_app_server:
                     mock_app_server.assert_called_once()

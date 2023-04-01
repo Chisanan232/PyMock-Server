@@ -7,6 +7,8 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, Union
 
+from .._utils.file_opt import YAML, _BaseFileOperation
+
 
 class _Config(metaclass=ABCMeta):
     def __eq__(self, other: "_Config") -> bool:
@@ -496,6 +498,8 @@ class APIConfig(_Config):
     _description: str = ""
     _apis: MockAPIs
 
+    _configuration: _BaseFileOperation = None
+
     def __init__(self, name: str = None, description: str = None, apis: MockAPIs = None):
         self._name = name
         self._description = description
@@ -506,6 +510,12 @@ class APIConfig(_Config):
 
     def _compare(self, other: "APIConfig") -> bool:
         return self.name == other.name and self.description == other.description and self.apis == other.apis
+
+    @property
+    def _config_operation(self) -> _BaseFileOperation:
+        if not self._configuration:
+            self._configuration = YAML()
+        return self._configuration
 
     def has_apis(self) -> bool:
         return len(self) != 0
@@ -623,3 +633,9 @@ class APIConfig(_Config):
         if not (self.name and self.description and self.apis):
             return None
         return self
+
+    def from_yaml(self, path: str) -> "APIConfig":
+        return self.deserialize(data=self._config_operation.read(path))
+
+    def to_yaml(self, path: str) -> None:
+        self._config_operation.write(path=path, config=self.serialize())

@@ -7,7 +7,7 @@ from typing import List, Optional, Union
 
 try:
     import pymock_api.cmd
-    from pymock_api._utils.reader import YAMLWriter
+    from pymock_api._utils.file_opt import YAML
     from pymock_api.model import (
         ParserArguments,
         SubcmdConfigArguments,
@@ -21,7 +21,7 @@ except (ImportError, ModuleNotFoundError):
     path = str(Path(runner_dir).parent.absolute())
     sys.path.append(path)
     import pymock_api.cmd
-    from pymock_api._utils.reader import YAMLWriter
+    from pymock_api._utils.file_opt import YAML
     from pymock_api.model import (
         ParserArguments,
         SubcmdConfigArguments,
@@ -47,16 +47,16 @@ class CommandRunner:
         self._server_gateway.run(args)
 
     def run_config(self, args: SubcmdConfigArguments) -> None:
-        yaml_writer: YAMLWriter = None
+        yaml: YAML = None
         sample_data: str = None
         if args.print_sample or args.generate_sample:
-            yaml_writer = YAMLWriter()
-            sample_data = yaml_writer.serialize(config=Sample_Config_Value)
+            yaml = YAML()
+            sample_data = yaml.serialize(config=Sample_Config_Value)
         if args.print_sample:
             print(f"It will write below content into file {args.sample_output_path}:")
             print(f"{sample_data}")
         if args.generate_sample:
-            yaml_writer.write(path=args.sample_output_path, config=sample_data)
+            yaml.write(path=args.sample_output_path, config=sample_data)
 
     def parse(self, cmd_args: Optional[List[str]] = None) -> Union[SubcmdRunArguments, SubcmdConfigArguments]:
         if self.mock_api_parser.subcommand == pymock_api.cmd.SubCommand.Run:

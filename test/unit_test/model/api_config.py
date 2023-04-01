@@ -21,6 +21,7 @@ from ..._values import (
     _Base_URL,
     _Config_Description,
     _Config_Name,
+    _Test_Config,
     _Test_HTTP_Resp,
     _Test_URL,
     _TestConfig,
@@ -198,6 +199,20 @@ class TestAPIConfig(ConfigTestSpec):
         assert obj.description == _Config_Description
         assert obj.apis.base.url == _TestConfig.API_Config.get("mocked_apis").get("base").get("url")
         assert list(obj.apis.apis.keys())[0] in _TestConfig.API_Config.get("mocked_apis").keys(), _assertion_msg
+
+    @patch("pymock_api._utils.file_opt.YAML.read", return_value=_TestConfig.API_Config)
+    def test_from_yaml_file(self, mock_read_yaml: Mock, sut: APIConfig):
+        config = sut.from_yaml(path="test-api.yaml")
+        mock_read_yaml.assert_called_once_with("test-api.yaml")
+        assert isinstance(config, APIConfig)
+        assert config.name == _Config_Name
+        assert config.description == _Config_Description
+        assert config.apis.serialize() == _TestConfig.Mock_APIs
+
+    @patch("pymock_api._utils.file_opt.YAML.write", return_value=None)
+    def test_to_yaml_file(self, mock_write_yaml: Mock, sut: APIConfig):
+        sut.to_yaml(path=_Test_Config)
+        mock_write_yaml.assert_called_once_with(path=_Test_Config, config=sut.serialize())
 
 
 class TestMockAPIs(ConfigTestSpec):
