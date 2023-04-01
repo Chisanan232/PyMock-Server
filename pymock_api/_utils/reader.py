@@ -91,7 +91,21 @@ except ImportError:
 #             file_stream.writelines(config)
 
 
-class YAML:
+class _BaseFileOperation(metaclass=ABCMeta):
+    @abstractmethod
+    def read(self, path: str) -> dict:
+        pass
+
+    @abstractmethod
+    def write(self, path: str, config: Union[str, dict]) -> None:
+        pass
+
+    @abstractmethod
+    def serialize(self, config: dict) -> str:
+        pass
+
+
+class YAML(_BaseFileOperation):
     def read(self, path: str) -> dict:
         exist_file = os.path.exists(path)
         if not exist_file:

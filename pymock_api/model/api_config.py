@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, Union
 
-from .._utils.reader import YAML
+from .._utils.reader import YAML, _BaseFileOperation
 
 
 class _Config(metaclass=ABCMeta):
@@ -498,7 +498,7 @@ class APIConfig(_Config):
     _description: str = ""
     _apis: MockAPIs
 
-    _configuration: YAML = None
+    _configuration: _BaseFileOperation = None
 
     def __init__(self, name: str = None, description: str = None, apis: MockAPIs = None):
         self._name = name
@@ -512,7 +512,7 @@ class APIConfig(_Config):
         return self.name == other.name and self.description == other.description and self.apis == other.apis
 
     @property
-    def _config_operation(self) -> YAML:
+    def _config_operation(self) -> _BaseFileOperation:
         if not self._configuration:
             self._configuration = YAML()
         return self._configuration
@@ -634,7 +634,7 @@ class APIConfig(_Config):
             return None
         return self
 
-    def from_yaml(self, path: str) -> "_Config":
+    def from_yaml(self, path: str) -> "APIConfig":
         return self.deserialize(data=self._config_operation.read(path))
 
     def to_yaml(self, path: str) -> None:
