@@ -199,6 +199,15 @@ class TestAPIConfig(ConfigTestSpec):
         assert obj.apis.base.url == _TestConfig.API_Config.get("mocked_apis").get("base").get("url")
         assert list(obj.apis.apis.keys())[0] in _TestConfig.API_Config.get("mocked_apis").keys(), _assertion_msg
 
+    @patch("pymock_api._utils.reader.YAML.read", return_value=_TestConfig.API_Config)
+    def test_from_yaml_file(self, mock_read_yaml: Mock, sut: APIConfig):
+        config = sut.from_yaml(path="test-api.yaml")
+        mock_read_yaml.assert_called_once_with("test-api.yaml")
+        assert isinstance(config, APIConfig)
+        assert config.name == _Config_Name
+        assert config.description == _Config_Description
+        assert config.apis.serialize() == _TestConfig.Mock_APIs
+
 
 class TestMockAPIs(ConfigTestSpec):
     _mock_base_config: BaseConfig = None
