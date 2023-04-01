@@ -1,7 +1,7 @@
 import re
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Union
-from unittest.mock import MagicMock, Mock, patch
+from typing import Any, Dict, Optional, Union
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -28,6 +28,25 @@ from ..._values import (
 
 _assertion_msg = "Its property's value should be same as we set."
 MOCK_RETURN_VALUE: Mock = Mock()
+
+
+def test_config_get_prop():
+    class FakeConfig(_Config):
+        def _compare(self, other: "_Config") -> bool:
+            pass
+
+        def serialize(self, data: Optional["_Config"] = None) -> Optional[Dict[str, Any]]:
+            pass
+
+        def deserialize(self, data: Dict[str, Any]) -> Optional["_Config"]:
+            pass
+
+    class Dummy:
+        pass
+
+    with pytest.raises(AttributeError) as exc_info:
+        FakeConfig()._get_prop(data=Dummy(), prop="not_exist_prop")
+    assert re.search(r"Cannot find attribute", str(exc_info.value), re.IGNORECASE)
 
 
 class ConfigTestSpec(metaclass=ABCMeta):
@@ -76,7 +95,6 @@ class ConfigTestSpec(metaclass=ABCMeta):
 
 
 class TestAPIConfig(ConfigTestSpec):
-
     _test_value: APIConfigValue = APIConfigValue()
     _mock_mock_apis: MockAPIs = None
 
@@ -183,7 +201,6 @@ class TestAPIConfig(ConfigTestSpec):
 
 
 class TestMockAPIs(ConfigTestSpec):
-
     _mock_base_config: BaseConfig = None
     _mock_mock_apis: Dict[str, MockAPI] = None
 
@@ -364,7 +381,6 @@ class TestBaseConfig(ConfigTestSpec):
 
 
 class TestMockAPI(ConfigTestSpec):
-
     _http: HTTP = None
 
     @pytest.fixture(scope="function")
@@ -439,7 +455,6 @@ class TestMockAPI(ConfigTestSpec):
 
 
 class TestHTTP(ConfigTestSpec):
-
     _mock_http_req: HTTPRequest = None
     _mock_http_resp: HTTPResponse = None
 
