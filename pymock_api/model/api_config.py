@@ -190,12 +190,15 @@ class HTTP(_Config):
 
     @request.setter
     def request(self, req: Union[dict, HTTPRequest]) -> None:
-        if isinstance(req, dict):
-            self._request = HTTPRequest().deserialize(data=req)
-        elif isinstance(req, HTTPRequest):
-            self._request = req
+        if req:
+            if isinstance(req, dict):
+                self._request = HTTPRequest().deserialize(data=req)
+            elif isinstance(req, HTTPRequest):
+                self._request = req
+            else:
+                raise TypeError("")
         else:
-            raise TypeError("")
+            self._request = None
 
     @property
     def response(self) -> HTTPResponse:
@@ -203,25 +206,28 @@ class HTTP(_Config):
 
     @response.setter
     def response(self, resp: Union[dict, HTTPResponse]) -> None:
-        if isinstance(resp, dict):
-            self._response = HTTPResponse().deserialize(data=resp)
-        elif isinstance(resp, HTTPResponse):
-            self._response = resp
+        if resp:
+            if isinstance(resp, dict):
+                self._response = HTTPResponse().deserialize(data=resp)
+            elif isinstance(resp, HTTPResponse):
+                self._response = resp
+            else:
+                raise TypeError("")
         else:
-            raise TypeError("")
+            self._response = None
 
     def serialize(self, data: "HTTP" = None) -> Optional[Dict[str, Any]]:
         if data and data.request:
             req = data.request.serialize()
-        elif self._request:
-            req = self._request.serialize()
+        elif self.request:
+            req = self.request.serialize()
         else:
             return None
 
         if data and data.response:
             resp = data.response.serialize()
-        elif self._response:
-            resp = self._response.serialize()
+        elif self.response:
+            resp = self.response.serialize()
         else:
             return None
 
@@ -259,9 +265,9 @@ class HTTP(_Config):
         """
         req = data.get("request", None)
         resp = data.get("response", None)
-        self._request = HTTPRequest().deserialize(data=req) if req else None
-        self._response = HTTPResponse().deserialize(data=resp) if resp else None
-        if not (self._request and self._response):
+        self.request = HTTPRequest().deserialize(data=req) if req else None
+        self.response = HTTPResponse().deserialize(data=resp) if resp else None
+        if not (self.request and self.response):
             return None
         return self
 
@@ -294,12 +300,15 @@ class MockAPI(_Config):
 
     @http.setter
     def http(self, http: Union[dict, HTTP]) -> None:
-        if isinstance(http, dict):
-            self._http = HTTP().deserialize(data=http)
-        elif isinstance(http, HTTP):
-            self._http = http
+        if http:
+            if isinstance(http, dict):
+                self._http = HTTP().deserialize(data=http)
+            elif isinstance(http, HTTP):
+                self._http = http
+            else:
+                raise TypeError("")
         else:
-            raise TypeError("")
+            self._http = None
 
     def serialize(self, data: "MockAPI" = None) -> Optional[Dict[str, Any]]:
         url = (data.url if data else None) or self._url
@@ -341,10 +350,10 @@ class MockAPI(_Config):
             A **MockAPI** type object.
 
         """
-        self._url = data.get("url", None)
+        self.url = data.get("url", None)
         http_info = data.get("http", None)
-        self._http = HTTP().deserialize(data=http_info) if http_info else None
-        if not (self._url and self._http):
+        self.http = HTTP().deserialize(data=http_info) if http_info else None
+        if not (self.url and self.http):
             return None
         return self
 
@@ -372,12 +381,15 @@ class MockAPIs(_Config):
 
     @base.setter
     def base(self, base: Union[dict, BaseConfig]) -> None:
-        if isinstance(base, dict):
-            self._base = BaseConfig().deserialize(data=base)
-        elif isinstance(base, BaseConfig):
-            self._base = base
+        if base:
+            if isinstance(base, dict):
+                self._base = BaseConfig().deserialize(data=base)
+            elif isinstance(base, BaseConfig):
+                self._base = base
+            else:
+                raise TypeError("")
         else:
-            raise TypeError("")
+            self._base = None
 
     @property
     def apis(self) -> Dict[str, MockAPI]:
@@ -385,18 +397,21 @@ class MockAPIs(_Config):
 
     @apis.setter
     def apis(self, apis: Dict[str, Union[dict, MockAPI]]) -> None:
-        if isinstance(apis, dict):
-            ele_types = list(map(lambda v: isinstance(v, MockAPI), apis.values()))
-            if False in ele_types:
-                self._apis = {}
-                for api_name, api_config in apis.items():
-                    self._apis[api_name] = MockAPI().deserialize(data=api_config)
+        if apis is not None:
+            if isinstance(apis, dict):
+                ele_types = list(map(lambda v: isinstance(v, MockAPI), apis.values()))
+                if False in ele_types:
+                    self._apis = {}
+                    for api_name, api_config in apis.items():
+                        self._apis[api_name] = MockAPI().deserialize(data=api_config)
+                else:
+                    self._apis = apis
             else:
-                self._apis = apis
+                raise TypeError("")
         else:
-            raise TypeError("")
+            self._apis = None
 
-    def serialize(self, data: "MockAPIs" = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: "MockAPIs" = None) -> Union[Dict[str, Any]]:
         base = (data.base if data else None) or self.base
         apis = (data.apis if data else None) or self.apis
         if not (base and apis):
@@ -464,12 +479,11 @@ class MockAPIs(_Config):
 
         """
         base_info = data.get("base", None)
-        if base_info:
-            self.base = BaseConfig().deserialize(data=base_info)
-        else:
+        if not base_info:
             return None
         if len(data.keys()) == 1:
             return None
+        self.base = BaseConfig().deserialize(data=base_info)
         self.apis = {}
         for mock_api_name in data.keys():
             if mock_api_name == "base":
@@ -531,7 +545,7 @@ class APIConfig(_Config):
         else:
             raise TypeError("")
 
-    def serialize(self, data: "APIConfig" = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: "APIConfig" = None) -> Union[Dict[str, Any]]:
         name = (data.name if data else None) or self.name
         description = (data.description if data else None) or self.description
         apis = (data.apis if data else None) or self.apis
