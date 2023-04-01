@@ -389,16 +389,19 @@ class MockAPIs(_Config):
     @apis.setter
     def apis(self, apis: Dict[str, Union[dict, MockAPI]]) -> None:
         if apis:
-            if isinstance(apis, dict):
-                ele_types = list(map(lambda v: isinstance(v, MockAPI), apis.values()))
-                if False in ele_types:
-                    self._apis = {}
-                    for api_name, api_config in apis.items():
-                        self._apis[api_name] = MockAPI().deserialize(data=api_config)
-                else:
-                    self._apis = apis
-            else:
+            if not isinstance(apis, dict):
                 raise TypeError("Setter *MockAPIs.apis* only accepts dict or MockAPI type object.")
+
+            ele_types = set(list(map(lambda v: isinstance(v, MockAPI), apis.values())))
+            if len(ele_types) != 1:
+                raise ValueError("It has multiple types of the data content. Please unify these objects data type.")
+
+            if False in ele_types:
+                self._apis = {}
+                for api_name, api_config in apis.items():
+                    self._apis[api_name] = MockAPI().deserialize(data=api_config)
+            else:
+                self._apis = apis
         else:
             self._apis = apis
 
