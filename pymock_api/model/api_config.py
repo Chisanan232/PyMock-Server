@@ -217,18 +217,9 @@ class HTTP(_Config):
             self._response = resp
 
     def serialize(self, data: "HTTP" = None) -> Optional[Dict[str, Any]]:
-        if data and data.request:
-            req = data.request.serialize()
-        elif self.request:
-            req = self.request.serialize()
-        else:
-            return None
-
-        if data and data.response:
-            resp = data.response.serialize()
-        elif self.response:
-            resp = self.response.serialize()
-        else:
+        req = (data or self).request.serialize() if (data and data.request) or self.request else None
+        resp = (data or self).response.serialize() if (data and data.response) or self.response else None
+        if not (req and resp):
             return None
 
         return {
