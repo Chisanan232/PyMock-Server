@@ -1,8 +1,9 @@
+import copy
 import os
 import re
 from abc import abstractmethod
 from argparse import ArgumentParser
-from typing import List, Tuple
+from typing import List, Tuple, Type
 
 from ._utils import YAML
 from .cmd import MockAPICommandParser, SubCommand
@@ -10,7 +11,15 @@ from .model import ParserArguments, SubcmdConfigArguments, SubcmdRunArguments
 from .model._sample import Sample_Config_Value
 from .server import BaseSGIServer, setup_asgi, setup_wsgi
 
-_COMMAND_CHAIN: List["BaseSubCmd"] = []
+_COMMAND_CHAIN: List[Type["BaseCommandProcessor"]] = []
+
+
+def make_command_chain() -> List["BaseCommandProcessor"]:
+    mock_api_cmd: List["BaseCommandProcessor"] = []
+    for cmd_cls in _COMMAND_CHAIN:
+        cmd = cmd_cls()
+        mock_api_cmd.append(cmd.copy())
+    return mock_api_cmd
 
 
 class MetaCommand(type):
@@ -32,25 +41,27 @@ class MetaCommand(type):
 class BaseCommandProcessor:
 
     responsible_subcommand: str = None
+    _existed_subcmd: List[str] = []
 
     def __init__(self):
-        self._current_index = 0
+        if self.responsible_subcommand in self._existed_subcmd:
+            raise ValueError(f"The subcommand *{self.responsible_subcommand}* has been used. Please use other naming.")
+        if isinstance(self, MetaCommand):
+            self._existed_subcmd.append(self.responsible_subcommand)
 
     @property
     def next(self) -> "BaseCommandProcessor":
-        # TODO: Should consider the ending point
-        if self._current_index == len(_COMMAND_CHAIN):
-            self._current_index = self._current_index - len(_COMMAND_CHAIN)
-        self._current_index += 1
-        return _COMMAND_CHAIN[self._current_index]
+        for cmd_ps in _COMMAND_CHAIN:
+            yield cmd_ps
+        raise ValueError("Cannot find the mapping subcommand to run.")
 
     def receive(self, args: ParserArguments) -> None:
-        if self.chk_responsibility(args):
+        if self.is_responsible(args):
             self.run(args)
         else:
             self.dispatch_to_next(args)
 
-    def chk_responsibility(self, args: ParserArguments) -> bool:
+    def is_responsible(self, args: ParserArguments) -> bool:
         return args.subparser_name == self.responsible_subcommand
 
     @abstractmethod
@@ -59,6 +70,9 @@ class BaseCommandProcessor:
 
     def dispatch_to_next(self, args: ParserArguments) -> None:
         self.next.receive(args)
+
+    def copy(self) -> "BaseCommandProcessor":
+        return copy.copy(self)
 
 
 BaseCommandProcessor = MetaCommand("BaseCommandProcessor", (BaseCommandProcessor,), {})
