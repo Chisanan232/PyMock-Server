@@ -1,111 +1,25 @@
-from typing import Callable, Union
 from unittest.mock import Mock, patch
 
-from pymock_api._utils.file_opt import YAML
-from pymock_api.model.cmd_args import (
-    ParserArguments,
-    SubcmdConfigArguments,
-    SubcmdRunArguments,
-)
-from pymock_api.runner import CommandRunner, run
-from pymock_api.server.sgi._model import Command, CommandOptions
+import pytest
 
-from .._values import (
-    _Bind_Host_And_Port,
-    _Generate_Sample,
-    _Log_Level,
-    _Print_Sample,
-    _Sample_File_Path,
-    _Test_App_Type,
-    _Test_Config,
-    _Test_SubCommand_Run,
-    _Workers_Amount,
-)
+from pymock_api.model.cmd_args import ParserArguments
+from pymock_api.runner import CommandRunner, run
 
 MOCK_ARGS_PARSE_RESULT = Mock()
 
 
-def _given_parser_args(
-    subcommand: str = None, app_type: str = None
-) -> Union[SubcmdRunArguments, SubcmdConfigArguments, ParserArguments]:
-    if subcommand == "run":
-        return SubcmdRunArguments(
-            subparser_name=subcommand,
-            app_type=app_type,
-            config=_Test_Config,
-            bind=_Bind_Host_And_Port.value,
-            workers=_Workers_Amount.value,
-            log_level=_Log_Level.value,
-        )
-    elif subcommand == "config":
-        return SubcmdConfigArguments(
-            subparser_name=subcommand,
-            print_sample=_Print_Sample,
-            generate_sample=_Generate_Sample,
-            sample_output_path=_Sample_File_Path,
-        )
-    else:
-        return ParserArguments()
-
-
-def _given_command_option() -> CommandOptions:
-    return CommandOptions(bind=_Bind_Host_And_Port.value, workers=_Workers_Amount.value, log_level=_Log_Level.value)
-
-
-def _given_command(app_type: str) -> Command:
-    mock_parser_arg = _given_parser_args(subcommand="run", app_type=app_type)
-    mock_cmd_option_obj = _given_command_option()
-    return Command(entry_point="SGI tool command", app=mock_parser_arg.app_type, options=mock_cmd_option_obj)
-
-
-class FakeRunner(CommandRunner):
-    def __init__(self):
-        pass
-
-
-class FakeYAML(YAML):
-    pass
-
-
 class TestEntryPoint:
-    def test_run(self):
-        def _give() -> SubcmdRunArguments:
-            return _given_parser_args(app_type=_Test_App_Type)
+    @pytest.fixture(scope="function")
+    def runner(self) -> CommandRunner:
+        return CommandRunner()
 
-        def _run_sut() -> None:
-            run()
+    def test_run(self, runner: CommandRunner):
+        mock_parser_arg = ParserArguments()
+        with patch("pymock_api.runner.CommandRunner", return_value=runner) as mock_runner_instance:
+            with patch.object(runner, "parse", return_value=mock_parser_arg) as mock_parse:
+                with patch.object(runner, "run") as mock_run:
+                    run()
 
-        def _should_be_called_as(instantiate_runner: Mock, parse_func: Mock, mock_run_command_chain: Mock) -> None:
-            instantiate_runner.assert_called_once()
-            parse_func.assert_called_once()
-            mock_run_command_chain.assert_called_once()
-
-        self._run_test_within_mock(given=_give, run_uat=_run_sut, should_be=_should_be_called_as)
-
-    def test_run_with_subcommand_run(self):
-        mock_parser_arg: SubcmdRunArguments = None
-
-        def _give() -> SubcmdRunArguments:
-            nonlocal mock_parser_arg
-            mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Run, app_type=_Test_App_Type)
-            return mock_parser_arg
-
-        def _run_sut() -> None:
-            run()
-
-        def _should_be_called_as(instantiate_runner: Mock, parse_func: Mock, mock_run_command_chain: Mock) -> None:
-            instantiate_runner.assert_called_once()
-            parse_func.assert_called_once()
-            mock_run_command_chain.assert_called_once_with(mock_parser_arg)
-
-        self._run_test_within_mock(given=_give, run_uat=_run_sut, should_be=_should_be_called_as)
-
-    @classmethod
-    def _run_test_within_mock(cls, given: Callable, run_uat: Callable, should_be: Callable) -> None:
-        mock_parser_arg = given()
-        fake_runner = FakeRunner()
-        with patch("pymock_api.runner.CommandRunner", return_value=fake_runner) as mock_runner_instance:
-            with patch.object(fake_runner, "parse", return_value=mock_parser_arg) as mock_parse:
-                with patch("pymock_api.cmd_ps.run_command_chain") as mock_run_command_chain:
-                    run_uat()
-                    should_be(mock_runner_instance, mock_parse, mock_run_command_chain)
+                    mock_runner_instance.assert_called_once()
+                    mock_parse.assert_called_once()
+                    mock_run.assert_called_once_with(mock_parser_arg)
