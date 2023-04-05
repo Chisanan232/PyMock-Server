@@ -54,7 +54,7 @@ class BaseCommandProcessor:
         self._current_index = 0
 
     @property
-    def next(self) -> "BaseCommandProcessor":
+    def _next(self) -> "BaseCommandProcessor":
         if self._current_index == len(_COMMAND_CHAIN):
             raise StopIteration
         cmd = _COMMAND_CHAIN[self._current_index]
@@ -62,20 +62,20 @@ class BaseCommandProcessor:
         return cmd()
 
     def process(self, args: ParserArguments, cmd_index: int = 0) -> None:
-        if self.is_responsible(args):
-            self.run(args)
+        if self._is_responsible(args):
+            self._run(args)
         else:
             self._current_index = cmd_index
-            self.dispatch_to_next(args)
+            self._dispatch_to_next(args)
 
-    def is_responsible(self, args: ParserArguments) -> bool:
+    def _is_responsible(self, args: ParserArguments) -> bool:
         return args.subparser_name == self.responsible_subcommand
 
-    def run(self, args: ParserArguments) -> None:
+    def _run(self, args: ParserArguments) -> None:
         raise NotImplementedError
 
-    def dispatch_to_next(self, args: ParserArguments) -> None:
-        self.next.process(args, cmd_index=self._current_index)
+    def _dispatch_to_next(self, args: ParserArguments) -> None:
+        self._next.process(args, cmd_index=self._current_index)
 
     def copy(self) -> "BaseCommandProcessor":
         return copy.copy(self)
@@ -88,7 +88,7 @@ class NoSubCmd(BaseCommandProcessor):
 
     responsible_subcommand: str = None
 
-    def run(self, args: ParserArguments) -> None:
+    def _run(self, args: ParserArguments) -> None:
         pass
 
 
@@ -102,7 +102,7 @@ class SubCmdRun(BaseCommandProcessor):
         self.cmd_parser: ArgumentParser = self.mock_api_parser.parse()
         self._server_gateway: BaseSGIServer = None
 
-    def run(self, args: SubcmdRunArguments) -> None:
+    def _run(self, args: SubcmdRunArguments) -> None:
         self._process_option(args)
         self._server_gateway.run(args)
 
@@ -125,7 +125,7 @@ class SubCmdConfig(BaseCommandProcessor):
 
     responsible_subcommand = SubCommand.Config
 
-    def run(self, args: SubcmdConfigArguments) -> None:
+    def _run(self, args: SubcmdConfigArguments) -> None:
         yaml: YAML = None
         sample_data: str = None
         if args.print_sample or args.generate_sample:

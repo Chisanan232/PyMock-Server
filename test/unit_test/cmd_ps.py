@@ -29,7 +29,7 @@ _Fake_Amt: int = 1
 class FakeCommandProcess(BaseCommandProcessor):
     responsible_subcommand: str = _Fake_SubCmd
 
-    def run(self, args: ParserArguments) -> None:
+    def _run(self, args: ParserArguments) -> None:
         pass
 
 
@@ -39,13 +39,13 @@ class TestSubCmdProcessChain:
         return FakeCommandProcess()
 
     def test_next(self, cmd_processor: FakeCommandProcess):
-        next_cmd = cmd_processor.next
+        next_cmd = cmd_processor._next
         assert (next_cmd != cmd_processor) and (next_cmd is not cmd_processor)
 
     def test_next_exceed_length(self, cmd_processor: FakeCommandProcess):
         with pytest.raises(StopIteration):
             for _ in range(len(make_command_chain()) + 1):
-                assert cmd_processor.next
+                assert cmd_processor._next
 
     @pytest.mark.parametrize(
         ("subcmd", "expected_result"),
@@ -56,7 +56,7 @@ class TestSubCmdProcessChain:
     )
     def test_is_responsible(self, subcmd: str, expected_result: bool, cmd_processor: FakeCommandProcess):
         arg = ParserArguments(subparser_name=subcmd)
-        is_responsible = cmd_processor.is_responsible(arg)
+        is_responsible = cmd_processor._is_responsible(arg)
         assert is_responsible is expected_result
 
     @pytest.mark.parametrize(
@@ -67,20 +67,20 @@ class TestSubCmdProcessChain:
         ],
     )
     def test_process(self, chk_result: bool, should_dispatch: bool, cmd_processor: FakeCommandProcess):
-        cmd_processor.is_responsible = MagicMock(return_value=chk_result)
-        cmd_processor.run = MagicMock()
-        cmd_processor.dispatch_to_next = MagicMock()
+        cmd_processor._is_responsible = MagicMock(return_value=chk_result)
+        cmd_processor._run = MagicMock()
+        cmd_processor._dispatch_to_next = MagicMock()
 
         arg = ParserArguments(subparser_name=_Fake_SubCmd)
         cmd_processor.process(arg)
 
-        cmd_processor.is_responsible.assert_called_once_with(arg)
+        cmd_processor._is_responsible.assert_called_once_with(arg)
         if should_dispatch:
-            cmd_processor.run.assert_not_called()
-            cmd_processor.dispatch_to_next.assert_called_once_with(arg)
+            cmd_processor._run.assert_not_called()
+            cmd_processor._dispatch_to_next.assert_called_once_with(arg)
         else:
-            cmd_processor.run.assert_called_once_with(arg)
-            cmd_processor.dispatch_to_next.assert_not_called()
+            cmd_processor._run.assert_called_once_with(arg)
+            cmd_processor._dispatch_to_next.assert_not_called()
 
     @patch("copy.copy")
     def test_copy(self, mock_copy: Mock, cmd_processor: FakeCommandProcess):
