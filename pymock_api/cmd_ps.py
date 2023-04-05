@@ -1,16 +1,26 @@
 import copy
 import os
 import re
-from argparse import ArgumentParser
-from typing import List, Tuple, Type
+from argparse import ArgumentParser, Namespace
+from typing import List, Optional, Tuple, Type
 
 from ._utils import YAML
 from .cmd import MockAPICommandParser, SubCommand
-from .model import ParserArguments, SubcmdConfigArguments, SubcmdRunArguments
+from .model import (
+    ParserArguments,
+    SubcmdConfigArguments,
+    SubcmdRunArguments,
+    deserialize_args,
+)
 from .model._sample import Sample_Config_Value
 from .server import BaseSGIServer, setup_asgi, setup_wsgi
 
 _COMMAND_CHAIN: List[Type["BaseCommandProcessor"]] = []
+
+
+def dispatch_command_processor() -> "BaseCommandProcessor":
+    cmd_chain = make_command_chain()
+    return cmd_chain[0].distribute()
 
 
 def run_command_chain(args: ParserArguments) -> None:
@@ -51,6 +61,7 @@ class BaseCommandProcessor:
     responsible_subcommand: str = None
 
     def __init__(self):
+        self.mock_api_parser = MockAPICommandParser()
         self._current_index = 0
 
     @property
@@ -61,24 +72,45 @@ class BaseCommandProcessor:
         self._current_index += 1
         return cmd()
 
+    def distribute(self, cmd_index: int = 0) -> "BaseCommandProcessor":
+        if self._is_responsible(subcmd=self.mock_api_parser.subcommand):
+            return self
+        else:
+            self._current_index = cmd_index
+            return self._next.distribute(self._current_index)
+
     def process(self, args: ParserArguments, cmd_index: int = 0) -> None:
-        if self._is_responsible(args):
+        if self._is_responsible(args=args):
             self._run(args)
         else:
             self._current_index = cmd_index
-            self._dispatch_to_next(args)
+            self._next.process(args, cmd_index=self._current_index)
 
-    def _is_responsible(self, args: ParserArguments) -> bool:
-        return args.subparser_name == self.responsible_subcommand
+    def parse(
+        self, parser: ArgumentParser, subcmd: str = None, cmd_args: Optional[List[str]] = None, cmd_index: int = 0
+    ) -> ParserArguments:
+        if self._is_responsible(subcmd=subcmd):
+            return self._parse_process(parser, cmd_args)
+        else:
+            self._current_index = cmd_index
+            return self._next.parse(parser, subcmd, cmd_args)
+
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
+        raise NotImplementedError
+
+    def copy(self) -> "BaseCommandProcessor":
+        return copy.copy(self)
+
+    def _is_responsible(self, subcmd: str = None, args: ParserArguments = None) -> bool:
+        if args:
+            return args.subparser_name == self.responsible_subcommand
+        return subcmd == self.responsible_subcommand
 
     def _run(self, args: ParserArguments) -> None:
         raise NotImplementedError
 
-    def _dispatch_to_next(self, args: ParserArguments) -> None:
-        self._next.process(args, cmd_index=self._current_index)
-
-    def copy(self) -> "BaseCommandProcessor":
-        return copy.copy(self)
+    def _parse_cmd_arguments(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> Namespace:
+        return parser.parse_args(cmd_args)
 
 
 BaseCommandProcessor = MetaCommand("BaseCommandProcessor", (BaseCommandProcessor,), {})
@@ -87,6 +119,9 @@ BaseCommandProcessor = MetaCommand("BaseCommandProcessor", (BaseCommandProcessor
 class NoSubCmd(BaseCommandProcessor):
 
     responsible_subcommand: str = None
+
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
+        return self._parse_cmd_arguments(parser, cmd_args)
 
     def _run(self, args: ParserArguments) -> None:
         pass
@@ -98,9 +133,10 @@ class SubCmdRun(BaseCommandProcessor):
 
     def __init__(self):
         super().__init__()
-        self.mock_api_parser = MockAPICommandParser()
-        self.cmd_parser: ArgumentParser = self.mock_api_parser.parse()
         self._server_gateway: BaseSGIServer = None
+
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdRunArguments:
+        return deserialize_args.subcmd_run(self._parse_cmd_arguments(parser, cmd_args))
 
     def _run(self, args: SubcmdRunArguments) -> None:
         self._process_option(args)
@@ -124,6 +160,9 @@ class SubCmdRun(BaseCommandProcessor):
 class SubCmdConfig(BaseCommandProcessor):
 
     responsible_subcommand = SubCommand.Config
+
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdConfigArguments:
+        return deserialize_args.subcmd_config(self._parse_cmd_arguments(parser, cmd_args))
 
     def _run(self, args: SubcmdConfigArguments) -> None:
         yaml: YAML = None
