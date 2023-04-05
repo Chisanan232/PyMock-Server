@@ -15,7 +15,7 @@ _COMMAND_CHAIN: List[Type["BaseCommandProcessor"]] = []
 
 def run_command_chain(args: ParserArguments) -> None:
     cmd_chain = make_command_chain()
-    cmd_chain[0].receive(args)
+    cmd_chain[0].process(args)
 
 
 def make_command_chain() -> List["BaseCommandProcessor"]:
@@ -61,7 +61,7 @@ class BaseCommandProcessor:
         self._current_index += 1
         return cmd()
 
-    def receive(self, args: ParserArguments, cmd_index: int = 0) -> None:
+    def process(self, args: ParserArguments, cmd_index: int = 0) -> None:
         if self.is_responsible(args):
             self.run(args)
         else:
@@ -75,7 +75,7 @@ class BaseCommandProcessor:
         raise NotImplementedError
 
     def dispatch_to_next(self, args: ParserArguments) -> None:
-        self.next.receive(args, cmd_index=self._current_index)
+        self.next.process(args, cmd_index=self._current_index)
 
     def copy(self) -> "BaseCommandProcessor":
         return copy.copy(self)

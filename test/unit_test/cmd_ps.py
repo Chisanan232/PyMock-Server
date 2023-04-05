@@ -66,13 +66,13 @@ class TestSubCmdProcessChain:
             (False, True),
         ],
     )
-    def test_receive(self, chk_result: bool, should_dispatch: bool, cmd_processor: FakeCommandProcess):
+    def test_process(self, chk_result: bool, should_dispatch: bool, cmd_processor: FakeCommandProcess):
         cmd_processor.is_responsible = MagicMock(return_value=chk_result)
         cmd_processor.run = MagicMock()
         cmd_processor.dispatch_to_next = MagicMock()
 
         arg = ParserArguments(subparser_name=_Fake_SubCmd)
-        cmd_processor.receive(arg)
+        cmd_processor.process(arg)
 
         cmd_processor.is_responsible.assert_called_once_with(arg)
         if should_dispatch:
@@ -96,7 +96,7 @@ class CommandProcessorTestSpec(metaclass=ABCMeta):
 
     @pytest.fixture(scope="function")
     def object_under_test(self, cmd_ps: BaseCommandProcessor) -> Callable:
-        return cmd_ps.receive
+        return cmd_ps.process
 
     @pytest.fixture(scope="function")
     def entry_point_under_test(self) -> Callable:
