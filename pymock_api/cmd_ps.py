@@ -83,7 +83,7 @@ class BaseCommandProcessor:
         self.distribute(args=args, cmd_index=cmd_index)._run(args)
 
     def parse(
-        self, parser: ArgumentParser, subcmd: str = None, cmd_args: Optional[List[str]] = None, cmd_index: int = 0
+        self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None, cmd_index: int = 0
     ) -> ParserArguments:
         return self.distribute(cmd_index=cmd_index)._parse_process(parser=parser, cmd_args=cmd_args)
 
