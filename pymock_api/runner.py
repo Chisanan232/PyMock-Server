@@ -24,9 +24,7 @@ class CommandRunner:
         self._cmd_processor.process(cmd_args)
 
     def parse(self, cmd_args: Optional[List[str]] = None) -> ParserArguments:
-        return self._cmd_processor.parse(
-            parser=self.cmd_parser, subcmd=self._cmd_processor.mock_api_parser.subcommand, cmd_args=cmd_args
-        )
+        return self._cmd_processor.parse(parser=self.cmd_parser, cmd_args=cmd_args)
 
     def _dispatch(self) -> BaseCommandProcessor:
         return dispatch_command_processor()
