@@ -124,7 +124,7 @@ class TestSubCmdProcessChain:
         arg = ParserArguments(subparser_name=_Fake_SubCmd)
         cmd_processor.process(arg)
 
-        cmd_processor._is_responsible.assert_called_once_with(args=arg)
+        cmd_processor._is_responsible.assert_called_once_with(subcmd=None, args=arg)
         if should_dispatch:
             cmd_processor._run.assert_not_called()
         else:
@@ -165,6 +165,10 @@ class CommandProcessorTestSpec(metaclass=ABCMeta):
     def test_parse(self, cmd_ps: BaseCommandProcessor):
         args_namespace = self._given_cmd_args_namespace()
         cmd_ps._parse_cmd_arguments = MagicMock(return_value=args_namespace)
+
+        api_parser = MagicMock()
+        api_parser.subcommand = self._given_subcmd()
+        cmd_ps.mock_api_parser = api_parser
 
         arguments = cmd_ps.parse(parser=cmd_ps.mock_api_parser.parse(), subcmd=self._given_subcmd(), cmd_args=None)
 

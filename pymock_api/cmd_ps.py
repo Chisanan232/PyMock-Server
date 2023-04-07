@@ -72,28 +72,20 @@ class BaseCommandProcessor:
         self._current_index += 1
         return cmd()
 
-    def distribute(self, cmd_index: int = 0) -> "BaseCommandProcessor":
-        if self._is_responsible(subcmd=self.mock_api_parser.subcommand):
+    def distribute(self, args: ParserArguments = None, cmd_index: int = 0) -> "BaseCommandProcessor":
+        if self._is_responsible(subcmd=self.mock_api_parser.subcommand, args=args):
             return self
         else:
             self._current_index = cmd_index
-            return self._next.distribute(self._current_index)
+            return self._next.distribute(args=args, cmd_index=self._current_index)
 
     def process(self, args: ParserArguments, cmd_index: int = 0) -> None:
-        if self._is_responsible(args=args):
-            self._run(args)
-        else:
-            self._current_index = cmd_index
-            self._next.process(args, cmd_index=self._current_index)
+        self.distribute(args=args, cmd_index=cmd_index)._run(args)
 
     def parse(
         self, parser: ArgumentParser, subcmd: str = None, cmd_args: Optional[List[str]] = None, cmd_index: int = 0
     ) -> ParserArguments:
-        if self._is_responsible(subcmd=subcmd):
-            return self._parse_process(parser, cmd_args)
-        else:
-            self._current_index = cmd_index
-            return self._next.parse(parser, subcmd, cmd_args)
+        return self.distribute(cmd_index=cmd_index)._parse_process(parser=parser, cmd_args=cmd_args)
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         raise NotImplementedError
