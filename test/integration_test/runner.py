@@ -35,7 +35,7 @@ class CommandFunctionTestSpec(metaclass=ABCMeta):
     def test_command(self, runner: CommandRunner):
         with Capturing() as output:
             with pytest.raises(SystemExit):
-                runner.parse_subcmd_run(cmd_args=self.options.split())
+                runner.parse(cmd_args=self.options.split())
         self.verify_running_output(" ".join(output))
 
     @abstractmethod

@@ -40,6 +40,8 @@ def make_options() -> List["CommandOption"]:
     mock_api_cmd_options: List["CommandOption"] = []
     for option_cls in COMMAND_OPTIONS:
         option = option_cls()
+        if not option.cli_option:
+            raise ValueError(f"The object {option.__class__}'s attribute *cli_option* cannot be None or empty value.")
         mock_api_cmd_options.append(option.copy())
     return mock_api_cmd_options
 
@@ -133,10 +135,6 @@ class CommandOption:
 
     _subparser: List[argparse._SubParsersAction] = []
     _parser_of_subparser: Dict[str, argparse._ArgumentGroup] = {}
-
-    def __init__(self):
-        if not self.cli_option:
-            raise ValueError(f"The object {self.__class__}'s attribute *cli_option* cannot be None or empty value.")
 
     @property
     def cli_option_name(self) -> Tuple[str]:

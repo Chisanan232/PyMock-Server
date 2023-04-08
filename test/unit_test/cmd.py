@@ -33,6 +33,7 @@ class TestCommandOption:
     def one_option(self) -> CommandOption:
         class FakeOneOption(CommandOption):
             cli_option: str = "--one-fake"
+            help_description: str = "Fake option for test"
 
         return FakeOneOption()
 
@@ -40,6 +41,7 @@ class TestCommandOption:
     def option(self) -> CommandOption:
         class FakeOption(CommandOption):
             cli_option: str = "-f,--fake"
+            help_description: str = "Fake option for test"
 
         return FakeOption()
 
@@ -48,8 +50,13 @@ class TestCommandOption:
             pass
 
         with pytest.raises(ValueError) as exc_info:
-            FakeNothingOption()
+            make_options()
         assert re.search(r"\*cli_option\* cannot be None or empty value", str(exc_info), re.IGNORECASE)
+
+        # Remove the invalid option object of the list to let test could be run finely.
+        from pymock_api.cmd import COMMAND_OPTIONS
+
+        COMMAND_OPTIONS.pop(-1)
 
     def test_cli_option_name_with_one(self, one_option: CommandOption):
         assert one_option.cli_option_name == ("--one-fake",)
