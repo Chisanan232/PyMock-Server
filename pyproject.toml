@@ -12,6 +12,7 @@ python = "^3.8"
 PyYAML = "^6.0"
 
 [tool.poetry.group.dev.dependencies]
+# Dependency for test
 pytest = "^7.0.0"
 pytest-cov = "^3.0.0"
 pytest-html = "^3.1.1"
@@ -19,11 +20,16 @@ pytest-rerunfailures = "^10.2"
 coverage = "^6.2"
 codecov = "^2.1.12"
 coveralls = "^3.3.1"
+# Dependency for CI
 tox = "^3.25.1"
-Flask = "^2.2.3"
 pre-commit = "^3.0.4"
 pylint = "^2.16.2"
+# Dependency of web framework Flask
+Flask = "^2.2.3"
 gunicorn = "^20.1.0"
+# Dependency of web framework FastAPI
+fastapi = {extras = ["all"], version = "^0.95.0"}
+uvicorn = {extras = ["standard"], version = "^0.21.1"}
 
 [build-system]
 requires = ["poetry-core"]
