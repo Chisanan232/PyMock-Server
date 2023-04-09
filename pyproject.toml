@@ -52,7 +52,6 @@ coverage = "^6.2"
 codecov = "^2.1.12"
 coveralls = "^3.3.1"
 # Dependency for CI
-tox = "^3.25.1"
 pre-commit = "^3.0.4"
 pylint = "^2.16.2"
 # Dependency of web framework Flask
