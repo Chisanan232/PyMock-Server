@@ -14,6 +14,9 @@ packages = [{include = "pymock_api"}]
 [tool.poetry.dependencies]
 python = "^3.8"
 PyYAML = "^6.0"
+# Extra dependency of web framework *Flask* with WSGI server *Gunicorn*
+Flask = {version = "^2.2.3", extras = ["flask"]}
+gunicorn = {version = "^20.1.0", extras = ["flask"]}
 
 [tool.poetry.group.dev.dependencies]
 # Dependency for test
