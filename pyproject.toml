@@ -36,11 +36,11 @@ documentation = ""  #TODO: Wait for package documentation
 python = "^3.8"
 PyYAML = "^6.0"
 # Extra dependency of web framework *Flask* with WSGI server *Gunicorn*
-Flask = {version = "^2.2.3", extras = ["flask"]}
-gunicorn = {version = "^20.1.0", extras = ["flask"]}
+Flask = {version = "^2.2.3", extras = ["flask", "all"]}
+gunicorn = {version = "^20.1.0", extras = ["flask", "all"]}
 # Extra dependency of web framework *FastAPI* with ASGI server *Uvicorn*
-fastapi = {version = "^0.95.0", extras = ["fastapi"]}
-uvicorn = {version = "^0.21.1", extras = ["fastapi"]}
+fastapi = {version = "^0.95.0", extras = ["fastapi", "all"]}
+uvicorn = {version = "^0.21.1", extras = ["fastapi", "all"]}
 
 [tool.poetry.group.dev.dependencies]
 # Dependency for test
