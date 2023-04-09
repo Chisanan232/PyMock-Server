@@ -34,3 +34,8 @@ repos:
           dist"""
 
       language_version: python3.10
+- repo: https://github.com/python-poetry/poetry
+  rev: 1.2.1
+  hooks:
+    - id: poetry-check
+    - id: poetry-lock
