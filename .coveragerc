@@ -5,7 +5,7 @@ include=./pymock_api
 
 omit =
 #    */__init__.py
-#    ./pymock_api/__pkg_info__.py
+    ./pymock_api/__main__.py
 
 
 [report]
@@ -26,5 +26,9 @@ exclude_lines =
 
     # Don't complain about abstract methods, they aren't run:
     @(abc\.)?abstractmethod
+
+    # Don't complain about the exceptions catching of ImportError and ModuleNotFoundError, they aren't run:
+    except ImportError:
+    except (ImportError, ModuleNotFoundError):
 
 #ignore_errors = True

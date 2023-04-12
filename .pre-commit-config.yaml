@@ -20,7 +20,6 @@ repos:
     - id: black
       args: # arguments to configure black
         - --line-length=120
-
         # these folders won't be formatted by black
         - --exclude="""\.git |
           \.__pycache__|
@@ -32,5 +31,11 @@ repos:
           _build|
           build|
           dist"""
-
       language_version: python3.10
+- repo: https://github.com/python-poetry/poetry
+  rev: 1.2.1
+  hooks:
+    - id: poetry-check
+      # Please activate this hook in local development environment. In Pre-Commit CI, it would occur error like below:
+      # HTTPSConnectionPool(host='pypi.org', port=443): Max retries exceeded with url ...
+#    - id: poetry-lock

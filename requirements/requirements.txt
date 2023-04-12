@@ -1,2 +1,0 @@
-###### PyMock-API package Dependencies Requirements ######
-PyYAML >= 6.0

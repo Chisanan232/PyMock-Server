@@ -55,7 +55,7 @@ jobs:
   run_unit-test:
 #    name: Run all unit test items
     needs: prep-testbed_unit-test
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/run_test_items_via_pytest.yaml@v4
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/poetry_run_test_via_pytest.yaml@develop
     with:
       test_type: unit-test
       all_test_items_paths: ${{needs.prep-testbed_unit-test.outputs.all_test_items}}
@@ -64,7 +64,7 @@ jobs:
   run_integration-test:
 #    name: Run all integration test items
     needs: prep-testbed_integration-test
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/run_test_items_via_pytest.yaml@v4
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/poetry_run_test_via_pytest.yaml@develop
     with:
       test_type: integration-test
       all_test_items_paths: ${{needs.prep-testbed_integration-test.outputs.all_test_items}}
