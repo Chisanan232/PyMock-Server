@@ -35,7 +35,6 @@ def ensure_importing(import_callback: Callable, import_err_callback: Callable = 
 
     def _import(function) -> Callable:
         def _(*args, **kwargs) -> None:
-
             try:
                 import_callback()
             except (ImportError, ModuleNotFoundError) as e:

@@ -14,7 +14,6 @@ from .._spec import MockAPI_Config_Path, run_test
 
 
 class TestYAML:
-
     _Test_File: str = "pytest-yaml-write.yaml"
 
     @pytest.fixture(scope="function")

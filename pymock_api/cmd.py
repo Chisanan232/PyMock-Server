@@ -122,7 +122,6 @@ class MetaCommandOption(type):
 
 
 class CommandOption:
-
     sub_cmd: SubCommandAttr = None
     sub_parser: SubParserAttr = None
     cli_option: str = None
@@ -209,14 +208,12 @@ class CommandOption:
 
 @dataclass
 class SubCommand:
-
     Base: str = "subcommand"
     Run: str = "run"
     Config: str = "config"
 
 
 class BaseSubCommand(CommandOption):
-
     sub_cmd: SubCommandAttr = SubCommandAttr(
         title="Subcommands",
         dest=SubCommand.Base,
@@ -226,7 +223,6 @@ class BaseSubCommand(CommandOption):
 
 
 class SubCommandRunOption(BaseSubCommand):
-
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommand.Run,
         help="Set up APIs with configuration and run a web application to mock them.",
@@ -235,7 +231,6 @@ class SubCommandRunOption(BaseSubCommand):
 
 
 class SubCommandConfigOption(BaseSubCommand):
-
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommand.Config,
         help="Something processing about configuration, i.e., generate a sample configuration or validate configuration"
@@ -249,7 +244,6 @@ SubCommandConfigOption = MetaCommandOption("SubCommandConfigOption", (SubCommand
 
 
 class Version(CommandOption):
-
     cli_option: str = "-v, --version"
     name: str = "version"
     help_description: str = "The version info of PyMock-API."
@@ -270,7 +264,6 @@ class Version(CommandOption):
 
 
 class WebAppType(SubCommandRunOption):
-
     cli_option: str = "--app-type"
     name: str = "app_type"
     help_description: str = "Which Python web framework it should use to set up web server for mocking APIs."
@@ -279,7 +272,6 @@ class WebAppType(SubCommandRunOption):
 
 
 class Config(SubCommandRunOption):
-
     cli_option: str = "-c, --config"
     name: str = "config"
     help_description: str = "The configuration of tool PyMock-API."
@@ -287,7 +279,6 @@ class Config(SubCommandRunOption):
 
 
 class Bind(SubCommandRunOption):
-
     cli_option: str = "-b, --bind"
     name: str = "bind"
     help_description: str = "The socket to bind."
@@ -295,7 +286,6 @@ class Bind(SubCommandRunOption):
 
 
 class Workers(SubCommandRunOption):
-
     cli_option: str = "-w, --workers"
     name: str = "workers"
     help_description: str = "The workers amount."
@@ -303,7 +293,6 @@ class Workers(SubCommandRunOption):
 
 
 class LegLevel(SubCommandRunOption):
-
     cli_option: str = "--log-level"
     name: str = "log_level"
     help_description: str = "The log level."
@@ -312,7 +301,6 @@ class LegLevel(SubCommandRunOption):
 
 
 class PrintSample(SubCommandConfigOption):
-
     cli_option: str = "-p, --print-sample"
     name: str = "print_sample"
     help_description: str = "Print the sample configuration content."
@@ -322,7 +310,6 @@ class PrintSample(SubCommandConfigOption):
 
 
 class GenerateSample(SubCommandConfigOption):
-
     cli_option: str = "-g, --generate-sample"
     name: str = "generate_sample"
     help_description: str = "Create a sample configuration file."
@@ -332,7 +319,6 @@ class GenerateSample(SubCommandConfigOption):
 
 
 class Output(SubCommandConfigOption):
-
     cli_option: str = "-o, --output"
     name: str = "file_path"
     help_description: str = (

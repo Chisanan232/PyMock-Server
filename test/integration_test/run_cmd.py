@@ -23,7 +23,6 @@ from .runner import Capturing
 
 
 class CommandTestSpec(metaclass=ABCMeta):
-
     Server_Running_Entry_Point: str = "pymock_api/runner.py"
     Terminate_Command_Running_When_Sniff_IP_Info: bool = True
 
@@ -79,7 +78,6 @@ class CommandTestSpec(metaclass=ABCMeta):
 
 
 class TestSubCommandRun(CommandTestSpec):
-
     Terminate_Command_Running_When_Sniff_IP_Info: bool = False
 
     @property
@@ -97,7 +95,6 @@ class TestSubCommandRun(CommandTestSpec):
 
 
 class TestSubCommandConfig(CommandTestSpec):
-
     Terminate_Command_Running_When_Sniff_IP_Info: bool = False
 
     @property
@@ -112,7 +109,6 @@ class TestSubCommandConfig(CommandTestSpec):
 
 
 class TestShowSampleConfiguration(CommandTestSpec):
-
     Terminate_Command_Running_When_Sniff_IP_Info: bool = False
 
     @property
@@ -129,7 +125,6 @@ class TestShowSampleConfiguration(CommandTestSpec):
 
 
 class TestGenerateSampleConfiguration(CommandTestSpec):
-
     Terminate_Command_Running_When_Sniff_IP_Info: bool = False
     _Default_Path: str = "sample-api.yaml"
     _Under_Test_Path: str = None

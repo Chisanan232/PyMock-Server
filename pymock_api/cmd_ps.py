@@ -57,7 +57,6 @@ class MetaCommand(type):
 
 
 class BaseCommandProcessor:
-
     responsible_subcommand: str = None
 
     def __init__(self):
@@ -109,7 +108,6 @@ BaseCommandProcessor = MetaCommand("BaseCommandProcessor", (BaseCommandProcessor
 
 
 class NoSubCmd(BaseCommandProcessor):
-
     responsible_subcommand: str = None
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
@@ -120,7 +118,6 @@ class NoSubCmd(BaseCommandProcessor):
 
 
 class SubCmdRun(BaseCommandProcessor):
-
     responsible_subcommand = SubCommand.Run
 
     def __init__(self):
@@ -150,7 +147,6 @@ class SubCmdRun(BaseCommandProcessor):
 
 
 class SubCmdConfig(BaseCommandProcessor):
-
     responsible_subcommand = SubCommand.Config
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdConfigArguments:

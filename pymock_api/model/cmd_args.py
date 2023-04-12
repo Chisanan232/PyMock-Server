@@ -11,7 +11,6 @@ class ParserArguments:
 
 @dataclass(frozen=True)
 class SubcmdRunArguments(ParserArguments):
-
     config: str = None
     app_type: str = None
     bind: str = None
@@ -21,7 +20,6 @@ class SubcmdRunArguments(ParserArguments):
 
 @dataclass(frozen=True)
 class SubcmdConfigArguments(ParserArguments):
-
     generate_sample: bool = None
     print_sample: bool = None
     sample_output_path: str = ""
