@@ -15,8 +15,6 @@ on:
       - ".gitignore"
       - "LICENSE"
       - "README.md"
-      - "poetry.lock"
-      - "pyproject.toml"
 
   pull_request:
     branches:
@@ -32,8 +30,6 @@ on:
       - ".gitignore"
       - "LICENSE"
       - "README.md"
-      - "poetry.lock"
-      - "pyproject.toml"
 
 jobs:
   prep-testbed_unit-test:
