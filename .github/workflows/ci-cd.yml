@@ -15,8 +15,6 @@ on:
       - ".gitignore"
       - "LICENSE"
       - "README.md"
-      - "poetry.lock"
-      - "pyproject.toml"
 
   pull_request:
     branches:
@@ -32,8 +30,6 @@ on:
       - ".gitignore"
       - "LICENSE"
       - "README.md"
-      - "poetry.lock"
-      - "pyproject.toml"
 
 jobs:
   prep-testbed_unit-test:
@@ -83,7 +79,7 @@ jobs:
   codecov_finish:
 #    name: Organize and generate the testing report and upload it to Codecov
     needs: all-test_codecov
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/upload_test_cov_report.yaml@v4
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/upload_test_cov_report.yaml@develop
     secrets:
       codecov_token: ${{ secrets.CODECOV_TOKEN }}
     with:

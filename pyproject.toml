@@ -49,7 +49,6 @@ pytest-cov = "^3.0.0"
 pytest-html = "^3.1.1"
 pytest-rerunfailures = "^10.2"
 coverage = "^6.2"
-codecov = "^2.1.12"
 coveralls = "^3.3.1"
 # Dependency for CI
 pre-commit = "^3.0.4"
