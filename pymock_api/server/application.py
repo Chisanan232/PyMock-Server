@@ -68,9 +68,8 @@ class FlaskServer(BaseAppServer):
         return app
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        url_path = self.url_path(api_config, base_url)
         return f"""self.web_application.route(
-            "{url_path}", methods=["{api_config.http.request.method}"]
+            "{self.url_path(api_config, base_url)}", methods=["{api_config.http.request.method}"]
             )({api_name})
         """
 
@@ -84,9 +83,8 @@ class FastAPIServer(BaseAppServer):
         return app
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        url_path = self.url_path(api_config, base_url)
         return f"""self.web_application.api_route(
-            path="{url_path}", methods=["{api_config.http.request.method}"]
+            path="{self.url_path(api_config, base_url)}", methods=["{api_config.http.request.method}"]
             )({api_name})
         """
 
