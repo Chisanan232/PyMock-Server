@@ -55,8 +55,7 @@ class BaseAppServer(metaclass=ABCMeta):
         pass
 
     def url_path(self, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        url_path = f"{base_url}{api_config.url}" if base_url else f"{api_config.url}"
-        return url_path
+        return f"{base_url}{api_config.url}" if base_url else f"{api_config.url}"
 
 
 class FlaskServer(BaseAppServer):
