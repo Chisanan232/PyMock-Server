@@ -54,6 +54,10 @@ class BaseAppServer(metaclass=ABCMeta):
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         pass
 
+    def url_path(self, api_config: MockAPI, base_url: Optional[str] = None) -> str:
+        url_path = f"{base_url}{api_config.url}" if base_url else f"{api_config.url}"
+        return url_path
+
 
 class FlaskServer(BaseAppServer):
     """*Build a web application with *Flask**"""
@@ -64,16 +68,10 @@ class FlaskServer(BaseAppServer):
         return app
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        if base_url:
-            return f"""self.web_application.route(
-                "{base_url}{api_config.url}", methods=["{api_config.http.request.method}"]
-                )({api_name})
-            """
-        else:
-            return f"""self.web_application.route(
-                "{api_config.url}", methods=["{api_config.http.request.method}"]
-                )({api_name})
-            """
+        return f"""self.web_application.route(
+            "{self.url_path(api_config, base_url)}", methods=["{api_config.http.request.method}"]
+            )({api_name})
+        """
 
 
 class FastAPIServer(BaseAppServer):
@@ -85,16 +83,10 @@ class FastAPIServer(BaseAppServer):
         return app
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        if base_url:
-            return f"""self.web_application.api_route(
-                path="{base_url}{api_config.url}", methods=["{api_config.http.request.method}"]
-                )({api_name})
-            """
-        else:
-            return f"""self.web_application.api_route(
-                path="{api_config.url}", methods=["{api_config.http.request.method}"]
-                )({api_name})
-            """
+        return f"""self.web_application.api_route(
+            path="{self.url_path(api_config, base_url)}", methods=["{api_config.http.request.method}"]
+            )({api_name})
+        """
 
 
 class _HTTPResponse:
