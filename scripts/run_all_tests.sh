@@ -25,9 +25,18 @@ echo "🔍 Get the testing items ... ⏳"
 if echo "$testing_type" | grep -q "unit-test";
 then
     test_path=$(bash ./scripts/ci/get-unit-test-paths.sh windows | sed "s/\"//g" | sed 's/^//')
+    unit_test_path=''
+    integration_test_path=''
 elif echo "$testing_type" | grep -q "integration-test";
 then
     test_path=$(bash ./scripts/ci/get-integration-test-paths.sh windows | sed "s/\"//g" | sed 's/^//')
+    unit_test_path=''
+    integration_test_path=''
+elif echo "$testing_type" | grep -q "all-test";
+then
+    test_path=''
+    unit_test_path=$(bash ./scripts/ci/get-unit-test-paths.sh windows | sed "s/\"//g" | sed 's/^//')
+    integration_test_path=$(bash ./scripts/ci/get-integration-test-paths.sh windows | sed "s/\"//g" | sed 's/^//')
 else
     test_path='error'
 fi
@@ -39,8 +48,10 @@ then
 else
   echo "🎉🎊🍾 Get the testing items successfully!"
   echo "📄 The testing items are: "
-  echo $test_path
+  # shellcheck disable=SC2086
+  echo $test_path $unit_test_path $integration_test_path
 
   echo "🤖⚒ It would start to run testing with Python testing framework *pytest*."
-  pytest $test_path
+  # shellcheck disable=SC2086
+  pytest $test_path $unit_test_path $integration_test_path
 fi
