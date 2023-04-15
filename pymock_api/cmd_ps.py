@@ -6,6 +6,7 @@ from typing import List, Optional, Tuple, Type
 
 from ._utils import YAML, import_web_lib
 from .cmd import MockAPICommandParser, SubCommand
+from .exceptions import NoValidWebLibrary
 from .model import (
     ParserArguments,
     SubcmdConfigArguments,
@@ -142,7 +143,10 @@ class SubCmdRun(BaseCommandProcessor):
 
     def _initial_server_gateway(self, lib: str) -> None:
         if re.search(r"auto", lib, re.IGNORECASE):
-            self._server_gateway = setup_wsgi()
+            web_lib = import_web_lib.auto_ready()
+            if not web_lib:
+                raise NoValidWebLibrary
+            self._initial_server_gateway(lib=web_lib)
         elif re.search(r"flask", lib, re.IGNORECASE):
             self._server_gateway = setup_wsgi()
         elif re.search(r"fastapi", lib, re.IGNORECASE):

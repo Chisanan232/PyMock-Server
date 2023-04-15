@@ -16,3 +16,11 @@ class FunctionNotFoundError(RuntimeError):
 
     def __str__(self):
         return f"Cannot find the function {self._function} in current module."
+
+
+class NoValidWebLibrary(RuntimeError):
+    def __str__(self):
+        return (
+            "Cannot initial and set up server gateway because current runtime environment doesn't have valid web "
+            "library."
+        )
