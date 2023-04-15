@@ -264,11 +264,20 @@ class Version(CommandOption):
 
 
 class WebAppType(SubCommandRunOption):
+    """
+    Which Python web framework it should use to set up web server for mocking APIs.
+
+    Option values:
+        * *auto*: it would automatically scan which Python web library it could use to initial and set up server gateway in current runtime environment.
+        * *flask*: Use Python web framework Flask (https://palletsprojects.com/p/flask/) to set up web application.
+        * *fastapi*: Use Python web framework FastAPI (https://fastapi.tiangolo.com/) to set up web application.
+    """
+
     cli_option: str = "--app-type"
     name: str = "app_type"
     help_description: str = "Which Python web framework it should use to set up web server for mocking APIs."
-    default_value: str = "flask"
-    _options: List[str] = ["flask"]
+    default_value: str = "auto"
+    _options: List[str] = ["auto", "flask", "fastapi"]
 
 
 class Config(SubCommandRunOption):
