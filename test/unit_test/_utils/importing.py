@@ -66,9 +66,16 @@ class TestImportWebLib:
         ready_lib: Optional[str],
         import_web_lib: Type[import_web_lib],
     ):
+        # Mock function
+        og_flask_ready = import_web_lib.flask_ready
+        og_fastapi_ready = import_web_lib.fastapi_ready
         import_web_lib.flask_ready = MagicMock(return_value=flask_ready_return)
         import_web_lib.fastapi_ready = MagicMock(return_value=fastapi_ready_return)
+        # Run target function under test
         assert import_web_lib.auto_ready() == ready_lib
+        # Annotate the function back to correct implementation
+        import_web_lib.flask_ready = og_flask_ready
+        import_web_lib.fastapi_ready = og_fastapi_ready
 
 
 class TestEnsureImporting:
