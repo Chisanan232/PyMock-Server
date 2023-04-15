@@ -1,5 +1,5 @@
 import re
-from typing import Any, Callable, Type
+from typing import Any, Callable, Optional, Type
 from unittest.mock import MagicMock, Mock, _patch, patch
 
 import fastapi
@@ -49,6 +49,26 @@ class TestImportWebLib:
         assert import_web_lib.fastapi_ready()
         # Annotate the function back to correct implementation
         import_web_lib.fastapi = og_fastapi
+
+    @pytest.mark.parametrize(
+        ("flask_ready_return", "fastapi_ready_return", "ready_lib"),
+        [
+            (True, True, "fastapi"),
+            (True, False, "flask"),
+            (False, True, "fastapi"),
+            (False, False, None),
+        ],
+    )
+    def test_auto_ready(
+        self,
+        flask_ready_return: bool,
+        fastapi_ready_return: bool,
+        ready_lib: Optional[str],
+        import_web_lib: Type[import_web_lib],
+    ):
+        import_web_lib.flask_ready = MagicMock(return_value=flask_ready_return)
+        import_web_lib.fastapi_ready = MagicMock(return_value=fastapi_ready_return)
+        assert import_web_lib.auto_ready() == ready_lib
 
 
 class TestEnsureImporting:
