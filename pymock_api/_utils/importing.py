@@ -20,6 +20,23 @@ class import_web_lib:
 
         return fastapi
 
+    @staticmethod
+    def flask_ready() -> bool:
+        return import_web_lib._chk_lib_ready(import_web_lib.flask)
+
+    @staticmethod
+    def fastapi_ready() -> bool:
+        return import_web_lib._chk_lib_ready(import_web_lib.fastapi)
+
+    @staticmethod
+    def _chk_lib_ready(lib_import: Callable) -> bool:
+        try:
+            lib_import()
+        except ImportError:
+            return False
+        else:
+            return True
+
 
 def ensure_importing(import_callback: Callable, import_err_callback: Callable = None) -> Callable:
     """Load application if importing works finely without any issue. Or it will do nothing.
