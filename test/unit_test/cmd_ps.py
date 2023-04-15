@@ -26,6 +26,7 @@ from .._values import (
     _Print_Sample,
     _Sample_File_Path,
     _Test_App_Type,
+    _Test_Auto_Type,
     _Test_Config,
     _Test_FastAPI_App_Type,
     _Workers_Amount,
@@ -238,6 +239,7 @@ class TestSubCmdRun(CommandProcessorTestSpec):
         [
             (_Test_App_Type, False),
             (_Test_FastAPI_App_Type, False),
+            (_Test_Auto_Type, False),
             ("invalid app-type which is not a Python web library or framework", True),
         ],
     )
@@ -254,6 +256,7 @@ class TestSubCmdRun(CommandProcessorTestSpec):
         [
             (_Test_App_Type, False),
             (_Test_FastAPI_App_Type, False),
+            (_Test_Auto_Type, False),
             ("invalid app-type which is not a Python web library or framework", True),
         ],
     )
@@ -283,12 +286,17 @@ class TestSubCmdRun(CommandProcessorTestSpec):
                         mock_instantiate_writer.assert_not_called()
                     else:
                         cmd_ps(mock_parser_arg)
-                        if app_type == "flask":
-                            mock_asgi_generate.assert_not_called()
-                            mock_wsgi_generate.assert_called_once_with(mock_parser_arg)
-                        else:
+                        if app_type == "auto":
                             mock_asgi_generate.assert_called_once_with(mock_parser_arg)
                             mock_wsgi_generate.assert_not_called()
+                        elif app_type == "flask":
+                            mock_asgi_generate.assert_not_called()
+                            mock_wsgi_generate.assert_called_once_with(mock_parser_arg)
+                        elif app_type == "fastapi":
+                            mock_asgi_generate.assert_called_once_with(mock_parser_arg)
+                            mock_wsgi_generate.assert_not_called()
+                        else:
+                            assert False, "Please use valid *app-type* option value."
                         command.run.assert_called_once()
                         mock_instantiate_writer.assert_not_called()
 
@@ -307,6 +315,13 @@ class TestSubCmdRun(CommandProcessorTestSpec):
 
     def _expected_argument_type(self) -> Type[SubcmdRunArguments]:
         return SubcmdRunArguments
+
+    @patch("pymock_api.cmd_ps.import_web_lib.auto_ready", return_value=None)
+    def test_auto_with_nonexist_lib(self, mock_auto_ready: Mock, cmd_ps: SubCmdRun):
+        with pytest.raises(RuntimeError) as exc_info:
+            cmd_ps._initial_server_gateway(lib=_Test_Auto_Type)
+        assert re.search(r"doesn't have valid web library", str(exc_info.value), re.IGNORECASE)
+        mock_auto_ready.assert_called_once()
 
 
 class TestSubCmdConfig(CommandProcessorTestSpec):

@@ -99,6 +99,7 @@ _Log_Level: _Cmd_Option = _Cmd_Option(option_name="--log-level", value="info")
 # Test command line options
 _Test_SubCommand_Run: str = "run"
 _Test_Config: str = "test-api.yaml"
+_Test_Auto_Type: str = "auto"
 _Test_App_Type: str = "flask"
 _Test_FastAPI_App_Type: str = "fastapi"
 
