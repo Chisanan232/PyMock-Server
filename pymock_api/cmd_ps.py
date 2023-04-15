@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple, Type
 
 from ._utils import YAML, import_web_lib
 from .cmd import MockAPICommandParser, SubCommand
-from .exceptions import NoValidWebLibrary
+from .exceptions import InvalidAppType, NoValidWebLibrary
 from .model import (
     ParserArguments,
     SubcmdConfigArguments,
@@ -152,9 +152,7 @@ class SubCmdRun(BaseCommandProcessor):
         elif re.search(r"fastapi", lib, re.IGNORECASE):
             self._server_gateway = setup_asgi()
         else:
-            raise ValueError(
-                "Invalid value at argument *app-type*. It only supports 'auto', 'flask' or 'fastapi' currently."
-            )
+            raise InvalidAppType
 
 
 class SubCmdConfig(BaseCommandProcessor):

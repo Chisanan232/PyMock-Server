@@ -24,3 +24,8 @@ class NoValidWebLibrary(RuntimeError):
             "Cannot initial and set up server gateway because current runtime environment doesn't have valid web "
             "library."
         )
+
+
+class InvalidAppType(ValueError):
+    def __str__(self):
+        return "Invalid value at argument *app-type*. It only supports 'auto', 'flask' or 'fastapi' currently."
