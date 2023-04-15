@@ -1,6 +1,7 @@
 """*Handle importing*"""
 
-from typing import Callable
+import re
+from typing import Callable, Optional
 
 
 class import_web_lib:
@@ -19,6 +20,17 @@ class import_web_lib:
         import fastapi
 
         return fastapi
+
+    @staticmethod
+    def auto_ready() -> Optional[str]:
+        self = import_web_lib
+        all_ready_funs = list(filter(lambda e: re.search(r"\w{1,16}_ready", e), dir(self)))
+        ready_funs = list(filter(lambda e: not re.search(r"^(_|auto)\w{1,16}", e), all_ready_funs))
+        could_import_lib = list(map(lambda e: getattr(self, e)(), ready_funs))
+        try:
+            return ready_funs[could_import_lib.index(True)].replace("_ready", "")
+        except ValueError:
+            return None
 
     @staticmethod
     def flask_ready() -> bool:
