@@ -4,7 +4,7 @@ import re
 from argparse import ArgumentParser, Namespace
 from typing import List, Optional, Tuple, Type
 
-from ._utils import YAML
+from ._utils import YAML, import_web_lib
 from .cmd import MockAPICommandParser, SubCommand
 from .model import (
     ParserArguments,
@@ -138,12 +138,19 @@ class SubCmdRun(BaseCommandProcessor):
         os.environ["MockAPI_Config"] = parser_options.config
 
         # Handle *app-type*
-        if re.search(r"flask", parser_options.app_type, re.IGNORECASE):
+        self._initial_server_gateway(lib=parser_options.app_type)
+
+    def _initial_server_gateway(self, lib: str) -> None:
+        if re.search(r"auto", lib, re.IGNORECASE):
             self._server_gateway = setup_wsgi()
-        elif re.search(r"fastapi", parser_options.app_type, re.IGNORECASE):
+        elif re.search(r"flask", lib, re.IGNORECASE):
+            self._server_gateway = setup_wsgi()
+        elif re.search(r"fastapi", lib, re.IGNORECASE):
             self._server_gateway = setup_asgi()
         else:
-            raise ValueError("Invalid value at argument *app-type*. It only supports 'flask' or 'fastapi' currently.")
+            raise ValueError(
+                "Invalid value at argument *app-type*. It only supports 'auto', 'flask' or 'fastapi' currently."
+            )
 
 
 class SubCmdConfig(BaseCommandProcessor):
