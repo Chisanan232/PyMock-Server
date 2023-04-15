@@ -209,3 +209,21 @@ class TestRunMockApplicationWithFastAPI(RunMockApplicationTestSpec):
             cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}"
         )
         super()._verify_running_output(cmd_running_result)
+
+
+class TestRunMockApplicationWithAuto(RunMockApplicationTestSpec):
+    @property
+    def options(self) -> str:
+        return f"run --app-type auto --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Path}"
+
+    def _do_finally(self) -> None:
+        subprocess.run("pkill -f uvicorn", shell=True)
+
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._should_contains_chars_in_result(cmd_running_result, "Started server process")
+        self._should_contains_chars_in_result(cmd_running_result, "Waiting for application startup")
+        self._should_contains_chars_in_result(cmd_running_result, "Application startup complete")
+        self._should_contains_chars_in_result(
+            cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}"
+        )
+        super()._verify_running_output(cmd_running_result)
