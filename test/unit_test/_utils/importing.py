@@ -1,6 +1,6 @@
 import re
-from typing import Callable, Type
-from unittest.mock import Mock, _patch, patch
+from typing import Any, Callable, Type
+from unittest.mock import MagicMock, Mock, _patch, patch
 
 import fastapi
 import flask
@@ -23,6 +23,32 @@ class TestImportWebLib:
 
     def test_import_web_lib_fastapi(self, import_web_lib: Type[import_web_lib]):
         assert import_web_lib.fastapi() == fastapi
+
+    @pytest.mark.parametrize(
+        ("site_effect", "lib_ready"),
+        [(None, True), (ImportError("PyTest ImportError"), False)],
+    )
+    def test_flask_ready(self, site_effect: Any, lib_ready: bool, import_web_lib: Type[import_web_lib]):
+        # Mock function
+        og_flask = import_web_lib.flask
+        import_web_lib.flask = MagicMock(site_effect=site_effect)
+        # Run target function under test
+        assert import_web_lib.flask_ready()
+        # Annotate the function back to correct implementation
+        import_web_lib.flask = og_flask
+
+    @pytest.mark.parametrize(
+        ("site_effect", "lib_ready"),
+        [(None, True), (ImportError("PyTest ImportError"), False)],
+    )
+    def test_fastapi_ready(self, site_effect: Any, lib_ready: bool, import_web_lib: Type[import_web_lib]):
+        # Mock function
+        og_fastapi = import_web_lib.fastapi
+        import_web_lib.fastapi = MagicMock(site_effect=site_effect)
+        # Run target function under test
+        assert import_web_lib.fastapi_ready()
+        # Annotate the function back to correct implementation
+        import_web_lib.fastapi = og_fastapi
 
 
 class TestEnsureImporting:
