@@ -50,7 +50,7 @@ class import_web_lib:
             return True
 
 
-def ensure_importing(import_callback: Callable, import_err_callback: Callable = None) -> Callable:
+def ensure_importing(import_callback: Callable, import_err_callback: Optional[Callable] = None) -> Callable:
     """Load application if importing works finely without any issue. Or it will do nothing.
 
     Args:
