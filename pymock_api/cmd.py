@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 from .__pkg_info__ import __version__
 
 SUBCOMMAND: List[str] = []
-COMMAND_OPTIONS: List[Type["CommandOption"]] = []
+COMMAND_OPTIONS: List["MetaCommandOption"] = []
 
 
 def get_all_subcommands() -> List[str]:
@@ -60,7 +60,7 @@ class MockAPICommandParser:
         A Python tool for mocking APIs by set up an application easily. PyMock-API bases on Python web framework to set
         up application, i.e., you could select using *flask* to set up application to mock APIs.
         """
-        self._parser_args: Dict[str, str] = {
+        self._parser_args: Dict[str, Any] = {
             "prog": self._prog,
             "usage": self._usage,
             "description": self._description,
@@ -101,7 +101,7 @@ class MockAPICommandParser:
 SubCommandAttr = namedtuple("SubCommandAttr", ["title", "dest", "description", "help"])
 SubParserAttr = namedtuple("SubParserAttr", ["name", "help"])
 
-_ClsNamingFormat = namedtuple("_ClassNamingFormat", ["ahead", "tail"])
+_ClsNamingFormat = namedtuple("_ClsNamingFormat", ["ahead", "tail"])
 _ClsNamingFormat.ahead = "BaseSubCmd"
 _ClsNamingFormat.tail = "Option"
 
@@ -152,7 +152,7 @@ class CommandOption:
     _parser_of_subparser: Dict[str, argparse.ArgumentParser] = {}
 
     @property
-    def cli_option_name(self) -> Tuple[str]:
+    def cli_option_name(self) -> Tuple[str, ...]:
         cli_option_sep_char: list = self.cli_option.split(",")
         if cli_option_sep_char and len(cli_option_sep_char) > 1:
             return tuple(map(lambda o: o.replace(" ", ""), self.cli_option.split(",")))
