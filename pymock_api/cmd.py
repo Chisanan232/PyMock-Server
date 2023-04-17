@@ -18,7 +18,7 @@ import re
 import sys
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from .__pkg_info__ import __version__
 
@@ -122,15 +122,15 @@ class MetaCommandOption(type):
 
 
 class CommandOption:
-    sub_cmd: SubCommandAttr = None
-    sub_parser: SubParserAttr = None
+    sub_cmd: Optional[SubCommandAttr] = None
+    sub_parser: Optional[SubParserAttr] = None
     cli_option: str
-    name: str = None
+    name: Optional[str] = None
     help_description: str
-    option_value_type: type = None
-    default_value: type = None
-    action: str = None
-    _options: List[str] = None
+    option_value_type: Optional[type] = None
+    default_value: Optional[Any] = None
+    action: Optional[str] = None
+    _options: Optional[List[str]] = None
 
     _subparser: List[argparse._SubParsersAction] = []
     _parser_of_subparser: Dict[str, argparse._ArgumentGroup] = {}
@@ -247,7 +247,7 @@ class Version(CommandOption):
     cli_option: str = "-v, --version"
     name: str = "version"
     help_description: str = "The version info of PyMock-API."
-    default_value: type = argparse.SUPPRESS
+    default_value: Any = argparse.SUPPRESS
     action: str = "version"
     _version_output: str = "%(prog)s (version " + __version__ + ")\n"
 
@@ -314,7 +314,7 @@ class PrintSample(SubCommandConfigOption):
     name: str = "print_sample"
     help_description: str = "Print the sample configuration content."
     action: str = "store_true"
-    option_value_type: type = None
+    option_value_type: Optional[type] = None
     default_value: bool = False
 
 
@@ -323,7 +323,7 @@ class GenerateSample(SubCommandConfigOption):
     name: str = "generate_sample"
     help_description: str = "Create a sample configuration file."
     action: str = "store_true"
-    option_value_type: type = None
+    option_value_type: Optional[type] = None
     default_value: bool = False
 
 
@@ -335,4 +335,4 @@ class Output(SubCommandConfigOption):
         " option *-g* (aka *--generate-sample*)."
     )
     option_value_type: type = str
-    default_value: int = "sample-api.yaml"
+    default_value: str = "sample-api.yaml"
