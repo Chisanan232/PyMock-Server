@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from pymock_api.cmd import CommandOption, MockAPICommandParser, make_options
+from pymock_api.cmd import BaseCmdOption, MockAPICommandParser, make_options
 
 
 def test_make_options():
@@ -30,23 +30,23 @@ class TestMockAPICommandParser:
 
 class TestCommandOption:
     @pytest.fixture(scope="function")
-    def one_option(self) -> CommandOption:
-        class FakeOneOption(CommandOption):
+    def one_option(self) -> BaseCmdOption:
+        class FakeOneOption(BaseCmdOption):
             cli_option: str = "--one-fake"
             help_description: str = "Fake option for test"
 
         return FakeOneOption()
 
     @pytest.fixture(scope="function")
-    def option(self) -> CommandOption:
-        class FakeOption(CommandOption):
+    def option(self) -> BaseCmdOption:
+        class FakeOption(BaseCmdOption):
             cli_option: str = "-f,--fake"
             help_description: str = "Fake option for test"
 
         return FakeOption()
 
     def test_instantiate_object_without_cli_option(self):
-        class FakeNothingOption(CommandOption):
+        class FakeNothingOption(BaseCmdOption):
             cli_option: str = ""
             help_description: str = ""
 
@@ -59,10 +59,10 @@ class TestCommandOption:
 
         COMMAND_OPTIONS.pop(-1)
 
-    def test_cli_option_name_with_one(self, one_option: CommandOption):
+    def test_cli_option_name_with_one(self, one_option: BaseCmdOption):
         assert one_option.cli_option_name == ("--one-fake",)
 
-    def test_cli_option_name_with_multiple(self, option: CommandOption):
+    def test_cli_option_name_with_multiple(self, option: BaseCmdOption):
         assert option.cli_option_name == ("-f", "--fake")
 
     @pytest.mark.parametrize(
@@ -76,7 +76,7 @@ class TestCommandOption:
     )
     def test_help_description_content(
         self,
-        option: CommandOption,
+        option: BaseCmdOption,
         help_descr: Optional[str],
         default_value: Optional[str],
         option_values: Optional[str],
@@ -95,7 +95,7 @@ class TestCommandOption:
     )
     def test_help_description_content_with_invalid_options(
         self,
-        option: CommandOption,
+        option: BaseCmdOption,
         help_descr: Optional[str],
         default_value: Optional[str],
         option_values: Optional[str],
@@ -107,14 +107,14 @@ class TestCommandOption:
         self._should_raise_exception(option, expected_error)
 
     @patch.object(argparse.ArgumentParser, "add_argument")
-    def test_add_option(self, mock_argparser: Mock, option: CommandOption):
+    def test_add_option(self, mock_argparser: Mock, option: BaseCmdOption):
         mock_argparser.add_argument = MagicMock()
         option.help_description = "Message for PyTest"
         option.add_option(mock_argparser)
         mock_argparser.add_argument.assert_called_once()
 
     @patch.object(argparse.ArgumentParser, "add_argument")
-    def test_bad_add_option(self, mock_argparser: Mock, option: CommandOption):
+    def test_bad_add_option(self, mock_argparser: Mock, option: BaseCmdOption):
         mock_argparser.add_argument = MagicMock()
         mock_argparser.add_argument.side_effect = argparse.ArgumentError(None, "Error for PyTest")
         option.help_description = "Message for PyTest"
@@ -124,13 +124,13 @@ class TestCommandOption:
         assert str(exc_info.value) == "Error for PyTest"
 
     @patch("copy.copy")
-    def test_copy(self, mock_copy: Mock, option: CommandOption):
+    def test_copy(self, mock_copy: Mock, option: BaseCmdOption):
         option.copy()
         mock_copy.assert_called_once_with(option)
 
     def _given_default_and_options(
         self,
-        option: CommandOption,
+        option: BaseCmdOption,
         help_descr: Optional[str],
         default_value: Optional[str],
         option_values: Optional[str],
@@ -147,7 +147,7 @@ class TestCommandOption:
         )
         assert chk_chars
 
-    def _should_raise_exception(self, option: CommandOption, expected_error: Exception) -> None:
+    def _should_raise_exception(self, option: BaseCmdOption, expected_error: Exception) -> None:
         help_desc = None
         with pytest.raises(expected_error):
             help_desc = option.help_description_content
