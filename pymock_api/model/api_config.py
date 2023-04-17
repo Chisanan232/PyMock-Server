@@ -179,8 +179,8 @@ class HTTPResponse(_Config):
 class HTTP(_Config):
     """*The **http** section in **mocked_apis.<api>***"""
 
-    _request: HTTPRequest
-    _response: HTTPResponse
+    _request: Optional[HTTPRequest]
+    _response: Optional[HTTPResponse]
 
     def __init__(self, request: Optional[HTTPRequest] = None, response: Optional[HTTPResponse] = None):
         self._request = request
@@ -190,7 +190,7 @@ class HTTP(_Config):
         return self.request == other.request and self.response == other.response
 
     @property
-    def request(self) -> HTTPRequest:
+    def request(self) -> Optional[HTTPRequest]:
         return self._request
 
     @request.setter
@@ -203,10 +203,10 @@ class HTTP(_Config):
             else:
                 raise TypeError("Setter *HTTP.request* only accepts dict or HTTPRequest type object.")
         else:
-            self._request = req
+            self._request = None
 
     @property
-    def response(self) -> HTTPResponse:
+    def response(self) -> Optional[HTTPResponse]:
         return self._response
 
     @response.setter
@@ -219,7 +219,7 @@ class HTTP(_Config):
             else:
                 raise TypeError("Setter *HTTP.response* only accepts dict or HTTPResponse type object.")
         else:
-            self._response = resp
+            self._response = None
 
     def serialize(self, data: Optional["HTTP"] = None) -> Optional[Dict[str, Any]]:
         req = (data or self).request.serialize() if (data and data.request) or self.request else None
@@ -271,8 +271,8 @@ class HTTP(_Config):
 class MockAPI(_Config):
     """*The **<api>** section in **mocked_apis***"""
 
-    _url: str
-    _http: HTTP
+    _url: Optional[str]
+    _http: Optional[HTTP]
 
     def __init__(self, url: Optional[str] = None, http: Optional[HTTP] = None):
         self._url = url
@@ -282,15 +282,15 @@ class MockAPI(_Config):
         return self.url == other.url and self.http == other.http
 
     @property
-    def url(self) -> str:
+    def url(self) -> Optional[str]:
         return self._url
 
     @url.setter
-    def url(self, url: str) -> None:
+    def url(self, url: Optional[str]) -> None:
         self._url = url
 
     @property
-    def http(self) -> HTTP:
+    def http(self) -> Optional[HTTP]:
         return self._http
 
     @http.setter
@@ -303,7 +303,7 @@ class MockAPI(_Config):
             else:
                 raise TypeError("Setter *MockAPI.http* only accepts dict or HTTP type object.")
         else:
-            self._http = http
+            self._http = None
 
     def serialize(self, data: Optional["MockAPI"] = None) -> Optional[Dict[str, Any]]:
         url = (data.url if data else None) or self._url
@@ -356,10 +356,10 @@ class MockAPI(_Config):
 class MockAPIs(_Config):
     """*The **mocked_apis** section*"""
 
-    _base: BaseConfig
-    _apis: Dict[str, MockAPI]
+    _base: Optional[BaseConfig]
+    _apis: Dict[str, Optional[MockAPI]]
 
-    def __init__(self, base: Optional[BaseConfig] = None, apis: Optional[Dict[str, MockAPI]] = None):
+    def __init__(self, base: Optional[BaseConfig] = None, apis: Dict[str, Optional[MockAPI]] = {}):
         self._base = base
         self._apis = apis
 
@@ -370,7 +370,7 @@ class MockAPIs(_Config):
         return self.base == other.base and self.apis == other.apis
 
     @property
-    def base(self) -> BaseConfig:
+    def base(self) -> Optional[BaseConfig]:
         return self._base
 
     @base.setter
@@ -383,10 +383,10 @@ class MockAPIs(_Config):
             else:
                 raise TypeError("Setter *MockAPIs.base* only accepts dict or BaseConfig type object.")
         else:
-            self._base = base
+            self._base = None
 
     @property
-    def apis(self) -> Dict[str, MockAPI]:
+    def apis(self) -> Dict[str, Optional[MockAPI]]:
         return self._apis
 
     @apis.setter
@@ -406,7 +406,7 @@ class MockAPIs(_Config):
             else:
                 self._apis = apis
         else:
-            self._apis = apis
+            self._apis = {}
 
     def serialize(self, data: Optional["MockAPIs"] = None) -> Optional[Dict[str, Any]]:
         base = (data.base if data else None) or self.base
@@ -496,11 +496,11 @@ class APIConfig(_Config):
 
     _name: str = ""
     _description: str = ""
-    _apis: MockAPIs
+    _apis: Optional[MockAPIs]
 
-    _configuration: _BaseFileOperation = None
+    _configuration: Optional[_BaseFileOperation] = None
 
-    def __init__(self, name: Optional[str] = None, description: Optional[str] = None, apis: Optional[MockAPIs] = None):
+    def __init__(self, name: str = "", description: str = "", apis: Optional[MockAPIs] = None):
         self._name = name
         self._description = description
         self._apis = apis
@@ -537,7 +537,7 @@ class APIConfig(_Config):
         self._description = desc
 
     @property
-    def apis(self) -> MockAPIs:
+    def apis(self) -> Optional[MockAPIs]:
         return self._apis
 
     @apis.setter
@@ -550,7 +550,7 @@ class APIConfig(_Config):
             else:
                 raise TypeError("Setter *APIConfig.apis* only accepts dict or MockAPIs type object.")
         else:
-            self._apis = apis
+            self._apis = None
 
     def serialize(self, data: Optional["APIConfig"] = None) -> Optional[Dict[str, Any]]:
         name = (data.name if data else None) or self.name
