@@ -47,7 +47,8 @@ class TestCommandOption:
 
     def test_instantiate_object_without_cli_option(self):
         class FakeNothingOption(CommandOption):
-            pass
+            cli_option: str = ""
+            help_description: str = ""
 
         with pytest.raises(ValueError) as exc_info:
             make_options()

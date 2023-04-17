@@ -124,9 +124,9 @@ class MetaCommandOption(type):
 class CommandOption:
     sub_cmd: SubCommandAttr = None
     sub_parser: SubParserAttr = None
-    cli_option: str = None
+    cli_option: str
     name: str = None
-    help_description: str = None
+    help_description: str
     option_value_type: type = None
     default_value: type = None
     action: str = None
