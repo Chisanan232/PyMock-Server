@@ -101,6 +101,10 @@ class MockAPICommandParser:
 SubCommandAttr = namedtuple("SubCommandAttr", ["title", "dest", "description", "help"])
 SubParserAttr = namedtuple("SubParserAttr", ["name", "help"])
 
+_ClsNamingFormat = namedtuple("_ClassNamingFormat", ["ahead", "tail"])
+_ClsNamingFormat.ahead = "BaseSubCmd"
+_ClsNamingFormat.tail = "Option"
+
 
 class MetaCommandOption(type):
     """*The metaclass for options of PyMock-API command*
@@ -113,9 +117,21 @@ class MetaCommandOption(type):
         parent = [b for b in bases if isinstance(b, MetaCommandOption)]
         if not parent:
             return super_new(cls, name, bases, attrs)
-        parent_is_subcmd = list(filter(lambda b: re.search(r"SubCommand\w{1,10}Option", b.__name__), bases))
+        parent_is_subcmd = list(
+            filter(
+                lambda b: re.search(
+                    re.escape(_ClsNamingFormat.ahead) + r"\w{1,10}" + re.escape(_ClsNamingFormat.tail), b.__name__
+                ),
+                bases,
+            )
+        )
         if parent_is_subcmd:
-            SUBCOMMAND.extend([b.__name__.replace("SubCommand", "").replace("Option", "").lower() for b in bases])
+            SUBCOMMAND.extend(
+                [
+                    b.__name__.replace(_ClsNamingFormat.ahead, "").replace(_ClsNamingFormat.tail, "").lower()
+                    for b in bases
+                ]
+            )
         new_class = super_new(cls, name, bases, attrs)
         COMMAND_OPTIONS.append(new_class)
         return new_class
@@ -133,7 +149,7 @@ class CommandOption:
     _options: Optional[List[str]] = None
 
     _subparser: List[argparse._SubParsersAction] = []
-    _parser_of_subparser: Dict[str, argparse._ArgumentGroup] = {}
+    _parser_of_subparser: Dict[str, argparse.ArgumentParser] = {}
 
     @property
     def cli_option_name(self) -> Tuple[str]:
@@ -238,12 +254,12 @@ class SubCommandConfigOption(BaseSubCommand):
     )
 
 
-CommandOption = MetaCommandOption("CommandOption", (CommandOption,), {})
-SubCommandRunOption = MetaCommandOption("SubCommandRunOption", (SubCommandRunOption,), {})
-SubCommandConfigOption = MetaCommandOption("SubCommandConfigOption", (SubCommandConfigOption,), {})
+BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
+BaseSubCmdRunOption: type = MetaCommandOption("BaseSubCmdRunOption", (SubCommandRunOption,), {})
+BaseSubCmdConfigOption: type = MetaCommandOption("BaseSubCmdConfigOption", (SubCommandConfigOption,), {})
 
 
-class Version(CommandOption):
+class Version(BaseCmdOption):
     cli_option: str = "-v, --version"
     name: str = "version"
     help_description: str = "The version info of PyMock-API."
@@ -263,7 +279,7 @@ class Version(CommandOption):
         parser.add_argument(*self.cli_option_name, **cmd_option_args)
 
 
-class WebAppType(SubCommandRunOption):
+class WebAppType(BaseSubCmdRunOption):
     """
     Which Python web framework it should use to set up web server for mocking APIs.
 
@@ -280,28 +296,28 @@ class WebAppType(SubCommandRunOption):
     _options: List[str] = ["auto", "flask", "fastapi"]
 
 
-class Config(SubCommandRunOption):
+class Config(BaseSubCmdRunOption):
     cli_option: str = "-c, --config"
     name: str = "config"
     help_description: str = "The configuration of tool PyMock-API."
     default_value: str = "api.yaml"
 
 
-class Bind(SubCommandRunOption):
+class Bind(BaseSubCmdRunOption):
     cli_option: str = "-b, --bind"
     name: str = "bind"
     help_description: str = "The socket to bind."
     default_value: str = "127.0.0.1:9672"
 
 
-class Workers(SubCommandRunOption):
+class Workers(BaseSubCmdRunOption):
     cli_option: str = "-w, --workers"
     name: str = "workers"
     help_description: str = "The workers amount."
     default_value: int = 1
 
 
-class LegLevel(SubCommandRunOption):
+class LegLevel(BaseSubCmdRunOption):
     cli_option: str = "--log-level"
     name: str = "log_level"
     help_description: str = "The log level."
@@ -309,7 +325,7 @@ class LegLevel(SubCommandRunOption):
     _options: List[str] = ["critical", "error", "warning", "info", "debug", "trace"]
 
 
-class PrintSample(SubCommandConfigOption):
+class PrintSample(BaseSubCmdConfigOption):
     cli_option: str = "-p, --print-sample"
     name: str = "print_sample"
     help_description: str = "Print the sample configuration content."
@@ -318,7 +334,7 @@ class PrintSample(SubCommandConfigOption):
     default_value: bool = False
 
 
-class GenerateSample(SubCommandConfigOption):
+class GenerateSample(BaseSubCmdConfigOption):
     cli_option: str = "-g, --generate-sample"
     name: str = "generate_sample"
     help_description: str = "Create a sample configuration file."
@@ -327,7 +343,7 @@ class GenerateSample(SubCommandConfigOption):
     default_value: bool = False
 
 
-class Output(SubCommandConfigOption):
+class Output(BaseSubCmdConfigOption):
     cli_option: str = "-o, --output"
     name: str = "file_path"
     help_description: str = (
