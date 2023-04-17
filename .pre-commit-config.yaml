@@ -39,3 +39,9 @@ repos:
       # Please activate this hook in local development environment. In Pre-Commit CI, it would occur error like below:
       # HTTPSConnectionPool(host='pypi.org', port=443): Max retries exceeded with url ...
 #    - id: poetry-lock
+#- repo: https://github.com/pre-commit/mirrors-mypy
+#  rev: v1.2.0
+#  hooks:
+#    - id: mypy
+#      exclude: ^tests/
+#      args: [--strict]
