@@ -93,7 +93,7 @@ class HTTPRequest(_Config):
     def _compare(self, other: "HTTPRequest") -> bool:
         return self.method == other.method and self.parameters == other.parameters
 
-    def serialize(self, data: "HTTPRequest" = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["HTTPRequest"] = None) -> Optional[Dict[str, Any]]:
         method: str = self._get_prop(data, prop="method")
         parameters: str = self._get_prop(data, prop="parameters")
         if not (method and parameters):
@@ -141,7 +141,7 @@ class HTTPResponse(_Config):
     def _compare(self, other: "HTTPResponse") -> bool:
         return self.value == other.value
 
-    def serialize(self, data: "HTTPResponse" = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["HTTPResponse"] = None) -> Optional[Dict[str, Any]]:
         value: str = self._get_prop(data, prop="value")
         if not value:
             return None
@@ -182,7 +182,7 @@ class HTTP(_Config):
     _request: HTTPRequest
     _response: HTTPResponse
 
-    def __init__(self, request: HTTPRequest = None, response: HTTPResponse = None):
+    def __init__(self, request: Optional[HTTPRequest] = None, response: Optional[HTTPResponse] = None):
         self._request = request
         self._response = response
 
@@ -221,7 +221,7 @@ class HTTP(_Config):
         else:
             self._response = resp
 
-    def serialize(self, data: "HTTP" = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["HTTP"] = None) -> Optional[Dict[str, Any]]:
         req = (data or self).request.serialize() if (data and data.request) or self.request else None
         resp = (data or self).response.serialize() if (data and data.response) or self.response else None
         if not (req and resp):
@@ -274,7 +274,7 @@ class MockAPI(_Config):
     _url: str
     _http: HTTP
 
-    def __init__(self, url: str = None, http: HTTP = None):
+    def __init__(self, url: Optional[str] = None, http: Optional[HTTP] = None):
         self._url = url
         self._http = http
 
@@ -305,7 +305,7 @@ class MockAPI(_Config):
         else:
             self._http = http
 
-    def serialize(self, data: "MockAPI" = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["MockAPI"] = None) -> Optional[Dict[str, Any]]:
         url = (data.url if data else None) or self._url
         http = (data.http if data else None) or self.http
         if not (url and http):
@@ -359,7 +359,7 @@ class MockAPIs(_Config):
     _base: BaseConfig
     _apis: Dict[str, MockAPI]
 
-    def __init__(self, base: BaseConfig = None, apis: Dict[str, MockAPI] = None):
+    def __init__(self, base: Optional[BaseConfig] = None, apis: Optional[Dict[str, MockAPI]] = None):
         self._base = base
         self._apis = apis
 
@@ -408,7 +408,7 @@ class MockAPIs(_Config):
         else:
             self._apis = apis
 
-    def serialize(self, data: "MockAPIs" = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["MockAPIs"] = None) -> Optional[Dict[str, Any]]:
         base = (data.base if data else None) or self.base
         apis = (data.apis if data else None) or self.apis
         if not (base and apis):
@@ -500,7 +500,7 @@ class APIConfig(_Config):
 
     _configuration: _BaseFileOperation = None
 
-    def __init__(self, name: str = None, description: str = None, apis: MockAPIs = None):
+    def __init__(self, name: Optional[str] = None, description: Optional[str] = None, apis: Optional[MockAPIs] = None):
         self._name = name
         self._description = description
         self._apis = apis
@@ -552,7 +552,7 @@ class APIConfig(_Config):
         else:
             self._apis = apis
 
-    def serialize(self, data: "APIConfig" = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["APIConfig"] = None) -> Optional[Dict[str, Any]]:
         name = (data.name if data else None) or self.name
         description = (data.description if data else None) or self.description
         apis = (data.apis if data else None) or self.apis
