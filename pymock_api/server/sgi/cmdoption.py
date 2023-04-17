@@ -1,6 +1,6 @@
 import re
 from abc import ABCMeta, abstractmethod
-from typing import TypeVar
+from typing import Optional, TypeVar
 
 
 class BaseCommandOption(metaclass=ABCMeta):
@@ -25,7 +25,7 @@ class BaseCommandOption(metaclass=ABCMeta):
         return "--version"
 
     @abstractmethod
-    def bind(self, address: str = None, host: str = None, port: str = None) -> str:
+    def bind(self, address: Optional[str] = None, host: Optional[str] = None, port: Optional[str] = None) -> str:
         """Option for binding target address includes IPv4 address and port.
 
         Returns:
@@ -80,7 +80,7 @@ class WSGICmdOption(BaseCommandOption):
     3. --log-level LEVEL    The granularity of Error log outputs. [info]
     """
 
-    def bind(self, address: str = None, host: str = None, port: str = None) -> str:
+    def bind(self, address: Optional[str] = None, host: Optional[str] = None, port: Optional[str] = None) -> str:
         if address:
             self._is_valid_address(address)
             binding_addr = address
@@ -115,7 +115,7 @@ class ASGICmdOption(BaseCommandOption):
     3. --log-level [critical|error|warning|info|debug|trace] Log level. [default: info]
     """
 
-    def bind(self, address: str = None, host: str = None, port: str = None) -> str:
+    def bind(self, address: Optional[str] = None, host: Optional[str] = None, port: Optional[str] = None) -> str:
         if address:
             self._is_valid_address(address)
             address_info = address.split(":")
