@@ -4,7 +4,7 @@ The factory to generate SGI application instance to run Python web framework.
 """
 
 import re
-from typing import Callable, Union
+from typing import Callable, Optional, Union
 
 from ...exceptions import FunctionNotFoundError
 from .cmd import ASGIServer, WSGIServer
@@ -13,14 +13,14 @@ from .cmdoption import ASGICmdOption, WSGICmdOption
 
 class setup_server_gateway:
     @classmethod
-    def wsgi(cls, web_app: Union[str, Callable], module_dict: dict = None) -> WSGIServer:
+    def wsgi(cls, web_app: Union[str, Callable], module_dict: Optional[dict] = None) -> WSGIServer:
         if module_dict:
             cls._ensure_function_exists(web_app, module_dict)
         web_app = f"{web_app.__qualname__}()" if isinstance(web_app, Callable) else web_app
         return WSGIServer(app=web_app)
 
     @classmethod
-    def asgi(cls, web_app: Union[str, Callable], module_dict: dict = None) -> ASGIServer:
+    def asgi(cls, web_app: Union[str, Callable], module_dict: Optional[dict] = None) -> ASGIServer:
         if module_dict:
             cls._ensure_function_exists(web_app, module_dict)
         web_app = web_app.__name__ if isinstance(web_app, Callable) else web_app
