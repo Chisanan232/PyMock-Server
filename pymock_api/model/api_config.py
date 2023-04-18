@@ -5,13 +5,26 @@ content ...
 
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, TypeAlias, Union
 
 from .._utils.file_opt import YAML, _BaseFileOperation
 
+# The truly semantically is more near like following:
+#
+# ConfigType = TypeVar("ConfigType" bound="_Config")
+# def need_implement_func(param: ConfigType):
+#     ... (implementation)
+#
+# However, it would have mypy issue:
+# error: Argument 1 of "{method}" is incompatible with supertype "_Config"; supertype defines the argument type as
+# "ConfigType"  [override]
+# note: This violates the Liskov substitution principle
+# note: See https://mypy.readthedocs.io/en/stable/common_issues.html#incompatible-overrides
+SelfType: TypeAlias = Any
+
 
 class _Config(metaclass=ABCMeta):
-    def __eq__(self, other: "_Config") -> bool:
+    def __eq__(self, other: SelfType) -> bool:
         if other is None:
             return False
         if not isinstance(other, self.__class__):
@@ -22,15 +35,15 @@ class _Config(metaclass=ABCMeta):
         return self._compare(other)
 
     @abstractmethod
-    def _compare(self, other: "_Config") -> bool:
+    def _compare(self, other: SelfType) -> bool:
         pass
 
     @abstractmethod
-    def serialize(self, data: Optional["_Config"] = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional[SelfType] = None) -> Optional[Dict[str, Any]]:
         pass
 
     @abstractmethod
-    def deserialize(self, data: Dict[str, Any]) -> Optional["_Config"]:
+    def deserialize(self, data: Dict[str, Any]) -> Optional[SelfType]:
         pass
 
     def _get_prop(self, data: Optional[object], prop: str) -> Any:
