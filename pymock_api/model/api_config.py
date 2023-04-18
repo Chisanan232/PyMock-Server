@@ -235,8 +235,8 @@ class HTTP(_Config):
             self._response = None
 
     def serialize(self, data: Optional["HTTP"] = None) -> Optional[Dict[str, Any]]:
-        req = (data or self).request.serialize() if (data and data.request) or self.request else None
-        resp = (data or self).response.serialize() if (data and data.response) or self.response else None
+        req = (data or self).request.serialize() if (data and data.request) or self.request else None  # type: ignore
+        resp = (data or self).response.serialize() if (data and data.response) or self.response else None  # type: ignore
         if not (req and resp):
             return None
 
@@ -415,9 +415,9 @@ class MockAPIs(_Config):
             if False in ele_types:
                 self._apis = {}
                 for api_name, api_config in apis.items():
-                    self._apis[api_name] = MockAPI().deserialize(data=api_config)
+                    self._apis[api_name] = MockAPI().deserialize(data=(api_config or {}))  # type: ignore
             else:
-                self._apis = apis
+                self._apis = apis  # type: ignore
         else:
             self._apis = {}
 
@@ -511,7 +511,7 @@ class APIConfig(_Config):
     _description: str = ""
     _apis: Optional[MockAPIs]
 
-    _configuration: Optional[_BaseFileOperation] = None
+    _configuration: _BaseFileOperation = YAML()
 
     def __init__(self, name: str = "", description: str = "", apis: Optional[MockAPIs] = None):
         self._name = name
@@ -526,8 +526,6 @@ class APIConfig(_Config):
 
     @property
     def _config_operation(self) -> _BaseFileOperation:
-        if not self._configuration:
-            self._configuration = YAML()
         return self._configuration
 
     def has_apis(self) -> bool:
@@ -647,8 +645,8 @@ class APIConfig(_Config):
             return None
         return self
 
-    def from_yaml(self, path: str) -> "APIConfig":
+    def from_yaml(self, path: str) -> Optional["APIConfig"]:
         return self.deserialize(data=self._config_operation.read(path))
 
     def to_yaml(self, path: str) -> None:
-        self._config_operation.write(path=path, config=self.serialize())
+        self._config_operation.write(path=path, config=(self.serialize() or {}))
