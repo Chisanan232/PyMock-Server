@@ -4,6 +4,7 @@ content ...
 """
 
 from argparse import Namespace
+from typing import Optional
 
 from .api_config import APIConfig
 from .cmd_args import (
@@ -42,5 +43,5 @@ class deserialize_args:
         return DeserializeParsedArgs.subcommand_config(args)
 
 
-def load_config(path: str) -> APIConfig:
+def load_config(path: str) -> Optional[APIConfig]:
     return APIConfig().from_yaml(path=path)
