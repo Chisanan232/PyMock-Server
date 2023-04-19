@@ -13,16 +13,16 @@ from .sgi import setup_server_gateway
 from .sgi._model import Command, CommandOptions
 from .sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
 
-flask_app: "flask.Flask" = None
-fastapi_app: "fastapi.FastAPI" = None
+flask_app: "flask.Flask" = None  # type: ignore
+fastapi_app: "fastapi.FastAPI" = None  # type: ignore
 
 
-def create_flask_app() -> "flask.Flask":
+def create_flask_app() -> "flask.Flask":  # type: ignore
     load_app.by_flask()
     return flask_app
 
 
-def create_fastapi_app() -> "fastapi.FastAPI":
+def create_fastapi_app() -> "fastapi.FastAPI":  # type: ignore
     load_app.by_fastapi()
     return fastapi_app
 
