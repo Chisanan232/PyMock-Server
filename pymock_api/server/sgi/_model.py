@@ -8,9 +8,9 @@ from typing import List
 class CommandOptions:
     """*The data object for the reality usage of target command of SGI tool. e.g., *gunicorn**"""
 
-    bind: str = None
-    workers: str = None
-    log_level: str = None
+    bind: str
+    workers: str
+    log_level: str
 
     def __str__(self):
         """Combine all command line options as one line which be concatenated by a one space string value `' '`.
@@ -31,10 +31,10 @@ class CommandOptions:
 class Command:
     """*The data object for command line which would be used finally in *PyMock-API**"""
 
-    entry_point: str = None
-    options: CommandOptions = None
+    entry_point: str
+    options: CommandOptions
+    app: str
     app_module_path: str = "pymock_api.server"
-    app: str = None
 
     @property
     def line(self) -> str:
