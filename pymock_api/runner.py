@@ -5,13 +5,13 @@ from pathlib import Path
 from typing import List, Optional
 
 try:
-    from pymock_api.cmd_ps import BaseCommandProcessor, dispatch_command_processor
+    from pymock_api.cmd_ps import CommandProcessor, dispatch_command_processor
     from pymock_api.model import ParserArguments
 except (ImportError, ModuleNotFoundError):
     runner_dir = os.path.dirname(os.path.abspath(__file__))
     path = str(Path(runner_dir).parent.absolute())
     sys.path.append(path)
-    from pymock_api.cmd_ps import BaseCommandProcessor, dispatch_command_processor
+    from pymock_api.cmd_ps import CommandProcessor, dispatch_command_processor
     from pymock_api.model import ParserArguments
 
 
@@ -26,7 +26,7 @@ class CommandRunner:
     def parse(self, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         return self._cmd_processor.parse(parser=self.cmd_parser, cmd_args=cmd_args)
 
-    def _dispatch(self) -> BaseCommandProcessor:
+    def _dispatch(self) -> CommandProcessor:
         return dispatch_command_processor()
 
 

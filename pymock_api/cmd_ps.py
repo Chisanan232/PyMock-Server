@@ -16,10 +16,10 @@ from .model import (
 from .model._sample import Sample_Config_Value
 from .server import BaseSGIServer, setup_asgi, setup_wsgi
 
-_COMMAND_CHAIN: List[Type["BaseCommandProcessor"]] = []
+_COMMAND_CHAIN: List[Type["CommandProcessor"]] = []
 
 
-def dispatch_command_processor() -> "BaseCommandProcessor":
+def dispatch_command_processor() -> "CommandProcessor":
     cmd_chain = make_command_chain()
     return cmd_chain[0].distribute()
 
@@ -29,9 +29,9 @@ def run_command_chain(args: ParserArguments) -> None:
     cmd_chain[0].process(args)
 
 
-def make_command_chain() -> List["BaseCommandProcessor"]:
+def make_command_chain() -> List["CommandProcessor"]:
     existed_subcmd: List[str] = []
-    mock_api_cmd: List["BaseCommandProcessor"] = []
+    mock_api_cmd: List["CommandProcessor"] = []
     for cmd_cls in _COMMAND_CHAIN:
         cmd = cmd_cls()
         if cmd.responsible_subcommand in existed_subcmd:
@@ -57,7 +57,7 @@ class MetaCommand(type):
         return new_class
 
 
-class BaseCommandProcessor:
+class CommandProcessor:
     responsible_subcommand: Optional[str] = None
 
     def __init__(self):
@@ -65,14 +65,14 @@ class BaseCommandProcessor:
         self._current_index = 0
 
     @property
-    def _next(self) -> "BaseCommandProcessor":
+    def _next(self) -> "CommandProcessor":
         if self._current_index == len(_COMMAND_CHAIN):
             raise StopIteration
         cmd = _COMMAND_CHAIN[self._current_index]
         self._current_index += 1
         return cmd()
 
-    def distribute(self, args: Optional[ParserArguments] = None, cmd_index: int = 0) -> "BaseCommandProcessor":
+    def distribute(self, args: Optional[ParserArguments] = None, cmd_index: int = 0) -> "CommandProcessor":
         if self._is_responsible(subcmd=self.mock_api_parser.subcommand, args=args):
             return self
         else:
@@ -90,7 +90,7 @@ class BaseCommandProcessor:
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         raise NotImplementedError
 
-    def copy(self) -> "BaseCommandProcessor":
+    def copy(self) -> "CommandProcessor":
         return copy.copy(self)
 
     def _is_responsible(self, subcmd: Optional[str] = None, args: Optional[ParserArguments] = None) -> bool:
@@ -105,7 +105,7 @@ class BaseCommandProcessor:
         return parser.parse_args(cmd_args)
 
 
-BaseCommandProcessor: type = MetaCommand("BaseCommandProcessor", (BaseCommandProcessor,), {})
+BaseCommandProcessor: type = MetaCommand("BaseCommandProcessor", (CommandProcessor,), {})
 
 
 class NoSubCmd(BaseCommandProcessor):

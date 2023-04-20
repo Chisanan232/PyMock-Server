@@ -9,7 +9,7 @@ import pytest
 from pymock_api._utils.file_opt import YAML
 from pymock_api.cmd import SubCommand, get_all_subcommands
 from pymock_api.cmd_ps import (
-    CommandProcessor,
+    BaseCommandProcessor,
     NoSubCmd,
     SubCmdConfig,
     SubCmdRun,
@@ -75,7 +75,7 @@ class FakeYAML(YAML):
     pass
 
 
-class FakeCommandProcess(CommandProcessor):
+class FakeCommandProcess(BaseCommandProcessor):
     responsible_subcommand: str = _Fake_SubCmd
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
@@ -137,14 +137,14 @@ class TestSubCmdProcessChain:
         mock_copy.assert_called_once_with(cmd_processor)
 
 
-class CommandProcessorTestSpec(metaclass=ABCMeta):
+class BaseCommandProcessorTestSpec(metaclass=ABCMeta):
     @pytest.fixture(scope="function")
     @abstractmethod
-    def cmd_ps(self) -> CommandProcessor:
+    def cmd_ps(self) -> BaseCommandProcessor:
         pass
 
     @pytest.fixture(scope="function")
-    def object_under_test(self, cmd_ps: CommandProcessor) -> Callable:
+    def object_under_test(self, cmd_ps: BaseCommandProcessor) -> Callable:
         return cmd_ps.process
 
     @pytest.fixture(scope="function")
@@ -163,7 +163,7 @@ class CommandProcessorTestSpec(metaclass=ABCMeta):
     def _test_process(self, **kwargs):
         pass
 
-    def test_parse(self, cmd_ps: CommandProcessor):
+    def test_parse(self, cmd_ps: BaseCommandProcessor):
         args_namespace = self._given_cmd_args_namespace()
         cmd_ps._parse_cmd_arguments = MagicMock(return_value=args_namespace)
 
@@ -188,7 +188,7 @@ class CommandProcessorTestSpec(metaclass=ABCMeta):
         pass
 
 
-class TestNoSubCmd(CommandProcessorTestSpec):
+class TestNoSubCmd(BaseCommandProcessorTestSpec):
     @pytest.fixture(scope="function")
     def cmd_ps(self) -> NoSubCmd:
         return NoSubCmd()
@@ -229,7 +229,7 @@ class TestNoSubCmd(CommandProcessorTestSpec):
         return Namespace
 
 
-class TestSubCmdRun(CommandProcessorTestSpec):
+class TestSubCmdRun(BaseCommandProcessorTestSpec):
     @pytest.fixture(scope="function")
     def cmd_ps(self) -> SubCmdRun:
         return SubCmdRun()
@@ -324,7 +324,7 @@ class TestSubCmdRun(CommandProcessorTestSpec):
         mock_auto_ready.assert_called_once()
 
 
-class TestSubCmdConfig(CommandProcessorTestSpec):
+class TestSubCmdConfig(BaseCommandProcessorTestSpec):
     @pytest.fixture(scope="function")
     def cmd_ps(self) -> SubCmdConfig:
         return SubCmdConfig()
@@ -412,13 +412,13 @@ def test_make_command_chain():
 
 
 def test_make_command_chain_if_duplicated_subcmd():
-    class FakeCmdPS(CommandProcessor):
+    class FakeCmdPS(BaseCommandProcessor):
         responsible_subcommand: str = _Fake_Duplicated_SubCmd
 
         def run(self, args: ParserArguments) -> None:
             pass
 
-    class FakeDuplicatedCmdPS(CommandProcessor):
+    class FakeDuplicatedCmdPS(BaseCommandProcessor):
         responsible_subcommand: str = _Fake_Duplicated_SubCmd
 
         def run(self, args: ParserArguments) -> None:
