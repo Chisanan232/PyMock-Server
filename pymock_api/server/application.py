@@ -38,12 +38,13 @@ class BaseAppServer(metaclass=ABCMeta):
 
     def create_api(self, mocked_apis: MockAPIs) -> None:
         for api_name, api_config in mocked_apis.apis.items():
-            annotate_function_pycode = self._annotate_function(api_name, api_config)
-            add_api_pycode = self._add_api(api_name, api_config, base_url=mocked_apis.base.url)
-            # pylint: disable=exec-used
-            exec(annotate_function_pycode)
-            # pylint: disable=exec-used
-            exec(add_api_pycode)
+            if api_config:
+                annotate_function_pycode = self._annotate_function(api_name, api_config)
+                add_api_pycode = self._add_api(api_name, api_config, base_url=mocked_apis.base.url)
+                # pylint: disable=exec-used
+                exec(annotate_function_pycode)
+                # pylint: disable=exec-used
+                exec(add_api_pycode)
 
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
         return f"""def {api_name}() -> Union[str, dict]:
