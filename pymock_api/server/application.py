@@ -10,7 +10,7 @@ from typing import Any, List, Optional, Union
 
 from .._utils.importing import import_web_lib
 from ..exceptions import BrokenConfigError, FileFormatNotSupport
-from ..model.api_config import HTTPRequest, MockAPI, MockAPIs
+from ..model.api_config import HTTPRequest, HTTPResponse, MockAPI, MockAPIs
 
 
 class BaseAppServer(metaclass=ABCMeta):
@@ -49,11 +49,14 @@ class BaseAppServer(metaclass=ABCMeta):
                 exec(add_api_pycode)
 
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
+        return f"""def {api_name}() -> Union[str, dict]:
+            return _HTTPResponse.generate(data='{self._ensure_http_response(api_config).value}')
+        """
+
+    def _ensure_http_response(self, api_config) -> HTTPResponse:
         if not (api_config.http and api_config.http.response):
             raise BrokenConfigError(config_prop=["api_config.http", "api_config.http.response"])
-        return f"""def {api_name}() -> Union[str, dict]:
-            return _HTTPResponse.generate(data='{api_config.http.response.value}')
-        """
+        return api_config.http.response
 
     @abstractmethod
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
