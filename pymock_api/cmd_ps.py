@@ -72,7 +72,7 @@ class BaseCommandProcessor:
         self._current_index += 1
         return cmd()
 
-    def distribute(self, args: ParserArguments = None, cmd_index: int = 0) -> "BaseCommandProcessor":
+    def distribute(self, args: Optional[ParserArguments] = None, cmd_index: int = 0) -> "BaseCommandProcessor":
         if self._is_responsible(subcmd=self.mock_api_parser.subcommand, args=args):
             return self
         else:
@@ -93,7 +93,7 @@ class BaseCommandProcessor:
     def copy(self) -> "BaseCommandProcessor":
         return copy.copy(self)
 
-    def _is_responsible(self, subcmd: str = None, args: ParserArguments = None) -> bool:
+    def _is_responsible(self, subcmd: Optional[str] = None, args: Optional[ParserArguments] = None) -> bool:
         if args:
             return args.subparser_name == self.responsible_subcommand
         return subcmd == self.responsible_subcommand
