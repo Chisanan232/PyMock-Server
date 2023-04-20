@@ -11,7 +11,7 @@ class FileFormatNotSupport(RuntimeError):
 
 class FunctionNotFoundError(RuntimeError):
     def __init__(self, function: Union[str, Callable]):
-        self._function = str(function.__qualname__ if isinstance(function, Callable) else function)
+        self._function = str(function.__qualname__ if isinstance(function, Callable) else function)  # type: ignore
 
     def __str__(self):
         return f"Cannot find the function {self._function} in current module."
