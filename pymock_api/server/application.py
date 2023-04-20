@@ -50,13 +50,13 @@ class BaseAppServer(metaclass=ABCMeta):
 
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
         return f"""def {api_name}() -> Union[str, dict]:
-            return _HTTPResponse.generate(data='{self._ensure_http_response(api_config).value}')
+            return _HTTPResponse.generate(data='{self._ensure_http_response(api_config, "response").value}')
         """
 
-    def _ensure_http_response(self, api_config) -> HTTPResponse:
-        if not (api_config.http and api_config.http.response):
-            raise BrokenConfigError(config_prop=["api_config.http", "api_config.http.response"])
-        return api_config.http.response
+    def _ensure_http_response(self, api_config: MockAPI, http_attr: str) -> HTTPResponse:
+        if not (api_config.http and getattr(api_config.http, http_attr)):
+            raise BrokenConfigError(config_prop=["api_config.http", f"api_config.http.{http_attr}"])
+        return getattr(api_config.http, http_attr)
 
     @abstractmethod
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
