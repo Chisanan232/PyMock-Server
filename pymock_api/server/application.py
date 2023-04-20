@@ -69,7 +69,7 @@ class BaseAppServer(metaclass=ABCMeta):
 class FlaskServer(BaseAppServer):
     """*Build a web application with *Flask**"""
 
-    def setup(self) -> "flask.Flask":
+    def setup(self) -> "flask.Flask":  # type: ignore
         return import_web_lib.flask().Flask(__name__)
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
@@ -82,7 +82,7 @@ class FlaskServer(BaseAppServer):
 class FastAPIServer(BaseAppServer):
     """*Build a web application with *FastAPI**"""
 
-    def setup(self) -> "fastapi.FastAPI":
+    def setup(self) -> "fastapi.FastAPI":  # type: ignore
         return import_web_lib.fastapi().FastAPI()
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
