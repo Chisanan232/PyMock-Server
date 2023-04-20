@@ -62,11 +62,6 @@ class BaseAppServer(metaclass=ABCMeta):
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         pass
 
-    def _ensure_http_request(self, api_config) -> HTTPRequest:
-        if not (api_config.http and api_config.http.request):
-            raise BrokenConfigError(config_prop=["api_config.http", "api_config.http.request"])
-        return api_config.http.request
-
     def url_path(self, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         return f"{base_url}{api_config.url}" if base_url else f"{api_config.url}"
 
@@ -81,7 +76,7 @@ class FlaskServer(BaseAppServer):
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         return f"""self.web_application.route(
-            "{self.url_path(api_config, base_url)}", methods=["{self._ensure_http_request(api_config).method}"]
+            "{self.url_path(api_config, base_url)}", methods=["{cast(HTTPRequest, self._ensure_http(api_config, "request")).method}"]
             )({api_name})
         """
 
@@ -96,7 +91,7 @@ class FastAPIServer(BaseAppServer):
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         return f"""self.web_application.api_route(
-            path="{self.url_path(api_config, base_url)}", methods=["{self._ensure_http_request(api_config).method}"]
+            path="{self.url_path(api_config, base_url)}", methods=["{cast(HTTPRequest, self._ensure_http(api_config, "request")).method}"]
             )({api_name})
         """
 
