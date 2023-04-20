@@ -6,7 +6,7 @@ This module provides which library of Python web framework you could use to set 
 import json
 import os
 from abc import ABCMeta, abstractmethod
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Union, cast
 
 from .._utils.importing import import_web_lib
 from ..exceptions import BrokenConfigError, FileFormatNotSupport
@@ -50,10 +50,10 @@ class BaseAppServer(metaclass=ABCMeta):
 
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
         return f"""def {api_name}() -> Union[str, dict]:
-            return _HTTPResponse.generate(data='{self._ensure_http_response(api_config, "response").value}')
+            return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')
         """
 
-    def _ensure_http_response(self, api_config: MockAPI, http_attr: str) -> HTTPResponse:
+    def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
         if not (api_config.http and getattr(api_config.http, http_attr)):
             raise BrokenConfigError(config_prop=["api_config.http", f"api_config.http.{http_attr}"])
         return getattr(api_config.http, http_attr)
