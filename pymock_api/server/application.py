@@ -9,7 +9,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, List, Optional, Union
 
 from .._utils.importing import import_web_lib
-from ..exceptions import FileFormatNotSupport
+from ..exceptions import BrokenConfigError, FileFormatNotSupport
 from ..model.api_config import MockAPI, MockAPIs
 
 
@@ -40,13 +40,17 @@ class BaseAppServer(metaclass=ABCMeta):
         for api_name, api_config in mocked_apis.apis.items():
             if api_config:
                 annotate_function_pycode = self._annotate_function(api_name, api_config)
-                add_api_pycode = self._add_api(api_name, api_config, base_url=mocked_apis.base.url)
+                add_api_pycode = self._add_api(
+                    api_name, api_config, base_url=mocked_apis.base.url if mocked_apis.base else None
+                )
                 # pylint: disable=exec-used
                 exec(annotate_function_pycode)
                 # pylint: disable=exec-used
                 exec(add_api_pycode)
 
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
+        if not (api_config.http and api_config.http.response):
+            raise BrokenConfigError(config_prop=["api_config.http", "api_config.http.response"])
         return f"""def {api_name}() -> Union[str, dict]:
             return _HTTPResponse.generate(data='{api_config.http.response.value}')
         """
@@ -68,6 +72,8 @@ class FlaskServer(BaseAppServer):
         return app
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
+        if not (api_config.http and api_config.http.request):
+            raise BrokenConfigError(config_prop=["api_config.http", "api_config.http.request"])
         return f"""self.web_application.route(
             "{self.url_path(api_config, base_url)}", methods=["{api_config.http.request.method}"]
             )({api_name})
@@ -83,6 +89,8 @@ class FastAPIServer(BaseAppServer):
         return app
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
+        if not (api_config.http and api_config.http.request):
+            raise BrokenConfigError(config_prop=["api_config.http", "api_config.http.request"])
         return f"""self.web_application.api_route(
             path="{self.url_path(api_config, base_url)}", methods=["{api_config.http.request.method}"]
             )({api_name})
