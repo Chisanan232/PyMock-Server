@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple, Type
 
 from ._utils import YAML, import_web_lib
 from .cmd import MockAPICommandParser, SubCommand
-from .exceptions import InvalidAppType, NoValidWebLibrary
+from .exceptions import InvalidAppType, NoValidWebLibrary, OptionValueCannotBeEmpty
 from .model import (
     ParserArguments,
     SubcmdConfigArguments,
@@ -140,6 +140,8 @@ class SubCmdRun(BaseCommandProcessor):
             os.environ["MockAPI_Config"] = parser_options.config
 
         # Handle *app-type*
+        if not parser_options.app_type:
+            raise OptionValueCannotBeEmpty("--app-type")
         self._initial_server_gateway(lib=parser_options.app_type)
 
     def _initial_server_gateway(self, lib: str) -> None:
@@ -169,4 +171,6 @@ class SubCmdConfig(BaseCommandProcessor):
             print(f"It will write below content into file {args.sample_output_path}:")
             print(f"{sample_data}")
         if args.generate_sample:
+            if not args.sample_output_path:
+                raise OptionValueCannotBeEmpty("-o, --output")
             yaml.write(path=args.sample_output_path, config=sample_data)
