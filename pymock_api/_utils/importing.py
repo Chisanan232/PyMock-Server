@@ -8,14 +8,14 @@ class import_web_lib:
     """*Import the Python library and return it.*"""
 
     @staticmethod
-    def flask() -> "flask":
+    def flask() -> "flask":  # type: ignore
         """Import Python web framework *flask*."""
         import flask
 
         return flask
 
     @staticmethod
-    def fastapi() -> "fastapi":
+    def fastapi() -> "fastapi":  # type: ignore
         """Import Python web framework *fastapi*."""
         import fastapi
 
