@@ -3,7 +3,7 @@
 This module provides objects for mocking APIs as a web application with different Python framework.
 """
 
-from typing import Any
+from typing import Any, Optional
 
 from ..model import load_config
 from ..model.api_config import APIConfig, MockAPIs
@@ -17,7 +17,12 @@ class MockHTTPServer:
     default, it would use *Flask* to set up the web server to provide the APIs.
     """
 
-    def __init__(self, config_path: str = None, app_server: BaseAppServer = None, auto_setup: bool = False):
+    def __init__(
+        self,
+        config_path: Optional[str] = None,
+        app_server: Optional[BaseAppServer] = None,
+        auto_setup: Optional[bool] = False,
+    ):
         """
 
         Args:
@@ -32,7 +37,7 @@ class MockHTTPServer:
         if not config_path:
             config_path = "api.yaml"
         self._config_path = config_path
-        self._api_config: APIConfig = load_config(path=self._config_path)
+        self._api_config: Optional[APIConfig] = load_config(path=self._config_path)
 
         if app_server and not isinstance(app_server, BaseAppServer):
             raise TypeError(f"The instance {app_server} must be *pymock_api.application.BaseAppServer* type object.")
