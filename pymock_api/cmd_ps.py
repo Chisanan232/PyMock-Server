@@ -58,7 +58,7 @@ class MetaCommand(type):
 
 
 class BaseCommandProcessor:
-    responsible_subcommand: str = None
+    responsible_subcommand: Optional[str] = None
 
     def __init__(self):
         self.mock_api_parser = MockAPICommandParser()
@@ -105,11 +105,11 @@ class BaseCommandProcessor:
         return parser.parse_args(cmd_args)
 
 
-BaseCommandProcessor = MetaCommand("BaseCommandProcessor", (BaseCommandProcessor,), {})
+BaseCommandProcessor: type = MetaCommand("BaseCommandProcessor", (BaseCommandProcessor,), {})
 
 
 class NoSubCmd(BaseCommandProcessor):
-    responsible_subcommand: str = None
+    responsible_subcommand: Optional[str] = None
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         return self._parse_cmd_arguments(parser, cmd_args)
@@ -136,7 +136,8 @@ class SubCmdRun(BaseCommandProcessor):
         # Note: It's possible that it should separate the functions to be multiple objects to implement and manage the
         # behaviors of command line with different options.
         # Handle *config*
-        os.environ["MockAPI_Config"] = parser_options.config
+        if parser_options.config:
+            os.environ["MockAPI_Config"] = parser_options.config
 
         # Handle *app-type*
         self._initial_server_gateway(lib=parser_options.app_type)
@@ -162,11 +163,8 @@ class SubCmdConfig(BaseCommandProcessor):
         return deserialize_args.subcmd_config(self._parse_cmd_arguments(parser, cmd_args))
 
     def _run(self, args: SubcmdConfigArguments) -> None:
-        yaml: YAML = None
-        sample_data: str = None
-        if args.print_sample or args.generate_sample:
-            yaml = YAML()
-            sample_data = yaml.serialize(config=Sample_Config_Value)
+        yaml: YAML = YAML()
+        sample_data: str = yaml.serialize(config=Sample_Config_Value)
         if args.print_sample:
             print(f"It will write below content into file {args.sample_output_path}:")
             print(f"{sample_data}")
