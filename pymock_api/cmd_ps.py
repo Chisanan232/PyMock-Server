@@ -30,13 +30,13 @@ def run_command_chain(args: ParserArguments) -> None:
 
 
 def make_command_chain() -> List["CommandProcessor"]:
-    existed_subcmd: List[str] = []
+    existed_subcmd: List[Optional[str]] = []
     mock_api_cmd: List["CommandProcessor"] = []
     for cmd_cls in _COMMAND_CHAIN:
         cmd = cmd_cls()
         if cmd.responsible_subcommand in existed_subcmd:
             raise ValueError(f"The subcommand *{cmd.responsible_subcommand}* has been used. Please use other naming.")
-        existed_subcmd.append(cmd.responsible_subcommand)
+        existed_subcmd.append(getattr(cmd, "responsible_subcommand"))
         mock_api_cmd.append(cmd.copy())
     return mock_api_cmd
 
@@ -53,7 +53,7 @@ class MetaCommand(type):
         if not parent:
             return super_new(cls, name, bases, attrs)
         new_class = super_new(cls, name, bases, attrs)
-        _COMMAND_CHAIN.append(new_class)
+        _COMMAND_CHAIN.append(new_class)  # type: ignore
         return new_class
 
 
