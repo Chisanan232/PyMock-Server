@@ -46,9 +46,8 @@ class MockHTTPServer:
         self._app_server = app_server
         self._web_application = None
 
-        if auto_setup:
-            mocked_apis = self._api_config.apis
-            self.create_apis(mocked_apis=mocked_apis)
+        if auto_setup and (self._api_config and self._api_config.apis):
+            self.create_apis(mocked_apis=self._api_config.apis)
 
     @property
     def web_app(self) -> Any:
