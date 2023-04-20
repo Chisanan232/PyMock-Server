@@ -10,7 +10,7 @@ from typing import Any, List, Optional, Union
 
 from .._utils.importing import import_web_lib
 from ..exceptions import BrokenConfigError, FileFormatNotSupport
-from ..model.api_config import MockAPI, MockAPIs
+from ..model.api_config import HTTPRequest, MockAPI, MockAPIs
 
 
 class BaseAppServer(metaclass=ABCMeta):
@@ -59,6 +59,11 @@ class BaseAppServer(metaclass=ABCMeta):
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         pass
 
+    def _ensure_http_request(self, api_config) -> HTTPRequest:
+        if not (api_config.http and api_config.http.request):
+            raise BrokenConfigError(config_prop=["api_config.http", "api_config.http.request"])
+        return api_config.http.request
+
     def url_path(self, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         return f"{base_url}{api_config.url}" if base_url else f"{api_config.url}"
 
@@ -72,10 +77,8 @@ class FlaskServer(BaseAppServer):
         return app
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        if not (api_config.http and api_config.http.request):
-            raise BrokenConfigError(config_prop=["api_config.http", "api_config.http.request"])
         return f"""self.web_application.route(
-            "{self.url_path(api_config, base_url)}", methods=["{api_config.http.request.method}"]
+            "{self.url_path(api_config, base_url)}", methods=["{self._ensure_http_request(api_config).method}"]
             )({api_name})
         """
 
@@ -89,10 +92,8 @@ class FastAPIServer(BaseAppServer):
         return app
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        if not (api_config.http and api_config.http.request):
-            raise BrokenConfigError(config_prop=["api_config.http", "api_config.http.request"])
         return f"""self.web_application.api_route(
-            path="{self.url_path(api_config, base_url)}", methods=["{api_config.http.request.method}"]
+            path="{self.url_path(api_config, base_url)}", methods=["{self._ensure_http_request(api_config).method}"]
             )({api_name})
         """
 
