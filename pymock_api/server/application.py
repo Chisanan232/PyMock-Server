@@ -70,9 +70,7 @@ class FlaskServer(BaseAppServer):
     """*Build a web application with *Flask**"""
 
     def setup(self) -> "flask.Flask":
-        flask_pkg: "flask" = import_web_lib.flask()
-        app: "flask.Flask" = flask_pkg.Flask(__name__)
-        return app
+        return import_web_lib.flask().Flask(__name__)
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         return f"""self.web_application.route(
@@ -85,9 +83,7 @@ class FastAPIServer(BaseAppServer):
     """*Build a web application with *FastAPI**"""
 
     def setup(self) -> "fastapi.FastAPI":
-        fastapi_pkg: "fastapi" = import_web_lib.fastapi()
-        app: "fastapi.FastAPI" = fastapi_pkg.FastAPI()
-        return app
+        return import_web_lib.fastapi().FastAPI()
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         return f"""self.web_application.api_route(
