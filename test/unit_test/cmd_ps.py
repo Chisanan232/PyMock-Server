@@ -9,7 +9,7 @@ import pytest
 from pymock_api._utils.file_opt import YAML
 from pymock_api.cmd import SubCommand, get_all_subcommands
 from pymock_api.cmd_ps import (
-    BaseCommandProcessor,
+    CommandProcessor,
     NoSubCmd,
     SubCmdConfig,
     SubCmdRun,
@@ -75,7 +75,7 @@ class FakeYAML(YAML):
     pass
 
 
-class FakeCommandProcess(BaseCommandProcessor):
+class FakeCommandProcess(CommandProcessor):
     responsible_subcommand: str = _Fake_SubCmd
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
@@ -140,11 +140,11 @@ class TestSubCmdProcessChain:
 class CommandProcessorTestSpec(metaclass=ABCMeta):
     @pytest.fixture(scope="function")
     @abstractmethod
-    def cmd_ps(self) -> BaseCommandProcessor:
+    def cmd_ps(self) -> CommandProcessor:
         pass
 
     @pytest.fixture(scope="function")
-    def object_under_test(self, cmd_ps: BaseCommandProcessor) -> Callable:
+    def object_under_test(self, cmd_ps: CommandProcessor) -> Callable:
         return cmd_ps.process
 
     @pytest.fixture(scope="function")
@@ -163,7 +163,7 @@ class CommandProcessorTestSpec(metaclass=ABCMeta):
     def _test_process(self, **kwargs):
         pass
 
-    def test_parse(self, cmd_ps: BaseCommandProcessor):
+    def test_parse(self, cmd_ps: CommandProcessor):
         args_namespace = self._given_cmd_args_namespace()
         cmd_ps._parse_cmd_arguments = MagicMock(return_value=args_namespace)
 
@@ -379,12 +379,8 @@ class TestSubCmdConfig(CommandProcessorTestSpec):
             with patch("pymock_api.cmd_ps.YAML", return_value=FakeYAML) as mock_instantiate_writer:
                 cmd_ps(mock_parser_arg)
 
-                if oprint or generate:
-                    mock_instantiate_writer.assert_called_once()
-                    FakeYAML.serialize.assert_called_once()
-                else:
-                    mock_instantiate_writer.assert_not_called()
-                    FakeYAML.serialize.assert_not_called()
+                mock_instantiate_writer.assert_called_once()
+                FakeYAML.serialize.assert_called_once()
 
                 if oprint:
                     mock_print.assert_has_calls([call(f"It will write below content into file {output}:")])
@@ -416,13 +412,13 @@ def test_make_command_chain():
 
 
 def test_make_command_chain_if_duplicated_subcmd():
-    class FakeCmdPS(BaseCommandProcessor):
+    class FakeCmdPS(CommandProcessor):
         responsible_subcommand: str = _Fake_Duplicated_SubCmd
 
         def run(self, args: ParserArguments) -> None:
             pass
 
-    class FakeDuplicatedCmdPS(BaseCommandProcessor):
+    class FakeDuplicatedCmdPS(CommandProcessor):
         responsible_subcommand: str = _Fake_Duplicated_SubCmd
 
         def run(self, args: ParserArguments) -> None:
