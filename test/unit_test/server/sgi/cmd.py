@@ -14,12 +14,20 @@ from pymock_api.server.sgi.cmdoption import (
     WSGICmdOption,
 )
 
-from ...._values import _Bind_Host_And_Port, _Log_Level, _Workers_Amount
+from ...._values import (
+    _Bind_Host_And_Port,
+    _Log_Level,
+    _Test_Config,
+    _Test_SubCommand_Run,
+    _Workers_Amount,
+)
 
 BaseSGICmdType = TypeVar("BaseSGICmdType", bound=BaseSGIServer)
 
 app_path: str = "application instance path"
 mock_parser_arg_obj = SubcmdRunArguments(
+    subparser_name=_Test_SubCommand_Run,
+    config=_Test_Config,
     app_type="python web library name",
     bind=_Bind_Host_And_Port.value,
     workers=_Workers_Amount.value,

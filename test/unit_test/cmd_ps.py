@@ -58,7 +58,9 @@ def _given_parser_args(
             sample_output_path=_Sample_File_Path,
         )
     else:
-        return ParserArguments()
+        return ParserArguments(
+            subparser_name=None,
+        )
 
 
 def _given_command_option() -> CommandOptions:

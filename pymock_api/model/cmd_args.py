@@ -1,5 +1,5 @@
 from argparse import Namespace
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 
@@ -7,23 +7,23 @@ from typing import Optional
 class ParserArguments:
     """*The data object for the arguments from parsing the command line of PyMock-API program*"""
 
-    subparser_name: Optional[str] = None
+    subparser_name: Optional[str]
 
 
 @dataclass(frozen=True)
 class SubcmdRunArguments(ParserArguments):
-    config: Optional[str] = None
-    app_type: Optional[str] = None
-    bind: Optional[str] = None
-    workers: Optional[int] = None
-    log_level: Optional[str] = None
+    config: str
+    app_type: str
+    bind: str
+    workers: int
+    log_level: str
 
 
 @dataclass(frozen=True)
 class SubcmdConfigArguments(ParserArguments):
-    generate_sample: Optional[bool] = None
-    print_sample: Optional[bool] = None
-    sample_output_path: Optional[str] = ""
+    generate_sample: bool
+    print_sample: bool
+    sample_output_path: str
 
 
 class DeserializeParsedArgs:

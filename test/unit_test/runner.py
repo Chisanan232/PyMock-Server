@@ -14,7 +14,7 @@ class TestEntryPoint:
         return CommandRunner()
 
     def test_run(self, runner: CommandRunner):
-        mock_parser_arg = ParserArguments()
+        mock_parser_arg = ParserArguments(subparser_name=None)
         with patch("pymock_api.runner.CommandRunner", return_value=runner) as mock_runner_instance:
             with patch.object(runner, "parse", return_value=mock_parser_arg) as mock_parse:
                 with patch.object(runner, "run") as mock_run:
