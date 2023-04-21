@@ -9,7 +9,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, List, Optional, Union, cast
 
 from .._utils.importing import import_web_lib
-from ..exceptions import BrokenConfigError, FileFormatNotSupport
+from ..exceptions import FileFormatNotSupport
 from ..model.api_config import HTTPRequest, HTTPResponse, MockAPI, MockAPIs
 
 
@@ -54,8 +54,9 @@ class BaseAppServer(metaclass=ABCMeta):
         """
 
     def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
-        if not (api_config.http and getattr(api_config.http, http_attr)):
-            raise BrokenConfigError(config_prop=["api_config.http", f"api_config.http.{http_attr}"])
+        assert api_config.http and getattr(
+            api_config.http, http_attr
+        ), "The configuration *HTTP* value should not be empty."
         return getattr(api_config.http, http_attr)
 
     @abstractmethod

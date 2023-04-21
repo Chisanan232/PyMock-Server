@@ -36,13 +36,3 @@ class OptionValueCannotBeEmpty(ValueError):
 
     def __str__(self):
         return f"Option '{self._cmd_option}' value cannot be empty."
-
-
-class BrokenConfigError(RuntimeError):
-    def __init__(self, config_prop: Union[str, List[str]]):
-        self._config_prop = (
-            ", ".join([f"*{cp}*" for cp in config_prop]) if isinstance(config_prop, list) else config_prop
-        )
-
-    def __str__(self):
-        return f"Config value of properties {self._config_prop} should not be empty here."
