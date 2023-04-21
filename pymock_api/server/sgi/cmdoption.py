@@ -54,7 +54,7 @@ class BaseCommandOption(metaclass=ABCMeta):
         """
         pass
 
-    def _is_valid_address(self, address) -> bool:
+    def _is_valid_address(self, address: str) -> bool:
         if not re.search(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", str(address)):
             raise ValueError(
                 "The address info is invalid. Please entry value format should be as <IPv4 address>:<Port>."

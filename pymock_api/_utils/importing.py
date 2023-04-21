@@ -62,8 +62,8 @@ def ensure_importing(import_callback: Callable, import_err_callback: Optional[Ca
 
     """
 
-    def _import(function) -> Callable:
-        def _(*args, **kwargs) -> None:
+    def _import(function: Callable) -> Callable:
+        def _(*args: tuple, **kwargs: dict) -> None:
             try:
                 import_callback()
             except (ImportError, ModuleNotFoundError) as e:
