@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple, Type
 
 from ._utils import YAML, import_web_lib
 from .cmd import MockAPICommandParser, SubCommand
-from .exceptions import InvalidAppType, NoValidWebLibrary, OptionValueCannotBeEmpty
+from .exceptions import InvalidAppType, NoValidWebLibrary
 from .model import (
     ParserArguments,
     SubcmdConfigArguments,
@@ -39,6 +39,10 @@ def make_command_chain() -> List["CommandProcessor"]:
         existed_subcmd.append(getattr(cmd, "responsible_subcommand"))
         mock_api_cmd.append(cmd.copy())
     return mock_api_cmd
+
+
+def _option_cannot_be_empty_assertion(cmd_option: str) -> str:
+    return f"Option '{cmd_option}' value cannot be empty."
 
 
 class MetaCommand(type):
@@ -140,8 +144,7 @@ class SubCmdRun(BaseCommandProcessor):
             os.environ["MockAPI_Config"] = parser_options.config
 
         # Handle *app-type*
-        if not parser_options.app_type:
-            raise OptionValueCannotBeEmpty("--app-type")
+        assert parser_options.app_type, _option_cannot_be_empty_assertion("--app-type")
         self._initial_server_gateway(lib=parser_options.app_type)
 
     def _initial_server_gateway(self, lib: str) -> None:
@@ -171,6 +174,5 @@ class SubCmdConfig(BaseCommandProcessor):
             print(f"It will write below content into file {args.sample_output_path}:")
             print(f"{sample_data}")
         if args.generate_sample:
-            if not args.sample_output_path:
-                raise OptionValueCannotBeEmpty("-o, --output")
+            assert args.sample_output_path, _option_cannot_be_empty_assertion("-o, --output")
             yaml.write(path=args.sample_output_path, config=sample_data)

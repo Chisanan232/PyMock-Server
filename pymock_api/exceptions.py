@@ -28,11 +28,3 @@ class NoValidWebLibrary(RuntimeError):
 class InvalidAppType(ValueError):
     def __str__(self):
         return "Invalid value at argument *app-type*. It only supports 'auto', 'flask' or 'fastapi' currently."
-
-
-class OptionValueCannotBeEmpty(ValueError):
-    def __init__(self, cmd_option: str):
-        self._cmd_option = cmd_option
-
-    def __str__(self):
-        return f"Option '{self._cmd_option}' value cannot be empty."
