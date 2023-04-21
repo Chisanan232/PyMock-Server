@@ -62,6 +62,7 @@ gunicorn = "^20.1.0"
 # Dependency of web framework FastAPI
 fastapi = {extras = ["all"], version = "^0.95.0"}
 uvicorn = {extras = ["standard"], version = "^0.21.1"}
+types-PyYAML = "^6.0.12.9"
 
 [tool.poetry.scripts]
 mock-api = "pymock_api.runner:run"
