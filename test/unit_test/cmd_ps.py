@@ -29,6 +29,8 @@ from .._values import (
     _Test_Auto_Type,
     _Test_Config,
     _Test_FastAPI_App_Type,
+    _Test_SubCommand_Config,
+    _Test_SubCommand_Run,
     _Workers_Amount,
 )
 
@@ -271,7 +273,7 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
         self._test_process(**kwargs)
 
     def _test_process(self, app_type: str, should_raise_exc: bool, cmd_ps: Callable):
-        mock_parser_arg = _given_parser_args(subcommand="run", app_type=app_type)
+        mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Run, app_type=app_type)
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
 
@@ -371,7 +373,7 @@ class TestSubCmdConfig(BaseCommandProcessorTestSpec):
         FakeYAML.serialize = MagicMock()
         FakeYAML.write = MagicMock()
         mock_parser_arg = SubcmdConfigArguments(
-            subparser_name="config",
+            subparser_name=_Test_SubCommand_Config,
             print_sample=oprint,
             generate_sample=generate,
             sample_output_path=output,
