@@ -327,6 +327,31 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
         assert re.search(r"doesn't have valid web library", str(exc_info.value), re.IGNORECASE)
         mock_auto_ready.assert_called_once()
 
+    def test_assert_error_with_empty_args(self, cmd_ps: SubCmdRun):
+        # Mock functions
+        cmd_ps._initial_server_gateway = MagicMock()
+        mock_server_gateway = Mock()
+        mock_server_gateway.run = MagicMock()
+        cmd_ps._server_gateway = mock_server_gateway
+
+        invalid_args = SubcmdRunArguments(
+            subparser_name=_Test_SubCommand_Run,
+            app_type="",
+            config=_Test_Config,
+            bind=_Bind_Host_And_Port.value,
+            workers=_Workers_Amount.value,
+            log_level=_Log_Level.value,
+        )
+
+        # Run target function to test
+        with pytest.raises(AssertionError) as exc_info:
+            cmd_ps.process(invalid_args)
+
+        # Verify result
+        assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)
+        cmd_ps._initial_server_gateway.assert_not_called()
+        cmd_ps._server_gateway.run.assert_not_called()
+
 
 class TestSubCmdConfig(BaseCommandProcessorTestSpec):
     @pytest.fixture(scope="function")
@@ -409,6 +434,29 @@ class TestSubCmdConfig(BaseCommandProcessorTestSpec):
 
     def _expected_argument_type(self) -> Type[SubcmdConfigArguments]:
         return SubcmdConfigArguments
+
+    def test_assert_error_with_empty_args(self, cmd_ps: SubCmdConfig):
+        # Mock functions
+        FakeYAML.serialize = MagicMock()
+        FakeYAML.write = MagicMock()
+
+        invalid_args = SubcmdConfigArguments(
+            subparser_name=_Test_SubCommand_Config,
+            print_sample=False,
+            generate_sample=True,
+            sample_output_path="",
+        )
+
+        # Run target function to test
+        with patch("pymock_api.cmd_ps.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+            with pytest.raises(AssertionError) as exc_info:
+                cmd_ps.process(invalid_args)
+
+            # Verify result
+            assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)
+            mock_instantiate_writer.assert_called_once()
+            FakeYAML.serialize.assert_called_once()
+            FakeYAML.write.assert_not_called()
 
 
 def test_make_command_chain():
