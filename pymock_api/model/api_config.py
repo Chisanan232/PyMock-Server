@@ -5,7 +5,7 @@ content ...
 
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional, TypeAlias, Union
+from typing import Any, Dict, Optional, Union
 
 from .._utils.file_opt import YAML, _BaseFileOperation
 
@@ -20,7 +20,7 @@ from .._utils.file_opt import YAML, _BaseFileOperation
 # "ConfigType"  [override]
 # note: This violates the Liskov substitution principle
 # note: See https://mypy.readthedocs.io/en/stable/common_issues.html#incompatible-overrides
-SelfType: TypeAlias = Any
+SelfType = Any
 
 
 class _Config(metaclass=ABCMeta):
