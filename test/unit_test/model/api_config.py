@@ -181,7 +181,7 @@ class TestAPIConfig(ConfigTestSpec):
             assert sut_with_nothing.apis == MOCK_RETURN_VALUE
         else:
             mock_deserialize.assert_not_called()
-            assert sut_with_nothing.apis == setting_val
+            assert sut_with_nothing.apis == (setting_val if setting_val else None)
 
     @patch.object(MockAPIs, "deserialize", return_value=MOCK_RETURN_VALUE)
     def test_prop_apis_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: APIConfig):
@@ -286,7 +286,7 @@ class TestMockAPIs(ConfigTestSpec):
             assert sut_with_nothing.base == MOCK_RETURN_VALUE
         else:
             mock_deserialize.assert_not_called()
-            assert sut_with_nothing.base == setting_val
+            assert sut_with_nothing.base == (setting_val if setting_val else None)
 
     @patch.object(BaseConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
     def test_prop_base_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: MockAPIs):

@@ -6,11 +6,11 @@ This module provides which library of Python web framework you could use to set 
 import json
 import os
 from abc import ABCMeta, abstractmethod
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Union, cast
 
 from .._utils.importing import import_web_lib
 from ..exceptions import FileFormatNotSupport
-from ..model.api_config import MockAPI, MockAPIs
+from ..model.api_config import HTTPRequest, HTTPResponse, MockAPI, MockAPIs
 
 
 class BaseAppServer(metaclass=ABCMeta):
@@ -38,17 +38,26 @@ class BaseAppServer(metaclass=ABCMeta):
 
     def create_api(self, mocked_apis: MockAPIs) -> None:
         for api_name, api_config in mocked_apis.apis.items():
-            annotate_function_pycode = self._annotate_function(api_name, api_config)
-            add_api_pycode = self._add_api(api_name, api_config, base_url=mocked_apis.base.url)
-            # pylint: disable=exec-used
-            exec(annotate_function_pycode)
-            # pylint: disable=exec-used
-            exec(add_api_pycode)
+            if api_config:
+                annotate_function_pycode = self._annotate_function(api_name, api_config)
+                add_api_pycode = self._add_api(
+                    api_name, api_config, base_url=mocked_apis.base.url if mocked_apis.base else None
+                )
+                # pylint: disable=exec-used
+                exec(annotate_function_pycode)
+                # pylint: disable=exec-used
+                exec(add_api_pycode)
 
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
         return f"""def {api_name}() -> Union[str, dict]:
-            return _HTTPResponse.generate(data='{api_config.http.response.value}')
+            return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')
         """
+
+    def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
+        assert api_config.http and getattr(
+            api_config.http, http_attr
+        ), "The configuration *HTTP* value should not be empty."
+        return getattr(api_config.http, http_attr)
 
     @abstractmethod
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
@@ -61,14 +70,12 @@ class BaseAppServer(metaclass=ABCMeta):
 class FlaskServer(BaseAppServer):
     """*Build a web application with *Flask**"""
 
-    def setup(self) -> "flask.Flask":
-        flask_pkg: "flask" = import_web_lib.flask()
-        app: "flask.Flask" = flask_pkg.Flask(__name__)
-        return app
+    def setup(self) -> "flask.Flask":  # type: ignore
+        return import_web_lib.flask().Flask(__name__)
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         return f"""self.web_application.route(
-            "{self.url_path(api_config, base_url)}", methods=["{api_config.http.request.method}"]
+            "{self.url_path(api_config, base_url)}", methods=["{cast(HTTPRequest, self._ensure_http(api_config, "request")).method}"]
             )({api_name})
         """
 
@@ -76,14 +83,12 @@ class FlaskServer(BaseAppServer):
 class FastAPIServer(BaseAppServer):
     """*Build a web application with *FastAPI**"""
 
-    def setup(self) -> "fastapi.FastAPI":
-        fastapi_pkg: "fastapi" = import_web_lib.fastapi()
-        app: "fastapi.FastAPI" = fastapi_pkg.FastAPI()
-        return app
+    def setup(self) -> "fastapi.FastAPI":  # type: ignore
+        return import_web_lib.fastapi().FastAPI()
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         return f"""self.web_application.api_route(
-            path="{self.url_path(api_config, base_url)}", methods=["{api_config.http.request.method}"]
+            path="{self.url_path(api_config, base_url)}", methods=["{cast(HTTPRequest, self._ensure_http(api_config, "request")).method}"]
             )({api_name})
         """
 

@@ -29,6 +29,8 @@ from .._values import (
     _Test_Auto_Type,
     _Test_Config,
     _Test_FastAPI_App_Type,
+    _Test_SubCommand_Config,
+    _Test_SubCommand_Run,
     _Workers_Amount,
 )
 
@@ -58,7 +60,9 @@ def _given_parser_args(
             sample_output_path=_Sample_File_Path,
         )
     else:
-        return ParserArguments()
+        return ParserArguments(
+            subparser_name=None,
+        )
 
 
 def _given_command_option() -> CommandOptions:
@@ -137,7 +141,7 @@ class TestSubCmdProcessChain:
         mock_copy.assert_called_once_with(cmd_processor)
 
 
-class CommandProcessorTestSpec(metaclass=ABCMeta):
+class BaseCommandProcessorTestSpec(metaclass=ABCMeta):
     @pytest.fixture(scope="function")
     @abstractmethod
     def cmd_ps(self) -> BaseCommandProcessor:
@@ -188,7 +192,7 @@ class CommandProcessorTestSpec(metaclass=ABCMeta):
         pass
 
 
-class TestNoSubCmd(CommandProcessorTestSpec):
+class TestNoSubCmd(BaseCommandProcessorTestSpec):
     @pytest.fixture(scope="function")
     def cmd_ps(self) -> NoSubCmd:
         return NoSubCmd()
@@ -229,7 +233,7 @@ class TestNoSubCmd(CommandProcessorTestSpec):
         return Namespace
 
 
-class TestSubCmdRun(CommandProcessorTestSpec):
+class TestSubCmdRun(BaseCommandProcessorTestSpec):
     @pytest.fixture(scope="function")
     def cmd_ps(self) -> SubCmdRun:
         return SubCmdRun()
@@ -269,7 +273,7 @@ class TestSubCmdRun(CommandProcessorTestSpec):
         self._test_process(**kwargs)
 
     def _test_process(self, app_type: str, should_raise_exc: bool, cmd_ps: Callable):
-        mock_parser_arg = _given_parser_args(subcommand="run", app_type=app_type)
+        mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Run, app_type=app_type)
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
 
@@ -323,8 +327,33 @@ class TestSubCmdRun(CommandProcessorTestSpec):
         assert re.search(r"doesn't have valid web library", str(exc_info.value), re.IGNORECASE)
         mock_auto_ready.assert_called_once()
 
+    def test_assert_error_with_empty_args(self, cmd_ps: SubCmdRun):
+        # Mock functions
+        cmd_ps._initial_server_gateway = MagicMock()
+        mock_server_gateway = Mock()
+        mock_server_gateway.run = MagicMock()
+        cmd_ps._server_gateway = mock_server_gateway
 
-class TestSubCmdConfig(CommandProcessorTestSpec):
+        invalid_args = SubcmdRunArguments(
+            subparser_name=_Test_SubCommand_Run,
+            app_type="",
+            config=_Test_Config,
+            bind=_Bind_Host_And_Port.value,
+            workers=_Workers_Amount.value,
+            log_level=_Log_Level.value,
+        )
+
+        # Run target function to test
+        with pytest.raises(AssertionError) as exc_info:
+            cmd_ps.process(invalid_args)
+
+        # Verify result
+        assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)
+        cmd_ps._initial_server_gateway.assert_not_called()
+        cmd_ps._server_gateway.run.assert_not_called()
+
+
+class TestSubCmdConfig(BaseCommandProcessorTestSpec):
     @pytest.fixture(scope="function")
     def cmd_ps(self) -> SubCmdConfig:
         return SubCmdConfig()
@@ -369,7 +398,7 @@ class TestSubCmdConfig(CommandProcessorTestSpec):
         FakeYAML.serialize = MagicMock()
         FakeYAML.write = MagicMock()
         mock_parser_arg = SubcmdConfigArguments(
-            subparser_name="config",
+            subparser_name=_Test_SubCommand_Config,
             print_sample=oprint,
             generate_sample=generate,
             sample_output_path=output,
@@ -379,12 +408,8 @@ class TestSubCmdConfig(CommandProcessorTestSpec):
             with patch("pymock_api.cmd_ps.YAML", return_value=FakeYAML) as mock_instantiate_writer:
                 cmd_ps(mock_parser_arg)
 
-                if oprint or generate:
-                    mock_instantiate_writer.assert_called_once()
-                    FakeYAML.serialize.assert_called_once()
-                else:
-                    mock_instantiate_writer.assert_not_called()
-                    FakeYAML.serialize.assert_not_called()
+                mock_instantiate_writer.assert_called_once()
+                FakeYAML.serialize.assert_called_once()
 
                 if oprint:
                     mock_print.assert_has_calls([call(f"It will write below content into file {output}:")])
@@ -409,6 +434,29 @@ class TestSubCmdConfig(CommandProcessorTestSpec):
 
     def _expected_argument_type(self) -> Type[SubcmdConfigArguments]:
         return SubcmdConfigArguments
+
+    def test_assert_error_with_empty_args(self, cmd_ps: SubCmdConfig):
+        # Mock functions
+        FakeYAML.serialize = MagicMock()
+        FakeYAML.write = MagicMock()
+
+        invalid_args = SubcmdConfigArguments(
+            subparser_name=_Test_SubCommand_Config,
+            print_sample=False,
+            generate_sample=True,
+            sample_output_path="",
+        )
+
+        # Run target function to test
+        with patch("pymock_api.cmd_ps.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+            with pytest.raises(AssertionError) as exc_info:
+                cmd_ps.process(invalid_args)
+
+            # Verify result
+            assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)
+            mock_instantiate_writer.assert_called_once()
+            FakeYAML.serialize.assert_called_once()
+            FakeYAML.write.assert_not_called()
 
 
 def test_make_command_chain():

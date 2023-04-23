@@ -1,20 +1,22 @@
 from abc import ABCMeta, abstractmethod
-from typing import Generic
 
 from ...model.cmd_args import SubcmdRunArguments
 from ._model import Command, CommandOptions
-from .cmdoption import ASGICmdOption, Base_Command_Option_Type, WSGICmdOption
+from .cmdoption import ASGICmdOption, BaseCommandOption, WSGICmdOption
 
 
 class BaseSGIServer(metaclass=ABCMeta):
     """*Base class of SGI*"""
 
-    _SGI_Command_Option: Generic[Base_Command_Option_Type] = None
-
     def __init__(self, app: str):
         if not app:
             raise ValueError("The application instance path cannot be None or empty.")
         self._app = app
+        self._SGI_Command_Option: BaseCommandOption = self._init_cmd_option()
+
+    @abstractmethod
+    def _init_cmd_option(self) -> BaseCommandOption:
+        pass
 
     def run(self, parser_args: SubcmdRunArguments) -> None:
         command_line = self.generate(parser_args)
@@ -53,15 +55,14 @@ class BaseSGIServer(metaclass=ABCMeta):
         pass
 
     @property
-    @abstractmethod
-    def options(self) -> Generic[Base_Command_Option_Type]:
+    def options(self) -> BaseCommandOption:
         """The command line options.
 
         Returns:
             An implementation of subclass of BaseCommandLineOption which has its options.
 
         """
-        pass
+        return self._SGI_Command_Option
 
 
 class WSGIServer(BaseSGIServer):
@@ -79,15 +80,12 @@ class WSGIServer(BaseSGIServer):
 
     """
 
+    def _init_cmd_option(self) -> BaseCommandOption:
+        return WSGICmdOption()
+
     @property
     def entry_point(self) -> str:
         return "gunicorn"
-
-    @property
-    def options(self) -> WSGICmdOption:
-        if not self._SGI_Command_Option:
-            self._SGI_Command_Option = WSGICmdOption()
-        return self._SGI_Command_Option
 
 
 class ASGIServer(BaseSGIServer):
@@ -105,12 +103,9 @@ class ASGIServer(BaseSGIServer):
 
     """
 
+    def _init_cmd_option(self) -> BaseCommandOption:
+        return ASGICmdOption()
+
     @property
     def entry_point(self) -> str:
         return "uvicorn --factory"
-
-    @property
-    def options(self) -> ASGICmdOption:
-        if not self._SGI_Command_Option:
-            self._SGI_Command_Option = ASGICmdOption()
-        return self._SGI_Command_Option

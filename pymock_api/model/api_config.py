@@ -9,9 +9,22 @@ from typing import Any, Dict, Optional, Union
 
 from .._utils.file_opt import YAML, _BaseFileOperation
 
+# The truly semantically is more near like following:
+#
+# ConfigType = TypeVar("ConfigType" bound="_Config")
+# def need_implement_func(param: ConfigType):
+#     ... (implementation)
+#
+# However, it would have mypy issue:
+# error: Argument 1 of "{method}" is incompatible with supertype "_Config"; supertype defines the argument type as
+# "ConfigType"  [override]
+# note: This violates the Liskov substitution principle
+# note: See https://mypy.readthedocs.io/en/stable/common_issues.html#incompatible-overrides
+SelfType = Any
+
 
 class _Config(metaclass=ABCMeta):
-    def __eq__(self, other: "_Config") -> bool:
+    def __eq__(self, other: SelfType) -> bool:
         if other is None:
             return False
         if not isinstance(other, self.__class__):
@@ -22,15 +35,15 @@ class _Config(metaclass=ABCMeta):
         return self._compare(other)
 
     @abstractmethod
-    def _compare(self, other: "_Config") -> bool:
+    def _compare(self, other: SelfType) -> bool:
         pass
 
     @abstractmethod
-    def serialize(self, data: Optional["_Config"] = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional[SelfType] = None) -> Optional[Dict[str, Any]]:
         pass
 
     @abstractmethod
-    def deserialize(self, data: Dict[str, Any]) -> Optional["_Config"]:
+    def deserialize(self, data: Dict[str, Any]) -> Optional[SelfType]:
         pass
 
     def _get_prop(self, data: Optional[object], prop: str) -> Any:
@@ -93,7 +106,7 @@ class HTTPRequest(_Config):
     def _compare(self, other: "HTTPRequest") -> bool:
         return self.method == other.method and self.parameters == other.parameters
 
-    def serialize(self, data: "HTTPRequest" = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["HTTPRequest"] = None) -> Optional[Dict[str, Any]]:
         method: str = self._get_prop(data, prop="method")
         parameters: str = self._get_prop(data, prop="parameters")
         if not (method and parameters):
@@ -141,7 +154,7 @@ class HTTPResponse(_Config):
     def _compare(self, other: "HTTPResponse") -> bool:
         return self.value == other.value
 
-    def serialize(self, data: "HTTPResponse" = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["HTTPResponse"] = None) -> Optional[Dict[str, Any]]:
         value: str = self._get_prop(data, prop="value")
         if not value:
             return None
@@ -179,10 +192,10 @@ class HTTPResponse(_Config):
 class HTTP(_Config):
     """*The **http** section in **mocked_apis.<api>***"""
 
-    _request: HTTPRequest
-    _response: HTTPResponse
+    _request: Optional[HTTPRequest]
+    _response: Optional[HTTPResponse]
 
-    def __init__(self, request: HTTPRequest = None, response: HTTPResponse = None):
+    def __init__(self, request: Optional[HTTPRequest] = None, response: Optional[HTTPResponse] = None):
         self._request = request
         self._response = response
 
@@ -190,7 +203,7 @@ class HTTP(_Config):
         return self.request == other.request and self.response == other.response
 
     @property
-    def request(self) -> HTTPRequest:
+    def request(self) -> Optional[HTTPRequest]:
         return self._request
 
     @request.setter
@@ -203,10 +216,10 @@ class HTTP(_Config):
             else:
                 raise TypeError("Setter *HTTP.request* only accepts dict or HTTPRequest type object.")
         else:
-            self._request = req
+            self._request = None
 
     @property
-    def response(self) -> HTTPResponse:
+    def response(self) -> Optional[HTTPResponse]:
         return self._response
 
     @response.setter
@@ -219,11 +232,11 @@ class HTTP(_Config):
             else:
                 raise TypeError("Setter *HTTP.response* only accepts dict or HTTPResponse type object.")
         else:
-            self._response = resp
+            self._response = None
 
-    def serialize(self, data: "HTTP" = None) -> Optional[Dict[str, Any]]:
-        req = (data or self).request.serialize() if (data and data.request) or self.request else None
-        resp = (data or self).response.serialize() if (data and data.response) or self.response else None
+    def serialize(self, data: Optional["HTTP"] = None) -> Optional[Dict[str, Any]]:
+        req = (data or self).request.serialize() if (data and data.request) or self.request else None  # type: ignore
+        resp = (data or self).response.serialize() if (data and data.response) or self.response else None  # type: ignore
         if not (req and resp):
             return None
 
@@ -271,10 +284,10 @@ class HTTP(_Config):
 class MockAPI(_Config):
     """*The **<api>** section in **mocked_apis***"""
 
-    _url: str
-    _http: HTTP
+    _url: Optional[str]
+    _http: Optional[HTTP]
 
-    def __init__(self, url: str = None, http: HTTP = None):
+    def __init__(self, url: Optional[str] = None, http: Optional[HTTP] = None):
         self._url = url
         self._http = http
 
@@ -282,15 +295,15 @@ class MockAPI(_Config):
         return self.url == other.url and self.http == other.http
 
     @property
-    def url(self) -> str:
+    def url(self) -> Optional[str]:
         return self._url
 
     @url.setter
-    def url(self, url: str) -> None:
+    def url(self, url: Optional[str]) -> None:
         self._url = url
 
     @property
-    def http(self) -> HTTP:
+    def http(self) -> Optional[HTTP]:
         return self._http
 
     @http.setter
@@ -303,9 +316,9 @@ class MockAPI(_Config):
             else:
                 raise TypeError("Setter *MockAPI.http* only accepts dict or HTTP type object.")
         else:
-            self._http = http
+            self._http = None
 
-    def serialize(self, data: "MockAPI" = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["MockAPI"] = None) -> Optional[Dict[str, Any]]:
         url = (data.url if data else None) or self._url
         http = (data.http if data else None) or self.http
         if not (url and http):
@@ -356,10 +369,10 @@ class MockAPI(_Config):
 class MockAPIs(_Config):
     """*The **mocked_apis** section*"""
 
-    _base: BaseConfig
-    _apis: Dict[str, MockAPI]
+    _base: Optional[BaseConfig]
+    _apis: Dict[str, Optional[MockAPI]]
 
-    def __init__(self, base: BaseConfig = None, apis: Dict[str, MockAPI] = None):
+    def __init__(self, base: Optional[BaseConfig] = None, apis: Dict[str, Optional[MockAPI]] = {}):
         self._base = base
         self._apis = apis
 
@@ -370,7 +383,7 @@ class MockAPIs(_Config):
         return self.base == other.base and self.apis == other.apis
 
     @property
-    def base(self) -> BaseConfig:
+    def base(self) -> Optional[BaseConfig]:
         return self._base
 
     @base.setter
@@ -383,10 +396,10 @@ class MockAPIs(_Config):
             else:
                 raise TypeError("Setter *MockAPIs.base* only accepts dict or BaseConfig type object.")
         else:
-            self._base = base
+            self._base = None
 
     @property
-    def apis(self) -> Dict[str, MockAPI]:
+    def apis(self) -> Dict[str, Optional[MockAPI]]:
         return self._apis
 
     @apis.setter
@@ -402,13 +415,13 @@ class MockAPIs(_Config):
             if False in ele_types:
                 self._apis = {}
                 for api_name, api_config in apis.items():
-                    self._apis[api_name] = MockAPI().deserialize(data=api_config)
+                    self._apis[api_name] = MockAPI().deserialize(data=(api_config or {}))  # type: ignore
             else:
-                self._apis = apis
+                self._apis = apis  # type: ignore
         else:
-            self._apis = apis
+            self._apis = {}
 
-    def serialize(self, data: "MockAPIs" = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["MockAPIs"] = None) -> Optional[Dict[str, Any]]:
         base = (data.base if data else None) or self.base
         apis = (data.apis if data else None) or self.apis
         if not (base and apis):
@@ -496,11 +509,11 @@ class APIConfig(_Config):
 
     _name: str = ""
     _description: str = ""
-    _apis: MockAPIs
+    _apis: Optional[MockAPIs]
 
-    _configuration: _BaseFileOperation = None
+    _configuration: _BaseFileOperation = YAML()
 
-    def __init__(self, name: str = None, description: str = None, apis: MockAPIs = None):
+    def __init__(self, name: str = "", description: str = "", apis: Optional[MockAPIs] = None):
         self._name = name
         self._description = description
         self._apis = apis
@@ -513,8 +526,6 @@ class APIConfig(_Config):
 
     @property
     def _config_operation(self) -> _BaseFileOperation:
-        if not self._configuration:
-            self._configuration = YAML()
         return self._configuration
 
     def has_apis(self) -> bool:
@@ -537,7 +548,7 @@ class APIConfig(_Config):
         self._description = desc
 
     @property
-    def apis(self) -> MockAPIs:
+    def apis(self) -> Optional[MockAPIs]:
         return self._apis
 
     @apis.setter
@@ -550,9 +561,9 @@ class APIConfig(_Config):
             else:
                 raise TypeError("Setter *APIConfig.apis* only accepts dict or MockAPIs type object.")
         else:
-            self._apis = apis
+            self._apis = None
 
-    def serialize(self, data: "APIConfig" = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["APIConfig"] = None) -> Optional[Dict[str, Any]]:
         name = (data.name if data else None) or self.name
         description = (data.description if data else None) or self.description
         apis = (data.apis if data else None) or self.apis
@@ -634,8 +645,8 @@ class APIConfig(_Config):
             return None
         return self
 
-    def from_yaml(self, path: str) -> "APIConfig":
+    def from_yaml(self, path: str) -> Optional["APIConfig"]:
         return self.deserialize(data=self._config_operation.read(path))
 
     def to_yaml(self, path: str) -> None:
-        self._config_operation.write(path=path, config=self.serialize())
+        self._config_operation.write(path=path, config=(self.serialize() or {}))
