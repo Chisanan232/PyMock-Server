@@ -77,7 +77,7 @@ _Cmd_Option = namedtuple("_Cmd_Option", ["option_name", "value"])
 
 # Sample configuration content
 class _TestConfig:
-    Request: Dict[str, str] = {"method": "GET", "parameters": {"param1": "val1"}}
+    Request: dict = {"method": "GET", "parameters": {"param1": "val1"}}
     Response: Dict[str, str] = {"value": _Test_HTTP_Resp}
     Http: dict = {"request": Request, "response": Response}
     Mock_API: dict = {"url": _Test_URL, "http": Http}

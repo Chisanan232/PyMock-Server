@@ -1,6 +1,6 @@
 import json
 from abc import abstractmethod
-from typing import Union
+from typing import Any, Union
 
 import fastapi
 import flask
@@ -20,6 +20,9 @@ from pymock_api.server.application import (
 from ..._values import _YouTube_API_Content
 from .._spec import ConfigFile, MockAPI_Config_Path, file
 
+WebLibraryType = Any  # flask.Flask, fastapi.FastAPI
+ResponseType = Any  # FlaskResponse, FastAPIResponse
+
 
 class MockHTTPServerTestSpec:
     config_file: ConfigFile = ConfigFile()
@@ -30,7 +33,7 @@ class MockHTTPServerTestSpec:
         pass
 
     @pytest.fixture(scope="class", autouse=True)
-    def api_config(self) -> APIConfig:
+    def api_config(self) -> APIConfig:  # type: ignore
         # Ensure that it doesn't have file
         self.config_file.delete()
         # Create the target file before run test
@@ -48,25 +51,34 @@ class MockHTTPServerTestSpec:
     def mock_server_app(
         self, server_app_type: BaseAppServer, api_config: APIConfig
     ) -> Union[flask.Flask, fastapi.FastAPI]:
+        assert api_config.apis
         server_app_type.create_api(mocked_apis=api_config.apis)
         return server_app_type.web_application
 
     @pytest.fixture(scope="function")
     @abstractmethod
-    def client(
-        self, mock_server_app: Union[flask.Flask, fastapi.FastAPI]
-    ) -> Union["flask.testing.FlaskClient", FastAPITestClient]:
+    def client(self, mock_server_app: WebLibraryType) -> Union["flask.testing.FlaskClient", FastAPITestClient]:
         pass
 
     def test_mock_apis(self, client: Union["flask.testing.FlaskClient", FastAPITestClient], api_config: APIConfig):
+        assert api_config.apis and api_config.apis.apis
         for one_api_name, one_api_config in api_config.apis.apis.items():
             # Send HTTP request to target API and get its response data
+            assert (
+                one_api_config
+                and one_api_config.http
+                and one_api_config.http.request
+                and one_api_config.http.request.method
+                and api_config.apis.base
+                and one_api_config.url
+            )
             response = getattr(client, one_api_config.http.request.method.lower())(
                 api_config.apis.base.url + one_api_config.url
             )
             under_test_http_resp = self._deserialize_response(response)
 
             # Get the expected result data
+            assert one_api_config.http.response
             expected_http_resp = _HTTPResponse.generate(data=one_api_config.http.response.value)
 
             # Verify the result data
@@ -75,7 +87,7 @@ class MockHTTPServerTestSpec:
             ), f"The response data should be the same at mocked API '{one_api_name}'."
 
     @abstractmethod
-    def _deserialize_response(self, response: Union[FlaskResponse, FastAPIResponse]) -> Union[str, dict]:
+    def _deserialize_response(self, response: ResponseType) -> Union[str, dict]:
         pass
 
 
