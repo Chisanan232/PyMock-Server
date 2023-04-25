@@ -1,6 +1,8 @@
+from typing import Optional
+
 from pymock_api.runner import CommandRunner
 
-CMD_RUNNER: CommandRunner = None
+CMD_RUNNER: Optional[CommandRunner] = None
 
 
 def initial_runner() -> None:
@@ -10,6 +12,7 @@ def initial_runner() -> None:
 
 
 def get_runner() -> CommandRunner:
+    assert CMD_RUNNER
     return CMD_RUNNER
 
 
