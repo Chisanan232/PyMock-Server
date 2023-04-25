@@ -43,10 +43,11 @@ repos:
   rev: v1.2.0
   hooks:
     - id: mypy
-      package: pymock_api
-      exclude: ^test/
-      args:
-#        - --strict
-        - --ignore-missing-imports
-        - --show-traceback
-      additional_dependencies: [types-PyYAML>=6.0.12.9]
+      config_file: mypy.ini
+#      package: pymock_api
+#      exclude: ^test/
+#      args:
+##        - --strict
+#        - --ignore-missing-imports
+#        - --show-traceback
+#      additional_dependencies: [types-PyYAML>=6.0.12.9]
