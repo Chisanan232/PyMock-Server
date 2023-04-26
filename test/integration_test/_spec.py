@@ -1,12 +1,12 @@
 import json
 import os
 from functools import wraps
-from typing import Any, Callable, Union
+from typing import Any, Callable, Optional, Union
 
 try:
     from yaml import CDumper as Dumper
 except ImportError:
-    from yaml import Dumper
+    from yaml import Dumper  # type: ignore
 
 from yaml import dump
 
@@ -15,7 +15,7 @@ from .._values import _Test_Config_Value, _YouTube_API_Content
 
 class file:
     @classmethod
-    def write(cls, path: str, content: Union[str, dict], serialize: Callable = None) -> None:
+    def write(cls, path: str, content: Union[str, dict], serialize: Optional[Callable] = None) -> None:
         if not serialize:
             serialize = lambda dataraw: dataraw
         with open(path, "a+", encoding="utf-8") as file_stream:

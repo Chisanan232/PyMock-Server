@@ -43,8 +43,8 @@ repos:
   rev: v1.2.0
   hooks:
     - id: mypy
-      package: pymock_api
-      exclude: ^test/
+      package: pymock_api,test
+      exclude: ^test/unit_test.{1,64}.py
       args:
 #        - --strict
         - --ignore-missing-imports

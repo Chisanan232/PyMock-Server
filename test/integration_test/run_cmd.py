@@ -5,6 +5,7 @@ import subprocess
 import sys
 import threading
 from abc import ABC, ABCMeta, abstractmethod
+from typing import Optional
 
 import pytest
 
@@ -49,7 +50,7 @@ class CommandTestSpec(metaclass=ABCMeta):
         self._read_streaming_output(cmd_ps)
 
     def _read_streaming_output(self, cmd_ps: subprocess.Popen) -> None:
-        for line in iter(lambda: cmd_ps.stdout.readline(), b""):
+        for line in iter(lambda: cmd_ps.stdout.readline(), b""):  # type: ignore
             sys.stdout.write(line.decode("utf-8"))
             if self.Terminate_Command_Running_When_Sniff_IP_Info and re.search(
                 r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", line.decode("utf-8")
@@ -127,7 +128,7 @@ class TestShowSampleConfiguration(CommandTestSpec):
 class TestGenerateSampleConfiguration(CommandTestSpec):
     Terminate_Command_Running_When_Sniff_IP_Info: bool = False
     _Default_Path: str = "sample-api.yaml"
-    _Under_Test_Path: str = None
+    _Under_Test_Path: Optional[str] = None
 
     @property
     def options(self) -> str:
@@ -149,6 +150,7 @@ class TestGenerateSampleConfiguration(CommandTestSpec):
                 os.remove(self._Under_Test_Path)
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
+        assert self._Under_Test_Path
         assert os.path.exists(self._Under_Test_Path)
         config_data = YAML().read(self._Under_Test_Path)
         assert config_data == Sample_Config_Value
@@ -174,6 +176,7 @@ class RunMockApplicationTestSpec(CommandTestSpec, ABC):
         curl_google_ps = subprocess.Popen(
             f"curl http://{_Bind_Host_And_Port.value}{api}", shell=True, stdout=subprocess.PIPE
         )
+        assert curl_google_ps.stdout
         resp = curl_google_ps.stdout.readlines()[0]
         resp_content = json.loads(resp.decode("utf-8"))["content"] if resp_is_json_format else resp.decode("utf-8")
         assert re.search(re.escape(expected_resp_content), resp_content, re.IGNORECASE)
