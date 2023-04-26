@@ -43,7 +43,8 @@ repos:
   rev: v1.2.0
   hooks:
     - id: mypy
-      config_file: mypy.ini
+      args:
+        - --config-file mypy.ini
 #      package: pymock_api
 #      exclude: ^test/
 #      args:
