@@ -3,12 +3,12 @@
 .DS_Store
 ## Python cache
 __pycache__
-## PyLint
-.pypirc
-## PyTest
-.pytest_cache/
 ## PyEnv
 .python-version
+## PyTest
+.pytest_cache/
+## PyLint
+.pypirc
 
 #### Running result of tools
 ## Test coverage
