@@ -1,14 +1,21 @@
+#### Cache
+## MacOS
 .DS_Store
+## Python cache
 __pycache__
+## PyLint
+.pypirc
+## PyTest
+.pytest_cache/
+## PyEnv
+.python-version
+
+#### Running result of tools
+## Test coverage
 .coverage
 .coverage.*
-.pypirc
-.pytest_cache/
-.python-version
-.tox/
-build/
-code_source/
 coverage.xml
+## Package Python code
+build/
 dist/
-study/
 *.egg-info/
