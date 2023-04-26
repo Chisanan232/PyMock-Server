@@ -9,6 +9,8 @@ __pycache__
 .pytest_cache/
 ## PyLint
 .pypirc
+## MyPy
+.mypy_cache/
 
 #### Running result of tools
 ## Test coverage
