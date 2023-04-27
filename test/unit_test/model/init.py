@@ -11,6 +11,7 @@ from ..._values import (
     _Sample_File_Path,
     _Test_App_Type,
     _Test_Config,
+    _Test_SubCommand_Check,
     _Test_SubCommand_Config,
     _Test_SubCommand_Run,
     _Workers_Amount,
@@ -42,4 +43,15 @@ def test_deserialize_subcommand_config_args(mock_parser_arguments: Mock):
     }
     namespace = Namespace(**namespace_args)
     deserialize_args.subcmd_config(namespace)
+    mock_parser_arguments.assert_called_once_with(namespace)
+
+
+@patch.object(DeserializeParsedArgs, "subcommand_check")
+def test_deserialize_subcommand_check_args(mock_parser_arguments: Mock):
+    namespace_args = {
+        "subcommand": _Test_SubCommand_Check,
+        "config_path": _Test_Config,
+    }
+    namespace = Namespace(**namespace_args)
+    deserialize_args.subcmd_check(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
