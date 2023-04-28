@@ -5,7 +5,7 @@ content ...
 
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 from .._utils.file_opt import YAML, _BaseFileOperation
 
@@ -42,7 +42,17 @@ class _Config(metaclass=ABCMeta):
     def serialize(self, data: Optional[SelfType] = None) -> Optional[Dict[str, Any]]:
         pass
 
+    @staticmethod
+    def _ensure_process_with_not_empty_value(function: Callable) -> Callable:
+        def _(self, data: Dict[str, Any]) -> Optional[SelfType]:
+            if not data:
+                return data
+            return function(self, data)
+
+        return _
+
     @abstractmethod
+    @_ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional[SelfType]:
         pass
 
@@ -69,6 +79,7 @@ class BaseConfig(_Config):
             "url": url,
         }
 
+    @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["BaseConfig"]:
         """Convert data to **BaseConfig** type object.
 
@@ -91,8 +102,6 @@ class BaseConfig(_Config):
 
         """
         self.url = data.get("url", None)
-        if not self.url:
-            return None
         return self
 
 
@@ -116,6 +125,7 @@ class HTTPRequest(_Config):
             "parameters": parameters,
         }
 
+    @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["HTTPRequest"]:
         """Convert data to **HTTPRequest** type object.
 
@@ -140,8 +150,6 @@ class HTTPRequest(_Config):
         """
         self.method = data.get("method", None)
         self.parameters = data.get("parameters", None)
-        if not (self.method and self.parameters):
-            return None
         return self
 
 
@@ -162,6 +170,7 @@ class HTTPResponse(_Config):
             "value": value,
         }
 
+    @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["HTTPResponse"]:
         """Convert data to **HTTPResponse** type object.
 
@@ -184,8 +193,6 @@ class HTTPResponse(_Config):
 
         """
         self.value = data.get("value", None)
-        if not self.value:
-            return None
         return self
 
 
@@ -245,6 +252,7 @@ class HTTP(_Config):
             "response": resp,
         }
 
+    @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["HTTP"]:
         """Convert data to **HTTP** type object.
 
@@ -276,8 +284,6 @@ class HTTP(_Config):
         resp = data.get("response", None)
         self.request = HTTPRequest().deserialize(data=req) if req else None
         self.response = HTTPResponse().deserialize(data=resp) if resp else None
-        if not (self.request and self.response):
-            return None
         return self
 
 
@@ -328,6 +334,7 @@ class MockAPI(_Config):
             "http": http.serialize(data=http),
         }
 
+    @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["MockAPI"]:
         """Convert data to **MockAPI** type object.
 
@@ -361,8 +368,6 @@ class MockAPI(_Config):
         self.url = data.get("url", None)
         http_info = data.get("http", None)
         self.http = HTTP().deserialize(data=http_info) if http_info else None
-        if not (self.url and self.http):
-            return None
         return self
 
 
@@ -415,7 +420,7 @@ class MockAPIs(_Config):
             if False in ele_types:
                 self._apis = {}
                 for api_name, api_config in apis.items():
-                    self._apis[api_name] = MockAPI().deserialize(data=(api_config or {}))  # type: ignore
+                    self._apis[api_name] = MockAPI().deserialize(data=(api_config or {}))
             else:
                 self._apis = apis  # type: ignore
         else:
@@ -433,6 +438,7 @@ class MockAPIs(_Config):
             api_info[api_name] = MockAPI().serialize(data=api_config)
         return api_info
 
+    @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["MockAPIs"]:
         """Convert data to **MockAPIs** type object.
 
@@ -489,18 +495,12 @@ class MockAPIs(_Config):
 
         """
         base_info = data.get("base", None)
-        if not base_info:
-            return None
-        if len(data.keys()) == 1:
-            return None
         self.base = BaseConfig().deserialize(data=base_info)
         self.apis = {}
         for mock_api_name in data.keys():
             if mock_api_name == "base":
                 continue
             self.apis[mock_api_name] = MockAPI().deserialize(data=data.get(mock_api_name, None))
-        if not (self.base and self.apis):
-            return None
         return self
 
 
@@ -575,6 +575,7 @@ class APIConfig(_Config):
             "mocked_apis": MockAPIs().serialize(data=apis),
         }
 
+    @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["APIConfig"]:
         """Convert data to **APIConfig** type object.
 
@@ -641,8 +642,6 @@ class APIConfig(_Config):
         mocked_apis = data.get("mocked_apis", None)
         if mocked_apis:
             self.apis = MockAPIs().deserialize(data=mocked_apis)
-        if not (self.name and self.description and self.apis):
-            return None
         return self
 
     def from_yaml(self, path: str) -> Optional["APIConfig"]:
