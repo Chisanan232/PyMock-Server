@@ -31,6 +31,25 @@ _assertion_msg = "Its property's value should be same as we set."
 MOCK_RETURN_VALUE: Mock = Mock()
 
 
+@pytest.mark.parametrize(
+    ("data", "expected"),
+    [
+        (None, None),
+        ({}, {}),
+        ({"any_key": "any_value"}, {"any_key": "any_value", "flag": "has run *test_function*"}),
+    ],
+)
+def test_ensure_process_with_not_empty_value(data: Optional[Dict[str, str]], expected: Optional[Dict[str, str]]):
+    class FakeObject:
+        @_Config._ensure_process_with_not_empty_value
+        def test_function(self, data: Dict[str, Any]) -> Any:
+            data["flag"] = "has run *test_function*"
+            return data
+
+    fo = FakeObject()
+    assert fo.test_function(data=data) == expected
+
+
 def test_config_get_prop():
     class FakeConfig(_Config):
         def _compare(self, other: "_Config") -> bool:
