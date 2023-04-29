@@ -1,6 +1,9 @@
 import copy
+import json
 import os
+import pathlib
 import re
+import sys
 from argparse import ArgumentParser, Namespace
 from typing import List, Optional, Tuple, Type
 
@@ -8,10 +11,13 @@ from ._utils import YAML, import_web_lib
 from .cmd import MockAPICommandParser, SubCommand
 from .exceptions import InvalidAppType, NoValidWebLibrary
 from .model import (
+    APIConfig,
     ParserArguments,
+    SubcmdCheckArguments,
     SubcmdConfigArguments,
     SubcmdRunArguments,
     deserialize_args,
+    load_config,
 )
 from .model._sample import Sample_Config_Value
 from .server import BaseSGIServer, setup_asgi, setup_wsgi
@@ -176,3 +182,80 @@ class SubCmdConfig(BaseCommandProcessor):
         if args.generate_sample:
             assert args.sample_output_path, _option_cannot_be_empty_assertion("-o, --output")
             yaml.write(path=args.sample_output_path, config=sample_data)
+
+
+class SubCmdCheck(BaseCommandProcessor):
+    responsible_subcommand = SubCommand.Check
+
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdCheckArguments:
+        return deserialize_args.subcmd_check(self._parse_cmd_arguments(parser, cmd_args))
+
+    def _run(self, args: SubcmdCheckArguments) -> None:
+        print(f"[DEBUG] api_config: {args.config_path}")
+        api_config: Optional[APIConfig] = load_config(path=args.config_path)
+        print(f"[DEBUG] api_config: {api_config}")
+        if api_config is None:
+            print("Configuration *mocked_apis* is empty.")
+            sys.exit(1)
+
+        print(f"[DEBUG] api_config.apis: {api_config.apis}")
+        if api_config.apis:
+            if api_config.apis.apis is None:
+                print("Configuration *mocked_apis* is empty.")
+                sys.exit(1)
+
+            for one_api_name, one_api_config in api_config.apis.apis.items():
+                if one_api_config is None:
+                    print(f"Configuration *mocked_apis.{one_api_name}* content is empty.")
+                    sys.exit(1)
+
+                print(f"[DEBUG] one_api_config.url: {one_api_config.url}")
+                if one_api_config.url is None:
+                    print(f"Configuration *mocked_apis.{one_api_name}.url* content is empty.")
+                    sys.exit(1)
+
+                print(f"[DEBUG] one_api_config.http: {one_api_config.http}")
+                if one_api_config.http is None:
+                    print(f"Configuration *mocked_apis.{one_api_name}.http* content is empty.")
+                    sys.exit(1)
+
+                print(f"[DEBUG] one_api_config.http.request: {one_api_config.http.request}")
+                if one_api_config.http.request is None:
+                    print(f"Configuration *mocked_apis.{one_api_name}.http.request* content is empty.")
+                    sys.exit(1)
+
+                print(f"[DEBUG] one_api_config.http.request.method: {one_api_config.http.request.method}")
+                if one_api_config.http.request.method is None:
+                    print(f"Configuration *mocked_apis.{one_api_name}.http.request.method* content is empty.")
+                    sys.exit(1)
+
+                if one_api_config.http.request.method.upper() not in ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTION"]:
+                    print(f"Configuration *mocked_apis.{one_api_name}.http.request.method* content is empty.")
+                    sys.exit(1)
+
+                print(f"[DEBUG] one_api_config.http.response: {one_api_config.http.response}")
+                if one_api_config.http.response is None:
+                    print(f"Configuration *mocked_apis.{one_api_name}.http.response* content is empty.")
+                    sys.exit(1)
+
+                print(f"[DEBUG] one_api_config.http.response.value: {one_api_config.http.response.value}")
+                if one_api_config.http.response.value is None:
+                    print(f"Configuration *mocked_apis.{one_api_name}.http.response.value* content is empty.")
+                    sys.exit(1)
+
+                if one_api_config.http.response.value:
+                    try:
+                        json.loads(one_api_config.http.response.value)
+                    except:
+                        is_file_name_format = re.search(r"\w{1,32}\.\w{1,8}", one_api_config.http.response.value)
+                        print(f"[DEBUG] is_file_name_format: {is_file_name_format}")
+                        if is_file_name_format:
+                            if not pathlib.Path(one_api_config.http.response.value).exists():
+                                print("File doesn't exist")
+                                sys.exit(1)
+                        # else:
+                        #     print("Data content format is incorrect")
+                        #     sys.exit(1)
+
+        print("Configuration is valid.")
+        sys.exit(0)
