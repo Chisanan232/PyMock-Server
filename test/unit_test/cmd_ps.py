@@ -478,8 +478,8 @@ API_NAME: str = "google_home"
 INVALID_YAML: List[str] = []
 
 
-def _get_all_invalid_yaml() -> None:
-    invalid_yaml_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "config", "invalid", "*.yaml")
+def _get_all_invalid_yaml(config_type: str = "invalid") -> None:
+    invalid_yaml_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "config", config_type, "*.yaml")
     global INVALID_YAML
     INVALID_YAML = glob.glob(invalid_yaml_dir)
 
