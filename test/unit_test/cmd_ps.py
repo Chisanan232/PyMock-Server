@@ -4,7 +4,7 @@ import pathlib
 import re
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, Namespace
-from typing import Callable, List, Optional, Type, Union
+from typing import Callable, List, Optional, Tuple, Type, Union
 from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
@@ -475,13 +475,16 @@ class TestSubCmdConfig(BaseCommandProcessorTestSpec):
 
 
 API_NAME: str = "google_home"
-TEST_YAML_PATHS: List[str] = []
+YAML_PATHS_WITH_EX_CODE: List[tuple] = []
 
 
-def _get_all_yaml(config_type: str) -> None:
+def _get_all_yaml(config_type: str, exit_code: Union[str, int]) -> None:
     yaml_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "config", config_type, "*.yaml")
-    global TEST_YAML_PATHS
-    TEST_YAML_PATHS.extend(glob.glob(yaml_dir))
+    global YAML_PATHS_WITH_EX_CODE
+    for yaml_config_path in glob.glob(yaml_dir):
+        expected_exit_code = exit_code if isinstance(exit_code, str) and exit_code.isdigit() else str(exit_code)
+        one_test_scenario = (yaml_config_path, expected_exit_code)
+        YAML_PATHS_WITH_EX_CODE.append(one_test_scenario)
 
 
 def _expected_err_msg(file: str) -> str:
@@ -491,7 +494,8 @@ def _expected_err_msg(file: str) -> str:
     return f"Configuration *{config_key}* content"
 
 
-_get_all_yaml(config_type="invalid")
+_get_all_yaml(config_type="valid", exit_code=0)
+_get_all_yaml(config_type="invalid", exit_code=1)
 
 
 class TestSubCmdCheck(BaseCommandProcessorTestSpec):
@@ -499,28 +503,35 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
     def cmd_ps(self) -> SubCmdCheck:
         return SubCmdCheck()
 
-    @pytest.mark.parametrize("config_path", TEST_YAML_PATHS)
-    def test_with_command_processor(self, config_path: str, object_under_test: Callable):
+    @pytest.mark.parametrize(
+        ("config_path", "expected_exit_code"),
+        YAML_PATHS_WITH_EX_CODE,
+    )
+    def test_with_command_processor(self, config_path: str, expected_exit_code: str, object_under_test: Callable):
         kwargs = {
             "config_path": config_path,
+            "expected_exit_code": expected_exit_code,
             "cmd_ps": object_under_test,
         }
         self._test_process(**kwargs)
 
-    @pytest.mark.parametrize("config_path", TEST_YAML_PATHS)
-    def test_with_run_entry_point(self, config_path: str, entry_point_under_test: Callable):
+    @pytest.mark.parametrize(
+        ("config_path", "expected_exit_code"),
+        YAML_PATHS_WITH_EX_CODE,
+    )
+    def test_with_run_entry_point(self, config_path: str, expected_exit_code: str, entry_point_under_test: Callable):
         kwargs = {
             "config_path": config_path,
+            "expected_exit_code": expected_exit_code,
             "cmd_ps": entry_point_under_test,
         }
         self._test_process(**kwargs)
 
-    def _test_process(self, config_path: str, cmd_ps: Callable):
+    def _test_process(self, config_path: str, expected_exit_code: str, cmd_ps: Callable):
         mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Check, config_path=config_path)
         with pytest.raises(SystemExit) as exc_info:
             cmd_ps(mock_parser_arg)
-        _expected_sys_exit_code = "1"
-        assert _expected_sys_exit_code in str(exc_info.value)
+        assert expected_exit_code in str(exc_info.value)
         # TODO: Add one more checking of the error message content with function *_expected_err_msg*
 
     def _given_cmd_args_namespace(self) -> Namespace:
