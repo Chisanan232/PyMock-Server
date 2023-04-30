@@ -195,7 +195,7 @@ class SubCmdCheck(BaseCommandProcessor):
         api_config: Optional[APIConfig] = load_config(path=args.config_path)
         print(f"[DEBUG] api_config: {api_config}")
         if api_config is None:
-            print("Configuration *mocked_apis* is empty.")
+            print("Configuration is empty.")
             sys.exit(1)
 
         print(f"[DEBUG] api_config.apis: {api_config.apis}")
