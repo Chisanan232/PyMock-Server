@@ -223,25 +223,24 @@ class SubCmdCheck(BaseCommandProcessor):
                     sys.exit(1)
 
                 if one_api_config.http.request.method.upper() not in ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTION"]:
-                    print(f"Configuration *mocked_apis.{one_api_name}.http.request.method* content is empty.")
+                    print(f"Configuration *mocked_apis.{one_api_name}.http.request.method* value is invalid.")
                     sys.exit(1)
 
                 if one_api_config.http.response is None:
                     print(f"Configuration *mocked_apis.{one_api_name}.http.response* content is empty.")
                     sys.exit(1)
 
-                if one_api_config.http.response.value is None:
+                response_value = one_api_config.http.response.value
+                if response_value is None:
                     print(f"Configuration *mocked_apis.{one_api_name}.http.response.value* content is empty.")
                     sys.exit(1)
-
-                if one_api_config.http.response.value:
+                else:
                     try:
-                        json.loads(one_api_config.http.response.value)
+                        json.loads(response_value)
                     except:
-                        is_file_name_format = re.search(r"\w{1,32}\.\w{1,8}", one_api_config.http.response.value)
-                        if is_file_name_format:
-                            if not pathlib.Path(one_api_config.http.response.value).exists():
-                                print("File doesn't exist")
+                        if re.search(r"\w{1,32}\.\w{1,8}", response_value):
+                            if not pathlib.Path(response_value).exists():
+                                print("The file which is the response content doesn't exist.")
                                 sys.exit(1)
                         # else:
                         #     print("Data content format is incorrect")
