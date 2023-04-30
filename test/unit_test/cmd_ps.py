@@ -1,3 +1,6 @@
+import glob
+import os.path
+import pathlib
 import re
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, Namespace
@@ -11,12 +14,18 @@ from pymock_api.cmd import SubCommand, get_all_subcommands
 from pymock_api.cmd_ps import (
     BaseCommandProcessor,
     NoSubCmd,
+    SubCmdCheck,
     SubCmdConfig,
     SubCmdRun,
     make_command_chain,
     run_command_chain,
 )
-from pymock_api.model import ParserArguments, SubcmdConfigArguments, SubcmdRunArguments
+from pymock_api.model import (
+    ParserArguments,
+    SubcmdCheckArguments,
+    SubcmdConfigArguments,
+    SubcmdRunArguments,
+)
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from .._values import (
@@ -29,6 +38,7 @@ from .._values import (
     _Test_Auto_Type,
     _Test_Config,
     _Test_FastAPI_App_Type,
+    _Test_SubCommand_Check,
     _Test_SubCommand_Config,
     _Test_SubCommand_Run,
     _Workers_Amount,
@@ -41,7 +51,7 @@ _Fake_Amt: int = 1
 
 
 def _given_parser_args(
-    subcommand: str = None, app_type: str = None
+    subcommand: str = None, app_type: str = None, config_path: str = None
 ) -> Union[SubcmdRunArguments, SubcmdConfigArguments, ParserArguments]:
     if subcommand == "run":
         return SubcmdRunArguments(
@@ -58,6 +68,11 @@ def _given_parser_args(
             print_sample=_Print_Sample,
             generate_sample=_Generate_Sample,
             sample_output_path=_Sample_File_Path,
+        )
+    elif subcommand == "check":
+        return SubcmdCheckArguments(
+            subparser_name=subcommand,
+            config_path=(config_path or _Test_Config),
         )
     else:
         return ParserArguments(
@@ -457,6 +472,68 @@ class TestSubCmdConfig(BaseCommandProcessorTestSpec):
             mock_instantiate_writer.assert_called_once()
             FakeYAML.serialize.assert_called_once()
             FakeYAML.write.assert_not_called()
+
+
+API_NAME: str = "google_home"
+INVALID_YAML: List[str] = []
+
+
+def _get_all_invalid_yaml() -> None:
+    invalid_yaml_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "config", "invalid", "*.yaml")
+    global INVALID_YAML
+    INVALID_YAML = glob.glob(invalid_yaml_dir)
+
+
+def _expected_err_msg(file: str) -> str:
+    file = file.split("/")[-1] if "/" in file else file
+    file_name: List[str] = file.split("-")
+    config_key = file_name[0].replace("no_", "").replace(".yaml", "").replace("_", ".").replace("api.name", API_NAME)
+    return f"Configuration *{config_key}* content"
+
+
+_get_all_invalid_yaml()
+
+
+class TestSubCmdCheck(BaseCommandProcessorTestSpec):
+    @pytest.fixture(scope="function")
+    def cmd_ps(self) -> SubCmdCheck:
+        return SubCmdCheck()
+
+    @pytest.mark.parametrize("config_path", INVALID_YAML)
+    def test_with_command_processor(self, config_path: str, object_under_test: Callable):
+        kwargs = {
+            "config_path": config_path,
+            "cmd_ps": object_under_test,
+        }
+        self._test_process(**kwargs)
+
+    @pytest.mark.parametrize("config_path", INVALID_YAML)
+    def test_with_run_entry_point(self, config_path: str, entry_point_under_test: Callable):
+        kwargs = {
+            "config_path": config_path,
+            "cmd_ps": entry_point_under_test,
+        }
+        self._test_process(**kwargs)
+
+    def _test_process(self, config_path: str, cmd_ps: Callable):
+        mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Check, config_path=config_path)
+        with pytest.raises(SystemExit) as exc_info:
+            cmd_ps(mock_parser_arg)
+        _expected_sys_exit_code = "1"
+        assert _expected_sys_exit_code in str(exc_info.value)
+        # TODO: Add one more checking of the error message content with function *_expected_err_msg*
+
+    def _given_cmd_args_namespace(self) -> Namespace:
+        args_namespace = Namespace()
+        args_namespace.subcommand = SubCommand.Check
+        args_namespace.config_path = _Test_Config
+        return args_namespace
+
+    def _given_subcmd(self) -> Optional[str]:
+        return SubCommand.Check
+
+    def _expected_argument_type(self) -> Type[SubcmdCheckArguments]:
+        return SubcmdCheckArguments
 
 
 def test_make_command_chain():
