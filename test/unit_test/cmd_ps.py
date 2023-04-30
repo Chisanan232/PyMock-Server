@@ -475,13 +475,13 @@ class TestSubCmdConfig(BaseCommandProcessorTestSpec):
 
 
 API_NAME: str = "google_home"
-INVALID_YAML: List[str] = []
+TEST_YAML_PATHS: List[str] = []
 
 
-def _get_all_invalid_yaml(config_type: str = "invalid") -> None:
-    invalid_yaml_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "config", config_type, "*.yaml")
-    global INVALID_YAML
-    INVALID_YAML = glob.glob(invalid_yaml_dir)
+def _get_all_yaml(config_type: str) -> None:
+    yaml_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "config", config_type, "*.yaml")
+    global TEST_YAML_PATHS
+    TEST_YAML_PATHS = glob.glob(yaml_dir)
 
 
 def _expected_err_msg(file: str) -> str:
@@ -491,7 +491,7 @@ def _expected_err_msg(file: str) -> str:
     return f"Configuration *{config_key}* content"
 
 
-_get_all_invalid_yaml()
+_get_all_yaml(config_type="invalid")
 
 
 class TestSubCmdCheck(BaseCommandProcessorTestSpec):
@@ -499,7 +499,7 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
     def cmd_ps(self) -> SubCmdCheck:
         return SubCmdCheck()
 
-    @pytest.mark.parametrize("config_path", INVALID_YAML)
+    @pytest.mark.parametrize("config_path", TEST_YAML_PATHS)
     def test_with_command_processor(self, config_path: str, object_under_test: Callable):
         kwargs = {
             "config_path": config_path,
@@ -507,7 +507,7 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
         }
         self._test_process(**kwargs)
 
-    @pytest.mark.parametrize("config_path", INVALID_YAML)
+    @pytest.mark.parametrize("config_path", TEST_YAML_PATHS)
     def test_with_run_entry_point(self, config_path: str, entry_point_under_test: Callable):
         kwargs = {
             "config_path": config_path,
