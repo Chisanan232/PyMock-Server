@@ -481,7 +481,7 @@ TEST_YAML_PATHS: List[str] = []
 def _get_all_yaml(config_type: str) -> None:
     yaml_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "config", config_type, "*.yaml")
     global TEST_YAML_PATHS
-    TEST_YAML_PATHS = glob.glob(yaml_dir)
+    TEST_YAML_PATHS.extend(glob.glob(yaml_dir))
 
 
 def _expected_err_msg(file: str) -> str:
