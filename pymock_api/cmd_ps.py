@@ -256,6 +256,9 @@ class SubCmdCheck(BaseCommandProcessor):
                         # else:
                         #     print("Data content format is incorrect")
                         #     sys.exit(1)
+        else:
+            print("Configuration *mocked_apis* content is empty.")
+            sys.exit(1)
 
         print("Configuration is valid.")
         sys.exit(0)
