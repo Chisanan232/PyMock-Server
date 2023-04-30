@@ -546,6 +546,20 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
     def _expected_argument_type(self) -> Type[SubcmdCheckArguments]:
         return SubcmdCheckArguments
 
+    def test__setting_should_be_valid(self, cmd_ps: SubCmdCheck):
+        test_callback = MagicMock()
+        cmd_ps._setting_should_be_valid(
+            config_key="key", config_value="value", criteria=["value"], valid_callback=test_callback
+        )
+        test_callback.assert_called_once_with("key", "value", ["value"])
+
+    def test__setting_should_be_valid_with_invalid_type_criteria(self, cmd_ps: SubCmdCheck):
+        with pytest.raises(TypeError) as exc_info:
+            cmd_ps._setting_should_be_valid(
+                config_key="any key", config_value="any value", criteria="invalid type value"
+            )
+        assert re.search(r"only accept 'list'", str(exc_info.value), re.IGNORECASE)
+
 
 def test_make_command_chain():
     assert len(get_all_subcommands()) == len(make_command_chain()) - _No_SubCmd_Amt - _Fake_Amt
