@@ -5,7 +5,7 @@ import pathlib
 import re
 import sys
 from argparse import ArgumentParser, Namespace
-from typing import List, Optional, Tuple, Type
+from typing import Any, Callable, List, Optional, Tuple, Type, Union
 
 from ._utils import YAML, import_web_lib
 from .cmd import MockAPICommandParser, SubCommand
@@ -202,52 +202,97 @@ class SubCmdCheck(BaseCommandProcessor):
             assert api_config.apis.apis
 
             for one_api_name, one_api_config in api_config.apis.apis.items():
-                if one_api_config is None:
-                    print(f"Configuration *mocked_apis.{one_api_name}* content is empty.")
-                    sys.exit(1)
+                # # Check first layer of configuration
+                SubCmdCheck._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}",
+                    config_value=one_api_config,
+                )
 
-                if one_api_config.url is None:
-                    print(f"Configuration *mocked_apis.{one_api_name}.url* content is empty.")
-                    sys.exit(1)
+                # # Check second layer of configuration (not include the layer about API name, should be the first
+                # # layer under API name)
+                assert one_api_config
+                SubCmdCheck._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}.url",
+                    config_value=one_api_config.url,
+                )
+                SubCmdCheck._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}.http",
+                    config_value=one_api_config.http,
+                )
 
-                if one_api_config.http is None:
-                    print(f"Configuration *mocked_apis.{one_api_name}.http* content is empty.")
-                    sys.exit(1)
+                # # Check third layer of configuration
+                assert one_api_config.http
+                SubCmdCheck._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}.http.request",
+                    config_value=one_api_config.http.request,
+                )
 
-                if one_api_config.http.request is None:
-                    print(f"Configuration *mocked_apis.{one_api_name}.http.request* content is empty.")
-                    sys.exit(1)
+                assert one_api_config.http.request
+                SubCmdCheck._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}.http.request.method",
+                    config_value=one_api_config.http.request.method,
+                )
+                SubCmdCheck._setting_should_be_valid(
+                    config_key=f"mocked_apis.{one_api_name}.http.request.method",
+                    config_value=one_api_config.http.request.method.upper(),
+                    criteria=["GET", "POST", "PUT", "DELETE", "HEAD", "OPTION"],
+                )
 
-                if one_api_config.http.request.method is None:
-                    print(f"Configuration *mocked_apis.{one_api_name}.http.request.method* content is empty.")
-                    sys.exit(1)
+                SubCmdCheck._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}.http.response",
+                    config_value=one_api_config.http.response,
+                )
 
-                if one_api_config.http.request.method.upper() not in ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTION"]:
-                    print(f"Configuration *mocked_apis.{one_api_name}.http.request.method* value is invalid.")
-                    sys.exit(1)
-
-                if one_api_config.http.response is None:
-                    print(f"Configuration *mocked_apis.{one_api_name}.http.response* content is empty.")
-                    sys.exit(1)
-
-                response_value = one_api_config.http.response.value
-                if response_value is None:
-                    print(f"Configuration *mocked_apis.{one_api_name}.http.response.value* content is empty.")
-                    sys.exit(1)
-                else:
-                    try:
-                        json.loads(response_value)
-                    except:
-                        if re.search(r"\w{1,32}\.\w{1,8}", response_value):
-                            if not pathlib.Path(response_value).exists():
-                                print("The file which is the response content doesn't exist.")
-                                sys.exit(1)
-                        # else:
-                        #     print("Data content format is incorrect")
-                        #     sys.exit(1)
+                assert one_api_config.http.response
+                SubCmdCheck._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}.http.response.value",
+                    config_value=one_api_config.http.response.value,
+                    valid_callback=self._chk_response_value_validity,
+                )
         else:
             print("Configuration *mocked_apis* content is empty.")
             sys.exit(1)
 
         print("Configuration is valid.")
         sys.exit(0)
+
+    def _chk_response_value_validity(self, config_key: str, config_value: Any) -> None:
+        try:
+            json.loads(config_value)
+        except:
+            if re.search(r"\w{1,32}\.\w{1,8}", config_value):
+                if not pathlib.Path(config_value).exists():
+                    print("The file which is the response content doesn't exist.")
+                    sys.exit(1)
+            # else:
+            #     print("Data content format is incorrect")
+            #     sys.exit(1)
+
+    @staticmethod
+    def _setting_should_not_be_none(
+        config_key: str, config_value: Any, valid_callback: Optional[Callable] = None
+    ) -> None:
+        if config_value is None:
+            print(f"Configuration *{config_key}* content cannot be empty.")
+            sys.exit(1)
+        else:
+            if valid_callback:
+                valid_callback(config_key, config_value)
+
+    @staticmethod
+    def _setting_should_be_valid(
+        config_key: str, config_value: Any, criteria: Union[str, list], valid_callback: Optional[Callable] = None
+    ) -> None:
+        if isinstance(criteria, str) and config_value != criteria:
+            is_valid = False
+        elif isinstance(criteria, list) and config_value not in criteria:
+            is_valid = False
+        else:
+            is_valid = True
+
+        if not is_valid:
+            print(f"Configuration *{config_key}* value is invalid.")
+            sys.exit(1)
+        else:
+            if valid_callback:
+                valid_callback(config_key, config_value, criteria)
