@@ -200,9 +200,7 @@ class SubCmdCheck(BaseCommandProcessor):
 
         print(f"[DEBUG] api_config.apis: {api_config.apis}")
         if api_config.apis:
-            if api_config.apis.apis is None:
-                print("Configuration *mocked_apis* is empty.")
-                sys.exit(1)
+            assert api_config.apis.apis
 
             for one_api_name, one_api_config in api_config.apis.apis.items():
                 if one_api_config is None:
