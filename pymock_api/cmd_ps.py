@@ -193,12 +193,14 @@ class SubCmdCheck(BaseCommandProcessor):
     def _run(self, args: SubcmdCheckArguments) -> None:
         api_config: Optional[APIConfig] = load_config(path=args.config_path)
 
+        # # Check whether it has anything in configuration or not
         SubCmdCheck._setting_should_not_be_none(
             config_key="",
             config_value=api_config,
             err_msg="Configuration is empty.",
         )
 
+        # # Check first layer of configuration
         assert api_config is not None
         SubCmdCheck._setting_should_not_be_none(
             config_key="mocked_apis",
@@ -209,14 +211,15 @@ class SubCmdCheck(BaseCommandProcessor):
         # if it has anything within key *mocked_apis*.
         assert api_config.apis and api_config.apis.apis
 
+        # # Check each API content at first layer is *mocked_apis* of configuration
         for one_api_name, one_api_config in api_config.apis.apis.items():
-            # # Check first layer of configuration
+            # # Check second layer of configuration
             SubCmdCheck._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}",
                 config_value=one_api_config,
             )
 
-            # # Check second layer of configuration (not include the layer about API name, should be the first
+            # # Check third layer of configuration (not include the layer about API name, should be the first
             # # layer under API name)
             assert one_api_config
             SubCmdCheck._setting_should_not_be_none(
@@ -228,7 +231,7 @@ class SubCmdCheck(BaseCommandProcessor):
                 config_value=one_api_config.http,
             )
 
-            # # Check third layer of configuration
+            # # Check forth layer of configuration
             assert one_api_config.http
             SubCmdCheck._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}.http.request",
