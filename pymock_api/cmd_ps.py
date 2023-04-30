@@ -200,6 +200,8 @@ class SubCmdCheck(BaseCommandProcessor):
 
         print(f"[DEBUG] api_config.apis: {api_config.apis}")
         if api_config.apis:
+            # NOTE: It's the normal behavior of code implementation. It must have something of property *MockAPIs.apis*
+            # if it has anything within key *mocked_apis*.
             assert api_config.apis.apis
 
             for one_api_name, one_api_config in api_config.apis.apis.items():
