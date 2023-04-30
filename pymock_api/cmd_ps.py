@@ -5,7 +5,7 @@ import pathlib
 import re
 import sys
 from argparse import ArgumentParser, Namespace
-from typing import Any, Callable, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, List, Optional, Tuple, Type
 
 from ._utils import YAML, import_web_lib
 from .cmd import MockAPICommandParser, SubCommand
@@ -281,11 +281,12 @@ class SubCmdCheck(BaseCommandProcessor):
 
     @staticmethod
     def _setting_should_be_valid(
-        config_key: str, config_value: Any, criteria: Union[str, list], valid_callback: Optional[Callable] = None
+        config_key: str, config_value: Any, criteria: list, valid_callback: Optional[Callable] = None
     ) -> None:
-        if isinstance(criteria, str) and config_value != criteria:
-            is_valid = False
-        elif isinstance(criteria, list) and config_value not in criteria:
+        if not isinstance(criteria, list):
+            raise TypeError("The argument *criteria* only accept 'list' type value.")
+
+        if config_value not in criteria:
             is_valid = False
         else:
             is_valid = True
