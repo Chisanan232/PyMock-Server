@@ -200,7 +200,7 @@ class SubCmdCheck(BaseCommandProcessor):
             err_msg="Configuration is empty.",
         )
 
-        # # Check first layer of configuration
+        # # Check the section *mocked_apis* (first layer) of configuration
         assert api_config is not None
         SubCmdCheck._setting_should_not_be_none(
             config_key="mocked_apis",
@@ -213,14 +213,14 @@ class SubCmdCheck(BaseCommandProcessor):
 
         # # Check each API content at first layer is *mocked_apis* of configuration
         for one_api_name, one_api_config in api_config.apis.apis.items():
-            # # Check second layer of configuration
+            # # Check the section *mocked_apis.<API name>* (second layer) of configuration
             SubCmdCheck._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}",
                 config_value=one_api_config,
             )
 
-            # # Check third layer of configuration (not include the layer about API name, should be the first
-            # # layer under API name)
+            # # Check the section *mocked_apis.<API name>.<property>* (third layer) of configuration (not include the
+            # # layer about API name, should be the first layer under API name)
             assert one_api_config
             SubCmdCheck._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}.url",
@@ -231,7 +231,7 @@ class SubCmdCheck(BaseCommandProcessor):
                 config_value=one_api_config.http,
             )
 
-            # # Check forth layer of configuration
+            # # Check the section *mocked_apis.<API name>.http.<property>* (forth layer) of configuration
             assert one_api_config.http
             SubCmdCheck._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}.http.request",
