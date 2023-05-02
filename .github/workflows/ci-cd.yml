@@ -10,9 +10,10 @@ on:
       - "master"
     paths-ignore:
       - "docs/**"
-      - "example/**"
       - ".gitcommitrules"
       - ".gitignore"
+      - ".pre-commit-config.yaml"
+      - ".pylintrc"
       - "LICENSE"
       - "README.md"
 
@@ -25,9 +26,10 @@ on:
       - "master"
     paths-ignore:
       - "docs/**"
-      - "example/**"
       - ".gitcommitrules"
       - ".gitignore"
+      - ".pre-commit-config.yaml"
+      - ".pylintrc"
       - "LICENSE"
       - "README.md"
 
