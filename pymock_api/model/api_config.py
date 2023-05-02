@@ -52,7 +52,6 @@ class _Config(metaclass=ABCMeta):
         return _
 
     @abstractmethod
-    @_ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional[SelfType]:
         pass
 
