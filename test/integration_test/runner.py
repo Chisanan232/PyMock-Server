@@ -60,9 +60,10 @@ class TestHelp(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "-v, --version")
         self._should_contains_chars_in_result(cmd_running_result, "Subcommands:")
-        self._should_contains_chars_in_result(cmd_running_result, "{run,config}")
+        self._should_contains_chars_in_result(cmd_running_result, "{run,config,check}")
         self._should_contains_chars_in_result(cmd_running_result, "run")
         self._should_contains_chars_in_result(cmd_running_result, "config")
+        self._should_contains_chars_in_result(cmd_running_result, "check")
 
 
 class TestVersion(CommandFunctionTestSpec):

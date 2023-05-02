@@ -108,3 +108,6 @@ _Test_SubCommand_Config: str = "config"
 _Generate_Sample: bool = True
 _Print_Sample: bool = True
 _Sample_File_Path: str = "pytest-api.yaml"
+
+# Test subcommand *check* options
+_Test_SubCommand_Check: str = "check"

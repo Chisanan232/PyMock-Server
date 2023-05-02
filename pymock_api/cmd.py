@@ -227,6 +227,7 @@ class SubCommand:
     Base: str = "subcommand"
     Run: str = "run"
     Config: str = "config"
+    Check: str = "check"
 
 
 class BaseSubCommand(CommandOption):
@@ -254,9 +255,17 @@ class SubCommandConfigOption(BaseSubCommand):
     )
 
 
+class SubCommandCheckOption(BaseSubCommand):
+    sub_parser: SubParserAttr = SubParserAttr(
+        name=SubCommand.Check,
+        help="Check the validity of *PyMock-API* configuration.",
+    )
+
+
 BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
 BaseSubCmdRunOption: type = MetaCommandOption("BaseSubCmdRunOption", (SubCommandRunOption,), {})
 BaseSubCmdConfigOption: type = MetaCommandOption("BaseSubCmdConfigOption", (SubCommandConfigOption,), {})
+BaseSubCmdCheckOption: type = MetaCommandOption("BaseSubCmdCheckOption", (SubCommandCheckOption,), {})
 
 
 class Version(BaseCmdOption):
@@ -352,3 +361,10 @@ class Output(BaseSubCmdConfigOption):
     )
     option_value_type: type = str
     default_value: str = "sample-api.yaml"
+
+
+class ConfigPath(BaseSubCmdCheckOption):
+    cli_option: str = "-p, --config-path"
+    name: str = "config_path"
+    help_description: str = "The file path of configuration."
+    default_value: str = "api.yaml"

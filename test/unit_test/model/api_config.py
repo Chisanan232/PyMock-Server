@@ -31,6 +31,25 @@ _assertion_msg = "Its property's value should be same as we set."
 MOCK_RETURN_VALUE: Mock = Mock()
 
 
+@pytest.mark.parametrize(
+    ("data", "expected"),
+    [
+        (None, None),
+        ({}, {}),
+        ({"any_key": "any_value"}, {"any_key": "any_value", "flag": "has run *test_function*"}),
+    ],
+)
+def test_ensure_process_with_not_empty_value(data: Optional[Dict[str, str]], expected: Optional[Dict[str, str]]):
+    class FakeObject:
+        @_Config._ensure_process_with_not_empty_value
+        def test_function(self, data: Dict[str, Any]) -> Any:
+            data["flag"] = "has run *test_function*"
+            return data
+
+    fo = FakeObject()
+    assert fo.test_function(data=data) == expected
+
+
 def test_config_get_prop():
     class FakeConfig(_Config):
         def _compare(self, other: "_Config") -> bool:
@@ -92,7 +111,7 @@ class ConfigTestSpec(metaclass=ABCMeta):
         pass
 
     def test_deserialize_with_invalid_data(self, sut_with_nothing: _Config):
-        assert sut_with_nothing.deserialize(data={}) is None
+        assert sut_with_nothing.deserialize(data={}) == {}
 
 
 class TestAPIConfig(ConfigTestSpec):
@@ -358,12 +377,11 @@ class TestMockAPIs(ConfigTestSpec):
     def test_deserialize_with_nonideal_value(
         self, mock_deserialize_base: Mock, mock_deserialize_mock_api: Mock, test_data: dict, sut_with_nothing: MockAPIs
     ):
-        assert sut_with_nothing.deserialize(data=test_data) is None
+        assert sut_with_nothing.deserialize(data=test_data) is not None
+        mock_deserialize_base.assert_called_once_with(data="base_info")
         if len(test_data.keys()) > 1:
-            mock_deserialize_base.assert_called_once_with(data="base_info")
             mock_deserialize_mock_api.assert_called_once_with(data="api_info")
         else:
-            mock_deserialize_base.assert_not_called()
             mock_deserialize_mock_api.assert_not_called()
 
     def _expected_serialize_value(self) -> Any:

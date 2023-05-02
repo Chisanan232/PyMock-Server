@@ -1,5 +1,5 @@
 from argparse import Namespace
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 
@@ -26,6 +26,11 @@ class SubcmdConfigArguments(ParserArguments):
     sample_output_path: str
 
 
+@dataclass(frozen=True)
+class SubcmdCheckArguments(ParserArguments):
+    config_path: str
+
+
 class DeserializeParsedArgs:
     """*Deserialize the object *argparse.Namespace* to *ParserArguments*"""
 
@@ -47,4 +52,11 @@ class DeserializeParsedArgs:
             generate_sample=args.generate_sample,
             print_sample=args.print_sample,
             sample_output_path=args.file_path,
+        )
+
+    @classmethod
+    def subcommand_check(cls, args: Namespace) -> SubcmdCheckArguments:
+        return SubcmdCheckArguments(
+            subparser_name=args.subcommand,
+            config_path=args.config_path,
         )
