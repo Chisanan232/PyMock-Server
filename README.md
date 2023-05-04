@@ -123,3 +123,8 @@ Currently, it won't have documentation. But it would have soon.
 
 [![Downloads](https://pepy.tech/badge/PyMock-API)](https://pepy.tech/project/PyMock-API)
 [![Downloads](https://pepy.tech/badge/PyMock-API/month)](https://pepy.tech/project/PyMock-API)
+
+
+## License
+
+![MIT License](./LICENSE)
