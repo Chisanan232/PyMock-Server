@@ -64,8 +64,9 @@ After you done above step, please make sure the command line tool feature should
 
 > **_NOTE:_**
 >
-> Please take a look at option _--app-type_ of the command line tool. Its option value could be ``auto``, ``flask`` or ``fastapi``.
-> It means that **_PyMock-API_** only supports 2 Python web frameworks: **_Flask_** and **_FastAPI_**.
+> Please take a look at option _--app-type_ (this option is in subcommand **_mock-api run_**) of the command line tool. Its option
+> value could be ``auto``, ``flask`` or ``fastapi``. It means that **_PyMock-API_** only supports 2 Python web frameworks: **_Flask_**
+> and **_FastAPI_**.
 
 ### Configure setting to mock target APIs
 
