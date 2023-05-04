@@ -127,4 +127,4 @@ Currently, it won't have documentation. But it would have soon.
 
 ## License
 
-![MIT License](./LICENSE)
+[MIT License](./LICENSE)
