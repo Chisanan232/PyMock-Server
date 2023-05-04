@@ -35,11 +35,11 @@ Here section would lead you quickly start to set up your first one application b
 
 In basically, it has 3 steps: install the package, configure settings about the APIs for mocking and run command.
 
-* [Install](Install)
-* [Configure](Configure)
-* [Run](Run)
+* [Install](#install-command-line-tool)
+* [Configure](#configure-setting-to-mock-target-apis)
+* [Run](#run-command-to-set-up-application)
 
-### Install
+### Install command line tool
 
 First of all, we need to install the command line tool and the way to install is same as installing Python package by ``pip``.
 
@@ -67,7 +67,7 @@ After you done above step, please make sure the command line tool feature should
 > Please take a look at option _--app-type_ of the command line tool. Its option value could be ``auto``, ``flask`` or ``fastapi``.
 > It means that **_PyMock-API_** only supports 2 Python web frameworks: **_Flask_** and **_FastAPI_**.
 
-### Configure
+### Configure setting to mock target APIs
 
 Now, we have the command line tool. Let's configure the settings it needs to set up application to mock API.
 
@@ -84,7 +84,7 @@ mocked_apis:
         value: 'This is Google home API.'
 ```
 
-### Run
+### Run command to set up application
 
 Now, both of the command line tool and configuration have been already. So let's try to run the command to set up application!
 
