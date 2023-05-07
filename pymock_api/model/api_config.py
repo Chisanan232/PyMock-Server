@@ -5,7 +5,7 @@ content ...
 
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from .._utils.file_opt import YAML, _BaseFileOperation
 
@@ -105,18 +105,61 @@ class BaseConfig(_Config):
 
 
 @dataclass(eq=False)
+class APIParameter(_Config):
+    name: str = field(default_factory=str)
+    required: Optional[bool] = None
+    default: Optional[Any] = None
+    value_type: Optional[type] = None
+    value_format: Optional[str] = None
+    force_naming: Optional[bool] = None
+
+    def _compare(self, other: "APIParameter") -> bool:
+        # TODO: Let it could automatically scan what properties it has and compare all of their value.
+        return self.name == other.name
+
+    def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:
+        name: str = self._get_prop(data, prop="name")
+        required: bool = self._get_prop(data, prop="required")
+        default: str = self._get_prop(data, prop="default")
+        value_type: type = self._get_prop(data, prop="value_type")
+        value_format: str = self._get_prop(data, prop="value_format")
+        force_naming: bool = self._get_prop(data, prop="force_naming")
+        if not (name and default and value_type and value_format) or (required is None and force_naming is None):
+            return None
+        return {
+            "name": name,
+            "required": required,
+            "default": default,
+            "value_type": value_type,
+            "value_format": value_format,
+            "force_naming": force_naming,
+        }
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["APIParameter"]:
+        self.name = data.get("name", None)
+        self.required = data.get("required", None)
+        self.default = data.get("default", None)
+        self.value_type = data.get("value_type", None)
+        self.value_format = data.get("value_format", None)
+        self.force_naming = data.get("force_naming", None)
+        return self
+
+
+@dataclass(eq=False)
 class HTTPRequest(_Config):
     """*The **http.request** section in **mocked_apis.<api>***"""
 
     method: str = field(default_factory=str)
-    parameters: dict = field(default_factory=dict)
+    parameters: List[APIParameter] = field(default_factory=list)
 
     def _compare(self, other: "HTTPRequest") -> bool:
         return self.method == other.method and self.parameters == other.parameters
 
     def serialize(self, data: Optional["HTTPRequest"] = None) -> Optional[Dict[str, Any]]:
         method: str = self._get_prop(data, prop="method")
-        parameters: str = self._get_prop(data, prop="parameters")
+        all_parameters = (data or self).parameters if (data and data.parameters) or self.parameters else None
+        parameters = [param.serialize() for param in (all_parameters or [])]
         if not (method and parameters):
             return None
         return {
@@ -148,7 +191,10 @@ class HTTPRequest(_Config):
 
         """
         self.method = data.get("method", None)
-        self.parameters = data.get("parameters", None)
+        parameters: List[dict] = data.get("parameters", None)
+        if parameters and not isinstance(parameters, list):
+            raise TypeError("Argument *parameters* should be a list type value.")
+        self.parameters = [APIParameter().deserialize(data=parameter) for parameter in parameters] if parameters else []
         return self
 
 
