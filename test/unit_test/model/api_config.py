@@ -1,6 +1,6 @@
 import re
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from unittest.mock import Mock, patch
 
 import pytest
@@ -148,8 +148,17 @@ class TestAPIConfig(ConfigTestSpec):
 
     @property
     def mock_request(self) -> HTTPRequest:
-        return HTTPRequest(
-            method=_TestConfig.Request.get("method"), parameters=_TestConfig.Request.get("parameters", {})
+        return HTTPRequest(method=_TestConfig.Request.get("method"), parameters=[self.mock_api_parameter])
+
+    @property
+    def mock_api_parameter(self) -> APIParameter:
+        return APIParameter(
+            name=_Test_API_Parameter["name"],
+            required=_Test_API_Parameter["required"],
+            default=_Test_API_Parameter["default"],
+            value_type=_Test_API_Parameter["value_type"],
+            value_format=_Test_API_Parameter["value_format"],
+            force_naming=_Test_API_Parameter["force_naming"],
         )
 
     @property
@@ -266,8 +275,17 @@ class TestMockAPIs(ConfigTestSpec):
 
     @property
     def mock_request(self) -> HTTPRequest:
-        return HTTPRequest(
-            method=_TestConfig.Request.get("method"), parameters=_TestConfig.Request.get("parameters", {})
+        return HTTPRequest(method=_TestConfig.Request.get("method"), parameters=[self.mock_api_parameter])
+
+    @property
+    def mock_api_parameter(self) -> APIParameter:
+        return APIParameter(
+            name=_Test_API_Parameter["name"],
+            required=_Test_API_Parameter["required"],
+            default=_Test_API_Parameter["default"],
+            value_type=_Test_API_Parameter["value_type"],
+            value_format=_Test_API_Parameter["value_format"],
+            force_naming=_Test_API_Parameter["force_naming"],
         )
 
     @property
@@ -434,8 +452,17 @@ class TestMockAPI(ConfigTestSpec):
 
     @property
     def mock_request(self) -> HTTPRequest:
-        return HTTPRequest(
-            method=_TestConfig.Request.get("method"), parameters=_TestConfig.Request.get("parameters", {})
+        return HTTPRequest(method=_TestConfig.Request.get("method"), parameters=[self.mock_api_parameter])
+
+    @property
+    def mock_api_parameter(self) -> APIParameter:
+        return APIParameter(
+            name=_Test_API_Parameter["name"],
+            required=_Test_API_Parameter["required"],
+            default=_Test_API_Parameter["default"],
+            value_type=_Test_API_Parameter["value_type"],
+            value_format=_Test_API_Parameter["value_format"],
+            force_naming=_Test_API_Parameter["force_naming"],
         )
 
     @property
@@ -485,7 +512,7 @@ class TestMockAPI(ConfigTestSpec):
         assert isinstance(obj, MockAPI)
         assert obj.url == _Test_URL
         assert obj.http.request.method == _TestConfig.Request.get("method", None)
-        assert obj.http.request.parameters == _TestConfig.Request.get("parameters", None)
+        assert obj.http.request.parameters == [self.mock_api_parameter]
         assert obj.http.response.value == _TestConfig.Response.get("value", None)
 
 
@@ -509,9 +536,20 @@ class TestHTTP(ConfigTestSpec):
     def mock_http_req(self) -> HTTPRequest:
         if not self._mock_http_req:
             self._mock_http_req = HTTPRequest(
-                method=_TestConfig.Request.get("method"), parameters=_TestConfig.Request.get("parameters", {})
+                method=_TestConfig.Request.get("method"), parameters=[self.mock_api_parameter]
             )
         return self._mock_http_req
+
+    @property
+    def mock_api_parameter(self) -> APIParameter:
+        return APIParameter(
+            name=_Test_API_Parameter["name"],
+            required=_Test_API_Parameter["required"],
+            default=_Test_API_Parameter["default"],
+            value_type=_Test_API_Parameter["value_type"],
+            value_format=_Test_API_Parameter["value_format"],
+            force_naming=_Test_API_Parameter["force_naming"],
+        )
 
     @property
     def mock_http_resp(self) -> HTTPResponse:
@@ -593,24 +631,33 @@ class TestHTTP(ConfigTestSpec):
     def _expected_deserialize_value(self, obj: HTTP) -> None:
         assert isinstance(obj, HTTP)
         assert obj.request.method == _TestConfig.Request.get("method", None)
-        assert obj.request.parameters == _TestConfig.Request.get("parameters", None)
+        assert obj.request.parameters == [self.mock_api_parameter]
         assert obj.response.value == _TestConfig.Response.get("value", None)
 
 
 class TestHTTPReqeust(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> HTTPRequest:
-        return HTTPRequest(
-            method=_TestConfig.Request.get("method", None), parameters=_TestConfig.Request.get("parameters", {})
-        )
+        return HTTPRequest(method=_TestConfig.Request.get("method", None), parameters=[self.mock_api_parameter])
 
     @pytest.fixture(scope="function")
     def sut_with_nothing(self) -> HTTPRequest:
         return HTTPRequest()
 
+    @property
+    def mock_api_parameter(self) -> APIParameter:
+        return APIParameter(
+            name=_Test_API_Parameter["name"],
+            required=_Test_API_Parameter["required"],
+            default=_Test_API_Parameter["default"],
+            value_type=_Test_API_Parameter["value_type"],
+            value_format=_Test_API_Parameter["value_format"],
+            force_naming=_Test_API_Parameter["force_naming"],
+        )
+
     def test_value_attributes(self, sut: HTTPRequest):
         assert sut.method == _TestConfig.Request.get("method", None), _assertion_msg
-        assert sut.parameters == _TestConfig.Request.get("parameters", {}), _assertion_msg
+        assert sut.parameters == [self.mock_api_parameter], _assertion_msg
 
     def _expected_serialize_value(self) -> dict:
         return _TestConfig.Request
@@ -618,7 +665,7 @@ class TestHTTPReqeust(ConfigTestSpec):
     def _expected_deserialize_value(self, obj: HTTPRequest) -> None:
         assert isinstance(obj, HTTPRequest)
         assert obj.method == _TestConfig.Request.get("method", None)
-        assert obj.parameters == _TestConfig.Request.get("parameters", None)
+        assert obj.parameters == [self.mock_api_parameter]
 
 
 class TestAPIParameter(ConfigTestSpec):
