@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import Dict
+from typing import Dict, List
 from unittest.mock import Mock
 
 
@@ -35,7 +35,7 @@ _Mock_API_HTTP: dict = {
 
 _YouTube_Home_Value: dict = {
     "url": "/youtube",
-    "http": {"request": {"method": "GET", "parameters": [{"param1": "val1"}]}, "response": {"value": "youtube.json"}},
+    "http": {"request": {"method": "GET", "parameters": [{"name": "param1"}]}, "response": {"value": "youtube.json"}},
     "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
 }
 
@@ -44,7 +44,7 @@ _YouTube_API_Content: dict = {"responseCode": "200", "errorMessage": "OK", "cont
 _Google_Home_Value: dict = {
     "url": "/google",
     "http": {
-        "request": {"method": "GET", "parameters": [{"param1": "val1"}]},
+        "request": {"method": "GET", "parameters": [{"name": "param1"}]},
         "response": {"value": "This is Google home API."},
     },
 }
@@ -52,7 +52,7 @@ _Google_Home_Value: dict = {
 _Test_Home: dict = {
     "url": "/test",
     "http": {
-        "request": {"method": "GET", "parameters": [{"param1": "val1"}]},
+        "request": {"method": "GET", "parameters": [{"name": "param1"}]},
         "response": {"value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }'},
     },
     "cookie": [{"TEST": "cookie_value"}],
@@ -74,10 +74,37 @@ _Test_Config_Value: dict = {
 
 _Cmd_Option = namedtuple("_Cmd_Option", ["option_name", "value"])
 
+_Test_API_Parameter: dict = {
+    "name": "param_1",
+    "required": False,
+    "default": "default_value",
+    "value_type": str,
+    "value_format": "any_format",
+    "force_naming": True,
+}
+_Test_API_Parameters: List[dict] = [
+    {
+        "name": "param_1",
+        "required": True,
+        "default": "default_value",
+        "value_type": str,
+        "value_format": None,
+        "force_naming": False,
+    },
+    {
+        "name": "param_2",
+        "required": False,
+        "default": 0,
+        "value_type": int,
+        "value_format": None,
+        "force_naming": False,
+    },
+]
+
 
 # Sample configuration content
 class _TestConfig:
-    Request: dict = {"method": "GET", "parameters": {"param1": "val1"}}
+    Request: dict = {"method": "GET", "parameters": [{"name": "param1"}]}
     Response: Dict[str, str] = {"value": _Test_HTTP_Resp}
     Http: dict = {"request": Request, "response": Response}
     Mock_API: dict = {"url": _Test_URL, "http": Http}
