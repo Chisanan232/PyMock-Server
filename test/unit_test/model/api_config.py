@@ -18,7 +18,6 @@ from pymock_api.model.api_config import (
 )
 
 from ..._values import (
-    APIConfigValue,
     _Base_URL,
     _Config_Description,
     _Config_Name,
@@ -156,9 +155,6 @@ class ConfigTestSpec(metaclass=ABCMeta):
 
 
 class TestAPIConfig(ConfigTestSpec):
-    _test_value: APIConfigValue = APIConfigValue()
-    # _mock_mock_apis: MockAPIs = None
-
     @pytest.fixture(scope="function")
     def sut(self) -> APIConfig:
         return APIConfig(name=_Config_Name, description=_Config_Description, apis=self._Mock_Model.mock_apis)
