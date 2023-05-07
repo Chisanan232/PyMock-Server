@@ -107,14 +107,6 @@ class MockModel:
     def mock_response(self) -> HTTPResponse:
         return HTTPResponse(value=_Test_HTTP_Resp)
 
-    @property
-    def mock_http_req(self) -> HTTPRequest:
-        return HTTPRequest(method=_TestConfig.Request.get("method"), parameters=[self.mock_api_parameter])
-
-    @property
-    def mock_http_resp(self) -> HTTPResponse:
-        return HTTPResponse(value=_TestConfig.Response.get("value"))
-
 
 class ConfigTestSpec(metaclass=ABCMeta):
     _Mock_Model = MockModel()
@@ -464,15 +456,15 @@ class TestMockAPI(ConfigTestSpec):
 class TestHTTP(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> HTTP:
-        return HTTP(request=self._Mock_Model.mock_http_req, response=self._Mock_Model.mock_http_resp)
+        return HTTP(request=self._Mock_Model.mock_request, response=self._Mock_Model.mock_response)
 
     @pytest.fixture(scope="function")
     def sut_with_nothing(self) -> HTTP:
         return HTTP()
 
     def test_value_attributes(self, sut: HTTP):
-        assert sut.request == self._Mock_Model.mock_http_req, _assertion_msg
-        assert sut.response == self._Mock_Model.mock_http_resp, _assertion_msg
+        assert sut.request == self._Mock_Model.mock_request, _assertion_msg
+        assert sut.response == self._Mock_Model.mock_response, _assertion_msg
 
     @pytest.mark.parametrize(
         ("setting_val", "should_call_deserialize"),
