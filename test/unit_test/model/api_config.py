@@ -1,6 +1,6 @@
 import re
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
 from unittest.mock import Mock, patch
 
 import pytest
