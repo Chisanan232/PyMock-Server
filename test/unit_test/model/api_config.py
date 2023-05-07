@@ -8,6 +8,7 @@ import pytest
 from pymock_api.model.api_config import (
     HTTP,
     APIConfig,
+    APIParameter,
     BaseConfig,
     HTTPRequest,
     HTTPResponse,
@@ -21,6 +22,7 @@ from ..._values import (
     _Base_URL,
     _Config_Description,
     _Config_Name,
+    _Test_API_Parameter,
     _Test_Config,
     _Test_HTTP_Resp,
     _Test_URL,
@@ -617,6 +619,43 @@ class TestHTTPReqeust(ConfigTestSpec):
         assert isinstance(obj, HTTPRequest)
         assert obj.method == _TestConfig.Request.get("method", None)
         assert obj.parameters == _TestConfig.Request.get("parameters", None)
+
+
+class TestAPIParameter(ConfigTestSpec):
+    @pytest.fixture(scope="function")
+    def sut(self) -> APIParameter:
+        return APIParameter(
+            name=_Test_API_Parameter["name"],
+            required=_Test_API_Parameter["required"],
+            default=_Test_API_Parameter["default"],
+            value_type=_Test_API_Parameter["value_type"],
+            value_format=_Test_API_Parameter["value_format"],
+            force_naming=_Test_API_Parameter["force_naming"],
+        )
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> APIParameter:
+        return APIParameter()
+
+    def test_value_attributes(self, sut: APIParameter):
+        assert sut.name == _Test_API_Parameter["name"], _assertion_msg
+        assert sut.required is _Test_API_Parameter["required"], _assertion_msg
+        assert sut.default == _Test_API_Parameter["default"], _assertion_msg
+        assert sut.value_type == _Test_API_Parameter["value_type"], _assertion_msg
+        assert sut.value_format == _Test_API_Parameter["value_format"], _assertion_msg
+        assert sut.force_naming is _Test_API_Parameter["force_naming"], _assertion_msg
+
+    def _expected_serialize_value(self) -> dict:
+        return _Test_API_Parameter
+
+    def _expected_deserialize_value(self, obj: APIParameter) -> None:
+        assert isinstance(obj, APIParameter)
+        assert obj.name == _Test_API_Parameter["name"]
+        assert obj.required is _Test_API_Parameter["required"]
+        assert obj.default == _Test_API_Parameter["default"]
+        assert obj.value_type == _Test_API_Parameter["value_type"]
+        assert obj.value_format == _Test_API_Parameter["value_format"]
+        assert obj.force_naming is _Test_API_Parameter["force_naming"]
 
 
 class TestHTTPResponse(ConfigTestSpec):
