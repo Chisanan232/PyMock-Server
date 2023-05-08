@@ -16,6 +16,9 @@ class FakeWebServer(BaseAppServer):
     def setup(self) -> Any:
         pass
 
+    def _request_process(self) -> None:
+        pass
+
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         pass
 

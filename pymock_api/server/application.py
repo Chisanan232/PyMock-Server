@@ -49,9 +49,16 @@ class BaseAppServer(metaclass=ABCMeta):
                 exec(add_api_pycode)
 
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
-        return f"""def {api_name}() -> Union[str, dict]:
+        initial_global_server = f"""global SERVER\nSERVER = self\n"""
+        define_function_for_api = f"""def {api_name}() -> Union[str, dict]:
+            SERVER._request_process()
             return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')
         """
+        return initial_global_server + define_function_for_api
+
+    @abstractmethod
+    def _request_process(self) -> None:
+        pass
 
     def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
         assert api_config.http and getattr(
@@ -73,6 +80,9 @@ class FlaskServer(BaseAppServer):
     def setup(self) -> "flask.Flask":  # type: ignore
         return import_web_lib.flask().Flask(__name__)
 
+    def _request_process(self) -> None:
+        print(f"[DEBUG in src] Here is request process by Flask.")
+
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         return f"""self.web_application.route(
             "{self.url_path(api_config, base_url)}", methods=["{cast(HTTPRequest, self._ensure_http(api_config, "request")).method}"]
@@ -85,6 +95,9 @@ class FastAPIServer(BaseAppServer):
 
     def setup(self) -> "fastapi.FastAPI":  # type: ignore
         return import_web_lib.fastapi().FastAPI()
+
+    def _request_process(self) -> None:
+        print(f"[DEBUG in src] Here is request process by FastAPI.")
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         return f"""self.web_application.api_route(
