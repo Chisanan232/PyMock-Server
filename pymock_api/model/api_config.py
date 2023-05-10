@@ -130,8 +130,8 @@ class APIParameter(_Config):
             "name": name,
             "required": required,
             "default": default,
-            "value_type": value_type,
-            "value_format": value_format,
+            "type": value_type,
+            "format": value_format,
             "force_naming": force_naming,
         }
 
@@ -140,8 +140,8 @@ class APIParameter(_Config):
         self.name = data.get("name", None)
         self.required = data.get("required", None)
         self.default = data.get("default", None)
-        self.value_type = data.get("value_type", None)
-        self.value_format = data.get("value_format", None)
+        self.value_type = data.get("type", None)
+        self.value_format = data.get("format", None)
         self.force_naming = data.get("force_naming", None)
         return self
 
