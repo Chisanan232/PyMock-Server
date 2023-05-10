@@ -78,8 +78,8 @@ _Test_API_Parameter: dict = {
     "name": "param_1",
     "required": False,
     "default": "default_value",
-    "value_type": str,
-    "value_format": "any_format",
+    "type": str,
+    "format": "any_format",
     "force_naming": True,
 }
 _Test_API_Parameters: List[dict] = [
@@ -87,16 +87,16 @@ _Test_API_Parameters: List[dict] = [
         "name": "param_1",
         "required": True,
         "default": "default_value",
-        "value_type": str,
-        "value_format": None,
+        "type": str,
+        "format": None,
         "force_naming": False,
     },
     {
         "name": "param_2",
         "required": False,
         "default": 0,
-        "value_type": int,
-        "value_format": None,
+        "type": int,
+        "format": None,
         "force_naming": False,
     },
 ]
