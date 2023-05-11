@@ -5,12 +5,20 @@ This module provides which library of Python web framework you could use to set 
 
 import json
 import os
+import re
 from abc import ABCMeta, abstractmethod
-from typing import Any, List, Optional, Union, cast
+from pydoc import locate
+from typing import Any, Dict, List, Optional, Union, cast
 
 from .._utils.importing import import_web_lib
 from ..exceptions import FileFormatNotSupport
-from ..model.api_config import HTTPRequest, HTTPResponse, MockAPI, MockAPIs
+from ..model.api_config import (
+    APIParameter,
+    HTTPRequest,
+    HTTPResponse,
+    MockAPI,
+    MockAPIs,
+)
 
 
 class BaseAppServer(metaclass=ABCMeta):
@@ -18,6 +26,7 @@ class BaseAppServer(metaclass=ABCMeta):
 
     def __init__(self):
         self._web_application = None
+        self._api_params: Dict[str, MockAPI] = {}
 
     @property
     def web_application(self) -> Any:
@@ -51,7 +60,9 @@ class BaseAppServer(metaclass=ABCMeta):
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
         initial_global_server = f"""global SERVER\nSERVER = self\n"""
         define_function_for_api = f"""def {api_name}() -> Union[str, dict]:
-            SERVER._request_process()
+            process_result = SERVER._request_process()
+            if process_result.status_code != 200:
+                return process_result
             return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')
         """
         return initial_global_server + define_function_for_api
@@ -68,10 +79,18 @@ class BaseAppServer(metaclass=ABCMeta):
 
     @abstractmethod
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        pass
+        self._record_api_params_info(url=self.url_path(api_config=api_config, base_url=base_url), api_config=api_config)
+        return ""
 
     def url_path(self, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         return f"{base_url}{api_config.url}" if base_url else f"{api_config.url}"
+
+    def _record_api_params_info(self, url: str, api_config: MockAPI) -> None:
+        self._api_params[url] = api_config
+
+    @abstractmethod
+    def _generate_http_response(self, body: str, status_code: int) -> Any:
+        pass
 
 
 class FlaskServer(BaseAppServer):
@@ -80,10 +99,37 @@ class FlaskServer(BaseAppServer):
     def setup(self) -> "flask.Flask":  # type: ignore
         return import_web_lib.flask().Flask(__name__)
 
-    def _request_process(self) -> None:
-        print(f"[DEBUG in src] Here is request process by Flask.")
+    def _request_process(self) -> "flask.Response":  # type: ignore
+        request: "flask.Request" = import_web_lib.flask().request  # type: ignore
+        req_params = request.args if request.method.upper() == "GET" else request.form or request.data or request.json
+
+        api_params_info: List[APIParameter] = self._api_params[request.path].http.request.parameters  # type: ignore[union-attr]
+        for param_info in api_params_info:
+            if param_info.required and param_info.name not in req_params:
+                return self._generate_http_response(f"Miss required parameter *{param_info.name}*.", status_code=400)
+            one_req_param_value = req_params.get(param_info.name, None)
+            if one_req_param_value:
+                if param_info.value_type and not isinstance(one_req_param_value, locate(param_info.value_type)):  # type: ignore[arg-type]
+                    return self._generate_http_response(
+                        f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different with the "
+                        f"implementation of Back-End site (*{type(param_info.value_type)}*).",
+                        status_code=400,
+                    )
+                if param_info.value_format and not re.search(
+                    param_info.value_format, one_req_param_value, re.IGNORECASE
+                ):
+                    return self._generate_http_response(
+                        f"The format of data from Font-End site (value: *{one_req_param_value}*) is incorrect. Its "
+                        f"format should be '{param_info.value_format}'.",
+                        status_code=400,
+                    )
+        return self._generate_http_response(body="OK.", status_code=200)
+
+    def _generate_http_response(self, body: str, status_code: int) -> "flask.Response":  # type: ignore
+        return import_web_lib.flask().Response(body, status=status_code)
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
+        super()._add_api(api_name=api_name, api_config=api_config, base_url=base_url)
         return f"""self.web_application.route(
             "{self.url_path(api_config, base_url)}", methods=["{cast(HTTPRequest, self._ensure_http(api_config, "request")).method}"]
             )({api_name})
@@ -96,10 +142,16 @@ class FastAPIServer(BaseAppServer):
     def setup(self) -> "fastapi.FastAPI":  # type: ignore
         return import_web_lib.fastapi().FastAPI()
 
-    def _request_process(self) -> None:
+    def _request_process(self) -> "fastapi.Response":  # type: ignore
         print(f"[DEBUG in src] Here is request process by FastAPI.")
+        # FIXME: Implement the request process in FastAPI strategy
+        return self._generate_http_response("OK.", status_code=200)
+
+    def _generate_http_response(self, body: str, status_code: int) -> "fastapi.Response":  # type: ignore
+        return import_web_lib.fastapi().Response(body, status_code=status_code)
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
+        super()._add_api(api_name=api_name, api_config=api_config, base_url=base_url)
         return f"""self.web_application.api_route(
             path="{self.url_path(api_config, base_url)}", methods=["{cast(HTTPRequest, self._ensure_http(api_config, "request")).method}"]
             )({api_name})
