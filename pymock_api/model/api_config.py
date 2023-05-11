@@ -109,7 +109,7 @@ class APIParameter(_Config):
     name: str = field(default_factory=str)
     required: Optional[bool] = None
     default: Optional[Any] = None
-    value_type: Optional[type] = None
+    value_type: Optional[str] = None  # A type value as string
     value_format: Optional[str] = None
     force_naming: Optional[bool] = None
 
