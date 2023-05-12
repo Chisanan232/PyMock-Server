@@ -3,20 +3,26 @@ import os
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from typing import Any, Optional, Type
-from unittest.mock import Mock, mock_open, patch
+from unittest.mock import MagicMock, Mock, PropertyMock, mock_open, patch
 
 import pytest
 from fastapi import FastAPI
+from fastapi import Request as FastAPIRequest
+from fastapi import Response as FastAPIResponse
 from flask import Flask
+from flask import Request as FlaskRequest
+from flask import Response as FlaskResponse
 
 from pymock_api.exceptions import FileFormatNotSupport
-from pymock_api.model.api_config import MockAPI
+from pymock_api.model.api_config import APIParameter, MockAPI
 from pymock_api.server.application import (
     BaseAppServer,
     FastAPIServer,
     FlaskServer,
     _HTTPResponse,
 )
+
+from ..._values import _Test_API_Parameter, _TestConfig
 
 MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
 
@@ -33,6 +39,12 @@ class FakeFlask(Flask):
 
 class FakeFastAPI(FastAPI):
     pass
+
+
+class DummyFlaskRequest(FlaskRequest):
+    def __init__(self):
+        pass
+        # super().__init__(environ={})
 
 
 class AppServerTestSpec(metaclass=ABCMeta):
@@ -69,6 +81,30 @@ class AppServerTestSpec(metaclass=ABCMeta):
 
         assert for_test_api_name in annotate_function_pycode and for_test_resp in annotate_function_pycode
 
+    def test_request_process(self, sut: BaseAppServer):
+        # Mock Flask request
+        request = Mock()
+        request.path = "/test-api-path"
+        request.method = "GET"
+        request.args = {}
+
+        # Mock attribute and function
+        sut._api_params = {"/test-api-path": MockAPI().deserialize(_TestConfig.Mock_API)}
+        sut._get_current_request = MagicMock(return_value=request)
+
+        # Run target function
+        response = sut._request_process()
+
+        # Verify
+        sut._get_current_request.assert_called_once()
+        assert isinstance(response, self._expected_response_type)
+        assert response.status_code == 200
+
+    @property
+    @abstractmethod
+    def _expected_response_type(self) -> Type[Any]:
+        pass
+
     @pytest.mark.parametrize("base_url", [None, "Has base URL"])
     def test_generate_pycode_about_adding_api(self, sut: BaseAppServer, base_url: Optional[str]):
         for_test_api_name = "Function name"
@@ -97,6 +133,10 @@ class TestFlaskServer(AppServerTestSpec):
     def mocker(self) -> MockerModule:
         return MockerModule(module_path="flask.Flask", return_value=FakeFlask("PyTest-Used"))
 
+    @property
+    def _expected_response_type(self) -> Type[FlaskResponse]:
+        return FlaskResponse
+
 
 class TestFastAPIServer(AppServerTestSpec):
     @pytest.fixture(scope="function")
@@ -110,6 +150,10 @@ class TestFastAPIServer(AppServerTestSpec):
     @property
     def mocker(self) -> MockerModule:
         return MockerModule(module_path="fastapi.FastAPI", return_value=FakeFastAPI())
+
+    @property
+    def _expected_response_type(self) -> Type[FastAPIResponse]:
+        return FastAPIResponse
 
 
 class TestInnerHTTPResponse:
