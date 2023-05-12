@@ -71,6 +71,10 @@ class BaseAppServer(metaclass=ABCMeta):
     def _request_process(self) -> None:
         pass
 
+    @abstractmethod
+    def _get_current_request(self) -> Any:
+        pass
+
     def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
         assert api_config.http and getattr(
             api_config.http, http_attr
@@ -100,7 +104,7 @@ class FlaskServer(BaseAppServer):
         return import_web_lib.flask().Flask(__name__)
 
     def _request_process(self) -> "flask.Response":  # type: ignore
-        request: "flask.Request" = import_web_lib.flask().request  # type: ignore
+        request = self._get_current_request()
         req_params = request.args if request.method.upper() == "GET" else request.form or request.data or request.json
 
         api_params_info: List[APIParameter] = self._api_params[request.path].http.request.parameters  # type: ignore[union-attr]
@@ -125,6 +129,9 @@ class FlaskServer(BaseAppServer):
                     )
         return self._generate_http_response(body="OK.", status_code=200)
 
+    def _get_current_request(self) -> "flask.Request":  # type: ignore
+        return import_web_lib.flask().request
+
     def _generate_http_response(self, body: str, status_code: int) -> "flask.Response":  # type: ignore
         return import_web_lib.flask().Response(body, status=status_code)
 
@@ -145,7 +152,11 @@ class FastAPIServer(BaseAppServer):
     def _request_process(self) -> "fastapi.Response":  # type: ignore
         print(f"[DEBUG in src] Here is request process by FastAPI.")
         # FIXME: Implement the request process in FastAPI strategy
+        request = self._get_current_request()
         return self._generate_http_response("OK.", status_code=200)
+
+    def _get_current_request(self) -> "fastapi.Request":  # type: ignore
+        return None
 
     def _generate_http_response(self, body: str, status_code: int) -> "fastapi.Response":  # type: ignore
         return import_web_lib.fastapi().Response(body, status_code=status_code)
