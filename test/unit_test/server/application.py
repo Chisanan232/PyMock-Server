@@ -3,7 +3,7 @@ import os
 import re
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
-from typing import Any, Optional, Type
+from typing import Any, List, Optional, Type
 from unittest.mock import MagicMock, Mock, PropertyMock, mock_open, patch
 
 import pytest
@@ -86,16 +86,16 @@ class AppServerTestSpec(metaclass=ABCMeta):
         ("method", "api_params", "error_msg_like", "expected_status_code"),
         [
             ("GET", {"param_1": "any_format"}, None, 200),
-            ("GET", {"miss_param": "miss_param"}, "Miss required parameter", 400),
-            ("GET", {"param_1": 123}, "type of data", 400),
-            ("GET", {"param_1": "incorrect_format"}, "format of data", 400),
+            ("GET", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
+            ("GET", {"param_1": 123}, ["type of data", "is different"], 400),
+            ("GET", {"param_1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
         ],
     )
     def test_request_process(
         self,
         method: str,
         api_params: dict,
-        error_msg_like: Optional[str],
+        error_msg_like: Optional[List[str]],
         expected_status_code: int,
         sut: BaseAppServer,
     ):
@@ -119,7 +119,10 @@ class AppServerTestSpec(metaclass=ABCMeta):
         if response.status_code != 200:
             response_content = response.data or response.json
             response_str = response_content.decode("utf-8") if isinstance(response_content, bytes) else response_content
-            assert re.search(error_msg_like, response_str, re.IGNORECASE)
+            regular = r""
+            for er_msg_f in error_msg_like:
+                regular += r".{0,512}" + re.escape(er_msg_f)
+            assert re.search(regular, response_str, re.IGNORECASE)
 
     @property
     @abstractmethod
