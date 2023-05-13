@@ -76,7 +76,7 @@ _Cmd_Option = namedtuple("_Cmd_Option", ["option_name", "value"])
 
 _Test_API_Parameter: dict = {
     "name": "param_1",
-    "required": False,
+    "required": True,
     "default": "default_value",
     "type": "str",
     "format": "any_format",
