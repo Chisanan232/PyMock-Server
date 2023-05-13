@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from typing import Any, Optional, Type
@@ -22,7 +23,7 @@ from pymock_api.server.application import (
     _HTTPResponse,
 )
 
-from ..._values import _Test_API_Parameter, _TestConfig
+from ..._values import _Test_API_Parameter, _Test_URL, _TestConfig
 
 MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
 
@@ -81,14 +82,30 @@ class AppServerTestSpec(metaclass=ABCMeta):
 
         assert for_test_api_name in annotate_function_pycode and for_test_resp in annotate_function_pycode
 
-    def test_request_process(self, sut: BaseAppServer):
+    @pytest.mark.parametrize(
+        ("method", "api_params", "error_msg_like", "expected_status_code"),
+        [
+            ("GET", {"param_1": "any_format"}, None, 200),
+            ("GET", {"miss_param": "miss_param"}, "Miss required parameter", 400),
+            ("GET", {"param_1": 123}, "type of data", 400),
+            ("GET", {"param_1": "incorrect_format"}, "format of data", 400),
+        ],
+    )
+    def test_request_process(
+        self,
+        method: str,
+        api_params: dict,
+        error_msg_like: Optional[str],
+        expected_status_code: int,
+        sut: BaseAppServer,
+    ):
         # Mock Flask request
         request = Mock()
         request.path = "/test-api-path"
-        request.method = "GET"
-        request.args = {}
+        request.method = method
+        request.args = api_params
 
-        # Mock attribute and function
+        # Mock API attribute and function
         sut._api_params = {"/test-api-path": MockAPI().deserialize(_TestConfig.Mock_API)}
         sut._get_current_request = MagicMock(return_value=request)
 
@@ -98,7 +115,11 @@ class AppServerTestSpec(metaclass=ABCMeta):
         # Verify
         sut._get_current_request.assert_called_once()
         assert isinstance(response, self._expected_response_type)
-        assert response.status_code == 200
+        assert response.status_code == expected_status_code
+        if response.status_code != 200:
+            response_content = response.data or response.json
+            response_str = response_content.decode("utf-8") if isinstance(response_content, bytes) else response_content
+            assert re.search(error_msg_like, response_str, re.IGNORECASE)
 
     @property
     @abstractmethod
@@ -150,6 +171,17 @@ class TestFastAPIServer(AppServerTestSpec):
     @property
     def mocker(self) -> MockerModule:
         return MockerModule(module_path="fastapi.FastAPI", return_value=FakeFastAPI())
+
+    @pytest.mark.skip(reason="Not implement FastAPI section features.")
+    def test_request_process(
+        self,
+        method: str,
+        api_params: dict,
+        error_msg_like: Optional[str],
+        expected_status_code: int,
+        sut: BaseAppServer,
+    ):
+        pass
 
     @property
     def _expected_response_type(self) -> Type[FastAPIResponse]:
