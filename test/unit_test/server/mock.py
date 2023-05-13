@@ -22,6 +22,9 @@ class FakeWebServer(BaseAppServer):
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         pass
 
+    def _get_current_request(self) -> Any:
+        pass
+
     def _generate_http_response(self, body: str, status_code: int) -> Any:
         pass
 
