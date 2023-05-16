@@ -59,13 +59,15 @@ class BaseAppServer(metaclass=ABCMeta):
 
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
         initial_global_server = f"""global SERVER\nSERVER = self\n"""
+        define_function_for_api = self._define_api_function_pycode(api_name, api_config)
+        return initial_global_server + define_function_for_api
 
-        define_function_for_api = f"""def {api_name}() -> Union[str, dict]:
+    def _define_api_function_pycode(self, api_name: str, api_config: MockAPI) -> str:
+        return f"""def {api_name}() -> Union[str, dict]:
             {self._run_request_process_pycode()}
             {self._handle_request_process_result_pycode()}
             {self._generate_response_pycode(api_config)}
         """
-        return initial_global_server + define_function_for_api
 
     def _run_request_process_pycode(self, **kwargs) -> str:
         return "process_result = SERVER._request_process()"
