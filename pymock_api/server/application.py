@@ -82,7 +82,7 @@ class BaseAppServer(metaclass=ABCMeta):
 
     def _request_process(self) -> "flask.Response":  # type: ignore
         request = self._get_current_request()
-        req_params = request.args if request.method.upper() == "GET" else request.form or request.data or request.json
+        req_params = self._get_current_api_parameters(request)
 
         api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(request)].http.request.parameters  # type: ignore[union-attr]
         for param_info in api_params_info:
@@ -113,6 +113,9 @@ class BaseAppServer(metaclass=ABCMeta):
     @abstractmethod
     def _get_current_api_path(self, request: Any) -> str:
         pass
+
+    def _get_current_api_parameters(self, request) -> dict:
+        return request.args if request.method.upper() == "GET" else request.form or request.data or request.json
 
     def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
         assert api_config.http and getattr(
