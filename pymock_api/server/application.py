@@ -60,17 +60,23 @@ class BaseAppServer(metaclass=ABCMeta):
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
         initial_global_server = f"""global SERVER\nSERVER = self\n"""
 
-        run_request_process = "process_result = SERVER._request_process()"
-        handle_request_process_result = f"""if process_result.status_code != 200:
-            return process_result
-        """
-        generate_response = f"""return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')"""
         define_function_for_api = f"""def {api_name}() -> Union[str, dict]:
-            {run_request_process}
-            {handle_request_process_result}
-            {generate_response}
+            {self.run_request_process_pycode()}
+            {self.handle_request_process_result_pycode()}
+            {self.generate_response_pycode(api_config)}
         """
         return initial_global_server + define_function_for_api
+
+    def run_request_process_pycode(self, **kwargs) -> str:
+        return "process_result = SERVER._request_process()"
+
+    def handle_request_process_result_pycode(self, **kwargs) -> str:
+        return f"""if process_result.status_code != 200:
+            return process_result
+        """
+
+    def generate_response_pycode(self, api_config: MockAPI) -> str:
+        return f"""return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')"""
 
     def _request_process(self) -> "flask.Response":  # type: ignore
         request = self._get_current_request()
