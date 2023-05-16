@@ -97,8 +97,9 @@ class BaseAppServer(metaclass=ABCMeta):
     def _get_current_request(self) -> Any:
         pass
 
+    @abstractmethod
     def _get_current_api_path(self, request: Any) -> str:
-        return request.path
+        pass
 
     def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
         assert api_config.http and getattr(
@@ -131,6 +132,9 @@ class FlaskServer(BaseAppServer):
     def _get_current_request(self) -> "flask.Request":  # type: ignore
         return import_web_lib.flask().request
 
+    def _get_current_api_path(self, request: "flask.Flask") -> str:  # type: ignore[name-defined]
+        return request.path
+
     def _generate_http_response(self, body: str, status_code: int) -> "flask.Response":  # type: ignore
         return import_web_lib.flask().Response(body, status=status_code)
 
@@ -150,6 +154,9 @@ class FastAPIServer(BaseAppServer):
 
     def _get_current_request(self) -> "fastapi.Request":  # type: ignore
         return None
+
+    def _get_current_api_path(self, request: "fastapi.Flask") -> str:  # type: ignore[name-defined]
+        return ""
 
     def _generate_http_response(self, body: str, status_code: int) -> "fastapi.Response":  # type: ignore
         return import_web_lib.fastapi().Response(body, status_code=status_code)
