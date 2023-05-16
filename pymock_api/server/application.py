@@ -61,21 +61,21 @@ class BaseAppServer(metaclass=ABCMeta):
         initial_global_server = f"""global SERVER\nSERVER = self\n"""
 
         define_function_for_api = f"""def {api_name}() -> Union[str, dict]:
-            {self.run_request_process_pycode()}
-            {self.handle_request_process_result_pycode()}
-            {self.generate_response_pycode(api_config)}
+            {self._run_request_process_pycode()}
+            {self._handle_request_process_result_pycode()}
+            {self._generate_response_pycode(api_config)}
         """
         return initial_global_server + define_function_for_api
 
-    def run_request_process_pycode(self, **kwargs) -> str:
+    def _run_request_process_pycode(self, **kwargs) -> str:
         return "process_result = SERVER._request_process()"
 
-    def handle_request_process_result_pycode(self, **kwargs) -> str:
+    def _handle_request_process_result_pycode(self, **kwargs) -> str:
         return f"""if process_result.status_code != 200:
             return process_result
         """
 
-    def generate_response_pycode(self, api_config: MockAPI) -> str:
+    def _generate_response_pycode(self, api_config: MockAPI) -> str:
         return f"""return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')"""
 
     def _request_process(self) -> "flask.Response":  # type: ignore
