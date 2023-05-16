@@ -67,9 +67,31 @@ class BaseAppServer(metaclass=ABCMeta):
         """
         return initial_global_server + define_function_for_api
 
-    @abstractmethod
-    def _request_process(self) -> None:
-        pass
+    def _request_process(self) -> "flask.Response":  # type: ignore
+        request = self._get_current_request()
+        req_params = request.args if request.method.upper() == "GET" else request.form or request.data or request.json
+
+        api_params_info: List[APIParameter] = self._api_params[request.path].http.request.parameters  # type: ignore[union-attr]
+        for param_info in api_params_info:
+            if param_info.required and param_info.name not in req_params:
+                return self._generate_http_response(f"Miss required parameter *{param_info.name}*.", status_code=400)
+            one_req_param_value = req_params.get(param_info.name, None)
+            if one_req_param_value:
+                if param_info.value_type and not isinstance(one_req_param_value, locate(param_info.value_type)):  # type: ignore[arg-type]
+                    return self._generate_http_response(
+                        f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different with the "
+                        f"implementation of Back-End site (*{type(param_info.value_type)}*).",
+                        status_code=400,
+                    )
+                if param_info.value_format and not re.search(
+                    param_info.value_format, one_req_param_value, re.IGNORECASE
+                ):
+                    return self._generate_http_response(
+                        f"The format of data from Font-End site (value: *{one_req_param_value}*) is incorrect. Its "
+                        f"format should be '{param_info.value_format}'.",
+                        status_code=400,
+                    )
+        return self._generate_http_response(body="OK.", status_code=200)
 
     @abstractmethod
     def _get_current_request(self) -> Any:
@@ -103,32 +125,6 @@ class FlaskServer(BaseAppServer):
     def setup(self) -> "flask.Flask":  # type: ignore
         return import_web_lib.flask().Flask(__name__)
 
-    def _request_process(self) -> "flask.Response":  # type: ignore
-        request = self._get_current_request()
-        req_params = request.args if request.method.upper() == "GET" else request.form or request.data or request.json
-
-        api_params_info: List[APIParameter] = self._api_params[request.path].http.request.parameters  # type: ignore[union-attr]
-        for param_info in api_params_info:
-            if param_info.required and param_info.name not in req_params:
-                return self._generate_http_response(f"Miss required parameter *{param_info.name}*.", status_code=400)
-            one_req_param_value = req_params.get(param_info.name, None)
-            if one_req_param_value:
-                if param_info.value_type and not isinstance(one_req_param_value, locate(param_info.value_type)):  # type: ignore[arg-type]
-                    return self._generate_http_response(
-                        f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different with the "
-                        f"implementation of Back-End site (*{type(param_info.value_type)}*).",
-                        status_code=400,
-                    )
-                if param_info.value_format and not re.search(
-                    param_info.value_format, one_req_param_value, re.IGNORECASE
-                ):
-                    return self._generate_http_response(
-                        f"The format of data from Font-End site (value: *{one_req_param_value}*) is incorrect. Its "
-                        f"format should be '{param_info.value_format}'.",
-                        status_code=400,
-                    )
-        return self._generate_http_response(body="OK.", status_code=200)
-
     def _get_current_request(self) -> "flask.Request":  # type: ignore
         return import_web_lib.flask().request
 
@@ -148,12 +144,6 @@ class FastAPIServer(BaseAppServer):
 
     def setup(self) -> "fastapi.FastAPI":  # type: ignore
         return import_web_lib.fastapi().FastAPI()
-
-    def _request_process(self) -> "fastapi.Response":  # type: ignore
-        print(f"[DEBUG in src] Here is request process by FastAPI.")
-        # FIXME: Implement the request process in FastAPI strategy
-        request = self._get_current_request()
-        return self._generate_http_response("OK.", status_code=200)
 
     def _get_current_request(self) -> "fastapi.Request":  # type: ignore
         return None
