@@ -80,6 +80,23 @@ class BaseAppServer(metaclass=ABCMeta):
     def _generate_response_pycode(self, api_config: MockAPI) -> str:
         return f"""return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')"""
 
+    def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
+        assert api_config.http and getattr(
+            api_config.http, http_attr
+        ), "The configuration *HTTP* value should not be empty."
+        return getattr(api_config.http, http_attr)
+
+    @abstractmethod
+    def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
+        self._record_api_params_info(url=self.url_path(api_config=api_config, base_url=base_url), api_config=api_config)
+        return ""
+
+    def url_path(self, api_config: MockAPI, base_url: Optional[str] = None) -> str:
+        return f"{base_url}{api_config.url}" if base_url else f"{api_config.url}"
+
+    def _record_api_params_info(self, url: str, api_config: MockAPI) -> None:
+        self._api_params[url] = api_config
+
     def _request_process(self) -> "flask.Response":  # type: ignore
         request = self._get_current_request()
         req_params = self._get_current_api_parameters(request)
@@ -111,29 +128,12 @@ class BaseAppServer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _get_current_api_path(self, request: Any) -> str:
-        pass
-
-    @abstractmethod
     def _get_current_api_parameters(self, request: Any) -> dict:
         pass
 
-    def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
-        assert api_config.http and getattr(
-            api_config.http, http_attr
-        ), "The configuration *HTTP* value should not be empty."
-        return getattr(api_config.http, http_attr)
-
     @abstractmethod
-    def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        self._record_api_params_info(url=self.url_path(api_config=api_config, base_url=base_url), api_config=api_config)
-        return ""
-
-    def url_path(self, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        return f"{base_url}{api_config.url}" if base_url else f"{api_config.url}"
-
-    def _record_api_params_info(self, url: str, api_config: MockAPI) -> None:
-        self._api_params[url] = api_config
+    def _get_current_api_path(self, request: Any) -> str:
+        pass
 
     @abstractmethod
     def _generate_http_response(self, body: str, status_code: int) -> Any:
@@ -149,11 +149,11 @@ class FlaskServer(BaseAppServer):
     def _get_current_request(self) -> "flask.Request":  # type: ignore
         return import_web_lib.flask().request
 
-    def _get_current_api_path(self, request: "flask.Request") -> str:  # type: ignore[name-defined]
-        return request.path
-
     def _get_current_api_parameters(self, request: "flask.Request") -> dict:  # type: ignore[name-defined]
         return request.args if request.method.upper() == "GET" else request.form or request.data or request.json
+
+    def _get_current_api_path(self, request: "flask.Request") -> str:  # type: ignore[name-defined]
+        return request.path
 
     def _generate_http_response(self, body: str, status_code: int) -> "flask.Response":  # type: ignore
         return import_web_lib.flask().Response(body, status=status_code)
@@ -175,11 +175,11 @@ class FastAPIServer(BaseAppServer):
     def _get_current_request(self) -> "fastapi.Request":  # type: ignore
         return None
 
-    def _get_current_api_path(self, request: "fastapi.Request") -> str:  # type: ignore[name-defined]
-        return ""
-
     def _get_current_api_parameters(self, request: "fastapi.Request") -> dict:  # type: ignore[name-defined]
         return {}
+
+    def _get_current_api_path(self, request: "fastapi.Request") -> str:  # type: ignore[name-defined]
+        return ""
 
     def _generate_http_response(self, body: str, status_code: int) -> "fastapi.Response":  # type: ignore
         return import_web_lib.fastapi().Response(body, status_code=status_code)
