@@ -97,9 +97,9 @@ class BaseAppServer(metaclass=ABCMeta):
     def _record_api_params_info(self, url: str, api_config: MockAPI) -> None:
         self._api_params[url] = api_config
 
-    def _request_process(self) -> "flask.Response":  # type: ignore
-        request = self._get_current_request()
-        req_params = self._get_current_api_parameters(request)
+    def _request_process(self, **kwargs) -> "flask.Response":  # type: ignore
+        request = self._get_current_request(**kwargs)
+        req_params = self._get_current_api_parameters(**kwargs)
 
         api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(request)].http.request.parameters  # type: ignore[union-attr]
         for param_info in api_params_info:
@@ -127,11 +127,11 @@ class BaseAppServer(metaclass=ABCMeta):
         return self._generate_http_response(body="OK.", status_code=200)
 
     @abstractmethod
-    def _get_current_request(self) -> Any:
+    def _get_current_request(self, **kwargs) -> Any:
         pass
 
     @abstractmethod
-    def _get_current_api_parameters(self, request: Any) -> dict:
+    def _get_current_api_parameters(self, **kwargs) -> dict:
         pass
 
     @abstractmethod
@@ -149,11 +149,15 @@ class FlaskServer(BaseAppServer):
     def setup(self) -> "flask.Flask":  # type: ignore
         return import_web_lib.flask().Flask(__name__)
 
-    def _get_current_request(self) -> "flask.Request":  # type: ignore
+    def _get_current_request(self, **kwargs) -> "flask.Request":  # type: ignore
         return import_web_lib.flask().request
 
-    def _get_current_api_parameters(self, request: "flask.Request") -> dict:  # type: ignore[name-defined]
-        return request.args if request.method.upper() == "GET" else request.form or request.data or request.json
+    def _get_current_api_parameters(self, **kwargs) -> dict:
+        request: "flask.Request" = kwargs.get("request", import_web_lib.flask().request)  # type: ignore
+        api_params = request.args if request.method.upper() == "GET" else request.form or request.data or request.json
+        if isinstance(api_params, bytes):
+            api_params = json.loads(api_params.decode("utf-8"))
+        return api_params
 
     def _get_current_api_path(self, request: "flask.Request") -> str:  # type: ignore[name-defined]
         return request.path
@@ -175,14 +179,38 @@ class FastAPIServer(BaseAppServer):
     def setup(self) -> "fastapi.FastAPI":  # type: ignore
         return import_web_lib.fastapi().FastAPI()
 
-    def _get_current_request(self) -> "fastapi.Request":  # type: ignore
-        return None
+    def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
+        initial_global_server = f"""global SERVER\nSERVER = self\n"""
+        new_api_name = "".join(map(lambda n: f"{n[0].upper()}{n[1:]}", api_name.split("_")))
+        parameter_class = f"{new_api_name}Parameter"
+        define_parameters_model = f"""from pydantic import BaseModel\nclass {parameter_class}(BaseModel):\n"""
+        for prop in api_config.http.request.parameters:  # type: ignore[union-attr]
+            if prop.default:
+                define_parameters_model += f"    {prop.name}: {prop.value_type} = '{prop.default}'\n"
+            else:
+                define_parameters_model += f"    {prop.name}: {prop.value_type}\n"
+        import_fastapi = "from fastapi import Request as FastAPIRequest\n"
+        define_function_for_api = f"""def {api_name}(model: {parameter_class}, request: FastAPIRequest):
+            process_result = SERVER._request_process(model=model, request=request)
+            if process_result.status_code != 200:
+                return process_result
+            return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')
+        """
+        return import_fastapi + initial_global_server + define_parameters_model + define_function_for_api
 
-    def _get_current_api_parameters(self, request: "fastapi.Request") -> dict:  # type: ignore[name-defined]
-        return {}
+    def _get_current_request(self, **kwargs) -> "fastapi.Request":  # type: ignore[name-defined]
+        return kwargs.get("request")
+
+    def _get_current_api_parameters(self, **kwargs) -> dict:
+        api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(kwargs["request"])].http.request.parameters  # type: ignore[union-attr]
+        api_param_names = list(map(lambda e: e.name, api_params_info))
+        api_param = {}
+        for param_name in api_param_names:
+            api_param[param_name] = getattr(kwargs["model"], param_name)
+        return api_param
 
     def _get_current_api_path(self, request: "fastapi.Request") -> str:  # type: ignore[name-defined]
-        return ""
+        return request.scope["root_path"] + request.scope["route"].path
 
     def _generate_http_response(self, body: str, status_code: int) -> "fastapi.Response":  # type: ignore
         return import_web_lib.fastapi().Response(body, status_code=status_code)
