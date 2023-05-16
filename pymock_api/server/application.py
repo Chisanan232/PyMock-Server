@@ -103,16 +103,19 @@ class BaseAppServer(metaclass=ABCMeta):
 
         api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(request)].http.request.parameters  # type: ignore[union-attr]
         for param_info in api_params_info:
+            # Check the required parameter
             if param_info.required and param_info.name not in req_params:
                 return self._generate_http_response(f"Miss required parameter *{param_info.name}*.", status_code=400)
             one_req_param_value = req_params.get(param_info.name, None)
             if one_req_param_value:
+                # Check the data type of parameter
                 if param_info.value_type and not isinstance(one_req_param_value, locate(param_info.value_type)):  # type: ignore[arg-type]
                     return self._generate_http_response(
                         f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different with the "
                         f"implementation of Back-End site (*{type(param_info.value_type)}*).",
                         status_code=400,
                     )
+                # Check the data format of parameter
                 if param_info.value_format and not re.search(
                     param_info.value_format, one_req_param_value, re.IGNORECASE
                 ):
