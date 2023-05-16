@@ -71,7 +71,7 @@ class BaseAppServer(metaclass=ABCMeta):
         request = self._get_current_request()
         req_params = request.args if request.method.upper() == "GET" else request.form or request.data or request.json
 
-        api_params_info: List[APIParameter] = self._api_params[request.path].http.request.parameters  # type: ignore[union-attr]
+        api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(request)].http.request.parameters  # type: ignore[union-attr]
         for param_info in api_params_info:
             if param_info.required and param_info.name not in req_params:
                 return self._generate_http_response(f"Miss required parameter *{param_info.name}*.", status_code=400)
@@ -96,6 +96,9 @@ class BaseAppServer(metaclass=ABCMeta):
     @abstractmethod
     def _get_current_request(self) -> Any:
         pass
+
+    def _get_current_api_path(self, request: Any) -> str:
+        return request.path
 
     def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
         assert api_config.http and getattr(
