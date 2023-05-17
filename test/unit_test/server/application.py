@@ -121,15 +121,13 @@ class AppServerTestSpec(metaclass=ABCMeta):
                 regular += r".{0,512}" + re.escape(er_msg_f)
             assert re.search(regular, response_str, re.IGNORECASE)
 
+    @abstractmethod
     def _mock_request(self, method: str, api_params: dict) -> Mock:
-        request = Mock()
-        request.path = "/test-api-path"
-        request.method = method
-        request.args = api_params
-        return request
+        pass
 
-    def _run_request_process_func(self, sut: BaseAppServer) -> "flask.Response":
-        return sut._request_process()
+    @abstractmethod
+    def _run_request_process_func(self, sut: BaseAppServer) -> Any:
+        pass
 
     @property
     @abstractmethod
@@ -164,6 +162,16 @@ class TestFlaskServer(AppServerTestSpec):
     def mocker(self) -> MockerModule:
         return MockerModule(module_path="flask.Flask", return_value=FakeFlask("PyTest-Used"))
 
+    def _mock_request(self, method: str, api_params: dict) -> Mock:
+        request = Mock()
+        request.path = "/test-api-path"
+        request.method = method
+        request.args = api_params
+        return request
+
+    def _run_request_process_func(self, sut: BaseAppServer) -> "flask.Response":
+        return sut._request_process()
+
     @property
     def _expected_response_type(self) -> Type[FlaskResponse]:
         return FlaskResponse
@@ -191,6 +199,12 @@ class TestFastAPIServer(AppServerTestSpec):
         expected_status_code: int,
         sut: BaseAppServer,
     ):
+        pass
+
+    def _mock_request(self, method: str, api_params: dict) -> Mock:
+        pass
+
+    def _run_request_process_func(self, sut: BaseAppServer) -> "fastapi.Response":
         pass
 
     @property
