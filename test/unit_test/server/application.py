@@ -4,7 +4,7 @@ import re
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from typing import Any, List, Optional, Type
-from unittest.mock import MagicMock, Mock, PropertyMock, mock_open, patch
+from unittest.mock import MagicMock, Mock, PropertyMock, call, mock_open, patch
 
 import pytest
 from fastapi import FastAPI
@@ -113,7 +113,7 @@ class AppServerTestSpec(metaclass=ABCMeta):
         response = sut._request_process()
 
         # Verify
-        sut._get_current_request.assert_called_once()
+        sut._get_current_request.assert_has_calls(calls=[call(), call()])
         assert isinstance(response, self._expected_response_type)
         assert response.status_code == expected_status_code
         if response.status_code != 200:
