@@ -3,7 +3,7 @@ import os
 import re
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
-from typing import Any, List, Optional, Type
+from typing import Any, List, Optional, Type, Union
 from unittest.mock import MagicMock, Mock, PropertyMock, call, mock_open, patch
 
 import pytest
@@ -113,7 +113,7 @@ class AppServerTestSpec(metaclass=ABCMeta):
         assert isinstance(response, self._expected_response_type)
         assert response.status_code == expected_status_code
         if response.status_code != 200:
-            response_content = response.data or response.json
+            response_content = self._get_response_content(response)
             response_str = response_content.decode("utf-8") if isinstance(response_content, bytes) else response_content
             regular = r""
             for er_msg_f in error_msg_like:
@@ -127,6 +127,9 @@ class AppServerTestSpec(metaclass=ABCMeta):
     @abstractmethod
     def _run_request_process_func(self, sut: BaseAppServer, **kwargs) -> Any:
         pass
+
+    def _get_response_content(self, response: "flask.Response") -> Union[str, bytes, dict]:
+        return response.data or response.json
 
     @property
     @abstractmethod
