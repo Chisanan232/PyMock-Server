@@ -70,15 +70,20 @@ class BaseAppServer(metaclass=ABCMeta):
         """
 
     def _run_request_process_pycode(self, **kwargs) -> str:
-        return "process_result = SERVER._request_process()"
+        return """
+        process_result = SERVER._request_process()
+        """
 
     def _handle_request_process_result_pycode(self, **kwargs) -> str:
-        return f"""if process_result.status_code != 200:
+        return """
+        if process_result.status_code != 200:
             return process_result
         """
 
     def _generate_response_pycode(self, api_config: MockAPI) -> str:
-        return f"""return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')"""
+        return f"""
+        return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')
+        """
 
     def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
         assert api_config.http and getattr(
