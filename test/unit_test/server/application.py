@@ -99,11 +99,8 @@ class AppServerTestSpec(metaclass=ABCMeta):
         expected_status_code: int,
         sut: BaseAppServer,
     ):
-        # Mock Flask request
-        request = Mock()
-        request.path = "/test-api-path"
-        request.method = method
-        request.args = api_params
+        # Mock request
+        request = self._mock_request(method=method, api_params=api_params)
 
         # Mock API attribute and function
         sut._api_params = {"/test-api-path": MockAPI().deserialize(_TestConfig.Mock_API)}
@@ -123,6 +120,13 @@ class AppServerTestSpec(metaclass=ABCMeta):
             for er_msg_f in error_msg_like:
                 regular += r".{0,512}" + re.escape(er_msg_f)
             assert re.search(regular, response_str, re.IGNORECASE)
+
+    def _mock_request(self, method: str, api_params: dict) -> Mock:
+        request = Mock()
+        request.path = "/test-api-path"
+        request.method = method
+        request.args = api_params
+        return request
 
     @property
     @abstractmethod
