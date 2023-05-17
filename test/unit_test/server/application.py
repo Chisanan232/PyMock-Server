@@ -107,7 +107,7 @@ class AppServerTestSpec(metaclass=ABCMeta):
         sut._get_current_request = MagicMock(return_value=request)
 
         # Run target function
-        response = sut._request_process()
+        response = self._run_request_process_func(sut)
 
         # Verify
         sut._get_current_request.assert_has_calls(calls=[call(), call()])
@@ -127,6 +127,9 @@ class AppServerTestSpec(metaclass=ABCMeta):
         request.method = method
         request.args = api_params
         return request
+
+    def _run_request_process_func(self, sut: BaseAppServer) -> "flask.Response":
+        return sut._request_process()
 
     @property
     @abstractmethod
