@@ -128,8 +128,9 @@ class AppServerTestSpec(metaclass=ABCMeta):
     def _run_request_process_func(self, sut: BaseAppServer, **kwargs) -> Any:
         pass
 
-    def _get_response_content(self, response: "flask.Response") -> Union[str, bytes, dict]:
-        return response.data or response.json
+    @abstractmethod
+    def _get_response_content(self, response: Any) -> Union[str, bytes, dict]:
+        pass
 
     @property
     @abstractmethod
@@ -174,6 +175,9 @@ class TestFlaskServer(AppServerTestSpec):
     def _run_request_process_func(self, sut: BaseAppServer, **kwargs) -> "flask.Response":
         return sut._request_process()
 
+    def _get_response_content(self, response: "flask.Response") -> Union[str, bytes, dict]:
+        return response.data or response.json
+
     @property
     def _expected_response_type(self) -> Type[FlaskResponse]:
         return FlaskResponse
@@ -210,6 +214,9 @@ class TestFastAPIServer(AppServerTestSpec):
         model = Mock()
         model.param_1 = kwargs["request"].api_parameters
         return sut._request_process(model=model, request=kwargs["request"])
+
+    def _get_response_content(self, response: "fastapi.Response") -> Union[str, bytes, dict]:
+        return response.body
 
     @property
     def _expected_response_type(self) -> Type[FastAPIResponse]:
