@@ -107,10 +107,9 @@ class AppServerTestSpec(metaclass=ABCMeta):
         sut._get_current_request = MagicMock(return_value=request)
 
         # Run target function
-        response = self._run_request_process_func(sut)
+        response = self._run_request_process_func(sut, request=request)
 
         # Verify
-        sut._get_current_request.assert_has_calls(calls=[call(), call()])
         assert isinstance(response, self._expected_response_type)
         assert response.status_code == expected_status_code
         if response.status_code != 200:
@@ -126,7 +125,7 @@ class AppServerTestSpec(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _run_request_process_func(self, sut: BaseAppServer) -> Any:
+    def _run_request_process_func(self, sut: BaseAppServer, **kwargs) -> Any:
         pass
 
     @property
@@ -169,7 +168,7 @@ class TestFlaskServer(AppServerTestSpec):
         request.args = api_params
         return request
 
-    def _run_request_process_func(self, sut: BaseAppServer) -> "flask.Response":
+    def _run_request_process_func(self, sut: BaseAppServer, **kwargs) -> "flask.Response":
         return sut._request_process()
 
     @property
@@ -190,22 +189,24 @@ class TestFastAPIServer(AppServerTestSpec):
     def mocker(self) -> MockerModule:
         return MockerModule(module_path="fastapi.FastAPI", return_value=FakeFastAPI())
 
-    @pytest.mark.skip(reason="Not implement FastAPI section features.")
-    def test_request_process(
-        self,
-        method: str,
-        api_params: dict,
-        error_msg_like: Optional[str],
-        expected_status_code: int,
-        sut: BaseAppServer,
-    ):
-        pass
-
     def _mock_request(self, method: str, api_params: dict) -> Mock:
-        pass
+        route_prop = Mock()
+        route_prop.path = "/test-api-path"
 
-    def _run_request_process_func(self, sut: BaseAppServer) -> "fastapi.Response":
-        pass
+        request = Mock()
+        request.scope = {
+            "root_path": "",
+            "route": route_prop,
+        }
+
+        # Just for testing, source code won't have any usage like this
+        request.api_parameters = api_params
+        return request
+
+    def _run_request_process_func(self, sut: BaseAppServer, **kwargs) -> "fastapi.Response":
+        model = Mock()
+        model.param_1 = kwargs["request"].api_parameters
+        return sut._request_process(model=model, request=kwargs["request"])
 
     @property
     def _expected_response_type(self) -> Type[FastAPIResponse]:
