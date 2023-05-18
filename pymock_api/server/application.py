@@ -109,7 +109,7 @@ class BaseAppServer(metaclass=ABCMeta):
         api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(request)].http.request.parameters  # type: ignore[union-attr]
         for param_info in api_params_info:
             # Check the required parameter
-            if param_info.required and param_info.name not in req_params:
+            if param_info.required and param_info.name not in req_params.keys():
                 return self._generate_http_response(f"Miss required parameter *{param_info.name}*.", status_code=400)
             one_req_param_value = req_params.get(param_info.name, None)
             if one_req_param_value:
@@ -245,7 +245,8 @@ class FastAPIServer(BaseAppServer):
         api_param_names = list(map(lambda e: e.name, api_params_info))
         api_param = {}
         for param_name in api_param_names:
-            api_param[param_name] = getattr(kwargs["model"], param_name)
+            if hasattr(kwargs["model"], param_name):
+                api_param[param_name] = getattr(kwargs["model"], param_name)
         return api_param
 
     def _get_current_api_path(self, request: "fastapi.Request") -> str:  # type: ignore[name-defined]
