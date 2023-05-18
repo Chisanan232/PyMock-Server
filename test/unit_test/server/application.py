@@ -3,9 +3,10 @@ import os
 import re
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
-from typing import Any, List, Optional, Type, Union
+from typing import Any, List, Optional, Type, Union, cast
 from unittest.mock import MagicMock, Mock, PropertyMock, call, mock_open, patch
 
+import fastapi
 import pytest
 from fastapi import FastAPI
 from fastapi import Request as FastAPIRequest
@@ -211,8 +212,12 @@ class TestFastAPIServer(AppServerTestSpec):
         return request
 
     def _run_request_process_func(self, sut: BaseAppServer, **kwargs) -> "fastapi.Response":
-        model = Mock()
-        model.param_1 = kwargs["request"].api_parameters
+        class DummyModel:
+            pass
+
+        model = DummyModel()
+        for k, v in cast(dict, kwargs["request"].api_parameters).items():
+            setattr(model, k, v)
         return sut._request_process(model=model, request=kwargs["request"])
 
     def _get_response_content(self, response: "fastapi.Response") -> Union[str, bytes, dict]:
