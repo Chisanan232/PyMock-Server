@@ -24,7 +24,7 @@ from pymock_api.server.application import (
     _HTTPResponse,
 )
 
-from ..._values import _Test_API_Parameter, _Test_URL, _TestConfig
+from ..._values import _Test_API_Parameter, _Test_API_Parameters, _Test_URL, _TestConfig
 
 MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
 
@@ -77,6 +77,7 @@ class AppServerTestSpec(metaclass=ABCMeta):
         for_test_api_name = "Function name"
         for_test_resp = "Response value for PyTest."
         api = Mock(MockAPI(url=Mock(), http=Mock()))
+        api.http.request.parameters = [APIParameter().deserialize(p) for p in _Test_API_Parameters]
         api.http.response.value = for_test_resp
 
         annotate_function_pycode = sut._annotate_function(api_name=for_test_api_name, api_config=api)
