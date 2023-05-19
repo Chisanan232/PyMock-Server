@@ -87,10 +87,10 @@ class AppServerTestSpec(metaclass=ABCMeta):
     @pytest.mark.parametrize(
         ("method", "api_params", "error_msg_like", "expected_status_code"),
         [
-            ("GET", {"param_1": "any_format"}, None, 200),
+            ("GET", {"param1": "any_format"}, None, 200),
             ("GET", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
-            ("GET", {"param_1": 123}, ["type of data", "is different"], 400),
-            ("GET", {"param_1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
+            ("GET", {"param1": 123}, ["type of data", "is different"], 400),
+            ("GET", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
         ],
     )
     def test_request_process(

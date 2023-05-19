@@ -33,6 +33,33 @@ _Mock_API_HTTP: dict = {
     "response": Mock,
 }
 
+_Test_API_Parameter: dict = {
+    "name": "param1",
+    "required": True,
+    "default": "default_value",
+    "type": "str",
+    "format": "any_format",
+    "force_naming": True,
+}
+_Test_API_Parameters: List[dict] = [
+    {
+        "name": "param1",
+        "required": True,
+        "default": "default_value",
+        "type": "str",
+        "format": None,
+        "force_naming": False,
+    },
+    {
+        "name": "param_2",
+        "required": False,
+        "default": 0,
+        "type": "int",
+        "format": None,
+        "force_naming": False,
+    },
+]
+
 _YouTube_Home_Value: dict = {
     "url": "/youtube",
     "http": {
@@ -112,33 +139,6 @@ _Test_Config_Value: dict = {
 }
 
 _Cmd_Option = namedtuple("_Cmd_Option", ["option_name", "value"])
-
-_Test_API_Parameter: dict = {
-    "name": "param_1",
-    "required": True,
-    "default": "default_value",
-    "type": "str",
-    "format": "any_format",
-    "force_naming": True,
-}
-_Test_API_Parameters: List[dict] = [
-    {
-        "name": "param_1",
-        "required": True,
-        "default": "default_value",
-        "type": "str",
-        "format": None,
-        "force_naming": False,
-    },
-    {
-        "name": "param_2",
-        "required": False,
-        "default": 0,
-        "type": "int",
-        "format": None,
-        "force_naming": False,
-    },
-]
 
 
 # Sample configuration content
