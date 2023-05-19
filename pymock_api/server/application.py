@@ -49,9 +49,11 @@ class BaseAppServer(metaclass=ABCMeta):
         for api_name, api_config in mocked_apis.apis.items():
             if api_config:
                 annotate_function_pycode = self._annotate_function(api_name, api_config)
+                print(f"[DEBUG in src] annotate_function_pycode: {annotate_function_pycode}")
                 add_api_pycode = self._add_api(
                     api_name, api_config, base_url=mocked_apis.base.url if mocked_apis.base else None
                 )
+                print(f"[DEBUG in src] add_api_pycode: {add_api_pycode}")
                 # pylint: disable=exec-used
                 exec(annotate_function_pycode)
                 # pylint: disable=exec-used
@@ -181,6 +183,10 @@ class FlaskServer(BaseAppServer):
 class FastAPIServer(BaseAppServer):
     """*Build a web application with *FastAPI**"""
 
+    def __init__(self):
+        super().__init__()
+        self._api_has_params: bool = False
+
     def setup(self) -> "fastapi.FastAPI":  # type: ignore
         return import_web_lib.fastapi().FastAPI()
 
@@ -212,7 +218,8 @@ class FastAPIServer(BaseAppServer):
 
     def _define_api_function_pycode(self, api_name: str, api_config: MockAPI) -> str:
         parameter_class = self._api_name_as_camel_case(api_name)
-        return f"""def {api_name}(model: {parameter_class}, request: FastAPIRequest):
+        api_func_signature = f"model: {parameter_class}, " if self._api_has_params else ""
+        return f"""def {api_name}({api_func_signature}request: FastAPIRequest):
             {self._run_request_process_pycode()}
             {self._handle_request_process_result_pycode()}
             {self._generate_response_pycode(api_config)}
@@ -224,18 +231,30 @@ class FastAPIServer(BaseAppServer):
 
     def _annotate_api_parameters_model_pycode(self, api_name: str, api_config: MockAPI) -> str:
         parameter_class = self._api_name_as_camel_case(api_name)
-        define_parameters_model = f"""from pydantic import BaseModel\nclass {parameter_class}(BaseModel):\n"""
-        for prop in api_config.http.request.parameters:  # type: ignore[union-attr]
-            if prop.default:
-                define_parameters_model += f"    {prop.name}: {prop.value_type} = '{prop.default}'\n"
-            else:
-                define_parameters_model += f"    {prop.name}: {prop.value_type}\n"
+        define_parameters_model = ""
+        if api_config.http.request.parameters:  # type: ignore[union-attr]
+            self._api_has_params = True
+            define_parameters_model = f"""from pydantic import BaseModel\nclass {parameter_class}(BaseModel):\n"""
+            for prop in api_config.http.request.parameters:  # type: ignore[union-attr]
+                if prop.default:
+                    define_parameters_model += f"    {prop.name}: {prop.value_type} = '{prop.default}'\n"
+                else:
+                    if prop.required:
+                        define_parameters_model += f"    {prop.name}: {prop.value_type}\n"
+                    else:
+                        define_parameters_model += f"    {prop.name}: {prop.value_type} = None\n"
         return define_parameters_model
 
     def _run_request_process_pycode(self, **kwargs) -> str:
-        return """
+        return (
+            """
         process_result = SERVER._request_process(model=model, request=request)
         """
+            if self._api_has_params
+            else """
+        process_result = SERVER._request_process(request=request)
+        """
+        )
 
     def _get_current_request(self, **kwargs) -> "fastapi.Request":  # type: ignore[name-defined]
         return kwargs.get("request")
@@ -244,9 +263,10 @@ class FastAPIServer(BaseAppServer):
         api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(kwargs["request"])].http.request.parameters  # type: ignore[union-attr]
         api_param_names = list(map(lambda e: e.name, api_params_info))
         api_param = {}
-        for param_name in api_param_names:
-            if hasattr(kwargs["model"], param_name):
-                api_param[param_name] = getattr(kwargs["model"], param_name)
+        if "model" in kwargs.keys():
+            for param_name in api_param_names:
+                if hasattr(kwargs["model"], param_name):
+                    api_param[param_name] = getattr(kwargs["model"], param_name)
         return api_param
 
     def _get_current_api_path(self, request: "fastapi.Request") -> str:  # type: ignore[name-defined]
