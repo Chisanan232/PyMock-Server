@@ -65,16 +65,7 @@ _YouTube_Home_Value: dict = {
     "http": {
         "request": {
             "method": "POST",
-            "parameters": [
-                {
-                    "name": "param1",
-                    "required": False,
-                    "default": "default_value",
-                    "type": "str",
-                    "format": None,
-                    "force_naming": True,
-                },
-            ],
+            "parameters": [_Test_API_Parameter],
         },
         "response": {"value": "youtube.json"},
     },
@@ -88,16 +79,7 @@ _Google_Home_Value: dict = {
     "http": {
         "request": {
             "method": "POST",
-            "parameters": [
-                {
-                    "name": "param1",
-                    "required": False,
-                    "default": "default_value",
-                    "type": "str",
-                    "format": None,
-                    "force_naming": True,
-                },
-            ],
+            "parameters": [_Test_API_Parameter],
         },
         "response": {"value": "This is Google home API."},
     },
@@ -108,16 +90,7 @@ _Test_Home: dict = {
     "http": {
         "request": {
             "method": "POST",
-            "parameters": [
-                {
-                    "name": "param1",
-                    "required": False,
-                    "default": "default_value",
-                    "type": "str",
-                    "format": None,
-                    "force_naming": True,
-                },
-            ],
+            "parameters": [_Test_API_Parameter],
         },
         "response": {"value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }'},
     },

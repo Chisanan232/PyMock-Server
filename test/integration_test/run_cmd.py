@@ -162,19 +162,35 @@ class RunMockApplicationTestSpec(CommandTestSpec, ABC):
 
     def _verify_apis(self) -> None:
         self._curl_and_chk_resp_content(
-            api=f"{_Base_URL}{_Google_Home_Value['url']}", expected_resp_content="google", resp_is_json_format=False
+            api=f"{_Base_URL}{_Google_Home_Value['url']}",
+            http_method=_Google_Home_Value["http"]["request"]["method"],
+            expected_resp_content="google",
+            resp_is_json_format=False,
         )
         self._curl_and_chk_resp_content(
-            api=f"{_Base_URL}{_Test_Home['url']}", expected_resp_content="test", resp_is_json_format=True
+            api=f"{_Base_URL}{_Test_Home['url']}",
+            http_method=_Test_Home["http"]["request"]["method"],
+            expected_resp_content="test",
+            resp_is_json_format=True,
         )
         self._curl_and_chk_resp_content(
-            api=f"{_Base_URL}{_YouTube_Home_Value['url']}", expected_resp_content="youtube", resp_is_json_format=True
+            api=f"{_Base_URL}{_YouTube_Home_Value['url']}",
+            http_method=_YouTube_Home_Value["http"]["request"]["method"],
+            expected_resp_content="youtube",
+            resp_is_json_format=True,
         )
 
     @classmethod
-    def _curl_and_chk_resp_content(cls, api: str, expected_resp_content: str, resp_is_json_format: bool) -> None:
+    def _curl_and_chk_resp_content(
+        cls, api: str, http_method: str, expected_resp_content: str, resp_is_json_format: bool
+    ) -> None:
         curl_google_ps = subprocess.Popen(
-            f"curl http://{_Bind_Host_And_Port.value}{api}", shell=True, stdout=subprocess.PIPE
+            f"curl \
+              -X {http_method.upper()} http://{_Bind_Host_And_Port.value}{api} \
+              -d '{{\"param1\": \"any_format\"}}' \
+              -H 'Content-Type: application/json'",
+            shell=True,
+            stdout=subprocess.PIPE,
         )
         assert curl_google_ps.stdout
         resp = curl_google_ps.stdout.readlines()[0]
