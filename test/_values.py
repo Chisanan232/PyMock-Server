@@ -35,7 +35,22 @@ _Mock_API_HTTP: dict = {
 
 _YouTube_Home_Value: dict = {
     "url": "/youtube",
-    "http": {"request": {"method": "GET", "parameters": [{"name": "param1"}]}, "response": {"value": "youtube.json"}},
+    "http": {
+        "request": {
+            "method": "POST",
+            "parameters": [
+                {
+                    "name": "param1",
+                    "required": False,
+                    "default": "default_value",
+                    "type": "str",
+                    "format": None,
+                    "force_naming": True,
+                },
+            ],
+        },
+        "response": {"value": "youtube.json"},
+    },
     "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
 }
 
@@ -44,7 +59,19 @@ _YouTube_API_Content: dict = {"responseCode": "200", "errorMessage": "OK", "cont
 _Google_Home_Value: dict = {
     "url": "/google",
     "http": {
-        "request": {"method": "GET", "parameters": [{"name": "param1"}]},
+        "request": {
+            "method": "POST",
+            "parameters": [
+                {
+                    "name": "param1",
+                    "required": False,
+                    "default": "default_value",
+                    "type": "str",
+                    "format": None,
+                    "force_naming": True,
+                },
+            ],
+        },
         "response": {"value": "This is Google home API."},
     },
 }
@@ -52,7 +79,19 @@ _Google_Home_Value: dict = {
 _Test_Home: dict = {
     "url": "/test",
     "http": {
-        "request": {"method": "GET", "parameters": [{"name": "param1"}]},
+        "request": {
+            "method": "POST",
+            "parameters": [
+                {
+                    "name": "param1",
+                    "required": False,
+                    "default": "default_value",
+                    "type": "str",
+                    "format": None,
+                    "force_naming": True,
+                },
+            ],
+        },
         "response": {"value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }'},
     },
     "cookie": [{"TEST": "cookie_value"}],
