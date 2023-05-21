@@ -78,7 +78,7 @@ _Google_Home_Value: dict = {
     "url": "/google",
     "http": {
         "request": {
-            "method": "POST",
+            "method": "GET",
             "parameters": [_Test_API_Parameter],
         },
         "response": {"value": "This is Google home API."},
