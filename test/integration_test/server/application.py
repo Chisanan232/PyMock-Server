@@ -17,7 +17,7 @@ from pymock_api.server.application import (
     _HTTPResponse,
 )
 
-from ..._values import _YouTube_API_Content
+from ..._values import _Bind_Host_And_Port, _YouTube_API_Content
 from .._spec import ConfigFile, MockAPI_Config_Path, file
 
 WebLibraryType = Any  # flask.Flask, fastapi.FastAPI
@@ -72,9 +72,26 @@ class MockHTTPServerTestSpec:
                 and api_config.apis.base
                 and one_api_config.url
             )
-            response = getattr(client, one_api_config.http.request.method.lower())(
-                api_config.apis.base.url + one_api_config.url
-            )
+            if one_api_config.http.request.method.lower() != "get":
+                params = {
+                    "json": {"param1": "any_format"},
+                    "headers": {"Content-Type": "application/json"},
+                }
+            else:
+                if isinstance(client, FastAPITestClient):
+                    params = {
+                        "params": {"param1": "any_format"},
+                        "headers": {"Content-Type": "application/json"},
+                    }
+                else:
+                    params = {
+                        "query_string": {"param1": "any_format"},
+                        "headers": {"Content-Type": "application/json"},
+                    }
+            under_test_api = api_config.apis.base.url + one_api_config.url
+            print(f"[DEBUG in test] under_test_api: {under_test_api}")
+            response = getattr(client, one_api_config.http.request.method.lower())(under_test_api, **params)
+            print(f"[DEBUG in test] response: {response}")
             under_test_http_resp = self._deserialize_response(response)
 
             # Get the expected result data
