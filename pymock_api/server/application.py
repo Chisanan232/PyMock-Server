@@ -107,6 +107,7 @@ class BaseAppServer(metaclass=ABCMeta):
     def _request_process(self, **kwargs) -> "flask.Response":  # type: ignore
         request = self._get_current_request(**kwargs)
         req_params = self._get_current_api_parameters(**kwargs)
+        print(f"[DEBUG in src::_request_process] req_params: {req_params}")
 
         api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(request)].http.request.parameters  # type: ignore[union-attr]
         for param_info in api_params_info:
@@ -114,6 +115,7 @@ class BaseAppServer(metaclass=ABCMeta):
             if param_info.required and param_info.name not in req_params.keys():
                 return self._generate_http_response(f"Miss required parameter *{param_info.name}*.", status_code=400)
             one_req_param_value = req_params.get(param_info.name, None)
+            print(f"[DEBUG in src::_request_process] one_req_param_value: {one_req_param_value}")
             if one_req_param_value:
                 # Check the data type of parameter
                 if param_info.value_type and not isinstance(one_req_param_value, locate(param_info.value_type)):  # type: ignore[arg-type]
@@ -217,24 +219,56 @@ class FastAPIServer(BaseAppServer):
         return import_fastapi + initial_global_server + define_params_model + define_function_for_api
 
     def _define_api_function_pycode(self, api_name: str, api_config: MockAPI) -> str:
-        parameter_class = self._api_name_as_camel_case(api_name)
-        api_func_signature = f"model: {parameter_class}, " if self._api_has_params else ""
-        return f"""def {api_name}({api_func_signature}request: FastAPIRequest):
-            {self._run_request_process_pycode()}
-            {self._handle_request_process_result_pycode()}
-            {self._generate_response_pycode(api_config)}
-        """
+        if api_config.http.request.method.upper() != "GET":  # type: ignore[union-attr]
+            parameter_class = self._api_name_as_camel_case(api_name)
+            api_func_signature = f"model: {parameter_class}, " if self._api_has_params else ""
+            return f"""def {api_name}({api_func_signature}request: FastAPIRequest):
+                {self._run_request_process_pycode()}
+                {self._handle_request_process_result_pycode()}
+                {self._generate_response_pycode(api_config)}
+            """
+        else:
+            function_args = ""
+            assign_value_to_model = ""
+            for param in api_config.http.request.parameters:  # type: ignore[union-attr]
+                if param.default:
+                    if param.value_type == "str":
+                        default_value = f"'{param.default}'"
+                    else:
+                        default_value = f"{param.default}"
+                    function_args += f", {param.name}: {param.value_type} = {default_value}"
+                else:
+                    function_args += f", {param.name}: {param.value_type} = None"
+                assign_value_to_model += f"""
+        setattr(model, '{param.name}', {param.name})
+                """
+            parameter_class = self._api_name_as_camel_case(api_name)
+            instantiate_model = f"""
+        class {parameter_class}: pass
+        model = {parameter_class}()
+            """
+            return f"""def {api_name}(request: FastAPIRequest{function_args}):
+                {instantiate_model}
+                {assign_value_to_model}
+                {self._run_request_process_pycode()}
+                {self._handle_request_process_result_pycode()}
+                {self._generate_response_pycode(api_config)}
+            """
 
     def _api_name_as_camel_case(self, api_name: str) -> str:
         camel_case_api_name = "".join(map(lambda n: f"{n[0].upper()}{n[1:]}", api_name.split("_")))
         return f"{camel_case_api_name}Parameter"
 
     def _annotate_api_parameters_model_pycode(self, api_name: str, api_config: MockAPI) -> str:
-        parameter_class = self._api_name_as_camel_case(api_name)
         define_parameters_model = ""
         if api_config.http.request.parameters:  # type: ignore[union-attr]
-            self._api_has_params = True
-            define_parameters_model = f"""from pydantic import BaseModel\nclass {parameter_class}(BaseModel):\n"""
+            if api_config.http.request.method.upper() == "GET":  # type: ignore[union-attr]
+                self._api_has_params = True
+                return define_parameters_model
+            else:
+                self._api_has_params = True
+                parameter_class = self._api_name_as_camel_case(api_name)
+                define_parameters_model = f"""from pydantic import BaseModel\nclass {parameter_class}(BaseModel):\n"""
             for prop in api_config.http.request.parameters:  # type: ignore[union-attr]
                 if prop.default:
                     define_parameters_model += f"    {prop.name}: {prop.value_type} = '{prop.default}'\n"
@@ -243,6 +277,7 @@ class FastAPIServer(BaseAppServer):
                         define_parameters_model += f"    {prop.name}: {prop.value_type}\n"
                     else:
                         define_parameters_model += f"    {prop.name}: {prop.value_type} = None\n"
+            return define_parameters_model
         return define_parameters_model
 
     def _run_request_process_pycode(self, **kwargs) -> str:
@@ -260,7 +295,9 @@ class FastAPIServer(BaseAppServer):
         return kwargs.get("request")
 
     def _get_current_api_parameters(self, **kwargs) -> dict:
+        print(f"[DEBUG in src::_get_current_api_parameters] kwargs: {kwargs}")
         api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(kwargs["request"])].http.request.parameters  # type: ignore[union-attr]
+        print(f"[DEBUG in src::_get_current_api_parameters] api_params_info: {api_params_info}")
         api_param_names = list(map(lambda e: e.name, api_params_info))
         api_param = {}
         if "model" in kwargs.keys():
