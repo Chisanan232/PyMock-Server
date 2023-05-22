@@ -78,16 +78,7 @@ class MockHTTPServerTestSpec:
                     "headers": {"Content-Type": "application/json"},
                 }
             else:
-                if isinstance(client, FastAPITestClient):
-                    params = {
-                        "params": {"param1": "any_format"},
-                        "headers": {"Content-Type": "application/json"},
-                    }
-                else:
-                    params = {
-                        "query_string": {"param1": "any_format"},
-                        "headers": {"Content-Type": "application/json"},
-                    }
+                params = self._client_get_req_params(client)
             response = getattr(client, one_api_config.http.request.method.lower())(
                 api_config.apis.base.url + one_api_config.url, **params
             )
@@ -101,6 +92,19 @@ class MockHTTPServerTestSpec:
             assert (
                 under_test_http_resp == expected_http_resp
             ), f"The response data should be the same at mocked API '{one_api_name}'."
+
+    def _client_get_req_params(self, client: Union["flask.testing.FlaskClient", FastAPITestClient]) -> dict:
+        if isinstance(client, FastAPITestClient):
+            params = {
+                "params": {"param1": "any_format"},
+                "headers": {"Content-Type": "application/json"},
+            }
+        else:
+            params = {
+                "query_string": {"param1": "any_format"},
+                "headers": {"Content-Type": "application/json"},
+            }
+        return params
 
     @abstractmethod
     def _deserialize_response(self, response: ResponseType) -> Union[str, dict]:
