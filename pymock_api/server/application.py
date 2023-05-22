@@ -49,11 +49,9 @@ class BaseAppServer(metaclass=ABCMeta):
         for api_name, api_config in mocked_apis.apis.items():
             if api_config:
                 annotate_function_pycode = self._annotate_function(api_name, api_config)
-                print(f"[DEBUG in src] annotate_function_pycode: {annotate_function_pycode}")
                 add_api_pycode = self._add_api(
                     api_name, api_config, base_url=mocked_apis.base.url if mocked_apis.base else None
                 )
-                print(f"[DEBUG in src] add_api_pycode: {add_api_pycode}")
                 # pylint: disable=exec-used
                 exec(annotate_function_pycode)
                 # pylint: disable=exec-used
@@ -107,7 +105,6 @@ class BaseAppServer(metaclass=ABCMeta):
     def _request_process(self, **kwargs) -> "flask.Response":  # type: ignore
         request = self._get_current_request(**kwargs)
         req_params = self._get_current_api_parameters(**kwargs)
-        print(f"[DEBUG in src::_request_process] req_params: {req_params}")
 
         api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(request)].http.request.parameters  # type: ignore[union-attr]
         for param_info in api_params_info:
@@ -115,7 +112,6 @@ class BaseAppServer(metaclass=ABCMeta):
             if param_info.required and param_info.name not in req_params.keys():
                 return self._generate_http_response(f"Miss required parameter *{param_info.name}*.", status_code=400)
             one_req_param_value = req_params.get(param_info.name, None)
-            print(f"[DEBUG in src::_request_process] one_req_param_value: {one_req_param_value}")
             if one_req_param_value:
                 # Check the data type of parameter
                 if param_info.value_type and not isinstance(one_req_param_value, locate(param_info.value_type)):  # type: ignore[arg-type]
@@ -295,9 +291,7 @@ class FastAPIServer(BaseAppServer):
         return kwargs.get("request")
 
     def _get_current_api_parameters(self, **kwargs) -> dict:
-        print(f"[DEBUG in src::_get_current_api_parameters] kwargs: {kwargs}")
         api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(kwargs["request"])].http.request.parameters  # type: ignore[union-attr]
-        print(f"[DEBUG in src::_get_current_api_parameters] api_params_info: {api_params_info}")
         api_param_names = list(map(lambda e: e.name, api_params_info))
         api_param = {}
         if "model" in kwargs.keys():
