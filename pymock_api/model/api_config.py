@@ -115,7 +115,14 @@ class APIParameter(_Config):
 
     def _compare(self, other: "APIParameter") -> bool:
         # TODO: Let it could automatically scan what properties it has and compare all of their value.
-        return self.name == other.name
+        return (
+            self.name == other.name
+            and self.required == other.required
+            and self.default == other.default
+            and self.value_type == other.value_type
+            and self.value_format == other.value_format
+            and self.force_naming == other.force_naming
+        )
 
     def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:
         name: str = self._get_prop(data, prop="name")
