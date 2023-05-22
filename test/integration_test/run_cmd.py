@@ -199,9 +199,7 @@ class RunMockApplicationTestSpec(CommandTestSpec, ABC):
             stdout=subprocess.PIPE,
         )
         assert curl_google_ps.stdout
-        print(f"[DEBUG in test] curl_google_ps.stdout: {curl_google_ps.stdout}")
         resp = curl_google_ps.stdout.readlines()[0]
-        print(f"[DEBUG in test] resp: {resp}")  # type: ignore[str-bytes-safe]
         resp_content = json.loads(resp.decode("utf-8"))["content"] if resp_is_json_format else resp.decode("utf-8")
         assert re.search(re.escape(expected_resp_content), resp_content, re.IGNORECASE)
 
