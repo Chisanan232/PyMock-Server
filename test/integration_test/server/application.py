@@ -72,10 +72,10 @@ class MockHTTPServerTestSpec:
                 and api_config.apis.base
                 and one_api_config.url
             )
-            if one_api_config.http.request.method.lower() != "get":
-                params = self._client_non_get_req_params()
-            else:
+            if one_api_config.http.request.method.lower() == "get":
                 params = self._client_get_req_params(client)
+            else:
+                params = self._client_non_get_req_params()
             response = getattr(client, one_api_config.http.request.method.lower())(
                 api_config.apis.base.url + one_api_config.url, **params
             )
