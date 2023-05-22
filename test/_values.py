@@ -41,23 +41,26 @@ _Test_API_Parameter: dict = {
     "format": "any_format",
     "force_naming": True,
 }
+_Test_API_Parameter_With_Int: dict = {
+    "name": "param2",
+    "required": False,
+    "default": 0,
+    "type": "int",
+    "format": None,
+    "force_naming": True,
+}
+_Test_API_Parameter_Without_Default: dict = {
+    "name": "param3",
+    "required": False,
+    "default": None,
+    "type": "dict",
+    "format": None,
+    "force_naming": True,
+}
 _Test_API_Parameters: List[dict] = [
-    {
-        "name": "param1",
-        "required": True,
-        "default": "default_value",
-        "type": "str",
-        "format": None,
-        "force_naming": False,
-    },
-    {
-        "name": "param_2",
-        "required": False,
-        "default": 0,
-        "type": "int",
-        "format": None,
-        "force_naming": False,
-    },
+    _Test_API_Parameter,
+    _Test_API_Parameter_With_Int,
+    _Test_API_Parameter_Without_Default,
 ]
 
 _YouTube_Home_Value: dict = {
@@ -79,7 +82,7 @@ _Google_Home_Value: dict = {
     "http": {
         "request": {
             "method": "GET",
-            "parameters": [_Test_API_Parameter],
+            "parameters": _Test_API_Parameters,
         },
         "response": {"value": "This is Google home API."},
     },
