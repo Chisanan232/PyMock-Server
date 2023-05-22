@@ -124,7 +124,7 @@ class APIParameter(_Config):
         value_type: type = self._get_prop(data, prop="value_type")
         value_format: str = self._get_prop(data, prop="value_format")
         force_naming: bool = self._get_prop(data, prop="force_naming")
-        if not (name and default and value_type and value_format) or (required is None and force_naming is None):
+        if not (name and value_type and value_format) or (required is None and force_naming is None):
             return None
         return {
             "name": name,
