@@ -4,12 +4,11 @@ import re
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from typing import Any, List, Optional, Type, Union, cast
-from unittest.mock import MagicMock, Mock, PropertyMock, call, mock_open, patch
+from unittest.mock import MagicMock, Mock, mock_open, patch
 
 import fastapi
 import pytest
 from fastapi import FastAPI
-from fastapi import Request as FastAPIRequest
 from fastapi import Response as FastAPIResponse
 from flask import Flask
 from flask import Request as FlaskRequest
@@ -24,7 +23,7 @@ from pymock_api.server.application import (
     _HTTPResponse,
 )
 
-from ..._values import _Test_API_Parameter, _Test_API_Parameters, _Test_URL, _TestConfig
+from ..._values import _Test_API_Parameters, _TestConfig
 
 MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
 
