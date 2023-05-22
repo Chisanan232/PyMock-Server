@@ -73,7 +73,7 @@ class MockHTTPServerTestSpec:
                 and one_api_config.url
             )
             if one_api_config.http.request.method.lower() == "get":
-                params = self._client_get_req_func_params(client)
+                params = self._client_get_req_func_params()
             else:
                 params = self._client_non_get_req_func_params()
             response = getattr(client, one_api_config.http.request.method.lower())(
@@ -96,18 +96,9 @@ class MockHTTPServerTestSpec:
             "headers": {"Content-Type": "application/json"},
         }
 
-    def _client_get_req_func_params(self, client: Union["flask.testing.FlaskClient", FastAPITestClient]) -> dict:
-        if isinstance(client, FastAPITestClient):
-            params = {
-                "params": {"param1": "any_format"},
-                "headers": {"Content-Type": "application/json"},
-            }
-        else:
-            params = {
-                "query_string": {"param1": "any_format"},
-                "headers": {"Content-Type": "application/json"},
-            }
-        return params
+    @abstractmethod
+    def _client_get_req_func_params(self) -> dict:
+        pass
 
     @abstractmethod
     def _deserialize_response(self, response: ResponseType) -> Union[str, dict]:
@@ -122,6 +113,12 @@ class TestMockHTTPServerWithFlaskApp(MockHTTPServerTestSpec):
     @pytest.fixture(scope="function")
     def client(self, mock_server_app: flask.Flask) -> "flask.testing.FlaskClient":
         return mock_server_app.test_client()
+
+    def _client_get_req_func_params(self) -> dict:
+        return {
+            "query_string": {"param1": "any_format"},
+            "headers": {"Content-Type": "application/json"},
+        }
 
     def _deserialize_response(self, response: FlaskResponse) -> Union[str, dict]:
         response_str = response.data.decode("utf-8")
@@ -139,6 +136,12 @@ class TestMockHTTPServerWithFastAPIApp(MockHTTPServerTestSpec):
     @pytest.fixture(scope="function")
     def client(self, mock_server_app: fastapi.FastAPI) -> FastAPITestClient:
         return FastAPITestClient(mock_server_app)
+
+    def _client_get_req_func_params(self) -> dict:
+        return {
+            "params": {"param1": "any_format"},
+            "headers": {"Content-Type": "application/json"},
+        }
 
     def _deserialize_response(self, response: FastAPIResponse) -> Union[str, dict]:
         try:
