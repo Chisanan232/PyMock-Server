@@ -10,6 +10,7 @@ from flask.app import Response as FlaskResponse
 from httpx import Response as FastAPIResponse
 
 from pymock_api.model import APIConfig, load_config
+from pymock_api.model.api_config import MockAPI
 from pymock_api.server.application import (
     BaseAppServer,
     FastAPIServer,
@@ -73,9 +74,9 @@ class MockHTTPServerTestSpec:
                 and one_api_config.url
             )
             if one_api_config.http.request.method.lower() == "get":
-                params = self._client_get_req_func_params()
+                params = self._client_get_req_func_params(one_api_config)
             else:
-                params = self._client_non_get_req_func_params()
+                params = self._client_non_get_req_func_params(one_api_config)
             response = getattr(client, one_api_config.http.request.method.lower())(
                 api_config.apis.base.url + one_api_config.url, **params
             )
@@ -90,14 +91,20 @@ class MockHTTPServerTestSpec:
                 under_test_http_resp == expected_http_resp
             ), f"The response data should be the same at mocked API '{one_api_name}'."
 
-    def _client_non_get_req_func_params(self) -> dict:
-        return {
-            "json": {"param1": "any_format"},
-            "headers": {"Content-Type": "application/json"},
-        }
+    def _client_non_get_req_func_params(self, one_api_config: MockAPI) -> dict:
+        if one_api_config.http.request.parameters:  # type: ignore[union-attr]
+            return {
+                "json": {"param1": "any_format"},
+                "headers": {"Content-Type": "application/json"},
+            }
+        else:
+            return {
+                "json": {},
+                "headers": {"Content-Type": "application/json"},
+            }
 
     @abstractmethod
-    def _client_get_req_func_params(self) -> dict:
+    def _client_get_req_func_params(self, one_api_config: MockAPI) -> dict:
         pass
 
     @abstractmethod
@@ -114,11 +121,17 @@ class TestMockHTTPServerWithFlaskApp(MockHTTPServerTestSpec):
     def client(self, mock_server_app: flask.Flask) -> "flask.testing.FlaskClient":
         return mock_server_app.test_client()
 
-    def _client_get_req_func_params(self) -> dict:
-        return {
-            "query_string": {"param1": "any_format"},
-            "headers": {"Content-Type": "application/json"},
-        }
+    def _client_get_req_func_params(self, one_api_config: MockAPI) -> dict:
+        if one_api_config.http.request.parameters:  # type: ignore[union-attr]
+            return {
+                "query_string": {"param1": "any_format"},
+                "headers": {"Content-Type": "application/json"},
+            }
+        else:
+            return {
+                "query_string": {},
+                "headers": {"Content-Type": "application/json"},
+            }
 
     def _deserialize_response(self, response: FlaskResponse) -> Union[str, dict]:
         response_str = response.data.decode("utf-8")
@@ -137,11 +150,17 @@ class TestMockHTTPServerWithFastAPIApp(MockHTTPServerTestSpec):
     def client(self, mock_server_app: fastapi.FastAPI) -> FastAPITestClient:
         return FastAPITestClient(mock_server_app)
 
-    def _client_get_req_func_params(self) -> dict:
-        return {
-            "params": {"param1": "any_format"},
-            "headers": {"Content-Type": "application/json"},
-        }
+    def _client_get_req_func_params(self, one_api_config: MockAPI) -> dict:
+        if one_api_config.http.request.parameters:  # type: ignore[union-attr]
+            return {
+                "params": {"param1": "any_format"},
+                "headers": {"Content-Type": "application/json"},
+            }
+        else:
+            return {
+                "params": {},
+                "headers": {"Content-Type": "application/json"},
+            }
 
     def _deserialize_response(self, response: FastAPIResponse) -> Union[str, dict]:
         try:
