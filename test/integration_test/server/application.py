@@ -89,9 +89,7 @@ class MockHTTPServerTestSpec:
                         "headers": {"Content-Type": "application/json"},
                     }
             under_test_api = api_config.apis.base.url + one_api_config.url
-            print(f"[DEBUG in test] under_test_api: {under_test_api}")
             response = getattr(client, one_api_config.http.request.method.lower())(under_test_api, **params)
-            print(f"[DEBUG in test] response: {response}")
             under_test_http_resp = self._deserialize_response(response)
 
             # Get the expected result data
