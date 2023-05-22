@@ -192,7 +192,7 @@ class RunMockApplicationTestSpec(CommandTestSpec, ABC):
             option_data = '-d \'{"param1": "any_format"}\''
         curl_google_ps = subprocess.Popen(
             f"curl {api_path} \
-              -X {http_method.upper()} http://{_Bind_Host_And_Port.value}{api} \
+              -X {http_method.upper()} \
               {option_data} \
               -H 'Content-Type: application/json'",
             shell=True,
@@ -202,10 +202,8 @@ class RunMockApplicationTestSpec(CommandTestSpec, ABC):
         print(f"[DEBUG in test] curl_google_ps.stdout: {curl_google_ps.stdout}")
         resp = curl_google_ps.stdout.readlines()[0]
         print(f"[DEBUG in test] resp: {resp}")  # type: ignore[str-bytes-safe]
-        # FIXME: The response data would be duplicated so that it would be an invalid JSON format
-        # resp_content = json.loads(resp.decode("utf-8"))["content"] if resp_is_json_format else resp.decode("utf-8")
-        # assert re.search(re.escape(expected_resp_content), resp_content, re.IGNORECASE)
-        assert re.search(re.escape(expected_resp_content), resp.decode("utf-8"), re.IGNORECASE)
+        resp_content = json.loads(resp.decode("utf-8"))["content"] if resp_is_json_format else resp.decode("utf-8")
+        assert re.search(re.escape(expected_resp_content), resp_content, re.IGNORECASE)
 
 
 class TestRunMockApplicationWithFlask(RunMockApplicationTestSpec):
