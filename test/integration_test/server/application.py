@@ -73,9 +73,9 @@ class MockHTTPServerTestSpec:
                 and one_api_config.url
             )
             if one_api_config.http.request.method.lower() == "get":
-                params = self._client_get_req_params(client)
+                params = self._client_get_req_func_params(client)
             else:
-                params = self._client_non_get_req_params()
+                params = self._client_non_get_req_func_params()
             response = getattr(client, one_api_config.http.request.method.lower())(
                 api_config.apis.base.url + one_api_config.url, **params
             )
@@ -90,13 +90,13 @@ class MockHTTPServerTestSpec:
                 under_test_http_resp == expected_http_resp
             ), f"The response data should be the same at mocked API '{one_api_name}'."
 
-    def _client_non_get_req_params(self) -> dict:
+    def _client_non_get_req_func_params(self) -> dict:
         return {
             "json": {"param1": "any_format"},
             "headers": {"Content-Type": "application/json"},
         }
 
-    def _client_get_req_params(self, client: Union["flask.testing.FlaskClient", FastAPITestClient]) -> dict:
+    def _client_get_req_func_params(self, client: Union["flask.testing.FlaskClient", FastAPITestClient]) -> dict:
         if isinstance(client, FastAPITestClient):
             params = {
                 "params": {"param1": "any_format"},
