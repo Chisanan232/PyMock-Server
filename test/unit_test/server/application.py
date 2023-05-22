@@ -89,6 +89,7 @@ class AppServerTestSpec(metaclass=ABCMeta):
         [
             ("GET", {"param1": "any_format"}, None, 200),
             ("GET", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
+            ("GET", {"param1": None}, ["Miss required parameter"], 400),
             ("GET", {"param1": 123}, ["type of data", "is different"], 400),
             ("GET", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
         ],
