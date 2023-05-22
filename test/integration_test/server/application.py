@@ -88,8 +88,9 @@ class MockHTTPServerTestSpec:
                         "query_string": {"param1": "any_format"},
                         "headers": {"Content-Type": "application/json"},
                     }
-            under_test_api = api_config.apis.base.url + one_api_config.url
-            response = getattr(client, one_api_config.http.request.method.lower())(under_test_api, **params)
+            response = getattr(client, one_api_config.http.request.method.lower())(
+                api_config.apis.base.url + one_api_config.url, **params
+            )
             under_test_http_resp = self._deserialize_response(response)
 
             # Get the expected result data
