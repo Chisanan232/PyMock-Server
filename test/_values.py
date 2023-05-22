@@ -67,8 +67,7 @@ _YouTube_Home_Value: dict = {
     "url": "/youtube",
     "http": {
         "request": {
-            "method": "POST",
-            "parameters": [_Test_API_Parameter],
+            "method": "PUT",
         },
         "response": {"value": "youtube.json"},
     },
