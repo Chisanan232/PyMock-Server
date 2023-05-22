@@ -36,7 +36,7 @@ _Mock_API_HTTP: dict = {
 _Test_API_Parameter: dict = {
     "name": "param1",
     "required": True,
-    "default": "default_value",
+    "default": None,
     "type": "str",
     "format": "any_format",
     "force_naming": True,
@@ -49,8 +49,16 @@ _Test_API_Parameter_With_Int: dict = {
     "format": None,
     "force_naming": True,
 }
-_Test_API_Parameter_Without_Default: dict = {
+_Test_API_Parameter_With_Str: dict = {
     "name": "param3",
+    "required": False,
+    "default": "default_value",
+    "type": "str",
+    "format": None,
+    "force_naming": True,
+}
+_Test_API_Parameter_Without_Default: dict = {
+    "name": "param4",
     "required": False,
     "default": None,
     "type": "dict",
@@ -60,6 +68,7 @@ _Test_API_Parameter_Without_Default: dict = {
 _Test_API_Parameters: List[dict] = [
     _Test_API_Parameter,
     _Test_API_Parameter_With_Int,
+    _Test_API_Parameter_With_Str,
     _Test_API_Parameter_Without_Default,
 ]
 
