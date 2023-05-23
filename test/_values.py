@@ -33,6 +33,7 @@ _Mock_API_HTTP: dict = {
     "response": Mock,
 }
 
+# Sample API parameters
 _Test_API_Parameter: dict = {
     "name": "param1",
     "required": True,
@@ -68,6 +69,32 @@ _Test_API_Parameters: List[dict] = [
     _Test_API_Parameter_Without_Default,
 ]
 
+# Sample API for testing ('<base URL>/google' with GET)
+_Google_Home_Value: dict = {
+    "url": "/google",
+    "http": {
+        "request": {
+            "method": "GET",
+            "parameters": _Test_API_Parameters,
+        },
+        "response": {"value": "This is Google home API."},
+    },
+}
+
+# Sample API for testing ('<base URL>/test' with POST)
+_Test_Home: dict = {
+    "url": "/test",
+    "http": {
+        "request": {
+            "method": "POST",
+            "parameters": [_Test_API_Parameter],
+        },
+        "response": {"value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }'},
+    },
+    "cookie": [{"TEST": "cookie_value"}],
+}
+
+# Sample API for testing ('<base URL>/test' with PUT)
 _YouTube_Home_Value: dict = {
     "url": "/youtube",
     "http": {
@@ -81,28 +108,6 @@ _YouTube_Home_Value: dict = {
 
 _YouTube_API_Content: dict = {"responseCode": "200", "errorMessage": "OK", "content": "This is YouTube home."}
 
-_Google_Home_Value: dict = {
-    "url": "/google",
-    "http": {
-        "request": {
-            "method": "GET",
-            "parameters": _Test_API_Parameters,
-        },
-        "response": {"value": "This is Google home API."},
-    },
-}
-
-_Test_Home: dict = {
-    "url": "/test",
-    "http": {
-        "request": {
-            "method": "POST",
-            "parameters": [_Test_API_Parameter],
-        },
-        "response": {"value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }'},
-    },
-    "cookie": [{"TEST": "cookie_value"}],
-}
 
 _Mocked_APIs: dict = {
     "base": {"url": "/test/v1"},
@@ -117,8 +122,6 @@ _Test_Config_Value: dict = {
     "auth_cookie": [{"USERNAME": "test"}, {"PASSWORD": "test"}],
     "mocked_apis": _Mocked_APIs,
 }
-
-_Cmd_Option = namedtuple("_Cmd_Option", ["option_name", "value"])
 
 
 # Sample configuration content
@@ -138,6 +141,8 @@ class _TestConfig:
 
 # For testing data objects in *.server.sgi._model*
 _Test_Entry_Point: str = "entry-point"
+
+_Cmd_Option = namedtuple("_Cmd_Option", ["option_name", "value"])
 _Bind_Host_And_Port: _Cmd_Option = _Cmd_Option(option_name="--bind", value="127.0.0.1:9672")
 _Workers_Amount: _Cmd_Option = _Cmd_Option(option_name="--workers", value=3)
 _Log_Level: _Cmd_Option = _Cmd_Option(option_name="--log-level", value="info")
