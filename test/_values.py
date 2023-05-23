@@ -22,7 +22,6 @@ _Config_Description: str = "pytest description"
 _Base_URL: str = "/test/v1"
 _Test_URL: str = "/test-url"
 _Test_HTTP_Method: str = "GET"
-_Test_HTTP_Req_Params: dict = {"param1": "val1", "param2": "val2"}
 _Test_HTTP_Resp: str = "This is HTTP response for PyTest."
 _Mock_APIs: dict = {
     "test_api_1": Mock(),
