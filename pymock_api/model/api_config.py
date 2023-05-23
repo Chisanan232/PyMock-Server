@@ -111,7 +111,6 @@ class APIParameter(_Config):
     default: Optional[Any] = None
     value_type: Optional[str] = None  # A type value as string
     value_format: Optional[str] = None
-    force_naming: Optional[bool] = None
 
     def _compare(self, other: "APIParameter") -> bool:
         # TODO: Let it could automatically scan what properties it has and compare all of their value.
@@ -121,7 +120,6 @@ class APIParameter(_Config):
             and self.default == other.default
             and self.value_type == other.value_type
             and self.value_format == other.value_format
-            and self.force_naming == other.force_naming
         )
 
     def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:
@@ -130,8 +128,7 @@ class APIParameter(_Config):
         default: str = self._get_prop(data, prop="default")
         value_type: type = self._get_prop(data, prop="value_type")
         value_format: str = self._get_prop(data, prop="value_format")
-        force_naming: bool = self._get_prop(data, prop="force_naming")
-        if not (name and value_type and value_format) or (required is None and force_naming is None):
+        if not (name and value_type and value_format) or (required is None):
             return None
         return {
             "name": name,
@@ -139,7 +136,6 @@ class APIParameter(_Config):
             "default": default,
             "type": value_type,
             "format": value_format,
-            "force_naming": force_naming,
         }
 
     @_Config._ensure_process_with_not_empty_value
@@ -149,7 +145,6 @@ class APIParameter(_Config):
         self.default = data.get("default", None)
         self.value_type = data.get("type", None)
         self.value_format = data.get("format", None)
-        self.force_naming = data.get("force_naming", None)
         return self
 
 

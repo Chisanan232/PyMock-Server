@@ -99,7 +99,6 @@ class MockModel:
             default=_Test_API_Parameter["default"],
             value_type=_Test_API_Parameter["type"],
             value_format=_Test_API_Parameter["format"],
-            force_naming=_Test_API_Parameter["force_naming"],
         )
 
     @property
@@ -567,7 +566,6 @@ class TestAPIParameter(ConfigTestSpec):
             default=_Test_API_Parameter["default"],
             value_type=_Test_API_Parameter["type"],
             value_format=_Test_API_Parameter["format"],
-            force_naming=_Test_API_Parameter["force_naming"],
         )
 
     @pytest.fixture(scope="function")
@@ -580,7 +578,6 @@ class TestAPIParameter(ConfigTestSpec):
         assert sut.default == _Test_API_Parameter["default"], _assertion_msg
         assert sut.value_type == _Test_API_Parameter["type"], _assertion_msg
         assert sut.value_format == _Test_API_Parameter["format"], _assertion_msg
-        assert sut.force_naming is _Test_API_Parameter["force_naming"], _assertion_msg
 
     def _expected_serialize_value(self) -> dict:
         return _Test_API_Parameter
@@ -592,7 +589,6 @@ class TestAPIParameter(ConfigTestSpec):
         assert obj.default == _Test_API_Parameter["default"]
         assert obj.value_type == _Test_API_Parameter["type"]
         assert obj.value_format == _Test_API_Parameter["format"]
-        assert obj.force_naming is _Test_API_Parameter["force_naming"]
 
 
 class TestHTTPResponse(ConfigTestSpec):

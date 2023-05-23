@@ -39,7 +39,6 @@ _Test_API_Parameter: dict = {
     "default": None,
     "type": "str",
     "format": "any_format",
-    "force_naming": True,
 }
 _Test_API_Parameter_With_Int: dict = {
     "name": "param2",
@@ -47,7 +46,6 @@ _Test_API_Parameter_With_Int: dict = {
     "default": 0,
     "type": "int",
     "format": None,
-    "force_naming": True,
 }
 _Test_API_Parameter_With_Str: dict = {
     "name": "param3",
@@ -55,7 +53,6 @@ _Test_API_Parameter_With_Str: dict = {
     "default": "default_value",
     "type": "str",
     "format": None,
-    "force_naming": True,
 }
 _Test_API_Parameter_Without_Default: dict = {
     "name": "param4",
@@ -63,7 +60,6 @@ _Test_API_Parameter_Without_Default: dict = {
     "default": None,
     "type": "dict",
     "format": None,
-    "force_naming": True,
 }
 _Test_API_Parameters: List[dict] = [
     _Test_API_Parameter,
