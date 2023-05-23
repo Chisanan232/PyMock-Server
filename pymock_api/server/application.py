@@ -196,11 +196,14 @@ class FastAPIServer(BaseAppServer):
         return import_fastapi + initial_global_server + define_params_model + define_function_for_api
 
     def _define_api_function_pycode(self, api_name: str, api_config: MockAPI) -> str:
+        # The code implementation is different if the HTTP method is *GET* or not
         if api_config.http.request.method.upper() != "GET":  # type: ignore[union-attr]
             api_func_signature = ""
+            # Process the function signature if API has parameter settings
             if api_config.http.request.parameters:  # type: ignore[union-attr]
                 parameter_class = self._api_name_as_camel_case(api_name)
                 api_func_signature = f"model: {parameter_class}, " if self._api_has_params else ""
+            # Combine all the string value as a valid Python code
             return f"""def {api_name}({api_func_signature}request: FastAPIRequest):
                 {self._run_request_process_pycode()}
                 {self._handle_request_process_result_pycode()}
@@ -210,6 +213,7 @@ class FastAPIServer(BaseAppServer):
             function_args = ""
             assign_value_to_model = ""
             instantiate_model = ""
+            # Process the function signature if API has parameter settings
             for param in api_config.http.request.parameters:  # type: ignore[union-attr]
                 if param.default is not None:
                     if param.value_type == "str":
@@ -222,12 +226,14 @@ class FastAPIServer(BaseAppServer):
                 assign_value_to_model += f"""
         setattr(model, '{param.name}', {param.name})
                 """
+            # Instantiate and assign data into objects as data model
             if api_config.http.request.parameters:  # type: ignore[union-attr]
                 parameter_class = self._api_name_as_camel_case(api_name)
                 instantiate_model = f"""
         class {parameter_class}: pass
         model = {parameter_class}()
                 """
+            # Combine all the string value as a valid Python code
             return f"""def {api_name}(request: FastAPIRequest{function_args}):
                 {instantiate_model}
                 {assign_value_to_model}
@@ -243,13 +249,18 @@ class FastAPIServer(BaseAppServer):
     def _annotate_api_parameters_model_pycode(self, api_name: str, api_config: MockAPI) -> str:
         define_parameters_model = ""
         if api_config.http.request.parameters:  # type: ignore[union-attr]
+            # The code implementation is different if the HTTP method is *GET* or not
             if api_config.http.request.method.upper() == "GET":  # type: ignore[union-attr]
+                # API with HTTP method *GET* doesn't need to use 'pydantic.BaseModel' object to process API parameters
                 self._api_has_params = True
                 return define_parameters_model
             else:
+                # API without HTTP method *GET* needs to use 'pydantic.BaseModel' object to process API parameters
                 self._api_has_params = True
+                # Handle the class annotation
                 parameter_class = self._api_name_as_camel_case(api_name)
                 define_parameters_model = f"""from pydantic import BaseModel\nclass {parameter_class}(BaseModel):\n"""
+            # Handle the class's attributes
             for prop in api_config.http.request.parameters:  # type: ignore[union-attr]
                 if prop.default is not None:
                     define_parameters_model += f"    {prop.name}: {prop.value_type} = '{prop.default}'\n"
