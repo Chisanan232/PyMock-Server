@@ -188,25 +188,6 @@ class FastAPIServer(BaseAppServer):
     def setup(self) -> "fastapi.FastAPI":  # type: ignore
         return import_web_lib.fastapi().FastAPI()
 
-    # def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
-    #     initial_global_server = f"""global SERVER\nSERVER = self\n"""
-    #     new_api_name = "".join(map(lambda n: f"{n[0].upper()}{n[1:]}", api_name.split("_")))
-    #     parameter_class = f"{new_api_name}Parameter"
-    #     define_parameters_model = f"""from pydantic import BaseModel\nclass {parameter_class}(BaseModel):\n"""
-    #     for prop in api_config.http.request.parameters:  # type: ignore[union-attr]
-    #         if prop.default:
-    #             define_parameters_model += f"    {prop.name}: {prop.value_type} = '{prop.default}'\n"
-    #         else:
-    #             define_parameters_model += f"    {prop.name}: {prop.value_type}\n"
-    #     import_fastapi = "from fastapi import Request as FastAPIRequest\n"
-    #     define_function_for_api = f"""def {api_name}(model: {parameter_class}, request: FastAPIRequest):
-    #         process_result = SERVER._request_process(model=model, request=request)
-    #         if process_result.status_code != 200:
-    #             return process_result
-    #         return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')
-    #     """
-    #     return import_fastapi + initial_global_server + define_parameters_model + define_function_for_api
-
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
         import_fastapi = "from fastapi import Request as FastAPIRequest\n"
         initial_global_server = f"""global SERVER\nSERVER = self\n"""
