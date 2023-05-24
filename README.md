@@ -15,9 +15,9 @@ A Python tool to mock API easily and humanly.
 
 ## Overview
 
-Do you ever have experience about needing to set up a very simple application and write some APIs with hardcode response for developing
-Font-End site? **_PyMock-API_** provides a command line tool to let developers could quickly and easily set up application to mock APIs
-with configuration only.
+Do you ever have experience about needing to set up a very simple application and write some APIs with hardcode response again and again
+for developing Font-End site? **_PyMock-API_** provides a command line tool to let developers could quickly and easily set up application
+to mock APIs with configuration only.
 
 
 ## Python versions support
