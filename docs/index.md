@@ -32,3 +32,27 @@
 <p align="center">
   <em>PyMock-API</em> is a Python tool to mock API easily and humanly without any coding.
 </p>
+
+## What things it wants to resolve?
+
+Mock APIs through YAML file only, without any codes. And it also could easily and quickly set up a web server with the YAML format configuration.
+
+## Why it is easy to use?
+
+It provides command line tool to help developers could set up a web server quickly.
+
+## Why it is humanly?
+
+Its configuration has been designed for humanly understand what settings the API has.
+
+## Requirements
+
+Python 3.8+
+
+**_PyMock-API_** stands on the shoulder of giants:
+
+* Frameworks and tools for web server and WSGI or ASGI server.
+    * [**_Flask_**](https://flask.palletsprojects.com/en/2.3.x/) with [**_Gunicorn_**](https://docs.gunicorn.org/)
+    * [**_FastAPI_**](https://fastapi.tiangolo.com) with [**_Uvicorn_**](https://www.uvicorn.org/)
+
+* [**_PyYAML_**](https://pyyaml.org/wiki/PyYAMLDocumentation) for processing YAML format data.
