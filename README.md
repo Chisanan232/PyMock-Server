@@ -43,14 +43,14 @@ In basically, it has 3 steps: install the package, configure settings about the 
 
 First of all, we need to install the command line tool and the way to install is same as installing Python package by ``pip``.
 
-```shell
+```console
 >>> pip install pymock-api
 ```
 
 If the runtime environment has installed some Python web framework, e.g., **_Flask_**, you also could install **_Pymock-API_**
 with one specific option as following:
 
-```shell
+```console
 >>> pip install "pymock-api[flask]"
 ```
 
@@ -58,7 +58,7 @@ Then it would only install the lowest Python dependencies you need.
 
 After you done above step, please make sure the command line tool feature should work finely by below command:
 
-```shell
+```console
 >>> mock-api --help
 ```
 
@@ -89,7 +89,7 @@ mocked_apis:
 
 Now, both of the command line tool and configuration have been already. So let's try to run the command to set up application!
 
-```shell
+```console
 >>> mock-api run -c <your configuration path>
 ```
 
@@ -97,7 +97,7 @@ You would see some log messages in terminal and that is the log of web server by
 
 And you could test the API by ``curl``:
 
-```shell
+```console
 >>> curl http://127.0.0.1:9672/google
 "This is Google home API."%
 ```
