@@ -7,7 +7,7 @@
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Chisanan232/PyMock-API/master.svg)](https://results.pre-commit.ci/latest/github/Chisanan232/PyMock-API/master)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Python tool to mock API easily and humanly.
+A Python tool to mock API easily and humanly without any coding.
 
 [Overview](#overview) | [Python versions support](#Python-versions-support) | [Quickly Start](#quickly-start) | [Documentation](#documentation)
 <hr>
