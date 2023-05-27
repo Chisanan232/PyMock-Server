@@ -52,7 +52,13 @@ Python 3.8+
 **_PyMock-API_** stands on the shoulder of giants:
 
 * Frameworks and tools for web server and WSGI or ASGI server.
-    * [**_Flask_**](https://flask.palletsprojects.com/en/2.3.x/) with [**_Gunicorn_**](https://docs.gunicorn.org/)
-    * [**_FastAPI_**](https://fastapi.tiangolo.com) with [**_Uvicorn_**](https://www.uvicorn.org/)
+    * [**_Flask_**] with [**_Gunicorn_**]
+    * [**_FastAPI_**] with [**_Uvicorn_**]
 
-* [**_PyYAML_**](https://pyyaml.org/wiki/PyYAMLDocumentation) for processing YAML format data.
+* [**_PyYAML_**] for processing YAML format data.
+
+[**_Flask_**]: https://flask.palletsprojects.com/en/2.3.x/
+[**_Gunicorn_**]: https://docs.gunicorn.org/
+[**_FastAPI_**]: https://fastapi.tiangolo.com
+[**_Uvicorn_**]: https://www.uvicorn.org/
+[**_PyYAML_**]: https://pyyaml.org/wiki/PyYAMLDocumentation
