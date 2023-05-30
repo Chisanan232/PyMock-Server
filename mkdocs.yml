@@ -106,3 +106,4 @@ nav:
   - Getting started:
     - Runtime environment: getting-started/runtime-environment.md
     - Installation: getting-started/installation.md
+    - Configure your APIs: getting-started/configure-your-api.md
