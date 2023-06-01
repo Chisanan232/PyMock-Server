@@ -1,4 +1,4 @@
-#######################################################################################
+########################################################################################################################
 #
 # Description:
 # Build and run web server for mocking APIs
@@ -20,9 +20,13 @@
 #
 # Example running docker command line:
 # >>> docker build ./ -t pymock-runner:v0
-# >>> docker run --name foo-mock-server -e CONFIG_PATH=<your config path> -e WEB_FRAMEWORK=fastapi pymock-runner:v0
+# >>> docker run --name foo-mock-server \
+#                -v <API configuration root directory>:/mit-pymock-api/<API configuration root directory> \
+#                -e CONFIG_PATH=<API configuration path>
+#                -p 9672:9672 \
+#                pymock-runner:v0
 #
-#######################################################################################
+########################################################################################################################
 
 FROM python:3.10
 
@@ -51,7 +55,7 @@ RUN poetry config virtualenvs.create false
 # # Run the web server for mocking APIs
 #ENTRYPOINT poetry run
 #CMD mock-api run --config $CONFIG_PATH --app-type $WEB_FRAMEWORK --bind $HOST_ADDRESS --workers $WORKERS --log-level $LOG_LEVEL
-CMD poetry run mock-api run --config ./study/parse_yaml/api.yaml --bind 0.0.0.0:9672
+CMD poetry run mock-api run --config $CONFIG_PATH --bind 0.0.0.0:9672
 
 # # For debug
 #ENTRYPOINT ["tail", "-f", "/dev/null"]
