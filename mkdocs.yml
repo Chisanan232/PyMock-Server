@@ -104,6 +104,6 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting started:
-    - Runtime environment: getting-started/runtime-environment.md
+    - Version requirements: getting-started/runtime-environment.md
     - Installation: getting-started/installation.md
     - Configure your APIs: getting-started/configure-your-api.md

@@ -3,7 +3,7 @@
 Actually, **_PyMock-API_** is a Python package which provides command line tool. So it still needs to install a Python
 package to activate the command line feature.
 
-## Runtime environment
+## Version requirements
 
 **_PyMock-API_** only supports _Python 3.8 and newer_ version.
 
