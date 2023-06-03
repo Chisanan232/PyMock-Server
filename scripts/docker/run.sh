@@ -41,19 +41,19 @@ echo "        📄 log level: $Log_Level"
 
 Command_Line_Options=""
 generate_cli_args_if_not_empty() {
-  arg_env_val=$1
-  arg_name=$2
+  arg_name=$1
+  arg_env_val=$2
 
   if [ "$arg_env_val" != "" ]; then
     Command_Line_Options="$Command_Line_Options $arg_name $arg_env_val"
   fi
 }
 
-generate_cli_args_if_not_empty "$Config_Path" "--config"
-generate_cli_args_if_not_empty "$Web_Framework" "--app-type"
-generate_cli_args_if_not_empty "$Host_Address" "--bind"
-generate_cli_args_if_not_empty "$Workers" "--workers"
-generate_cli_args_if_not_empty "$Log_Level" "--log-level"
+generate_cli_args_if_not_empty "--config" "$Config_Path"
+generate_cli_args_if_not_empty "--app-type" "$Web_Framework"
+generate_cli_args_if_not_empty "--bind" "$Host_Address"
+generate_cli_args_if_not_empty "--workers" "$Workers"
+generate_cli_args_if_not_empty "--log-level" "$Log_Level"
 
 echo "Final command line arguments: $Command_Line_Options"
 
