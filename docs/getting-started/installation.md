@@ -1,8 +1,3 @@
-# Getting started
-
-Actually, **_PyMock-API_** is a Python package which provides command line tool. So it still needs to install a Python
-package to activate the command line feature.
-
 ## With pip <small>for general usage</small> { #with-pip data-toc-label="with pip" }
 
 [**_pip_**](https://pip.pypa.io/en/stable/) is a Python package management tool. We could install all the Python packages
