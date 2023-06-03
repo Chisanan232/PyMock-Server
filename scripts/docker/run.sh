@@ -55,8 +55,8 @@ generate_cli_args_if_not_empty "--bind" "$Host_Address"
 generate_cli_args_if_not_empty "--workers" "$Workers"
 generate_cli_args_if_not_empty "--log-level" "$Log_Level"
 
-echo "Final command line arguments: $Command_Line_Options"
+echo "⚙️ Final command line arguments: $Command_Line_Options"
 
 # Run web server for mocking APIs
-echo "Start to run server ..."
+echo "+++++++++++++ 🍻 Start to run server +++++++++++++"
 mock-api run $Command_Line_Options
