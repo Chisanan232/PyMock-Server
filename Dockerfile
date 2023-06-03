@@ -42,6 +42,7 @@ COPY ./README.md /mit-pymock-api/
 COPY ./pyproject.toml /mit-pymock-api/
 COPY ./poetry.lock /mit-pymock-api/
 COPY ./pymock_api/ /mit-pymock-api/pymock_api/
+COPY ./scripts/docker/ /mit-pymock-api/scripts/docker/
 
 # # Expose the port to outside to provide service
 EXPOSE 9672
@@ -55,7 +56,8 @@ RUN poetry config virtualenvs.create false
 # # Run the web server for mocking APIs
 #ENTRYPOINT poetry run
 #CMD mock-api run --config $CONFIG_PATH --app-type $WEB_FRAMEWORK --bind $HOST_ADDRESS --workers $WORKERS --log-level $LOG_LEVEL
-CMD poetry run mock-api run --config $CONFIG_PATH --bind 0.0.0.0:9672
+#CMD poetry run mock-api run --config $CONFIG_PATH --bind 0.0.0.0:9672
+CMD poetry run bash ./scripts/docker/run.sh
 
 # # For debug
 #ENTRYPOINT ["tail", "-f", "/dev/null"]
