@@ -40,7 +40,7 @@ echo "        📄 workers amount to process requests: $Workers"
 echo "        📄 log level: $Log_Level"
 
 Command_Line_Options=""
-generate_cli_args() {
+generate_cli_args_if_not_empty() {
   arg_env_val=$1
   arg_name=$2
 
@@ -49,11 +49,11 @@ generate_cli_args() {
   fi
 }
 
-generate_cli_args "$Config_Path" "--config"
-generate_cli_args "$Web_Framework" "--app-type"
-generate_cli_args "$Host_Address" "--bind"
-generate_cli_args "$Workers" "--workers"
-generate_cli_args "$Log_Level" "--log-level"
+generate_cli_args_if_not_empty "$Config_Path" "--config"
+generate_cli_args_if_not_empty "$Web_Framework" "--app-type"
+generate_cli_args_if_not_empty "$Host_Address" "--bind"
+generate_cli_args_if_not_empty "$Workers" "--workers"
+generate_cli_args_if_not_empty "$Log_Level" "--log-level"
 
 echo "Final command line arguments: $Command_Line_Options"
 
