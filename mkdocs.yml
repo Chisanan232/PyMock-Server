@@ -114,3 +114,4 @@ nav:
   - Development:
     - development/index.md
     - How it works: development/how-it-works.md
+    - Software architecture: development/software-architecture.md
