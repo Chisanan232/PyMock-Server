@@ -118,3 +118,4 @@ nav:
     - Contributing :
       - development/contributing/index.md
       - Developing: development/contributing/developing.md
+      - Testing: development/contributing/testing.md
