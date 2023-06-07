@@ -108,3 +108,5 @@ nav:
     - Installation: getting-started/installation.md
     - Configure your APIs: getting-started/configure-your-api.md
     - Set up web server: getting-started/setup-web-server.md
+  - Configure references:
+    - Basic info: configure-references/config-info.md
