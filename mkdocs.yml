@@ -117,3 +117,4 @@ nav:
     - Software architecture: development/software-architecture.md
     - Contributing :
       - development/contributing/index.md
+      - Developing: development/contributing/developing.md
