@@ -110,3 +110,4 @@ nav:
     - Set up web server: getting-started/setup-web-server.md
   - Configure references:
     - Basic info: configure-references/config-info.md
+    - API: configure-references/mocked-apis.md
