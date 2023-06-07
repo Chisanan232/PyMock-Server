@@ -119,3 +119,4 @@ nav:
       - development/contributing/index.md
       - Developing: development/contributing/developing.md
       - Testing: development/contributing/testing.md
+      - Report a bug: development/contributing/reporting-a-bug.md
