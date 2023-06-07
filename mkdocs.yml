@@ -113,3 +113,4 @@ nav:
     - API: configure-references/mocked-apis.md
   - Development:
     - development/index.md
+    - How it works: development/how-it-works.md
