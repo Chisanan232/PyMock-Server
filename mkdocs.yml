@@ -111,3 +111,5 @@ nav:
   - Configure references:
     - Basic info: configure-references/config-info.md
     - API: configure-references/mocked-apis.md
+  - Development:
+    - development/index.md
