@@ -120,3 +120,4 @@ nav:
       - Developing: development/contributing/developing.md
       - Testing: development/contributing/testing.md
       - Report a bug: development/contributing/reporting-a-bug.md
+      - Requesting a feature: development/contributing/requesting-a-feature.md
