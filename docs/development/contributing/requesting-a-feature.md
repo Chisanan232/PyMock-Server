@@ -1,3 +1,3 @@
-# Requesting a feature
+# Requesting a feature or change
 
 content ...
