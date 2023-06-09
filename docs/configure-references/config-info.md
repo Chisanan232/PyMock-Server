@@ -1,4 +1,4 @@
-# Configure references
+# Configure basic information
 
 content ...
 

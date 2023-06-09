@@ -1,4 +1,4 @@
-# Configure references
+# Mocked API settings
 
 content ...
 
