@@ -113,6 +113,7 @@ nav:
         - command-line-usage/index.md
         - run: command-line-usage/subcmd-run.md
         - config: command-line-usage/subcmd-config.md
+        - check: command-line-usage/subcmd-check.md
   - Configure references:
     - Basic info: configure-references/config-basic-info.md
     - API: configure-references/mocked-apis.md

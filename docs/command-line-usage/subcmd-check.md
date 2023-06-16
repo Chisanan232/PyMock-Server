@@ -1,0 +1,3 @@
+# Subcommand ``check`` usage
+
+content ...
