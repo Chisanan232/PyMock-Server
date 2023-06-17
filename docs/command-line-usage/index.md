@@ -1,25 +1,13 @@
 # Command line usages
 
-content ...
+Currently, it doesn't have any options could use of command line ``mock-api`` without subcommand. The only one option which
+is useful is ``--version`` for checking current version info in your runtime environment.
+
+```console
+>>> mock-api <option>
+```
+
 
 ## ``--version``
 
-content ...
-
-=== "Flask"
-
-    ``` console
-    >>> mock-api --version
-    PyMock-API 0.1.0
-    Flask x.x.x
-    Gunicorn x.x.x
-    ```
-
-=== "FastAPI"
-
-    ``` console
-    >>> mock-api --version
-    PyMock-API 0.1.0
-    FastAPI x.x.x
-    Uvicorn x.x.x
-    ```
+Show to details about version info in current runtime environment.
