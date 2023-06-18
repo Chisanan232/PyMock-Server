@@ -1,6 +1,7 @@
 # Software architecture
 
-content ...
+Software architecture is very important in a production because it's relative the flexibility and extensibility of the production.
+So it must have design 
 
 
 ## Program entry point - command line runner
@@ -19,6 +20,12 @@ content ...
 
 content ...
 
+![sequence diagram - command runner]
+
+[sequence diagram - command runner]: ../../images/development/cmd_runner_sequence_diagram.drawio.png
+
+content ...
+
 
 ## Command line features
 
@@ -33,10 +40,6 @@ content ...
 ![software architecture - operation with file]
 
 [software architecture - operation with file]: ../../images/development/file_operatrions_software_architecture.drawio.png
-
-content ...
-
-#### Workflow
 
 content ...
 
@@ -75,6 +78,10 @@ content ...
 
 content ...
 
+![sequence diagram - auto register by meta class]
+
+[sequence diagram - auto register by meta class]: ../../images/development/meta-class_auto-register_sequence_diagram.drawio.png
+
 #### Extension
 
 content ...
@@ -107,6 +114,10 @@ content ...
 content ...
 
 #### Workflow
+
+content ...
+
+[workflow](#workflow_1)
 
 content ...
 
