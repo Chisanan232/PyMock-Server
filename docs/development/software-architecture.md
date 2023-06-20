@@ -180,31 +180,60 @@ content ...
 
 content ...
 
+* Add new attribute of data object **SubCommand**
+
+content ...
+
+```python hl_lines="7"
+@dataclass
+class SubCommand:
+    Base: str = "subcommand"
+    Run: str = "run"
+    Config: str = "config"
+    Check: str = "check"
+    NewProcess: str = "new-ps"
+```
+
+content ...
+
+* Implement new class about subcommand ``new-ps``
+
+content ...
+
 ```python
 from pymock_api.cmd import BaseSubCommand
 
 class SubCommandNewProcessOption(BaseSubCommand):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Config,
-        help="Something processing about configuration, i.e., generate a sample configuration or validate configuration"
-        " content.",
+        name=SubCommand.NewProcess,
+        help="New subcommand for demonstration,",
     )
 ```
+
+content ...
+
+* Instantiate class with metaclass for subcommand ``new-ps``
 
 content ...
 
 ```python
 from pymock_api.cmd import MetaCommandOption
 
-BaseSubCmdNewProcessOption: type = MetaCommandOption("BaseSubCmdNewProcessOption", (SubCommandRunOption,), {})
+BaseSubCmdNewProcessOption: type = MetaCommandOption("BaseSubCmdNewProcessOption", (SubCommandNewProcessOption,), {})
 ```
 
 content ...
 
+* Extend the subcommand object to add its option(s)
+
+content ...
+
 ```python
-class SubCmdNewProcess(BaseCommandProcessor):
-    def read(self):
-        return 
+class Arg_1(BaseSubCmdNewProcessOption):
+
+    cli_option: str = "--arg-1"
+    name: str = "arg_1"
+    help_description: str = "A parameter for demonstration of extending new subcommand and new option."
 ```
 
 content ...
