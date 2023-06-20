@@ -86,16 +86,64 @@ content ...
 
 content ...
 
+* Command line argument
+
+content ...
+
+```python
+# In module pymock_api.model.cmd_args
+
+@dataclass(frozen=True)
+class SubcmdNewProcessArguments(ParserArguments):
+    arg_1: str
+```
+
+content ...
+
+* Deserialization
+
+content ...
+
+```python
+class DeserializeParsedArgs:
+  
+    # ... some code
+
+    @classmethod
+    def subcommand_new_process(cls, args: Namespace) -> SubcmdNewProcessArguments:
+        return SubcmdNewProcessArguments(
+            subparser_name=args.subcommand,
+            arg_1=args.arg_1,
+        )
+```
+
+content ...
+
+```python
+class deserialize_args:
+    @classmethod
+    def subcmd_new_process(cls, args: Namespace) -> SubcmdNewProcessArguments:
+        return DeserializeParsedArgs.subcommand_new_process(args)
+```
+
+content ...
+
 * SubCommand process
 
 content ...
 
 ```python
+from argparse import ArgumentParser
+from typing import List, Optional
 from pymock_api.cmd_ps import BaseCommandProcessor
 
 class SubCmdNewProcess(BaseCommandProcessor):
-    def read(self):
-        return 
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdNewProcessArguments:
+        return deserialize_args.subcmd_new_process(self._parse_cmd_arguments(parser, cmd_args))
+
+    def _run(self, args: SubcmdNewProcessArguments) -> None:
+        # Do something ...
+        pass
 ```
 
 content ...
