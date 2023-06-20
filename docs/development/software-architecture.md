@@ -276,6 +276,30 @@ content ...
 
 content ...
 
+* Import web library
+
+content ...
+
+```python
+class import_web_lib:
+
+    # Some code ...
+
+    @staticmethod
+    def foo_web_lib() -> "foo_web_lib":
+        import foo_web_lib
+
+        return foo_web_lib
+
+    # Some code ...
+
+    @staticmethod
+    def foo_web_lib_ready() -> bool:
+        return import_web_lib._chk_lib_ready(import_web_lib.foo_web_lib)
+```
+
+content ...
+
 * BaseAppServer
 
 content ...
@@ -284,8 +308,16 @@ content ...
 from pymock_api.server.application import BaseAppServer
 
 class FooWebLibrary(BaseAppServer):
-    def read(self):
-        return 
+    def setup(self) -> "foo_web_lib.Foo":
+        # How to set up web application instance by this web library
+        return import_web_lib.foo_web_lib().Foo(__name__)
+
+    def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
+        # How to add API by this web library
+        return f"""self.web_application.add_web_route(
+            path="{self.url_path(api_config, base_url)}", methods=["{cast(HTTPRequest, self._ensure_http(api_config, "request")).method}"]
+            )({api_name})
+        """
 ```
 
 * BaseSGIServer
@@ -296,8 +328,12 @@ content ...
 from pymock_api.server.sgi.cmd import BaseSGIServer
 
 class FooSGIServerCmd(BaseSGIServer):
-    def read(self):
-        return 
+    def _init_cmd_option(self) -> BaseCommandOption:
+        return FooWebSGIServerCmdOption()
+
+    @property
+    def entry_point(self) -> str:
+        return "foonicorn"
 ```
 
 * BaseCommandOption
@@ -308,8 +344,24 @@ content ...
 from pymock_api.server.sgi.cmdoption import BaseCommandOption
 
 class FooWebSGIServerCmdOption(BaseCommandOption):
-    def read(self):
-        return 
+    def bind(self, address: Optional[str] = None, host: Optional[str] = None, port: Optional[str] = None) -> str:
+        # Set the option about binding the service at one or more specific hosts
+        if address:
+            self._is_valid_address(address)
+            binding_addr = address
+        elif host and port:
+            binding_addr = f"{host}:{port}"
+        else:
+            raise ValueError("There are 2 ways to pass arguments: using *address* or using *host* and *port*.")
+        return f"--bind {binding_addr}"
+
+    def workers(self, w: int) -> str:
+        # Set the option about how many workers could handle the requests
+        return f"--workers {w}"
+
+    def log_level(self, level: str) -> str:
+        # Set the option about log level
+        return f"--log-level {level}"
 ```
 
 content ...
