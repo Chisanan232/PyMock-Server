@@ -179,7 +179,7 @@ Run the command line directly to be closer in usage as a developers:
     You could access into **Poetry** shell as below command:
 
     ```console
-    pyenv shell
+    poetry shell
     ```
 
 Congratulation! Right now you could start to do anything what you want to do of **_PyMock-API_** project!
