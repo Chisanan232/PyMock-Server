@@ -1,12 +1,28 @@
 # Software architecture
 
 Software architecture is very important in a production because it's relative the flexibility and extensibility of the production.
-So it must have design 
+So it must have some designs applies to core functions codes.
+
+In **_PyMock-API_** realm, it can divide to several sections to parse its software architecture:
+
+* Entry point of entire program
+    * Runner of command line
+
+* Command line
+    * Entire command lines
+    * Entire command line options
+
+* Features of command line
+    * Option ``--config``
+    * The sub-command line ``run``
+
+Above all are some parts which have value or more complex to explain their details to developers.
 
 
 ## Program entry point - command line runner
 
-content ...
+The entry point of **_PyMock-API_** command line tool. Its actually entry point is calling the function ``run`` in module
+``pymock_api.runner``.
 
 ### UML
 
@@ -14,57 +30,56 @@ content ...
 
 [software architecture - command runner]: ../../images/development/cmd_runner_software_architecture.drawio.png
 
-content ...
+* About the function which would be run as entry point ``run``, it's a running logic of object ``CommandRunner``.
+* Object ``CommandRunner`` would keep instance of ``ArgumentParser`` and ``CommandProcessor`` to parse command line and run
+core logic of the current sub-command.
+* Object ``CommandRunner`` would use function ``dispatch_command_processor`` to get the correct instance to handle current
+command line.
 
 ### Workflow
 
-content ...
+About workflow of command line runer, it uses 2 types sequence diagram to explain the relationship between different objects
+and functions.
+
+* Sequence diagram
 
 ![sequence diagram - command runner]
 
 [sequence diagram - command runner]: ../../images/development/cmd_runner_sequence_diagram.drawio.png
 
-content ...
+From the sequence diagram, you could observe that function ``dispatch_command_processor`` would keep getting the correct
+instances of ``CommandProcessor`` to run current command line.
+
+However, how it gets the correct object to process current command line? That's the reason having below activity sequence
+diagram to explain that:
+
+* Activity sequence diagram for getting ``CommandProcessor``
+
+![activity sequence diagram - command runner]
+
+[activity sequence diagram - command runner]: ../../images/development/cmd_runner_activity_sequence_diagram.drawio.png
+
+In short, function ``dispatch_command_processor`` would iterate all instances of ``CommandProcessor`` to find the one which
+is responsible for current command line.
+
+Now you may have another question: it seems like that it has a ``CommandProcessor`` instance of list to let it find. So what
+is the list? When does the list would be generated?
+
+The answers of above would be in next section.
 
 
 ## Command line features
 
-content ...
+The core implementation of the command line. It would divide 2 sections here:
 
-### Option ``--config`` - file operation
-
-content ...
-
-#### UML
-
-![software architecture - operation with file]
-
-[software architecture - operation with file]: ../../images/development/file_operatrions_software_architecture.drawio.png
-
-content ...
-
-#### Extension
-
-content ...
-
-* File operation
-
-content ...
-
-```python
-from pymock_api._utils.file_opt import _BaseFileOperation
-
-class JSON(_BaseFileOperation):
-    def read(self):
-        return 
-```
-
-content ...
-
+* Command line processors
+* Command line options
 
 ### Command line processors
 
-content ...
+The logic which would run by the current command line you enter.
+
+All codes belong to here section, they all are responsible for **what thing would happen after user run the command line**.
 
 #### UML
 
@@ -72,23 +87,46 @@ content ...
 
 [software architecture - command line processor]: ../../images/development/cmd_ps_software_architecture.drawio.png
 
-content ...
+* It has 3 base classes:
+    * ``MetaCommand``
+
+        It's a metaclass for instantiating base class. It would auto-register objects which extends the base class be instantiated
+        from this metaclass to list type protected variable ``_COMMAND_CHAIN``.
+
+    * ``CommandProcessor``
+
+        It defines all attributes and functions for subclass to reuse or override to implement customize logic.
+
+    * ``BaseCommandProcessor``
+
+        This is the base class which should be extended by all subclasses. This object be instantiated by metaclass ``MetaCommand``
+        and general object ``CommandProcessor``.
+
+* The list be used by function ``dispatch_command_processor`` is protected variable ``_COMMAND_CHAIN``.
+* All subclasses, i.e., ``NoSubCmd``, ``SubCmdRun``, etc., extend ``BaseCommandProcessor`` and implement what thing they need
+to do if user run the command.
 
 #### Workflow
 
-content ...
+* Sequence diagram
 
 ![sequence diagram - auto register by meta class]
 
 [sequence diagram - auto register by meta class]: ../../images/development/meta-class_auto-register_sequence_diagram.drawio.png
 
+From above sequence diagram, it does auto-registration when initialize an object. It won't do something to iterate all objects
+and save them to list type object, it automates all things when you add one or more new subclasses which is responsible for new
+sub-command line.
+
 #### Extension
 
-content ...
+Here would demonstrate how to add one new sub-command processor in this software architecture.
+
+You'll have 3 things need to do:
 
 * Command line argument
 
-content ...
+New sub-command line must have options. So you need to define which sub-command line options it has.
 
 ```python
 # In module pymock_api.model.cmd_args
@@ -98,13 +136,13 @@ class SubcmdNewProcessArguments(ParserArguments):
     arg_1: str
 ```
 
-content ...
-
 * Deserialization
 
-content ...
+After defining new sub-command line's options, you should define how to deserialize it:
 
 ```python
+# In module pymock_api.model.cmd_args
+
 class DeserializeParsedArgs:
   
     # ... some code
@@ -117,25 +155,28 @@ class DeserializeParsedArgs:
         )
 ```
 
-content ...
+And also defining the utility function at module **_\_\_init\_\__**:
 
 ```python
+# In module pymock_api.model.__init__
+
 class deserialize_args:
+  
+    # ... some code
+
     @classmethod
     def subcmd_new_process(cls, args: Namespace) -> SubcmdNewProcessArguments:
         return DeserializeParsedArgs.subcommand_new_process(args)
 ```
 
-content ...
-
 * SubCommand process
 
-content ...
+Now, it has sub-command line option data object and deserialization, we could implement what thing it should do:
 
 ```python
-from argparse import ArgumentParser
-from typing import List, Optional
-from pymock_api.cmd_ps import BaseCommandProcessor
+# In module pymock_api.cmd_ps
+  
+# ... some code
 
 class SubCmdNewProcess(BaseCommandProcessor):
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdNewProcessArguments:
@@ -143,15 +184,26 @@ class SubCmdNewProcess(BaseCommandProcessor):
 
     def _run(self, args: SubcmdNewProcessArguments) -> None:
         # Do something ...
-        pass
+        print(f"This is new sub-command line and get option *arg_1*: {args.arg_1}.")
 ```
 
-content ...
+We finish all things if we want to extend one new sub-command line! Let's try to run it:
+
+```console
+>>> mock-api new-ps --arg-1 test_value
+```
+
+Unfortunately, you would get an error finally. Why? What you miss? Do you remember all the code in this software architecture
+only process the logic it should run by the current command line? But, how does it parse the command line and its options? So
+next section would tell you how to add new sub-command line and its options in their software architecture.
 
 
 ### Command line options
 
-content ...
+The logic which would parse the current command line and run something for it.
+
+All codes belong to here section, they all are responsible for **defining the command line and its options to let _argpars_**
+**understands how to parse the current command line.**
 
 #### UML
 
@@ -159,32 +211,50 @@ content ...
 
 [software architecture - command line options]: ../../images/development/cmd_options_software_architecture.drawio.png
 
-content ...
+The software architecture here feature apply is mostly same as previous one section [Command line processors](#uml_1).
+
+* It has 3 base classes:
+    * ``MetaCommandOption``
+
+        It's a metaclass for instantiating base class. It would auto-register objects which extends the base class be instantiated
+        from this metaclass to list type data ``COMMAND_OPTIONS``. If it is sub-command, it also saves sub-command line string to
+        list type data ``SUBCOMMAND``.
+
+    * ``CommandOption`` (includes all subclasses of ``BaseSubCommand``)
+
+        It defines all attributes and functions for subclass to reuse or override to implement customize logic.
+
+    * ``BaseCmdOption``, ``BaseSubCmdRunOption``, etc.
+
+        This is the base class which should be extended by all subclasses. This object be instantiated by metaclass ``MetaCommandOption``
+        and general object ``CommandOption``.
+
+* Every sub-command has their own base class. For example, sub-command line ``run`` with ``BaseSubCmdRunOption``, ``config``
+with ``BaseSubCmdConfigOption`` and so on.
+* The list be used by function ``get_all_subcommands`` is variable ``SUBCOMMAND``.
+* The list be used by function ``make_options`` is variable ``COMMAND_OPTIONS``.
+* All subclasses, i.e., ``Version`` extends ``BaseCmdOption``, ``WebAppType`` extends ``BaseSubCmdRunOption``, ``ConfigPath``
+extends ``BaseSubCmdConfigOption``, etc., means the specific options under the sub-command line.
 
 #### Workflow
 
-content ...
-
-[workflow](#workflow_1)
-
-content ...
+Because the software architecture of here section is mostly same with [Command line processors](#command-line-processors), its
+workflow also could refer to its [workflow](#workflow_1).
 
 #### Extension
 
-content ...
+Here would demonstrate how to extend or add new sub-command feature.
 
-* SubCommand process
-    * Sub-command class
-    * Class which be instantiated from meta class with sub-command class
-    * The options as classes which extends from the instance
-
-content ...
+You'll have 4 things:
 
 * Add new attribute of data object **SubCommand**
 
-content ...
+Object ``SubCommand`` is the standard for **_PyMock-API_** to recognize which sub-command it has. So let's add one new sub-command
+line here:
 
 ```python hl_lines="7"
+# In module pymock_api.cmd
+
 @dataclass
 class SubCommand:
     Base: str = "subcommand"
@@ -194,14 +264,12 @@ class SubCommand:
     NewProcess: str = "new-ps"
 ```
 
-content ...
-
 * Implement new class about subcommand ``new-ps``
 
-content ...
+Add new class extends base class ``BaseSubCommand`` and set value at attribute ``sub_parser``.
 
 ```python
-from pymock_api.cmd import BaseSubCommand
+# In module pymock_api.cmd
 
 class SubCommandNewProcessOption(BaseSubCommand):
     sub_parser: SubParserAttr = SubParserAttr(
@@ -210,25 +278,25 @@ class SubCommandNewProcessOption(BaseSubCommand):
     )
 ```
 
-content ...
-
 * Instantiate class with metaclass for subcommand ``new-ps``
 
-content ...
+Instantiate a base class for adding options.
 
 ```python
-from pymock_api.cmd import MetaCommandOption
+# In module pymock_api.cmd
 
 BaseSubCmdNewProcessOption: type = MetaCommandOption("BaseSubCmdNewProcessOption", (SubCommandNewProcessOption,), {})
 ```
 
-content ...
+It would auto-register this sub-command line into ``SUBCOMMAND``. We have sub-command line ``new-ps``, let's add its options.
 
 * Extend the subcommand object to add its option(s)
 
-content ...
+Add new command option with extending ``BaseSubCmdNewProcessOption`` and set needed attributes in it:
 
 ```python
+# In module pymock_api.cmd
+
 class Arg_1(BaseSubCmdNewProcessOption):
 
     cli_option: str = "--arg-1"
@@ -236,17 +304,96 @@ class Arg_1(BaseSubCmdNewProcessOption):
     help_description: str = "A parameter for demonstration of extending new subcommand and new option."
 ```
 
-content ...
+* ``cli_option``: Define the option usage via command line.
+* ``name``: The attribute to get the option value from _argpars_.
+* ``help_description``: The description would be displayed if you run ``--help``.
+
+Now, let's try to run the **_PyMock-API_** with new sub-command:
+
+```console
+>>> mock-api new-ps --arg-1 test_value
+This is new sub-command line and get option *arg_1*: test_value
+```
+
+Congratulation! It works finely as out expect.
 
 
 ## SubCommand features
 
-content ...
+The features which be run in each command lines.
+
+### Option ``--config`` - file operation
+
+Here focus on a small part --- a feature of one specific option ``--config`` under sub-command ``run``.
+
+#### UML
+
+![software architecture - operation with file]
+
+[software architecture - operation with file]: ../../images/development/file_operatrions_software_architecture.drawio.png
+
+* Object ``MockHTTPServer`` uses function ``load_config`` to get all detail settings.
+* Data object ``APIConfig`` provides function to read and deserialize the configuration file content.
+* Currently, it only supports parsing YAML file by object ``YAML``.
+
+#### Extension
+
+Here demonstrate how to extend this feature to parse other file formatter.
+
+* File operation
+
+If you want to use other file formatter, e.g., JSON, you could extend the base class of file operation _``BaseFileOperation``
+to implement needed features.
+
+```python
+# In module pymock_api.cmd
+
+# ... some code
+
+class JSON(_BaseFileOperation):
+    def read(self):
+        # Read the configuration file content
+
+    def write(self, path: str, config: Union[str, dict]) -> None:
+        # Write data into file
+
+    def serialize(self, config: dict) -> str:
+        # Serialize dat object to string value
+```
+
+Because currently it won't have option in command line to control which way it should use to serialize or deserialize configuration
+file, so we need to manually modify the code to use it.
+
+```python hl_lines="10"
+# In module pymock_api.model.api_config
+
+class APIConfig(_Config):
+    """*The entire configuration*"""
+
+    _name: str = ""
+    _description: str = ""
+    _apis: Optional[MockAPIs]
+
+    _configuration: _BaseFileOperation = JSON()
+
+    def __init__(self, name: str = "", description: str = "", apis: Optional[MockAPIs] = None):
+        self._name = name
+        # ... some code
+```
+
+Finally, we could use JSON type file as our configuration formatter.
+
+```console
+>>> mock-api -c ./api.json
+```
 
 
 ### ``run`` - web server
 
-content ...
+This is the core feature of **_PyMock-API_**. It does 2 things:
+
+* Set up web application with the API from the detail settings of configuration.
+* Run the web application by SGI server.
 
 #### UML
 
@@ -254,33 +401,42 @@ content ...
 
 [software architecture - web server with sgi server]: ../../images/development/server_software_architecture.drawio.png
 
-content ...
-
-#### Workflow
-
-content ...
+* The sub-command line processor ``SubCmdRun`` would use function ``setup_wsgi`` or ``setup_asgi`` to run the web application.
+* All the way to run web application by factory pattern in **_PyMock-API_**.
+* The functions as factory callee to set up web application is ``create_flask_app`` and ``create_fastapi_app``.
+* Functions ``create_flask_app`` or ``create_fastapi_app`` would use adapter ``MockHTTPServer`` to set up all APIs as Python
+code with Python web framework **_Flask_** or **_FastAPI_**.
 
 #### Extension
 
-content ...
+If you have your own customize Python web framework, you also could extend this features by your own one.
 
-* Web server
-    * Server implementation from Python web framework
-    * Server gateway interface (a.k.a SGI) server
+Here would demonstrate how to extend it to implement your own web server.
 
-content ...
+First, the entire web server should be divided to 2 parts:
 
-* BaseAppServer
-* BaseSGIServer
-* BaseCommandOption
+* Server implementation from Python web framework
+* Server gateway interface (a.k.a SGI) server
 
-content ...
+They mean you should extend all below classes to implement:
+
+* For setting up web application by generating Python code
+    * ``BaseAppServer``
+
+* For running web application by SGI server
+    * ``BaseSGIServer``
+    * ``BaseCommandOption``
+
+Don't forget it also needs to import the Python web framework into **_PyMock-API_** to let it could generate Python code about
+APIs with configuration.
 
 * Import web library
 
-content ...
+2 Things you need to implement: importing the web framework and check importing the web framework.
 
 ```python
+# In module pymock_api._utils.importing
+
 class import_web_lib:
 
     # Some code ...
@@ -298,14 +454,17 @@ class import_web_lib:
         return import_web_lib._chk_lib_ready(import_web_lib.foo_web_lib)
 ```
 
-content ...
+!!! note "Importing way may be different with different web framework"
 
-* BaseAppServer
+    The importing way should be based on how to use the customized Python web framework.
 
-content ...
+* ``BaseAppServer``
+
+Extend the web application feature about how PyMock-API should set up it? How to initial the web application by the customized
+Python web framework? How to add new API by the customized web framework?
 
 ```python
-from pymock_api.server.application import BaseAppServer
+# In module pymock_api.server.application
 
 class FooWebLibrary(BaseAppServer):
     def setup(self) -> "foo_web_lib.Foo":
@@ -320,14 +479,15 @@ class FooWebLibrary(BaseAppServer):
         """
 ```
 
-* BaseSGIServer
+* ``BaseSGIServer``
 
-content ...
+Implement how to run web application by your own customized Python web framework. In exactly, it just generates a command line
+with options.
 
 ```python
-from pymock_api.server.sgi.cmd import BaseSGIServer
+# In module pymock_api.server.sgi.cmd
 
-class FooSGIServerCmd(BaseSGIServer):
+class FooSGIServer(BaseSGIServer):
     def _init_cmd_option(self) -> BaseCommandOption:
         return FooWebSGIServerCmdOption()
 
@@ -336,12 +496,12 @@ class FooSGIServerCmd(BaseSGIServer):
         return "foonicorn"
 ```
 
-* BaseCommandOption
+* ``BaseCommandOption``
 
-content ...
+Previous one implement the command line entry point, here implement each options how to set it.
 
 ```python
-from pymock_api.server.sgi.cmdoption import BaseCommandOption
+# In module pymock_api.server.sgi.cmdoption
 
 class FooWebSGIServerCmdOption(BaseCommandOption):
     def bind(self, address: Optional[str] = None, host: Optional[str] = None, port: Optional[str] = None) -> str:
@@ -364,4 +524,103 @@ class FooWebSGIServerCmdOption(BaseCommandOption):
         return f"--log-level {level}"
 ```
 
-content ...
+Now, we have done the core implementation, then we just leave some utility functions which we need to add.
+
+* Utility function in module ``pymock_api.server.sgi.__init__``
+
+```python hl_lines="10"
+# In module pymock_api.server.sgi.__init__
+
+class setup_server_gateway:
+    # Some code ...
+
+    @classmethod
+    def foo(cls, web_app: Union[str, Callable], module_dict: Optional[dict] = None) -> FooSGIServer:
+        if module_dict:
+            cls._ensure_function_exists(web_app, module_dict)
+        return FooSGIServer(app=f"{web_app.__qualname__}()" if isinstance(web_app, Callable) else web_app)
+
+# Some code ...
+```
+
+Please take a look at the code line 10, it's the key line to let SGI server to catch which factory function it should use to
+generate the web application. Here usage should base on which way should use by your own customized Python web framework.
+
+* Utility function in module ``pymock_api.server.__init__``
+
+```python
+# In module pymock_api.server.__init__
+
+# Some code ...
+
+foo_app: "foo_web_lib.Foo" = None
+
+# Some code ...
+
+def create_foo_app() -> "foo_web_lib.Foo":
+    load_app.by_foo()
+    return foo_app
+
+# Some code ...
+
+def setup_foosgi() -> FooSGIServer:
+    return setup_server_gateway.foo(web_app=create_foo_app, module_dict=globals())
+
+# Some code ...
+
+class load_app:
+
+    @classmethod
+    @ensure_importing(import_web_lib.foo_web_lib)
+    def by_foo(cls) -> None:
+        global foo_app
+        config = cls._get_config_path()
+        foo_app = cls._initial_mock_server(config_path=config, app_server=FooWebLibrary()).web_app
+
+# Some code ...
+```
+
+The global variable ``foo_app`` is the variable which web application instance will be saved at. Function ``create_foo_app`` is
+the factory function to generate web application. Function ``setup_foosgi`` is the one which runs the web application which be
+set up by your own customized Python web framework.
+
+* Add option value in one specific function in module ``pymock_api.cmd_ps``
+
+Finally, we need to add a new value to let option ``--app-type`` could recognize and dispatch it to set up and run the web
+application by your own customized Python web framework.
+
+```python hl_lines="19-20"
+# In module pymock_api.cmd_ps
+
+# Some code ...
+
+class SubCmdRun(BaseCommandProcessor):
+    
+    # Some code ...
+
+    def _initial_server_gateway(self, lib: str) -> None:
+        if re.search(r"auto", lib, re.IGNORECASE):
+            web_lib = import_web_lib.auto_ready()
+            if not web_lib:
+                raise NoValidWebLibrary
+            self._initial_server_gateway(lib=web_lib)
+        elif re.search(r"flask", lib, re.IGNORECASE):
+            self._server_gateway = setup_wsgi()
+        elif re.search(r"fastapi", lib, re.IGNORECASE):
+            self._server_gateway = setup_asgi()
+        elif re.search(r"foo", lib, re.IGNORECASE):
+            self._server_gateway = setup_foosgi()
+        else:
+            raise InvalidAppType
+
+# Some code ...
+```
+
+All things you need to do is done! Let's try to run the command line to test its feature:
+
+```console
+>>> mock-api --app-type foo
+```
+
+If you could keep observing the log message which be generated by web application as you expect, congratulation you extend the
+feature successfully!
