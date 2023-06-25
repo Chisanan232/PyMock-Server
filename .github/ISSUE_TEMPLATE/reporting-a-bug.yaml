@@ -1,0 +1,62 @@
+name: Report a bug
+description: Something is broken? Report a bug
+labels: ["🪲 bug"]
+body:
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: OS
+      description: What OS do you run our software in your runtime environment?
+      options:
+        - MacOS
+        - Ubuntu
+    validations:
+      required: true
+
+  - type: dropdown
+    id: python-version
+    attributes:
+      label: Python version
+      description: What Python version do you use to run and see the problem?
+      options:
+        - 3.11
+        - 3.10
+        - 3.9
+        - 3.8
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: >-
+        Please provide a detailed list of instructions, guiding us maintainers
+        through the required steps, helping us to recreate the problem using the
+        minimal reproduction you provided. Be as specific as possible and as
+        verbose as necessary – try not to leave anything out.
+      placeholder: |-
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
