@@ -106,6 +106,14 @@ All codes belong to here section, they all are responsible for **what thing woul
 * All subclasses, i.e., ``NoSubCmd``, ``SubCmdRun``, etc., extend ``BaseCommandProcessor`` and implement what thing they need
 to do if user run the command.
 
+??? note "The great idea about **auto-register** refer to source code of project **_Gunicorn_**"
+
+    About the powerful design **auto-register** which has beautiful extension, it
+    refers to the module _config_ implementation of open source project **_Gunicorn_**.
+    Please refer to [its source code] if you have interesting in it.
+
+    [its source code]: https://github.com/benoitc/gunicorn/blob/master/gunicorn/config.py
+
 #### Workflow
 
 * Sequence diagram
