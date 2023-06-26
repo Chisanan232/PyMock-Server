@@ -64,5 +64,12 @@ fastapi = {extras = ["all"], version = "^0.95.0"}
 uvicorn = {extras = ["standard"], version = "^0.21.1"}
 types-PyYAML = "^6.0.12.9"
 
+[tool.poetry.group.doc.dependencies]
+mkdocs = "^1.4.3"
+mkdocs-material = "^9.1.17"
+mkdocs-autorefs = "^0.4.1"
+mkdocstrings = "^0.22.0"
+mkdocstrings-python = "^1.1.2"
+
 [tool.poetry.scripts]
 mock-api = "pymock_api.runner:run"
