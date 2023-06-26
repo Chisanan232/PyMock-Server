@@ -123,7 +123,8 @@ nav:
     - Software architecture: development/software-architecture.md
     - Contributing :
       - development/contributing/index.md
-      - Developing: development/contributing/developing.md
-      - Testing: development/contributing/testing.md
+      - Join in developing:
+        - Developing: development/contributing/developing.md
+        - Testing: development/contributing/testing.md
       - Reporting a bug: development/contributing/reporting-a-bug.md
       - Requesting a feature or change: development/contributing/requesting-a-feature.md
