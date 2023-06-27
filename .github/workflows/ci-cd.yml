@@ -17,6 +17,7 @@ on:
       - ".pre-commit-config.yaml"
       - ".pylintrc"
       - "LICENSE"
+      - "mkdocs.yml"
       - "README.md"
 
   pull_request:
@@ -35,6 +36,7 @@ on:
       - ".pre-commit-config.yaml"
       - ".pylintrc"
       - "LICENSE"
+      - "mkdocs.yml"
       - "README.md"
 
 jobs:
