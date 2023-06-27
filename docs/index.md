@@ -23,6 +23,9 @@
   <a href="https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-API">
     <img src="https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyMock-API&metric=alert_status" alt="Code quality level">
   </a>
+  <a href="https://chisanan232.github.io/PyMock-API/">
+    <img src="https://github.com/Chisanan232/PyMock-API/actions/workflows/documentation.yaml/badge.svg" alt="documentation CI status">
+  </a>
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="Software license">
   </a>
