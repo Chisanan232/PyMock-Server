@@ -1,5 +1,5 @@
 site_name: PyMock-API
-site_url: https://bryantliu.github.io/pymock-api/
+#site_url: https://bryantliu.github.io/pymock-api/
 site_author: Bryant Liu
 site_description: >-
   Mock your APIs by YAML configuration and set up an application in minutes
