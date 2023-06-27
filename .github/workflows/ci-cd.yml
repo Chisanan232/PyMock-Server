@@ -9,12 +9,15 @@ on:
       - "release/**"
       - "master"
     paths-ignore:
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/documentation.yaml"
       - "docs/**"
       - ".gitcommitrules"
       - ".gitignore"
       - ".pre-commit-config.yaml"
       - ".pylintrc"
       - "LICENSE"
+      - "mkdocs.yml"
       - "README.md"
 
   pull_request:
@@ -25,12 +28,15 @@ on:
       - "release/**"
       - "master"
     paths-ignore:
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/documentation.yaml"
       - "docs/**"
       - ".gitcommitrules"
       - ".gitignore"
       - ".pre-commit-config.yaml"
       - ".pylintrc"
       - "LICENSE"
+      - "mkdocs.yml"
       - "README.md"
 
 jobs:
