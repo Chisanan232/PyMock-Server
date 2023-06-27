@@ -5,9 +5,9 @@ on:
     branches:
       - "develop/**"
       - "master"
-#    paths:
-#      - "docs/**"
-#      - "mkdocs.yml"
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
 
 permissions:
   contents: write
