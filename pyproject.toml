@@ -30,7 +30,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
-homepage = ""  #TODO: Wait for package documentation
+homepage = "https://github.com/Chisanan232/PyMock-API"
 documentation = "https://chisanan232.github.io/PyMock-API/"
 
 [tool.poetry.dependencies]
