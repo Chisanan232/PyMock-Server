@@ -6,6 +6,7 @@
 [![codecov](https://codecov.io/gh/Chisanan232/PyMock-API/branch/main/graph/badge.svg?token=r5HJxg9KhN)](https://codecov.io/gh/Chisanan232/PyMock-API)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Chisanan232/PyMock-API/master.svg)](https://results.pre-commit.ci/latest/github/Chisanan232/PyMock-API/master)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyMock-API&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-API)
+[![documentation](https://github.com/Chisanan232/PyMock-API/actions/workflows/documentation.yaml/badge.svg)](https://chisanan232.github.io/PyMock-API/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A Python tool to mock API easily and humanly without any coding.
