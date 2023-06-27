@@ -6,6 +6,7 @@ on:
       - "develop/**"
       - "master"
     paths:
+      - ".github/workflows/documentation.yaml"
       - "docs/**"
       - "mkdocs.yml"
 
