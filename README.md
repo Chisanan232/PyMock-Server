@@ -5,9 +5,10 @@
 [![CI](https://github.com/Chisanan232/PyMock-API/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Chisanan232/PyMock-API/actions/workflows/ci-cd.yml)
 [![codecov](https://codecov.io/gh/Chisanan232/PyMock-API/branch/main/graph/badge.svg?token=r5HJxg9KhN)](https://codecov.io/gh/Chisanan232/PyMock-API)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Chisanan232/PyMock-API/master.svg)](https://results.pre-commit.ci/latest/github/Chisanan232/PyMock-API/master)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyMock-API&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-API)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Python tool to mock API easily and humanly.
+A Python tool to mock API easily and humanly without any coding.
 
 [Overview](#overview) | [Python versions support](#Python-versions-support) | [Quickly Start](#quickly-start) | [Documentation](#documentation)
 <hr>
@@ -15,9 +16,9 @@ A Python tool to mock API easily and humanly.
 
 ## Overview
 
-Do you ever have experience about needing to set up a very simple application and write some APIs with hardcode response for developing
-Font-End site? **_PyMock-API_** provides a command line tool to let developers could quickly and easily set up application to mock APIs
-with configuration only.
+Do you ever have experience about needing to set up a very simple application and write some APIs with hardcode response again and again
+for developing Font-End site? **_PyMock-API_** provides a command line tool to let developers could quickly and easily set up application
+to mock APIs with configuration only.
 
 
 ## Python versions support
@@ -43,14 +44,14 @@ In basically, it has 3 steps: install the package, configure settings about the 
 
 First of all, we need to install the command line tool and the way to install is same as installing Python package by ``pip``.
 
-```shell
+```console
 >>> pip install pymock-api
 ```
 
 If the runtime environment has installed some Python web framework, e.g., **_Flask_**, you also could install **_Pymock-API_**
 with one specific option as following:
 
-```shell
+```console
 >>> pip install "pymock-api[flask]"
 ```
 
@@ -58,11 +59,11 @@ Then it would only install the lowest Python dependencies you need.
 
 After you done above step, please make sure the command line tool feature should work finely by below command:
 
-```shell
+```console
 >>> mock-api --help
 ```
 
-> **_NOTE:_**
+> **Note**
 >
 > Please take a look at option _--app-type_ (this option is in subcommand **_mock-api run_**) of the command line tool. Its option
 > value could be ``auto``, ``flask`` or ``fastapi``. It means that **_PyMock-API_** only supports 2 Python web frameworks: **_Flask_**
@@ -89,7 +90,7 @@ mocked_apis:
 
 Now, both of the command line tool and configuration have been already. So let's try to run the command to set up application!
 
-```shell
+```console
 >>> mock-api run -c <your configuration path>
 ```
 
@@ -97,7 +98,7 @@ You would see some log messages in terminal and that is the log of web server by
 
 And you could test the API by ``curl``:
 
-```shell
+```console
 >>> curl http://127.0.0.1:9672/google
 "This is Google home API."%
 ```

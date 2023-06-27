@@ -1,0 +1,130 @@
+site_name: PyMock-API
+site_url: https://bryantliu.github.io/pymock-api/
+site_author: Bryant Liu
+site_description: >-
+  Mock your APIs by YAML configuration and set up an application in minutes
+
+# Repository
+repo_name: Chisanan232/PyMock-API
+repo_url: https://github.com/Chisanan232/PyMock-API
+
+# Copyright
+copyright: Copyright &copy; 2023 - 2023 Bryant Liu
+
+theme:
+  name: material
+#  custom_dir: material/.overrides
+  features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    # - content.tabs.link
+    - content.tooltips
+    # - header.autohide
+    # - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    # - navigation.instant
+    # - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    # - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    # - toc.integrate
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+#  favicon: assets/favicon.png
+  icon:
+    logo: logo
+
+# Extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:materialx.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Page tree
+nav:
+  - Home: index.md
+  - Getting started:
+    - Version requirements: getting-started/version-requirements.md
+    - Installation: getting-started/installation.md
+    - Configure your APIs: getting-started/configure-your-api.md
+    - Set up web server: getting-started/setup-web-server.md
+    - Command line usages:
+      - subcommand:
+        - command-line-usage/index.md
+        - run: command-line-usage/subcmd-run.md
+        - config: command-line-usage/subcmd-config.md
+        - check: command-line-usage/subcmd-check.md
+  - Configure references:
+    - Basic info: configure-references/config-basic-info.md
+    - API: configure-references/mocked-apis.md
+  - Development:
+    - development/index.md
+    - How it works: development/how-it-works.md
+    - Software architecture: development/software-architecture.md
+    - Contributing :
+      - development/contributing/index.md
+      - Join in developing:
+        - Developing: development/contributing/developing.md
+        - Testing: development/contributing/testing.md
+      - Reporting a bug: development/contributing/reporting-a-bug.md
+      - Requesting a feature or change: development/contributing/requesting-a-feature.md
