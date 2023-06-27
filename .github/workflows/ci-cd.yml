@@ -10,6 +10,7 @@ on:
       - "master"
     paths-ignore:
       - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/documentation.yaml"
       - "docs/**"
       - ".gitcommitrules"
       - ".gitignore"
@@ -27,6 +28,7 @@ on:
       - "master"
     paths-ignore:
       - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/documentation.yaml"
       - "docs/**"
       - ".gitcommitrules"
       - ".gitignore"
