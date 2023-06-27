@@ -33,8 +33,8 @@ jobs:
           poetry install --with docs
 
       - name: Deploy documentation
-#        env:
-#          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           poetry run mkdocs gh-deploy --force
           poetry run mkdocs --version
