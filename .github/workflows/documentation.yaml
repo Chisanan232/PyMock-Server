@@ -36,5 +36,5 @@ jobs:
 #        env:
 #          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          mkdocs gh-deploy --force
-          mkdocs --version
+          poetry run mkdocs gh-deploy --force
+          poetry run mkdocs --version
