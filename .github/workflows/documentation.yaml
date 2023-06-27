@@ -10,7 +10,7 @@ on:
 #      - "mkdocs.yml"
 
 jobs:
-  upload_test_cov_report:
+  deploy_documentation:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
