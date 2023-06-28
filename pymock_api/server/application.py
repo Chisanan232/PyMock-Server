@@ -5,12 +5,20 @@ This module provides which library of Python web framework you could use to set 
 
 import json
 import os
+import re
 from abc import ABCMeta, abstractmethod
-from typing import Any, List, Optional, Union, cast
+from pydoc import locate
+from typing import Any, Dict, List, Optional, Union, cast
 
 from .._utils.importing import import_web_lib
 from ..exceptions import FileFormatNotSupport
-from ..model.api_config import HTTPRequest, HTTPResponse, MockAPI, MockAPIs
+from ..model.api_config import (
+    APIParameter,
+    HTTPRequest,
+    HTTPResponse,
+    MockAPI,
+    MockAPIs,
+)
 
 
 class BaseAppServer(metaclass=ABCMeta):
@@ -18,6 +26,7 @@ class BaseAppServer(metaclass=ABCMeta):
 
     def __init__(self):
         self._web_application = None
+        self._api_params: Dict[str, MockAPI] = {}
 
     @property
     def web_application(self) -> Any:
@@ -49,8 +58,31 @@ class BaseAppServer(metaclass=ABCMeta):
                 exec(add_api_pycode)
 
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
+        initial_global_server = f"""global SERVER\nSERVER = self\n"""
+        define_function_for_api = self._define_api_function_pycode(api_name, api_config)
+        return initial_global_server + define_function_for_api
+
+    def _define_api_function_pycode(self, api_name: str, api_config: MockAPI) -> str:
         return f"""def {api_name}() -> Union[str, dict]:
-            return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')
+            {self._run_request_process_pycode()}
+            {self._handle_request_process_result_pycode()}
+            {self._generate_response_pycode(api_config)}
+        """
+
+    def _run_request_process_pycode(self, **kwargs) -> str:
+        return """
+        process_result = SERVER._request_process()
+        """
+
+    def _handle_request_process_result_pycode(self, **kwargs) -> str:
+        return """
+        if process_result.status_code != 200:
+            return process_result
+        """
+
+    def _generate_response_pycode(self, api_config: MockAPI) -> str:
+        return f"""
+        return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')
         """
 
     def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
@@ -61,10 +93,59 @@ class BaseAppServer(metaclass=ABCMeta):
 
     @abstractmethod
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        pass
+        self._record_api_params_info(url=self.url_path(api_config=api_config, base_url=base_url), api_config=api_config)
+        return ""
 
     def url_path(self, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         return f"{base_url}{api_config.url}" if base_url else f"{api_config.url}"
+
+    def _record_api_params_info(self, url: str, api_config: MockAPI) -> None:
+        self._api_params[url] = api_config
+
+    def _request_process(self, **kwargs) -> "flask.Response":  # type: ignore
+        request = self._get_current_request(**kwargs)
+        req_params = self._get_current_api_parameters(**kwargs)
+
+        api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(request)].http.request.parameters  # type: ignore[union-attr]
+        for param_info in api_params_info:
+            # Check the required parameter
+            one_req_param_value = req_params.get(param_info.name, None)
+            if param_info.required and (param_info.name not in req_params.keys() or one_req_param_value is None):
+                return self._generate_http_response(f"Miss required parameter *{param_info.name}*.", status_code=400)
+            if one_req_param_value:
+                # Check the data type of parameter
+                if param_info.value_type and not isinstance(one_req_param_value, locate(param_info.value_type)):  # type: ignore[arg-type]
+                    return self._generate_http_response(
+                        f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different with the "
+                        f"implementation of Back-End site (*{type(param_info.value_type)}*).",
+                        status_code=400,
+                    )
+                # Check the data format of parameter
+                if param_info.value_format and not re.search(
+                    param_info.value_format, one_req_param_value, re.IGNORECASE
+                ):
+                    return self._generate_http_response(
+                        f"The format of data from Font-End site (value: *{one_req_param_value}*) is incorrect. Its "
+                        f"format should be '{param_info.value_format}'.",
+                        status_code=400,
+                    )
+        return self._generate_http_response(body="OK.", status_code=200)
+
+    @abstractmethod
+    def _get_current_request(self, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
+    def _get_current_api_parameters(self, **kwargs) -> dict:
+        pass
+
+    @abstractmethod
+    def _get_current_api_path(self, request: Any) -> str:
+        pass
+
+    @abstractmethod
+    def _generate_http_response(self, body: str, status_code: int) -> Any:
+        pass
 
 
 class FlaskServer(BaseAppServer):
@@ -73,7 +154,24 @@ class FlaskServer(BaseAppServer):
     def setup(self) -> "flask.Flask":  # type: ignore
         return import_web_lib.flask().Flask(__name__)
 
+    def _get_current_request(self, **kwargs) -> "flask.Request":  # type: ignore
+        return import_web_lib.flask().request
+
+    def _get_current_api_parameters(self, **kwargs) -> dict:
+        request: "flask.Request" = kwargs.get("request", self._get_current_request())  # type: ignore
+        api_params = request.args if request.method.upper() == "GET" else request.form or request.data or request.json
+        if isinstance(api_params, bytes):
+            api_params = json.loads(api_params.decode("utf-8"))
+        return api_params
+
+    def _get_current_api_path(self, request: "flask.Request") -> str:  # type: ignore[name-defined]
+        return request.path
+
+    def _generate_http_response(self, body: str, status_code: int) -> "flask.Response":  # type: ignore
+        return import_web_lib.flask().Response(body, status=status_code)
+
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
+        super()._add_api(api_name=api_name, api_config=api_config, base_url=base_url)
         return f"""self.web_application.route(
             "{self.url_path(api_config, base_url)}", methods=["{cast(HTTPRequest, self._ensure_http(api_config, "request")).method}"]
             )({api_name})
@@ -83,10 +181,131 @@ class FlaskServer(BaseAppServer):
 class FastAPIServer(BaseAppServer):
     """*Build a web application with *FastAPI**"""
 
+    def __init__(self):
+        super().__init__()
+        self._api_has_params: bool = False
+
     def setup(self) -> "fastapi.FastAPI":  # type: ignore
         return import_web_lib.fastapi().FastAPI()
 
+    def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
+        import_fastapi = "from fastapi import Request as FastAPIRequest\n"
+        initial_global_server = f"""global SERVER\nSERVER = self\n"""
+        define_params_model = self._annotate_api_parameters_model_pycode(api_name, api_config)
+        define_function_for_api = self._define_api_function_pycode(api_name, api_config)
+        return import_fastapi + initial_global_server + define_params_model + define_function_for_api
+
+    def _define_api_function_pycode(self, api_name: str, api_config: MockAPI) -> str:
+        # The code implementation is different if the HTTP method is *GET* or not
+        if api_config.http.request.method.upper() != "GET":  # type: ignore[union-attr]
+            api_func_signature = ""
+            # Process the function signature if API has parameter settings
+            if api_config.http.request.parameters:  # type: ignore[union-attr]
+                parameter_class = self._api_name_as_camel_case(api_name)
+                api_func_signature = f"model: {parameter_class}, " if self._api_has_params else ""
+            # Combine all the string value as a valid Python code
+            return f"""def {api_name}({api_func_signature}request: FastAPIRequest):
+                {self._run_request_process_pycode()}
+                {self._handle_request_process_result_pycode()}
+                {self._generate_response_pycode(api_config)}
+            """
+        else:
+            function_args = ""
+            assign_value_to_model = ""
+            instantiate_model = ""
+            # Process the function signature if API has parameter settings
+            for param in api_config.http.request.parameters:  # type: ignore[union-attr]
+                if param.default is not None:
+                    if param.value_type == "str":
+                        default_value = f"'{param.default}'"
+                    else:
+                        default_value = f"{param.default}"
+                    function_args += f", {param.name}: {param.value_type} = {default_value}"
+                else:
+                    function_args += f", {param.name}: {param.value_type} = None"
+                assign_value_to_model += f"""
+        setattr(model, '{param.name}', {param.name})
+                """
+            # Instantiate and assign data into objects as data model
+            if api_config.http.request.parameters:  # type: ignore[union-attr]
+                parameter_class = self._api_name_as_camel_case(api_name)
+                instantiate_model = f"""
+        class {parameter_class}: pass
+        model = {parameter_class}()
+                """
+            # Combine all the string value as a valid Python code
+            return f"""def {api_name}(request: FastAPIRequest{function_args}):
+                {instantiate_model}
+                {assign_value_to_model}
+                {self._run_request_process_pycode()}
+                {self._handle_request_process_result_pycode()}
+                {self._generate_response_pycode(api_config)}
+            """
+
+    def _api_name_as_camel_case(self, api_name: str) -> str:
+        camel_case_api_name = "".join(map(lambda n: f"{n[0].upper()}{n[1:]}", api_name.split("_")))
+        return f"{camel_case_api_name}Parameter"
+
+    def _annotate_api_parameters_model_pycode(self, api_name: str, api_config: MockAPI) -> str:
+        define_parameters_model = ""
+        if api_config.http.request.parameters:  # type: ignore[union-attr]
+            # The code implementation is different if the HTTP method is *GET* or not
+            if api_config.http.request.method.upper() == "GET":  # type: ignore[union-attr]
+                # API with HTTP method *GET* doesn't need to use 'pydantic.BaseModel' object to process API parameters
+                self._api_has_params = True
+                return define_parameters_model
+            else:
+                # API without HTTP method *GET* needs to use 'pydantic.BaseModel' object to process API parameters
+                self._api_has_params = True
+                # Handle the class annotation
+                parameter_class = self._api_name_as_camel_case(api_name)
+                define_parameters_model = f"""from pydantic import BaseModel\nclass {parameter_class}(BaseModel):\n"""
+            # Handle the class's attributes
+            for prop in api_config.http.request.parameters:  # type: ignore[union-attr]
+                if prop.default is not None:
+                    define_parameters_model += f"    {prop.name}: {prop.value_type} = '{prop.default}'\n"
+                else:
+                    if prop.required:
+                        define_parameters_model += f"    {prop.name}: {prop.value_type}\n"
+                    else:
+                        define_parameters_model += f"    {prop.name}: {prop.value_type} = None\n"
+            return define_parameters_model
+        else:
+            self._api_has_params = False
+            return define_parameters_model
+
+    def _run_request_process_pycode(self, **kwargs) -> str:
+        return (
+            """
+        process_result = SERVER._request_process(model=model, request=request)
+        """
+            if self._api_has_params
+            else """
+        process_result = SERVER._request_process(request=request)
+        """
+        )
+
+    def _get_current_request(self, **kwargs) -> "fastapi.Request":  # type: ignore[name-defined]
+        return kwargs.get("request")
+
+    def _get_current_api_parameters(self, **kwargs) -> dict:
+        api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(kwargs["request"])].http.request.parameters  # type: ignore[union-attr]
+        api_param_names = list(map(lambda e: e.name, api_params_info))
+        api_param = {}
+        if "model" in kwargs.keys():
+            for param_name in api_param_names:
+                if hasattr(kwargs["model"], param_name):
+                    api_param[param_name] = getattr(kwargs["model"], param_name)
+        return api_param
+
+    def _get_current_api_path(self, request: "fastapi.Request") -> str:  # type: ignore[name-defined]
+        return request.scope["root_path"] + request.scope["route"].path
+
+    def _generate_http_response(self, body: str, status_code: int) -> "fastapi.Response":  # type: ignore
+        return import_web_lib.fastapi().Response(body, status_code=status_code)
+
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
+        super()._add_api(api_name=api_name, api_config=api_config, base_url=base_url)
         return f"""self.web_application.api_route(
             path="{self.url_path(api_config, base_url)}", methods=["{cast(HTTPRequest, self._ensure_http(api_config, "request")).method}"]
             )({api_name})
