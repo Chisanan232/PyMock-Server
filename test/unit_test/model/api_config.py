@@ -557,6 +557,15 @@ class TestHTTPReqeust(ConfigTestSpec):
         assert obj.method == _TestConfig.Request.get("method", None)
         assert obj.parameters == [self._Mock_Model.api_parameter]
 
+    def test_deserialize_fail(self, sut_with_nothing: HTTPRequest):
+        utd = {
+            "method": "HTTP method",
+            "parameters": "a value which data type is not list",
+        }
+        with pytest.raises(TypeError) as exc_info:
+            sut_with_nothing.deserialize(data=utd)
+        assert str(exc_info.value) == "Argument *parameters* should be a list type value."
+
 
 class TestAPIParameter(ConfigTestSpec):
     @pytest.fixture(scope="function")
