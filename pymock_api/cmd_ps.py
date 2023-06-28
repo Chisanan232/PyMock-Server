@@ -27,11 +27,13 @@ _COMMAND_CHAIN: List[Type["CommandProcessor"]] = []
 
 def dispatch_command_processor() -> "CommandProcessor":
     cmd_chain = make_command_chain()
+    assert len(cmd_chain) > 0, "It's impossible that command line processors list is empty."
     return cmd_chain[0].distribute()
 
 
 def run_command_chain(args: ParserArguments) -> None:
     cmd_chain = make_command_chain()
+    assert len(cmd_chain) > 0, "It's impossible that command line processors list is empty."
     cmd_chain[0].process(args)
 
 

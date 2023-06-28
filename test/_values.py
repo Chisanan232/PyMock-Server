@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import Dict
+from typing import Dict, List
 from unittest.mock import Mock
 
 
@@ -22,7 +22,6 @@ _Config_Description: str = "pytest description"
 _Base_URL: str = "/test/v1"
 _Test_URL: str = "/test-url"
 _Test_HTTP_Method: str = "GET"
-_Test_HTTP_Req_Params: dict = {"param1": "val1", "param2": "val2"}
 _Test_HTTP_Resp: str = "This is HTTP response for PyTest."
 _Mock_APIs: dict = {
     "test_api_1": Mock(),
@@ -33,30 +32,81 @@ _Mock_API_HTTP: dict = {
     "response": Mock,
 }
 
+# Sample API parameters
+_Test_API_Parameter: dict = {
+    "name": "param1",
+    "required": True,
+    "default": None,
+    "type": "str",
+    "format": "any_format",
+}
+_Test_API_Parameter_With_Int: dict = {
+    "name": "param2",
+    "required": False,
+    "default": 0,
+    "type": "int",
+    "format": None,
+}
+_Test_API_Parameter_With_Str: dict = {
+    "name": "param3",
+    "required": False,
+    "default": "default_value",
+    "type": "str",
+    "format": None,
+}
+_Test_API_Parameter_Without_Default: dict = {
+    "name": "param4",
+    "required": False,
+    "default": None,
+    "type": "dict",
+    "format": None,
+}
+_Test_API_Parameters: List[dict] = [
+    _Test_API_Parameter,
+    _Test_API_Parameter_With_Int,
+    _Test_API_Parameter_With_Str,
+    _Test_API_Parameter_Without_Default,
+]
+
+# Sample API for testing ('<base URL>/google' with GET)
+_Google_Home_Value: dict = {
+    "url": "/google",
+    "http": {
+        "request": {
+            "method": "GET",
+            "parameters": _Test_API_Parameters,
+        },
+        "response": {"value": "This is Google home API."},
+    },
+}
+
+# Sample API for testing ('<base URL>/test' with POST)
+_Test_Home: dict = {
+    "url": "/test",
+    "http": {
+        "request": {
+            "method": "POST",
+            "parameters": [_Test_API_Parameter],
+        },
+        "response": {"value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }'},
+    },
+    "cookie": [{"TEST": "cookie_value"}],
+}
+
+# Sample API for testing ('<base URL>/test' with PUT)
 _YouTube_Home_Value: dict = {
     "url": "/youtube",
-    "http": {"request": {"method": "GET", "parameters": [{"param1": "val1"}]}, "response": {"value": "youtube.json"}},
+    "http": {
+        "request": {
+            "method": "PUT",
+        },
+        "response": {"value": "youtube.json"},
+    },
     "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
 }
 
 _YouTube_API_Content: dict = {"responseCode": "200", "errorMessage": "OK", "content": "This is YouTube home."}
 
-_Google_Home_Value: dict = {
-    "url": "/google",
-    "http": {
-        "request": {"method": "GET", "parameters": [{"param1": "val1"}]},
-        "response": {"value": "This is Google home API."},
-    },
-}
-
-_Test_Home: dict = {
-    "url": "/test",
-    "http": {
-        "request": {"method": "GET", "parameters": [{"param1": "val1"}]},
-        "response": {"value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }'},
-    },
-    "cookie": [{"TEST": "cookie_value"}],
-}
 
 _Mocked_APIs: dict = {
     "base": {"url": "/test/v1"},
@@ -72,12 +122,10 @@ _Test_Config_Value: dict = {
     "mocked_apis": _Mocked_APIs,
 }
 
-_Cmd_Option = namedtuple("_Cmd_Option", ["option_name", "value"])
-
 
 # Sample configuration content
 class _TestConfig:
-    Request: dict = {"method": "GET", "parameters": {"param1": "val1"}}
+    Request: dict = {"method": "GET", "parameters": [_Test_API_Parameter]}
     Response: Dict[str, str] = {"value": _Test_HTTP_Resp}
     Http: dict = {"request": Request, "response": Response}
     Mock_API: dict = {"url": _Test_URL, "http": Http}
@@ -92,6 +140,8 @@ class _TestConfig:
 
 # For testing data objects in *.server.sgi._model*
 _Test_Entry_Point: str = "entry-point"
+
+_Cmd_Option = namedtuple("_Cmd_Option", ["option_name", "value"])
 _Bind_Host_And_Port: _Cmd_Option = _Cmd_Option(option_name="--bind", value="127.0.0.1:9672")
 _Workers_Amount: _Cmd_Option = _Cmd_Option(option_name="--workers", value=3)
 _Log_Level: _Cmd_Option = _Cmd_Option(option_name="--log-level", value="info")
