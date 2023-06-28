@@ -109,13 +109,18 @@ class APIParameter(_Config):
     name: str = field(default_factory=str)
     required: Optional[bool] = None
     default: Optional[Any] = None
-    value_type: Optional[type] = None
+    value_type: Optional[str] = None  # A type value as string
     value_format: Optional[str] = None
-    force_naming: Optional[bool] = None
 
     def _compare(self, other: "APIParameter") -> bool:
         # TODO: Let it could automatically scan what properties it has and compare all of their value.
-        return self.name == other.name
+        return (
+            self.name == other.name
+            and self.required == other.required
+            and self.default == other.default
+            and self.value_type == other.value_type
+            and self.value_format == other.value_format
+        )
 
     def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:
         name: str = self._get_prop(data, prop="name")
@@ -123,16 +128,14 @@ class APIParameter(_Config):
         default: str = self._get_prop(data, prop="default")
         value_type: type = self._get_prop(data, prop="value_type")
         value_format: str = self._get_prop(data, prop="value_format")
-        force_naming: bool = self._get_prop(data, prop="force_naming")
-        if not (name and default and value_type and value_format) or (required is None and force_naming is None):
+        if not (name and value_type and value_format) or (required is None):
             return None
         return {
             "name": name,
             "required": required,
             "default": default,
-            "value_type": value_type,
-            "value_format": value_format,
-            "force_naming": force_naming,
+            "type": value_type,
+            "format": value_format,
         }
 
     @_Config._ensure_process_with_not_empty_value
@@ -140,9 +143,8 @@ class APIParameter(_Config):
         self.name = data.get("name", None)
         self.required = data.get("required", None)
         self.default = data.get("default", None)
-        self.value_type = data.get("value_type", None)
-        self.value_format = data.get("value_format", None)
-        self.force_naming = data.get("force_naming", None)
+        self.value_type = data.get("type", None)
+        self.value_format = data.get("format", None)
         return self
 
 

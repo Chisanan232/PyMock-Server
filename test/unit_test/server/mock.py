@@ -16,7 +16,22 @@ class FakeWebServer(BaseAppServer):
     def setup(self) -> Any:
         pass
 
+    def _request_process(self) -> None:
+        pass
+
+    def _get_current_api_parameters(self, **kwargs) -> dict:
+        pass
+
+    def _get_current_api_path(self, request: Any) -> str:
+        pass
+
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
+        pass
+
+    def _get_current_request(self) -> Any:
+        pass
+
+    def _generate_http_response(self, body: str, status_code: int) -> Any:
         pass
 
 
