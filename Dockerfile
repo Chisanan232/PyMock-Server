@@ -19,12 +19,12 @@
 #         - Default values: 'api.yaml'
 #
 # Example running docker command line:
-# >>> docker build ./ -t pymock-runner:v0
-# >>> docker run --name foo-mock-server \
+# >>> docker build ./ -t <image name>:<image tag>
+# >>> docker run --name <container name> \
 #                -v <API configuration root directory>:/mit-pymock-api/<API configuration root directory> \
 #                -e CONFIG_PATH=<API configuration path>
 #                -p 9672:9672 \
-#                pymock-runner:v0
+#                <image name>:<image tag>
 #
 ########################################################################################################################
 
