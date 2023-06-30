@@ -8,8 +8,13 @@
 # Description:
 # Set up and run web server with Python web framework by server gateway interface (WSGI or ASGI).
 #
-# Allowable argument:
-# Nothing.
+# Allowable options:
+#  -r [Release type]              Release type of project. Different release type it would get different version format. [options: python-package]
+#  -p [Python package name]       The Python package name. It will use this naming to get the package info module (__pkg_info__.py) to get the version info.
+#  -v [Version format]            Which version format you should use. [options: general-2, general-3, date-based]
+#  -i [Docker image name]         Set the naming to the Docker image this shell will build.
+#  -d [Run mode]                  Running mode. Set 'dry-run' or 'debug' to let it only show log message without exactly working. [options: general, dry-run, debug]
+#  -h [Argument]                  Show this help. You could set a specific argument naming to show the option usage. Empty or 'all' would show all arguments usage. [options: r, p, v, i, d, h]
 #
 #####################################################################################################################
 
