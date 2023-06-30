@@ -1,0 +1,47 @@
+name: docker
+
+on:
+  push:
+    branches:
+      - "develop/**"
+      - "master"
+    paths:
+      - "pymock_api/__pkg_info__.py"
+
+env:
+  DOCKER_ACCOUNT: chisanan232
+#  DOCKER_IMAGE_NAME: pymock-api
+  DOCKER_IMAGE_NAME: test    # For testing
+  RELEASE_TYPE: python-package
+  PYTHON_PACKAGE_NAME: pymock_api
+  SOFTWARE_VERSION_FORMAT: general-3
+
+permissions:
+  contents: write
+
+jobs:
+  deploy_documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build Docker image with tag
+        run: |
+          bash ./scripts/docker/build.sh \
+               -r '${{ env.RELEASE_TYPE }}' \
+               -p '${{ env.PYTHON_PACKAGE_NAME }}' \
+               -v '${{ env.SOFTWARE_VERSION_FORMAT }}' \
+               -i '${{ env.DOCKER_IMAGE_NAME }}'
+
+      - name: Loging Docker
+        run: |
+          docker loging -u ${{ env.DOCKER_ACCOUNT }} -p ${{ secrets.DOCKER_ACCOUNT_PWD }}
+
+      - name: Release the Docker image to Docker hub
+        run: |
+          bash ./scripts/docker/push.sh \
+               -r '${{ env.RELEASE_TYPE }}' \
+               -p '${{ env.PYTHON_PACKAGE_NAME }}' \
+               -v '${{ env.SOFTWARE_VERSION_FORMAT }}' \
+               -i '${{ env.DOCKER_IMAGE_NAME }}'
