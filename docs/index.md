@@ -36,7 +36,6 @@
   <em>PyMock-API</em> is a Python tool to mock API easily and humanly without any coding.
 </p>
 
-
 ## What things it wants to resolve?
 
 Mock APIs through YAML file only, without any codes. And it also could easily and quickly set up a web server with the YAML format configuration.
