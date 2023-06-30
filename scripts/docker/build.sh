@@ -14,7 +14,6 @@
 #####################################################################################################################
 
 # Check the environment variables and set default value to them if it's empty
-echo "Start to check command line tool arguments ..."
 
 while getopts "r:p:v:i:d:h:?" argv
 do
@@ -133,6 +132,9 @@ final_display() {
 
     echo "🍻 Build successfully!"
 }
+
+# The process what the shell script want to do truly start here
+echo "Start to check command line tool arguments ..."
 
 generate_version_regex
 generate_new_version_as_tag "python"
