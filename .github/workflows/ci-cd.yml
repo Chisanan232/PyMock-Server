@@ -9,13 +9,16 @@ on:
       - "release/**"
       - "master"
     paths-ignore:
+#       For documentation
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/workflows/documentation.yaml"
       - "docs/**"
       - "mkdocs.yml"
       - "README.md"
+#       For Docker feature
       - "scripts/docker/**"
       - "Dockerfile"
+#       Others
       - ".gitcommitrules"
       - ".gitignore"
       - ".pre-commit-config.yaml"
@@ -30,13 +33,16 @@ on:
       - "release/**"
       - "master"
     paths-ignore:
+#       For documentation
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/workflows/documentation.yaml"
       - "docs/**"
       - "mkdocs.yml"
       - "README.md"
+#       For Docker feature
       - "scripts/docker/**"
       - "Dockerfile"
+#       Others
       - ".gitcommitrules"
       - ".gitignore"
       - ".pre-commit-config.yaml"
