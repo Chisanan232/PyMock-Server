@@ -18,8 +18,6 @@
 #
 #####################################################################################################################
 
-# Check the environment variables and set default value to them if it's empty
-
 while getopts "r:p:v:i:d:h:?" argv
 do
      case $argv in
