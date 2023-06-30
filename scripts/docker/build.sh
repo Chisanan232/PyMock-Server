@@ -3,10 +3,10 @@
 #####################################################################################################################
 #
 # Target:
-# Provide for developer who want to set up a web server in a Docker container.
+# Automate to build Docker image with the software version which be recorded in package info module (<pacakge>/__pkg_info__.py)
 #
 # Description:
-# Set up and run web server with Python web framework by server gateway interface (WSGI or ASGI).
+# Build the Docker image and tag it by current software version.
 #
 # Allowable options:
 #  -r [Release type]              Release type of project. Different release type it would get different version format. [options: python-package]
