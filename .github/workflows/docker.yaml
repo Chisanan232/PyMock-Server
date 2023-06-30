@@ -6,6 +6,7 @@ on:
       - "develop/**"
       - "master"
     paths:
+      - ".github/workflows/docker.yaml"
       - "pymock_api/__pkg_info__.py"
 
 env:
@@ -36,7 +37,7 @@ jobs:
 
       - name: Loging Docker
         run: |
-          docker loging -u ${{ env.DOCKER_ACCOUNT }} -p ${{ secrets.DOCKER_ACCOUNT_PWD }}
+          docker login -u ${{ env.DOCKER_ACCOUNT }} -p ${{ secrets.DOCKER_ACCOUNT_PWD }}
 
       - name: Release the Docker image to Docker hub
         run: |
