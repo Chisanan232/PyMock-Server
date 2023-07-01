@@ -1,3 +1,17 @@
+# CI workflow for Docker feature
+#
+# Description:
+#     This CI workflow for releasing Docker image to Docker hub.
+#
+# Processes:
+#     1. Generate the tag by software version for Docker image
+#     2. Build the Docker image and name it with the tag
+#     3. Push the Docker image to Docker hub
+#
+# Trigger condition:
+#     This CI workflow only be triggered by changing the package info module (__pkg_info__.py) of *PyMock-API*.
+#
+
 name: docker
 
 on:
