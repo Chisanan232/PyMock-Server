@@ -43,7 +43,7 @@ jobs:
 
       - name: Build Docker image with tag
         run: |
-          bash ./scripts/docker/build.sh \
+          bash ./scripts/ci/build.sh \
                -r '${{ env.RELEASE_TYPE }}' \
                -p '${{ env.PYTHON_PACKAGE_NAME }}' \
                -v '${{ env.SOFTWARE_VERSION_FORMAT }}' \
@@ -55,7 +55,7 @@ jobs:
 
       - name: Release the Docker image to Docker hub
         run: |
-          bash ./scripts/docker/push.sh \
+          bash ./scripts/ci/push.sh \
                -r '${{ env.RELEASE_TYPE }}' \
                -p '${{ env.PYTHON_PACKAGE_NAME }}' \
                -v '${{ env.SOFTWARE_VERSION_FORMAT }}' \
