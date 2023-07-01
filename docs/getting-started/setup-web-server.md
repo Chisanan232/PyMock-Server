@@ -77,7 +77,7 @@ Let's give you a sample command line to set up mock server by **Docker**:
                -v <configuration root directory>:/mit-pymock-api/<configuration root directory> \
                -e CONFIG_PATH=<configuration path>
                -p 9672:9672 \
-               pymock-api:v1
+               pymock-api:v0.1.0
 ```
 
 ??? tip "Hint: Still being confused about the configuration path setting? Let's demonstrate some usage scenarios to you."
@@ -103,7 +103,7 @@ Let's give you a sample command line to set up mock server by **Docker**:
     >>> docker run --name mock-server \
                    -v /User/foo/mock-api-demo:/mit-pymock-api \
                    -p 9672:9672 \
-                   pymock-api:v1
+                   pymock-api:v0.1.0
     ```
     
     You can mount the all files in folder ``/User/foo/mock-api-demo`` into folder
@@ -136,7 +136,7 @@ Let's give you a sample command line to set up mock server by **Docker**:
                    -v /User/foo/mock-api-demo:/mit-pymock-api \
                    -e CONFIG_PATH=./folder1/beta-api.yaml
                    -p 9672:9672 \
-                   pymock-api:v1
+                   pymock-api:v0.1.0
     ```
     
     The mount setting is the same as previous scenario so the file tree also be the

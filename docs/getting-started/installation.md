@@ -145,7 +145,7 @@ enjoy **_PyMock-API_**.
 Download **_PyMock-API_** official image as below:
 
 ```console
-docker pull pymock-api:v1
+docker pull pymock-api:v0.1.0
 ```
 
 ??? tip "Recommended: Use the tag to manage your Docker image"
