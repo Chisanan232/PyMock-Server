@@ -576,6 +576,14 @@ class TestHTTPReqeust(ConfigTestSpec):
             sut_with_nothing.deserialize(data=utd)
         assert str(exc_info.value) == "Argument *parameters* should be a list type value."
 
+    def test_get_one_param_by_name(self, sut: HTTPRequest):
+        param = sut.get_one_param_by_name(_Test_API_Parameter["name"])
+        assert param == self._Mock_Model.api_parameter
+
+    def test_fail_get_one_param_by_name(self, sut: HTTPRequest):
+        param = sut.get_one_param_by_name("Not exist argument")
+        assert param is None
+
 
 class TestAPIParameter(ConfigTestSpec):
     @pytest.fixture(scope="function")
