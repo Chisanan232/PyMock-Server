@@ -199,6 +199,12 @@ class HTTPRequest(_Config):
         self.parameters = [APIParameter().deserialize(data=parameter) for parameter in parameters] if parameters else []
         return self
 
+    def get_one_param_by_name(self, name: str) -> Optional[APIParameter]:
+        for param in self.parameters:
+            if param.name == name:
+                return param
+        return None
+
 
 @dataclass(eq=False)
 class HTTPResponse(_Config):
