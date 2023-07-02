@@ -319,9 +319,10 @@ class SubCmdInspect(BaseCommandProcessor):
         return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
 
     def _run(self, args: SubcmdInspectArguments) -> None:
-        current_api_config: APIConfig = load_config(path=args.config_path)
-        base_info = current_api_config.apis.base
-        mocked_apis_info = current_api_config.apis.apis
+        current_api_config = load_config(path=args.config_path)
+        assert current_api_config, "It doesn't permit the configuration content to be empty."
+        base_info = current_api_config.apis.base  # type: ignore[union-attr]
+        mocked_apis_info = current_api_config.apis.apis  # type: ignore[union-attr]
         if base_info:
             mocked_apis_path = list(map(lambda p: f"{base_info.url}{p.url}", mocked_apis_info.values()))
         else:
@@ -337,17 +338,17 @@ class SubCmdInspect(BaseCommandProcessor):
                 sys.exit(1)
 
             for swagger_one_api_method, swagger_one_api_props in cast(dict, swagger_api_props).items():
-                api_http_config = current_api_config.apis.get_api_config_by_url(swagger_api_path, base=base_info).http
+                api_http_config = current_api_config.apis.get_api_config_by_url(swagger_api_path, base=base_info).http  # type: ignore[union-attr]
 
                 # Check API HTTP method
-                if args.check_api_http_method and str(swagger_one_api_method).upper() != api_http_config.request.method.upper():
+                if args.check_api_http_method and str(swagger_one_api_method).upper() != api_http_config.request.method.upper():  # type: ignore[union-attr]
                     print(f"⚠️  Miss the API with HTTP method {swagger_one_api_method}")
                     sys.exit(1)
 
                 # Check API parameters
                 if args.check_api_parameters:
                     for swagger_one_api_param in swagger_one_api_props["parameters"]:
-                        api_config = api_http_config.request.get_one_param_by_name(swagger_one_api_param["name"])
+                        api_config = api_http_config.request.get_one_param_by_name(swagger_one_api_param["name"])  # type: ignore[union-attr]
                         if api_config is None:
                             print(f"⚠️  Miss the API parameter {swagger_one_api_param['name']}.")
                             sys.exit(1)
