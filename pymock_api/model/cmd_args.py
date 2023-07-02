@@ -72,6 +72,10 @@ class DeserializeParsedArgs:
 
     @classmethod
     def subcommand_inspect(cls, args: Namespace) -> SubcmdInspectArguments:
+        if hasattr(args, "check_entire_api") and args.check_entire_api:
+            args.check_api_path = True
+            args.check_api_http_method = True
+            args.check_api_parameters = True
         return SubcmdInspectArguments(
             subparser_name=args.subcommand,
             config_path=args.config_path,

@@ -392,6 +392,15 @@ class SwaggerDocURL(BaseSubCmdInspectOption):
     help_description: str = "The URL path of swagger style API document."
 
 
+class CheckEntireAPI(BaseSubCmdInspectOption):
+    cli_option: str = "--check-entire-api"
+    name: str = "check_entire_api"
+    help_description: str = "Do the inspection of all properties of each API."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
 class CheckAPIPath(BaseSubCmdInspectOption):
     cli_option: str = "--check-api-path"
     name: str = "check_api_path"
