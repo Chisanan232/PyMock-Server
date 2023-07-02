@@ -552,7 +552,7 @@ class MockAPIs(_Config):
 
     def get_api_config_by_url(self, url: str) -> Optional[MockAPI]:
         for k, v in self._apis.items():
-            if v.url == url:
+            if v and v.url == url:
                 return self._apis[k]
         return None
 
