@@ -1,0 +1,8 @@
+mocked_apis:
+  test_home:
+    url: '/test'
+    http:
+      request:
+        method: 'GET'
+      response:
+        value: 'This is Test home API.'
