@@ -580,12 +580,14 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
 RESPONSE_JSON_PATHS_WITH_EX_CODE: List[tuple] = []
 
 
-def _get_all_json(config_type: str, exit_code: Union[str, int]) -> None:
-    json_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "data", "inspect_test", "api_response", "*.json")
+def _get_all_json(has_base_info: bool, config_type: str, exit_code: Union[str, int]) -> None:
+    file_naming = "has-base-info" if has_base_info else "no-base-info"
+    json_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "data", "inspect_test", "api_response", f"{file_naming}*.json")
     global RESPONSE_JSON_PATHS_WITH_EX_CODE
     for json_config_path in glob.glob(json_dir):
+        yaml_file_format = "*.yaml" if config_type == "invalid" else f"{file_naming}*.yaml"
         yaml_dir = os.path.join(
-            str(pathlib.Path(__file__).parent.parent), "data", "inspect_test", "config", config_type, "*.yaml"
+            str(pathlib.Path(__file__).parent.parent), "data", "inspect_test", "config", config_type, yaml_file_format
         )
         expected_exit_code = exit_code if isinstance(exit_code, str) and exit_code.isdigit() else str(exit_code)
         for yaml_config_path in glob.glob(yaml_dir):
@@ -594,8 +596,9 @@ def _get_all_json(config_type: str, exit_code: Union[str, int]) -> None:
             RESPONSE_JSON_PATHS_WITH_EX_CODE.append(one_test_scenario)
 
 
-_get_all_json(config_type="valid", exit_code=0)
-_get_all_json(config_type="invalid", exit_code=1)
+_get_all_json(has_base_info=False, config_type="valid", exit_code=0)
+_get_all_json(has_base_info=True, config_type="valid", exit_code=0)
+_get_all_json(has_base_info=False, config_type="invalid", exit_code=1)
 
 
 class TestSubCmdInspect(BaseCommandProcessorTestSpec):
