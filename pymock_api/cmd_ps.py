@@ -5,7 +5,8 @@ import pathlib
 import re
 import sys
 from argparse import ArgumentParser, Namespace
-from typing import Any, Callable, List, Optional, Tuple, Type
+from typing import Any, Callable, List, Optional, Tuple, Type, cast
+from urllib3 import PoolManager, BaseHTTPResponse
 
 from ._utils import YAML, import_web_lib
 from .cmd import MockAPICommandParser, SubCommand
@@ -16,6 +17,7 @@ from .model import (
     SubcmdCheckArguments,
     SubcmdConfigArguments,
     SubcmdRunArguments,
+    SubcmdInspectArguments,
     deserialize_args,
     load_config,
 )
@@ -307,3 +309,53 @@ class SubCmdCheck(BaseCommandProcessor):
         else:
             if valid_callback:
                 valid_callback(config_key, config_value, criteria)
+
+
+class SubCmdInspect(BaseCommandProcessor):
+    responsible_subcommand = SubCommand.Inspect
+
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:
+        return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
+
+    def _run(self, args: SubcmdInspectArguments) -> None:
+        current_api_config: APIConfig = load_config(path=args.config_path)
+        base_info = current_api_config.apis.base
+        mocked_apis_info = current_api_config.apis.apis
+        if base_info:
+            mocked_apis_path = list(map(lambda p: f"{base_info.url}{p.url}", mocked_apis_info.values()))
+        else:
+            mocked_apis_path = list(map(lambda p: p.url, mocked_apis_info.values()))
+
+        pm: PoolManager = PoolManager()
+        resp: BaseHTTPResponse = pm.request(method="GET", url=args.swagger_doc_url)
+        swagger_api_doc: dict = resp.json()
+        for swagger_api_path, swagger_api_props in swagger_api_doc["paths"].items():
+            # Check API path
+            if swagger_api_path not in mocked_apis_path:
+                print(f"⚠️  Miss API. Path: {swagger_api_path}")
+                sys.exit(1)
+
+            for swagger_one_api_method, swagger_one_api_props in cast(dict, swagger_api_props).items():
+                api_http_config = current_api_config.apis.get_api_config_by_url(swagger_api_path).http
+
+                # Check API HTTP method
+                if str(swagger_one_api_method).upper() != api_http_config.request.method.upper():
+                    print(f"⚠️  Miss the API with HTTP method {swagger_one_api_method}")
+                    sys.exit(1)
+
+                # Check API parameters
+                api_params = swagger_one_api_props["parameters"]
+                param_names = list(map(lambda p: p.name, api_http_config.request.parameters))
+                has_params: bool = False
+                for one_api_params in api_params:
+                    if one_api_params["name"] in param_names:
+                        has_params = True
+                        break
+                if not has_params:
+                    print(f"⚠️  Miss the API parameter {param_names}")
+                    sys.exit(1)
+
+                # Check API response
+                api_resp = swagger_one_api_props["responses"]["200"]
+        print(f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.")
+        sys.exit(0)
