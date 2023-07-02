@@ -344,16 +344,11 @@ class SubCmdInspect(BaseCommandProcessor):
                     sys.exit(1)
 
                 # Check API parameters
-                swagger_api_parameters = swagger_one_api_props["parameters"]
-                param_names = list(map(lambda p: p.name, api_http_config.request.parameters))
-                has_params: bool = False
-                for swagger_one_api_param in swagger_api_parameters:
-                    if swagger_one_api_param["name"] in param_names:
-                        has_params = True
-                        break
-                if not has_params:
-                    print(f"⚠️  Miss the API parameter {param_names}")
-                    sys.exit(1)
+                for swagger_one_api_param in swagger_one_api_props["parameters"]:
+                    api_config = api_http_config.request.get_one_param_by_name(swagger_one_api_param["name"])
+                    if api_config is None:
+                        print(f"⚠️  Miss the API parameter {swagger_one_api_param['name']}.")
+                        sys.exit(1)
 
                 # TODO: Implement the checking detail of HTTP response
                 # Check API response
