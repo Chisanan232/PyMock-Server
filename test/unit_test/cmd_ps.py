@@ -6,29 +6,30 @@ from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, Namespace
 from typing import Callable, List, Optional, Tuple, Type, Union
 from unittest.mock import MagicMock, Mock, call, patch
-from urllib3 import PoolManager, HTTPResponse
 
 import pytest
+from urllib3 import HTTPResponse, PoolManager
 
 from pymock_api._utils.file_opt import YAML
-from pymock_api.model import load_config, APIConfig
 from pymock_api.cmd import SubCommand, get_all_subcommands
 from pymock_api.cmd_ps import (
     BaseCommandProcessor,
     NoSubCmd,
     SubCmdCheck,
     SubCmdConfig,
-    SubCmdRun,
     SubCmdInspect,
+    SubCmdRun,
     make_command_chain,
     run_command_chain,
 )
 from pymock_api.model import (
+    APIConfig,
     ParserArguments,
     SubcmdCheckArguments,
     SubcmdConfigArguments,
-    SubcmdRunArguments,
     SubcmdInspectArguments,
+    SubcmdRunArguments,
+    load_config,
 )
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
@@ -38,15 +39,15 @@ from .._values import (
     _Log_Level,
     _Print_Sample,
     _Sample_File_Path,
+    _Swagger_API_Document_URL,
     _Test_App_Type,
     _Test_Auto_Type,
     _Test_Config,
     _Test_FastAPI_App_Type,
     _Test_SubCommand_Check,
     _Test_SubCommand_Config,
-    _Test_SubCommand_Run,
     _Test_SubCommand_Inspect,
-    _Swagger_API_Document_URL,
+    _Test_SubCommand_Run,
     _Workers_Amount,
 )
 
@@ -583,7 +584,9 @@ def _get_all_json(config_type: str, exit_code: Union[str, int]) -> None:
     json_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "data", "inspect_test", "api_response", "*.json")
     global RESPONSE_JSON_PATHS_WITH_EX_CODE
     for json_config_path in glob.glob(json_dir):
-        yaml_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "data", "inspect_test", "config", config_type, "*.yaml")
+        yaml_dir = os.path.join(
+            str(pathlib.Path(__file__).parent.parent), "data", "inspect_test", "config", config_type, "*.yaml"
+        )
         expected_exit_code = exit_code if isinstance(exit_code, str) and exit_code.isdigit() else str(exit_code)
         for yaml_config_path in glob.glob(yaml_dir):
             dummy_yaml = load_config(yaml_config_path)
@@ -604,7 +607,9 @@ class TestSubCmdInspect(BaseCommandProcessorTestSpec):
         ("api_resp_path", "dummy_yaml", "expected_exit_code"),
         RESPONSE_JSON_PATHS_WITH_EX_CODE,
     )
-    def test_with_command_processor(self, api_resp_path: str, dummy_yaml: APIConfig, expected_exit_code: str, object_under_test: Callable):
+    def test_with_command_processor(
+        self, api_resp_path: str, dummy_yaml: APIConfig, expected_exit_code: str, object_under_test: Callable
+    ):
         kwargs = {
             "api_resp_path": api_resp_path,
             "dummy_yaml": dummy_yaml,
@@ -617,7 +622,9 @@ class TestSubCmdInspect(BaseCommandProcessorTestSpec):
         ("api_resp_path", "dummy_yaml", "expected_exit_code"),
         RESPONSE_JSON_PATHS_WITH_EX_CODE,
     )
-    def test_with_run_entry_point(self, api_resp_path: str, dummy_yaml: APIConfig, expected_exit_code: str, entry_point_under_test: Callable):
+    def test_with_run_entry_point(
+        self, api_resp_path: str, dummy_yaml: APIConfig, expected_exit_code: str, entry_point_under_test: Callable
+    ):
         kwargs = {
             "api_resp_path": api_resp_path,
             "dummy_yaml": dummy_yaml,
