@@ -93,6 +93,8 @@ class TestDeserialize:
             (True, False, True, True, True, True, True),
             (True, True, False, False, True, True, True),
             (True, False, False, False, True, True, True),
+            (False, True, False, True, True, False, True),
+            (False, False, False, True, False, False, True),
         ],
     )
     def test_parser_subcommand_inspect_arguments(
