@@ -344,11 +344,11 @@ class SubCmdInspect(BaseCommandProcessor):
                     sys.exit(1)
 
                 # Check API parameters
-                api_params = swagger_one_api_props["parameters"]
+                swagger_api_parameters = swagger_one_api_props["parameters"]
                 param_names = list(map(lambda p: p.name, api_http_config.request.parameters))
                 has_params: bool = False
-                for one_api_params in api_params:
-                    if one_api_params["name"] in param_names:
+                for swagger_one_api_param in swagger_api_parameters:
+                    if swagger_one_api_param["name"] in param_names:
                         has_params = True
                         break
                 if not has_params:
