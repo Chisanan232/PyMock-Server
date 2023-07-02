@@ -579,11 +579,6 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
 RESPONSE_JSON_PATHS_WITH_EX_CODE: List[tuple] = []
 
 
-# def _get_dummy_yaml(config_type: str) -> APIConfig:
-#     test_yaml = os.path.join(str(pathlib.Path(__file__).parent.parent), "data", "inspect_test", "config", config_type, "*.yaml")
-#     return load_config(test_yaml)
-
-
 def _get_all_json(config_type: str, exit_code: Union[str, int]) -> None:
     json_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "data", "inspect_test", "api_response", "*.json")
     global RESPONSE_JSON_PATHS_WITH_EX_CODE
