@@ -331,7 +331,7 @@ class SubCmdInspect(BaseCommandProcessor):
         swagger_api_doc: dict = resp.json()
         for swagger_api_path, swagger_api_props in swagger_api_doc["paths"].items():
             # Check API path
-            if swagger_api_path not in mocked_apis_path:
+            if args.check_api_path and swagger_api_path not in mocked_apis_path:
                 print(f"⚠️  Miss API. Path: {swagger_api_path}")
                 sys.exit(1)
 
@@ -339,39 +339,40 @@ class SubCmdInspect(BaseCommandProcessor):
                 api_http_config = current_api_config.apis.get_api_config_by_url(swagger_api_path).http
 
                 # Check API HTTP method
-                if str(swagger_one_api_method).upper() != api_http_config.request.method.upper():
+                if args.check_api_http_method and str(swagger_one_api_method).upper() != api_http_config.request.method.upper():
                     print(f"⚠️  Miss the API with HTTP method {swagger_one_api_method}")
                     sys.exit(1)
 
                 # Check API parameters
-                for swagger_one_api_param in swagger_one_api_props["parameters"]:
-                    api_config = api_http_config.request.get_one_param_by_name(swagger_one_api_param["name"])
-                    if api_config is None:
-                        print(f"⚠️  Miss the API parameter {swagger_one_api_param['name']}.")
-                        sys.exit(1)
-                    if swagger_one_api_param["required"] is not api_config.required:
-                        print(f"⚠️  Incorrect API parameter property *required*.")
-                        print(f"  * Swagger API document: {swagger_one_api_param['name']}")
-                        print(f"  * Current config: {api_config.required}")
-                        sys.exit(1)
-                    if swagger_one_api_param["schema"]["type"]:
-                        is_incorrect: bool = False
-                        if swagger_one_api_param["schema"]["type"] == "string" and api_config.value_type != "str":
-                            is_incorrect = True
-                        if swagger_one_api_param["schema"]["type"] == "integer" and api_config.value_type != "int":
-                            is_incorrect = True
-                        if swagger_one_api_param["schema"]["type"] == "boolean" and api_config.value_type != "bool":
-                            is_incorrect = True
-                        if is_incorrect:
-                            print(f"⚠️  Incorrect API parameter property *value_type*.")
-                            print(f"  * Swagger API document: {swagger_one_api_param['schema']['type']}")
-                            print(f"  * Current config: {api_config.value_type}")
+                if args.check_api_parameters:
+                    for swagger_one_api_param in swagger_one_api_props["parameters"]:
+                        api_config = api_http_config.request.get_one_param_by_name(swagger_one_api_param["name"])
+                        if api_config is None:
+                            print(f"⚠️  Miss the API parameter {swagger_one_api_param['name']}.")
                             sys.exit(1)
-                    if swagger_one_api_param["schema"]["default"] != api_config.default:
-                        print(f"⚠️  Incorrect API parameter property *default*.")
-                        print(f"  * Swagger API document: {swagger_one_api_param['schema']['default']}")
-                        print(f"  * Current config: {api_config.default}")
-                        sys.exit(1)
+                        if swagger_one_api_param["required"] is not api_config.required:
+                            print(f"⚠️  Incorrect API parameter property *required*.")
+                            print(f"  * Swagger API document: {swagger_one_api_param['name']}")
+                            print(f"  * Current config: {api_config.required}")
+                            sys.exit(1)
+                        if swagger_one_api_param["schema"]["type"]:
+                            is_incorrect: bool = False
+                            if swagger_one_api_param["schema"]["type"] == "string" and api_config.value_type != "str":
+                                is_incorrect = True
+                            if swagger_one_api_param["schema"]["type"] == "integer" and api_config.value_type != "int":
+                                is_incorrect = True
+                            if swagger_one_api_param["schema"]["type"] == "boolean" and api_config.value_type != "bool":
+                                is_incorrect = True
+                            if is_incorrect:
+                                print(f"⚠️  Incorrect API parameter property *value_type*.")
+                                print(f"  * Swagger API document: {swagger_one_api_param['schema']['type']}")
+                                print(f"  * Current config: {api_config.value_type}")
+                                sys.exit(1)
+                        if swagger_one_api_param["schema"]["default"] != api_config.default:
+                            print(f"⚠️  Incorrect API parameter property *default*.")
+                            print(f"  * Swagger API document: {swagger_one_api_param['schema']['default']}")
+                            print(f"  * Current config: {api_config.default}")
+                            sys.exit(1)
 
                 # TODO: Implement the checking detail of HTTP response
                 # Check API response
