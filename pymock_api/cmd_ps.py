@@ -358,7 +358,7 @@ class SubCmdInspect(BaseCommandProcessor):
                         is_incorrect: bool = False
                         if swagger_one_api_param["schema"]["type"] == "string" and api_config.value_type != "str":
                             is_incorrect = True
-                        if swagger_one_api_param["schema"]["type"] == "number" and api_config.value_type != "int":
+                        if swagger_one_api_param["schema"]["type"] == "integer" and api_config.value_type != "int":
                             is_incorrect = True
                         if swagger_one_api_param["schema"]["type"] == "boolean" and api_config.value_type != "bool":
                             is_incorrect = True
