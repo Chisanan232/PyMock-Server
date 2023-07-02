@@ -137,6 +137,31 @@ After source code be ready, you could install it by ``pip``.
 pip install -e pymock-api
 ```
 
+## With _Docker_ <small>for general usage without Python runtime environment</small> { #with-docker data-toc-label="with Docker" }
+
+If your runtime environment has not installed Python and you won't use Python temporarily, you also could use **Docker** to
+enjoy **_PyMock-API_**.
+
+Download **_PyMock-API_** official image as below:
+
+```console
+docker pull pymock-api:v0.1.0
+```
+
+??? tip "Recommended: Use the tag to manage your Docker image"
+
+    You could use command line ``docker pull pymock-api`` without tag
+    absolutely. But the default tag is ``latest``. That means you cannot
+    clear what version you have currently. So it recommends using tag
+    to manage it and clear what version it use currently by yourself.
+
+Verify the Docker image has been exactly installed:
+
+```console
+docker images pymock-api
+```
+
+
 ## Verify the command line feature
 
 No matter which way to install **_PyMock-API_**, it must verify whether the command line tool is ready for working or not.

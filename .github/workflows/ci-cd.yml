@@ -9,16 +9,23 @@ on:
       - "release/**"
       - "master"
     paths-ignore:
+#       For documentation
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/workflows/documentation.yaml"
       - "docs/**"
+      - "mkdocs.yml"
+      - "README.md"
+#       For Docker feature
+      - "scripts/ci/**-docker-**.sh"
+      - "scripts/docker/**"
+      - "Dockerfile"
+      - "README-DOCKER.md"
+#       Others
       - ".gitcommitrules"
       - ".gitignore"
       - ".pre-commit-config.yaml"
       - ".pylintrc"
       - "LICENSE"
-      - "mkdocs.yml"
-      - "README.md"
 
   pull_request:
     branches:
@@ -28,16 +35,23 @@ on:
       - "release/**"
       - "master"
     paths-ignore:
+#       For documentation
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/workflows/documentation.yaml"
       - "docs/**"
+      - "mkdocs.yml"
+      - "README.md"
+#       For Docker feature
+      - "scripts/ci/**-docker-**.sh"
+      - "scripts/docker/**"
+      - "Dockerfile"
+      - "README-DOCKER.md"
+#       Others
       - ".gitcommitrules"
       - ".gitignore"
       - ".pre-commit-config.yaml"
       - ".pylintrc"
       - "LICENSE"
-      - "mkdocs.yml"
-      - "README.md"
 
 jobs:
   prep-testbed_unit-test:
