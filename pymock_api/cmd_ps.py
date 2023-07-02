@@ -355,6 +355,7 @@ class SubCmdInspect(BaseCommandProcessor):
                     print(f"⚠️  Miss the API parameter {param_names}")
                     sys.exit(1)
 
+                # TODO: Implement the checking detail of HTTP response
                 # Check API response
                 api_resp = swagger_one_api_props["responses"]["200"]
         print(f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.")
