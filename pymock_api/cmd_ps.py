@@ -349,6 +349,29 @@ class SubCmdInspect(BaseCommandProcessor):
                     if api_config is None:
                         print(f"⚠️  Miss the API parameter {swagger_one_api_param['name']}.")
                         sys.exit(1)
+                    if swagger_one_api_param["required"] is not api_config.required:
+                        print(f"⚠️  Incorrect API parameter property *required*.")
+                        print(f"  * Swagger API document: {swagger_one_api_param['name']}")
+                        print(f"  * Current config: {api_config.required}")
+                        sys.exit(1)
+                    if swagger_one_api_param["schema"]["type"]:
+                        is_incorrect: bool = False
+                        if swagger_one_api_param["schema"]["type"] == "string" and api_config.value_type != "str":
+                            is_incorrect = True
+                        if swagger_one_api_param["schema"]["type"] == "number" and api_config.value_type != "int":
+                            is_incorrect = True
+                        if swagger_one_api_param["schema"]["type"] == "boolean" and api_config.value_type != "bool":
+                            is_incorrect = True
+                        if is_incorrect:
+                            print(f"⚠️  Incorrect API parameter property *value_type*.")
+                            print(f"  * Swagger API document: {swagger_one_api_param['schema']['type']}")
+                            print(f"  * Current config: {api_config.value_type}")
+                            sys.exit(1)
+                    if swagger_one_api_param["schema"]["default"] != api_config.default:
+                        print(f"⚠️  Incorrect API parameter property *default*.")
+                        print(f"  * Swagger API document: {swagger_one_api_param['schema']['default']}")
+                        print(f"  * Current config: {api_config.default}")
+                        sys.exit(1)
 
                 # TODO: Implement the checking detail of HTTP response
                 # Check API response
