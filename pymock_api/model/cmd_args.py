@@ -31,6 +31,15 @@ class SubcmdCheckArguments(ParserArguments):
     config_path: str
 
 
+@dataclass(frozen=True)
+class SubcmdInspectArguments(ParserArguments):
+    config_path: str
+    swagger_doc_url: str
+    check_api_path: bool
+    check_api_http_method: bool
+    check_api_parameters: bool
+
+
 class DeserializeParsedArgs:
     """*Deserialize the object *argparse.Namespace* to *ParserArguments*"""
 
@@ -59,4 +68,15 @@ class DeserializeParsedArgs:
         return SubcmdCheckArguments(
             subparser_name=args.subcommand,
             config_path=args.config_path,
+        )
+
+    @classmethod
+    def subcommand_inspect(cls, args: Namespace) -> SubcmdInspectArguments:
+        return SubcmdInspectArguments(
+            subparser_name=args.subcommand,
+            config_path=args.config_path,
+            swagger_doc_url=args.swagger_doc_url,
+            check_api_path=args.check_api_path,
+            check_api_http_method=args.check_api_http_method,
+            check_api_parameters=args.check_api_parameters,
         )

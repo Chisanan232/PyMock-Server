@@ -161,3 +161,7 @@ _Sample_File_Path: str = "pytest-api.yaml"
 
 # Test subcommand *check* options
 _Test_SubCommand_Check: str = "check"
+
+# Test subcommand *inspect* options
+_Test_SubCommand_Inspect: str = "inspect"
+_Swagger_API_Document_URL: str = "Swagger API document URL"

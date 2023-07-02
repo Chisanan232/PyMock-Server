@@ -7,6 +7,7 @@ from pymock_api.model.cmd_args import (
     DeserializeParsedArgs,
     SubcmdCheckArguments,
     SubcmdConfigArguments,
+    SubcmdInspectArguments,
     SubcmdRunArguments,
 )
 
@@ -16,10 +17,12 @@ from ..._values import (
     _Log_Level,
     _Print_Sample,
     _Sample_File_Path,
+    _Swagger_API_Document_URL,
     _Test_App_Type,
     _Test_Config,
     _Test_SubCommand_Check,
     _Test_SubCommand_Config,
+    _Test_SubCommand_Inspect,
     _Test_SubCommand_Run,
     _Workers_Amount,
 )
@@ -74,3 +77,22 @@ class TestDeserialize:
         assert isinstance(arguments, SubcmdCheckArguments)
         assert arguments.subparser_name == _Test_SubCommand_Check
         assert arguments.config_path == _Test_Config
+
+    def test_parser_subcommand_inspect_arguments(self, deserialize: Type[DeserializeParsedArgs]):
+        namespace_args = {
+            "subcommand": _Test_SubCommand_Inspect,
+            "config_path": _Test_Config,
+            "swagger_doc_url": _Swagger_API_Document_URL,
+            "check_api_path": True,
+            "check_api_http_method": True,
+            "check_api_parameters": True,
+        }
+        namespace = Namespace(**namespace_args)
+        arguments = deserialize.subcommand_inspect(namespace)
+        assert isinstance(arguments, SubcmdInspectArguments)
+        assert arguments.subparser_name == _Test_SubCommand_Inspect
+        assert arguments.config_path == _Test_Config
+        assert arguments.swagger_doc_url == _Swagger_API_Document_URL
+        assert arguments.check_api_path is True
+        assert arguments.check_api_http_method is True
+        assert arguments.check_api_parameters is True
