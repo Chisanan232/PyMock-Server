@@ -164,7 +164,7 @@ class CommandOption:
             raise ValueError("An command option must have help description for developers to clear what it does.")
         all_help_desps: List[str] = [self.help_description.splitlines()[0]]
 
-        if self.default_value:
+        if self.default_value is not None:
             default_value_str = f"[default: '{self.default_value}']"
             all_help_desps.append(default_value_str)
 
@@ -228,6 +228,7 @@ class SubCommand:
     Run: str = "run"
     Config: str = "config"
     Check: str = "check"
+    Inspect: str = "inspect"
 
 
 class BaseSubCommand(CommandOption):
@@ -262,10 +263,18 @@ class SubCommandCheckOption(BaseSubCommand):
     )
 
 
+class SubCommandInspectOption(BaseSubCommand):
+    sub_parser: SubParserAttr = SubParserAttr(
+        name=SubCommand.Inspect,
+        help="Do some comprehensive inspection for configuration.",
+    )
+
+
 BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
 BaseSubCmdRunOption: type = MetaCommandOption("BaseSubCmdRunOption", (SubCommandRunOption,), {})
 BaseSubCmdConfigOption: type = MetaCommandOption("BaseSubCmdConfigOption", (SubCommandConfigOption,), {})
 BaseSubCmdCheckOption: type = MetaCommandOption("BaseSubCmdCheckOption", (SubCommandCheckOption,), {})
+BaseSubCmdInspectOption: type = MetaCommandOption("BaseSubCmdInspectOption", (SubCommandInspectOption,), {})
 
 
 class Version(BaseCmdOption):
@@ -368,3 +377,43 @@ class ConfigPath(BaseSubCmdCheckOption):
     name: str = "config_path"
     help_description: str = "The file path of configuration."
     default_value: str = "api.yaml"
+
+
+class UnderCheckConfigPath(BaseSubCmdInspectOption):
+    cli_option: str = "-p, --config-path"
+    name: str = "config_path"
+    help_description: str = "The file path of configuration."
+    default_value: str = "api.yaml"
+
+
+class SwaggerDocURL(BaseSubCmdInspectOption):
+    cli_option: str = "-s, --swagger-doc-url"
+    name: str = "swagger_doc_url"
+    help_description: str = "The URL path of swagger style API document."
+
+
+class APIPath(BaseSubCmdInspectOption):
+    cli_option: str = "--api-path"
+    name: str = "check_api_path"
+    help_description: str = "Do the inspection of property API path."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = True
+
+
+class APIHTTPMethod(BaseSubCmdInspectOption):
+    cli_option: str = "--api-http-method"
+    name: str = "check_api_http_method"
+    help_description: str = "Do the inspection of property allowable HTTP method of one specific API."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = True
+
+
+class APIParameter(BaseSubCmdInspectOption):
+    cli_option: str = "--api-parameters"
+    name: str = "check_api_parameters"
+    help_description: str = "Do the inspection of property API parameters."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
