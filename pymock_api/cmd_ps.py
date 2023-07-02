@@ -6,7 +6,8 @@ import re
 import sys
 from argparse import ArgumentParser, Namespace
 from typing import Any, Callable, List, Optional, Tuple, Type, cast
-from urllib3 import PoolManager, BaseHTTPResponse
+
+from urllib3 import BaseHTTPResponse, PoolManager
 
 from ._utils import YAML, import_web_lib
 from .cmd import MockAPICommandParser, SubCommand
@@ -16,8 +17,8 @@ from .model import (
     ParserArguments,
     SubcmdCheckArguments,
     SubcmdConfigArguments,
-    SubcmdRunArguments,
     SubcmdInspectArguments,
+    SubcmdRunArguments,
     deserialize_args,
     load_config,
 )
