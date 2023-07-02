@@ -15,7 +15,7 @@ mocked_apis:
             default: 0
           - name: 'arg3'
             required: false
-            type: bool
-            default: false
+            type: str
+            default: 'false'
       response:
         value: 'This is Foo home API.'

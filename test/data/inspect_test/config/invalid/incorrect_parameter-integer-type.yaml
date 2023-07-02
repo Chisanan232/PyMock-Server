@@ -11,11 +11,7 @@ mocked_apis:
             default: 'arg1_default_value'
           - name: 'arg2'
             required: false
-            type: int
-            default: 0
-          - name: 'arg3'
-            required: false
-            type: bool
-            default: false
+            type: str
+            default: '0'
       response:
         value: 'This is Foo home API.'

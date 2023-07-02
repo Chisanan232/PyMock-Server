@@ -19,6 +19,26 @@
             },
             "name": "arg1",
             "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Arg2",
+              "type": "integer",
+              "default": 0
+            },
+            "name": "arg2",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Arg3",
+              "type": "boolean",
+              "default": false
+            },
+            "name": "arg3",
+            "in": "query"
           }
         ],
         "responses": {
