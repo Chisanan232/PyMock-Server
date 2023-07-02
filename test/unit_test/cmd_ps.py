@@ -6,10 +6,12 @@ from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, Namespace
 from typing import Callable, List, Optional, Tuple, Type, Union
 from unittest.mock import MagicMock, Mock, call, patch
+from urllib3 import PoolManager, HTTPResponse
 
 import pytest
 
 from pymock_api._utils.file_opt import YAML
+from pymock_api.model import load_config, APIConfig
 from pymock_api.cmd import SubCommand, get_all_subcommands
 from pymock_api.cmd_ps import (
     BaseCommandProcessor,
@@ -17,6 +19,7 @@ from pymock_api.cmd_ps import (
     SubCmdCheck,
     SubCmdConfig,
     SubCmdRun,
+    SubCmdInspect,
     make_command_chain,
     run_command_chain,
 )
@@ -25,6 +28,7 @@ from pymock_api.model import (
     SubcmdCheckArguments,
     SubcmdConfigArguments,
     SubcmdRunArguments,
+    SubcmdInspectArguments,
 )
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
@@ -41,6 +45,8 @@ from .._values import (
     _Test_SubCommand_Check,
     _Test_SubCommand_Config,
     _Test_SubCommand_Run,
+    _Test_SubCommand_Inspect,
+    _Swagger_API_Document_URL,
     _Workers_Amount,
 )
 
@@ -52,7 +58,7 @@ _Fake_Amt: int = 1
 
 def _given_parser_args(
     subcommand: str = None, app_type: str = None, config_path: str = None
-) -> Union[SubcmdRunArguments, SubcmdConfigArguments, ParserArguments]:
+) -> Union[SubcmdRunArguments, SubcmdConfigArguments, SubcmdCheckArguments, SubcmdInspectArguments, ParserArguments]:
     if subcommand == "run":
         return SubcmdRunArguments(
             subparser_name=subcommand,
@@ -73,6 +79,15 @@ def _given_parser_args(
         return SubcmdCheckArguments(
             subparser_name=subcommand,
             config_path=(config_path or _Test_Config),
+        )
+    elif subcommand == "inspect":
+        return SubcmdInspectArguments(
+            config_path=_Test_Config,
+            subparser_name=subcommand,
+            swagger_doc_url=_Swagger_API_Document_URL,
+            check_api_path=True,
+            check_api_parameters=True,
+            check_api_http_method=True,
         )
     else:
         return ParserArguments(
@@ -559,6 +574,91 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
                 config_key="any key", config_value="any value", criteria="invalid type value"
             )
         assert re.search(r"only accept 'list'", str(exc_info.value), re.IGNORECASE)
+
+
+RESPONSE_JSON_PATHS_WITH_EX_CODE: List[tuple] = []
+
+
+# def _get_dummy_yaml(config_type: str) -> APIConfig:
+#     test_yaml = os.path.join(str(pathlib.Path(__file__).parent.parent), "data", "inspect_test", "config", config_type, "*.yaml")
+#     return load_config(test_yaml)
+
+
+def _get_all_json(config_type: str, exit_code: Union[str, int]) -> None:
+    json_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "data", "inspect_test", "api_response", "*.json")
+    global RESPONSE_JSON_PATHS_WITH_EX_CODE
+    for json_config_path in glob.glob(json_dir):
+        yaml_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "data", "inspect_test", "config", config_type, "*.yaml")
+        expected_exit_code = exit_code if isinstance(exit_code, str) and exit_code.isdigit() else str(exit_code)
+        for yaml_config_path in glob.glob(yaml_dir):
+            dummy_yaml = load_config(yaml_config_path)
+            one_test_scenario = (json_config_path, dummy_yaml, expected_exit_code)
+            RESPONSE_JSON_PATHS_WITH_EX_CODE.append(one_test_scenario)
+
+
+_get_all_json(config_type="normal", exit_code=0)
+_get_all_json(config_type="miss", exit_code=1)
+
+
+class TestSubCmdInspect(BaseCommandProcessorTestSpec):
+    @pytest.fixture(scope="function")
+    def cmd_ps(self) -> SubCmdInspect:
+        return SubCmdInspect()
+
+    @pytest.mark.parametrize(
+        ("api_resp_path", "dummy_yaml", "expected_exit_code"),
+        RESPONSE_JSON_PATHS_WITH_EX_CODE,
+    )
+    def test_with_command_processor(self, api_resp_path: str, dummy_yaml: APIConfig, expected_exit_code: str, object_under_test: Callable):
+        kwargs = {
+            "api_resp_path": api_resp_path,
+            "dummy_yaml": dummy_yaml,
+            "expected_exit_code": expected_exit_code,
+            "cmd_ps": object_under_test,
+        }
+        self._test_process(**kwargs)
+
+    @pytest.mark.parametrize(
+        ("api_resp_path", "dummy_yaml", "expected_exit_code"),
+        RESPONSE_JSON_PATHS_WITH_EX_CODE,
+    )
+    def test_with_run_entry_point(self, api_resp_path: str, dummy_yaml: APIConfig, expected_exit_code: str, entry_point_under_test: Callable):
+        kwargs = {
+            "api_resp_path": api_resp_path,
+            "dummy_yaml": dummy_yaml,
+            "expected_exit_code": expected_exit_code,
+            "cmd_ps": entry_point_under_test,
+        }
+        self._test_process(**kwargs)
+
+    def _test_process(self, api_resp_path: str, dummy_yaml: APIConfig, expected_exit_code: str, cmd_ps: Callable):
+        mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Inspect)
+        with patch("pymock_api.cmd_ps.load_config") as mock_load_config:
+            with patch.object(PoolManager, "request") as mock_urllib3_request:
+                mock_load_config.return_value = dummy_yaml
+                with open(api_resp_path, "r", encoding="utf-8") as file_stream:
+                    mock_urllib3_request.return_value = HTTPResponse(body=bytes(file_stream.read(), "utf-8"))
+
+                with pytest.raises(SystemExit) as exc_info:
+                    cmd_ps(mock_parser_arg)
+                assert expected_exit_code in str(exc_info.value)
+                mock_urllib3_request.assert_called_once_with(method="GET", url=_Swagger_API_Document_URL)
+
+    def _given_cmd_args_namespace(self) -> Namespace:
+        args_namespace = Namespace()
+        args_namespace.subcommand = SubCommand.Inspect
+        args_namespace.config_path = _Test_Config
+        args_namespace.swagger_doc_url = "http://127.0.0.1:8080/docs"
+        args_namespace.check_api_path = True
+        args_namespace.check_api_http_method = True
+        args_namespace.check_api_parameters = True
+        return args_namespace
+
+    def _given_subcmd(self) -> Optional[str]:
+        return SubCommand.Inspect
+
+    def _expected_argument_type(self) -> Type[SubcmdInspectArguments]:
+        return SubcmdInspectArguments
 
 
 def test_make_command_chain():
