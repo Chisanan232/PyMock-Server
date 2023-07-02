@@ -592,7 +592,7 @@ def _get_all_json(config_type: str, exit_code: Union[str, int]) -> None:
 
 
 _get_all_json(config_type="normal", exit_code=0)
-_get_all_json(config_type="miss", exit_code=1)
+_get_all_json(config_type="invalid", exit_code=1)
 
 
 class TestSubCmdInspect(BaseCommandProcessorTestSpec):
