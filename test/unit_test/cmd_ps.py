@@ -591,7 +591,7 @@ def _get_all_json(config_type: str, exit_code: Union[str, int]) -> None:
             RESPONSE_JSON_PATHS_WITH_EX_CODE.append(one_test_scenario)
 
 
-_get_all_json(config_type="normal", exit_code=0)
+_get_all_json(config_type="valid", exit_code=0)
 _get_all_json(config_type="invalid", exit_code=1)
 
 
