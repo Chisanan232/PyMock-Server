@@ -337,7 +337,7 @@ class SubCmdInspect(BaseCommandProcessor):
                 sys.exit(1)
 
             for swagger_one_api_method, swagger_one_api_props in cast(dict, swagger_api_props).items():
-                api_http_config = current_api_config.apis.get_api_config_by_url(swagger_api_path).http
+                api_http_config = current_api_config.apis.get_api_config_by_url(swagger_api_path, base=base_info).http
 
                 # Check API HTTP method
                 if args.check_api_http_method and str(swagger_one_api_method).upper() != api_http_config.request.method.upper():

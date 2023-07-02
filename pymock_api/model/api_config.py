@@ -556,7 +556,8 @@ class MockAPIs(_Config):
             self.apis[mock_api_name] = MockAPI().deserialize(data=data.get(mock_api_name, None))
         return self
 
-    def get_api_config_by_url(self, url: str) -> Optional[MockAPI]:
+    def get_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Optional[MockAPI]:
+        url = url.replace(base.url, "") if base else url
         for k, v in self._apis.items():
             if v and v.url == url:
                 return self._apis[k]
