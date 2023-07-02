@@ -392,26 +392,26 @@ class SwaggerDocURL(BaseSubCmdInspectOption):
     help_description: str = "The URL path of swagger style API document."
 
 
-class APIPath(BaseSubCmdInspectOption):
-    cli_option: str = "--api-path"
+class CheckAPIPath(BaseSubCmdInspectOption):
+    cli_option: str = "--check-api-path"
     name: str = "check_api_path"
     help_description: str = "Do the inspection of property API path."
     action: str = "store_true"
     option_value_type: Optional[type] = None
-    default_value: bool = True
+    default_value: bool = False
 
 
-class APIHTTPMethod(BaseSubCmdInspectOption):
-    cli_option: str = "--api-http-method"
+class CheckAPIHTTPMethod(BaseSubCmdInspectOption):
+    cli_option: str = "--check-api-http-method"
     name: str = "check_api_http_method"
     help_description: str = "Do the inspection of property allowable HTTP method of one specific API."
     action: str = "store_true"
     option_value_type: Optional[type] = None
-    default_value: bool = True
+    default_value: bool = False
 
 
-class APIParameter(BaseSubCmdInspectOption):
-    cli_option: str = "--api-parameters"
+class CheckAPIParameter(BaseSubCmdInspectOption):
+    cli_option: str = "--check-api-parameters"
     name: str = "check_api_parameters"
     help_description: str = "Do the inspection of property API parameters."
     action: str = "store_true"
