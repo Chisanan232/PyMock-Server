@@ -14,6 +14,8 @@ from ..._values import (
     _Test_SubCommand_Check,
     _Test_SubCommand_Config,
     _Test_SubCommand_Run,
+    _Test_SubCommand_Inspect,
+    _Swagger_API_Document_URL,
     _Workers_Amount,
 )
 
@@ -54,4 +56,19 @@ def test_deserialize_subcommand_check_args(mock_parser_arguments: Mock):
     }
     namespace = Namespace(**namespace_args)
     deserialize_args.subcmd_check(namespace)
+    mock_parser_arguments.assert_called_once_with(namespace)
+
+
+@patch.object(DeserializeParsedArgs, "subcommand_inspect")
+def test_deserialize_subcommand_inspect_args(mock_parser_arguments: Mock):
+    namespace_args = {
+        "subcommand": _Test_SubCommand_Inspect,
+        "config_path": _Test_Config,
+        "swagger_doc_url": _Swagger_API_Document_URL,
+        "check_api_path": True,
+        "check_api_http_method": True,
+        "check_api_parameters": True,
+    }
+    namespace = Namespace(**namespace_args)
+    deserialize_args.subcmd_inspect(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
