@@ -9,13 +9,13 @@ from ..._values import (
     _Log_Level,
     _Print_Sample,
     _Sample_File_Path,
+    _Swagger_API_Document_URL,
     _Test_App_Type,
     _Test_Config,
     _Test_SubCommand_Check,
     _Test_SubCommand_Config,
-    _Test_SubCommand_Run,
     _Test_SubCommand_Inspect,
-    _Swagger_API_Document_URL,
+    _Test_SubCommand_Run,
     _Workers_Amount,
 )
 

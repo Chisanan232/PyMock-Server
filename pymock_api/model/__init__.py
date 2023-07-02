@@ -12,8 +12,8 @@ from .cmd_args import (
     ParserArguments,
     SubcmdCheckArguments,
     SubcmdConfigArguments,
-    SubcmdRunArguments,
     SubcmdInspectArguments,
+    SubcmdRunArguments,
 )
 
 
