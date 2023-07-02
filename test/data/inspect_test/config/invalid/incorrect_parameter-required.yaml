@@ -1,0 +1,13 @@
+mocked_apis:
+  foo_home:
+    url: '/foo'
+    http:
+      request:
+        method: 'GET'
+        parameters:
+          - name: 'arg1'
+            required: true
+            type: str
+            default: 'arg1_default_value'
+      response:
+        value: 'This is Foo home API.'

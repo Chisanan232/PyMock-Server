@@ -199,6 +199,12 @@ class HTTPRequest(_Config):
         self.parameters = [APIParameter().deserialize(data=parameter) for parameter in parameters] if parameters else []
         return self
 
+    def get_one_param_by_name(self, name: str) -> Optional[APIParameter]:
+        for param in self.parameters:
+            if param.name == name:
+                return param
+        return None
+
 
 @dataclass(eq=False)
 class HTTPResponse(_Config):
@@ -550,7 +556,8 @@ class MockAPIs(_Config):
             self.apis[mock_api_name] = MockAPI().deserialize(data=data.get(mock_api_name, None))
         return self
 
-    def get_api_config_by_url(self, url: str) -> Optional[MockAPI]:
+    def get_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Optional[MockAPI]:
+        url = url.replace(base.url, "") if base else url
         for k, v in self._apis.items():
             if v and v.url == url:
                 return self._apis[k]

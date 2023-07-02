@@ -5,7 +5,9 @@ import pathlib
 import re
 import sys
 from argparse import ArgumentParser, Namespace
-from typing import Any, Callable, List, Optional, Tuple, Type
+from typing import Any, Callable, List, Optional, Tuple, Type, cast
+
+from urllib3 import BaseHTTPResponse, PoolManager
 
 from ._utils import YAML, import_web_lib
 from .cmd import MockAPICommandParser, SubCommand
@@ -15,6 +17,7 @@ from .model import (
     ParserArguments,
     SubcmdCheckArguments,
     SubcmdConfigArguments,
+    SubcmdInspectArguments,
     SubcmdRunArguments,
     deserialize_args,
     load_config,
@@ -307,3 +310,74 @@ class SubCmdCheck(BaseCommandProcessor):
         else:
             if valid_callback:
                 valid_callback(config_key, config_value, criteria)
+
+
+class SubCmdInspect(BaseCommandProcessor):
+    responsible_subcommand = SubCommand.Inspect
+
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:
+        return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
+
+    def _run(self, args: SubcmdInspectArguments) -> None:
+        current_api_config = load_config(path=args.config_path)
+        assert current_api_config, "It doesn't permit the configuration content to be empty."
+        base_info = current_api_config.apis.base  # type: ignore[union-attr]
+        mocked_apis_info = current_api_config.apis.apis  # type: ignore[union-attr]
+        if base_info:
+            mocked_apis_path = list(map(lambda p: f"{base_info.url}{p.url}", mocked_apis_info.values()))
+        else:
+            mocked_apis_path = list(map(lambda p: p.url, mocked_apis_info.values()))
+
+        pm: PoolManager = PoolManager()
+        resp: BaseHTTPResponse = pm.request(method="GET", url=args.swagger_doc_url)
+        swagger_api_doc: dict = resp.json()
+        for swagger_api_path, swagger_api_props in swagger_api_doc["paths"].items():
+            # Check API path
+            if args.check_api_path and swagger_api_path not in mocked_apis_path:
+                print(f"⚠️  Miss API. Path: {swagger_api_path}")
+                sys.exit(1)
+
+            for swagger_one_api_method, swagger_one_api_props in cast(dict, swagger_api_props).items():
+                api_http_config = current_api_config.apis.get_api_config_by_url(swagger_api_path, base=base_info).http  # type: ignore[union-attr]
+
+                # Check API HTTP method
+                if args.check_api_http_method and str(swagger_one_api_method).upper() != api_http_config.request.method.upper():  # type: ignore[union-attr]
+                    print(f"⚠️  Miss the API with HTTP method {swagger_one_api_method}")
+                    sys.exit(1)
+
+                # Check API parameters
+                if args.check_api_parameters:
+                    for swagger_one_api_param in swagger_one_api_props["parameters"]:
+                        api_config = api_http_config.request.get_one_param_by_name(swagger_one_api_param["name"])  # type: ignore[union-attr]
+                        if api_config is None:
+                            print(f"⚠️  Miss the API parameter {swagger_one_api_param['name']}.")
+                            sys.exit(1)
+                        if swagger_one_api_param["required"] is not api_config.required:
+                            print(f"⚠️  Incorrect API parameter property *required*.")
+                            print(f"  * Swagger API document: {swagger_one_api_param['name']}")
+                            print(f"  * Current config: {api_config.required}")
+                            sys.exit(1)
+                        if swagger_one_api_param["schema"]["type"]:
+                            is_incorrect: bool = False
+                            if swagger_one_api_param["schema"]["type"] == "string" and api_config.value_type != "str":
+                                is_incorrect = True
+                            if swagger_one_api_param["schema"]["type"] == "integer" and api_config.value_type != "int":
+                                is_incorrect = True
+                            if swagger_one_api_param["schema"]["type"] == "boolean" and api_config.value_type != "bool":
+                                is_incorrect = True
+                            if is_incorrect:
+                                print(f"⚠️  Incorrect API parameter property *value_type*.")
+                                print(f"  * Swagger API document: {swagger_one_api_param['schema']['type']}")
+                                print(f"  * Current config: {api_config.value_type}")
+                                sys.exit(1)
+                        if swagger_one_api_param["schema"]["default"] != api_config.default:
+                            print(f"⚠️  Incorrect API parameter property *default*.")
+                            print(f"  * Swagger API document: {swagger_one_api_param['schema']['default']}")
+                            print(f"  * Current config: {api_config.default}")
+                            sys.exit(1)
+
+                # TODO: Implement the checking detail of HTTP response
+                # Check API response
+                api_resp = swagger_one_api_props["responses"]["200"]
+        print(f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.")
+        sys.exit(0)

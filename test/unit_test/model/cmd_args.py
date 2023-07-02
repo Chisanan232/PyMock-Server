@@ -78,14 +78,44 @@ class TestDeserialize:
         assert arguments.subparser_name == _Test_SubCommand_Check
         assert arguments.config_path == _Test_Config
 
-    def test_parser_subcommand_inspect_arguments(self, deserialize: Type[DeserializeParsedArgs]):
+    @pytest.mark.parametrize(
+        (
+            "entire_check",
+            "check_api_path",
+            "check_http_method",
+            "check_api_parameters",
+            "expected_check_api_path",
+            "expected_check_http_method",
+            "expected_check_api_parameters",
+        ),
+        [
+            (True, True, True, True, True, True, True),
+            (True, False, True, True, True, True, True),
+            (True, True, False, False, True, True, True),
+            (True, False, False, False, True, True, True),
+            (False, True, False, True, True, False, True),
+            (False, False, False, True, False, False, True),
+        ],
+    )
+    def test_parser_subcommand_inspect_arguments(
+        self,
+        entire_check: bool,
+        check_api_path: bool,
+        check_http_method: bool,
+        check_api_parameters: bool,
+        expected_check_api_path: bool,
+        expected_check_http_method: bool,
+        expected_check_api_parameters: bool,
+        deserialize: Type[DeserializeParsedArgs],
+    ):
         namespace_args = {
             "subcommand": _Test_SubCommand_Inspect,
             "config_path": _Test_Config,
             "swagger_doc_url": _Swagger_API_Document_URL,
-            "check_api_path": True,
-            "check_api_http_method": True,
-            "check_api_parameters": True,
+            "check_entire_api": entire_check,
+            "check_api_path": check_api_path,
+            "check_api_http_method": check_http_method,
+            "check_api_parameters": check_api_parameters,
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_inspect(namespace)
@@ -93,6 +123,6 @@ class TestDeserialize:
         assert arguments.subparser_name == _Test_SubCommand_Inspect
         assert arguments.config_path == _Test_Config
         assert arguments.swagger_doc_url == _Swagger_API_Document_URL
-        assert arguments.check_api_path is True
-        assert arguments.check_api_http_method is True
-        assert arguments.check_api_parameters is True
+        assert arguments.check_api_path is expected_check_api_path
+        assert arguments.check_api_http_method is expected_check_http_method
+        assert arguments.check_api_parameters is expected_check_api_parameters
