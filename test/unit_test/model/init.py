@@ -1,7 +1,11 @@
 from argparse import Namespace
 from unittest.mock import Mock, patch
 
-from pymock_api.model import DeserializeParsedArgs, deserialize_args
+from pymock_api.model import (
+    DeserializeParsedArgs,
+    deserialize_args,
+    deserialize_swagger_api_config,
+)
 
 from ..._values import (
     _Bind_Host_And_Port,
@@ -72,3 +76,9 @@ def test_deserialize_subcommand_inspect_args(mock_parser_arguments: Mock):
     namespace = Namespace(**namespace_args)
     deserialize_args.subcmd_inspect(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
+
+
+def test_deserialize_swagger_api_config():
+    with patch("pymock_api.model.SwaggerConfig.deserialize") as mock_deserialize_swagger_config_function:
+        deserialize_swagger_api_config(data={"some key": "some value"})
+        mock_deserialize_swagger_config_function.assert_called_once_with(data={"some key": "some value"})
