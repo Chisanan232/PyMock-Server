@@ -15,6 +15,7 @@ from .cmd_args import (
     SubcmdInspectArguments,
     SubcmdRunArguments,
 )
+from .swagger_config import SwaggerConfig
 
 
 class deserialize_args:
@@ -69,6 +70,10 @@ class deserialize_args:
 
         """
         return DeserializeParsedArgs.subcommand_inspect(args)
+
+
+def deserialize_swagger_api_config(data: dict) -> SwaggerConfig:
+    return SwaggerConfig().deserialize(data=data)
 
 
 def load_config(path: str) -> Optional[APIConfig]:
