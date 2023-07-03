@@ -357,19 +357,11 @@ class SubCmdInspect(BaseCommandProcessor):
                         print(f"  * Swagger API document: {swagger_one_api_param.name}")
                         print(f"  * Current config: {api_config.required}")
                         sys.exit(1)
-                    if swagger_one_api_param.value_type:
-                        is_incorrect: bool = False
-                        if swagger_one_api_param.value_type == "string" and api_config.value_type != "str":
-                            is_incorrect = True
-                        if swagger_one_api_param.value_type == "integer" and api_config.value_type != "int":
-                            is_incorrect = True
-                        if swagger_one_api_param.value_type == "boolean" and api_config.value_type != "bool":
-                            is_incorrect = True
-                        if is_incorrect:
-                            print(f"⚠️  Incorrect API parameter property *value_type*.")
-                            print(f"  * Swagger API document: {swagger_one_api_param.value_type}")
-                            print(f"  * Current config: {api_config.value_type}")
-                            sys.exit(1)
+                    if swagger_one_api_param.value_type != api_config.value_type:
+                        print(f"⚠️  Incorrect API parameter property *value_type*.")
+                        print(f"  * Swagger API document: {swagger_one_api_param.value_type}")
+                        print(f"  * Current config: {api_config.value_type}")
+                        sys.exit(1)
                     if swagger_one_api_param.default_value != api_config.default:
                         print(f"⚠️  Incorrect API parameter property *default*.")
                         print(f"  * Swagger API document: {swagger_one_api_param.default_value}")
