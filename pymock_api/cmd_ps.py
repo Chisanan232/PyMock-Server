@@ -330,10 +330,7 @@ class SubCmdInspect(BaseCommandProcessor):
         else:
             mocked_apis_path = list(map(lambda p: p.url, mocked_apis_info.values()))
 
-        pm: PoolManager = PoolManager()
-        resp: BaseHTTPResponse = pm.request(method="GET", url=args.swagger_doc_url)
-        swagger_api_doc: dict = resp.json()
-        swagger_api_doc_model = deserialize_swagger_api_config(data=swagger_api_doc)
+        swagger_api_doc_model = self._get_swagger_config(swagger_url=args.swagger_doc_url)
 
         for swagger_api_config in swagger_api_doc_model.paths:
             # Check API path
@@ -384,3 +381,9 @@ class SubCmdInspect(BaseCommandProcessor):
             api_resp = swagger_api_config.response
         print(f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.")
         sys.exit(0)
+
+    def _get_swagger_config(self, swagger_url: str) -> SwaggerConfig:
+        pm: PoolManager = PoolManager()
+        resp: BaseHTTPResponse = pm.request(method="GET", url=swagger_url)
+        swagger_api_doc: dict = resp.json()
+        return deserialize_swagger_api_config(data=swagger_api_doc)
