@@ -593,8 +593,7 @@ def _get_all_json(has_base_info: bool, config_type: str, exit_code: Union[str, i
         )
         expected_exit_code = exit_code if isinstance(exit_code, str) and exit_code.isdigit() else str(exit_code)
         for yaml_config_path in glob.glob(yaml_dir):
-            dummy_yaml = load_config(yaml_config_path)
-            one_test_scenario = (json_config_path, dummy_yaml, expected_exit_code)
+            one_test_scenario = (json_config_path, yaml_config_path, expected_exit_code)
             RESPONSE_JSON_PATHS_WITH_EX_CODE.append(one_test_scenario)
 
 
@@ -609,40 +608,40 @@ class TestSubCmdInspect(BaseCommandProcessorTestSpec):
         return SubCmdInspect()
 
     @pytest.mark.parametrize(
-        ("api_resp_path", "dummy_yaml", "expected_exit_code"),
+        ("api_resp_path", "dummy_yaml_path", "expected_exit_code"),
         RESPONSE_JSON_PATHS_WITH_EX_CODE,
     )
     def test_with_command_processor(
-        self, api_resp_path: str, dummy_yaml: APIConfig, expected_exit_code: str, object_under_test: Callable
+        self, api_resp_path: str, dummy_yaml_path: str, expected_exit_code: str, object_under_test: Callable
     ):
         kwargs = {
             "api_resp_path": api_resp_path,
-            "dummy_yaml": dummy_yaml,
+            "dummy_yaml_path": dummy_yaml_path,
             "expected_exit_code": expected_exit_code,
             "cmd_ps": object_under_test,
         }
         self._test_process(**kwargs)
 
     @pytest.mark.parametrize(
-        ("api_resp_path", "dummy_yaml", "expected_exit_code"),
+        ("api_resp_path", "dummy_yaml_path", "expected_exit_code"),
         RESPONSE_JSON_PATHS_WITH_EX_CODE,
     )
     def test_with_run_entry_point(
-        self, api_resp_path: str, dummy_yaml: APIConfig, expected_exit_code: str, entry_point_under_test: Callable
+        self, api_resp_path: str, dummy_yaml_path: str, expected_exit_code: str, entry_point_under_test: Callable
     ):
         kwargs = {
             "api_resp_path": api_resp_path,
-            "dummy_yaml": dummy_yaml,
+            "dummy_yaml_path": dummy_yaml_path,
             "expected_exit_code": expected_exit_code,
             "cmd_ps": entry_point_under_test,
         }
         self._test_process(**kwargs)
 
-    def _test_process(self, api_resp_path: str, dummy_yaml: APIConfig, expected_exit_code: str, cmd_ps: Callable):
+    def _test_process(self, api_resp_path: str, dummy_yaml_path: str, expected_exit_code: str, cmd_ps: Callable):
         mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Inspect)
         with patch("pymock_api.cmd_ps.load_config") as mock_load_config:
             with patch.object(PoolManager, "request") as mock_urllib3_request:
-                mock_load_config.return_value = dummy_yaml
+                mock_load_config.return_value = load_config(dummy_yaml_path)
                 with open(api_resp_path, "r", encoding="utf-8") as file_stream:
                     mock_urllib3_request.return_value = HTTPResponse(body=bytes(file_stream.read(), "utf-8"))
 

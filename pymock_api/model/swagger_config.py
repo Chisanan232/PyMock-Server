@@ -22,10 +22,11 @@ class BaseSwaggerDataModel(metaclass=ABCMeta):
 
 
 class APIParameter(BaseSwaggerDataModel):
-    name: str = ""
-    required: bool = False
-    value_type: str = ""
-    default_value: Any = None
+    def __init__(self):
+        self.name: str = ""
+        self.required: bool = False
+        self.value_type: str = ""
+        self.default_value: Any = None
 
     def deserialize(self, data: Dict) -> "APIParameter":
         self.name = data["name"]
@@ -36,10 +37,11 @@ class APIParameter(BaseSwaggerDataModel):
 
 
 class API(BaseSwaggerDataModel):
-    path: str = ""
-    http_method: str = ""
-    parameters: List[APIParameter] = []
-    response: Dict = {}
+    def __init__(self):
+        self.path: str = ""
+        self.http_method: str = ""
+        self.parameters: List[APIParameter] = []
+        self.response: Dict = {}
 
     def deserialize(self, data: Dict) -> "API":
         for http_method, http_info in data.items():
@@ -51,7 +53,8 @@ class API(BaseSwaggerDataModel):
 
 
 class SwaggerConfig(BaseSwaggerDataModel):
-    paths: List[API] = []
+    def __init__(self):
+        self.paths: List[API] = []
 
     def deserialize(self, data: Dict) -> "SwaggerConfig":
         apis: dict = data["paths"]

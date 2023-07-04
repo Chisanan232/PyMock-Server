@@ -19,7 +19,9 @@ from .model import (
     SubcmdConfigArguments,
     SubcmdInspectArguments,
     SubcmdRunArguments,
+    SwaggerConfig,
     deserialize_args,
+    deserialize_swagger_api_config,
     load_config,
 )
 from .model._sample import Sample_Config_Value
@@ -328,56 +330,52 @@ class SubCmdInspect(BaseCommandProcessor):
         else:
             mocked_apis_path = list(map(lambda p: p.url, mocked_apis_info.values()))
 
-        pm: PoolManager = PoolManager()
-        resp: BaseHTTPResponse = pm.request(method="GET", url=args.swagger_doc_url)
-        swagger_api_doc: dict = resp.json()
-        for swagger_api_path, swagger_api_props in swagger_api_doc["paths"].items():
+        swagger_api_doc_model = self._get_swagger_config(swagger_url=args.swagger_doc_url)
+
+        for swagger_api_config in swagger_api_doc_model.paths:
             # Check API path
-            if args.check_api_path and swagger_api_path not in mocked_apis_path:
-                print(f"⚠️  Miss API. Path: {swagger_api_path}")
+            if args.check_api_path and swagger_api_config.path not in mocked_apis_path:
+                print(f"⚠️  Miss API. Path: {swagger_api_config.path}")
                 sys.exit(1)
 
-            for swagger_one_api_method, swagger_one_api_props in cast(dict, swagger_api_props).items():
-                api_http_config = current_api_config.apis.get_api_config_by_url(swagger_api_path, base=base_info).http  # type: ignore[union-attr]
+            api_http_config = current_api_config.apis.get_api_config_by_url(swagger_api_config.path, base=base_info).http  # type: ignore[union-attr]
 
-                # Check API HTTP method
-                if args.check_api_http_method and str(swagger_one_api_method).upper() != api_http_config.request.method.upper():  # type: ignore[union-attr]
-                    print(f"⚠️  Miss the API with HTTP method {swagger_one_api_method}")
-                    sys.exit(1)
+            # Check API HTTP method
+            if args.check_api_http_method and str(swagger_api_config.http_method).upper() != api_http_config.request.method.upper():  # type: ignore[union-attr]
+                print(f"⚠️  Miss the API with HTTP method {swagger_api_config.http_method}")
+                sys.exit(1)
 
-                # Check API parameters
-                if args.check_api_parameters:
-                    for swagger_one_api_param in swagger_one_api_props["parameters"]:
-                        api_config = api_http_config.request.get_one_param_by_name(swagger_one_api_param["name"])  # type: ignore[union-attr]
-                        if api_config is None:
-                            print(f"⚠️  Miss the API parameter {swagger_one_api_param['name']}.")
-                            sys.exit(1)
-                        if swagger_one_api_param["required"] is not api_config.required:
-                            print(f"⚠️  Incorrect API parameter property *required*.")
-                            print(f"  * Swagger API document: {swagger_one_api_param['name']}")
-                            print(f"  * Current config: {api_config.required}")
-                            sys.exit(1)
-                        if swagger_one_api_param["schema"]["type"]:
-                            is_incorrect: bool = False
-                            if swagger_one_api_param["schema"]["type"] == "string" and api_config.value_type != "str":
-                                is_incorrect = True
-                            if swagger_one_api_param["schema"]["type"] == "integer" and api_config.value_type != "int":
-                                is_incorrect = True
-                            if swagger_one_api_param["schema"]["type"] == "boolean" and api_config.value_type != "bool":
-                                is_incorrect = True
-                            if is_incorrect:
-                                print(f"⚠️  Incorrect API parameter property *value_type*.")
-                                print(f"  * Swagger API document: {swagger_one_api_param['schema']['type']}")
-                                print(f"  * Current config: {api_config.value_type}")
-                                sys.exit(1)
-                        if swagger_one_api_param["schema"]["default"] != api_config.default:
-                            print(f"⚠️  Incorrect API parameter property *default*.")
-                            print(f"  * Swagger API document: {swagger_one_api_param['schema']['default']}")
-                            print(f"  * Current config: {api_config.default}")
-                            sys.exit(1)
+            # Check API parameters
+            if args.check_api_parameters:
+                for swagger_one_api_param in swagger_api_config.parameters:
+                    api_config = api_http_config.request.get_one_param_by_name(swagger_one_api_param.name)  # type: ignore[union-attr]
+                    if api_config is None:
+                        print(f"⚠️  Miss the API parameter {swagger_one_api_param.name}.")
+                        sys.exit(1)
+                    if swagger_one_api_param.required is not api_config.required:
+                        print(f"⚠️  Incorrect API parameter property *required*.")
+                        print(f"  * Swagger API document: {swagger_one_api_param.name}")
+                        print(f"  * Current config: {api_config.required}")
+                        sys.exit(1)
+                    if swagger_one_api_param.value_type != api_config.value_type:
+                        print(f"⚠️  Incorrect API parameter property *value_type*.")
+                        print(f"  * Swagger API document: {swagger_one_api_param.value_type}")
+                        print(f"  * Current config: {api_config.value_type}")
+                        sys.exit(1)
+                    if swagger_one_api_param.default_value != api_config.default:
+                        print(f"⚠️  Incorrect API parameter property *default*.")
+                        print(f"  * Swagger API document: {swagger_one_api_param.default_value}")
+                        print(f"  * Current config: {api_config.default}")
+                        sys.exit(1)
 
-                # TODO: Implement the checking detail of HTTP response
-                # Check API response
-                api_resp = swagger_one_api_props["responses"]["200"]
+            # TODO: Implement the checking detail of HTTP response
+            # Check API response
+            api_resp = swagger_api_config.response
         print(f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.")
         sys.exit(0)
+
+    def _get_swagger_config(self, swagger_url: str) -> SwaggerConfig:
+        pm: PoolManager = PoolManager()
+        resp: BaseHTTPResponse = pm.request(method="GET", url=swagger_url)
+        swagger_api_doc: dict = resp.json()
+        return deserialize_swagger_api_config(data=swagger_api_doc)
