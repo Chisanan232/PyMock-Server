@@ -342,7 +342,7 @@ class SubCmdInspect(BaseCommandProcessor):
 
             # Check API HTTP method
             if args.check_api_http_method and str(swagger_api_config.http_method).upper() != api_http_config.request.method.upper():  # type: ignore[union-attr]
-                print(f"⚠️  Miss the API with HTTP method {swagger_api_config.http_method}")
+                print(f"⚠️  Miss the API {swagger_api_config.path} with HTTP method {swagger_api_config.http_method}.")
                 sys.exit(1)
 
             # Check API parameters
@@ -353,17 +353,23 @@ class SubCmdInspect(BaseCommandProcessor):
                         print(f"⚠️  Miss the API parameter {swagger_one_api_param.name}.")
                         sys.exit(1)
                     if swagger_one_api_param.required is not api_config.required:
-                        print(f"⚠️  Incorrect API parameter property *required*.")
+                        print(
+                            f"⚠️  Incorrect API parameter property *required* of API '{swagger_api_config.http_method} {swagger_api_config.path}'."
+                        )
                         print(f"  * Swagger API document: {swagger_one_api_param.name}")
                         print(f"  * Current config: {api_config.required}")
                         sys.exit(1)
                     if swagger_one_api_param.value_type != api_config.value_type:
-                        print(f"⚠️  Incorrect API parameter property *value_type*.")
+                        print(
+                            f"⚠️  Incorrect API parameter property *value_type* of API '{swagger_api_config.http_method} {swagger_api_config.path}'."
+                        )
                         print(f"  * Swagger API document: {swagger_one_api_param.value_type}")
                         print(f"  * Current config: {api_config.value_type}")
                         sys.exit(1)
                     if swagger_one_api_param.default_value != api_config.default:
-                        print(f"⚠️  Incorrect API parameter property *default*.")
+                        print(
+                            f"⚠️  Incorrect API parameter property *default* of API '{swagger_api_config.http_method} {swagger_api_config.path}'."
+                        )
                         print(f"  * Swagger API document: {swagger_one_api_param.default_value}")
                         print(f"  * Current config: {api_config.default}")
                         sys.exit(1)
