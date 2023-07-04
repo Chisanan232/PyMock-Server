@@ -25,6 +25,9 @@ from .model import (
     load_config,
 )
 from .model._sample import Sample_Config_Value
+from .model.api_config import APIParameter as MockedAPIParameter
+from .model.swagger_config import API as SwaggerAPI
+from .model.swagger_config import APIParameter as SwaggerAPIParameter
 from .server import BaseSGIServer, setup_asgi, setup_wsgi
 
 _COMMAND_CHAIN: List[Type["CommandProcessor"]] = []
@@ -353,26 +356,26 @@ class SubCmdInspect(BaseCommandProcessor):
                         print(f"⚠️  Miss the API parameter {swagger_one_api_param.name}.")
                         sys.exit(1)
                     if swagger_one_api_param.required is not api_config.required:
-                        print(
-                            f"⚠️  Incorrect API parameter property *required* of API '{swagger_api_config.http_method} {swagger_api_config.path}'."
+                        self._chk_api_params_error_log(
+                            api_config=api_config,
+                            param="required",
+                            swagger_api_config=swagger_api_config,
+                            swagger_api_param=swagger_one_api_param,
                         )
-                        print(f"  * Swagger API document: {swagger_one_api_param.name}")
-                        print(f"  * Current config: {api_config.required}")
-                        sys.exit(1)
                     if swagger_one_api_param.value_type != api_config.value_type:
-                        print(
-                            f"⚠️  Incorrect API parameter property *value_type* of API '{swagger_api_config.http_method} {swagger_api_config.path}'."
+                        self._chk_api_params_error_log(
+                            api_config=api_config,
+                            param="value_type",
+                            swagger_api_config=swagger_api_config,
+                            swagger_api_param=swagger_one_api_param,
                         )
-                        print(f"  * Swagger API document: {swagger_one_api_param.value_type}")
-                        print(f"  * Current config: {api_config.value_type}")
-                        sys.exit(1)
-                    if swagger_one_api_param.default_value != api_config.default:
-                        print(
-                            f"⚠️  Incorrect API parameter property *default* of API '{swagger_api_config.http_method} {swagger_api_config.path}'."
+                    if swagger_one_api_param.default != api_config.default:
+                        self._chk_api_params_error_log(
+                            api_config=api_config,
+                            param="default",
+                            swagger_api_config=swagger_api_config,
+                            swagger_api_param=swagger_one_api_param,
                         )
-                        print(f"  * Swagger API document: {swagger_one_api_param.default_value}")
-                        print(f"  * Current config: {api_config.default}")
-                        sys.exit(1)
 
             # TODO: Implement the checking detail of HTTP response
             # Check API response
@@ -385,3 +388,18 @@ class SubCmdInspect(BaseCommandProcessor):
         resp: BaseHTTPResponse = pm.request(method="GET", url=swagger_url)
         swagger_api_doc: dict = resp.json()
         return deserialize_swagger_api_config(data=swagger_api_doc)
+
+    def _chk_api_params_error_log(
+        self,
+        api_config: MockedAPIParameter,
+        param: str,
+        swagger_api_config: SwaggerAPI,
+        swagger_api_param: SwaggerAPIParameter,
+    ) -> None:
+        print(
+            f"⚠️  Incorrect API parameter property *{param}* of "
+            f"API '{swagger_api_config.http_method} {swagger_api_config.path}'."
+        )
+        print(f"  * Swagger API document: {getattr(swagger_api_param, param)}")
+        print(f"  * Current config: {getattr(api_config, param)}")
+        sys.exit(1)
