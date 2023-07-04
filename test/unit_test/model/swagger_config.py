@@ -96,4 +96,4 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
                 assert one_swagger_api_param is not None
                 assert api_param.required == one_swagger_api_param["required"]
                 assert api_param.value_type == convert_js_type(one_swagger_api_param["schema"]["type"])
-                assert api_param.default_value == one_swagger_api_param["schema"]["default"]
+                assert api_param.default == one_swagger_api_param["schema"]["default"]
