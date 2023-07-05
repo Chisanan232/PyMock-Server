@@ -11,6 +11,7 @@ from typing import Any, Callable, List, Optional, Tuple, Type, cast
 from urllib3 import BaseHTTPResponse, PoolManager
 
 from ._utils import YAML, import_web_lib
+from ._utils.api_client import URLLibHTTPClient
 from .cmd import MockAPICommandParser, SubCommand
 from .exceptions import InvalidAppType, NoValidWebLibrary
 from .model import (
@@ -321,6 +322,10 @@ class SubCmdCheck(BaseCommandProcessor):
 class SubCmdInspect(BaseCommandProcessor):
     responsible_subcommand = SubCommand.Inspect
 
+    def __init__(self):
+        super().__init__()
+        self._api_client = URLLibHTTPClient()
+
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:
         return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
 
@@ -384,9 +389,7 @@ class SubCmdInspect(BaseCommandProcessor):
         sys.exit(0)
 
     def _get_swagger_config(self, swagger_url: str) -> SwaggerConfig:
-        pm: PoolManager = PoolManager()
-        resp: BaseHTTPResponse = pm.request(method="GET", url=swagger_url)
-        swagger_api_doc: dict = resp.json()
+        swagger_api_doc: dict = self._api_client.request(method="GET", url=swagger_url)
         return deserialize_swagger_api_config(data=swagger_api_doc)
 
     def _chk_fail_error_log(self, log: str) -> None:
