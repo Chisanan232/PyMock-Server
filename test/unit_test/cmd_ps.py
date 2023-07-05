@@ -666,12 +666,12 @@ class TestSubCmdInspect(BaseCommandProcessorTestSpec):
 
     @pytest.mark.parametrize("swagger_config_response", RESPONSE_JSON_PATHS)
     def test__get_swagger_config(self, swagger_config_response: str, cmd_ps: SubCmdInspect):
-        with patch.object(PoolManager, "request") as mock_urllib3_request:
+        with patch("pymock_api.cmd_ps.URLLibHTTPClient.request") as mock_api_client_request:
             with open(swagger_config_response, "r", encoding="utf-8") as file_stream:
-                mock_urllib3_request.return_value = HTTPResponse(body=bytes(file_stream.read(), "utf-8"))
+                mock_api_client_request.return_value = json.loads(file_stream.read())
 
             cmd_ps._get_swagger_config(_Swagger_API_Document_URL)
-            mock_urllib3_request.assert_called_once_with(method="GET", url=_Swagger_API_Document_URL)
+            mock_api_client_request.assert_called_once_with(method="GET", url=_Swagger_API_Document_URL)
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
