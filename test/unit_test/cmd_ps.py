@@ -5,11 +5,10 @@ import pathlib
 import re
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, Namespace
-from typing import Callable, List, Optional, Tuple, Type, Union
+from typing import Callable, List, Optional, Type, Union
 from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
-from urllib3 import HTTPResponse, PoolManager
 
 from pymock_api._utils.file_opt import YAML
 from pymock_api.cmd import SubCommand, get_all_subcommands
@@ -24,7 +23,6 @@ from pymock_api.cmd_ps import (
     run_command_chain,
 )
 from pymock_api.model import (
-    APIConfig,
     ParserArguments,
     SubcmdCheckArguments,
     SubcmdConfigArguments,

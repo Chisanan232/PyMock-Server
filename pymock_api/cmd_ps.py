@@ -4,11 +4,8 @@ import os
 import pathlib
 import re
 import sys
-import textwrap
 from argparse import ArgumentParser, Namespace
-from typing import Any, Callable, List, Optional, Tuple, Type, cast
-
-from urllib3 import BaseHTTPResponse, PoolManager
+from typing import Any, Callable, List, Optional, Tuple, Type
 
 from ._utils import YAML, import_web_lib
 from ._utils.api_client import URLLibHTTPClient
