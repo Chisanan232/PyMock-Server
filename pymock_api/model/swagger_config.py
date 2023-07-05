@@ -26,13 +26,13 @@ class APIParameter(BaseSwaggerDataModel):
         self.name: str = ""
         self.required: bool = False
         self.value_type: str = ""
-        self.default_value: Any = None
+        self.default: Any = None
 
     def deserialize(self, data: Dict) -> "APIParameter":
         self.name = data["name"]
         self.required = data["required"]
         self.value_type = convert_js_type(data["schema"]["type"])
-        self.default_value = data["schema"]["default"]
+        self.default = data["schema"]["default"]
         return self
 
 

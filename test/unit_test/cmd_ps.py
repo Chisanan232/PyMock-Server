@@ -1,14 +1,14 @@
 import glob
+import json
 import os.path
 import pathlib
 import re
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, Namespace
-from typing import Callable, List, Optional, Tuple, Type, Union
+from typing import Callable, List, Optional, Type, Union
 from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
-from urllib3 import HTTPResponse, PoolManager
 
 from pymock_api._utils.file_opt import YAML
 from pymock_api.cmd import SubCommand, get_all_subcommands
@@ -23,12 +23,12 @@ from pymock_api.cmd_ps import (
     run_command_chain,
 )
 from pymock_api.model import (
-    APIConfig,
     ParserArguments,
     SubcmdCheckArguments,
     SubcmdConfigArguments,
     SubcmdInspectArguments,
     SubcmdRunArguments,
+    deserialize_swagger_api_config,
     load_config,
 )
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
@@ -578,6 +578,7 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
 
 
 RESPONSE_JSON_PATHS_WITH_EX_CODE: List[tuple] = []
+RESPONSE_JSON_PATHS: List[tuple] = []
 
 
 def _get_all_json(has_base_info: bool, config_type: str, exit_code: Union[str, int]) -> None:
@@ -597,9 +598,19 @@ def _get_all_json(has_base_info: bool, config_type: str, exit_code: Union[str, i
             RESPONSE_JSON_PATHS_WITH_EX_CODE.append(one_test_scenario)
 
 
+def _get_all_swagger_config() -> None:
+    json_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "data", "inspect_test", "api_response", "*.json")
+    global RESPONSE_JSON_PATHS
+    for json_config_path in glob.glob(json_dir):
+        one_test_scenario = json_config_path
+        RESPONSE_JSON_PATHS.append(one_test_scenario)
+
+
 _get_all_json(has_base_info=False, config_type="valid", exit_code=0)
 _get_all_json(has_base_info=True, config_type="valid", exit_code=0)
 _get_all_json(has_base_info=False, config_type="invalid", exit_code=1)
+
+_get_all_swagger_config()
 
 
 class TestSubCmdInspect(BaseCommandProcessorTestSpec):
@@ -640,15 +651,25 @@ class TestSubCmdInspect(BaseCommandProcessorTestSpec):
     def _test_process(self, api_resp_path: str, dummy_yaml_path: str, expected_exit_code: str, cmd_ps: Callable):
         mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Inspect)
         with patch("pymock_api.cmd_ps.load_config") as mock_load_config:
-            with patch.object(PoolManager, "request") as mock_urllib3_request:
-                mock_load_config.return_value = load_config(dummy_yaml_path)
+            mock_load_config.return_value = load_config(dummy_yaml_path)
+            with patch.object(SubCmdInspect, "_get_swagger_config") as mock_get_swagger_config:
                 with open(api_resp_path, "r", encoding="utf-8") as file_stream:
-                    mock_urllib3_request.return_value = HTTPResponse(body=bytes(file_stream.read(), "utf-8"))
+                    mock_get_swagger_config.return_value = deserialize_swagger_api_config(
+                        json.loads(file_stream.read())
+                    )
 
                 with pytest.raises(SystemExit) as exc_info:
                     cmd_ps(mock_parser_arg)
                 assert expected_exit_code in str(exc_info.value)
-                mock_urllib3_request.assert_called_once_with(method="GET", url=_Swagger_API_Document_URL)
+
+    @pytest.mark.parametrize("swagger_config_response", RESPONSE_JSON_PATHS)
+    def test__get_swagger_config(self, swagger_config_response: str, cmd_ps: SubCmdInspect):
+        with patch("pymock_api.cmd_ps.URLLibHTTPClient.request") as mock_api_client_request:
+            with open(swagger_config_response, "r", encoding="utf-8") as file_stream:
+                mock_api_client_request.return_value = json.loads(file_stream.read())
+
+            cmd_ps._get_swagger_config(_Swagger_API_Document_URL)
+            mock_api_client_request.assert_called_once_with(method="GET", url=_Swagger_API_Document_URL)
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()

@@ -18,7 +18,7 @@ import re
 import sys
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple
 
 from .__pkg_info__ import __version__
 
