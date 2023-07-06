@@ -58,7 +58,9 @@ _Fake_Amt: int = 1
 
 
 def _given_parser_args(
-    subcommand: str = None, app_type: str = None, config_path: str = None
+    subcommand: str = None,
+    app_type: str = None,
+    config_path: str = None,
 ) -> Union[SubcmdRunArguments, SubcmdConfigArguments, SubcmdCheckArguments, SubcmdInspectArguments, ParserArguments]:
     if subcommand == "run":
         return SubcmdRunArguments(
@@ -86,6 +88,7 @@ def _given_parser_args(
             config_path=_Test_Config,
             subparser_name=subcommand,
             swagger_doc_url=_Swagger_API_Document_URL,
+            stop_if_fail=True,
             check_api_path=True,
             check_api_parameters=True,
             check_api_http_method=True,
@@ -676,6 +679,7 @@ class TestSubCmdInspect(BaseCommandProcessorTestSpec):
         args_namespace.subcommand = SubCommand.Inspect
         args_namespace.config_path = _Test_Config
         args_namespace.swagger_doc_url = "http://127.0.0.1:8080/docs"
+        args_namespace.stop_if_fail = True
         args_namespace.check_api_path = True
         args_namespace.check_api_http_method = True
         args_namespace.check_api_parameters = True
