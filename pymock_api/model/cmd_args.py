@@ -35,6 +35,7 @@ class SubcmdCheckArguments(ParserArguments):
 class SubcmdInspectArguments(ParserArguments):
     config_path: str
     swagger_doc_url: str
+    stop_if_fail: bool
     check_api_path: bool
     check_api_http_method: bool
     check_api_parameters: bool
@@ -80,6 +81,7 @@ class DeserializeParsedArgs:
             subparser_name=args.subcommand,
             config_path=args.config_path,
             swagger_doc_url=args.swagger_doc_url,
+            stop_if_fail=args.stop_if_fail,
             check_api_path=args.check_api_path,
             check_api_http_method=args.check_api_http_method,
             check_api_parameters=args.check_api_parameters,
