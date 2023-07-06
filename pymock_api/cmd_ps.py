@@ -322,6 +322,7 @@ class SubCmdInspect(BaseCommandProcessor):
     def __init__(self):
         super().__init__()
         self._api_client = URLLibHTTPClient()
+        self._config_is_wrong: bool = False
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:
         return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
@@ -341,14 +342,18 @@ class SubCmdInspect(BaseCommandProcessor):
         for swagger_api_config in swagger_api_doc_model.paths:
             # Check API path
             if args.check_api_path and swagger_api_config.path not in mocked_apis_path:
-                self._chk_fail_error_log(f"⚠️  Miss API. Path: {swagger_api_config.path}")
+                self._chk_fail_error_log(
+                    f"⚠️  Miss API. Path: {swagger_api_config.path}",
+                    stop_if_fail=args.stop_if_fail,
+                )
 
             api_http_config = current_api_config.apis.get_api_config_by_url(swagger_api_config.path, base=base_info).http  # type: ignore[union-attr]
 
             # Check API HTTP method
             if args.check_api_http_method and str(swagger_api_config.http_method).upper() != api_http_config.request.method.upper():  # type: ignore[union-attr]
                 self._chk_fail_error_log(
-                    f"⚠️  Miss the API {swagger_api_config.path} with HTTP method {swagger_api_config.http_method}."
+                    f"⚠️  Miss the API {swagger_api_config.path} with HTTP method {swagger_api_config.http_method}.",
+                    stop_if_fail=args.stop_if_fail,
                 )
 
             # Check API parameters
@@ -356,13 +361,17 @@ class SubCmdInspect(BaseCommandProcessor):
                 for swagger_one_api_param in swagger_api_config.parameters:
                     api_param_config = api_http_config.request.get_one_param_by_name(swagger_one_api_param.name)  # type: ignore[union-attr]
                     if api_param_config is None:
-                        self._chk_fail_error_log(f"⚠️  Miss the API parameter {swagger_one_api_param.name}.")
+                        self._chk_fail_error_log(
+                            f"⚠️  Miss the API parameter {swagger_one_api_param.name}.",
+                            stop_if_fail=args.stop_if_fail,
+                        )
                     if swagger_one_api_param.required is not api_param_config.required:  # type: ignore[union-attr]
                         self._chk_api_params_error_log(
                             api_config=api_param_config,  # type: ignore[arg-type]
                             param="required",
                             swagger_api_config=swagger_api_config,
                             swagger_api_param=swagger_one_api_param,
+                            stop_if_fail=args.stop_if_fail,
                         )
                     if swagger_one_api_param.value_type != api_param_config.value_type:  # type: ignore[union-attr]
                         self._chk_api_params_error_log(
@@ -370,6 +379,7 @@ class SubCmdInspect(BaseCommandProcessor):
                             param="value_type",
                             swagger_api_config=swagger_api_config,
                             swagger_api_param=swagger_one_api_param,
+                            stop_if_fail=args.stop_if_fail,
                         )
                     if swagger_one_api_param.default != api_param_config.default:  # type: ignore[union-attr]
                         self._chk_api_params_error_log(
@@ -377,21 +387,25 @@ class SubCmdInspect(BaseCommandProcessor):
                             param="default",
                             swagger_api_config=swagger_api_config,
                             swagger_api_param=swagger_one_api_param,
+                            stop_if_fail=args.stop_if_fail,
                         )
 
             # TODO: Implement the checking detail of HTTP response
             # Check API response
             api_resp = swagger_api_config.response
-        print(f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.")
-        sys.exit(0)
+
+        if self._config_is_wrong:
+            print(
+                f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}."
+            )
+            sys.exit(1)
+        else:
+            print(f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.")
+            sys.exit(0)
 
     def _get_swagger_config(self, swagger_url: str) -> SwaggerConfig:
         swagger_api_doc: dict = self._api_client.request(method="GET", url=swagger_url)
         return deserialize_swagger_api_config(data=swagger_api_doc)
-
-    def _chk_fail_error_log(self, log: str) -> None:
-        print(log)
-        sys.exit(1)
 
     def _chk_api_params_error_log(
         self,
@@ -399,6 +413,7 @@ class SubCmdInspect(BaseCommandProcessor):
         param: str,
         swagger_api_config: SwaggerAPI,
         swagger_api_param: SwaggerAPIParameter,
+        stop_if_fail: bool,
     ) -> None:
         which_property_error = (
             f"⚠️  Incorrect API parameter property *{param}* of "
@@ -406,4 +421,12 @@ class SubCmdInspect(BaseCommandProcessor):
         )
         swagger_api_config_value = f"\n  * Swagger API document: {getattr(swagger_api_param, param)}"
         config_value = f"\n  * Current config: {getattr(api_config, param)}"
-        self._chk_fail_error_log(log=which_property_error + swagger_api_config_value + config_value)
+        self._chk_fail_error_log(
+            log=which_property_error + swagger_api_config_value + config_value, stop_if_fail=stop_if_fail
+        )
+
+    def _chk_fail_error_log(self, log: str, stop_if_fail: bool) -> None:
+        print(log)
+        self._config_is_wrong = True
+        if stop_if_fail:
+            sys.exit(1)
