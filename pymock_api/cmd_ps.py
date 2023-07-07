@@ -316,7 +316,7 @@ class SubCmdCheck(BaseCommandProcessor):
                 valid_callback(config_key, config_value, criteria)
 
 
-class SubCmdInspect(BaseCommandProcessor):
+class SubCmdInspect(SubCmdCheck):
     responsible_subcommand = SubCommand.Inspect
 
     def __init__(self):
@@ -324,14 +324,27 @@ class SubCmdInspect(BaseCommandProcessor):
         self._api_client = URLLibHTTPClient()
         self._config_is_wrong: bool = False
 
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:  # type: ignore[override]
         return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
 
-    def _run(self, args: SubcmdInspectArguments) -> None:
+    def _run(self, args: SubcmdInspectArguments) -> None:  # type: ignore[override]
         current_api_config = load_config(path=args.config_path)
-        assert current_api_config, "It doesn't permit the configuration content to be empty."
+        # assert current_api_config, "It doesn't permit the configuration content to be empty."
+        super()._run(
+            args=SubcmdCheckArguments(subparser_name=super().responsible_subcommand, config_path=args.config_path),
+        )
+        # if current_api_config.apis is None:
+        #     self._chk_fail_error_log(
+        #         "❌️  The configuration content is empty.",
+        #         stop_if_fail=args.stop_if_fail,
+        #     )
         base_info = current_api_config.apis.base  # type: ignore[union-attr]
         mocked_apis_info = current_api_config.apis.apis  # type: ignore[union-attr]
+        # if not mocked_apis_info:
+        #     self._chk_fail_error_log(
+        #         "❌️  Not exist any API settings for mocking.",
+        #         stop_if_fail=args.stop_if_fail,
+        #     )
         if base_info:
             mocked_apis_path = list(map(lambda p: f"{base_info.url}{p.url}", mocked_apis_info.values()))
         else:
@@ -347,9 +360,25 @@ class SubCmdInspect(BaseCommandProcessor):
                     stop_if_fail=args.stop_if_fail,
                 )
 
-            api_http_config = current_api_config.apis.get_api_config_by_url(swagger_api_config.path, base=base_info).http  # type: ignore[union-attr]
+            mocked_api_config = current_api_config.apis.get_api_config_by_url(swagger_api_config.path, base=base_info)  # type: ignore[union-attr]
+            # if mocked_api_config is None:
+            #     self._chk_fail_error_log(
+            #         f"❌️  Not exist the mocking settings of API '{swagger_api_config.http_method} {swagger_api_config.path}'.",
+            #         stop_if_fail=args.stop_if_fail,
+            #     )
+            api_http_config = mocked_api_config.http  # type: ignore[union-attr]
+            # if api_http_config is None:
+            #     self._chk_fail_error_log(
+            #         f"❌️  Not exist the HTTP settings of API '{swagger_api_config.http_method} {swagger_api_config.path}'.",
+            #         stop_if_fail=args.stop_if_fail,
+            #     )
 
             # Check API HTTP method
+            # if api_http_config.request is None:  # type: ignore[union-attr]
+            #     self._chk_fail_error_log(
+            #         f"❌️  Not exist the HTTP request settings of API '{swagger_api_config.http_method} {swagger_api_config.path}'.",
+            #         stop_if_fail=args.stop_if_fail,
+            #     )
             if args.check_api_http_method and str(swagger_api_config.http_method).upper() != api_http_config.request.method.upper():  # type: ignore[union-attr]
                 self._chk_fail_error_log(
                     f"⚠️  Miss the API {swagger_api_config.path} with HTTP method {swagger_api_config.http_method}.",
