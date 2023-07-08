@@ -196,14 +196,20 @@ class SubCmdConfig(BaseCommandProcessor):
 class SubCmdCheck(BaseCommandProcessor):
     responsible_subcommand = SubCommand.Check
 
+    def __init__(self):
+        super().__init__()
+        self._stop_if_fail: Optional[bool] = None
+        self._config_is_wrong: bool = False
+
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdCheckArguments:
         return deserialize_args.subcmd_check(self._parse_cmd_arguments(parser, cmd_args))
 
     def _run(self, args: SubcmdCheckArguments) -> None:
+        self._stop_if_fail = args.stop_if_fail
         api_config: Optional[APIConfig] = load_config(path=args.config_path)
 
         # # Check whether it has anything in configuration or not
-        SubCmdCheck._setting_should_not_be_none(
+        self._setting_should_not_be_none(
             config_key="",
             config_value=api_config,
             err_msg="Configuration is empty.",
@@ -211,7 +217,7 @@ class SubCmdCheck(BaseCommandProcessor):
 
         # # Check the section *mocked_apis* (first layer) of configuration
         assert api_config is not None
-        SubCmdCheck._setting_should_not_be_none(
+        self._setting_should_not_be_none(
             config_key="mocked_apis",
             config_value=api_config.apis,
         )
@@ -223,7 +229,7 @@ class SubCmdCheck(BaseCommandProcessor):
         # # Check each API content at first layer is *mocked_apis* of configuration
         for one_api_name, one_api_config in api_config.apis.apis.items():
             # # Check the section *mocked_apis.<API name>* (second layer) of configuration
-            SubCmdCheck._setting_should_not_be_none(
+            self._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}",
                 config_value=one_api_config,
             )
@@ -231,40 +237,40 @@ class SubCmdCheck(BaseCommandProcessor):
             # # Check the section *mocked_apis.<API name>.<property>* (third layer) of configuration (not include the
             # # layer about API name, should be the first layer under API name)
             assert one_api_config
-            SubCmdCheck._setting_should_not_be_none(
+            self._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}.url",
                 config_value=one_api_config.url,
             )
-            SubCmdCheck._setting_should_not_be_none(
+            self._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}.http",
                 config_value=one_api_config.http,
             )
 
             # # Check the section *mocked_apis.<API name>.http.<property>* (forth layer) of configuration
             assert one_api_config.http
-            SubCmdCheck._setting_should_not_be_none(
+            self._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}.http.request",
                 config_value=one_api_config.http.request,
             )
 
             assert one_api_config.http.request
-            SubCmdCheck._setting_should_not_be_none(
+            self._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}.http.request.method",
                 config_value=one_api_config.http.request.method,
             )
-            SubCmdCheck._setting_should_be_valid(
+            self._setting_should_be_valid(
                 config_key=f"mocked_apis.{one_api_name}.http.request.method",
                 config_value=one_api_config.http.request.method.upper(),
                 criteria=["GET", "POST", "PUT", "DELETE", "HEAD", "OPTION"],
             )
 
-            SubCmdCheck._setting_should_not_be_none(
+            self._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}.http.response",
                 config_value=one_api_config.http.response,
             )
 
             assert one_api_config.http.response
-            SubCmdCheck._setting_should_not_be_none(
+            self._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}.http.response.value",
                 config_value=one_api_config.http.response.value,
                 valid_callback=self._chk_response_value_validity,
@@ -285,13 +291,17 @@ class SubCmdCheck(BaseCommandProcessor):
             #     print("Data content format is incorrect")
             #     sys.exit(1)
 
-    @staticmethod
     def _setting_should_not_be_none(
-        config_key: str, config_value: Any, valid_callback: Optional[Callable] = None, err_msg: Optional[str] = None
+        self,
+        config_key: str,
+        config_value: Any,
+        valid_callback: Optional[Callable] = None,
+        err_msg: Optional[str] = None,
     ) -> None:
         if config_value is None:
             print(err_msg if err_msg else f"Configuration *{config_key}* content cannot be empty.")
-            sys.exit(1)
+            if self._stop_if_fail:
+                sys.exit(1)
         else:
             if valid_callback:
                 valid_callback(config_key, config_value)
