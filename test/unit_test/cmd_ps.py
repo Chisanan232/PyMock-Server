@@ -499,7 +499,7 @@ YAML_PATHS_WITH_EX_CODE: List[tuple] = []
 
 
 def _get_all_yaml(config_type: str, exit_code: Union[str, int]) -> None:
-    yaml_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "config", config_type, "*.yaml")
+    yaml_dir = os.path.join(str(pathlib.Path(__file__).parent.parent), "data", "config", config_type, "*.yaml")
     global YAML_PATHS_WITH_EX_CODE
     for yaml_config_path in glob.glob(yaml_dir):
         expected_exit_code = exit_code if isinstance(exit_code, str) and exit_code.isdigit() else str(exit_code)
