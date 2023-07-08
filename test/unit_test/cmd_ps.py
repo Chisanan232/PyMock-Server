@@ -506,8 +506,9 @@ def _get_all_yaml(config_type: str, exit_code: Union[str, int]) -> None:
     global YAML_PATHS_WITH_EX_CODE
     for yaml_config_path in glob.glob(yaml_dir):
         expected_exit_code = exit_code if isinstance(exit_code, str) and exit_code.isdigit() else str(exit_code)
-        one_test_scenario = (yaml_config_path, expected_exit_code)
-        YAML_PATHS_WITH_EX_CODE.append(one_test_scenario)
+        for stop_if_fail in (False, True):
+            one_test_scenario = (yaml_config_path, stop_if_fail, expected_exit_code)
+            YAML_PATHS_WITH_EX_CODE.append(one_test_scenario)
 
 
 def _expected_err_msg(file: str) -> str:
@@ -527,31 +528,39 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
         return SubCmdCheck()
 
     @pytest.mark.parametrize(
-        ("config_path", "expected_exit_code"),
+        ("config_path", "stop_if_fail", "expected_exit_code"),
         YAML_PATHS_WITH_EX_CODE,
     )
-    def test_with_command_processor(self, config_path: str, expected_exit_code: str, object_under_test: Callable):
+    def test_with_command_processor(
+        self, config_path: str, stop_if_fail: bool, expected_exit_code: str, object_under_test: Callable
+    ):
         kwargs = {
             "config_path": config_path,
+            "stop_if_fail": stop_if_fail,
             "expected_exit_code": expected_exit_code,
             "cmd_ps": object_under_test,
         }
         self._test_process(**kwargs)
 
     @pytest.mark.parametrize(
-        ("config_path", "expected_exit_code"),
+        ("config_path", "stop_if_fail", "expected_exit_code"),
         YAML_PATHS_WITH_EX_CODE,
     )
-    def test_with_run_entry_point(self, config_path: str, expected_exit_code: str, entry_point_under_test: Callable):
+    def test_with_run_entry_point(
+        self, config_path: str, stop_if_fail: bool, expected_exit_code: str, entry_point_under_test: Callable
+    ):
         kwargs = {
             "config_path": config_path,
+            "stop_if_fail": stop_if_fail,
             "expected_exit_code": expected_exit_code,
             "cmd_ps": entry_point_under_test,
         }
         self._test_process(**kwargs)
 
-    def _test_process(self, config_path: str, expected_exit_code: str, cmd_ps: Callable):
-        mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Check, config_path=config_path)
+    def _test_process(self, config_path: str, stop_if_fail: bool, expected_exit_code: str, cmd_ps: Callable):
+        mock_parser_arg = _given_parser_args(
+            subcommand=_Test_SubCommand_Check, config_path=config_path, stop_if_fail=stop_if_fail
+        )
         with pytest.raises(SystemExit) as exc_info:
             cmd_ps(mock_parser_arg)
         assert expected_exit_code in str(exc_info.value)
