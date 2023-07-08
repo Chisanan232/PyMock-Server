@@ -379,6 +379,15 @@ class ConfigPath(BaseSubCmdCheckOption):
     default_value: str = "api.yaml"
 
 
+class StopCheckIfFail(BaseSubCmdCheckOption):
+    cli_option: str = "--stop-if-fail"
+    name: str = "stop_if_fail"
+    help_description: str = "Stop program if it gets any fail in checking."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
 class UnderCheckConfigPath(BaseSubCmdInspectOption):
     cli_option: str = "-p, --config-path"
     name: str = "config_path"
