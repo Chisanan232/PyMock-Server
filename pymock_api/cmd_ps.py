@@ -224,57 +224,56 @@ class SubCmdCheck(BaseCommandProcessor):
 
         # NOTE: It's the normal behavior of code implementation. It must have something of property *MockAPIs.apis*
         # if it has anything within key *mocked_apis*.
-        assert api_config.apis and api_config.apis.apis
+        if api_config.apis and api_config.apis.apis:
+            # # Check each API content at first layer is *mocked_apis* of configuration
+            for one_api_name, one_api_config in api_config.apis.apis.items():
+                # # Check the section *mocked_apis.<API name>* (second layer) of configuration
+                self._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}",
+                    config_value=one_api_config,
+                )
 
-        # # Check each API content at first layer is *mocked_apis* of configuration
-        for one_api_name, one_api_config in api_config.apis.apis.items():
-            # # Check the section *mocked_apis.<API name>* (second layer) of configuration
-            self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}",
-                config_value=one_api_config,
-            )
+                # # Check the section *mocked_apis.<API name>.<property>* (third layer) of configuration (not include the
+                # # layer about API name, should be the first layer under API name)
+                assert one_api_config
+                self._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}.url",
+                    config_value=one_api_config.url,
+                )
+                self._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}.http",
+                    config_value=one_api_config.http,
+                )
 
-            # # Check the section *mocked_apis.<API name>.<property>* (third layer) of configuration (not include the
-            # # layer about API name, should be the first layer under API name)
-            assert one_api_config
-            self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}.url",
-                config_value=one_api_config.url,
-            )
-            self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}.http",
-                config_value=one_api_config.http,
-            )
+                # # Check the section *mocked_apis.<API name>.http.<property>* (forth layer) of configuration
+                assert one_api_config.http
+                self._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}.http.request",
+                    config_value=one_api_config.http.request,
+                )
 
-            # # Check the section *mocked_apis.<API name>.http.<property>* (forth layer) of configuration
-            assert one_api_config.http
-            self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}.http.request",
-                config_value=one_api_config.http.request,
-            )
+                assert one_api_config.http.request
+                self._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}.http.request.method",
+                    config_value=one_api_config.http.request.method,
+                )
+                self._setting_should_be_valid(
+                    config_key=f"mocked_apis.{one_api_name}.http.request.method",
+                    config_value=one_api_config.http.request.method.upper(),
+                    criteria=["GET", "POST", "PUT", "DELETE", "HEAD", "OPTION"],
+                )
 
-            assert one_api_config.http.request
-            self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}.http.request.method",
-                config_value=one_api_config.http.request.method,
-            )
-            self._setting_should_be_valid(
-                config_key=f"mocked_apis.{one_api_name}.http.request.method",
-                config_value=one_api_config.http.request.method.upper(),
-                criteria=["GET", "POST", "PUT", "DELETE", "HEAD", "OPTION"],
-            )
+                self._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}.http.response",
+                    config_value=one_api_config.http.response,
+                )
 
-            self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}.http.response",
-                config_value=one_api_config.http.response,
-            )
-
-            assert one_api_config.http.response
-            self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}.http.response.value",
-                config_value=one_api_config.http.response.value,
-                valid_callback=self._chk_response_value_validity,
-            )
+                assert one_api_config.http.response
+                self._setting_should_not_be_none(
+                    config_key=f"mocked_apis.{one_api_name}.http.response.value",
+                    config_value=one_api_config.http.response.value,
+                    valid_callback=self._chk_response_value_validity,
+                )
 
         if self._config_is_wrong:
             print("Configuration is invalid.")
