@@ -276,8 +276,12 @@ class SubCmdCheck(BaseCommandProcessor):
                 valid_callback=self._chk_response_value_validity,
             )
 
-        print("Configuration is valid.")
-        sys.exit(0)
+        if self._config_is_wrong:
+            print("Configuration is invalid.")
+            sys.exit(1)
+        else:
+            print("Configuration is valid.")
+            sys.exit(0)
 
     def _chk_response_value_validity(self, config_key: str, config_value: Any) -> None:
         try:
@@ -286,7 +290,9 @@ class SubCmdCheck(BaseCommandProcessor):
             if re.search(r"\w{1,32}\.\w{1,8}", config_value):
                 if not pathlib.Path(config_value).exists():
                     print("The file which is the response content doesn't exist.")
-                    sys.exit(1)
+                    self._config_is_wrong = True
+                    if self._stop_if_fail:
+                        sys.exit(1)
             # else:
             #     print("Data content format is incorrect")
             #     sys.exit(1)
@@ -300,6 +306,7 @@ class SubCmdCheck(BaseCommandProcessor):
     ) -> None:
         if config_value is None:
             print(err_msg if err_msg else f"Configuration *{config_key}* content cannot be empty.")
+            self._config_is_wrong = True
             if self._stop_if_fail:
                 sys.exit(1)
         else:
@@ -319,6 +326,7 @@ class SubCmdCheck(BaseCommandProcessor):
 
         if not is_valid:
             print(f"Configuration *{config_key}* value is invalid.")
+            self._config_is_wrong = True
             if self._stop_if_fail:
                 sys.exit(1)
         else:
