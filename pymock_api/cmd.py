@@ -392,6 +392,15 @@ class SwaggerDocURL(BaseSubCmdInspectOption):
     help_description: str = "The URL path of swagger style API document."
 
 
+class StopIfFail(BaseSubCmdInspectOption):
+    cli_option: str = "--stop-if-fail"
+    name: str = "stop_if_fail"
+    help_description: str = "Stop program if it gets any fail in checking."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
 class CheckEntireAPI(BaseSubCmdInspectOption):
     cli_option: str = "--check-entire-api"
     name: str = "check_entire_api"

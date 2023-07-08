@@ -1,4 +1,5 @@
 from argparse import Namespace
+from collections import namedtuple
 from typing import Type
 
 import pytest
@@ -26,6 +27,9 @@ from ..._values import (
     _Test_SubCommand_Run,
     _Workers_Amount,
 )
+
+check_attrs = namedtuple("check_attrs", ("entire_check", "api_path", "http_method", "api_parameters"))
+expected_check_attrs = namedtuple("expected_check_attrs", ("entire_check", "api_path", "http_method", "api_parameters"))
 
 
 class TestDeserialize:
@@ -80,42 +84,59 @@ class TestDeserialize:
 
     @pytest.mark.parametrize(
         (
-            "entire_check",
-            "check_api_path",
-            "check_http_method",
-            "check_api_parameters",
-            "expected_check_api_path",
-            "expected_check_http_method",
-            "expected_check_api_parameters",
+            "stop_if_fail",
+            "under_test_check_props",
+            "expected_check_props",
         ),
         [
-            (True, True, True, True, True, True, True),
-            (True, False, True, True, True, True, True),
-            (True, True, False, False, True, True, True),
-            (True, False, False, False, True, True, True),
-            (False, True, False, True, True, False, True),
-            (False, False, False, True, False, False, True),
+            (
+                True,
+                check_attrs(entire_check=True, api_path=True, http_method=True, api_parameters=True),
+                expected_check_attrs(entire_check=True, api_path=True, http_method=True, api_parameters=True),
+            ),
+            (
+                False,
+                check_attrs(entire_check=True, api_path=False, http_method=True, api_parameters=True),
+                expected_check_attrs(entire_check=True, api_path=True, http_method=True, api_parameters=True),
+            ),
+            (
+                True,
+                check_attrs(entire_check=True, api_path=False, http_method=False, api_parameters=True),
+                expected_check_attrs(entire_check=True, api_path=True, http_method=True, api_parameters=True),
+            ),
+            (
+                True,
+                check_attrs(entire_check=True, api_path=False, http_method=False, api_parameters=False),
+                expected_check_attrs(entire_check=True, api_path=True, http_method=True, api_parameters=True),
+            ),
+            (
+                False,
+                check_attrs(entire_check=False, api_path=True, http_method=False, api_parameters=True),
+                expected_check_attrs(entire_check=False, api_path=True, http_method=False, api_parameters=True),
+            ),
+            (
+                False,
+                check_attrs(entire_check=False, api_path=True, http_method=False, api_parameters=False),
+                expected_check_attrs(entire_check=False, api_path=True, http_method=False, api_parameters=False),
+            ),
         ],
     )
     def test_parser_subcommand_inspect_arguments(
         self,
-        entire_check: bool,
-        check_api_path: bool,
-        check_http_method: bool,
-        check_api_parameters: bool,
-        expected_check_api_path: bool,
-        expected_check_http_method: bool,
-        expected_check_api_parameters: bool,
+        stop_if_fail: bool,
+        under_test_check_props: check_attrs,
+        expected_check_props: expected_check_attrs,
         deserialize: Type[DeserializeParsedArgs],
     ):
         namespace_args = {
             "subcommand": _Test_SubCommand_Inspect,
             "config_path": _Test_Config,
             "swagger_doc_url": _Swagger_API_Document_URL,
-            "check_entire_api": entire_check,
-            "check_api_path": check_api_path,
-            "check_api_http_method": check_http_method,
-            "check_api_parameters": check_api_parameters,
+            "stop_if_fail": stop_if_fail,
+            "check_entire_api": under_test_check_props.entire_check,
+            "check_api_path": under_test_check_props.api_path,
+            "check_api_http_method": under_test_check_props.http_method,
+            "check_api_parameters": under_test_check_props.api_parameters,
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_inspect(namespace)
@@ -123,6 +144,7 @@ class TestDeserialize:
         assert arguments.subparser_name == _Test_SubCommand_Inspect
         assert arguments.config_path == _Test_Config
         assert arguments.swagger_doc_url == _Swagger_API_Document_URL
-        assert arguments.check_api_path is expected_check_api_path
-        assert arguments.check_api_http_method is expected_check_http_method
-        assert arguments.check_api_parameters is expected_check_api_parameters
+        assert arguments.stop_if_fail is stop_if_fail
+        assert arguments.check_api_path is expected_check_props.api_path
+        assert arguments.check_api_http_method is expected_check_props.http_method
+        assert arguments.check_api_parameters is expected_check_props.api_parameters

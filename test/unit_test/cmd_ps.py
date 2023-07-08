@@ -58,7 +58,10 @@ _Fake_Amt: int = 1
 
 
 def _given_parser_args(
-    subcommand: str = None, app_type: str = None, config_path: str = None
+    subcommand: str = None,
+    app_type: str = None,
+    config_path: str = None,
+    stop_if_fail: bool = True,
 ) -> Union[SubcmdRunArguments, SubcmdConfigArguments, SubcmdCheckArguments, SubcmdInspectArguments, ParserArguments]:
     if subcommand == "run":
         return SubcmdRunArguments(
@@ -86,6 +89,7 @@ def _given_parser_args(
             config_path=_Test_Config,
             subparser_name=subcommand,
             swagger_doc_url=_Swagger_API_Document_URL,
+            stop_if_fail=stop_if_fail,
             check_api_path=True,
             check_api_parameters=True,
             check_api_http_method=True,
@@ -594,8 +598,9 @@ def _get_all_json(has_base_info: bool, config_type: str, exit_code: Union[str, i
         )
         expected_exit_code = exit_code if isinstance(exit_code, str) and exit_code.isdigit() else str(exit_code)
         for yaml_config_path in glob.glob(yaml_dir):
-            one_test_scenario = (json_config_path, yaml_config_path, expected_exit_code)
-            RESPONSE_JSON_PATHS_WITH_EX_CODE.append(one_test_scenario)
+            for stop_if_fail in (True, False):
+                one_test_scenario = (json_config_path, yaml_config_path, stop_if_fail, expected_exit_code)
+                RESPONSE_JSON_PATHS_WITH_EX_CODE.append(one_test_scenario)
 
 
 def _get_all_swagger_config() -> None:
@@ -619,37 +624,51 @@ class TestSubCmdInspect(BaseCommandProcessorTestSpec):
         return SubCmdInspect()
 
     @pytest.mark.parametrize(
-        ("api_resp_path", "dummy_yaml_path", "expected_exit_code"),
+        ("api_resp_path", "dummy_yaml_path", "stop_if_fail", "expected_exit_code"),
         RESPONSE_JSON_PATHS_WITH_EX_CODE,
     )
     def test_with_command_processor(
-        self, api_resp_path: str, dummy_yaml_path: str, expected_exit_code: str, object_under_test: Callable
+        self,
+        api_resp_path: str,
+        dummy_yaml_path: str,
+        stop_if_fail: bool,
+        expected_exit_code: str,
+        object_under_test: Callable,
     ):
         kwargs = {
             "api_resp_path": api_resp_path,
             "dummy_yaml_path": dummy_yaml_path,
+            "stop_if_fail": stop_if_fail,
             "expected_exit_code": expected_exit_code,
             "cmd_ps": object_under_test,
         }
         self._test_process(**kwargs)
 
     @pytest.mark.parametrize(
-        ("api_resp_path", "dummy_yaml_path", "expected_exit_code"),
+        ("api_resp_path", "dummy_yaml_path", "stop_if_fail", "expected_exit_code"),
         RESPONSE_JSON_PATHS_WITH_EX_CODE,
     )
     def test_with_run_entry_point(
-        self, api_resp_path: str, dummy_yaml_path: str, expected_exit_code: str, entry_point_under_test: Callable
+        self,
+        api_resp_path: str,
+        dummy_yaml_path: str,
+        stop_if_fail: bool,
+        expected_exit_code: str,
+        entry_point_under_test: Callable,
     ):
         kwargs = {
             "api_resp_path": api_resp_path,
             "dummy_yaml_path": dummy_yaml_path,
+            "stop_if_fail": stop_if_fail,
             "expected_exit_code": expected_exit_code,
             "cmd_ps": entry_point_under_test,
         }
         self._test_process(**kwargs)
 
-    def _test_process(self, api_resp_path: str, dummy_yaml_path: str, expected_exit_code: str, cmd_ps: Callable):
-        mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Inspect)
+    def _test_process(
+        self, api_resp_path: str, dummy_yaml_path: str, expected_exit_code: str, cmd_ps: Callable, stop_if_fail: bool
+    ):
+        mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Inspect, stop_if_fail=stop_if_fail)
         with patch("pymock_api.cmd_ps.load_config") as mock_load_config:
             mock_load_config.return_value = load_config(dummy_yaml_path)
             with patch.object(SubCmdInspect, "_get_swagger_config") as mock_get_swagger_config:
@@ -676,6 +695,7 @@ class TestSubCmdInspect(BaseCommandProcessorTestSpec):
         args_namespace.subcommand = SubCommand.Inspect
         args_namespace.config_path = _Test_Config
         args_namespace.swagger_doc_url = "http://127.0.0.1:8080/docs"
+        args_namespace.stop_if_fail = True
         args_namespace.check_api_path = True
         args_namespace.check_api_http_method = True
         args_namespace.check_api_parameters = True
