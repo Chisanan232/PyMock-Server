@@ -362,6 +362,7 @@ class SubCmdInspect(SubCmdCheck):
                     f"⚠️  Miss API. Path: {swagger_api_config.path}",
                     stop_if_fail=args.stop_if_fail,
                 )
+                continue
 
             mocked_api_config = current_api_config.apis.get_api_config_by_url(swagger_api_config.path, base=base_info)  # type: ignore[union-attr]
             # FIXME: Integrate with subcommand *check*
@@ -400,25 +401,26 @@ class SubCmdInspect(SubCmdCheck):
                             f"⚠️  Miss the API parameter {swagger_one_api_param.name}.",
                             stop_if_fail=args.stop_if_fail,
                         )
-                    if swagger_one_api_param.required is not api_param_config.required:  # type: ignore[union-attr]
+                        continue
+                    if swagger_one_api_param.required is not api_param_config.required:
                         self._chk_api_params_error_log(
-                            api_config=api_param_config,  # type: ignore[arg-type]
+                            api_config=api_param_config,
                             param="required",
                             swagger_api_config=swagger_api_config,
                             swagger_api_param=swagger_one_api_param,
                             stop_if_fail=args.stop_if_fail,
                         )
-                    if swagger_one_api_param.value_type != api_param_config.value_type:  # type: ignore[union-attr]
+                    if swagger_one_api_param.value_type != api_param_config.value_type:
                         self._chk_api_params_error_log(
-                            api_config=api_param_config,  # type: ignore[arg-type]
+                            api_config=api_param_config,
                             param="value_type",
                             swagger_api_config=swagger_api_config,
                             swagger_api_param=swagger_one_api_param,
                             stop_if_fail=args.stop_if_fail,
                         )
-                    if swagger_one_api_param.default != api_param_config.default:  # type: ignore[union-attr]
+                    if swagger_one_api_param.default != api_param_config.default:
                         self._chk_api_params_error_log(
-                            api_config=api_param_config,  # type: ignore[arg-type]
+                            api_config=api_param_config,
                             param="default",
                             swagger_api_config=swagger_api_config,
                             swagger_api_param=swagger_one_api_param,
