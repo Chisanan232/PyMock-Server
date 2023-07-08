@@ -306,9 +306,8 @@ class SubCmdCheck(BaseCommandProcessor):
             if valid_callback:
                 valid_callback(config_key, config_value)
 
-    @staticmethod
     def _setting_should_be_valid(
-        config_key: str, config_value: Any, criteria: list, valid_callback: Optional[Callable] = None
+        self, config_key: str, config_value: Any, criteria: list, valid_callback: Optional[Callable] = None
     ) -> None:
         if not isinstance(criteria, list):
             raise TypeError("The argument *criteria* only accept 'list' type value.")
@@ -320,7 +319,8 @@ class SubCmdCheck(BaseCommandProcessor):
 
         if not is_valid:
             print(f"Configuration *{config_key}* value is invalid.")
-            sys.exit(1)
+            if self._stop_if_fail:
+                sys.exit(1)
         else:
             if valid_callback:
                 valid_callback(config_key, config_value, criteria)
