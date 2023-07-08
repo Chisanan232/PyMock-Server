@@ -83,6 +83,7 @@ def _given_parser_args(
         return SubcmdCheckArguments(
             subparser_name=subcommand,
             config_path=(config_path or _Test_Config),
+            stop_if_fail=stop_if_fail,
         )
     elif subcommand == "inspect":
         return SubcmdInspectArguments(
@@ -560,6 +561,7 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
         args_namespace = Namespace()
         args_namespace.subcommand = SubCommand.Check
         args_namespace.config_path = _Test_Config
+        args_namespace.stop_if_fail = True
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:

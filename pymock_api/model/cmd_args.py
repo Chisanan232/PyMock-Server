@@ -29,6 +29,7 @@ class SubcmdConfigArguments(ParserArguments):
 @dataclass(frozen=True)
 class SubcmdCheckArguments(ParserArguments):
     config_path: str
+    stop_if_fail: bool
 
 
 @dataclass(frozen=True)
@@ -69,6 +70,7 @@ class DeserializeParsedArgs:
         return SubcmdCheckArguments(
             subparser_name=args.subcommand,
             config_path=args.config_path,
+            stop_if_fail=args.stop_if_fail,
         )
 
     @classmethod
