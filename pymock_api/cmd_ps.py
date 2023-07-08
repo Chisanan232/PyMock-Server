@@ -330,9 +330,11 @@ class SubCmdInspect(SubCmdCheck):
     def _run(self, args: SubcmdInspectArguments) -> None:  # type: ignore[override]
         current_api_config = load_config(path=args.config_path)
         # assert current_api_config, "It doesn't permit the configuration content to be empty."
-        super()._run(
-            args=SubcmdCheckArguments(subparser_name=super().responsible_subcommand, config_path=args.config_path),
-        )
+        # FIXME: Integrate with subcommand *check*
+        # super()._run(
+        #     args=SubcmdCheckArguments(subparser_name=super().responsible_subcommand, config_path=args.config_path),
+        # )
+        # FIXME: Integrate with subcommand *check*
         # if current_api_config.apis is None:
         #     self._chk_fail_error_log(
         #         "❌️  The configuration content is empty.",
@@ -340,6 +342,7 @@ class SubCmdInspect(SubCmdCheck):
         #     )
         base_info = current_api_config.apis.base  # type: ignore[union-attr]
         mocked_apis_info = current_api_config.apis.apis  # type: ignore[union-attr]
+        # FIXME: Integrate with subcommand *check*
         # if not mocked_apis_info:
         #     self._chk_fail_error_log(
         #         "❌️  Not exist any API settings for mocking.",
@@ -361,6 +364,7 @@ class SubCmdInspect(SubCmdCheck):
                 )
 
             mocked_api_config = current_api_config.apis.get_api_config_by_url(swagger_api_config.path, base=base_info)  # type: ignore[union-attr]
+            # FIXME: Integrate with subcommand *check*
             # if mocked_api_config is None:
             #     self._chk_fail_error_log(
             #         f"❌️  Not exist the mocking settings of API '{swagger_api_config.http_method} {swagger_api_config.path}'.",
@@ -373,6 +377,7 @@ class SubCmdInspect(SubCmdCheck):
             #         stop_if_fail=args.stop_if_fail,
             #     )
 
+            # FIXME: Integrate with subcommand *check*
             # Check API HTTP method
             # if api_http_config.request is None:  # type: ignore[union-attr]
             #     self._chk_fail_error_log(
@@ -387,6 +392,7 @@ class SubCmdInspect(SubCmdCheck):
 
             # Check API parameters
             if args.check_api_parameters:
+                # FIXME: target configuration may have redunden settings.
                 for swagger_one_api_param in swagger_api_config.parameters:
                     api_param_config = api_http_config.request.get_one_param_by_name(swagger_one_api_param.name)  # type: ignore[union-attr]
                     if api_param_config is None:
