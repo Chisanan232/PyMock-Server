@@ -283,12 +283,7 @@ class SubCmdCheck(BaseCommandProcessor):
                             valid_callback=self._chk_response_value_validity,
                         )
 
-        if self._config_is_wrong:
-            print("Configuration is invalid.")
-            sys.exit(1)
-        else:
-            print("Configuration is valid.")
-            sys.exit(0)
+        self._exit_program()
 
     def _chk_response_value_validity(self, config_key: str, config_value: Any) -> bool:
         try:
@@ -345,6 +340,14 @@ class SubCmdCheck(BaseCommandProcessor):
         else:
             if valid_callback:
                 valid_callback(config_key, config_value, criteria)
+
+    def _exit_program(self) -> None:
+        if self._config_is_wrong:
+            print("Configuration is invalid.")
+            sys.exit(1)
+        else:
+            print("Configuration is valid.")
+            sys.exit(0)
 
 
 class SubCmdInspect(SubCmdCheck):
