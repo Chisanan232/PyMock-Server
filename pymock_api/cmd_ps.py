@@ -208,6 +208,11 @@ class SubCmdCheck(BaseCommandProcessor):
         self._stop_if_fail = args.stop_if_fail
         api_config: Optional[APIConfig] = load_config(path=args.config_path)
 
+        self.check_config_validity(api_config)
+
+        self._exit_program()
+
+    def check_config_validity(self, api_config: Optional[APIConfig]) -> None:
         # # Check whether it has anything in configuration or not
         if not self._setting_should_not_be_none(
             config_key="",
@@ -215,7 +220,6 @@ class SubCmdCheck(BaseCommandProcessor):
             err_msg="Configuration is empty.",
         ):
             self._exit_program()
-
         # # Check the section *mocked_apis* (first layer) of configuration
         # NOTE: It's the normal behavior of code implementation. It must have something of property *MockAPIs.apis*
         # if it has anything within key *mocked_apis*.
@@ -225,14 +229,12 @@ class SubCmdCheck(BaseCommandProcessor):
             config_value=api_config.apis,
         ):
             self._exit_program()
-
         assert api_config.apis
         if not self._setting_should_not_be_none(
             config_key="mocked_apis.<API name>",
             config_value=api_config.apis.apis,
         ):
             self._exit_program()
-
         # # Check each API content at first layer is *mocked_apis* of configuration
         for one_api_name, one_api_config in api_config.apis.apis.items():
             # # Check the section *mocked_apis.<API name>* (second layer) of configuration
@@ -288,8 +290,6 @@ class SubCmdCheck(BaseCommandProcessor):
                 config_value=one_api_config.http.response.value,
                 valid_callback=self._chk_response_value_validity,
             )
-
-        self._exit_program()
 
     def _chk_response_value_validity(self, config_key: str, config_value: Any) -> bool:
         try:
