@@ -379,7 +379,15 @@ class SubCmdInspect(BaseCommandProcessor):
         #         "❌️  The configuration content is empty.",
         #         stop_if_fail=args.stop_if_fail,
         #     )
-        mocked_apis_config = current_api_config.apis  # type: ignore[union-attr]
+        if not current_api_config:
+            print(f"⚠️  Empty configuration content. Configuration file path: {args.config_path}")
+            self._exit_program(
+                msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
+                exit_code=1,
+            )
+
+        assert current_api_config
+        mocked_apis_config = current_api_config.apis
         base_info = mocked_apis_config.base  # type: ignore[union-attr]
         mocked_apis_info = mocked_apis_config.apis  # type: ignore[union-attr]
         # FIXME: Integrate with subcommand *check*
