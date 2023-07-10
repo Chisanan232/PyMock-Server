@@ -230,11 +230,10 @@ class SubCmdCheck(BaseCommandProcessor):
         ):
             self._exit_program()
         assert api_config.apis
-        if not self._setting_should_not_be_none(
+        self._setting_should_not_be_none(
             config_key="mocked_apis.<API name>",
             config_value=api_config.apis.apis,
-        ):
-            self._exit_program()
+        )
         # # Check each API content at first layer is *mocked_apis* of configuration
         for one_api_name, one_api_config in api_config.apis.apis.items():
             # # Check the section *mocked_apis.<API name>* (second layer) of configuration
