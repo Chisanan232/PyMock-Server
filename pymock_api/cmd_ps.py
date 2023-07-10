@@ -379,8 +379,9 @@ class SubCmdInspect(SubCmdCheck):
         #         "❌️  The configuration content is empty.",
         #         stop_if_fail=args.stop_if_fail,
         #     )
-        base_info = current_api_config.apis.base  # type: ignore[union-attr]
-        mocked_apis_info = current_api_config.apis.apis  # type: ignore[union-attr]
+        mocked_apis_config = current_api_config.apis  # type: ignore[union-attr]
+        base_info = mocked_apis_config.base  # type: ignore[union-attr]
+        mocked_apis_info = mocked_apis_config.apis  # type: ignore[union-attr]
         # FIXME: Integrate with subcommand *check*
         # if not mocked_apis_info:
         #     self._chk_fail_error_log(
@@ -403,7 +404,7 @@ class SubCmdInspect(SubCmdCheck):
                 )
                 continue
 
-            mocked_api_config = current_api_config.apis.get_api_config_by_url(swagger_api_config.path, base=base_info)  # type: ignore[union-attr]
+            mocked_api_config = mocked_apis_config.get_api_config_by_url(swagger_api_config.path, base=base_info)  # type: ignore[union-attr]
             # FIXME: Integrate with subcommand *check*
             # if mocked_api_config is None:
             #     self._chk_fail_error_log(
