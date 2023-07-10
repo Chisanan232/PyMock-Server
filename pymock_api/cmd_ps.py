@@ -368,6 +368,20 @@ class SubCmdInspect(BaseCommandProcessor):
 
     def _run(self, args: SubcmdInspectArguments) -> None:
         current_api_config = load_config(path=args.config_path)
+        self._diff_config_with_swagger(args, current_api_config)
+
+        if self._config_is_wrong:
+            self._exit_program(
+                msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
+                exit_code=1,
+            )
+        else:
+            self._exit_program(
+                msg=f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.",
+                exit_code=0,
+            )
+
+    def _diff_config_with_swagger(self, args: SubcmdInspectArguments, current_api_config: Optional[APIConfig]) -> None:
         # assert current_api_config, "It doesn't permit the configuration content to be empty."
         # FIXME: Integrate with subcommand *check*
         # super()._run(
@@ -385,7 +399,6 @@ class SubCmdInspect(BaseCommandProcessor):
                 msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
                 exit_code=1,
             )
-
         assert current_api_config
         mocked_apis_config = current_api_config.apis
         base_info = mocked_apis_config.base  # type: ignore[union-attr]
@@ -400,9 +413,7 @@ class SubCmdInspect(BaseCommandProcessor):
             mocked_apis_path = list(map(lambda p: f"{base_info.url}{p.url}", mocked_apis_info.values()))
         else:
             mocked_apis_path = list(map(lambda p: p.url, mocked_apis_info.values()))
-
         swagger_api_doc_model = self._get_swagger_config(swagger_url=args.swagger_doc_url)
-
         for swagger_api_config in swagger_api_doc_model.paths:
             # Check API path
             if args.check_api_path and swagger_api_config.path not in mocked_apis_path:
@@ -412,7 +423,9 @@ class SubCmdInspect(BaseCommandProcessor):
                 )
                 continue
 
-            mocked_api_config = mocked_apis_config.get_api_config_by_url(swagger_api_config.path, base=base_info)  # type: ignore[union-attr]
+            mocked_api_config = mocked_apis_config.get_api_config_by_url(  # type: ignore[union-attr]
+                swagger_api_config.path, base=base_info
+            )
             # FIXME: Integrate with subcommand *check*
             # if mocked_api_config is None:
             #     self._chk_fail_error_log(
@@ -433,7 +446,10 @@ class SubCmdInspect(BaseCommandProcessor):
             #         f"❌️  Not exist the HTTP request settings of API '{swagger_api_config.http_method} {swagger_api_config.path}'.",
             #         stop_if_fail=args.stop_if_fail,
             #     )
-            if args.check_api_http_method and str(swagger_api_config.http_method).upper() != api_http_config.request.method.upper():  # type: ignore[union-attr]
+            if (
+                args.check_api_http_method
+                and str(swagger_api_config.http_method).upper() != api_http_config.request.method.upper()  # type: ignore[union-attr]
+            ):
                 self._chk_fail_error_log(
                     f"⚠️  Miss the API {swagger_api_config.path} with HTTP method {swagger_api_config.http_method}.",
                     stop_if_fail=args.stop_if_fail,
@@ -443,7 +459,9 @@ class SubCmdInspect(BaseCommandProcessor):
             if args.check_api_parameters:
                 # FIXME: target configuration may have redunden settings.
                 for swagger_one_api_param in swagger_api_config.parameters:
-                    api_param_config = api_http_config.request.get_one_param_by_name(swagger_one_api_param.name)  # type: ignore[union-attr]
+                    api_param_config = api_http_config.request.get_one_param_by_name(  # type: ignore[union-attr]
+                        swagger_one_api_param.name
+                    )
                     if api_param_config is None:
                         self._chk_fail_error_log(
                             f"⚠️  Miss the API parameter {swagger_one_api_param.name}.",
@@ -478,17 +496,6 @@ class SubCmdInspect(BaseCommandProcessor):
             # TODO: Implement the checking detail of HTTP response
             # Check API response
             api_resp = swagger_api_config.response
-
-        if self._config_is_wrong:
-            self._exit_program(
-                msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
-                exit_code=1,
-            )
-        else:
-            self._exit_program(
-                msg=f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.",
-                exit_code=0,
-            )
 
     def _get_swagger_config(self, swagger_url: str) -> SwaggerConfig:
         swagger_api_doc: dict = self._api_client.request(method="GET", url=swagger_url)
