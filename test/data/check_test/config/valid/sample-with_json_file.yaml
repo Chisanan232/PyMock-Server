@@ -1,0 +1,9 @@
+mocked_apis:
+  google_home:
+    url: '/google'
+    http:
+      request:
+        method: 'GET'
+      response:
+        # Note: The root directory it (PyTest) runs is project root directory.
+        value: ./test/data/check_test/config/valid/response.json

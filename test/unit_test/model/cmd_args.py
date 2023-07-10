@@ -75,12 +75,14 @@ class TestDeserialize:
         namespace_args = {
             "subcommand": _Test_SubCommand_Check,
             "config_path": _Test_Config,
+            "stop_if_fail": True,
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_check(namespace)
         assert isinstance(arguments, SubcmdCheckArguments)
         assert arguments.subparser_name == _Test_SubCommand_Check
         assert arguments.config_path == _Test_Config
+        assert arguments.stop_if_fail is True
 
     @pytest.mark.parametrize(
         (
