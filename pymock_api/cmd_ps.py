@@ -355,7 +355,7 @@ class SubCmdCheck(BaseCommandProcessor):
             sys.exit(0)
 
 
-class SubCmdInspect(SubCmdCheck):
+class SubCmdInspect(BaseCommandProcessor):
     responsible_subcommand = SubCommand.Inspect
 
     def __init__(self):
@@ -363,10 +363,10 @@ class SubCmdInspect(SubCmdCheck):
         self._api_client = URLLibHTTPClient()
         self._config_is_wrong: bool = False
 
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:  # type: ignore[override]
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:
         return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
 
-    def _run(self, args: SubcmdInspectArguments) -> None:  # type: ignore[override]
+    def _run(self, args: SubcmdInspectArguments) -> None:
         current_api_config = load_config(path=args.config_path)
         # assert current_api_config, "It doesn't permit the configuration content to be empty."
         # FIXME: Integrate with subcommand *check*
@@ -472,13 +472,15 @@ class SubCmdInspect(SubCmdCheck):
             api_resp = swagger_api_config.response
 
         if self._config_is_wrong:
-            print(
-                f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}."
+            self._exit_program(
+                msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
+                exit_code=1,
             )
-            sys.exit(1)
         else:
-            print(f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.")
-            sys.exit(0)
+            self._exit_program(
+                msg=f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.",
+                exit_code=0,
+            )
 
     def _get_swagger_config(self, swagger_url: str) -> SwaggerConfig:
         swagger_api_doc: dict = self._api_client.request(method="GET", url=swagger_url)
@@ -507,3 +509,7 @@ class SubCmdInspect(SubCmdCheck):
         self._config_is_wrong = True
         if stop_if_fail:
             sys.exit(1)
+
+    def _exit_program(self, msg: str, exit_code: int = 0) -> None:
+        print(msg)
+        sys.exit(exit_code)
