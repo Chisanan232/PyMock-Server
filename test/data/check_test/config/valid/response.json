@@ -1,0 +1,7 @@
+{
+  "responseCode": 200,
+  "responseData": {
+    "content": "This is sample response as JSON format",
+    "errorMsg": ""
+  }
+}
