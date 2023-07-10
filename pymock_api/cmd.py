@@ -18,7 +18,7 @@ import re
 import sys
 from collections import namedtuple
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple
 
 from .__pkg_info__ import __version__
 
@@ -164,7 +164,7 @@ class CommandOption:
             raise ValueError("An command option must have help description for developers to clear what it does.")
         all_help_desps: List[str] = [self.help_description.splitlines()[0]]
 
-        if self.default_value:
+        if self.default_value is not None:
             default_value_str = f"[default: '{self.default_value}']"
             all_help_desps.append(default_value_str)
 
@@ -228,6 +228,7 @@ class SubCommand:
     Run: str = "run"
     Config: str = "config"
     Check: str = "check"
+    Inspect: str = "inspect"
 
 
 class BaseSubCommand(CommandOption):
@@ -262,10 +263,18 @@ class SubCommandCheckOption(BaseSubCommand):
     )
 
 
+class SubCommandInspectOption(BaseSubCommand):
+    sub_parser: SubParserAttr = SubParserAttr(
+        name=SubCommand.Inspect,
+        help="Do some comprehensive inspection for configuration.",
+    )
+
+
 BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
 BaseSubCmdRunOption: type = MetaCommandOption("BaseSubCmdRunOption", (SubCommandRunOption,), {})
 BaseSubCmdConfigOption: type = MetaCommandOption("BaseSubCmdConfigOption", (SubCommandConfigOption,), {})
 BaseSubCmdCheckOption: type = MetaCommandOption("BaseSubCmdCheckOption", (SubCommandCheckOption,), {})
+BaseSubCmdInspectOption: type = MetaCommandOption("BaseSubCmdInspectOption", (SubCommandInspectOption,), {})
 
 
 class Version(BaseCmdOption):
@@ -368,3 +377,70 @@ class ConfigPath(BaseSubCmdCheckOption):
     name: str = "config_path"
     help_description: str = "The file path of configuration."
     default_value: str = "api.yaml"
+
+
+class StopCheckIfFail(BaseSubCmdCheckOption):
+    cli_option: str = "--stop-if-fail"
+    name: str = "stop_if_fail"
+    help_description: str = "Stop program if it gets any fail in checking."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
+class UnderCheckConfigPath(BaseSubCmdInspectOption):
+    cli_option: str = "-p, --config-path"
+    name: str = "config_path"
+    help_description: str = "The file path of configuration."
+    default_value: str = "api.yaml"
+
+
+class SwaggerDocURL(BaseSubCmdInspectOption):
+    cli_option: str = "-s, --swagger-doc-url"
+    name: str = "swagger_doc_url"
+    help_description: str = "The URL path of swagger style API document."
+
+
+class StopIfFail(BaseSubCmdInspectOption):
+    cli_option: str = "--stop-if-fail"
+    name: str = "stop_if_fail"
+    help_description: str = "Stop program if it gets any fail in checking."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
+class CheckEntireAPI(BaseSubCmdInspectOption):
+    cli_option: str = "--check-entire-api"
+    name: str = "check_entire_api"
+    help_description: str = "Do the inspection of all properties of each API."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
+class CheckAPIPath(BaseSubCmdInspectOption):
+    cli_option: str = "--check-api-path"
+    name: str = "check_api_path"
+    help_description: str = "Do the inspection of property API path."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
+class CheckAPIHTTPMethod(BaseSubCmdInspectOption):
+    cli_option: str = "--check-api-http-method"
+    name: str = "check_api_http_method"
+    help_description: str = "Do the inspection of property allowable HTTP method of one specific API."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
+class CheckAPIParameter(BaseSubCmdInspectOption):
+    cli_option: str = "--check-api-parameters"
+    name: str = "check_api_parameters"
+    help_description: str = "Do the inspection of property API parameters."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False

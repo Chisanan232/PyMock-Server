@@ -371,6 +371,17 @@ class TestMockAPIs(ConfigTestSpec):
         assert obj.base.url == _Base_URL
         assert obj.apis == self._Mock_Model.mock_api
 
+    def test_get_api_config_by_url(self, sut: MockAPIs):
+        api_config = sut.get_api_config_by_url(url=_Test_URL)
+        assert api_config.url == _Test_URL
+        assert api_config.http.request.method == _TestConfig.Request.get("method")
+        assert api_config.http.request.parameters == [self._Mock_Model.api_parameter]
+        assert api_config.http.response.value == _Test_HTTP_Resp
+
+    def test_fail_get_api_config_by_url(self, sut: MockAPIs):
+        api_config = sut.get_api_config_by_url(url="Not exist this path's API config")
+        assert api_config is None
+
 
 class TestBaseConfig(ConfigTestSpec):
     @pytest.fixture(scope="function")
@@ -564,6 +575,14 @@ class TestHTTPReqeust(ConfigTestSpec):
         with pytest.raises(TypeError) as exc_info:
             sut_with_nothing.deserialize(data=utd)
         assert str(exc_info.value) == "Argument *parameters* should be a list type value."
+
+    def test_get_one_param_by_name(self, sut: HTTPRequest):
+        param = sut.get_one_param_by_name(_Test_API_Parameter["name"])
+        assert param == self._Mock_Model.api_parameter
+
+    def test_fail_get_one_param_by_name(self, sut: HTTPRequest):
+        param = sut.get_one_param_by_name("Not exist argument")
+        assert param is None
 
 
 class TestAPIParameter(ConfigTestSpec):
