@@ -33,7 +33,7 @@ from pymock_api.model import (
 )
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
-from .._values import (
+from ..._values import (
     _Bind_Host_And_Port,
     _Generate_Sample,
     _Log_Level,
@@ -501,7 +501,7 @@ YAML_PATHS_WITH_EX_CODE: List[tuple] = []
 
 def _get_all_yaml(config_type: str, exit_code: Union[str, int]) -> None:
     yaml_dir = os.path.join(
-        str(pathlib.Path(__file__).parent.parent), "data", "check_test", "config", config_type, "*.yaml"
+        str(pathlib.Path(__file__).parent.parent.parent), "data", "check_test", "config", config_type, "*.yaml"
     )
     global YAML_PATHS_WITH_EX_CODE
     for yaml_config_path in glob.glob(yaml_dir):
@@ -529,7 +529,7 @@ RESPONSE_JSON_PATHS: List[str] = []
 def _get_all_json(has_base_info: bool, config_type: str, exit_code: Union[str, int]) -> None:
     file_naming = "has-base-info" if has_base_info else "no-base-info"
     json_dir = os.path.join(
-        str(pathlib.Path(__file__).parent.parent),
+        str(pathlib.Path(__file__).parent.parent.parent),
         "data",
         "check_test",
         "diff_with_swagger",
@@ -540,7 +540,7 @@ def _get_all_json(has_base_info: bool, config_type: str, exit_code: Union[str, i
     for json_config_path in glob.glob(json_dir):
         yaml_file_format = "*.yaml" if config_type == "invalid" else f"{file_naming}*.yaml"
         yaml_dir = os.path.join(
-            str(pathlib.Path(__file__).parent.parent),
+            str(pathlib.Path(__file__).parent.parent.parent),
             "data",
             "check_test",
             "diff_with_swagger",
@@ -557,7 +557,12 @@ def _get_all_json(has_base_info: bool, config_type: str, exit_code: Union[str, i
 
 def _get_all_swagger_config() -> None:
     json_dir = os.path.join(
-        str(pathlib.Path(__file__).parent.parent), "data", "check_test", "diff_with_swagger", "api_response", "*.json"
+        str(pathlib.Path(__file__).parent.parent.parent),
+        "data",
+        "check_test",
+        "diff_with_swagger",
+        "api_response",
+        "*.json",
     )
     global RESPONSE_JSON_PATHS
     for json_config_path in glob.glob(json_dir):
