@@ -37,7 +37,12 @@ SWAGGER_API_DOC_JSON: List[dict] = []
 
 def _get_all_swagger_api_doc() -> None:
     json_dir = os.path.join(
-        str(pathlib.Path(__file__).parent.parent.parent), "data", "inspect_test", "api_response", "*.json"
+        str(pathlib.Path(__file__).parent.parent.parent),
+        "data",
+        "check_test",
+        "diff_with_swagger",
+        "api_response",
+        "*.json",
     )
     global SWAGGER_API_DOC_JSON
     for json_config_path in glob.glob(json_dir):

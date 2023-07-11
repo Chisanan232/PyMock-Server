@@ -198,6 +198,7 @@ class SubCmdCheck(BaseCommandProcessor):
 
     def __init__(self):
         super().__init__()
+        self._api_client = URLLibHTTPClient()
         self._stop_if_fail: Optional[bool] = None
         self._config_is_wrong: bool = False
 
@@ -208,18 +209,40 @@ class SubCmdCheck(BaseCommandProcessor):
         self._stop_if_fail = args.stop_if_fail
         api_config: Optional[APIConfig] = load_config(path=args.config_path)
 
-        self.check_config_validity(api_config)
+        valid_api_config = self.check_config_validity(api_config)
+        if self._config_is_wrong:
+            print("Configuration is invalid.")
+            if self._stop_if_fail or not args.swagger_doc_url:
+                sys.exit(1)
+        else:
+            print("Configuration is valid.")
+            if not args.swagger_doc_url:
+                sys.exit(0)
 
-        self._exit_program()
+        if args.swagger_doc_url:
+            self._diff_config_with_swagger(args, valid_api_config)
+            if self._config_is_wrong:
+                self._exit_program(
+                    msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
+                    exit_code=1,
+                )
+            else:
+                self._exit_program(
+                    msg=f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.",
+                    exit_code=0,
+                )
 
-    def check_config_validity(self, api_config: Optional[APIConfig]) -> None:
+    def check_config_validity(self, api_config: Optional[APIConfig]) -> APIConfig:
         # # Check whether it has anything in configuration or not
         if not self._setting_should_not_be_none(
             config_key="",
             config_value=api_config,
             err_msg="Configuration is empty.",
         ):
-            self._exit_program()
+            self._exit_program(
+                msg="⚠️  Configuration is invalid.",
+                exit_code=1,
+            )
         # # Check the section *mocked_apis* (first layer) of configuration
         # NOTE: It's the normal behavior of code implementation. It must have something of property *MockAPIs.apis*
         # if it has anything within key *mocked_apis*.
@@ -228,7 +251,10 @@ class SubCmdCheck(BaseCommandProcessor):
             config_key="mocked_apis",
             config_value=api_config.apis,
         ):
-            self._exit_program()
+            self._exit_program(
+                msg="⚠️  Configuration is invalid.",
+                exit_code=1,
+            )
         assert api_config.apis
         self._setting_should_not_be_none(
             config_key="mocked_apis.<API name>",
@@ -289,6 +315,7 @@ class SubCmdCheck(BaseCommandProcessor):
                 config_value=one_api_config.http.response.value,
                 valid_callback=self._chk_response_value_validity,
             )
+        return api_config
 
     def _chk_response_value_validity(self, config_key: str, config_value: Any) -> bool:
         try:
@@ -346,54 +373,16 @@ class SubCmdCheck(BaseCommandProcessor):
             if valid_callback:
                 valid_callback(config_key, config_value, criteria)
 
-    def _exit_program(self) -> None:
-        if self._config_is_wrong:
-            print("Configuration is invalid.")
-            sys.exit(1)
-        else:
-            print("Configuration is valid.")
-            sys.exit(0)
-
-
-class SubCmdInspect(SubCmdCheck):
-    responsible_subcommand = SubCommand.Inspect
-
-    def __init__(self):
-        super().__init__()
-        self._api_client = URLLibHTTPClient()
-        self._config_is_wrong: bool = False
-
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:  # type: ignore[override]
-        return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
-
-    def _run(self, args: SubcmdInspectArguments) -> None:  # type: ignore[override]
-        current_api_config = load_config(path=args.config_path)
-        # assert current_api_config, "It doesn't permit the configuration content to be empty."
-        # FIXME: Integrate with subcommand *check*
-        # super()._run(
-        #     args=SubcmdCheckArguments(subparser_name=super().responsible_subcommand, config_path=args.config_path),
-        # )
-        # FIXME: Integrate with subcommand *check*
-        # if current_api_config.apis is None:
-        #     self._chk_fail_error_log(
-        #         "❌️  The configuration content is empty.",
-        #         stop_if_fail=args.stop_if_fail,
-        #     )
-        base_info = current_api_config.apis.base  # type: ignore[union-attr]
-        mocked_apis_info = current_api_config.apis.apis  # type: ignore[union-attr]
-        # FIXME: Integrate with subcommand *check*
-        # if not mocked_apis_info:
-        #     self._chk_fail_error_log(
-        #         "❌️  Not exist any API settings for mocking.",
-        #         stop_if_fail=args.stop_if_fail,
-        #     )
+    def _diff_config_with_swagger(self, args: SubcmdCheckArguments, current_api_config: APIConfig) -> None:
+        assert current_api_config
+        mocked_apis_config = current_api_config.apis
+        base_info = mocked_apis_config.base  # type: ignore[union-attr]
+        mocked_apis_info = mocked_apis_config.apis  # type: ignore[union-attr]
         if base_info:
             mocked_apis_path = list(map(lambda p: f"{base_info.url}{p.url}", mocked_apis_info.values()))
         else:
             mocked_apis_path = list(map(lambda p: p.url, mocked_apis_info.values()))
-
         swagger_api_doc_model = self._get_swagger_config(swagger_url=args.swagger_doc_url)
-
         for swagger_api_config in swagger_api_doc_model.paths:
             # Check API path
             if args.check_api_path and swagger_api_config.path not in mocked_apis_path:
@@ -403,28 +392,15 @@ class SubCmdInspect(SubCmdCheck):
                 )
                 continue
 
-            mocked_api_config = current_api_config.apis.get_api_config_by_url(swagger_api_config.path, base=base_info)  # type: ignore[union-attr]
-            # FIXME: Integrate with subcommand *check*
-            # if mocked_api_config is None:
-            #     self._chk_fail_error_log(
-            #         f"❌️  Not exist the mocking settings of API '{swagger_api_config.http_method} {swagger_api_config.path}'.",
-            #         stop_if_fail=args.stop_if_fail,
-            #     )
+            mocked_api_config = mocked_apis_config.get_api_config_by_url(  # type: ignore[union-attr]
+                swagger_api_config.path, base=base_info
+            )
             api_http_config = mocked_api_config.http  # type: ignore[union-attr]
-            # if api_http_config is None:
-            #     self._chk_fail_error_log(
-            #         f"❌️  Not exist the HTTP settings of API '{swagger_api_config.http_method} {swagger_api_config.path}'.",
-            #         stop_if_fail=args.stop_if_fail,
-            #     )
 
-            # FIXME: Integrate with subcommand *check*
-            # Check API HTTP method
-            # if api_http_config.request is None:  # type: ignore[union-attr]
-            #     self._chk_fail_error_log(
-            #         f"❌️  Not exist the HTTP request settings of API '{swagger_api_config.http_method} {swagger_api_config.path}'.",
-            #         stop_if_fail=args.stop_if_fail,
-            #     )
-            if args.check_api_http_method and str(swagger_api_config.http_method).upper() != api_http_config.request.method.upper():  # type: ignore[union-attr]
+            if (
+                args.check_api_http_method
+                and str(swagger_api_config.http_method).upper() != api_http_config.request.method.upper()  # type: ignore[union-attr]
+            ):
                 self._chk_fail_error_log(
                     f"⚠️  Miss the API {swagger_api_config.path} with HTTP method {swagger_api_config.http_method}.",
                     stop_if_fail=args.stop_if_fail,
@@ -434,7 +410,9 @@ class SubCmdInspect(SubCmdCheck):
             if args.check_api_parameters:
                 # FIXME: target configuration may have redunden settings.
                 for swagger_one_api_param in swagger_api_config.parameters:
-                    api_param_config = api_http_config.request.get_one_param_by_name(swagger_one_api_param.name)  # type: ignore[union-attr]
+                    api_param_config = api_http_config.request.get_one_param_by_name(  # type: ignore[union-attr]
+                        swagger_one_api_param.name
+                    )
                     if api_param_config is None:
                         self._chk_fail_error_log(
                             f"⚠️  Miss the API parameter {swagger_one_api_param.name}.",
@@ -470,15 +448,6 @@ class SubCmdInspect(SubCmdCheck):
             # Check API response
             api_resp = swagger_api_config.response
 
-        if self._config_is_wrong:
-            print(
-                f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}."
-            )
-            sys.exit(1)
-        else:
-            print(f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.")
-            sys.exit(0)
-
     def _get_swagger_config(self, swagger_url: str) -> SwaggerConfig:
         swagger_api_doc: dict = self._api_client.request(method="GET", url=swagger_url)
         return deserialize_swagger_api_config(data=swagger_api_doc)
@@ -506,3 +475,23 @@ class SubCmdInspect(SubCmdCheck):
         self._config_is_wrong = True
         if stop_if_fail:
             sys.exit(1)
+
+    def _exit_program(self, msg: str, exit_code: int = 0) -> None:
+        print(msg)
+        sys.exit(exit_code)
+
+
+class SubCmdInspect(BaseCommandProcessor):
+    responsible_subcommand = SubCommand.Inspect
+
+    def __init__(self):
+        super().__init__()
+        self._api_client = URLLibHTTPClient()
+        self._config_is_wrong: bool = False
+
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:
+        return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
+
+    def _run(self, args: SubcmdInspectArguments) -> None:
+        current_api_config = load_config(path=args.config_path)
+        # TODO: Add implementation about *inspect* feature gets some details of config
