@@ -212,24 +212,25 @@ class SubCmdCheck(BaseCommandProcessor):
         self.check_config_validity(api_config)
         if self._config_is_wrong:
             print("Configuration is invalid.")
-            if self._stop_if_fail:
+            if self._stop_if_fail or not args.swagger_doc_url:
                 sys.exit(1)
         else:
             print("Configuration is valid.")
+            if not args.swagger_doc_url:
+                sys.exit(0)
 
         if args.swagger_doc_url:
             self._diff_config_with_swagger(args, api_config)
-
-        if self._config_is_wrong:
-            self._exit_program(
-                msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
-                exit_code=1,
-            )
-        else:
-            self._exit_program(
-                msg=f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.",
-                exit_code=0,
-            )
+            if self._config_is_wrong:
+                self._exit_program(
+                    msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
+                    exit_code=1,
+                )
+            else:
+                self._exit_program(
+                    msg=f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.",
+                    exit_code=0,
+                )
 
     def check_config_validity(self, api_config: Optional[APIConfig]) -> None:
         # # Check whether it has anything in configuration or not
