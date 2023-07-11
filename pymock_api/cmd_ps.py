@@ -198,6 +198,7 @@ class SubCmdCheck(BaseCommandProcessor):
 
     def __init__(self):
         super().__init__()
+        self._api_client = URLLibHTTPClient()
         self._stop_if_fail: Optional[bool] = None
         self._config_is_wrong: bool = False
 
@@ -209,8 +210,26 @@ class SubCmdCheck(BaseCommandProcessor):
         api_config: Optional[APIConfig] = load_config(path=args.config_path)
 
         self.check_config_validity(api_config)
+        if self._config_is_wrong:
+            print("Configuration is invalid.")
+            if self._stop_if_fail:
+                sys.exit(1)
+        else:
+            print("Configuration is valid.")
 
-        self._exit_program()
+        if args.swagger_doc_url:
+            self._diff_config_with_swagger(args, api_config)
+
+        if self._config_is_wrong:
+            self._exit_program(
+                msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
+                exit_code=1,
+            )
+        else:
+            self._exit_program(
+                msg=f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.",
+                exit_code=0,
+            )
 
     def check_config_validity(self, api_config: Optional[APIConfig]) -> None:
         # # Check whether it has anything in configuration or not
@@ -219,7 +238,10 @@ class SubCmdCheck(BaseCommandProcessor):
             config_value=api_config,
             err_msg="Configuration is empty.",
         ):
-            self._exit_program()
+            self._exit_program(
+                msg="⚠️  Configuration is invalid.",
+                exit_code=1,
+            )
         # # Check the section *mocked_apis* (first layer) of configuration
         # NOTE: It's the normal behavior of code implementation. It must have something of property *MockAPIs.apis*
         # if it has anything within key *mocked_apis*.
@@ -228,7 +250,10 @@ class SubCmdCheck(BaseCommandProcessor):
             config_key="mocked_apis",
             config_value=api_config.apis,
         ):
-            self._exit_program()
+            self._exit_program(
+                msg="⚠️  Configuration is invalid.",
+                exit_code=1,
+            )
         assert api_config.apis
         self._setting_should_not_be_none(
             config_key="mocked_apis.<API name>",
@@ -346,42 +371,7 @@ class SubCmdCheck(BaseCommandProcessor):
             if valid_callback:
                 valid_callback(config_key, config_value, criteria)
 
-    def _exit_program(self) -> None:
-        if self._config_is_wrong:
-            print("Configuration is invalid.")
-            sys.exit(1)
-        else:
-            print("Configuration is valid.")
-            sys.exit(0)
-
-
-class SubCmdInspect(BaseCommandProcessor):
-    responsible_subcommand = SubCommand.Inspect
-
-    def __init__(self):
-        super().__init__()
-        self._api_client = URLLibHTTPClient()
-        self._config_is_wrong: bool = False
-
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:
-        return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
-
-    def _run(self, args: SubcmdInspectArguments) -> None:
-        current_api_config = load_config(path=args.config_path)
-        self._diff_config_with_swagger(args, current_api_config)
-
-        if self._config_is_wrong:
-            self._exit_program(
-                msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
-                exit_code=1,
-            )
-        else:
-            self._exit_program(
-                msg=f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.",
-                exit_code=0,
-            )
-
-    def _diff_config_with_swagger(self, args: SubcmdInspectArguments, current_api_config: Optional[APIConfig]) -> None:
+    def _diff_config_with_swagger(self, args: SubcmdCheckArguments, current_api_config: Optional[APIConfig]) -> None:
         # assert current_api_config, "It doesn't permit the configuration content to be empty."
         # FIXME: Integrate with subcommand *check*
         # super()._run(
@@ -528,3 +518,18 @@ class SubCmdInspect(BaseCommandProcessor):
     def _exit_program(self, msg: str, exit_code: int = 0) -> None:
         print(msg)
         sys.exit(exit_code)
+
+
+class SubCmdInspect(BaseCommandProcessor):
+    responsible_subcommand = SubCommand.Inspect
+
+    def __init__(self):
+        super().__init__()
+        self._api_client = URLLibHTTPClient()
+        self._config_is_wrong: bool = False
+
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:
+        return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
+
+    def _run(self, args: SubcmdInspectArguments) -> None:
+        current_api_config = load_config(path=args.config_path)
