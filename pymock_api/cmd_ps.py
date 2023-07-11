@@ -372,17 +372,6 @@ class SubCmdCheck(BaseCommandProcessor):
                 valid_callback(config_key, config_value, criteria)
 
     def _diff_config_with_swagger(self, args: SubcmdCheckArguments, current_api_config: Optional[APIConfig]) -> None:
-        # assert current_api_config, "It doesn't permit the configuration content to be empty."
-        # FIXME: Integrate with subcommand *check*
-        # super()._run(
-        #     args=SubcmdCheckArguments(subparser_name=super().responsible_subcommand, config_path=args.config_path),
-        # )
-        # FIXME: Integrate with subcommand *check*
-        # if current_api_config.apis is None:
-        #     self._chk_fail_error_log(
-        #         "❌️  The configuration content is empty.",
-        #         stop_if_fail=args.stop_if_fail,
-        #     )
         if not current_api_config:
             print(f"⚠️  Empty configuration content. Configuration file path: {args.config_path}")
             self._exit_program(
@@ -393,12 +382,6 @@ class SubCmdCheck(BaseCommandProcessor):
         mocked_apis_config = current_api_config.apis
         base_info = mocked_apis_config.base  # type: ignore[union-attr]
         mocked_apis_info = mocked_apis_config.apis  # type: ignore[union-attr]
-        # FIXME: Integrate with subcommand *check*
-        # if not mocked_apis_info:
-        #     self._chk_fail_error_log(
-        #         "❌️  Not exist any API settings for mocking.",
-        #         stop_if_fail=args.stop_if_fail,
-        #     )
         if base_info:
             mocked_apis_path = list(map(lambda p: f"{base_info.url}{p.url}", mocked_apis_info.values()))
         else:
@@ -416,26 +399,8 @@ class SubCmdCheck(BaseCommandProcessor):
             mocked_api_config = mocked_apis_config.get_api_config_by_url(  # type: ignore[union-attr]
                 swagger_api_config.path, base=base_info
             )
-            # FIXME: Integrate with subcommand *check*
-            # if mocked_api_config is None:
-            #     self._chk_fail_error_log(
-            #         f"❌️  Not exist the mocking settings of API '{swagger_api_config.http_method} {swagger_api_config.path}'.",
-            #         stop_if_fail=args.stop_if_fail,
-            #     )
             api_http_config = mocked_api_config.http  # type: ignore[union-attr]
-            # if api_http_config is None:
-            #     self._chk_fail_error_log(
-            #         f"❌️  Not exist the HTTP settings of API '{swagger_api_config.http_method} {swagger_api_config.path}'.",
-            #         stop_if_fail=args.stop_if_fail,
-            #     )
 
-            # FIXME: Integrate with subcommand *check*
-            # Check API HTTP method
-            # if api_http_config.request is None:  # type: ignore[union-attr]
-            #     self._chk_fail_error_log(
-            #         f"❌️  Not exist the HTTP request settings of API '{swagger_api_config.http_method} {swagger_api_config.path}'.",
-            #         stop_if_fail=args.stop_if_fail,
-            #     )
             if (
                 args.check_api_http_method
                 and str(swagger_api_config.http_method).upper() != api_http_config.request.method.upper()  # type: ignore[union-attr]
