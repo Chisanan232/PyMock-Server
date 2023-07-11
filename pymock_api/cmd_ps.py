@@ -209,7 +209,7 @@ class SubCmdCheck(BaseCommandProcessor):
         self._stop_if_fail = args.stop_if_fail
         api_config: Optional[APIConfig] = load_config(path=args.config_path)
 
-        self.check_config_validity(api_config)
+        valid_api_config = self.check_config_validity(api_config)
         if self._config_is_wrong:
             print("Configuration is invalid.")
             if self._stop_if_fail or not args.swagger_doc_url:
@@ -220,7 +220,7 @@ class SubCmdCheck(BaseCommandProcessor):
                 sys.exit(0)
 
         if args.swagger_doc_url:
-            self._diff_config_with_swagger(args, api_config)
+            self._diff_config_with_swagger(args, valid_api_config)
             if self._config_is_wrong:
                 self._exit_program(
                     msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
@@ -232,7 +232,7 @@ class SubCmdCheck(BaseCommandProcessor):
                     exit_code=0,
                 )
 
-    def check_config_validity(self, api_config: Optional[APIConfig]) -> None:
+    def check_config_validity(self, api_config: Optional[APIConfig]) -> APIConfig:
         # # Check whether it has anything in configuration or not
         if not self._setting_should_not_be_none(
             config_key="",
@@ -315,6 +315,7 @@ class SubCmdCheck(BaseCommandProcessor):
                 config_value=one_api_config.http.response.value,
                 valid_callback=self._chk_response_value_validity,
             )
+        return api_config
 
     def _chk_response_value_validity(self, config_key: str, config_value: Any) -> bool:
         try:
@@ -372,13 +373,7 @@ class SubCmdCheck(BaseCommandProcessor):
             if valid_callback:
                 valid_callback(config_key, config_value, criteria)
 
-    def _diff_config_with_swagger(self, args: SubcmdCheckArguments, current_api_config: Optional[APIConfig]) -> None:
-        if not current_api_config:
-            print(f"⚠️  Empty configuration content. Configuration file path: {args.config_path}")
-            self._exit_program(
-                msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
-                exit_code=1,
-            )
+    def _diff_config_with_swagger(self, args: SubcmdCheckArguments, current_api_config: APIConfig) -> None:
         assert current_api_config
         mocked_apis_config = current_api_config.apis
         base_info = mocked_apis_config.base  # type: ignore[union-attr]
