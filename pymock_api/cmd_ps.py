@@ -494,3 +494,4 @@ class SubCmdInspect(BaseCommandProcessor):
 
     def _run(self, args: SubcmdInspectArguments) -> None:
         current_api_config = load_config(path=args.config_path)
+        # TODO: Add implementation about *inspect* feature gets some details of config
