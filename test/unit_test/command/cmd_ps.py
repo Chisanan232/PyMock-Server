@@ -11,7 +11,6 @@ from unittest.mock import MagicMock, Mock, call, patch
 import pytest
 
 from pymock_api._utils.file_opt import YAML
-from pymock_api.command.cmd import SubCommand, get_all_subcommands
 from pymock_api.command.cmd_ps import (
     BaseCommandProcessor,
     NoSubCmd,
@@ -22,6 +21,7 @@ from pymock_api.command.cmd_ps import (
     make_command_chain,
     run_command_chain,
 )
+from pymock_api.command.options import SubCommand, get_all_subcommands
 from pymock_api.model import (
     ParserArguments,
     SubcmdCheckArguments,
