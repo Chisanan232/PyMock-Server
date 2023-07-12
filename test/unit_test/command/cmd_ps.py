@@ -11,8 +11,8 @@ from unittest.mock import MagicMock, Mock, call, patch
 import pytest
 
 from pymock_api._utils.file_opt import YAML
-from pymock_api.cmd import SubCommand, get_all_subcommands
-from pymock_api.cmd_ps import (
+from pymock_api.command.cmd import SubCommand, get_all_subcommands
+from pymock_api.command.cmd_ps import (
     BaseCommandProcessor,
     NoSubCmd,
     SubCmdCheck,
@@ -33,7 +33,7 @@ from pymock_api.model import (
 )
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
-from .._values import (
+from ..._values import (
     _Bind_Host_And_Port,
     _Generate_Sample,
     _Log_Level,
@@ -250,7 +250,7 @@ class TestNoSubCmd(BaseCommandProcessorTestSpec):
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
 
-        with patch("pymock_api.cmd_ps.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+        with patch("pymock_api.command.cmd_ps.YAML", return_value=FakeYAML) as mock_instantiate_writer:
             with patch.object(WSGIServer, "generate", return_value=command) as mock_sgi_generate:
                 cmd_ps(mock_parser_arg)
                 mock_sgi_generate.assert_not_called()
@@ -313,7 +313,7 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
 
-        with patch("pymock_api.cmd_ps.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+        with patch("pymock_api.command.cmd_ps.YAML", return_value=FakeYAML) as mock_instantiate_writer:
             with patch.object(ASGIServer, "generate", return_value=command) as mock_asgi_generate:
                 with patch.object(WSGIServer, "generate", return_value=command) as mock_wsgi_generate:
                     if should_raise_exc:
@@ -356,7 +356,7 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
     def _expected_argument_type(self) -> Type[SubcmdRunArguments]:
         return SubcmdRunArguments
 
-    @patch("pymock_api.cmd_ps.import_web_lib.auto_ready", return_value=None)
+    @patch("pymock_api.command.cmd_ps.import_web_lib.auto_ready", return_value=None)
     def test_auto_with_nonexist_lib(self, mock_auto_ready: Mock, cmd_ps: SubCmdRun):
         with pytest.raises(RuntimeError) as exc_info:
             cmd_ps._initial_server_gateway(lib=_Test_Auto_Type)
@@ -441,7 +441,7 @@ class TestSubCmdConfig(BaseCommandProcessorTestSpec):
         )
 
         with patch("builtins.print", autospec=True, side_effect=print) as mock_print:
-            with patch("pymock_api.cmd_ps.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+            with patch("pymock_api.command.cmd_ps.YAML", return_value=FakeYAML) as mock_instantiate_writer:
                 cmd_ps(mock_parser_arg)
 
                 mock_instantiate_writer.assert_called_once()
@@ -484,7 +484,7 @@ class TestSubCmdConfig(BaseCommandProcessorTestSpec):
         )
 
         # Run target function to test
-        with patch("pymock_api.cmd_ps.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+        with patch("pymock_api.command.cmd_ps.YAML", return_value=FakeYAML) as mock_instantiate_writer:
             with pytest.raises(AssertionError) as exc_info:
                 cmd_ps.process(invalid_args)
 
@@ -501,7 +501,7 @@ YAML_PATHS_WITH_EX_CODE: List[tuple] = []
 
 def _get_all_yaml(config_type: str, exit_code: Union[str, int]) -> None:
     yaml_dir = os.path.join(
-        str(pathlib.Path(__file__).parent.parent), "data", "check_test", "config", config_type, "*.yaml"
+        str(pathlib.Path(__file__).parent.parent.parent), "data", "check_test", "config", config_type, "*.yaml"
     )
     global YAML_PATHS_WITH_EX_CODE
     for yaml_config_path in glob.glob(yaml_dir):
@@ -529,7 +529,7 @@ RESPONSE_JSON_PATHS: List[str] = []
 def _get_all_json(has_base_info: bool, config_type: str, exit_code: Union[str, int]) -> None:
     file_naming = "has-base-info" if has_base_info else "no-base-info"
     json_dir = os.path.join(
-        str(pathlib.Path(__file__).parent.parent),
+        str(pathlib.Path(__file__).parent.parent.parent),
         "data",
         "check_test",
         "diff_with_swagger",
@@ -540,7 +540,7 @@ def _get_all_json(has_base_info: bool, config_type: str, exit_code: Union[str, i
     for json_config_path in glob.glob(json_dir):
         yaml_file_format = "*.yaml" if config_type == "invalid" else f"{file_naming}*.yaml"
         yaml_dir = os.path.join(
-            str(pathlib.Path(__file__).parent.parent),
+            str(pathlib.Path(__file__).parent.parent.parent),
             "data",
             "check_test",
             "diff_with_swagger",
@@ -557,7 +557,12 @@ def _get_all_json(has_base_info: bool, config_type: str, exit_code: Union[str, i
 
 def _get_all_swagger_config() -> None:
     json_dir = os.path.join(
-        str(pathlib.Path(__file__).parent.parent), "data", "check_test", "diff_with_swagger", "api_response", "*.json"
+        str(pathlib.Path(__file__).parent.parent.parent),
+        "data",
+        "check_test",
+        "diff_with_swagger",
+        "api_response",
+        "*.json",
     )
     global RESPONSE_JSON_PATHS
     for json_config_path in glob.glob(json_dir):
@@ -664,7 +669,7 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
         mock_parser_arg = _given_parser_args(
             subcommand=_Test_SubCommand_Check, swagger_doc_url=_Swagger_API_Document_URL, stop_if_fail=stop_if_fail
         )
-        with patch("pymock_api.cmd_ps.load_config") as mock_load_config:
+        with patch("pymock_api.command.cmd_ps.load_config") as mock_load_config:
             mock_load_config.return_value = load_config(dummy_yaml_path)
             with patch.object(SubCmdCheck, "_get_swagger_config") as mock_get_swagger_config:
                 with open(api_resp_path, "r", encoding="utf-8") as file_stream:
@@ -709,7 +714,7 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
 
     @pytest.mark.parametrize("swagger_config_response", RESPONSE_JSON_PATHS)
     def test__get_swagger_config(self, swagger_config_response: str, cmd_ps: SubCmdCheck):
-        with patch("pymock_api.cmd_ps.URLLibHTTPClient.request") as mock_api_client_request:
+        with patch("pymock_api.command.cmd_ps.URLLibHTTPClient.request") as mock_api_client_request:
             with open(swagger_config_response, "r", encoding="utf-8") as file_stream:
                 mock_api_client_request.return_value = json.loads(file_stream.read())
 
@@ -776,6 +781,6 @@ def test_make_command_chain_if_duplicated_subcmd():
     assert re.search(r"subcommand.{1,64}has been used", str(exc_info.value), re.IGNORECASE)
 
     # Remove the invalid object for test could run finely.
-    from pymock_api.cmd_ps import _COMMAND_CHAIN
+    from pymock_api.command.cmd_ps import _COMMAND_CHAIN
 
     _COMMAND_CHAIN.pop(-1)
