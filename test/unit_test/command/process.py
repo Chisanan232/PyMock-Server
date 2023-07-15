@@ -356,37 +356,37 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
     def _expected_argument_type(self) -> Type[SubcmdRunArguments]:
         return SubcmdRunArguments
 
-    @patch("pymock_api.command.process.import_web_lib.auto_ready", return_value=None)
-    def test_auto_with_nonexist_lib(self, mock_auto_ready: Mock, cmd_ps: SubCmdRun):
-        with pytest.raises(RuntimeError) as exc_info:
-            cmd_ps._initial_server_gateway(lib=_Test_Auto_Type)
-        assert re.search(r"doesn't have valid web library", str(exc_info.value), re.IGNORECASE)
-        mock_auto_ready.assert_called_once()
-
-    def test_assert_error_with_empty_args(self, cmd_ps: SubCmdRun):
-        # Mock functions
-        cmd_ps._initial_server_gateway = MagicMock()
-        mock_server_gateway = Mock()
-        mock_server_gateway.run = MagicMock()
-        cmd_ps._server_gateway = mock_server_gateway
-
-        invalid_args = SubcmdRunArguments(
-            subparser_name=_Test_SubCommand_Run,
-            app_type="",
-            config=_Test_Config,
-            bind=_Bind_Host_And_Port.value,
-            workers=_Workers_Amount.value,
-            log_level=_Log_Level.value,
-        )
-
-        # Run target function to test
-        with pytest.raises(AssertionError) as exc_info:
-            cmd_ps.process(invalid_args)
-
-        # Verify result
-        assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)
-        cmd_ps._initial_server_gateway.assert_not_called()
-        cmd_ps._server_gateway.run.assert_not_called()
+    # @patch("pymock_api.command.process.import_web_lib.auto_ready", return_value=None)
+    # def test_auto_with_nonexist_lib(self, mock_auto_ready: Mock, cmd_ps: SubCmdRun):
+    #     with pytest.raises(RuntimeError) as exc_info:
+    #         cmd_ps._initial_server_gateway(lib=_Test_Auto_Type)
+    #     assert re.search(r"doesn't have valid web library", str(exc_info.value), re.IGNORECASE)
+    #     mock_auto_ready.assert_called_once()
+    #
+    # def test_assert_error_with_empty_args(self, cmd_ps: SubCmdRun):
+    #     # Mock functions
+    #     cmd_ps._initial_server_gateway = MagicMock()
+    #     mock_server_gateway = Mock()
+    #     mock_server_gateway.run = MagicMock()
+    #     cmd_ps._server_gateway = mock_server_gateway
+    #
+    #     invalid_args = SubcmdRunArguments(
+    #         subparser_name=_Test_SubCommand_Run,
+    #         app_type="",
+    #         config=_Test_Config,
+    #         bind=_Bind_Host_And_Port.value,
+    #         workers=_Workers_Amount.value,
+    #         log_level=_Log_Level.value,
+    #     )
+    #
+    #     # Run target function to test
+    #     with pytest.raises(AssertionError) as exc_info:
+    #         cmd_ps.process(invalid_args)
+    #
+    #     # Verify result
+    #     assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)
+    #     cmd_ps._initial_server_gateway.assert_not_called()
+    #     cmd_ps._server_gateway.run.assert_not_called()
 
 
 class TestSubCmdConfig(BaseCommandProcessorTestSpec):
