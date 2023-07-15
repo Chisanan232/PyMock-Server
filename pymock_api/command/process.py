@@ -19,6 +19,7 @@ from ..model import (
 from ..model._sample import Sample_Config_Value
 from ..server import BaseSGIServer, setup_asgi, setup_wsgi
 from .check.component import SubCmdCheckComponent
+from .component import BaseSubCmdComponent
 from .options import MockAPICommandParser, SubCommand
 
 _COMMAND_CHAIN: List[Type["CommandProcessor"]] = []
@@ -83,6 +84,10 @@ class CommandProcessor:
         self._current_index += 1
         return cmd()
 
+    @property
+    def _subcmd_component(self) -> BaseSubCmdComponent:
+        raise NotImplementedError
+
     def distribute(self, args: Optional[ParserArguments] = None, cmd_index: int = 0) -> "CommandProcessor":
         if self._is_responsible(subcmd=self.mock_api_parser.subcommand, args=args):
             return self
@@ -110,7 +115,7 @@ class CommandProcessor:
         return subcmd == self.responsible_subcommand
 
     def _run(self, args: ParserArguments) -> None:
-        raise NotImplementedError
+        self._subcmd_component.process(args)
 
     def _parse_cmd_arguments(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> Namespace:
         return parser.parse_args(cmd_args)
@@ -194,9 +199,6 @@ class SubCmdCheck(BaseCommandProcessor):
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdCheckArguments:
         return deserialize_args.subcmd_check(self._parse_cmd_arguments(parser, cmd_args))
-
-    def _run(self, args: SubcmdCheckArguments) -> None:
-        self._subcmd_component.process(args)
 
 
 class SubCmdInspect(BaseCommandProcessor):
