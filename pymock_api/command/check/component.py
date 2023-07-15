@@ -227,9 +227,9 @@ class SwaggerDiffChecking(_BaseChecking):
                 exit_code=0,
             )
 
-    def check(self, args: SubcmdCheckArguments, current_api_config: APIConfig) -> None:  # type: ignore[override]
-        assert current_api_config
-        mocked_apis_config = current_api_config.apis
+    def check(self, args: SubcmdCheckArguments, api_config: APIConfig) -> None:  # type: ignore[override]
+        assert api_config
+        mocked_apis_config = api_config.apis
         base_info = mocked_apis_config.base  # type: ignore[union-attr]
         mocked_apis_info = mocked_apis_config.apis  # type: ignore[union-attr]
         if base_info:
