@@ -73,7 +73,7 @@ class _BaseChecking(metaclass=ABCMeta):
         return api_config
 
     @abstractmethod
-    def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> Any:
+    def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
         pass
 
     @abstractmethod
@@ -243,7 +243,7 @@ class SwaggerDiffChecking(_BaseChecking):
         super().__init__()
         self._api_client = URLLibHTTPClient()
 
-    def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> None:
+    def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
         assert api_config
         mocked_apis_config = api_config.apis
         base_info = mocked_apis_config.base  # type: ignore[union-attr]
@@ -317,6 +317,8 @@ class SwaggerDiffChecking(_BaseChecking):
             # TODO: Implement the checking detail of HTTP response
             # Check API response
             api_resp = swagger_api_config.response
+
+        return api_config
 
     def _get_swagger_config(self, swagger_url: str) -> SwaggerConfig:
         swagger_api_doc: dict = self._api_client.request(method="GET", url=swagger_url)
