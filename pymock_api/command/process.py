@@ -45,10 +45,6 @@ def make_command_chain() -> List["CommandProcessor"]:
     return mock_api_cmd
 
 
-def _option_cannot_be_empty_assertion(cmd_option: str) -> str:
-    return f"Option '{cmd_option}' value cannot be empty."
-
-
 class MetaCommand(type):
     """*The metaclass for options of PyMock-API command*
 
