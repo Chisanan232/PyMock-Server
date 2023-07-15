@@ -21,15 +21,42 @@ from ...model.swagger_config import APIParameter as SwaggerAPIParameter
 class SubCmdCheckComponent:
     def __init__(self):
         super().__init__()
-        self._validity_comp = ValidityChecking()
-        self._swagger_diff_comp = SwaggerDiffChecking()
+        self._check_config: _BaseCheckingFactory = ConfigCheckingFactory()
 
     def process(self, args: SubcmdCheckArguments) -> None:
         api_config: Optional[APIConfig] = load_config(path=args.config_path)
 
-        valid_api_config = self._validity_comp.run(args=args, api_config=api_config)
+        valid_api_config = self._check_config.validity(args=args, api_config=api_config)
         if args.swagger_doc_url:
-            self._swagger_diff_comp.run(args, valid_api_config)
+            self._check_config.diff_with_swagger(args=args, api_config=valid_api_config)
+
+
+class _BaseCheckingFactory(metaclass=ABCMeta):
+    def validity(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
+        return self.validity_checking.run(args=args, api_config=api_config)
+
+    @property
+    @abstractmethod
+    def validity_checking(self) -> "ValidityChecking":
+        pass
+
+    def diff_with_swagger(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> None:
+        self.diff_with_swagger_checking.run(args=args, api_config=api_config)
+
+    @property
+    @abstractmethod
+    def diff_with_swagger_checking(self) -> "SwaggerDiffChecking":
+        pass
+
+
+class ConfigCheckingFactory(_BaseCheckingFactory):
+    @property
+    def validity_checking(self) -> "ValidityChecking":
+        return ValidityChecking()
+
+    @property
+    def diff_with_swagger_checking(self) -> "SwaggerDiffChecking":
+        return SwaggerDiffChecking()
 
 
 class _BaseChecking(metaclass=ABCMeta):
@@ -38,10 +65,11 @@ class _BaseChecking(metaclass=ABCMeta):
         self._stop_if_fail: Optional[bool] = None
         self._config_is_wrong: bool = False
 
-    def run(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> Any:
+    def run(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
         self._stop_if_fail = args.stop_if_fail
         api_config = self.check(args, api_config)
         self.run_finally(args)
+        assert api_config
         return api_config
 
     @abstractmethod
