@@ -43,14 +43,14 @@ class _BaseChecking(metaclass=ABCMeta):
         self._stop_if_fail = args.stop_if_fail
 
     @abstractmethod
-    def check(self, **kwargs) -> Any:
+    def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> Any:
         pass
 
 
 class ValidityChecking(_BaseChecking):
     def run(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
         super().run(args, api_config)
-        api_config = self.check(api_config)
+        api_config = self.check(args, api_config)
         if self._config_is_wrong:
             print("Configuration is invalid.")
             if self._stop_if_fail or not args.swagger_doc_url:
@@ -61,7 +61,7 @@ class ValidityChecking(_BaseChecking):
                 sys.exit(0)
         return api_config
 
-    def check(self, api_config: Optional[APIConfig]) -> APIConfig:  # type: ignore[override]
+    def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
         # # Check whether it has anything in configuration or not
         if not self._setting_should_not_be_none(
             config_key="",
@@ -227,7 +227,7 @@ class SwaggerDiffChecking(_BaseChecking):
                 exit_code=0,
             )
 
-    def check(self, args: SubcmdCheckArguments, api_config: APIConfig) -> None:  # type: ignore[override]
+    def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> None:
         assert api_config
         mocked_apis_config = api_config.apis
         base_info = mocked_apis_config.base  # type: ignore[union-attr]
