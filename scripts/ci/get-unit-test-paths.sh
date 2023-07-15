@@ -41,7 +41,7 @@ getalltests() {
         # shellcheck disable=SC2124
         # shellcheck disable=SC2178
         server_tests=${alltestpaths[@]}
-    elif echo "$1" | grep -E "command" | grep -E "check";
+    elif echo "$1" | grep -q "check";  # /command/check
     then
         # shellcheck disable=SC2124
         # shellcheck disable=SC2178
