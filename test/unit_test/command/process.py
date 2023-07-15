@@ -246,12 +246,10 @@ class TestNoSubCmd(BaseCommandProcessorTestSpec):
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
 
-        with patch("pymock_api.command.process.YAML", return_value=FakeYAML) as mock_instantiate_writer:
-            with patch.object(WSGIServer, "generate", return_value=command) as mock_sgi_generate:
-                cmd_ps(mock_parser_arg)
-                mock_sgi_generate.assert_not_called()
-                command.run.assert_not_called()
-                mock_instantiate_writer.assert_not_called()
+        with patch.object(WSGIServer, "generate", return_value=command) as mock_sgi_generate:
+            cmd_ps(mock_parser_arg)
+            mock_sgi_generate.assert_not_called()
+            command.run.assert_not_called()
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
@@ -309,32 +307,29 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
 
-        with patch("pymock_api.command.process.YAML", return_value=FakeYAML) as mock_instantiate_writer:
-            with patch.object(ASGIServer, "generate", return_value=command) as mock_asgi_generate:
-                with patch.object(WSGIServer, "generate", return_value=command) as mock_wsgi_generate:
-                    if should_raise_exc:
-                        with pytest.raises(ValueError) as exc_info:
-                            cmd_ps(mock_parser_arg)
-                        assert "Invalid value" in str(exc_info.value)
-                        mock_asgi_generate.assert_not_called()
-                        mock_wsgi_generate.assert_not_called()
-                        command.run.assert_not_called()
-                        mock_instantiate_writer.assert_not_called()
-                    else:
+        with patch.object(ASGIServer, "generate", return_value=command) as mock_asgi_generate:
+            with patch.object(WSGIServer, "generate", return_value=command) as mock_wsgi_generate:
+                if should_raise_exc:
+                    with pytest.raises(ValueError) as exc_info:
                         cmd_ps(mock_parser_arg)
-                        if app_type == "auto":
-                            mock_asgi_generate.assert_called_once_with(mock_parser_arg)
-                            mock_wsgi_generate.assert_not_called()
-                        elif app_type == "flask":
-                            mock_asgi_generate.assert_not_called()
-                            mock_wsgi_generate.assert_called_once_with(mock_parser_arg)
-                        elif app_type == "fastapi":
-                            mock_asgi_generate.assert_called_once_with(mock_parser_arg)
-                            mock_wsgi_generate.assert_not_called()
-                        else:
-                            assert False, "Please use valid *app-type* option value."
-                        command.run.assert_called_once()
-                        mock_instantiate_writer.assert_not_called()
+                    assert "Invalid value" in str(exc_info.value)
+                    mock_asgi_generate.assert_not_called()
+                    mock_wsgi_generate.assert_not_called()
+                    command.run.assert_not_called()
+                else:
+                    cmd_ps(mock_parser_arg)
+                    if app_type == "auto":
+                        mock_asgi_generate.assert_called_once_with(mock_parser_arg)
+                        mock_wsgi_generate.assert_not_called()
+                    elif app_type == "flask":
+                        mock_asgi_generate.assert_not_called()
+                        mock_wsgi_generate.assert_called_once_with(mock_parser_arg)
+                    elif app_type == "fastapi":
+                        mock_asgi_generate.assert_called_once_with(mock_parser_arg)
+                        mock_wsgi_generate.assert_not_called()
+                    else:
+                        assert False, "Please use valid *app-type* option value."
+                    command.run.assert_called_once()
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
