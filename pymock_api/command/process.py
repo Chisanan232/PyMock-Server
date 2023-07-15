@@ -197,11 +197,15 @@ class SubCmdConfig(BaseCommandProcessor):
 class SubCmdCheck(BaseCommandProcessor):
     responsible_subcommand = SubCommand.Check
 
+    @property
+    def _subcmd_component(self) -> SubCmdCheckComponent:
+        return SubCmdCheckComponent()
+
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdCheckArguments:
         return deserialize_args.subcmd_check(self._parse_cmd_arguments(parser, cmd_args))
 
     def _run(self, args: SubcmdCheckArguments) -> None:
-        SubCmdCheckComponent().process(args)
+        self._subcmd_component.process(args)
 
 
 class SubCmdInspect(BaseCommandProcessor):
