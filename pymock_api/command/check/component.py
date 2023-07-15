@@ -2,6 +2,7 @@ import json
 import pathlib
 import re
 import sys
+from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Optional
 
 from ..._utils.api_client import URLLibHTTPClient
@@ -31,7 +32,17 @@ class SubCmdCheckComponent:
             self._swagger_diff_comp.run(args, valid_api_config)
 
 
-class ValidityChecking:
+class _BaseChecking(metaclass=ABCMeta):
+    @abstractmethod
+    def run(self, args: SubcmdCheckArguments, api_config: APIConfig) -> Any:
+        pass
+
+    @abstractmethod
+    def check(self, **kwargs) -> Any:
+        pass
+
+
+class ValidityChecking(_BaseChecking):
     def __init__(self):
         super().__init__()
         self._stop_if_fail: Optional[bool] = None
@@ -50,7 +61,7 @@ class ValidityChecking:
                 sys.exit(0)
         return api_config
 
-    def check(self, api_config: Optional[APIConfig]) -> APIConfig:
+    def check(self, api_config: Optional[APIConfig]) -> APIConfig:  # type: ignore[override]
         # # Check whether it has anything in configuration or not
         if not self._setting_should_not_be_none(
             config_key="",
@@ -196,7 +207,7 @@ class ValidityChecking:
         sys.exit(exit_code)
 
 
-class SwaggerDiffChecking:
+class SwaggerDiffChecking(_BaseChecking):
     def __init__(self):
         super().__init__()
         self._api_client = URLLibHTTPClient()
@@ -217,7 +228,7 @@ class SwaggerDiffChecking:
                 exit_code=0,
             )
 
-    def check(self, args: SubcmdCheckArguments, current_api_config: APIConfig) -> None:
+    def check(self, args: SubcmdCheckArguments, current_api_config: APIConfig) -> None:  # type: ignore[override]
         assert current_api_config
         mocked_apis_config = current_api_config.apis
         base_info = mocked_apis_config.base  # type: ignore[union-attr]
