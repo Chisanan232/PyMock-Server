@@ -8,7 +8,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pymock_api.command.check.component import SubCmdCheckComponent, ValidityChecking
+from pymock_api.command.check.component import (
+    SubCmdCheckComponent,
+    SwaggerDiffChecking,
+    ValidityChecking,
+)
 from pymock_api.model import (
     ParserArguments,
     SubcmdCheckArguments,
@@ -170,7 +174,7 @@ class TestSubCmdCheckComponent:
         )
         with patch("pymock_api.command.check.component.load_config") as mock_load_config:
             mock_load_config.return_value = load_config(dummy_yaml_path)
-            with patch.object(SubCmdCheckComponent, "_get_swagger_config") as mock_get_swagger_config:
+            with patch.object(SwaggerDiffChecking, "_get_swagger_config") as mock_get_swagger_config:
                 with open(api_resp_path, "r", encoding="utf-8") as file_stream:
                     mock_get_swagger_config.return_value = deserialize_swagger_api_config(
                         json.loads(file_stream.read())
@@ -179,15 +183,6 @@ class TestSubCmdCheckComponent:
                 with pytest.raises(SystemExit) as exc_info:
                     subcmd.process(mock_parser_arg)
                 assert expected_exit_code in str(exc_info.value)
-
-    @pytest.mark.parametrize("swagger_config_response", RESPONSE_JSON_PATHS)
-    def test__get_swagger_config(self, swagger_config_response: str, subcmd: SubCmdCheckComponent):
-        with patch("pymock_api.command.check.component.URLLibHTTPClient.request") as mock_api_client_request:
-            with open(swagger_config_response, "r", encoding="utf-8") as file_stream:
-                mock_api_client_request.return_value = json.loads(file_stream.read())
-
-            subcmd._get_swagger_config(_Swagger_API_Document_URL)
-            mock_api_client_request.assert_called_once_with(method="GET", url=_Swagger_API_Document_URL)
 
 
 class TestValidityChecking:
@@ -208,3 +203,18 @@ class TestValidityChecking:
                 config_key="any key", config_value="any value", criteria="invalid type value"
             )
         assert re.search(r"only accept 'list'", str(exc_info.value), re.IGNORECASE)
+
+
+class TestSwaggerDiffChecking:
+    @pytest.fixture(scope="class")
+    def checking(self) -> SwaggerDiffChecking:
+        return SwaggerDiffChecking()
+
+    @pytest.mark.parametrize("swagger_config_response", RESPONSE_JSON_PATHS)
+    def test__get_swagger_config(self, swagger_config_response: str, checking: SwaggerDiffChecking):
+        with patch("pymock_api.command.check.component.URLLibHTTPClient.request") as mock_api_client_request:
+            with open(swagger_config_response, "r", encoding="utf-8") as file_stream:
+                mock_api_client_request.return_value = json.loads(file_stream.read())
+
+            checking._get_swagger_config(_Swagger_API_Document_URL)
+            mock_api_client_request.assert_called_once_with(method="GET", url=_Swagger_API_Document_URL)
