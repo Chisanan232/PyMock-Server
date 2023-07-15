@@ -2,7 +2,6 @@ import copy
 from argparse import ArgumentParser, Namespace
 from typing import List, Optional, Tuple, Type
 
-from .._utils import YAML
 from .._utils.api_client import URLLibHTTPClient
 from ..model import (
     ParserArguments,
@@ -13,9 +12,9 @@ from ..model import (
     deserialize_args,
     load_config,
 )
-from ..model._sample import Sample_Config_Value
 from .check.component import SubCmdCheckComponent
 from .component import BaseSubCmdComponent
+from .config.component import SubCmdConfigComponent
 from .options import MockAPICommandParser, SubCommand
 from .run.component import SubCmdRunComponent
 
@@ -145,18 +144,12 @@ class SubCmdRun(BaseCommandProcessor):
 class SubCmdConfig(BaseCommandProcessor):
     responsible_subcommand = SubCommand.Config
 
+    @property
+    def _subcmd_component(self) -> SubCmdConfigComponent:
+        return SubCmdConfigComponent()
+
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdConfigArguments:
         return deserialize_args.subcmd_config(self._parse_cmd_arguments(parser, cmd_args))
-
-    def _run(self, args: SubcmdConfigArguments) -> None:
-        yaml: YAML = YAML()
-        sample_data: str = yaml.serialize(config=Sample_Config_Value)
-        if args.print_sample:
-            print(f"It will write below content into file {args.sample_output_path}:")
-            print(f"{sample_data}")
-        if args.generate_sample:
-            assert args.sample_output_path, _option_cannot_be_empty_assertion("-o, --output")
-            yaml.write(path=args.sample_output_path, config=sample_data)
 
 
 class SubCmdCheck(BaseCommandProcessor):
