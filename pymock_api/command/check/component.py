@@ -33,9 +33,14 @@ class SubCmdCheckComponent:
 
 
 class _BaseChecking(metaclass=ABCMeta):
+    def __init__(self):
+        super().__init__()
+        self._stop_if_fail: Optional[bool] = None
+        self._config_is_wrong: bool = False
+
     @abstractmethod
-    def run(self, args: SubcmdCheckArguments, api_config: APIConfig) -> Any:
-        pass
+    def run(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> Any:
+        self._stop_if_fail = args.stop_if_fail
 
     @abstractmethod
     def check(self, **kwargs) -> Any:
@@ -43,13 +48,8 @@ class _BaseChecking(metaclass=ABCMeta):
 
 
 class ValidityChecking(_BaseChecking):
-    def __init__(self):
-        super().__init__()
-        self._stop_if_fail: Optional[bool] = None
-        self._config_is_wrong: bool = False
-
     def run(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
-        self._stop_if_fail = args.stop_if_fail
+        super().run(args, api_config)
         api_config = self.check(api_config)
         if self._config_is_wrong:
             print("Configuration is invalid.")
@@ -211,11 +211,10 @@ class SwaggerDiffChecking(_BaseChecking):
     def __init__(self):
         super().__init__()
         self._api_client = URLLibHTTPClient()
-        self._stop_if_fail: Optional[bool] = None
-        self._config_is_wrong: bool = False
 
-    def run(self, args: SubcmdCheckArguments, api_config: APIConfig) -> None:
-        self._stop_if_fail = args.stop_if_fail
+    def run(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> None:
+        super().run(args, api_config)
+        assert api_config
         self.check(args, api_config)
         if self._config_is_wrong:
             self._exit_program(
