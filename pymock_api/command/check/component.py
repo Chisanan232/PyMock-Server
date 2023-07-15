@@ -38,29 +38,22 @@ class _BaseChecking(metaclass=ABCMeta):
         self._stop_if_fail: Optional[bool] = None
         self._config_is_wrong: bool = False
 
-    @abstractmethod
     def run(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> Any:
         self._stop_if_fail = args.stop_if_fail
+        api_config = self.check(args, api_config)
+        self.run_finally(args)
+        return api_config
 
     @abstractmethod
     def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> Any:
         pass
 
+    @abstractmethod
+    def run_finally(self, args: SubcmdCheckArguments) -> None:
+        pass
+
 
 class ValidityChecking(_BaseChecking):
-    def run(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
-        super().run(args, api_config)
-        api_config = self.check(args, api_config)
-        if self._config_is_wrong:
-            print("Configuration is invalid.")
-            if self._stop_if_fail or not args.swagger_doc_url:
-                sys.exit(1)
-        else:
-            print("Configuration is valid.")
-            if not args.swagger_doc_url:
-                sys.exit(0)
-        return api_config
-
     def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
         # # Check whether it has anything in configuration or not
         if not self._setting_should_not_be_none(
@@ -206,26 +199,21 @@ class ValidityChecking(_BaseChecking):
         print(msg)
         sys.exit(exit_code)
 
+    def run_finally(self, args: SubcmdCheckArguments) -> None:
+        if self._config_is_wrong:
+            print("Configuration is invalid.")
+            if self._stop_if_fail or not args.swagger_doc_url:
+                sys.exit(1)
+        else:
+            print("Configuration is valid.")
+            if not args.swagger_doc_url:
+                sys.exit(0)
+
 
 class SwaggerDiffChecking(_BaseChecking):
     def __init__(self):
         super().__init__()
         self._api_client = URLLibHTTPClient()
-
-    def run(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> None:
-        super().run(args, api_config)
-        assert api_config
-        self.check(args, api_config)
-        if self._config_is_wrong:
-            self._exit_program(
-                msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
-                exit_code=1,
-            )
-        else:
-            self._exit_program(
-                msg=f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.",
-                exit_code=0,
-            )
 
     def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> None:
         assert api_config
@@ -333,3 +321,15 @@ class SwaggerDiffChecking(_BaseChecking):
     def _exit_program(self, msg: str, exit_code: int = 0) -> None:
         print(msg)
         sys.exit(exit_code)
+
+    def run_finally(self, args: SubcmdCheckArguments) -> None:
+        if self._config_is_wrong:
+            self._exit_program(
+                msg=f"⚠️  The configuration has something wrong or miss with Swagger API document {args.swagger_doc_url}.",
+                exit_code=1,
+            )
+        else:
+            self._exit_program(
+                msg=f"🍻  All mock APIs are already be updated with Swagger API document {args.swagger_doc_url}.",
+                exit_code=0,
+            )
