@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pymock_api.command.check.component import SubCmdCheckComponent
+from pymock_api.command.check.component import SubCmdCheckComponent, ValidityChecking
 from pymock_api.model import (
     ParserArguments,
     SubcmdCheckArguments,
@@ -180,20 +180,6 @@ class TestSubCmdCheckComponent:
                     subcmd.process(mock_parser_arg)
                 assert expected_exit_code in str(exc_info.value)
 
-    def test__setting_should_be_valid(self, subcmd: SubCmdCheckComponent):
-        test_callback = MagicMock()
-        subcmd._setting_should_be_valid(
-            config_key="key", config_value="value", criteria=["value"], valid_callback=test_callback
-        )
-        test_callback.assert_called_once_with("key", "value", ["value"])
-
-    def test__setting_should_be_valid_with_invalid_type_criteria(self, subcmd: SubCmdCheckComponent):
-        with pytest.raises(TypeError) as exc_info:
-            subcmd._setting_should_be_valid(
-                config_key="any key", config_value="any value", criteria="invalid type value"
-            )
-        assert re.search(r"only accept 'list'", str(exc_info.value), re.IGNORECASE)
-
     @pytest.mark.parametrize("swagger_config_response", RESPONSE_JSON_PATHS)
     def test__get_swagger_config(self, swagger_config_response: str, subcmd: SubCmdCheckComponent):
         with patch("pymock_api.command.check.component.URLLibHTTPClient.request") as mock_api_client_request:
@@ -202,3 +188,23 @@ class TestSubCmdCheckComponent:
 
             subcmd._get_swagger_config(_Swagger_API_Document_URL)
             mock_api_client_request.assert_called_once_with(method="GET", url=_Swagger_API_Document_URL)
+
+
+class TestValidityChecking:
+    @pytest.fixture(scope="class")
+    def checking(self) -> ValidityChecking:
+        return ValidityChecking()
+
+    def test__setting_should_be_valid(self, checking: ValidityChecking):
+        test_callback = MagicMock()
+        checking._setting_should_be_valid(
+            config_key="key", config_value="value", criteria=["value"], valid_callback=test_callback
+        )
+        test_callback.assert_called_once_with("key", "value", ["value"])
+
+    def test__setting_should_be_valid_with_invalid_type_criteria(self, checking: ValidityChecking):
+        with pytest.raises(TypeError) as exc_info:
+            checking._setting_should_be_valid(
+                config_key="any key", config_value="any value", criteria="invalid type value"
+            )
+        assert re.search(r"only accept 'list'", str(exc_info.value), re.IGNORECASE)
