@@ -1,12 +1,9 @@
 import copy
-import os
-import re
 from argparse import ArgumentParser, Namespace
 from typing import List, Optional, Tuple, Type
 
-from .._utils import YAML, import_web_lib
+from .._utils import YAML
 from .._utils.api_client import URLLibHTTPClient
-from ..exceptions import InvalidAppType, NoValidWebLibrary
 from ..model import (
     ParserArguments,
     SubcmdCheckArguments,
@@ -17,10 +14,10 @@ from ..model import (
     load_config,
 )
 from ..model._sample import Sample_Config_Value
-from ..server import BaseSGIServer, setup_asgi, setup_wsgi
 from .check.component import SubCmdCheckComponent
 from .component import BaseSubCmdComponent
 from .options import MockAPICommandParser, SubCommand
+from .run.component import SubCmdRunComponent
 
 _COMMAND_CHAIN: List[Type["CommandProcessor"]] = []
 
@@ -137,40 +134,12 @@ class NoSubCmd(BaseCommandProcessor):
 class SubCmdRun(BaseCommandProcessor):
     responsible_subcommand = SubCommand.Run
 
-    def __init__(self):
-        super().__init__()
-        self._server_gateway: BaseSGIServer = None
+    @property
+    def _subcmd_component(self) -> SubCmdRunComponent:
+        return SubCmdRunComponent()
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdRunArguments:
         return deserialize_args.subcmd_run(self._parse_cmd_arguments(parser, cmd_args))
-
-    def _run(self, args: SubcmdRunArguments) -> None:
-        self._process_option(args)
-        self._server_gateway.run(args)
-
-    def _process_option(self, parser_options: SubcmdRunArguments) -> None:
-        # Note: It's possible that it should separate the functions to be multiple objects to implement and manage the
-        # behaviors of command line with different options.
-        # Handle *config*
-        if parser_options.config:
-            os.environ["MockAPI_Config"] = parser_options.config
-
-        # Handle *app-type*
-        assert parser_options.app_type, _option_cannot_be_empty_assertion("--app-type")
-        self._initial_server_gateway(lib=parser_options.app_type)
-
-    def _initial_server_gateway(self, lib: str) -> None:
-        if re.search(r"auto", lib, re.IGNORECASE):
-            web_lib = import_web_lib.auto_ready()
-            if not web_lib:
-                raise NoValidWebLibrary
-            self._initial_server_gateway(lib=web_lib)
-        elif re.search(r"flask", lib, re.IGNORECASE):
-            self._server_gateway = setup_wsgi()
-        elif re.search(r"fastapi", lib, re.IGNORECASE):
-            self._server_gateway = setup_asgi()
-        else:
-            raise InvalidAppType
 
 
 class SubCmdConfig(BaseCommandProcessor):
