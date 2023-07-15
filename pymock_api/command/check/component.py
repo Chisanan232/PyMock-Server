@@ -16,14 +16,15 @@ from ...model.api_config import APIConfig
 from ...model.api_config import APIParameter as MockedAPIParameter
 from ...model.swagger_config import API as SwaggerAPI
 from ...model.swagger_config import APIParameter as SwaggerAPIParameter
+from ..component import BaseSubCmdComponent
 
 
-class SubCmdCheckComponent:
+class SubCmdCheckComponent(BaseSubCmdComponent):
     def __init__(self):
         super().__init__()
         self._check_config: _BaseCheckingFactory = ConfigCheckingFactory()
 
-    def process(self, args: SubcmdCheckArguments) -> None:
+    def process(self, args: SubcmdCheckArguments) -> None:  # type: ignore[override]
         api_config: Optional[APIConfig] = load_config(path=args.config_path)
 
         valid_api_config = self._check_config.validity(args=args, api_config=api_config)
