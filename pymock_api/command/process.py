@@ -10,12 +10,12 @@ from ..model import (
     SubcmdRunArguments,
     deserialize_args,
 )
-from .check.component import SubCmdCheckComponent
+from .check import SubCmdCheckComponent
 from .component import BaseSubCmdComponent, NoSubCmdComponent
-from .config.component import SubCmdConfigComponent
-from .inspect.component import SubCmdInspectComponent
+from .config import SubCmdConfigComponent
+from .inspect import SubCmdInspectComponent
 from .options import MockAPICommandParser, SubCommand
-from .run.component import SubCmdRunComponent
+from .run import SubCmdRunComponent
 
 _COMMAND_CHAIN: List[Type["CommandProcessor"]] = []
 
