@@ -56,7 +56,7 @@ class TestDeserialize:
         assert arguments.workers == _Workers_Amount.value
         assert arguments.log_level == _Log_Level.value
 
-    def test_parser_subcommand_config_arguments(self, deserialize: Type[DeserializeParsedArgs]):
+    def test_parser_subcommand_add_arguments(self, deserialize: Type[DeserializeParsedArgs]):
         namespace_args = {
             "subcommand": _Test_SubCommand_Add,
             "generate_sample": _Generate_Sample,
@@ -64,7 +64,7 @@ class TestDeserialize:
             "file_path": _Sample_File_Path,
         }
         namespace = Namespace(**namespace_args)
-        arguments = deserialize.subcommand_config(namespace)
+        arguments = deserialize.subcommand_add(namespace)
         assert isinstance(arguments, SubcmdAddArguments)
         assert arguments.subparser_name == _Test_SubCommand_Add
         assert arguments.generate_sample == _Generate_Sample

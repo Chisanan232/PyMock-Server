@@ -33,7 +33,7 @@ class deserialize_args:
         return DeserializeParsedArgs.subcommand_run(args)
 
     @classmethod
-    def subcmd_config(cls, args: Namespace) -> SubcmdAddArguments:
+    def subcmd_add(cls, args: Namespace) -> SubcmdAddArguments:
         """Deserialize the object *argparse.Namespace* to *ParserArguments*.
 
         Args:
@@ -43,7 +43,7 @@ class deserialize_args:
             A *ParserArguments* type object.
 
         """
-        return DeserializeParsedArgs.subcommand_config(args)
+        return DeserializeParsedArgs.subcommand_add(args)
 
     @classmethod
     def subcmd_check(cls, args: Namespace) -> SubcmdCheckArguments:

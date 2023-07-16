@@ -145,7 +145,7 @@ class SubCmdAdd(BaseCommandProcessor):
         return SubCmdAddComponent()
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdAddArguments:
-        return deserialize_args.subcmd_config(self._parse_cmd_arguments(parser, cmd_args))
+        return deserialize_args.subcmd_add(self._parse_cmd_arguments(parser, cmd_args))
 
 
 class SubCmdCheck(BaseCommandProcessor):

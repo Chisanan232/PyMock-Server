@@ -56,7 +56,7 @@ class DeserializeParsedArgs:
         )
 
     @classmethod
-    def subcommand_config(cls, args: Namespace) -> SubcmdAddArguments:
+    def subcommand_add(cls, args: Namespace) -> SubcmdAddArguments:
         return SubcmdAddArguments(
             subparser_name=args.subcommand,
             generate_sample=args.generate_sample,
