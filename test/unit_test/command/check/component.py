@@ -15,8 +15,8 @@ from pymock_api.command.check.component import (
 )
 from pymock_api.model import (
     ParserArguments,
+    SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdConfigArguments,
     SubcmdInspectArguments,
     SubcmdRunArguments,
     deserialize_swagger_api_config,
@@ -42,7 +42,7 @@ def _given_parser_args(
     config_path: str = None,
     swagger_doc_url: str = None,
     stop_if_fail: bool = True,
-) -> Union[SubcmdRunArguments, SubcmdConfigArguments, SubcmdCheckArguments, SubcmdInspectArguments, ParserArguments]:
+) -> Union[SubcmdRunArguments, SubcmdAddArguments, SubcmdCheckArguments, SubcmdInspectArguments, ParserArguments]:
     if subcommand == "run":
         return SubcmdRunArguments(
             subparser_name=subcommand,
@@ -53,7 +53,7 @@ def _given_parser_args(
             log_level=_Log_Level.value,
         )
     elif subcommand == "config":
-        return SubcmdConfigArguments(
+        return SubcmdAddArguments(
             subparser_name=subcommand,
             print_sample=_Print_Sample,
             generate_sample=_Generate_Sample,

@@ -20,7 +20,7 @@ class SubcmdRunArguments(ParserArguments):
 
 
 @dataclass(frozen=True)
-class SubcmdConfigArguments(ParserArguments):
+class SubcmdAddArguments(ParserArguments):
     generate_sample: bool
     print_sample: bool
     sample_output_path: str
@@ -56,8 +56,8 @@ class DeserializeParsedArgs:
         )
 
     @classmethod
-    def subcommand_config(cls, args: Namespace) -> SubcmdConfigArguments:
-        return SubcmdConfigArguments(
+    def subcommand_config(cls, args: Namespace) -> SubcmdAddArguments:
+        return SubcmdAddArguments(
             subparser_name=args.subcommand,
             generate_sample=args.generate_sample,
             print_sample=args.print_sample,

@@ -4,8 +4,8 @@ from typing import List, Optional, Tuple, Type
 
 from ..model import (
     ParserArguments,
+    SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdConfigArguments,
     SubcmdInspectArguments,
     SubcmdRunArguments,
     deserialize_args,
@@ -144,7 +144,7 @@ class SubCmdAdd(BaseCommandProcessor):
     def _subcmd_component(self) -> SubCmdAddComponent:
         return SubCmdAddComponent()
 
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdConfigArguments:
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdAddArguments:
         return deserialize_args.subcmd_config(self._parse_cmd_arguments(parser, cmd_args))
 
 

@@ -6,8 +6,8 @@ import pytest
 
 from pymock_api.model.cmd_args import (
     DeserializeParsedArgs,
+    SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdConfigArguments,
     SubcmdInspectArguments,
     SubcmdRunArguments,
 )
@@ -65,7 +65,7 @@ class TestDeserialize:
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_config(namespace)
-        assert isinstance(arguments, SubcmdConfigArguments)
+        assert isinstance(arguments, SubcmdAddArguments)
         assert arguments.subparser_name == _Test_SubCommand_Add
         assert arguments.generate_sample == _Generate_Sample
         assert arguments.print_sample == _Print_Sample

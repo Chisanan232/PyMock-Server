@@ -5,7 +5,7 @@ import pytest
 
 from pymock_api._utils.file_opt import YAML
 from pymock_api.command.config.component import SubCmdAddComponent
-from pymock_api.model.cmd_args import SubcmdConfigArguments
+from pymock_api.model.cmd_args import SubcmdAddArguments
 
 from ...._values import (
     _Bind_Host_And_Port,
@@ -40,7 +40,7 @@ class TestSubCmdConfigComponent:
         FakeYAML.serialize = MagicMock()
         FakeYAML.write = MagicMock()
 
-        invalid_args = SubcmdConfigArguments(
+        invalid_args = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
             print_sample=False,
             generate_sample=True,

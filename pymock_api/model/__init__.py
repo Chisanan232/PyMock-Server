@@ -10,8 +10,8 @@ from .api_config import APIConfig
 from .cmd_args import (
     DeserializeParsedArgs,
     ParserArguments,
+    SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdConfigArguments,
     SubcmdInspectArguments,
     SubcmdRunArguments,
 )
@@ -33,7 +33,7 @@ class deserialize_args:
         return DeserializeParsedArgs.subcommand_run(args)
 
     @classmethod
-    def subcmd_config(cls, args: Namespace) -> SubcmdConfigArguments:
+    def subcmd_config(cls, args: Namespace) -> SubcmdAddArguments:
         """Deserialize the object *argparse.Namespace* to *ParserArguments*.
 
         Args:

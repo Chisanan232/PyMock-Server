@@ -23,8 +23,8 @@ from pymock_api.command.process import (
 )
 from pymock_api.model import (
     ParserArguments,
+    SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdConfigArguments,
     SubcmdInspectArguments,
     SubcmdRunArguments,
 )
@@ -59,7 +59,7 @@ def _given_parser_args(
     config_path: str = None,
     swagger_doc_url: str = None,
     stop_if_fail: bool = True,
-) -> Union[SubcmdRunArguments, SubcmdConfigArguments, SubcmdCheckArguments, SubcmdInspectArguments, ParserArguments]:
+) -> Union[SubcmdRunArguments, SubcmdAddArguments, SubcmdCheckArguments, SubcmdInspectArguments, ParserArguments]:
     if subcommand == "run":
         return SubcmdRunArguments(
             subparser_name=subcommand,
@@ -70,7 +70,7 @@ def _given_parser_args(
             log_level=_Log_Level.value,
         )
     elif subcommand == "config":
-        return SubcmdConfigArguments(
+        return SubcmdAddArguments(
             subparser_name=subcommand,
             print_sample=_Print_Sample,
             generate_sample=_Generate_Sample,
@@ -392,7 +392,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
     def _test_process(self, oprint: bool, generate: bool, output: str, cmd_ps: Callable):
         FakeYAML.serialize = MagicMock()
         FakeYAML.write = MagicMock()
-        mock_parser_arg = SubcmdConfigArguments(
+        mock_parser_arg = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
             print_sample=oprint,
             generate_sample=generate,
@@ -427,8 +427,8 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
     def _given_subcmd(self) -> Optional[str]:
         return SubCommand.Add
 
-    def _expected_argument_type(self) -> Type[SubcmdConfigArguments]:
-        return SubcmdConfigArguments
+    def _expected_argument_type(self) -> Type[SubcmdAddArguments]:
+        return SubcmdAddArguments
 
 
 API_NAME: str = "google_home"
