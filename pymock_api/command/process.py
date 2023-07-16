@@ -137,8 +137,8 @@ class SubCmdRun(BaseCommandProcessor):
         return deserialize_args.subcmd_run(self._parse_cmd_arguments(parser, cmd_args))
 
 
-class SubCmdConfig(BaseCommandProcessor):
-    responsible_subcommand = SubCommand.Config
+class SubCmdAdd(BaseCommandProcessor):
+    responsible_subcommand = SubCommand.Add
 
     @property
     def _subcmd_component(self) -> SubCmdConfigComponent:

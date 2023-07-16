@@ -154,7 +154,7 @@ _Test_App_Type: str = "flask"
 _Test_FastAPI_App_Type: str = "fastapi"
 
 # Test subcommand *config* options
-_Test_SubCommand_Config: str = "config"
+_Test_SubCommand_Add: str = "add"
 _Generate_Sample: bool = True
 _Print_Sample: bool = True
 _Sample_File_Path: str = "pytest-api.yaml"

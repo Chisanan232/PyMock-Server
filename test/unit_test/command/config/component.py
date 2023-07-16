@@ -18,8 +18,8 @@ from ...._values import (
     _Test_Auto_Type,
     _Test_Config,
     _Test_FastAPI_App_Type,
+    _Test_SubCommand_Add,
     _Test_SubCommand_Check,
-    _Test_SubCommand_Config,
     _Test_SubCommand_Inspect,
     _Test_SubCommand_Run,
     _Workers_Amount,
@@ -41,7 +41,7 @@ class TestSubCmdConfigComponent:
         FakeYAML.write = MagicMock()
 
         invalid_args = SubcmdConfigArguments(
-            subparser_name=_Test_SubCommand_Config,
+            subparser_name=_Test_SubCommand_Add,
             print_sample=False,
             generate_sample=True,
             sample_output_path="",

@@ -14,8 +14,8 @@ from pymock_api.command.options import SubCommand, get_all_subcommands
 from pymock_api.command.process import (
     BaseCommandProcessor,
     NoSubCmd,
+    SubCmdAdd,
     SubCmdCheck,
-    SubCmdConfig,
     SubCmdInspect,
     SubCmdRun,
     make_command_chain,
@@ -40,8 +40,8 @@ from ..._values import (
     _Test_Auto_Type,
     _Test_Config,
     _Test_FastAPI_App_Type,
+    _Test_SubCommand_Add,
     _Test_SubCommand_Check,
-    _Test_SubCommand_Config,
     _Test_SubCommand_Inspect,
     _Test_SubCommand_Run,
     _Workers_Amount,
@@ -348,10 +348,10 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
         return SubcmdRunArguments
 
 
-class TestSubCmdConfig(BaseCommandProcessorTestSpec):
+class TestSubCmdAdd(BaseCommandProcessorTestSpec):
     @pytest.fixture(scope="function")
-    def cmd_ps(self) -> SubCmdConfig:
-        return SubCmdConfig()
+    def cmd_ps(self) -> SubCmdAdd:
+        return SubCmdAdd()
 
     @pytest.mark.parametrize(
         ("oprint", "generate", "output"),
@@ -393,7 +393,7 @@ class TestSubCmdConfig(BaseCommandProcessorTestSpec):
         FakeYAML.serialize = MagicMock()
         FakeYAML.write = MagicMock()
         mock_parser_arg = SubcmdConfigArguments(
-            subparser_name=_Test_SubCommand_Config,
+            subparser_name=_Test_SubCommand_Add,
             print_sample=oprint,
             generate_sample=generate,
             sample_output_path=output,
@@ -418,14 +418,14 @@ class TestSubCmdConfig(BaseCommandProcessorTestSpec):
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
-        args_namespace.subcommand = SubCommand.Config
+        args_namespace.subcommand = SubCommand.Add
         args_namespace.generate_sample = _Generate_Sample
         args_namespace.print_sample = _Print_Sample
         args_namespace.file_path = _Sample_File_Path
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:
-        return SubCommand.Config
+        return SubCommand.Add
 
     def _expected_argument_type(self) -> Type[SubcmdConfigArguments]:
         return SubcmdConfigArguments

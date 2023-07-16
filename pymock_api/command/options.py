@@ -226,7 +226,7 @@ class CommandOption:
 class SubCommand:
     Base: str = "subcommand"
     Run: str = "run"
-    Config: str = "config"
+    Add: str = "add"
     Check: str = "check"
     Inspect: str = "inspect"
 
@@ -248,9 +248,9 @@ class SubCommandRunOption(BaseSubCommand):
     option_value_type: type = str
 
 
-class SubCommandConfigOption(BaseSubCommand):
+class SubCommandAddOption(BaseSubCommand):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Config,
+        name=SubCommand.Add,
         help="Something processing about configuration, i.e., generate a sample configuration or validate configuration"
         " content.",
     )
@@ -272,7 +272,7 @@ class SubCommandInspectOption(BaseSubCommand):
 
 BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
 BaseSubCmdRunOption: type = MetaCommandOption("BaseSubCmdRunOption", (SubCommandRunOption,), {})
-BaseSubCmdConfigOption: type = MetaCommandOption("BaseSubCmdConfigOption", (SubCommandConfigOption,), {})
+BaseSubCmdAddOption: type = MetaCommandOption("BaseSubCmdAddOption", (SubCommandAddOption,), {})
 BaseSubCmdCheckOption: type = MetaCommandOption("BaseSubCmdCheckOption", (SubCommandCheckOption,), {})
 BaseSubCmdInspectOption: type = MetaCommandOption("BaseSubCmdInspectOption", (SubCommandInspectOption,), {})
 
@@ -343,7 +343,7 @@ class LegLevel(BaseSubCmdRunOption):
     _options: List[str] = ["critical", "error", "warning", "info", "debug", "trace"]
 
 
-class PrintSample(BaseSubCmdConfigOption):
+class PrintSample(BaseSubCmdAddOption):
     cli_option: str = "-p, --print-sample"
     name: str = "print_sample"
     help_description: str = "Print the sample configuration content."
@@ -352,7 +352,7 @@ class PrintSample(BaseSubCmdConfigOption):
     default_value: bool = False
 
 
-class GenerateSample(BaseSubCmdConfigOption):
+class GenerateSample(BaseSubCmdAddOption):
     cli_option: str = "-g, --generate-sample"
     name: str = "generate_sample"
     help_description: str = "Create a sample configuration file."
@@ -361,7 +361,7 @@ class GenerateSample(BaseSubCmdConfigOption):
     default_value: bool = False
 
 
-class Output(BaseSubCmdConfigOption):
+class Output(BaseSubCmdAddOption):
     cli_option: str = "-o, --output"
     name: str = "file_path"
     help_description: str = (

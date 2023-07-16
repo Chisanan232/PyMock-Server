@@ -100,7 +100,7 @@ class TestSubCommandConfig(CommandTestSpec):
 
     @property
     def options(self) -> str:
-        return "config --help"
+        return "add --help"
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
@@ -114,7 +114,7 @@ class TestShowSampleConfiguration(CommandTestSpec):
 
     @property
     def options(self) -> str:
-        return "config -p"
+        return "add -p"
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
         for api_name, api_config in Mocked_APIs.items():
@@ -132,7 +132,7 @@ class TestGenerateSampleConfiguration(CommandTestSpec):
 
     @property
     def options(self) -> str:
-        return f"config -g -o {self._Under_Test_Path}" if self._Under_Test_Path else "config -g"
+        return f"add -g -o {self._Under_Test_Path}" if self._Under_Test_Path else "config -g"
 
     @pytest.mark.parametrize("config_path", [None, "output-test-api.yaml"])
     def test_command(self, config_path: str) -> None:
