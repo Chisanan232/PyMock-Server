@@ -1,12 +1,7 @@
 import copy
-import os
-import re
 from argparse import ArgumentParser, Namespace
 from typing import List, Optional, Tuple, Type
 
-from .._utils import YAML, import_web_lib
-from .._utils.api_client import URLLibHTTPClient
-from ..exceptions import InvalidAppType, NoValidWebLibrary
 from ..model import (
     ParserArguments,
     SubcmdCheckArguments,
@@ -14,12 +9,13 @@ from ..model import (
     SubcmdInspectArguments,
     SubcmdRunArguments,
     deserialize_args,
-    load_config,
 )
-from ..model._sample import Sample_Config_Value
-from ..server import BaseSGIServer, setup_asgi, setup_wsgi
-from .check.component import SubCmdCheckComponent
+from .check import SubCmdCheckComponent
+from .component import BaseSubCmdComponent, NoSubCmdComponent
+from .config import SubCmdConfigComponent
+from .inspect import SubCmdInspectComponent
 from .options import MockAPICommandParser, SubCommand
+from .run import SubCmdRunComponent
 
 _COMMAND_CHAIN: List[Type["CommandProcessor"]] = []
 
@@ -46,10 +42,6 @@ def make_command_chain() -> List["CommandProcessor"]:
         existed_subcmd.append(getattr(cmd, "responsible_subcommand"))
         mock_api_cmd.append(cmd.copy())
     return mock_api_cmd
-
-
-def _option_cannot_be_empty_assertion(cmd_option: str) -> str:
-    return f"Option '{cmd_option}' value cannot be empty."
 
 
 class MetaCommand(type):
@@ -83,6 +75,10 @@ class CommandProcessor:
         self._current_index += 1
         return cmd()
 
+    @property
+    def _subcmd_component(self) -> BaseSubCmdComponent:
+        raise NotImplementedError
+
     def distribute(self, args: Optional[ParserArguments] = None, cmd_index: int = 0) -> "CommandProcessor":
         if self._is_responsible(subcmd=self.mock_api_parser.subcommand, args=args):
             return self
@@ -110,7 +106,7 @@ class CommandProcessor:
         return subcmd == self.responsible_subcommand
 
     def _run(self, args: ParserArguments) -> None:
-        raise NotImplementedError
+        self._subcmd_component.process(args)
 
     def _parse_cmd_arguments(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> Namespace:
         return parser.parse_args(cmd_args)
@@ -122,67 +118,34 @@ BaseCommandProcessor: type = MetaCommand("BaseCommandProcessor", (CommandProcess
 class NoSubCmd(BaseCommandProcessor):
     responsible_subcommand: Optional[str] = None
 
+    @property
+    def _subcmd_component(self) -> NoSubCmdComponent:
+        return NoSubCmdComponent()
+
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         return self._parse_cmd_arguments(parser, cmd_args)
-
-    def _run(self, args: ParserArguments) -> None:
-        pass
 
 
 class SubCmdRun(BaseCommandProcessor):
     responsible_subcommand = SubCommand.Run
 
-    def __init__(self):
-        super().__init__()
-        self._server_gateway: BaseSGIServer = None
+    @property
+    def _subcmd_component(self) -> SubCmdRunComponent:
+        return SubCmdRunComponent()
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdRunArguments:
         return deserialize_args.subcmd_run(self._parse_cmd_arguments(parser, cmd_args))
-
-    def _run(self, args: SubcmdRunArguments) -> None:
-        self._process_option(args)
-        self._server_gateway.run(args)
-
-    def _process_option(self, parser_options: SubcmdRunArguments) -> None:
-        # Note: It's possible that it should separate the functions to be multiple objects to implement and manage the
-        # behaviors of command line with different options.
-        # Handle *config*
-        if parser_options.config:
-            os.environ["MockAPI_Config"] = parser_options.config
-
-        # Handle *app-type*
-        assert parser_options.app_type, _option_cannot_be_empty_assertion("--app-type")
-        self._initial_server_gateway(lib=parser_options.app_type)
-
-    def _initial_server_gateway(self, lib: str) -> None:
-        if re.search(r"auto", lib, re.IGNORECASE):
-            web_lib = import_web_lib.auto_ready()
-            if not web_lib:
-                raise NoValidWebLibrary
-            self._initial_server_gateway(lib=web_lib)
-        elif re.search(r"flask", lib, re.IGNORECASE):
-            self._server_gateway = setup_wsgi()
-        elif re.search(r"fastapi", lib, re.IGNORECASE):
-            self._server_gateway = setup_asgi()
-        else:
-            raise InvalidAppType
 
 
 class SubCmdConfig(BaseCommandProcessor):
     responsible_subcommand = SubCommand.Config
 
+    @property
+    def _subcmd_component(self) -> SubCmdConfigComponent:
+        return SubCmdConfigComponent()
+
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdConfigArguments:
         return deserialize_args.subcmd_config(self._parse_cmd_arguments(parser, cmd_args))
-
-    def _run(self, args: SubcmdConfigArguments) -> None:
-        yaml: YAML = YAML()
-        sample_data: str = yaml.serialize(config=Sample_Config_Value)
-        if args.print_sample:
-            print(f"It will write below content into file {args.sample_output_path}:")
-            print(f"{sample_data}")
-        if args.generate_sample:
-            assert args.sample_output_path, _option_cannot_be_empty_assertion("-o, --output")
-            yaml.write(path=args.sample_output_path, config=sample_data)
 
 
 class SubCmdCheck(BaseCommandProcessor):
@@ -195,21 +158,13 @@ class SubCmdCheck(BaseCommandProcessor):
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdCheckArguments:
         return deserialize_args.subcmd_check(self._parse_cmd_arguments(parser, cmd_args))
 
-    def _run(self, args: SubcmdCheckArguments) -> None:
-        self._subcmd_component.process(args)
-
 
 class SubCmdInspect(BaseCommandProcessor):
     responsible_subcommand = SubCommand.Inspect
 
-    def __init__(self):
-        super().__init__()
-        self._api_client = URLLibHTTPClient()
-        self._config_is_wrong: bool = False
+    @property
+    def _subcmd_component(self) -> SubCmdInspectComponent:
+        return SubCmdInspectComponent()
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:
         return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
-
-    def _run(self, args: SubcmdInspectArguments) -> None:
-        current_api_config = load_config(path=args.config_path)
-        # TODO: Add implementation about *inspect* feature gets some details of config

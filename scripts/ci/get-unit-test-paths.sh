@@ -9,6 +9,8 @@ declare -a model_tests
 declare -a server_tests
 declare -a server_sgi_tests
 declare -a command_tests
+declare -a subcommand_run_tests
+declare -a subcommand_config_tests
 declare -a subcommand_check_tests
 
 getalltests() {
@@ -41,6 +43,16 @@ getalltests() {
         # shellcheck disable=SC2124
         # shellcheck disable=SC2178
         server_tests=${alltestpaths[@]}
+    elif echo "$1" | grep -q "run";  # /command/run
+    then
+        # shellcheck disable=SC2124
+        # shellcheck disable=SC2178
+        subcommand_run_tests=${alltestpaths[@]}
+    elif echo "$1" | grep -q "config";  # /command/config
+    then
+        # shellcheck disable=SC2124
+        # shellcheck disable=SC2178
+        subcommand_config_tests=${alltestpaths[@]}
     elif echo "$1" | grep -q "check";  # /command/check
     then
         # shellcheck disable=SC2124
@@ -64,6 +76,8 @@ model_path=./test/unit_test/model/
 server_path=./test/unit_test/server/
 server_sgi_path=./test/unit_test/server/sgi/
 command_path=./test/unit_test/command/
+subcommand_run_path=./test/unit_test/command/run/
+subcommand_config_path=./test/unit_test/command/config/
 subcommand_check_path=./test/unit_test/command/check/
 
 getalltests $init_path
@@ -72,9 +86,11 @@ getalltests $model_path
 getalltests $server_path
 getalltests $server_sgi_path
 getalltests $command_path
+getalltests $subcommand_run_path
+getalltests $subcommand_config_path
 getalltests $subcommand_check_path
 
-dest=( "${init_tests[@]} ${utils_tests[@]} ${model_tests[@]} ${server_tests[@]} ${server_sgi_tests[@]} ${command_tests[@]} ${subcommand_check_tests[@]}" )
+dest=( "${init_tests[@]} ${utils_tests[@]} ${model_tests[@]} ${server_tests[@]} ${server_sgi_tests[@]} ${command_tests[@]} ${subcommand_run_tests[@]} ${subcommand_config_tests[@]} ${subcommand_check_tests[@]}" )
 
 if echo "$runtime_os" | grep -q "windows";
 then
