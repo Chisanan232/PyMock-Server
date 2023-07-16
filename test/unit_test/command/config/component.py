@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from pymock_api._utils.file_opt import YAML
-from pymock_api.command.config.component import SubCmdConfigComponent
+from pymock_api.command.config.component import SubCmdAddComponent
 from pymock_api.model.cmd_args import SubcmdConfigArguments
 
 from ...._values import (
@@ -32,10 +32,10 @@ class FakeYAML(YAML):
 
 class TestSubCmdConfigComponent:
     @pytest.fixture(scope="class")
-    def component(self) -> SubCmdConfigComponent:
-        return SubCmdConfigComponent()
+    def component(self) -> SubCmdAddComponent:
+        return SubCmdAddComponent()
 
-    def test_assert_error_with_empty_args(self, component: SubCmdConfigComponent):
+    def test_assert_error_with_empty_args(self, component: SubCmdAddComponent):
         # Mock functions
         FakeYAML.serialize = MagicMock()
         FakeYAML.write = MagicMock()

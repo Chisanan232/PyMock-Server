@@ -1,1 +1,1 @@
-from .component import SubCmdConfigComponent
+from .component import SubCmdAddComponent
