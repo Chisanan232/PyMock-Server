@@ -7,23 +7,7 @@ from pymock_api._utils.file_opt import YAML
 from pymock_api.command.add.component import SubCmdAddComponent
 from pymock_api.model.cmd_args import SubcmdAddArguments
 
-from ...._values import (
-    _Bind_Host_And_Port,
-    _Generate_Sample,
-    _Log_Level,
-    _Print_Sample,
-    _Sample_File_Path,
-    _Swagger_API_Document_URL,
-    _Test_App_Type,
-    _Test_Auto_Type,
-    _Test_Config,
-    _Test_FastAPI_App_Type,
-    _Test_SubCommand_Add,
-    _Test_SubCommand_Check,
-    _Test_SubCommand_Inspect,
-    _Test_SubCommand_Run,
-    _Workers_Amount,
-)
+from ...._values import _Test_SubCommand_Add
 
 
 class FakeYAML(YAML):
