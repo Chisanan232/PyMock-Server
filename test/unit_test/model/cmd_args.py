@@ -71,19 +71,6 @@ class TestDeserialize:
         assert arguments.print_sample == _Print_Sample
         assert arguments.sample_output_path == _Sample_File_Path
 
-    def test_parser_subcommand_check_arguments(self, deserialize: Type[DeserializeParsedArgs]):
-        namespace_args = {
-            "subcommand": _Test_SubCommand_Check,
-            "config_path": _Test_Config,
-            "stop_if_fail": True,
-        }
-        namespace = Namespace(**namespace_args)
-        arguments = deserialize.subcommand_check(namespace)
-        assert isinstance(arguments, SubcmdCheckArguments)
-        assert arguments.subparser_name == _Test_SubCommand_Check
-        assert arguments.config_path == _Test_Config
-        assert arguments.stop_if_fail is True
-
     @pytest.mark.parametrize(
         (
             "stop_if_fail",
@@ -123,7 +110,7 @@ class TestDeserialize:
             ),
         ],
     )
-    def test_parser_subcommand_inspect_arguments(
+    def test_parser_subcommand_check_arguments(
         self,
         stop_if_fail: bool,
         under_test_check_props: check_attrs,
@@ -131,7 +118,7 @@ class TestDeserialize:
         deserialize: Type[DeserializeParsedArgs],
     ):
         namespace_args = {
-            "subcommand": _Test_SubCommand_Inspect,
+            "subcommand": _Test_SubCommand_Check,
             "config_path": _Test_Config,
             "swagger_doc_url": _Swagger_API_Document_URL,
             "stop_if_fail": stop_if_fail,
@@ -141,12 +128,26 @@ class TestDeserialize:
             "check_api_parameters": under_test_check_props.api_parameters,
         }
         namespace = Namespace(**namespace_args)
-        arguments = deserialize.subcommand_inspect(namespace)
-        assert isinstance(arguments, SubcmdInspectArguments)
-        assert arguments.subparser_name == _Test_SubCommand_Inspect
+        arguments = deserialize.subcommand_check(namespace)
+        assert isinstance(arguments, SubcmdCheckArguments)
+        assert arguments.subparser_name == _Test_SubCommand_Check
         assert arguments.config_path == _Test_Config
         assert arguments.swagger_doc_url == _Swagger_API_Document_URL
         assert arguments.stop_if_fail is stop_if_fail
         assert arguments.check_api_path is expected_check_props.api_path
         assert arguments.check_api_http_method is expected_check_props.http_method
         assert arguments.check_api_parameters is expected_check_props.api_parameters
+
+    def test_parser_subcommand_inspect_arguments(
+        self,
+        deserialize: Type[DeserializeParsedArgs],
+    ):
+        namespace_args = {
+            "subcommand": _Test_SubCommand_Inspect,
+            "config_path": _Test_Config,
+        }
+        namespace = Namespace(**namespace_args)
+        arguments = deserialize.subcommand_inspect(namespace)
+        assert isinstance(arguments, SubcmdInspectArguments)
+        assert arguments.subparser_name == _Test_SubCommand_Inspect
+        assert arguments.config_path == _Test_Config

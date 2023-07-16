@@ -20,7 +20,7 @@ from collections import namedtuple
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
-from .__pkg_info__ import __version__
+from ..__pkg_info__ import __version__
 
 SUBCOMMAND: List[str] = []
 COMMAND_OPTIONS: List["MetaCommandOption"] = []
@@ -388,29 +388,13 @@ class StopCheckIfFail(BaseSubCmdCheckOption):
     default_value: bool = False
 
 
-class UnderCheckConfigPath(BaseSubCmdInspectOption):
-    cli_option: str = "-p, --config-path"
-    name: str = "config_path"
-    help_description: str = "The file path of configuration."
-    default_value: str = "api.yaml"
-
-
-class SwaggerDocURL(BaseSubCmdInspectOption):
+class SwaggerDocURL(BaseSubCmdCheckOption):
     cli_option: str = "-s, --swagger-doc-url"
     name: str = "swagger_doc_url"
     help_description: str = "The URL path of swagger style API document."
 
 
-class StopIfFail(BaseSubCmdInspectOption):
-    cli_option: str = "--stop-if-fail"
-    name: str = "stop_if_fail"
-    help_description: str = "Stop program if it gets any fail in checking."
-    action: str = "store_true"
-    option_value_type: Optional[type] = None
-    default_value: bool = False
-
-
-class CheckEntireAPI(BaseSubCmdInspectOption):
+class CheckEntireAPI(BaseSubCmdCheckOption):
     cli_option: str = "--check-entire-api"
     name: str = "check_entire_api"
     help_description: str = "Do the inspection of all properties of each API."
@@ -419,7 +403,7 @@ class CheckEntireAPI(BaseSubCmdInspectOption):
     default_value: bool = False
 
 
-class CheckAPIPath(BaseSubCmdInspectOption):
+class CheckAPIPath(BaseSubCmdCheckOption):
     cli_option: str = "--check-api-path"
     name: str = "check_api_path"
     help_description: str = "Do the inspection of property API path."
@@ -428,7 +412,7 @@ class CheckAPIPath(BaseSubCmdInspectOption):
     default_value: bool = False
 
 
-class CheckAPIHTTPMethod(BaseSubCmdInspectOption):
+class CheckAPIHTTPMethod(BaseSubCmdCheckOption):
     cli_option: str = "--check-api-http-method"
     name: str = "check_api_http_method"
     help_description: str = "Do the inspection of property allowable HTTP method of one specific API."
@@ -437,10 +421,17 @@ class CheckAPIHTTPMethod(BaseSubCmdInspectOption):
     default_value: bool = False
 
 
-class CheckAPIParameter(BaseSubCmdInspectOption):
+class CheckAPIParameter(BaseSubCmdCheckOption):
     cli_option: str = "--check-api-parameters"
     name: str = "check_api_parameters"
     help_description: str = "Do the inspection of property API parameters."
     action: str = "store_true"
     option_value_type: Optional[type] = None
     default_value: bool = False
+
+
+class UnderCheckConfigPath(BaseSubCmdInspectOption):
+    cli_option: str = "-p, --config-path"
+    name: str = "config_path"
+    help_description: str = "The file path of configuration."
+    default_value: str = "api.yaml"

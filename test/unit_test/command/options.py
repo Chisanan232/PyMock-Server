@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from pymock_api.cmd import BaseCmdOption, MockAPICommandParser, make_options
+from pymock_api.command.options import BaseCmdOption, MockAPICommandParser, make_options
 
 
 def test_make_options():
@@ -55,7 +55,7 @@ class TestCommandOption:
         assert re.search(r"\*cli_option\* cannot be None or empty value", str(exc_info), re.IGNORECASE)
 
         # Remove the invalid option object of the list to let test could be run finely.
-        from pymock_api.cmd import COMMAND_OPTIONS
+        from pymock_api.command.options import COMMAND_OPTIONS
 
         COMMAND_OPTIONS.pop(-1)
 
