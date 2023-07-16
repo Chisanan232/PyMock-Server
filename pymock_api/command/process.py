@@ -10,9 +10,9 @@ from ..model import (
     SubcmdRunArguments,
     deserialize_args,
 )
+from .add import SubCmdAddComponent
 from .check import SubCmdCheckComponent
 from .component import BaseSubCmdComponent, NoSubCmdComponent
-from .config import SubCmdAddComponent
 from .inspect import SubCmdInspectComponent
 from .options import MockAPICommandParser, SubCommand
 from .run import SubCmdRunComponent

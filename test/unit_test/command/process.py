@@ -400,7 +400,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         )
 
         with patch("builtins.print", autospec=True, side_effect=print) as mock_print:
-            with patch("pymock_api.command.config.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+            with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
                 cmd_ps(mock_parser_arg)
 
                 mock_instantiate_writer.assert_called_once()

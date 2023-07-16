@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from pymock_api._utils.file_opt import YAML
-from pymock_api.command.config.component import SubCmdAddComponent
+from pymock_api.command.add.component import SubCmdAddComponent
 from pymock_api.model.cmd_args import SubcmdAddArguments
 
 from ...._values import (
@@ -48,7 +48,7 @@ class TestSubCmdConfigComponent:
         )
 
         # Run target function to test
-        with patch("pymock_api.command.config.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+        with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
             with pytest.raises(AssertionError) as exc_info:
                 component.process(invalid_args)
 
