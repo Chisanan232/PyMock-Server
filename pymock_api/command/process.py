@@ -2,7 +2,6 @@ import copy
 from argparse import ArgumentParser, Namespace
 from typing import List, Optional, Tuple, Type
 
-from .._utils.api_client import URLLibHTTPClient
 from ..model import (
     ParserArguments,
     SubcmdCheckArguments,
@@ -10,10 +9,9 @@ from ..model import (
     SubcmdInspectArguments,
     SubcmdRunArguments,
     deserialize_args,
-    load_config,
 )
 from .check.component import SubCmdCheckComponent
-from .component import BaseSubCmdComponent
+from .component import BaseSubCmdComponent, NoSubCmdComponent
 from .config.component import SubCmdConfigComponent
 from .inspect.component import SubCmdInspectComponent
 from .options import MockAPICommandParser, SubCommand
@@ -120,11 +118,12 @@ BaseCommandProcessor: type = MetaCommand("BaseCommandProcessor", (CommandProcess
 class NoSubCmd(BaseCommandProcessor):
     responsible_subcommand: Optional[str] = None
 
+    @property
+    def _subcmd_component(self) -> NoSubCmdComponent:
+        return NoSubCmdComponent()
+
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         return self._parse_cmd_arguments(parser, cmd_args)
-
-    def _run(self, args: ParserArguments) -> None:
-        pass
 
 
 class SubCmdRun(BaseCommandProcessor):

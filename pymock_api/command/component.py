@@ -10,3 +10,8 @@ class BaseSubCmdComponent(metaclass=ABCMeta):
     @abstractmethod
     def process(self, args: ParserArgumentsType) -> None:
         pass
+
+
+class NoSubCmdComponent(BaseSubCmdComponent):
+    def process(self, args: ParserArgumentsType) -> None:
+        pass
