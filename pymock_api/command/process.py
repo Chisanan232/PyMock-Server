@@ -15,6 +15,7 @@ from ..model import (
 from .check.component import SubCmdCheckComponent
 from .component import BaseSubCmdComponent
 from .config.component import SubCmdConfigComponent
+from .inspect.component import SubCmdInspectComponent
 from .options import MockAPICommandParser, SubCommand
 from .run.component import SubCmdRunComponent
 
@@ -162,14 +163,9 @@ class SubCmdCheck(BaseCommandProcessor):
 class SubCmdInspect(BaseCommandProcessor):
     responsible_subcommand = SubCommand.Inspect
 
-    def __init__(self):
-        super().__init__()
-        self._api_client = URLLibHTTPClient()
-        self._config_is_wrong: bool = False
+    @property
+    def _subcmd_component(self) -> SubCmdInspectComponent:
+        return SubCmdInspectComponent()
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:
         return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
-
-    def _run(self, args: SubcmdInspectArguments) -> None:
-        current_api_config = load_config(path=args.config_path)
-        # TODO: Add implementation about *inspect* feature gets some details of config
