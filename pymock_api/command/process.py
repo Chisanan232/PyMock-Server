@@ -4,15 +4,15 @@ from typing import List, Optional, Tuple, Type
 
 from ..model import (
     ParserArguments,
+    SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdConfigArguments,
     SubcmdInspectArguments,
     SubcmdRunArguments,
     deserialize_args,
 )
+from .add import SubCmdAddComponent
 from .check import SubCmdCheckComponent
 from .component import BaseSubCmdComponent, NoSubCmdComponent
-from .config import SubCmdConfigComponent
 from .inspect import SubCmdInspectComponent
 from .options import MockAPICommandParser, SubCommand
 from .run import SubCmdRunComponent
@@ -137,15 +137,15 @@ class SubCmdRun(BaseCommandProcessor):
         return deserialize_args.subcmd_run(self._parse_cmd_arguments(parser, cmd_args))
 
 
-class SubCmdConfig(BaseCommandProcessor):
-    responsible_subcommand = SubCommand.Config
+class SubCmdAdd(BaseCommandProcessor):
+    responsible_subcommand = SubCommand.Add
 
     @property
-    def _subcmd_component(self) -> SubCmdConfigComponent:
-        return SubCmdConfigComponent()
+    def _subcmd_component(self) -> SubCmdAddComponent:
+        return SubCmdAddComponent()
 
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdConfigArguments:
-        return deserialize_args.subcmd_config(self._parse_cmd_arguments(parser, cmd_args))
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdAddArguments:
+        return deserialize_args.subcmd_add(self._parse_cmd_arguments(parser, cmd_args))
 
 
 class SubCmdCheck(BaseCommandProcessor):

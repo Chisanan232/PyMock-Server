@@ -6,8 +6,8 @@ import pytest
 
 from pymock_api.model.cmd_args import (
     DeserializeParsedArgs,
+    SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdConfigArguments,
     SubcmdInspectArguments,
     SubcmdRunArguments,
 )
@@ -21,8 +21,8 @@ from ..._values import (
     _Swagger_API_Document_URL,
     _Test_App_Type,
     _Test_Config,
+    _Test_SubCommand_Add,
     _Test_SubCommand_Check,
-    _Test_SubCommand_Config,
     _Test_SubCommand_Inspect,
     _Test_SubCommand_Run,
     _Workers_Amount,
@@ -56,17 +56,17 @@ class TestDeserialize:
         assert arguments.workers == _Workers_Amount.value
         assert arguments.log_level == _Log_Level.value
 
-    def test_parser_subcommand_config_arguments(self, deserialize: Type[DeserializeParsedArgs]):
+    def test_parser_subcommand_add_arguments(self, deserialize: Type[DeserializeParsedArgs]):
         namespace_args = {
-            "subcommand": _Test_SubCommand_Config,
+            "subcommand": _Test_SubCommand_Add,
             "generate_sample": _Generate_Sample,
             "print_sample": _Print_Sample,
             "file_path": _Sample_File_Path,
         }
         namespace = Namespace(**namespace_args)
-        arguments = deserialize.subcommand_config(namespace)
-        assert isinstance(arguments, SubcmdConfigArguments)
-        assert arguments.subparser_name == _Test_SubCommand_Config
+        arguments = deserialize.subcommand_add(namespace)
+        assert isinstance(arguments, SubcmdAddArguments)
+        assert arguments.subparser_name == _Test_SubCommand_Add
         assert arguments.generate_sample == _Generate_Sample
         assert arguments.print_sample == _Print_Sample
         assert arguments.sample_output_path == _Sample_File_Path

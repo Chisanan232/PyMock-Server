@@ -1,6 +1,6 @@
 from ..._utils import YAML
 from ...model._sample import Sample_Config_Value
-from ...model.cmd_args import SubcmdConfigArguments
+from ...model.cmd_args import SubcmdAddArguments
 from ..component import BaseSubCmdComponent
 
 
@@ -8,8 +8,8 @@ def _option_cannot_be_empty_assertion(cmd_option: str) -> str:
     return f"Option '{cmd_option}' value cannot be empty."
 
 
-class SubCmdConfigComponent(BaseSubCmdComponent):
-    def process(self, args: SubcmdConfigArguments) -> None:  # type: ignore[override]
+class SubCmdAddComponent(BaseSubCmdComponent):
+    def process(self, args: SubcmdAddArguments) -> None:  # type: ignore[override]
         yaml: YAML = YAML()
         sample_data: str = yaml.serialize(config=Sample_Config_Value)
         if args.print_sample:

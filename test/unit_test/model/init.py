@@ -16,8 +16,8 @@ from ..._values import (
     _Swagger_API_Document_URL,
     _Test_App_Type,
     _Test_Config,
+    _Test_SubCommand_Add,
     _Test_SubCommand_Check,
-    _Test_SubCommand_Config,
     _Test_SubCommand_Inspect,
     _Test_SubCommand_Run,
     _Workers_Amount,
@@ -39,16 +39,16 @@ def test_deserialize_subcommand_run_args(mock_parser_arguments: Mock):
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
-@patch.object(DeserializeParsedArgs, "subcommand_config")
-def test_deserialize_subcommand_config_args(mock_parser_arguments: Mock):
+@patch.object(DeserializeParsedArgs, "subcommand_add")
+def test_deserialize_subcommand_add_args(mock_parser_arguments: Mock):
     namespace_args = {
-        "subcommand": _Test_SubCommand_Config,
+        "subcommand": _Test_SubCommand_Add,
         "generate_sample": _Generate_Sample,
         "print_sample": _Print_Sample,
         "file_path": _Sample_File_Path,
     }
     namespace = Namespace(**namespace_args)
-    deserialize_args.subcmd_config(namespace)
+    deserialize_args.subcmd_add(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
