@@ -159,7 +159,7 @@ class SubCmdCheck(BaseCommandProcessor):
         return deserialize_args.subcmd_check(self._parse_cmd_arguments(parser, cmd_args))
 
 
-class SubCmdInspect(BaseCommandProcessor):
+class SubCmdGet(BaseCommandProcessor):
     responsible_subcommand = SubCommand.Get
 
     @property

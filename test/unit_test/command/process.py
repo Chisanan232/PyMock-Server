@@ -16,7 +16,7 @@ from pymock_api.command.process import (
     NoSubCmd,
     SubCmdAdd,
     SubCmdCheck,
-    SubCmdInspect,
+    SubCmdGet,
     SubCmdRun,
     make_command_chain,
     run_command_chain,
@@ -520,10 +520,10 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
         return SubcmdCheckArguments
 
 
-class TestSubCmdInspect(BaseCommandProcessorTestSpec):
+class TestSubCmdGet(BaseCommandProcessorTestSpec):
     @pytest.fixture(scope="function")
-    def cmd_ps(self) -> SubCmdInspect:
-        return SubCmdInspect()
+    def cmd_ps(self) -> SubCmdGet:
+        return SubCmdGet()
 
     def test_with_command_processor(self, object_under_test: Callable, **kwargs):
         kwargs = {
