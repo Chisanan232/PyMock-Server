@@ -13,7 +13,7 @@ from ..model import (
 from .add import SubCmdAddComponent
 from .check import SubCmdCheckComponent
 from .component import BaseSubCmdComponent, NoSubCmdComponent
-from .inspect import SubCmdGetComponent
+from .get import SubCmdGetComponent
 from .options import MockAPICommandParser, SubCommand
 from .run import SubCmdRunComponent
 
