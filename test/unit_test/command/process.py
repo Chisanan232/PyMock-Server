@@ -42,7 +42,7 @@ from ..._values import (
     _Test_FastAPI_App_Type,
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
-    _Test_SubCommand_Inspect,
+    _Test_SubCommand_Get,
     _Test_SubCommand_Run,
     _Workers_Amount,
 )
@@ -539,19 +539,19 @@ class TestSubCmdInspect(BaseCommandProcessorTestSpec):
 
     def _test_process(self, cmd_ps: Callable):
         mock_parser_arg = _given_parser_args(
-            subcommand=_Test_SubCommand_Inspect,
+            subcommand=_Test_SubCommand_Get,
             config_path="./test/data/check_test/config/valid/sample-with_general_string_value.yaml",
         )
         cmd_ps(mock_parser_arg)
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
-        args_namespace.subcommand = SubCommand.Inspect
+        args_namespace.subcommand = SubCommand.Get
         args_namespace.config_path = _Test_Config
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:
-        return SubCommand.Inspect
+        return SubCommand.Get
 
     def _expected_argument_type(self) -> Type[SubcmdInspectArguments]:
         return SubcmdInspectArguments

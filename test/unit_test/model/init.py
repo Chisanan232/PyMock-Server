@@ -18,7 +18,7 @@ from ..._values import (
     _Test_Config,
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
-    _Test_SubCommand_Inspect,
+    _Test_SubCommand_Get,
     _Test_SubCommand_Run,
     _Workers_Amount,
 )
@@ -66,7 +66,7 @@ def test_deserialize_subcommand_check_args(mock_parser_arguments: Mock):
 @patch.object(DeserializeParsedArgs, "subcommand_inspect")
 def test_deserialize_subcommand_inspect_args(mock_parser_arguments: Mock):
     namespace_args = {
-        "subcommand": _Test_SubCommand_Inspect,
+        "subcommand": _Test_SubCommand_Get,
         "config_path": _Test_Config,
         "swagger_doc_url": _Swagger_API_Document_URL,
         "check_api_path": True,

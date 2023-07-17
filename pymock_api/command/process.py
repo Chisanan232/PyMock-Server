@@ -160,7 +160,7 @@ class SubCmdCheck(BaseCommandProcessor):
 
 
 class SubCmdInspect(BaseCommandProcessor):
-    responsible_subcommand = SubCommand.Inspect
+    responsible_subcommand = SubCommand.Get
 
     @property
     def _subcmd_component(self) -> SubCmdInspectComponent:
