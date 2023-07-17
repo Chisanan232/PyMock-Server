@@ -63,8 +63,8 @@ def test_deserialize_subcommand_check_args(mock_parser_arguments: Mock):
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
-@patch.object(DeserializeParsedArgs, "subcommand_inspect")
-def test_deserialize_subcommand_inspect_args(mock_parser_arguments: Mock):
+@patch.object(DeserializeParsedArgs, "subcommand_get")
+def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
     namespace_args = {
         "subcommand": _Test_SubCommand_Get,
         "config_path": _Test_Config,
@@ -74,7 +74,7 @@ def test_deserialize_subcommand_inspect_args(mock_parser_arguments: Mock):
         "check_api_parameters": True,
     }
     namespace = Namespace(**namespace_args)
-    deserialize_args.subcmd_inspect(namespace)
+    deserialize_args.subcmd_get(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
 
 

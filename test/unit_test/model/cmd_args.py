@@ -8,7 +8,7 @@ from pymock_api.model.cmd_args import (
     DeserializeParsedArgs,
     SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdInspectArguments,
+    SubcmdGetArguments,
     SubcmdRunArguments,
 )
 
@@ -138,7 +138,7 @@ class TestDeserialize:
         assert arguments.check_api_http_method is expected_check_props.http_method
         assert arguments.check_api_parameters is expected_check_props.api_parameters
 
-    def test_parser_subcommand_inspect_arguments(
+    def test_parser_subcommand_get_arguments(
         self,
         deserialize: Type[DeserializeParsedArgs],
     ):
@@ -147,7 +147,7 @@ class TestDeserialize:
             "config_path": _Test_Config,
         }
         namespace = Namespace(**namespace_args)
-        arguments = deserialize.subcommand_inspect(namespace)
-        assert isinstance(arguments, SubcmdInspectArguments)
+        arguments = deserialize.subcommand_get(namespace)
+        assert isinstance(arguments, SubcmdGetArguments)
         assert arguments.subparser_name == _Test_SubCommand_Get
         assert arguments.config_path == _Test_Config
