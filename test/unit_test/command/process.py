@@ -69,7 +69,7 @@ def _given_parser_args(
             workers=_Workers_Amount.value,
             log_level=_Log_Level.value,
         )
-    elif subcommand == "config":
+    elif subcommand == "add":
         return SubcmdAddArguments(
             subparser_name=subcommand,
             print_sample=_Print_Sample,
@@ -86,7 +86,7 @@ def _given_parser_args(
             check_api_parameters=True,
             check_api_http_method=True,
         )
-    elif subcommand == "inspect":
+    elif subcommand == "get":
         return SubcmdGetArguments(
             subparser_name=subcommand,
             config_path=(config_path or _Test_Config),
