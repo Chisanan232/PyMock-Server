@@ -17,7 +17,7 @@ from pymock_api.model import (
     ParserArguments,
     SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdInspectArguments,
+    SubcmdGetArguments,
     SubcmdRunArguments,
     deserialize_swagger_api_config,
     load_config,
@@ -42,7 +42,7 @@ def _given_parser_args(
     config_path: str = None,
     swagger_doc_url: str = None,
     stop_if_fail: bool = True,
-) -> Union[SubcmdRunArguments, SubcmdAddArguments, SubcmdCheckArguments, SubcmdInspectArguments, ParserArguments]:
+) -> Union[SubcmdRunArguments, SubcmdAddArguments, SubcmdCheckArguments, SubcmdGetArguments, ParserArguments]:
     if subcommand == "run":
         return SubcmdRunArguments(
             subparser_name=subcommand,
@@ -70,7 +70,7 @@ def _given_parser_args(
             check_api_http_method=True,
         )
     elif subcommand == "inspect":
-        return SubcmdInspectArguments(
+        return SubcmdGetArguments(
             subparser_name=subcommand,
             config_path=(config_path or _Test_Config),
         )

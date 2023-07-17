@@ -16,7 +16,7 @@ from pymock_api.command.process import (
     NoSubCmd,
     SubCmdAdd,
     SubCmdCheck,
-    SubCmdInspect,
+    SubCmdGet,
     SubCmdRun,
     make_command_chain,
     run_command_chain,
@@ -25,7 +25,7 @@ from pymock_api.model import (
     ParserArguments,
     SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdInspectArguments,
+    SubcmdGetArguments,
     SubcmdRunArguments,
 )
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
@@ -42,7 +42,7 @@ from ..._values import (
     _Test_FastAPI_App_Type,
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
-    _Test_SubCommand_Inspect,
+    _Test_SubCommand_Get,
     _Test_SubCommand_Run,
     _Workers_Amount,
 )
@@ -59,7 +59,7 @@ def _given_parser_args(
     config_path: str = None,
     swagger_doc_url: str = None,
     stop_if_fail: bool = True,
-) -> Union[SubcmdRunArguments, SubcmdAddArguments, SubcmdCheckArguments, SubcmdInspectArguments, ParserArguments]:
+) -> Union[SubcmdRunArguments, SubcmdAddArguments, SubcmdCheckArguments, SubcmdGetArguments, ParserArguments]:
     if subcommand == "run":
         return SubcmdRunArguments(
             subparser_name=subcommand,
@@ -69,7 +69,7 @@ def _given_parser_args(
             workers=_Workers_Amount.value,
             log_level=_Log_Level.value,
         )
-    elif subcommand == "config":
+    elif subcommand == "add":
         return SubcmdAddArguments(
             subparser_name=subcommand,
             print_sample=_Print_Sample,
@@ -86,8 +86,8 @@ def _given_parser_args(
             check_api_parameters=True,
             check_api_http_method=True,
         )
-    elif subcommand == "inspect":
-        return SubcmdInspectArguments(
+    elif subcommand == "get":
+        return SubcmdGetArguments(
             subparser_name=subcommand,
             config_path=(config_path or _Test_Config),
         )
@@ -520,10 +520,10 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
         return SubcmdCheckArguments
 
 
-class TestSubCmdInspect(BaseCommandProcessorTestSpec):
+class TestSubCmdGet(BaseCommandProcessorTestSpec):
     @pytest.fixture(scope="function")
-    def cmd_ps(self) -> SubCmdInspect:
-        return SubCmdInspect()
+    def cmd_ps(self) -> SubCmdGet:
+        return SubCmdGet()
 
     def test_with_command_processor(self, object_under_test: Callable, **kwargs):
         kwargs = {
@@ -539,22 +539,22 @@ class TestSubCmdInspect(BaseCommandProcessorTestSpec):
 
     def _test_process(self, cmd_ps: Callable):
         mock_parser_arg = _given_parser_args(
-            subcommand=_Test_SubCommand_Inspect,
+            subcommand=_Test_SubCommand_Get,
             config_path="./test/data/check_test/config/valid/sample-with_general_string_value.yaml",
         )
         cmd_ps(mock_parser_arg)
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
-        args_namespace.subcommand = SubCommand.Inspect
+        args_namespace.subcommand = SubCommand.Get
         args_namespace.config_path = _Test_Config
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:
-        return SubCommand.Inspect
+        return SubCommand.Get
 
-    def _expected_argument_type(self) -> Type[SubcmdInspectArguments]:
-        return SubcmdInspectArguments
+    def _expected_argument_type(self) -> Type[SubcmdGetArguments]:
+        return SubcmdGetArguments
 
 
 def test_make_command_chain():

@@ -6,14 +6,14 @@ from ..model import (
     ParserArguments,
     SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdInspectArguments,
+    SubcmdGetArguments,
     SubcmdRunArguments,
     deserialize_args,
 )
 from .add import SubCmdAddComponent
 from .check import SubCmdCheckComponent
 from .component import BaseSubCmdComponent, NoSubCmdComponent
-from .inspect import SubCmdInspectComponent
+from .get import SubCmdGetComponent
 from .options import MockAPICommandParser, SubCommand
 from .run import SubCmdRunComponent
 
@@ -159,12 +159,12 @@ class SubCmdCheck(BaseCommandProcessor):
         return deserialize_args.subcmd_check(self._parse_cmd_arguments(parser, cmd_args))
 
 
-class SubCmdInspect(BaseCommandProcessor):
-    responsible_subcommand = SubCommand.Inspect
+class SubCmdGet(BaseCommandProcessor):
+    responsible_subcommand = SubCommand.Get
 
     @property
-    def _subcmd_component(self) -> SubCmdInspectComponent:
-        return SubCmdInspectComponent()
+    def _subcmd_component(self) -> SubCmdGetComponent:
+        return SubCmdGetComponent()
 
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:
-        return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdGetArguments:
+        return deserialize_args.subcmd_get(self._parse_cmd_arguments(parser, cmd_args))

@@ -37,7 +37,7 @@ class SubcmdCheckArguments(ParserArguments):
 
 
 @dataclass(frozen=True)
-class SubcmdInspectArguments(ParserArguments):
+class SubcmdGetArguments(ParserArguments):
     config_path: str
 
 
@@ -81,8 +81,8 @@ class DeserializeParsedArgs:
         )
 
     @classmethod
-    def subcommand_inspect(cls, args: Namespace) -> SubcmdInspectArguments:
-        return SubcmdInspectArguments(
+    def subcommand_get(cls, args: Namespace) -> SubcmdGetArguments:
+        return SubcmdGetArguments(
             subparser_name=args.subcommand,
             config_path=args.config_path,
         )

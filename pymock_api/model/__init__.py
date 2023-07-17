@@ -12,7 +12,7 @@ from .cmd_args import (
     ParserArguments,
     SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdInspectArguments,
+    SubcmdGetArguments,
     SubcmdRunArguments,
 )
 from .swagger_config import SwaggerConfig
@@ -59,7 +59,7 @@ class deserialize_args:
         return DeserializeParsedArgs.subcommand_check(args)
 
     @classmethod
-    def subcmd_inspect(cls, args: Namespace) -> SubcmdInspectArguments:
+    def subcmd_get(cls, args: Namespace) -> SubcmdGetArguments:
         """Deserialize the object *argparse.Namespace* to *ParserArguments*.
 
         Args:
@@ -69,7 +69,7 @@ class deserialize_args:
             A *ParserArguments* type object.
 
         """
-        return DeserializeParsedArgs.subcommand_inspect(args)
+        return DeserializeParsedArgs.subcommand_get(args)
 
 
 def deserialize_swagger_api_config(data: dict) -> SwaggerConfig:

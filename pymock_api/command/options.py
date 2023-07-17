@@ -228,7 +228,7 @@ class SubCommand:
     Run: str = "run"
     Add: str = "add"
     Check: str = "check"
-    Inspect: str = "inspect"
+    Get: str = "get"
 
 
 class BaseSubCommand(CommandOption):
@@ -263,9 +263,9 @@ class SubCommandCheckOption(BaseSubCommand):
     )
 
 
-class SubCommandInspectOption(BaseSubCommand):
+class SubCommandGetOption(BaseSubCommand):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Inspect,
+        name=SubCommand.Get,
         help="Do some comprehensive inspection for configuration.",
     )
 
@@ -274,7 +274,7 @@ BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
 BaseSubCmdRunOption: type = MetaCommandOption("BaseSubCmdRunOption", (SubCommandRunOption,), {})
 BaseSubCmdAddOption: type = MetaCommandOption("BaseSubCmdAddOption", (SubCommandAddOption,), {})
 BaseSubCmdCheckOption: type = MetaCommandOption("BaseSubCmdCheckOption", (SubCommandCheckOption,), {})
-BaseSubCmdInspectOption: type = MetaCommandOption("BaseSubCmdInspectOption", (SubCommandInspectOption,), {})
+BaseSubCmdGetOption: type = MetaCommandOption("BaseSubCmdGetOption", (SubCommandGetOption,), {})
 
 
 class Version(BaseCmdOption):
@@ -430,7 +430,7 @@ class CheckAPIParameter(BaseSubCmdCheckOption):
     default_value: bool = False
 
 
-class UnderCheckConfigPath(BaseSubCmdInspectOption):
+class UnderCheckConfigPath(BaseSubCmdGetOption):
     cli_option: str = "-p, --config-path"
     name: str = "config_path"
     help_description: str = "The file path of configuration."
