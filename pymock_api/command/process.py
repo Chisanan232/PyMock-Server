@@ -13,7 +13,7 @@ from ..model import (
 from .add import SubCmdAddComponent
 from .check import SubCmdCheckComponent
 from .component import BaseSubCmdComponent, NoSubCmdComponent
-from .inspect import SubCmdInspectComponent
+from .inspect import SubCmdGetComponent
 from .options import MockAPICommandParser, SubCommand
 from .run import SubCmdRunComponent
 
@@ -163,8 +163,8 @@ class SubCmdGet(BaseCommandProcessor):
     responsible_subcommand = SubCommand.Get
 
     @property
-    def _subcmd_component(self) -> SubCmdInspectComponent:
-        return SubCmdInspectComponent()
+    def _subcmd_component(self) -> SubCmdGetComponent:
+        return SubCmdGetComponent()
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdInspectArguments:
         return deserialize_args.subcmd_inspect(self._parse_cmd_arguments(parser, cmd_args))

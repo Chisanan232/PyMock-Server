@@ -1,1 +1,1 @@
-from .component import SubCmdInspectComponent
+from .component import SubCmdGetComponent
