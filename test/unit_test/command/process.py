@@ -32,6 +32,8 @@ from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (
     _Bind_Host_And_Port,
+    _Cmd_Arg_API_Path,
+    _Cmd_Arg_HTTP_Method,
     _Generate_Sample,
     _Log_Level,
     _Print_Sample,
@@ -90,6 +92,8 @@ def _given_parser_args(
         return SubcmdGetArguments(
             subparser_name=subcommand,
             config_path=(config_path or _Test_Config),
+            api_path=_Cmd_Arg_API_Path,
+            http_method=_Cmd_Arg_HTTP_Method,
         )
     else:
         return ParserArguments(
@@ -548,6 +552,8 @@ class TestSubCmdGet(BaseCommandProcessorTestSpec):
         args_namespace = Namespace()
         args_namespace.subcommand = SubCommand.Get
         args_namespace.config_path = _Test_Config
+        args_namespace.api_path = _Cmd_Arg_API_Path
+        args_namespace.http_method = _Cmd_Arg_HTTP_Method
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:
