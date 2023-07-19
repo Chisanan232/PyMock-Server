@@ -435,3 +435,18 @@ class UnderCheckConfigPath(BaseSubCmdGetOption):
     name: str = "config_path"
     help_description: str = "The file path of configuration."
     default_value: str = "api.yaml"
+
+
+class GetAPIPath(BaseSubCmdGetOption):
+    cli_option: str = "-a, --api-path"
+    name: str = "api_path"
+    help_description: str = "Get the API info by API path."
+
+
+class GetWithHTTPMethod(BaseSubCmdGetOption):
+    cli_option: str = "-m, --http-method"
+    name: str = "http_method"
+    help_description: str = (
+        "This is an option for searching condition which cannot be used individually. Add "
+        "condition of HTTP method to get the API info."
+    )
