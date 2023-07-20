@@ -20,7 +20,7 @@ class SubCmdGetComponent(BaseSubCmdComponent):
             print("🍻  Find the API info which satisfy the conditions.")
             print("+--------------- API info ---------------+")
             print(f"+ Path:  {specific_api_info.url}")
-            print(f"+ HTTP:")
+            print("+ HTTP:")
             http_info = specific_api_info.http
             print("+   Request:")
             if http_info and http_info.request:
