@@ -23,22 +23,25 @@ class SubCmdGetComponent(BaseSubCmdComponent):
             print("+ HTTP:")
             http_info = specific_api_info.http
             print("+   Request:")
-            if http_info and http_info.request:
-                print(f"+     HTTP method:  {http_info.request.method}")
-                print("+       Parameters:")
-                for param in http_info.request.parameters:
-                    print(f"+         name:  {param.name}")
-                    print(f"+           required:  {param.required}")
-                    print(f"+           default value:  {param.default}")
-                    print(f"+           data type:  {param.value_type}")
-                    print(f"+           value format:  {param.value_format}")
+            if http_info:
+                if http_info.request:
+                    print(f"+     HTTP method:  {http_info.request.method}")
+                    print("+       Parameters:")
+                    for param in http_info.request.parameters:
+                        print(f"+         name:  {param.name}")
+                        print(f"+           required:  {param.required}")
+                        print(f"+           default value:  {param.default}")
+                        print(f"+           data type:  {param.value_type}")
+                        print(f"+           value format:  {param.value_format}")
+                else:
+                    print("+     Miss HTTP request settings.")
+                print("+     Response:")
+                if http_info.response:
+                    print(f"+       Values:  {http_info.response.value}")
+                else:
+                    print("+     Miss HTTP response settings.")
             else:
-                print("+     Miss settings.")
-            print("+     Response:")
-            if http_info and http_info.response:
-                print(f"+       Values:  {http_info.response.value}")
-            else:
-                print("+     Miss settings.")
+                print("+     Miss HTTP settings.")
             sys.exit(0)
         else:
             print("🙅‍♂️  Cannot find the API info with the conditions.")
