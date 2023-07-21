@@ -39,6 +39,7 @@ class SubcmdCheckArguments(ParserArguments):
 @dataclass(frozen=True)
 class SubcmdGetArguments(ParserArguments):
     config_path: str
+    show_detail: bool
     api_path: str
     http_method: str
 
@@ -87,6 +88,7 @@ class DeserializeParsedArgs:
         return SubcmdGetArguments(
             subparser_name=args.subcommand,
             config_path=args.config_path,
+            show_detail=args.show_detail,
             api_path=args.api_path,
             http_method=args.http_method,
         )

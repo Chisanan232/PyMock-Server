@@ -93,6 +93,7 @@ def _given_parser_args(
         return SubcmdGetArguments(
             subparser_name=subcommand,
             config_path=(config_path or _Test_Config),
+            show_detail=True,
             api_path=get_api_path,
             http_method=_Cmd_Arg_HTTP_Method,
         )
@@ -621,6 +622,7 @@ class TestSubCmdGet(BaseCommandProcessorTestSpec):
         args_namespace = Namespace()
         args_namespace.subcommand = SubCommand.Get
         args_namespace.config_path = _Test_Config
+        args_namespace.show_detail = True
         args_namespace.api_path = _Cmd_Arg_API_Path
         args_namespace.http_method = _Cmd_Arg_HTTP_Method
         return args_namespace
