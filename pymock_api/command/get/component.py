@@ -46,4 +46,3 @@ class SubCmdGetComponent(BaseSubCmdComponent):
         else:
             print("🙅‍♂️  Cannot find the API info with the conditions.")
             sys.exit(1)
-        # TODO: Add implementation about *inspect* feature gets some details of config
