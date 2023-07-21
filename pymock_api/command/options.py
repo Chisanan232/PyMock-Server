@@ -437,6 +437,15 @@ class UnderCheckConfigPath(BaseSubCmdGetOption):
     default_value: str = "api.yaml"
 
 
+class GetAPIShowDetail(BaseSubCmdGetOption):
+    cli_option: str = "-s, --show-detail"
+    name: str = "show_detail"
+    help_description: str = "Show the API details."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
 class GetAPIPath(BaseSubCmdGetOption):
     cli_option: str = "-a, --api-path"
     name: str = "api_path"
