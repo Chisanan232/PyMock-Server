@@ -165,3 +165,5 @@ _Test_SubCommand_Check: str = "check"
 # Test subcommand *inspect* options
 _Test_SubCommand_Get: str = "get"
 _Swagger_API_Document_URL: str = "Swagger API document URL"
+_Cmd_Arg_API_Path: str = "/foo-home"
+_Cmd_Arg_HTTP_Method: str = "GET"

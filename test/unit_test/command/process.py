@@ -32,6 +32,8 @@ from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (
     _Bind_Host_And_Port,
+    _Cmd_Arg_API_Path,
+    _Cmd_Arg_HTTP_Method,
     _Generate_Sample,
     _Log_Level,
     _Print_Sample,
@@ -59,6 +61,7 @@ def _given_parser_args(
     config_path: str = None,
     swagger_doc_url: str = None,
     stop_if_fail: bool = True,
+    get_api_path: str = _Cmd_Arg_API_Path,
 ) -> Union[SubcmdRunArguments, SubcmdAddArguments, SubcmdCheckArguments, SubcmdGetArguments, ParserArguments]:
     if subcommand == "run":
         return SubcmdRunArguments(
@@ -90,6 +93,8 @@ def _given_parser_args(
         return SubcmdGetArguments(
             subparser_name=subcommand,
             config_path=(config_path or _Test_Config),
+            api_path=get_api_path,
+            http_method=_Cmd_Arg_HTTP_Method,
         )
     else:
         return ParserArguments(
@@ -520,34 +525,104 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
         return SubcmdCheckArguments
 
 
+GET_YAML_PATHS_WITH_EX_CODE: List[tuple] = []
+
+
+def _get_all_yaml_for_subcmd_get(
+    get_api_path: str, is_valid_config: bool, exit_code: Union[str, int], acceptable_error: bool = None
+) -> None:
+    is_valid_path = "valid" if is_valid_config else "invalid"
+    if is_valid_config is False and acceptable_error is not None:
+        config_folder = "warn" if acceptable_error else "error"
+        entire_config_path = (
+            str(pathlib.Path(__file__).parent.parent.parent),
+            "data",
+            "get_test",
+            is_valid_path,
+            config_folder,
+            "*.yaml",
+        )
+    else:
+        entire_config_path = (
+            str(pathlib.Path(__file__).parent.parent.parent),
+            "data",
+            "get_test",
+            is_valid_path,
+            "*.yaml",
+        )
+    yaml_dir = os.path.join(*entire_config_path)
+    global GET_YAML_PATHS_WITH_EX_CODE
+    for yaml_config_path in glob.glob(yaml_dir):
+        expected_exit_code = exit_code if isinstance(exit_code, str) and exit_code.isdigit() else str(exit_code)
+        one_test_scenario = (yaml_config_path, get_api_path, expected_exit_code)
+        GET_YAML_PATHS_WITH_EX_CODE.append(one_test_scenario)
+
+
+# With valid configuration
+_get_all_yaml_for_subcmd_get(get_api_path="/foo-home", is_valid_config=True, exit_code=0)
+_get_all_yaml_for_subcmd_get(get_api_path="/not-exist-api", is_valid_config=True, exit_code=1)
+
+# With invalid configuration
+_get_all_yaml_for_subcmd_get(get_api_path="/foo-home", is_valid_config=False, acceptable_error=True, exit_code=0)
+_get_all_yaml_for_subcmd_get(get_api_path="/foo-home", is_valid_config=False, acceptable_error=False, exit_code=1)
+_get_all_yaml_for_subcmd_get(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=True, exit_code=1)
+_get_all_yaml_for_subcmd_get(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=False, exit_code=1)
+
+
 class TestSubCmdGet(BaseCommandProcessorTestSpec):
     @pytest.fixture(scope="function")
     def cmd_ps(self) -> SubCmdGet:
         return SubCmdGet()
 
-    def test_with_command_processor(self, object_under_test: Callable, **kwargs):
+    @pytest.mark.parametrize(
+        ("yaml_config_path", "get_api_path", "expected_exit_code"),
+        GET_YAML_PATHS_WITH_EX_CODE,
+    )
+    def test_with_command_processor(
+        self, yaml_config_path: str, get_api_path: str, expected_exit_code: int, object_under_test: Callable, **kwargs
+    ):
         kwargs = {
+            "yaml_config_path": yaml_config_path,
+            "get_api_path": get_api_path,
+            "expected_exit_code": expected_exit_code,
             "cmd_ps": object_under_test,
         }
         self._test_process(**kwargs)
 
-    def test_with_run_entry_point(self, entry_point_under_test: Callable, **kwargs):
+    @pytest.mark.parametrize(
+        ("yaml_config_path", "get_api_path", "expected_exit_code"),
+        GET_YAML_PATHS_WITH_EX_CODE,
+    )
+    def test_with_run_entry_point(
+        self,
+        yaml_config_path: str,
+        get_api_path: str,
+        expected_exit_code: int,
+        entry_point_under_test: Callable,
+        **kwargs,
+    ):
         kwargs = {
+            "yaml_config_path": yaml_config_path,
+            "get_api_path": get_api_path,
+            "expected_exit_code": expected_exit_code,
             "cmd_ps": entry_point_under_test,
         }
         self._test_process(**kwargs)
 
-    def _test_process(self, cmd_ps: Callable):
+    def _test_process(self, yaml_config_path: str, get_api_path: str, expected_exit_code: int, cmd_ps: Callable):
         mock_parser_arg = _given_parser_args(
-            subcommand=_Test_SubCommand_Get,
-            config_path="./test/data/check_test/config/valid/sample-with_general_string_value.yaml",
+            subcommand=_Test_SubCommand_Get, config_path=yaml_config_path, get_api_path=get_api_path
         )
-        cmd_ps(mock_parser_arg)
+        with pytest.raises(SystemExit) as exc_info:
+            cmd_ps(mock_parser_arg)
+        assert str(expected_exit_code) == str(exc_info.value)
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
         args_namespace.subcommand = SubCommand.Get
         args_namespace.config_path = _Test_Config
+        args_namespace.api_path = _Cmd_Arg_API_Path
+        args_namespace.http_method = _Cmd_Arg_HTTP_Method
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:
