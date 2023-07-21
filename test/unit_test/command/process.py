@@ -528,8 +528,29 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
 GET_YAML_PATHS_WITH_EX_CODE: List[tuple] = []
 
 
-def _get_all_yaml_for_subcmd_get(get_api_path: str, exit_code: Union[str, int]) -> None:
-    yaml_dir = os.path.join(str(pathlib.Path(__file__).parent.parent.parent), "data", "get_test", "valid", "*.yaml")
+def _get_all_yaml_for_subcmd_get(
+    get_api_path: str, is_valid_config: bool, exit_code: Union[str, int], acceptable_error: bool = None
+) -> None:
+    is_valid_path = "valid" if is_valid_config else "invalid"
+    if is_valid_config is False and acceptable_error is not None:
+        config_folder = "warn" if acceptable_error else "error"
+        entire_config_path = (
+            str(pathlib.Path(__file__).parent.parent.parent),
+            "data",
+            "get_test",
+            is_valid_path,
+            config_folder,
+            "*.yaml",
+        )
+    else:
+        entire_config_path = (
+            str(pathlib.Path(__file__).parent.parent.parent),
+            "data",
+            "get_test",
+            is_valid_path,
+            "*.yaml",
+        )
+    yaml_dir = os.path.join(*entire_config_path)
     global GET_YAML_PATHS_WITH_EX_CODE
     for yaml_config_path in glob.glob(yaml_dir):
         expected_exit_code = exit_code if isinstance(exit_code, str) and exit_code.isdigit() else str(exit_code)
@@ -537,8 +558,15 @@ def _get_all_yaml_for_subcmd_get(get_api_path: str, exit_code: Union[str, int]) 
         GET_YAML_PATHS_WITH_EX_CODE.append(one_test_scenario)
 
 
-_get_all_yaml_for_subcmd_get("/foo-home", 0)
-_get_all_yaml_for_subcmd_get("/not-exist-api", 1)
+# With valid configuration
+_get_all_yaml_for_subcmd_get(get_api_path="/foo-home", is_valid_config=True, exit_code=0)
+_get_all_yaml_for_subcmd_get(get_api_path="/not-exist-api", is_valid_config=True, exit_code=1)
+
+# With invalid configuration
+_get_all_yaml_for_subcmd_get(get_api_path="/foo-home", is_valid_config=False, acceptable_error=True, exit_code=0)
+_get_all_yaml_for_subcmd_get(get_api_path="/foo-home", is_valid_config=False, acceptable_error=False, exit_code=1)
+_get_all_yaml_for_subcmd_get(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=True, exit_code=1)
+_get_all_yaml_for_subcmd_get(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=False, exit_code=1)
 
 
 class TestSubCmdGet(BaseCommandProcessorTestSpec):
