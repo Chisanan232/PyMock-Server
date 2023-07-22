@@ -40,6 +40,7 @@ class SubcmdCheckArguments(ParserArguments):
 class SubcmdGetArguments(ParserArguments):
     config_path: str
     show_detail: bool
+    show_as_format: str
     api_path: str
     http_method: str
 
@@ -89,6 +90,7 @@ class DeserializeParsedArgs:
             subparser_name=args.subcommand,
             config_path=args.config_path,
             show_detail=args.show_detail,
+            show_as_format=args.show_as_format,
             api_path=args.api_path,
             http_method=args.http_method,
         )

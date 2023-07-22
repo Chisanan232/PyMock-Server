@@ -20,6 +20,7 @@ from ..._values import (
     _Log_Level,
     _Print_Sample,
     _Sample_File_Path,
+    _Show_Detail_As_Format,
     _Swagger_API_Document_URL,
     _Test_App_Type,
     _Test_Config,
@@ -148,6 +149,7 @@ class TestDeserialize:
             "subcommand": _Test_SubCommand_Get,
             "config_path": _Test_Config,
             "show_detail": True,
+            "show_as_format": _Show_Detail_As_Format,
             "api_path": _Cmd_Arg_API_Path,
             "http_method": _Cmd_Arg_HTTP_Method,
         }
@@ -157,5 +159,6 @@ class TestDeserialize:
         assert arguments.subparser_name == _Test_SubCommand_Get
         assert arguments.config_path == _Test_Config
         assert arguments.show_detail == True
+        assert arguments.show_as_format == _Show_Detail_As_Format
         assert arguments.api_path == _Cmd_Arg_API_Path
         assert arguments.http_method == _Cmd_Arg_HTTP_Method

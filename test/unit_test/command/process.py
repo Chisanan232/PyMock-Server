@@ -38,6 +38,7 @@ from ..._values import (
     _Log_Level,
     _Print_Sample,
     _Sample_File_Path,
+    _Show_Detail_As_Format,
     _Test_App_Type,
     _Test_Auto_Type,
     _Test_Config,
@@ -94,6 +95,7 @@ def _given_parser_args(
             subparser_name=subcommand,
             config_path=(config_path or _Test_Config),
             show_detail=True,
+            show_as_format=_Show_Detail_As_Format,
             api_path=get_api_path,
             http_method=_Cmd_Arg_HTTP_Method,
         )
@@ -623,6 +625,7 @@ class TestSubCmdGet(BaseCommandProcessorTestSpec):
         args_namespace.subcommand = SubCommand.Get
         args_namespace.config_path = _Test_Config
         args_namespace.show_detail = True
+        args_namespace.show_as_format = _Show_Detail_As_Format
         args_namespace.api_path = _Cmd_Arg_API_Path
         args_namespace.http_method = _Cmd_Arg_HTTP_Method
         return args_namespace
