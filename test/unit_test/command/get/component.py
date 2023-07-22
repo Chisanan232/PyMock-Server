@@ -34,7 +34,6 @@ class TestSubCmdGetComponent:
             ("text", DisplayAsTextFormat, 0),
             ("yaml", DisplayAsYamlFormat, 0),
             ("json", None, 0),
-            ("invalid format", None, 1),
         ],
     )
     def test_component_with_valid_format(
@@ -60,6 +59,22 @@ class TestSubCmdGetComponent:
 
                 assert str(exc_info.value) == str(expected_exit_code)
                 mock_formatter_display.assert_called_once_with(MockAPI().deserialize(data=_TestConfig.Mock_API))
+
+    def test_component_with_invalid_format(self, component: SubCmdGetComponent):
+        with patch("pymock_api.command.get.component.load_config") as mock_load_config:
+            mock_load_config.return_value = APIConfig().deserialize(data=_TestConfig.API_Config)
+            with pytest.raises(SystemExit) as exc_info:
+                subcmd_get_args = SubcmdGetArguments(
+                    subparser_name="get",
+                    config_path="config path",
+                    show_detail=True,
+                    show_as_format="invalid format",
+                    api_path=_Test_URL,
+                    http_method=_Test_HTTP_Method,
+                )
+                component.process(subcmd_get_args)
+
+            assert str(exc_info.value) == "1"
 
 
 class DisplayFormatTestSpec(metaclass=ABCMeta):
