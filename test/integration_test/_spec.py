@@ -1,5 +1,6 @@
 import json
 import os
+from abc import ABCMeta, abstractmethod
 from functools import wraps
 from typing import Any, Callable, Optional, Union
 
@@ -37,7 +38,26 @@ class file:
 MockAPI_Config_Path: str = "./pytest-api.yaml"
 
 
-class yaml_factory:
+class _BaseConfigFactory(metaclass=ABCMeta):
+    @property
+    @abstractmethod
+    def file_path(self) -> str:
+        pass
+
+    @abstractmethod
+    def generate(self) -> None:
+        pass
+
+    @abstractmethod
+    def delete(self) -> None:
+        pass
+
+    @abstractmethod
+    def exist(self) -> bool:
+        pass
+
+
+class yaml_factory(_BaseConfigFactory):
     @property
     def file_path(self) -> str:
         return MockAPI_Config_Path
