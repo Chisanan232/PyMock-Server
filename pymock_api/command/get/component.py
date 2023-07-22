@@ -28,7 +28,8 @@ class SubCmdGetComponent(BaseSubCmdComponent):
                 elif args.show_as_format == "yaml":
                     DisplayAsYamlFormat().display(specific_api_info)
                 else:
-                    raise NotImplementedError
+                    print("❌  Invalid valid of option *--show-as-format*.")
+                    sys.exit(1)
             sys.exit(0)
         else:
             print("🙅‍♂️  Cannot find the API info with the conditions.")
