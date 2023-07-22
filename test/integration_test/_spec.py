@@ -37,7 +37,7 @@ class file:
 MockAPI_Config_Path: str = "./pytest-api.yaml"
 
 
-class ConfigFile:
+class yaml_factory:
     @property
     def file_path(self) -> str:
         return MockAPI_Config_Path
@@ -53,7 +53,7 @@ class ConfigFile:
 
 
 class run_test:
-    config_file: ConfigFile = ConfigFile()
+    config_file: yaml_factory = yaml_factory()
 
     @classmethod
     def with_file(cls, function: Callable) -> Callable:
