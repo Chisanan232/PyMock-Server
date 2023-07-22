@@ -467,7 +467,7 @@ class TestMockAPI(ConfigTestSpec):
             ("yaml", YAML),
         ],
     )
-    def test_format(self, formatter: str, format_object, sut: MockAPI):
+    def test_valid_format(self, formatter: str, format_object, sut: MockAPI):
         with patch.object(format_object, "serialize") as mock_formatter:
             format_str = sut.format(formatter)
             assert format_str
