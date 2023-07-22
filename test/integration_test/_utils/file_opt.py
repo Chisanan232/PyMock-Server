@@ -15,12 +15,15 @@ from .._spec import MockAPI_Config_Path, run_test
 
 
 class _BaseTestSuite(metaclass=ABCMeta):
-    _Test_File: str = "pytest-yaml-write.yaml"
-
     @pytest.fixture(scope="function")
     def file_opt(self) -> _BaseFileOperation:
         self._remove_test_config()
         return self._under_test_object()
+
+    @property
+    @abstractmethod
+    def _file_path(self) -> str:
+        pass
 
     @abstractmethod
     def _under_test_object(self) -> _BaseFileOperation:
@@ -37,22 +40,26 @@ class _BaseTestSuite(metaclass=ABCMeta):
 
     def test_write(self, file_opt: _BaseFileOperation):
         try:
-            assert os.path.exists(self._Test_File) is False
+            assert os.path.exists(self._file_path) is False
             config_data = file_opt.serialize(config=_Test_Config_Value)
-            file_opt.write(path=self._Test_File, config=config_data)
+            file_opt.write(path=self._file_path, config=config_data)
 
             assert isinstance(config_data, str)
-            assert os.path.exists(self._Test_File)
-            config = file_opt.read(self._Test_File)
+            assert os.path.exists(self._file_path)
+            config = file_opt.read(self._file_path)
             assert config == _Test_Config_Value
         finally:
             self._remove_test_config()
 
     def _remove_test_config(self):
-        if os.path.exists(self._Test_File):
-            os.remove(self._Test_File)
+        if os.path.exists(self._file_path):
+            os.remove(self._file_path)
 
 
 class TestYAML(_BaseTestSuite):
     def _under_test_object(self) -> YAML:
         return YAML()
+
+    @property
+    def _file_path(self) -> str:
+        return "pytest-yaml-write.yaml"
