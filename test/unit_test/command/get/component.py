@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Optional
 from unittest.mock import patch
 
 from yaml import dump
@@ -36,7 +37,7 @@ class TestSubCmdGetComponent:
             ("invalid format", None, 1),
         ],
     )
-    def test_component_with_different_format(
+    def test_component_with_valid_format(
         self,
         display_as_format: str,
         expected_object: _BaseDisplayFormat,
