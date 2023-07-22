@@ -446,6 +446,15 @@ class GetAPIShowDetail(BaseSubCmdGetOption):
     default_value: bool = False
 
 
+class GetAPIShowDetailAsFormat(BaseSubCmdGetOption):
+    cli_option: str = "-f, --show-as-format"
+    name: str = "show_as_format"
+    help_description: str = "Show the API details as one specific format."
+    option_value_type: type = str
+    default_value: str = "text"
+    _options: List[str] = ["text", "json", "yaml"]
+
+
 class GetAPIPath(BaseSubCmdGetOption):
     cli_option: str = "-a, --api-path"
     name: str = "api_path"
