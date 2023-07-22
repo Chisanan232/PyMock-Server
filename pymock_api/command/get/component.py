@@ -1,7 +1,7 @@
 import sys
 from abc import ABCMeta, abstractmethod
 
-from ...model import APIConfig, load_config
+from ...model import load_config
 from ...model.api_config import MockAPI
 from ...model.cmd_args import SubcmdGetArguments
 from ..component import BaseSubCmdComponent
@@ -22,11 +22,11 @@ class SubCmdGetComponent(BaseSubCmdComponent):
             print("🍻  Find the API info which satisfy the conditions.")
             if args.show_detail:
                 if args.show_as_format == "text":
-                    DisplayAsTextFormat.display(specific_api_info)
+                    DisplayAsTextFormat().display(specific_api_info)
                 elif args.show_as_format == "json":
                     raise NotImplementedError
                 elif args.show_as_format == "yaml":
-                    raise NotImplementedError
+                    DisplayAsYamlFormat().display(specific_api_info)
                 else:
                     raise NotImplementedError
             sys.exit(0)
@@ -41,9 +41,8 @@ class _BaseDisplayFormat(metaclass=ABCMeta):
     def format(self) -> str:
         pass
 
-    @classmethod
     @abstractmethod
-    def display(cls, specific_api_info: MockAPI) -> None:
+    def display(self, specific_api_info: MockAPI) -> None:
         pass
 
 
@@ -52,8 +51,7 @@ class DisplayAsTextFormat(_BaseDisplayFormat):
     def format(self) -> str:
         return "text"
 
-    @classmethod
-    def display(cls, specific_api_info: MockAPI) -> None:
+    def display(self, specific_api_info: MockAPI) -> None:
         print("+--------------- API info ---------------+")
         print(f"+ Path:  {specific_api_info.url}")
         print("+ HTTP:")
@@ -78,3 +76,12 @@ class DisplayAsTextFormat(_BaseDisplayFormat):
                 print("+     Miss HTTP response settings.")
         else:
             print("+     Miss HTTP settings.")
+
+
+class DisplayAsYamlFormat(_BaseDisplayFormat):
+    @property
+    def format(self) -> str:
+        return "yaml"
+
+    def display(self, specific_api_info: MockAPI) -> None:
+        print(specific_api_info.format(self.format))
