@@ -462,7 +462,6 @@ class TestMockAPI(ConfigTestSpec):
     @pytest.mark.parametrize(
         ("formatter", "format_object"),
         [
-            ("text", None),
             ("json", None),
             ("yaml", YAML),
         ],
@@ -472,6 +471,12 @@ class TestMockAPI(ConfigTestSpec):
             format_str = sut.format(formatter)
             assert format_str
             mock_formatter.assert_called_once_with(sut.serialize())
+
+    def test_invalid_format(self, sut: MockAPI):
+        invalid_format = "not support or invalid format type"
+        with pytest.raises(ValueError) as exc_info:
+            sut.format(invalid_format)
+        assert re.search(r".{0,64}not support.{0,64}" + re.escape(invalid_format), str(exc_info.value), re.IGNORECASE)
 
 
 class TestHTTP(ConfigTestSpec):
