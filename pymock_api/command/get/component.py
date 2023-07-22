@@ -1,6 +1,6 @@
 import sys
 
-from ...model import load_config
+from ...model import APIConfig, load_config
 from ...model.cmd_args import SubcmdGetArguments
 from ..component import BaseSubCmdComponent
 
@@ -19,30 +19,37 @@ class SubCmdGetComponent(BaseSubCmdComponent):
         if specific_api_info:
             print("🍻  Find the API info which satisfy the conditions.")
             if args.show_detail:
-                print("+--------------- API info ---------------+")
-                print(f"+ Path:  {specific_api_info.url}")
-                print("+ HTTP:")
-                http_info = specific_api_info.http
-                print("+   Request:")
-                if http_info:
-                    if http_info.request:
-                        print(f"+     HTTP method:  {http_info.request.method}")
-                        print("+       Parameters:")
-                        for param in http_info.request.parameters:
-                            print(f"+         name:  {param.name}")
-                            print(f"+           required:  {param.required}")
-                            print(f"+           default value:  {param.default}")
-                            print(f"+           data type:  {param.value_type}")
-                            print(f"+           value format:  {param.value_format}")
+                if args.show_as_format == "text":
+                    print("+--------------- API info ---------------+")
+                    print(f"+ Path:  {specific_api_info.url}")
+                    print("+ HTTP:")
+                    http_info = specific_api_info.http
+                    print("+   Request:")
+                    if http_info:
+                        if http_info.request:
+                            print(f"+     HTTP method:  {http_info.request.method}")
+                            print("+       Parameters:")
+                            for param in http_info.request.parameters:
+                                print(f"+         name:  {param.name}")
+                                print(f"+           required:  {param.required}")
+                                print(f"+           default value:  {param.default}")
+                                print(f"+           data type:  {param.value_type}")
+                                print(f"+           value format:  {param.value_format}")
+                        else:
+                            print("+     Miss HTTP request settings.")
+                        print("+     Response:")
+                        if http_info.response:
+                            print(f"+       Values:  {http_info.response.value}")
+                        else:
+                            print("+     Miss HTTP response settings.")
                     else:
-                        print("+     Miss HTTP request settings.")
-                    print("+     Response:")
-                    if http_info.response:
-                        print(f"+       Values:  {http_info.response.value}")
-                    else:
-                        print("+     Miss HTTP response settings.")
+                        print("+     Miss HTTP settings.")
+                elif args.show_as_format == "json":
+                    raise NotImplementedError
+                elif args.show_as_format == "yaml":
+                    raise NotImplementedError
                 else:
-                    print("+     Miss HTTP settings.")
+                    raise NotImplementedError
             sys.exit(0)
         else:
             print("🙅‍♂️  Cannot find the API info with the conditions.")
