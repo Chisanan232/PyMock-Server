@@ -431,7 +431,7 @@ class MockAPI(_Config):
             assert serialized_data, "It must have non-empty value for formatting."
             return YAML().serialize(serialized_data)
         else:
-            raise NotImplementedError
+            raise ValueError(f"Not support the format feature as {f}.")
 
 
 class MockAPIs(_Config):
