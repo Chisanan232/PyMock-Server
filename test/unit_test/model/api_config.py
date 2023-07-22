@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from pymock_api._utils import YAML
 from pymock_api.model.api_config import (
     HTTP,
     APIConfig,
@@ -457,6 +458,20 @@ class TestMockAPI(ConfigTestSpec):
         assert obj.http.request.method == _TestConfig.Request.get("method", None)
         assert obj.http.request.parameters == [self._Mock_Model.api_parameter]
         assert obj.http.response.value == _TestConfig.Response.get("value", None)
+
+    @pytest.mark.parametrize(
+        ("formatter", "format_object"),
+        [
+            ("text", None),
+            ("json", None),
+            ("yaml", YAML),
+        ],
+    )
+    def test_format(self, formatter: str, format_object, sut: MockAPI):
+        with patch.object(format_object, "serialize") as mock_formatter:
+            format_str = sut.format(formatter)
+            assert format_str
+            mock_formatter.assert_called_once_with(sut.serialize())
 
 
 class TestHTTP(ConfigTestSpec):
