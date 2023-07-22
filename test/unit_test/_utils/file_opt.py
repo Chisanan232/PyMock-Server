@@ -12,7 +12,7 @@ except ImportError:
 from pymock_api._utils.file_opt import YAML
 
 
-class TestYAMLReader:
+class TestYAML:
     @pytest.fixture(scope="function")
     def yaml_opt(self) -> YAML:
         return YAML()
