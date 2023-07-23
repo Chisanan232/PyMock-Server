@@ -49,13 +49,11 @@ class _BaseConfigFactory(metaclass=ABCMeta):
     def generate(self) -> None:
         pass
 
-    @abstractmethod
     def delete(self) -> None:
-        pass
+        file.delete(self.file_path)
 
-    @abstractmethod
     def exist(self) -> bool:
-        pass
+        return file.exist(self.file_path)
 
 
 class yaml_factory(_BaseConfigFactory):
@@ -65,12 +63,6 @@ class yaml_factory(_BaseConfigFactory):
 
     def generate(self) -> None:
         file.write(self.file_path, content=_Test_Config_Value, serialize=lambda content: dump(content, Dumper=Dumper))
-
-    def delete(self) -> None:
-        file.delete(self.file_path)
-
-    def exist(self) -> bool:
-        return file.exist(self.file_path)
 
 
 class run_test:
