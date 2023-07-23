@@ -2,7 +2,7 @@
 
 Read the configuration and parse its content to a specific data object so that it could be convenience to use it.
 """
-
+import json
 import os
 from abc import ABCMeta, abstractmethod
 from typing import Union
@@ -47,3 +47,22 @@ class YAML(_BaseFileOperation):
 
     def serialize(self, config: dict) -> str:
         return dump(config, Dumper=Dumper)
+
+
+class JSON(_BaseFileOperation):
+    def read(self, path: str) -> dict:
+        exist_file = os.path.exists(path)
+        if not exist_file:
+            raise FileNotFoundError(f"The target configuration file {path} doesn't exist.")
+
+        with open(path, "r", encoding="utf-8") as file_stream:
+            data: dict = json.loads(file_stream.read())
+        return data
+
+    def write(self, path: str, config: Union[str, dict]) -> None:
+        json_content = self.serialize(config) if isinstance(config, dict) else config
+        with open(path, "a+", encoding="utf-8") as file_stream:
+            file_stream.writelines(json_content)
+
+    def serialize(self, config: dict) -> str:
+        return json.dumps(config)

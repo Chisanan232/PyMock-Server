@@ -37,6 +37,7 @@ class file:
 
 
 MockAPI_Config_Yaml_Path: str = "./pytest-api.yaml"
+MockAPI_Config_Json_Path: str = "./pytest-api.json"
 
 
 class _BaseConfigFactory(metaclass=ABCMeta):
@@ -65,14 +66,21 @@ class yaml_factory(_BaseConfigFactory):
         file.write(self.file_path, content=_Test_Config_Value, serialize=lambda content: dump(content, Dumper=Dumper))
 
 
-class run_test:
-    config_file: _BaseConfigFactory
+class json_factory(_BaseConfigFactory):
+    @property
+    def file_path(self) -> str:
+        return MockAPI_Config_Json_Path
 
+    def generate(self) -> None:
+        file.write(self.file_path, content=_Test_Config_Value, serialize=lambda content: json.dumps(content))
+
+
+class run_test:
     @classmethod
     def with_file(cls, factory: Type[_BaseConfigFactory]) -> Callable:
         assert factory, "It must set a way to operate configuration file."
         if inspect.isclass(factory) and issubclass(factory, _BaseConfigFactory):
-            cls.config_file = factory()
+            config_file = factory()
         else:
             assert False, "Decorator's argument cannot accept None value in code usage."
 
@@ -80,9 +88,9 @@ class run_test:
             @wraps(function)
             def _(self, *args, **kwargs) -> Any:
                 # Ensure that it doesn't have file
-                cls.config_file.delete()
+                config_file.delete()
                 # Create the target file before run test
-                cls.config_file.generate()
+                config_file.generate()
                 file.write(
                     path="youtube.json", content=_YouTube_API_Content, serialize=lambda content: json.dumps(content)
                 )
@@ -92,7 +100,7 @@ class run_test:
                     function(self, *args, **kwargs)
                 finally:
                     # Delete file finally
-                    cls.config_file.delete()
+                    config_file.delete()
                     file.delete("youtube.json")
 
             return _

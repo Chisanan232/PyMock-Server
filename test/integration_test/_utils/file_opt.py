@@ -8,10 +8,16 @@ try:
 except ImportError:
     from yaml import Dumper  # type: ignore
 
-from pymock_api._utils.file_opt import YAML, _BaseFileOperation
+from pymock_api._utils.file_opt import JSON, YAML, _BaseFileOperation
 
 from ..._values import _Test_Config_Value
-from .._spec import MockAPI_Config_Yaml_Path, run_test, yaml_factory
+from .._spec import (
+    MockAPI_Config_Json_Path,
+    MockAPI_Config_Yaml_Path,
+    json_factory,
+    run_test,
+    yaml_factory,
+)
 
 
 class _BaseTestSuite(metaclass=ABCMeta):
@@ -29,14 +35,9 @@ class _BaseTestSuite(metaclass=ABCMeta):
     def _under_test_object(self) -> _BaseFileOperation:
         pass
 
-    @run_test.with_file(yaml_factory)
+    @abstractmethod
     def test_open_and_read(self, file_opt: _BaseFileOperation):
-        # Run target function
-        reading_data = file_opt.read(path=MockAPI_Config_Yaml_Path)
-
-        # Verify result
-        assert reading_data and isinstance(reading_data, dict)
-        assert reading_data == _Test_Config_Value
+        pass
 
     def test_write(self, file_opt: _BaseFileOperation):
         try:
@@ -63,3 +64,30 @@ class TestYAML(_BaseTestSuite):
     @property
     def _file_path(self) -> str:
         return "pytest-yaml-write.yaml"
+
+    @run_test.with_file(yaml_factory)
+    def test_open_and_read(self, file_opt: _BaseFileOperation):
+        # Run target function
+        reading_data = file_opt.read(path=MockAPI_Config_Yaml_Path)
+
+        # Verify result
+        assert reading_data and isinstance(reading_data, dict)
+        assert reading_data == _Test_Config_Value
+
+
+class TestJSON(_BaseTestSuite):
+    def _under_test_object(self) -> JSON:
+        return JSON()
+
+    @property
+    def _file_path(self) -> str:
+        return "pytest-yaml-write.json"
+
+    @run_test.with_file(json_factory)
+    def test_open_and_read(self, file_opt: _BaseFileOperation):
+        # Run target function
+        reading_data = file_opt.read(path=MockAPI_Config_Json_Path)
+
+        # Verify result
+        assert reading_data and isinstance(reading_data, dict)
+        assert reading_data == _Test_Config_Value
