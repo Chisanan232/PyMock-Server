@@ -9,7 +9,7 @@ import pytest
 
 import pymock_api.server as mock_server
 
-from .._spec import MockAPI_Config_Path, run_test
+from .._spec import MockAPI_Config_Path, run_test, yaml_factory
 
 LOAD_APP_TYPE = Type[mock_server.load_app]
 
@@ -20,7 +20,7 @@ class TestLoadApp:
         os.environ["MockAPI_Config"] = MockAPI_Config_Path
         return mock_server.load_app
 
-    @run_test.with_file
+    @run_test.with_file(yaml_factory)
     @pytest.mark.parametrize(
         ("web_lib", "expected"),
         [
@@ -32,7 +32,7 @@ class TestLoadApp:
         getattr(load_app, f"by_{web_lib}")()
         assert isinstance(getattr(mock_server, f"{web_lib}_app"), expected)
 
-    @run_test.with_file
+    @run_test.with_file(yaml_factory)
     @pytest.mark.parametrize(
         ("web_lib", "expected"),
         [

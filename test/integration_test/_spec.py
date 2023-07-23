@@ -1,8 +1,9 @@
+import inspect
 import json
 import os
 from abc import ABCMeta, abstractmethod
 from functools import wraps
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, Type, Union
 
 try:
     from yaml import CDumper as Dumper
@@ -73,24 +74,35 @@ class yaml_factory(_BaseConfigFactory):
 
 
 class run_test:
-    config_file: yaml_factory = yaml_factory()
+    config_file: _BaseConfigFactory
 
     @classmethod
-    def with_file(cls, function: Callable) -> Callable:
-        @wraps(function)
-        def _(self, *args, **kwargs) -> Any:
-            # Ensure that it doesn't have file
-            cls.config_file.delete()
-            # Create the target file before run test
-            cls.config_file.generate()
-            file.write(path="youtube.json", content=_YouTube_API_Content, serialize=lambda content: json.dumps(content))
+    def with_file(cls, factory: Type[_BaseConfigFactory]) -> Callable:
+        assert factory, "It must set a way to operate configuration file."
+        if inspect.isclass(factory) and issubclass(factory, _BaseConfigFactory):
+            cls.config_file = factory()
+        else:
+            assert False, "Decorator's argument cannot accept None value in code usage."
 
-            try:
-                # Run the test item
-                function(self, *args, **kwargs)
-            finally:
-                # Delete file finally
+        def _wrap_func(function: Callable) -> Callable:
+            @wraps(function)
+            def _(self, *args, **kwargs) -> Any:
+                # Ensure that it doesn't have file
                 cls.config_file.delete()
-                file.delete("youtube.json")
+                # Create the target file before run test
+                cls.config_file.generate()
+                file.write(
+                    path="youtube.json", content=_YouTube_API_Content, serialize=lambda content: json.dumps(content)
+                )
 
-        return _
+                try:
+                    # Run the test item
+                    function(self, *args, **kwargs)
+                finally:
+                    # Delete file finally
+                    cls.config_file.delete()
+                    file.delete("youtube.json")
+
+            return _
+
+        return _wrap_func

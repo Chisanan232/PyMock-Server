@@ -19,7 +19,7 @@ from .._values import (
     _Test_Home,
     _YouTube_Home_Value,
 )
-from ._spec import MockAPI_Config_Path, run_test
+from ._spec import MockAPI_Config_Path, run_test, yaml_factory
 from .runner import Capturing
 
 
@@ -36,7 +36,7 @@ class CommandTestSpec(metaclass=ABCMeta):
     def options(self) -> str:
         pass
 
-    @run_test.with_file
+    @run_test.with_file(yaml_factory)
     def test_command(self) -> None:
         try:
             with Capturing() as mock_server_output:
