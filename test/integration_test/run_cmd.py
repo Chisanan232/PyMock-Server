@@ -19,7 +19,7 @@ from .._values import (
     _Test_Home,
     _YouTube_Home_Value,
 )
-from ._spec import MockAPI_Config_Path, run_test, yaml_factory
+from ._spec import MockAPI_Config_Yaml_Path, run_test, yaml_factory
 from .runner import Capturing
 
 
@@ -207,7 +207,7 @@ class RunMockApplicationTestSpec(CommandTestSpec, ABC):
 class TestRunMockApplicationWithFlask(RunMockApplicationTestSpec):
     @property
     def options(self) -> str:
-        return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Path}"
+        return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
 
     def _do_finally(self) -> None:
         subprocess.run("pkill -f gunicorn", shell=True)
@@ -221,7 +221,7 @@ class TestRunMockApplicationWithFlask(RunMockApplicationTestSpec):
 class TestRunMockApplicationWithFastAPI(RunMockApplicationTestSpec):
     @property
     def options(self) -> str:
-        return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Path}"
+        return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
 
     def _do_finally(self) -> None:
         subprocess.run("pkill -f uvicorn", shell=True)
@@ -239,7 +239,7 @@ class TestRunMockApplicationWithFastAPI(RunMockApplicationTestSpec):
 class TestRunMockApplicationWithAuto(RunMockApplicationTestSpec):
     @property
     def options(self) -> str:
-        return f"run --app-type auto --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Path}"
+        return f"run --app-type auto --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
 
     def _do_finally(self) -> None:
         subprocess.run("pkill -f uvicorn", shell=True)

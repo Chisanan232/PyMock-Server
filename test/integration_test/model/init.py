@@ -2,7 +2,7 @@ import pytest
 
 from pymock_api.model import APIConfig, load_config
 
-from .._spec import MockAPI_Config_Path, run_test, yaml_factory
+from .._spec import MockAPI_Config_Yaml_Path, run_test, yaml_factory
 
 
 class TestInitFunctions:
@@ -13,7 +13,7 @@ class TestInitFunctions:
     @run_test.with_file(yaml_factory)
     def test_load_config(self):
         # Run target function
-        loaded_data = load_config(path=MockAPI_Config_Path)
+        loaded_data = load_config(path=MockAPI_Config_Yaml_Path)
 
         # Verify result
         assert isinstance(loaded_data, APIConfig) and len(loaded_data) != 0, ""

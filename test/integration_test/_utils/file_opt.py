@@ -11,7 +11,7 @@ except ImportError:
 from pymock_api._utils.file_opt import YAML, _BaseFileOperation
 
 from ..._values import _Test_Config_Value
-from .._spec import MockAPI_Config_Path, run_test, yaml_factory
+from .._spec import MockAPI_Config_Yaml_Path, run_test, yaml_factory
 
 
 class _BaseTestSuite(metaclass=ABCMeta):
@@ -32,7 +32,7 @@ class _BaseTestSuite(metaclass=ABCMeta):
     @run_test.with_file(yaml_factory)
     def test_open_and_read(self, file_opt: _BaseFileOperation):
         # Run target function
-        reading_data = file_opt.read(path=MockAPI_Config_Path)
+        reading_data = file_opt.read(path=MockAPI_Config_Yaml_Path)
 
         # Verify result
         assert reading_data and isinstance(reading_data, dict)

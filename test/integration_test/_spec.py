@@ -36,7 +36,7 @@ class file:
         return os.path.exists(path)
 
 
-MockAPI_Config_Path: str = "./pytest-api.yaml"
+MockAPI_Config_Yaml_Path: str = "./pytest-api.yaml"
 
 
 class _BaseConfigFactory(metaclass=ABCMeta):
@@ -61,7 +61,7 @@ class _BaseConfigFactory(metaclass=ABCMeta):
 class yaml_factory(_BaseConfigFactory):
     @property
     def file_path(self) -> str:
-        return MockAPI_Config_Path
+        return MockAPI_Config_Yaml_Path
 
     def generate(self) -> None:
         file.write(self.file_path, content=_Test_Config_Value, serialize=lambda content: dump(content, Dumper=Dumper))
