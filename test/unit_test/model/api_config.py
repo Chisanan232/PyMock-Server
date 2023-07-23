@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from pymock_api._utils import YAML
+from pymock_api._utils.file_opt import JSON
 from pymock_api.model.api_config import (
     HTTP,
     APIConfig,
@@ -462,7 +463,7 @@ class TestMockAPI(ConfigTestSpec):
     @pytest.mark.parametrize(
         ("formatter", "format_object"),
         [
-            ("json", None),
+            ("json", JSON),
             ("yaml", YAML),
         ],
     )

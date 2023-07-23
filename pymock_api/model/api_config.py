@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from .._utils.file_opt import YAML, _BaseFileOperation
+from .._utils.file_opt import JSON, YAML, _BaseFileOperation
 
 # The truly semantically is more near like following:
 #
@@ -430,7 +430,7 @@ class MockAPI(_Config):
             return serialized_data
 
         if f == "json":
-            raise NotImplementedError
+            return JSON().serialize(_ensure_getting_serialized_data())
         elif f == "yaml":
             return YAML().serialize(_ensure_getting_serialized_data())
         else:
