@@ -65,4 +65,4 @@ class JSON(_BaseFileOperation):
             file_stream.writelines(json_content)
 
     def serialize(self, config: dict) -> str:
-        return json.dumps(config)
+        return json.dumps(config, indent=4)
