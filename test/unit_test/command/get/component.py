@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from typing import Optional
 from unittest.mock import patch
 
 from yaml import dump
