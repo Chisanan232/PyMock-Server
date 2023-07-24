@@ -1,3 +1,4 @@
+import json
 from abc import ABCMeta, abstractmethod
 from unittest.mock import patch
 
@@ -117,3 +118,17 @@ class TestDisplayAsYamlFormat(DisplayFormatTestSpec):
     @property
     def _expected_format_value(self) -> str:
         return dump(data=_TestConfig.Mock_API, Dumper=Dumper)
+
+
+class TestDisplayAsJsonFormat(DisplayFormatTestSpec):
+    @pytest.fixture(scope="class")
+    def formatter(self) -> DisplayAsJsonFormat:
+        return DisplayAsJsonFormat()
+
+    @property
+    def _expected_format(self) -> str:
+        return "json"
+
+    @property
+    def _expected_format_value(self) -> str:
+        return json.dumps(_TestConfig.Mock_API, indent=4)
