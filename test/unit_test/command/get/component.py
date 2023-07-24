@@ -12,6 +12,7 @@ except ImportError:
 import pytest
 
 from pymock_api.command.get.component import (
+    DisplayAsJsonFormat,
     DisplayAsTextFormat,
     DisplayAsYamlFormat,
     SubCmdGetComponent,
@@ -33,7 +34,7 @@ class TestSubCmdGetComponent:
         [
             ("text", DisplayAsTextFormat, 0),
             ("yaml", DisplayAsYamlFormat, 0),
-            ("json", None, 0),
+            ("json", DisplayAsJsonFormat, 0),
         ],
     )
     def test_component_with_valid_format(

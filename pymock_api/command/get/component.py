@@ -24,7 +24,7 @@ class SubCmdGetComponent(BaseSubCmdComponent):
                 if args.show_as_format == "text":
                     DisplayAsTextFormat().display(specific_api_info)
                 elif args.show_as_format == "json":
-                    raise NotImplementedError
+                    DisplayAsJsonFormat().display(specific_api_info)
                 elif args.show_as_format == "yaml":
                     DisplayAsYamlFormat().display(specific_api_info)
                 else:
@@ -83,6 +83,15 @@ class DisplayAsYamlFormat(_BaseDisplayFormat):
     @property
     def format(self) -> str:
         return "yaml"
+
+    def display(self, specific_api_info: MockAPI) -> None:
+        print(specific_api_info.format(self.format))
+
+
+class DisplayAsJsonFormat(_BaseDisplayFormat):
+    @property
+    def format(self) -> str:
+        return "json"
 
     def display(self, specific_api_info: MockAPI) -> None:
         print(specific_api_info.format(self.format))
