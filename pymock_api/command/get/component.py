@@ -3,7 +3,7 @@ import inspect
 import os
 import sys
 from abc import ABCMeta, abstractmethod
-from typing import Dict, List, Optional, Type, cast
+from typing import Dict, Optional, cast
 
 from ...model import load_config
 from ...model.api_config import MockAPI
@@ -23,22 +23,6 @@ class SubCmdGetComponent(BaseSubCmdComponent):
             sys.exit(1)
         specific_api_info = apis_info.get_api_config_by_url(url=args.api_path, base=apis_info.base)
         APIInfoDisplayChain().show(args, specific_api_info)
-        # if specific_api_info:
-        #     print("🍻  Find the API info which satisfy the conditions.")
-        #     if args.show_detail:
-        #         if args.show_as_format == "text":
-        #             DisplayAsTextFormat().display(specific_api_info)
-        #         elif args.show_as_format == "json":
-        #             DisplayAsJsonFormat().display(specific_api_info)
-        #         elif args.show_as_format == "yaml":
-        #             DisplayAsYamlFormat().display(specific_api_info)
-        #         else:
-        #             print("❌  Invalid valid of option *--show-as-format*.")
-        #             sys.exit(1)
-        #     sys.exit(0)
-        # else:
-        #     print("🙅‍♂️  Cannot find the API info with the conditions.")
-        #     sys.exit(1)
 
 
 class _BaseDisplayChain(metaclass=ABCMeta):
@@ -96,15 +80,6 @@ class APIInfoDisplayChain(_BaseDisplayChain):
             print("🍻  Find the API info which satisfy the conditions.")
             if args.show_detail:
                 self.dispatch(format=args.show_as_format).display(specific_api_info)
-                # if args.show_as_format == "text":
-                #     DisplayAsTextFormat().display(specific_api_info)
-                # elif args.show_as_format == "json":
-                #     DisplayAsJsonFormat().display(specific_api_info)
-                # elif args.show_as_format == "yaml":
-                #     DisplayAsYamlFormat().display(specific_api_info)
-                # else:
-                #     print("❌  Invalid valid of option *--show-as-format*.")
-                #     sys.exit(1)
             sys.exit(0)
         else:
             print("🙅‍♂️  Cannot find the API info with the conditions.")
