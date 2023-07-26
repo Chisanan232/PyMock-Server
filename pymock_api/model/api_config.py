@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from .._utils.file_opt import JSON, YAML, _BaseFileOperation
+from ..model.enums import Format
 
 # The truly semantically is more near like following:
 #
@@ -423,15 +424,15 @@ class MockAPI(_Config):
         self.http = HTTP().deserialize(data=http_info) if http_info else None
         return self
 
-    def format(self, f: str) -> str:
+    def format(self, f: Format) -> str:
         def _ensure_getting_serialized_data() -> Dict[str, Any]:
             serialized_data = self.serialize()
             assert serialized_data, "It must have non-empty value for formatting."
             return serialized_data
 
-        if f == "json":
+        if f == Format.JSON:
             return JSON().serialize(_ensure_getting_serialized_data())
-        elif f == "yaml":
+        elif f == Format.YAML:
             return YAML().serialize(_ensure_getting_serialized_data())
         else:
             raise ValueError(f"Not support the format feature as {f}.")

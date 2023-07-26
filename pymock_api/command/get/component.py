@@ -8,6 +8,7 @@ from typing import Dict, Optional, cast
 from ...model import load_config
 from ...model.api_config import MockAPI
 from ...model.cmd_args import SubcmdGetArguments
+from ...model.enums import Format
 from ..component import BaseSubCmdComponent
 
 
@@ -27,13 +28,13 @@ class SubCmdGetComponent(BaseSubCmdComponent):
 
 class _BaseDisplayChain(metaclass=ABCMeta):
     def __init__(self):
-        self.displays: Dict[str, "_BaseDisplayFormat"] = self._get_display_members()
+        self.displays: Dict[Format, "_BaseDisplayFormat"] = self._get_display_members()
         print(f"[DEBUG] self.displays: {self.displays}")
         assert self.displays, "The API info display chain cannot be empty."
-        self._current_format: str = "text"
+        self._current_format: Format = Format.TEXT
         self._current_display = self.displays[self._current_format]
 
-    def _get_display_members(self) -> Dict[str, "_BaseDisplayFormat"]:
+    def _get_display_members(self) -> Dict[Format, "_BaseDisplayFormat"]:
         current_module = os.path.basename(__file__).replace(".py", "")
         module_path = ".".join([__package__, current_module])
         members = inspect.getmembers(
@@ -57,7 +58,7 @@ class _BaseDisplayChain(metaclass=ABCMeta):
         self._current_display = self.displays[self._current_format]
         return self._current_display
 
-    def dispatch(self, format: str) -> "_BaseDisplayFormat":
+    def dispatch(self, format: Format) -> "_BaseDisplayFormat":
         if format not in self.displays.keys():
             print("❌  Invalid valid of option *--show-as-format*.")
             sys.exit(1)
@@ -89,10 +90,10 @@ class APIInfoDisplayChain(_BaseDisplayChain):
 class _BaseDisplayFormat(metaclass=ABCMeta):
     @property
     @abstractmethod
-    def format(self) -> str:
+    def format(self) -> Format:
         pass
 
-    def is_responsible(self, f: str) -> bool:
+    def is_responsible(self, f: Format) -> bool:
         return self.format == f
 
     @abstractmethod
@@ -102,8 +103,8 @@ class _BaseDisplayFormat(metaclass=ABCMeta):
 
 class DisplayAsTextFormat(_BaseDisplayFormat):
     @property
-    def format(self) -> str:
-        return "text"
+    def format(self) -> Format:
+        return Format.TEXT
 
     def display(self, api_config: MockAPI) -> None:
         print("+--------------- API info ---------------+")
@@ -134,8 +135,8 @@ class DisplayAsTextFormat(_BaseDisplayFormat):
 
 class DisplayAsYamlFormat(_BaseDisplayFormat):
     @property
-    def format(self) -> str:
-        return "yaml"
+    def format(self) -> Format:
+        return Format.YAML
 
     def display(self, api_config: MockAPI) -> None:
         print(api_config.format(self.format))
@@ -143,8 +144,8 @@ class DisplayAsYamlFormat(_BaseDisplayFormat):
 
 class DisplayAsJsonFormat(_BaseDisplayFormat):
     @property
-    def format(self) -> str:
-        return "json"
+    def format(self) -> Format:
+        return Format.JSON
 
     def display(self, api_config: MockAPI) -> None:
         print(api_config.format(self.format))

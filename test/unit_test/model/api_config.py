@@ -18,6 +18,7 @@ from pymock_api.model.api_config import (
     MockAPIs,
     _Config,
 )
+from pymock_api.model.enums import Format
 
 from ..._values import (
     _Base_URL,
@@ -463,8 +464,8 @@ class TestMockAPI(ConfigTestSpec):
     @pytest.mark.parametrize(
         ("formatter", "format_object"),
         [
-            ("json", JSON),
-            ("yaml", YAML),
+            (Format.JSON, JSON),
+            (Format.YAML, YAML),
         ],
     )
     def test_valid_format(self, formatter: str, format_object, sut: MockAPI):

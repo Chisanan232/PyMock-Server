@@ -28,6 +28,7 @@ from pymock_api.model import (
     SubcmdGetArguments,
     SubcmdRunArguments,
 )
+from pymock_api.model.enums import Format
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (
@@ -95,7 +96,7 @@ def _given_parser_args(
             subparser_name=subcommand,
             config_path=(config_path or _Test_Config),
             show_detail=True,
-            show_as_format=_Show_Detail_As_Format,
+            show_as_format=Format[_Show_Detail_As_Format.upper()],
             api_path=get_api_path,
             http_method=_Cmd_Arg_HTTP_Method,
         )

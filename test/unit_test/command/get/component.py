@@ -22,6 +22,7 @@ from pymock_api.command.get.component import (
 )
 from pymock_api.model.api_config import APIConfig, MockAPI
 from pymock_api.model.cmd_args import SubcmdGetArguments
+from pymock_api.model.enums import Format
 
 from ...._values import _Test_HTTP_Method, _Test_URL, _TestConfig
 
@@ -34,14 +35,14 @@ class TestSubCmdGetComponent:
     @pytest.mark.parametrize(
         ("display_as_format", "expected_object", "expected_exit_code"),
         [
-            ("text", DisplayAsTextFormat, 0),
-            ("yaml", DisplayAsYamlFormat, 0),
-            ("json", DisplayAsJsonFormat, 0),
+            (Format.TEXT, DisplayAsTextFormat, 0),
+            (Format.YAML, DisplayAsYamlFormat, 0),
+            (Format.JSON, DisplayAsJsonFormat, 0),
         ],
     )
     def test_component_with_valid_format(
         self,
-        display_as_format: str,
+        display_as_format: Format,
         expected_object: _BaseDisplayFormat,
         expected_exit_code: int,
         component: SubCmdGetComponent,
@@ -103,13 +104,13 @@ class TestAPIInfoDisplayChain:
     @pytest.mark.parametrize(
         ("ut_format", "expected_instance"),
         [
-            ("text", DisplayAsTextFormat),
-            ("yaml", DisplayAsYamlFormat),
-            ("json", DisplayAsJsonFormat),
+            (Format.TEXT, DisplayAsTextFormat),
+            (Format.YAML, DisplayAsYamlFormat),
+            (Format.JSON, DisplayAsJsonFormat),
         ],
     )
     def test_dispatch_with_valid_format(
-        self, ut_format: str, expected_instance: Type[_BaseDisplayFormat], chain: APIInfoDisplayChain
+        self, ut_format: Format, expected_instance: Type[_BaseDisplayFormat], chain: APIInfoDisplayChain
     ):
         display_as_format = chain.dispatch(format=ut_format)
         assert isinstance(display_as_format, expected_instance)
@@ -158,7 +159,7 @@ class TestDisplayAsYamlFormat(DisplayFormatTestSpec):
 
     @property
     def _expected_format(self) -> str:
-        return "yaml"
+        return Format.YAML
 
     @property
     def _expected_format_value(self) -> str:
@@ -172,7 +173,7 @@ class TestDisplayAsJsonFormat(DisplayFormatTestSpec):
 
     @property
     def _expected_format(self) -> str:
-        return "json"
+        return Format.JSON
 
     @property
     def _expected_format_value(self) -> str:

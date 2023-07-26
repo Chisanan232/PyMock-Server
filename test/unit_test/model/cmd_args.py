@@ -11,6 +11,7 @@ from pymock_api.model.cmd_args import (
     SubcmdGetArguments,
     SubcmdRunArguments,
 )
+from pymock_api.model.enums import Format
 
 from ..._values import (
     _Bind_Host_And_Port,
@@ -159,6 +160,6 @@ class TestDeserialize:
         assert arguments.subparser_name == _Test_SubCommand_Get
         assert arguments.config_path == _Test_Config
         assert arguments.show_detail == True
-        assert arguments.show_as_format == _Show_Detail_As_Format
+        assert arguments.show_as_format == Format[_Show_Detail_As_Format.upper()]
         assert arguments.api_path == _Cmd_Arg_API_Path
         assert arguments.http_method == _Cmd_Arg_HTTP_Method
