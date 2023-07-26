@@ -5,6 +5,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from pymock_api._utils import YAML
+from pymock_api._utils.file_opt import JSON
 from pymock_api.model.api_config import (
     HTTP,
     APIConfig,
@@ -16,6 +18,7 @@ from pymock_api.model.api_config import (
     MockAPIs,
     _Config,
 )
+from pymock_api.model.enums import Format
 
 from ..._values import (
     _Base_URL,
@@ -457,6 +460,25 @@ class TestMockAPI(ConfigTestSpec):
         assert obj.http.request.method == _TestConfig.Request.get("method", None)
         assert obj.http.request.parameters == [self._Mock_Model.api_parameter]
         assert obj.http.response.value == _TestConfig.Response.get("value", None)
+
+    @pytest.mark.parametrize(
+        ("formatter", "format_object"),
+        [
+            (Format.JSON, JSON),
+            (Format.YAML, YAML),
+        ],
+    )
+    def test_valid_format(self, formatter: str, format_object, sut: MockAPI):
+        with patch.object(format_object, "serialize") as mock_formatter:
+            format_str = sut.format(formatter)
+            assert format_str
+            mock_formatter.assert_called_once_with(sut.serialize())
+
+    def test_invalid_format(self, sut: MockAPI):
+        invalid_format = "not support or invalid format type"
+        with pytest.raises(ValueError) as exc_info:
+            sut.format(invalid_format)
+        assert re.search(r".{0,64}not support.{0,64}" + re.escape(invalid_format), str(exc_info.value), re.IGNORECASE)
 
 
 class TestHTTP(ConfigTestSpec):

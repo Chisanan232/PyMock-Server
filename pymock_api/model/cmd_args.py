@@ -2,6 +2,8 @@ from argparse import Namespace
 from dataclasses import dataclass
 from typing import Optional
 
+from ..model.enums import Format
+
 
 @dataclass(frozen=True)
 class ParserArguments:
@@ -39,6 +41,8 @@ class SubcmdCheckArguments(ParserArguments):
 @dataclass(frozen=True)
 class SubcmdGetArguments(ParserArguments):
     config_path: str
+    show_detail: bool
+    show_as_format: Format
     api_path: str
     http_method: str
 
@@ -87,6 +91,8 @@ class DeserializeParsedArgs:
         return SubcmdGetArguments(
             subparser_name=args.subcommand,
             config_path=args.config_path,
+            show_detail=args.show_detail,
+            show_as_format=Format[str(args.show_as_format).upper()],
             api_path=args.api_path,
             http_method=args.http_method,
         )

@@ -7,7 +7,8 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from .._utils.file_opt import YAML, _BaseFileOperation
+from .._utils.file_opt import JSON, YAML, _BaseFileOperation
+from ..model.enums import Format
 
 # The truly semantically is more near like following:
 #
@@ -128,7 +129,7 @@ class APIParameter(_Config):
         default: str = self._get_prop(data, prop="default")
         value_type: type = self._get_prop(data, prop="value_type")
         value_format: str = self._get_prop(data, prop="value_format")
-        if not (name and value_type and value_format) or (required is None):
+        if not (name and value_type) or (required is None):
             return None
         return {
             "name": name,
@@ -422,6 +423,19 @@ class MockAPI(_Config):
         http_info = data.get("http", None)
         self.http = HTTP().deserialize(data=http_info) if http_info else None
         return self
+
+    def format(self, f: Format) -> str:
+        def _ensure_getting_serialized_data() -> Dict[str, Any]:
+            serialized_data = self.serialize()
+            assert serialized_data, "It must have non-empty value for formatting."
+            return serialized_data
+
+        if f == Format.JSON:
+            return JSON().serialize(_ensure_getting_serialized_data())
+        elif f == Format.YAML:
+            return YAML().serialize(_ensure_getting_serialized_data())
+        else:
+            raise ValueError(f"Not support the format feature as {f}.")
 
 
 class MockAPIs(_Config):
