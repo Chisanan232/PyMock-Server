@@ -1,5 +1,6 @@
 import json
 from abc import ABCMeta, abstractmethod
+from typing import Type
 from unittest.mock import patch
 
 from yaml import dump
@@ -12,6 +13,7 @@ except ImportError:
 import pytest
 
 from pymock_api.command.get.component import (
+    APIInfoDisplayChain,
     DisplayAsJsonFormat,
     DisplayAsTextFormat,
     DisplayAsYamlFormat,
@@ -76,6 +78,37 @@ class TestSubCmdGetComponent:
                 component.process(subcmd_get_args)
 
             assert str(exc_info.value) == "1"
+
+
+class TestAPIInfoDisplayChain:
+    @pytest.fixture(scope="function")
+    def chain(self) -> APIInfoDisplayChain:
+        return APIInfoDisplayChain()
+
+    def test__get_display_members(self, chain: APIInfoDisplayChain):
+        displays = chain._get_display_members()
+        assert isinstance(displays, list)
+        assert len(displays) == 3
+
+    def test_next(self, chain: APIInfoDisplayChain):
+        assert chain.current_display.__class__.__name__ == chain.displays[0].__name__
+        assert chain.next().__class__.__name__ == chain.displays[1].__name__
+        assert chain.current_display.__class__.__name__ == chain.displays[1].__name__
+
+    @pytest.mark.parametrize(
+        ("ut_format", "expected_instance"),
+        [
+            ("text", DisplayAsTextFormat),
+            ("yaml", DisplayAsYamlFormat),
+            ("json", DisplayAsJsonFormat),
+        ],
+    )
+    def test_dispatch(self, ut_format: str, expected_instance: Type[_BaseDisplayFormat], chain: APIInfoDisplayChain):
+        display_as_format = chain.dispatch(format=ut_format)
+        assert isinstance(display_as_format, expected_instance)
+
+    def test_show(self, chain: APIInfoDisplayChain):
+        pass
 
 
 class DisplayFormatTestSpec(metaclass=ABCMeta):
