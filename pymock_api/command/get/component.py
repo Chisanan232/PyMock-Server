@@ -52,8 +52,8 @@ class _BaseDisplayChain(metaclass=ABCMeta):
         current_module = os.path.basename(__file__).replace(".py", "")
         module_path = ".".join([__package__, current_module])
         members = inspect.getmembers(
-            importlib.import_module(module_path),
-            lambda c: inspect.isclass(c) and issubclass(c, _BaseDisplayFormat) and not inspect.isabstract(c),
+            object=importlib.import_module(module_path),
+            predicate=lambda c: inspect.isclass(c) and issubclass(c, _BaseDisplayFormat) and not inspect.isabstract(c),
         )
         return list(map(lambda c: c[1], members))
 
