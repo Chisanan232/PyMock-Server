@@ -1,5 +1,9 @@
+import importlib
+import inspect
+import os
 import sys
 from abc import ABCMeta, abstractmethod
+from typing import List, Optional, Type
 
 from ...model import load_config
 from ...model.api_config import MockAPI
@@ -18,18 +22,78 @@ class SubCmdGetComponent(BaseSubCmdComponent):
             print("❌  Cannot find any API setting to mock.")
             sys.exit(1)
         specific_api_info = apis_info.get_api_config_by_url(url=args.api_path, base=apis_info.base)
+        APIInfoDisplayChain().show(args, specific_api_info)
+        # if specific_api_info:
+        #     print("🍻  Find the API info which satisfy the conditions.")
+        #     if args.show_detail:
+        #         if args.show_as_format == "text":
+        #             DisplayAsTextFormat().display(specific_api_info)
+        #         elif args.show_as_format == "json":
+        #             DisplayAsJsonFormat().display(specific_api_info)
+        #         elif args.show_as_format == "yaml":
+        #             DisplayAsYamlFormat().display(specific_api_info)
+        #         else:
+        #             print("❌  Invalid valid of option *--show-as-format*.")
+        #             sys.exit(1)
+        #     sys.exit(0)
+        # else:
+        #     print("🙅‍♂️  Cannot find the API info with the conditions.")
+        #     sys.exit(1)
+
+
+class _BaseDisplayChain(metaclass=ABCMeta):
+    def __init__(self):
+        self.displays = self._get_display_members()
+        assert self.displays, "The API info display chain cannot be empty."
+        self._current_index: int = 0
+        self._current_display = self.displays[self._current_index]()
+
+    def _get_display_members(self) -> List[Type["_BaseDisplayFormat"]]:
+        current_module = os.path.basename(__file__).replace(".py", "")
+        module_path = ".".join([__package__, current_module])
+        members = inspect.getmembers(
+            importlib.import_module(module_path),
+            lambda c: inspect.isclass(c) and issubclass(c, _BaseDisplayFormat) and not inspect.isabstract(c),
+        )
+        return list(map(lambda c: c[1], members))
+
+    @property
+    def current_display(self) -> "_BaseDisplayFormat":
+        return self._current_display
+
+    def next(self) -> "_BaseDisplayFormat":
+        self._current_index += 1
+        self._current_index = self._current_index % len(self.displays)
+        self._current_display = self.displays[self._current_index]()
+        return self._current_display
+
+    def dispatch(self, format: str) -> "_BaseDisplayFormat":
+        if self.current_display.is_responsible(format):
+            return self.current_display
+        else:
+            self.next()
+            return self.dispatch(format)
+
+    @abstractmethod
+    def show(self, args: SubcmdGetArguments, specific_api_info: Optional[MockAPI]) -> None:
+        pass
+
+
+class APIInfoDisplayChain(_BaseDisplayChain):
+    def show(self, args: SubcmdGetArguments, specific_api_info: Optional[MockAPI]) -> None:
         if specific_api_info:
             print("🍻  Find the API info which satisfy the conditions.")
             if args.show_detail:
-                if args.show_as_format == "text":
-                    DisplayAsTextFormat().display(specific_api_info)
-                elif args.show_as_format == "json":
-                    DisplayAsJsonFormat().display(specific_api_info)
-                elif args.show_as_format == "yaml":
-                    DisplayAsYamlFormat().display(specific_api_info)
-                else:
-                    print("❌  Invalid valid of option *--show-as-format*.")
-                    sys.exit(1)
+                self.dispatch(format=args.show_as_format).display(specific_api_info)
+                # if args.show_as_format == "text":
+                #     DisplayAsTextFormat().display(specific_api_info)
+                # elif args.show_as_format == "json":
+                #     DisplayAsJsonFormat().display(specific_api_info)
+                # elif args.show_as_format == "yaml":
+                #     DisplayAsYamlFormat().display(specific_api_info)
+                # else:
+                #     print("❌  Invalid valid of option *--show-as-format*.")
+                #     sys.exit(1)
             sys.exit(0)
         else:
             print("🙅‍♂️  Cannot find the API info with the conditions.")
@@ -41,6 +105,9 @@ class _BaseDisplayFormat(metaclass=ABCMeta):
     @abstractmethod
     def format(self) -> str:
         pass
+
+    def is_responsible(self, f: str) -> bool:
+        return self.format == f
 
     @abstractmethod
     def display(self, specific_api_info: MockAPI) -> None:
