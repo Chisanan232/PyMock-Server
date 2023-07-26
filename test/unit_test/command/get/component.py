@@ -108,9 +108,16 @@ class TestAPIInfoDisplayChain:
             ("json", DisplayAsJsonFormat),
         ],
     )
-    def test_dispatch(self, ut_format: str, expected_instance: Type[_BaseDisplayFormat], chain: APIInfoDisplayChain):
+    def test_dispatch_with_valid_format(
+        self, ut_format: str, expected_instance: Type[_BaseDisplayFormat], chain: APIInfoDisplayChain
+    ):
         display_as_format = chain.dispatch(format=ut_format)
         assert isinstance(display_as_format, expected_instance)
+
+    def test_dispatch_with_invalid_format(self, chain: APIInfoDisplayChain):
+        with pytest.raises(SystemExit) as exc_info:
+            chain.dispatch(format="invalid format")
+        assert str(exc_info.value) == "1"
 
     def test_show(self, chain: APIInfoDisplayChain):
         pass
