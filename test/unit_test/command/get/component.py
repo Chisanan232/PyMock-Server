@@ -87,13 +87,18 @@ class TestAPIInfoDisplayChain:
 
     def test__get_display_members(self, chain: APIInfoDisplayChain):
         displays = chain._get_display_members()
-        assert isinstance(displays, list)
+        assert isinstance(displays, dict)
         assert len(displays) == 3
 
     def test_next(self, chain: APIInfoDisplayChain):
-        assert chain.current_display.__class__.__name__ == chain.displays[0].__name__
-        assert chain.next().__class__.__name__ == chain.displays[1].__name__
-        assert chain.current_display.__class__.__name__ == chain.displays[1].__name__
+        assert (
+            chain.current_display.__class__.__name__ == chain.displays[chain.current_display.format].__class__.__name__
+        )
+        next_display = chain.next()
+        assert next_display.__class__.__name__ == chain.displays[next_display.format].__class__.__name__
+        assert (
+            chain.current_display.__class__.__name__ == chain.displays[chain.current_display.format].__class__.__name__
+        )
 
     @pytest.mark.parametrize(
         ("ut_format", "expected_instance"),

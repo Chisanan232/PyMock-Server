@@ -3,7 +3,7 @@ import inspect
 import os
 import sys
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional, Type
+from typing import Dict, List, Optional, Type, cast
 
 from ...model import load_config
 from ...model.api_config import MockAPI
@@ -43,31 +43,41 @@ class SubCmdGetComponent(BaseSubCmdComponent):
 
 class _BaseDisplayChain(metaclass=ABCMeta):
     def __init__(self):
-        self.displays = self._get_display_members()
+        self.displays: Dict[str, "_BaseDisplayFormat"] = self._get_display_members()
+        print(f"[DEBUG] self.displays: {self.displays}")
         assert self.displays, "The API info display chain cannot be empty."
-        self._current_index: int = 0
-        self._current_display = self.displays[self._current_index]()
+        self._current_format: str = "text"
+        self._current_display = self.displays[self._current_format]
 
-    def _get_display_members(self) -> List[Type["_BaseDisplayFormat"]]:
+    def _get_display_members(self) -> Dict[str, "_BaseDisplayFormat"]:
         current_module = os.path.basename(__file__).replace(".py", "")
         module_path = ".".join([__package__, current_module])
         members = inspect.getmembers(
             object=importlib.import_module(module_path),
             predicate=lambda c: inspect.isclass(c) and issubclass(c, _BaseDisplayFormat) and not inspect.isabstract(c),
         )
-        return list(map(lambda c: c[1], members))
+
+        all_displays = {}
+        for m in members:
+            cls_obj = cast(_BaseDisplayFormat, m[1]())
+            all_displays[cls_obj.format] = cls_obj
+
+        return all_displays
 
     @property
     def current_display(self) -> "_BaseDisplayFormat":
         return self._current_display
 
     def next(self) -> "_BaseDisplayFormat":
-        self._current_index += 1
-        self._current_index = self._current_index % len(self.displays)
-        self._current_display = self.displays[self._current_index]()
+        self._current_display = self.displays[self._current_format]
         return self._current_display
 
     def dispatch(self, format: str) -> "_BaseDisplayFormat":
+        if format not in self.displays.keys():
+            print("❌  Invalid valid of option *--show-as-format*.")
+            sys.exit(1)
+
+        self._current_format = format
         if self.current_display.is_responsible(format):
             return self.current_display
         else:
