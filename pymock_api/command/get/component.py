@@ -59,8 +59,9 @@ class _BaseDisplayChain(metaclass=ABCMeta):
 
         all_displays = {}
         for m in members:
-            cls_obj = cast(_BaseDisplayFormat, m[1]())
-            all_displays[cls_obj.format] = cls_obj
+            cls_obj = m[1]
+            cls_inst = cast(_BaseDisplayFormat, cls_obj())
+            all_displays[cls_inst.format] = cls_inst
 
         return all_displays
 
