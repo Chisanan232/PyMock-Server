@@ -75,11 +75,11 @@ class _BaseDisplayChain(metaclass=ABCMeta):
 
 
 class APIInfoDisplayChain(_BaseDisplayChain):
-    def show(self, args: SubcmdGetArguments, specific_api_info: Optional[MockAPI]) -> None:
-        if specific_api_info:
+    def show(self, args: SubcmdGetArguments, api_config: Optional[MockAPI]) -> None:
+        if api_config:
             print("🍻  Find the API info which satisfy the conditions.")
             if args.show_detail:
-                self.dispatch(format=args.show_as_format).display(specific_api_info)
+                self.dispatch(format=args.show_as_format).display(api_config)
             sys.exit(0)
         else:
             print("🙅‍♂️  Cannot find the API info with the conditions.")
@@ -96,7 +96,7 @@ class _BaseDisplayFormat(metaclass=ABCMeta):
         return self.format == f
 
     @abstractmethod
-    def display(self, specific_api_info: MockAPI) -> None:
+    def display(self, api_config: MockAPI) -> None:
         pass
 
 
@@ -105,11 +105,11 @@ class DisplayAsTextFormat(_BaseDisplayFormat):
     def format(self) -> str:
         return "text"
 
-    def display(self, specific_api_info: MockAPI) -> None:
+    def display(self, api_config: MockAPI) -> None:
         print("+--------------- API info ---------------+")
-        print(f"+ Path:  {specific_api_info.url}")
+        print(f"+ Path:  {api_config.url}")
         print("+ HTTP:")
-        http_info = specific_api_info.http
+        http_info = api_config.http
         print("+   Request:")
         if http_info:
             if http_info.request:
@@ -137,8 +137,8 @@ class DisplayAsYamlFormat(_BaseDisplayFormat):
     def format(self) -> str:
         return "yaml"
 
-    def display(self, specific_api_info: MockAPI) -> None:
-        print(specific_api_info.format(self.format))
+    def display(self, api_config: MockAPI) -> None:
+        print(api_config.format(self.format))
 
 
 class DisplayAsJsonFormat(_BaseDisplayFormat):
@@ -146,5 +146,5 @@ class DisplayAsJsonFormat(_BaseDisplayFormat):
     def format(self) -> str:
         return "json"
 
-    def display(self, specific_api_info: MockAPI) -> None:
-        print(specific_api_info.format(self.format))
+    def display(self, api_config: MockAPI) -> None:
+        print(api_config.format(self.format))
