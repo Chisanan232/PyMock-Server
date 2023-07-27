@@ -1,5 +1,10 @@
+import os
+import sys
+
 from ..._utils import YAML
+from ...model import generate_empty_config, load_config
 from ...model._sample import Sample_Config_Value
+from ...model.api_config import APIConfig, MockAPI
 from ...model.cmd_args import SubcmdAddArguments
 from ..component import BaseSubCmdComponent
 
@@ -18,3 +23,30 @@ class SubCmdAddComponent(BaseSubCmdComponent):
         if args.generate_sample:
             assert args.sample_output_path, _option_cannot_be_empty_assertion("-o, --output")
             yaml.write(path=args.sample_output_path, config=sample_data)
+
+        if args.api_config_path:
+            if not args.api_info_is_complete():
+                print(f"❌  API info is not enough to add new API.")
+                sys.exit(1)
+            if os.path.exists(args.api_config_path):
+                api_config = load_config(args.api_config_path)
+                if not api_config:
+                    api_config = generate_empty_config()
+            else:
+                api_config = generate_empty_config()
+
+            assert api_config.apis
+            base = api_config.apis.base
+            mocked_api = MockAPI()
+            if args.api_path:
+                mocked_api.url = args.api_path.replace(base.url, "") if base else args.api_path
+            if args.http_method or args.parameters:
+                mocked_api.set_request(method=args.http_method, parameters=args.parameters)
+                # mocked_api.http.request.method = args.http_method
+            # if args.parameters:
+            #     mocked_api.http.request.parameters = args.parameters
+            if args.response:
+                mocked_api.set_response(value=args.response)
+                # mocked_api.http.response.value = args.response
+            api_config.apis.apis[args.api_path] = mocked_api
+            yaml.write(path=args.api_config_path, config=api_config.serialize())  # type: ignore[arg-type]

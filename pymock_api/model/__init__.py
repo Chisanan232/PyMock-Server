@@ -6,7 +6,16 @@ content ...
 from argparse import Namespace
 from typing import Optional
 
-from .api_config import APIConfig
+from .api_config import (
+    HTTP,
+    APIConfig,
+    APIParameter,
+    BaseConfig,
+    HTTPRequest,
+    HTTPResponse,
+    MockAPI,
+    MockAPIs,
+)
 from .cmd_args import (
     DeserializeParsedArgs,
     ParserArguments,
@@ -78,3 +87,7 @@ def deserialize_swagger_api_config(data: dict) -> SwaggerConfig:
 
 def load_config(path: str) -> Optional[APIConfig]:
     return APIConfig().from_yaml(path=path)
+
+
+def generate_empty_config(name: str = "", description: str = "") -> APIConfig:
+    return APIConfig(name=name, description=description, apis=MockAPIs(base=BaseConfig(url=""), apis={}))
