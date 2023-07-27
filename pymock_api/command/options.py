@@ -372,6 +372,46 @@ class Output(BaseSubCmdAddOption):
     default_value: str = "sample-api.yaml"
 
 
+class APIConfigPath(BaseSubCmdAddOption):
+    cli_option: str = "--api-config-path"
+    name: str = "api_config_path"
+    help_description: str = "The configuration file path."
+    option_value_type: type = str
+    default_value: str = "api.yaml"
+
+
+class AddAPIPath(BaseSubCmdAddOption):
+    cli_option: str = "--api-path"
+    name: str = "api_path"
+    help_description: str = "Set URL path of one specific API."
+    option_value_type: type = str
+
+
+class AddHTTPMethod(BaseSubCmdAddOption):
+    cli_option: str = "--http-method"
+    name: str = "http_method"
+    help_description: str = "Set HTTP method of one specific API."
+    option_value_type: type = str
+    default_value: str = "GET"
+
+
+class AddParameters(BaseSubCmdAddOption):
+    cli_option: str = "--parameters"
+    name: str = "parameters"
+    help_description: str = "Set HTTP request parameter(s) of one specific API."
+    action: str = "append"
+    option_value_type: type = str
+    default_value: str = ""
+
+
+class AddResponse(BaseSubCmdAddOption):
+    cli_option: str = "--response"
+    name: str = "response"
+    help_description: str = "Set HTTP response value of one specific API."
+    option_value_type: type = str
+    default_value: str = "OK."
+
+
 class ConfigPath(BaseSubCmdCheckOption):
     cli_option: str = "-p, --config-path"
     name: str = "config_path"
