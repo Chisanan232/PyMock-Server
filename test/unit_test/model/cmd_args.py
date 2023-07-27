@@ -25,10 +25,13 @@ from ..._values import (
     _Swagger_API_Document_URL,
     _Test_App_Type,
     _Test_Config,
+    _Test_HTTP_Method,
+    _Test_HTTP_Resp,
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
     _Test_SubCommand_Get,
     _Test_SubCommand_Run,
+    _Test_URL,
     _Workers_Amount,
 )
 
@@ -66,6 +69,11 @@ class TestDeserialize:
             "generate_sample": _Generate_Sample,
             "print_sample": _Print_Sample,
             "file_path": _Sample_File_Path,
+            "api_config_path": _Sample_File_Path,
+            "api_path": _Test_URL,
+            "http_method": _Test_HTTP_Method,
+            "parameters": ['{"name": "arg1", "required": false, "default": "val1", "type": "str"}'],
+            "response": _Test_HTTP_Resp,
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_add(namespace)
@@ -74,6 +82,11 @@ class TestDeserialize:
         assert arguments.generate_sample == _Generate_Sample
         assert arguments.print_sample == _Print_Sample
         assert arguments.sample_output_path == _Sample_File_Path
+        assert arguments.api_config_path == _Sample_File_Path
+        assert arguments.api_path == _Test_URL
+        assert arguments.http_method == _Test_HTTP_Method
+        assert arguments.parameters == [{"name": "arg1", "required": False, "default": "val1", "type": "str"}]
+        assert arguments.response == _Test_HTTP_Resp
 
     @pytest.mark.parametrize(
         (
