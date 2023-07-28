@@ -481,7 +481,7 @@ class TestMockAPI(ConfigTestSpec):
         assert re.search(r".{0,64}not support.{0,64}" + re.escape(invalid_format), str(exc_info.value), re.IGNORECASE)
 
     @pytest.mark.parametrize("http_req", [None, HTTP(), HTTP(request=HTTPRequest())])
-    def test_set_request(self, http_req: Optional[HTTPRequest], sut_with_nothing: MockAPI):
+    def test_set_valid_request(self, http_req: Optional[HTTPRequest], sut_with_nothing: MockAPI):
         # Pro-process
         sut_with_nothing.http = http_req
 
