@@ -103,6 +103,8 @@ class TestSubCmdConfigComponent:
                         else:
                             mock_load_config.assert_not_called()
                             mock_generate_empty_config.assert_called_once()
+                        component._generate_api_config.assert_called_once()
+                        FakeYAML.write.assert_called_once()
 
     @pytest.mark.parametrize(
         ("http_method", "parameters", "response"),
@@ -137,16 +139,8 @@ class TestSubCmdConfigComponent:
                 )
                 component.process(args)
 
-                default_http_method: str = "GET"
-                default_http_response: str = "OK"
-
                 api_config = generate_empty_config()
-                mocked_api = MockAPI()
-                if http_method or parameters:
-                    mocked_api.set_request(method=(http_method or default_http_method), parameters=parameters)
-                if response:
-                    mocked_api.set_response(value=(response or default_http_response))
-                api_config.apis.apis[_Test_URL] = mocked_api
+                api_config = component._generate_api_config(api_config, args)
 
                 mock_path_exist.assert_called_once_with(_Test_Config)
                 mock_instantiate_writer.assert_called_once()
