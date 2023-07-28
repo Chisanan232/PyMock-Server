@@ -480,6 +480,50 @@ class TestMockAPI(ConfigTestSpec):
             sut.format(invalid_format)
         assert re.search(r".{0,64}not support.{0,64}" + re.escape(invalid_format), str(exc_info.value), re.IGNORECASE)
 
+    @pytest.mark.parametrize("http_req", [None, HTTP(), HTTP(request=HTTPRequest())])
+    def test_set_valid_request(self, http_req: Optional[HTTPRequest], sut_with_nothing: MockAPI):
+        # Pro-process
+        sut_with_nothing.http = http_req
+
+        assert sut_with_nothing.http == http_req
+        ut_method = "POST"
+        ut_parameters = [{"name": "arg1", "required": False, "default": "val1", "type": "str"}]
+        sut_with_nothing.set_request(method=ut_method, parameters=ut_parameters)
+
+        assert sut_with_nothing.http
+        assert sut_with_nothing.http.request
+        assert sut_with_nothing.http.request.method == ut_method
+        assert sut_with_nothing.http.request.parameters == [
+            APIParameter(name="arg1", required=False, default="val1", value_type="str")
+        ]
+
+    @pytest.mark.parametrize(
+        "params",
+        [
+            {"name": "arg1", "required": False, "default": "val1", "type": "str", "invalid_key": ""},
+            {"name": "arg1", "required": False, "default": "val1", "value_type": "str"},
+        ],
+    )
+    def test_set_invalid_request(self, params: dict, sut_with_nothing: MockAPI):
+        ut_method = "POST"
+        ut_parameters = [params]
+        with pytest.raises(ValueError) as exc_info:
+            sut_with_nothing.set_request(method=ut_method, parameters=ut_parameters)
+        assert re.search(r".{1,64}format.{1,64}is incorrect.{1,64}", str(exc_info.value), re.IGNORECASE)
+
+    @pytest.mark.parametrize("http_resp", [None, HTTP(), HTTP(response=HTTPResponse())])
+    def test_set_response(self, http_resp: Optional[HTTPResponse], sut_with_nothing: MockAPI):
+        # Pro-process
+        sut_with_nothing.http = http_resp
+
+        assert sut_with_nothing.http == http_resp
+        ut_value = "PyTest response"
+        sut_with_nothing.set_response(value=ut_value)
+
+        assert sut_with_nothing.http
+        assert sut_with_nothing.http.response
+        assert sut_with_nothing.http.response.value == ut_value
+
 
 class TestHTTP(ConfigTestSpec):
     @pytest.fixture(scope="function")

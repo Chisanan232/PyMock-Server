@@ -1,6 +1,7 @@
+import json
 from argparse import Namespace
 from dataclasses import dataclass
-from typing import Optional
+from typing import List, Optional
 
 from ..model.enums import Format
 
@@ -26,6 +27,21 @@ class SubcmdAddArguments(ParserArguments):
     generate_sample: bool
     print_sample: bool
     sample_output_path: str
+    api_config_path: str
+    api_path: str
+    http_method: str
+    parameters: List[dict]
+    response: str
+
+    def api_info_is_complete(self) -> bool:
+        def _string_is_not_empty(s: Optional[str]) -> bool:
+            if s is not None:
+                s = s.replace(" ", "")
+                return s != ""
+            return False
+
+        string_chksum = list(map(_string_is_not_empty, [self.api_config_path, self.api_path]))
+        return False not in string_chksum
 
 
 @dataclass(frozen=True)
@@ -63,11 +79,18 @@ class DeserializeParsedArgs:
 
     @classmethod
     def subcommand_add(cls, args: Namespace) -> SubcmdAddArguments:
+        if args.parameters:
+            args.parameters = list(map(lambda p: json.loads(p), args.parameters))
         return SubcmdAddArguments(
             subparser_name=args.subcommand,
             generate_sample=args.generate_sample,
             print_sample=args.print_sample,
             sample_output_path=args.file_path,
+            api_config_path=args.api_config_path,
+            api_path=args.api_path,
+            http_method=args.http_method,
+            parameters=args.parameters,
+            response=args.response,
         )
 
     @classmethod

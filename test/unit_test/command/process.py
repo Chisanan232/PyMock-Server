@@ -44,10 +44,13 @@ from ..._values import (
     _Test_Auto_Type,
     _Test_Config,
     _Test_FastAPI_App_Type,
+    _Test_HTTP_Method,
+    _Test_HTTP_Resp,
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
     _Test_SubCommand_Get,
     _Test_SubCommand_Run,
+    _Test_URL,
     _Workers_Amount,
 )
 
@@ -80,6 +83,11 @@ def _given_parser_args(
             print_sample=_Print_Sample,
             generate_sample=_Generate_Sample,
             sample_output_path=_Sample_File_Path,
+            api_config_path=_Sample_File_Path,
+            api_path=_Test_URL,
+            http_method=_Test_HTTP_Method,
+            parameters="",
+            response=_Test_HTTP_Resp,
         )
     elif subcommand == "check":
         return SubcmdCheckArguments(
@@ -406,6 +414,11 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
             print_sample=oprint,
             generate_sample=generate,
             sample_output_path=output,
+            api_config_path="",
+            api_path=_Test_URL,
+            http_method=_Test_HTTP_Method,
+            parameters=[],
+            response=_Test_HTTP_Resp,
         )
 
         with patch("builtins.print", autospec=True, side_effect=print) as mock_print:
@@ -431,6 +444,11 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         args_namespace.generate_sample = _Generate_Sample
         args_namespace.print_sample = _Print_Sample
         args_namespace.file_path = _Sample_File_Path
+        args_namespace.api_config_path = ""
+        args_namespace.api_path = _Test_URL
+        args_namespace.http_method = _Test_HTTP_Method
+        args_namespace.parameters = ""
+        args_namespace.response = _Test_HTTP_Resp
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:

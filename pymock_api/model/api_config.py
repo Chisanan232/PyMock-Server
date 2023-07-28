@@ -2,7 +2,7 @@
 
 content ...
 """
-
+import sys
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -424,6 +424,38 @@ class MockAPI(_Config):
         self.http = HTTP().deserialize(data=http_info) if http_info else None
         return self
 
+    def set_request(self, method: str = "GET", parameters: Optional[List[dict]] = None) -> None:
+        def _convert(param: dict) -> APIParameter:
+            ap = APIParameter()
+            ap_data_obj_fields = list(ap.__dataclass_fields__.keys())
+            ap_data_obj_fields.pop(ap_data_obj_fields.index("value_type"))
+            ap_data_obj_fields.append("type")
+            if False in list(map(lambda p: p in ap_data_obj_fields, param.keys())):
+                raise ValueError("The data format of API parameter is incorrect.")
+            return ap.deserialize(param)
+
+        params = list(map(_convert, parameters)) if parameters else []
+        if not self.http:
+            self.http = HTTP(request=HTTPRequest(method=method, parameters=params), response=HTTPResponse())
+        else:
+            if not self.http.request:
+                self.http.request = HTTPRequest(method=method, parameters=params)
+            else:
+                if method:
+                    self.http.request.method = method
+                if parameters:
+                    self.http.request.parameters = params
+
+    def set_response(self, value: str = "") -> None:
+        if not self.http:
+            self.http = HTTP(request=HTTPRequest(), response=HTTPResponse(value=value))
+        else:
+            if not self.http.response:
+                self.http.response = HTTPResponse(value=value)
+            else:
+                if value:
+                    self.http.response.value = value
+
     def format(self, f: Format) -> str:
         def _ensure_getting_serialized_data() -> Dict[str, Any]:
             serialized_data = self.serialize()
@@ -641,7 +673,7 @@ class APIConfig(_Config):
         name = (data.name if data else None) or self.name
         description = (data.description if data else None) or self.description
         apis = (data.apis if data else None) or self.apis
-        if not (name and description and apis):
+        if not apis:
             return None
         return {
             "name": name,
