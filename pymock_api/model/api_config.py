@@ -432,8 +432,6 @@ class MockAPI(_Config):
             ap_data_obj_fields.append("type")
             if False in list(map(lambda p: p in ap_data_obj_fields, param.keys())):
                 raise ValueError("The data format of API parameter is incorrect.")
-                # print("❌  The data format of API parameter is incorrect.")
-                # sys.exit(1)
             return ap.deserialize(param)
 
         params = list(map(_convert, parameters)) if parameters else []
