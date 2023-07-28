@@ -15,6 +15,7 @@ def _option_cannot_be_empty_assertion(cmd_option: str) -> str:
 
 class SubCmdAddComponent(BaseSubCmdComponent):
     def process(self, args: SubcmdAddArguments) -> None:  # type: ignore[override]
+        # TODO: Add logic about using mapping file operation by the file extension.
         yaml: YAML = YAML()
         sample_data: str = yaml.serialize(config=Sample_Config_Value)
         if args.print_sample:
