@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from pymock_api import APIConfig
 from pymock_api._utils.file_opt import YAML
 from pymock_api.command.add.component import SubCmdAddComponent
 from pymock_api.model import MockAPI, generate_empty_config
@@ -55,6 +56,53 @@ class TestSubCmdConfigComponent:
             mock_instantiate_writer.assert_called_once()
             FakeYAML.serialize.assert_called_once()
             FakeYAML.write.assert_not_called()
+
+    @pytest.mark.parametrize(
+        ("file_exist", "load_config_result"),
+        [
+            (False, None),
+            (True, generate_empty_config()),
+            (True, None),
+        ],
+    )
+    def test_get_api_config(
+        self, file_exist: bool, load_config_result: Optional[APIConfig], component: SubCmdAddComponent
+    ):
+        # Mock functions
+        FakeYAML.serialize = MagicMock()
+        FakeYAML.write = MagicMock()
+        component._generate_api_config = MagicMock()
+
+        with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+            with patch(
+                "pymock_api.command.add.component.load_config", return_value=load_config_result
+            ) as mock_load_config:
+                with patch("pymock_api.command.add.component.generate_empty_config") as mock_generate_empty_config:
+                    with patch("os.path.exists", return_value=file_exist) as mock_path_exist:
+                        args = SubcmdAddArguments(
+                            subparser_name=_Test_SubCommand_Add,
+                            print_sample=False,
+                            generate_sample=False,
+                            sample_output_path="",
+                            api_config_path=_Test_Config,
+                            api_path=_Test_URL,
+                            http_method="GET",
+                            parameters=[],
+                            response="OK",
+                        )
+                        component.process(args)
+
+                        mock_instantiate_writer.assert_called_once()
+                        mock_path_exist.assert_called_once_with(_Test_Config)
+                        if file_exist:
+                            mock_load_config.assert_called_once_with(_Test_Config)
+                            if load_config_result:
+                                mock_generate_empty_config.assert_not_called()
+                            else:
+                                mock_generate_empty_config.assert_called_once()
+                        else:
+                            mock_load_config.assert_not_called()
+                            mock_generate_empty_config.assert_called_once()
 
     @pytest.mark.parametrize(
         ("http_method", "parameters", "response"),
