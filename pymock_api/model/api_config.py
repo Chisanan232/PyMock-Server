@@ -673,7 +673,7 @@ class APIConfig(_Config):
         name = (data.name if data else None) or self.name
         description = (data.description if data else None) or self.description
         apis = (data.apis if data else None) or self.apis
-        if not (name and description and apis):
+        if not apis:
             return None
         return {
             "name": name,
