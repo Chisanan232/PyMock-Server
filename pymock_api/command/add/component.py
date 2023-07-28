@@ -28,15 +28,18 @@ class SubCmdAddComponent(BaseSubCmdComponent):
             if not args.api_info_is_complete():
                 print(f"❌  API info is not enough to add new API.")
                 sys.exit(1)
-            if os.path.exists(args.api_config_path):
-                api_config = load_config(args.api_config_path)
-                if not api_config:
-                    api_config = generate_empty_config()
-            else:
-                api_config = generate_empty_config()
-
+            api_config = self._get_api_config(args)
             api_config = self._generate_api_config(api_config, args)
             yaml.write(path=args.api_config_path, config=api_config.serialize())  # type: ignore[arg-type]
+
+    def _get_api_config(self, args: SubcmdAddArguments) -> APIConfig:
+        if os.path.exists(args.api_config_path):
+            api_config = load_config(args.api_config_path)
+            if not api_config:
+                api_config = generate_empty_config()
+        else:
+            api_config = generate_empty_config()
+        return api_config
 
     def _generate_api_config(self, api_config: APIConfig, args: SubcmdAddArguments) -> APIConfig:
         assert api_config.apis is not None
