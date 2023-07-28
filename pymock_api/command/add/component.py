@@ -35,18 +35,22 @@ class SubCmdAddComponent(BaseSubCmdComponent):
             else:
                 api_config = generate_empty_config()
 
-            assert api_config.apis is not None
-            base = api_config.apis.base
-            mocked_api = MockAPI()
-            if args.api_path:
-                mocked_api.url = args.api_path.replace(base.url, "") if base else args.api_path
-            if args.http_method or args.parameters:
-                try:
-                    mocked_api.set_request(method=args.http_method, parameters=args.parameters)
-                except ValueError:
-                    print("❌  The data format of API parameter is incorrect.")
-                    sys.exit(1)
-            if args.response:
-                mocked_api.set_response(value=args.response)
-            api_config.apis.apis[args.api_path] = mocked_api
+            api_config = self._generate_api_config(api_config, args)
             yaml.write(path=args.api_config_path, config=api_config.serialize())  # type: ignore[arg-type]
+
+    def _generate_api_config(self, api_config: APIConfig, args: SubcmdAddArguments) -> APIConfig:
+        assert api_config.apis is not None
+        base = api_config.apis.base
+        mocked_api = MockAPI()
+        if args.api_path:
+            mocked_api.url = args.api_path.replace(base.url, "") if base else args.api_path
+        if args.http_method or args.parameters:
+            try:
+                mocked_api.set_request(method=args.http_method, parameters=args.parameters)
+            except ValueError:
+                print("❌  The data format of API parameter is incorrect.")
+                sys.exit(1)
+        if args.response:
+            mocked_api.set_response(value=args.response)
+        api_config.apis.apis[args.api_path] = mocked_api
+        return api_config
