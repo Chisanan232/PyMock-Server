@@ -46,11 +46,7 @@ class SubCmdAddComponent(BaseSubCmdComponent):
                 except ValueError:
                     print("❌  The data format of API parameter is incorrect.")
                     sys.exit(1)
-                # mocked_api.http.request.method = args.http_method
-            # if args.parameters:
-            #     mocked_api.http.request.parameters = args.parameters
             if args.response:
                 mocked_api.set_response(value=args.response)
-                # mocked_api.http.response.value = args.response
             api_config.apis.apis[args.api_path] = mocked_api
             yaml.write(path=args.api_config_path, config=api_config.serialize())  # type: ignore[arg-type]
