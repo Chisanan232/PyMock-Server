@@ -5,6 +5,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from pymock_api._utils import YAML
+from pymock_api._utils.file_opt import JSON
 from pymock_api.model.api_config import (
     HTTP,
     APIConfig,
@@ -16,6 +18,7 @@ from pymock_api.model.api_config import (
     MockAPIs,
     _Config,
 )
+from pymock_api.model.enums import Format
 
 from ..._values import (
     _Base_URL,
@@ -457,6 +460,69 @@ class TestMockAPI(ConfigTestSpec):
         assert obj.http.request.method == _TestConfig.Request.get("method", None)
         assert obj.http.request.parameters == [self._Mock_Model.api_parameter]
         assert obj.http.response.value == _TestConfig.Response.get("value", None)
+
+    @pytest.mark.parametrize(
+        ("formatter", "format_object"),
+        [
+            (Format.JSON, JSON),
+            (Format.YAML, YAML),
+        ],
+    )
+    def test_valid_format(self, formatter: str, format_object, sut: MockAPI):
+        with patch.object(format_object, "serialize") as mock_formatter:
+            format_str = sut.format(formatter)
+            assert format_str
+            mock_formatter.assert_called_once_with(sut.serialize())
+
+    def test_invalid_format(self, sut: MockAPI):
+        invalid_format = "not support or invalid format type"
+        with pytest.raises(ValueError) as exc_info:
+            sut.format(invalid_format)
+        assert re.search(r".{0,64}not support.{0,64}" + re.escape(invalid_format), str(exc_info.value), re.IGNORECASE)
+
+    @pytest.mark.parametrize("http_req", [None, HTTP(), HTTP(request=HTTPRequest())])
+    def test_set_valid_request(self, http_req: Optional[HTTPRequest], sut_with_nothing: MockAPI):
+        # Pro-process
+        sut_with_nothing.http = http_req
+
+        assert sut_with_nothing.http == http_req
+        ut_method = "POST"
+        ut_parameters = [{"name": "arg1", "required": False, "default": "val1", "type": "str"}]
+        sut_with_nothing.set_request(method=ut_method, parameters=ut_parameters)
+
+        assert sut_with_nothing.http
+        assert sut_with_nothing.http.request
+        assert sut_with_nothing.http.request.method == ut_method
+        assert sut_with_nothing.http.request.parameters == [
+            APIParameter(name="arg1", required=False, default="val1", value_type="str")
+        ]
+
+    @pytest.mark.parametrize(
+        "params",
+        [
+            {"name": "arg1", "required": False, "default": "val1", "type": "str", "invalid_key": ""},
+            {"name": "arg1", "required": False, "default": "val1", "value_type": "str"},
+        ],
+    )
+    def test_set_invalid_request(self, params: dict, sut_with_nothing: MockAPI):
+        ut_method = "POST"
+        ut_parameters = [params]
+        with pytest.raises(ValueError) as exc_info:
+            sut_with_nothing.set_request(method=ut_method, parameters=ut_parameters)
+        assert re.search(r".{1,64}format.{1,64}is incorrect.{1,64}", str(exc_info.value), re.IGNORECASE)
+
+    @pytest.mark.parametrize("http_resp", [None, HTTP(), HTTP(response=HTTPResponse())])
+    def test_set_response(self, http_resp: Optional[HTTPResponse], sut_with_nothing: MockAPI):
+        # Pro-process
+        sut_with_nothing.http = http_resp
+
+        assert sut_with_nothing.http == http_resp
+        ut_value = "PyTest response"
+        sut_with_nothing.set_response(value=ut_value)
+
+        assert sut_with_nothing.http
+        assert sut_with_nothing.http.response
+        assert sut_with_nothing.http.response.value == ut_value
 
 
 class TestHTTP(ConfigTestSpec):

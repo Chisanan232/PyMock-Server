@@ -19,14 +19,14 @@ from pymock_api.server.application import (
 )
 
 from ..._values import _Bind_Host_And_Port, _YouTube_API_Content
-from .._spec import ConfigFile, MockAPI_Config_Path, file
+from .._spec import MockAPI_Config_Yaml_Path, file, yaml_factory
 
 WebLibraryType = Any  # flask.Flask, fastapi.FastAPI
 ResponseType = Any  # FlaskResponse, FastAPIResponse
 
 
 class MockHTTPServerTestSpec:
-    config_file: ConfigFile = ConfigFile()
+    config_file: yaml_factory = yaml_factory()
 
     @pytest.fixture(scope="class")
     @abstractmethod
@@ -42,7 +42,7 @@ class MockHTTPServerTestSpec:
         # Create the example extended file for one of mocked APIs
         file.write(path="youtube.json", content=_YouTube_API_Content, serialize=lambda content: json.dumps(content))
 
-        yield load_config(MockAPI_Config_Path)
+        yield load_config(MockAPI_Config_Yaml_Path)
 
         # Delete file finally
         self.config_file.delete()

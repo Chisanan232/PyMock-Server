@@ -14,36 +14,43 @@ from pymock_api.command.options import SubCommand, get_all_subcommands
 from pymock_api.command.process import (
     BaseCommandProcessor,
     NoSubCmd,
+    SubCmdAdd,
     SubCmdCheck,
-    SubCmdConfig,
-    SubCmdInspect,
+    SubCmdGet,
     SubCmdRun,
     make_command_chain,
     run_command_chain,
 )
 from pymock_api.model import (
     ParserArguments,
+    SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdConfigArguments,
-    SubcmdInspectArguments,
+    SubcmdGetArguments,
     SubcmdRunArguments,
 )
+from pymock_api.model.enums import Format
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (
     _Bind_Host_And_Port,
+    _Cmd_Arg_API_Path,
+    _Cmd_Arg_HTTP_Method,
     _Generate_Sample,
     _Log_Level,
     _Print_Sample,
     _Sample_File_Path,
+    _Show_Detail_As_Format,
     _Test_App_Type,
     _Test_Auto_Type,
     _Test_Config,
     _Test_FastAPI_App_Type,
+    _Test_HTTP_Method,
+    _Test_HTTP_Resp,
+    _Test_SubCommand_Add,
     _Test_SubCommand_Check,
-    _Test_SubCommand_Config,
-    _Test_SubCommand_Inspect,
+    _Test_SubCommand_Get,
     _Test_SubCommand_Run,
+    _Test_URL,
     _Workers_Amount,
 )
 
@@ -59,7 +66,8 @@ def _given_parser_args(
     config_path: str = None,
     swagger_doc_url: str = None,
     stop_if_fail: bool = True,
-) -> Union[SubcmdRunArguments, SubcmdConfigArguments, SubcmdCheckArguments, SubcmdInspectArguments, ParserArguments]:
+    get_api_path: str = _Cmd_Arg_API_Path,
+) -> Union[SubcmdRunArguments, SubcmdAddArguments, SubcmdCheckArguments, SubcmdGetArguments, ParserArguments]:
     if subcommand == "run":
         return SubcmdRunArguments(
             subparser_name=subcommand,
@@ -69,12 +77,17 @@ def _given_parser_args(
             workers=_Workers_Amount.value,
             log_level=_Log_Level.value,
         )
-    elif subcommand == "config":
-        return SubcmdConfigArguments(
+    elif subcommand == "add":
+        return SubcmdAddArguments(
             subparser_name=subcommand,
             print_sample=_Print_Sample,
             generate_sample=_Generate_Sample,
             sample_output_path=_Sample_File_Path,
+            api_config_path=_Sample_File_Path,
+            api_path=_Test_URL,
+            http_method=_Test_HTTP_Method,
+            parameters="",
+            response=_Test_HTTP_Resp,
         )
     elif subcommand == "check":
         return SubcmdCheckArguments(
@@ -86,10 +99,14 @@ def _given_parser_args(
             check_api_parameters=True,
             check_api_http_method=True,
         )
-    elif subcommand == "inspect":
-        return SubcmdInspectArguments(
+    elif subcommand == "get":
+        return SubcmdGetArguments(
             subparser_name=subcommand,
             config_path=(config_path or _Test_Config),
+            show_detail=True,
+            show_as_format=Format[_Show_Detail_As_Format.upper()],
+            api_path=get_api_path,
+            http_method=_Cmd_Arg_HTTP_Method,
         )
     else:
         return ParserArguments(
@@ -348,10 +365,10 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
         return SubcmdRunArguments
 
 
-class TestSubCmdConfig(BaseCommandProcessorTestSpec):
+class TestSubCmdAdd(BaseCommandProcessorTestSpec):
     @pytest.fixture(scope="function")
-    def cmd_ps(self) -> SubCmdConfig:
-        return SubCmdConfig()
+    def cmd_ps(self) -> SubCmdAdd:
+        return SubCmdAdd()
 
     @pytest.mark.parametrize(
         ("oprint", "generate", "output"),
@@ -392,15 +409,20 @@ class TestSubCmdConfig(BaseCommandProcessorTestSpec):
     def _test_process(self, oprint: bool, generate: bool, output: str, cmd_ps: Callable):
         FakeYAML.serialize = MagicMock()
         FakeYAML.write = MagicMock()
-        mock_parser_arg = SubcmdConfigArguments(
-            subparser_name=_Test_SubCommand_Config,
+        mock_parser_arg = SubcmdAddArguments(
+            subparser_name=_Test_SubCommand_Add,
             print_sample=oprint,
             generate_sample=generate,
             sample_output_path=output,
+            api_config_path="",
+            api_path=_Test_URL,
+            http_method=_Test_HTTP_Method,
+            parameters=[],
+            response=_Test_HTTP_Resp,
         )
 
         with patch("builtins.print", autospec=True, side_effect=print) as mock_print:
-            with patch("pymock_api.command.config.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+            with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
                 cmd_ps(mock_parser_arg)
 
                 mock_instantiate_writer.assert_called_once()
@@ -418,17 +440,22 @@ class TestSubCmdConfig(BaseCommandProcessorTestSpec):
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
-        args_namespace.subcommand = SubCommand.Config
+        args_namespace.subcommand = SubCommand.Add
         args_namespace.generate_sample = _Generate_Sample
         args_namespace.print_sample = _Print_Sample
         args_namespace.file_path = _Sample_File_Path
+        args_namespace.api_config_path = ""
+        args_namespace.api_path = _Test_URL
+        args_namespace.http_method = _Test_HTTP_Method
+        args_namespace.parameters = ""
+        args_namespace.response = _Test_HTTP_Resp
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:
-        return SubCommand.Config
+        return SubCommand.Add
 
-    def _expected_argument_type(self) -> Type[SubcmdConfigArguments]:
-        return SubcmdConfigArguments
+    def _expected_argument_type(self) -> Type[SubcmdAddArguments]:
+        return SubcmdAddArguments
 
 
 API_NAME: str = "google_home"
@@ -520,41 +547,113 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
         return SubcmdCheckArguments
 
 
-class TestSubCmdInspect(BaseCommandProcessorTestSpec):
-    @pytest.fixture(scope="function")
-    def cmd_ps(self) -> SubCmdInspect:
-        return SubCmdInspect()
+GET_YAML_PATHS_WITH_EX_CODE: List[tuple] = []
 
-    def test_with_command_processor(self, object_under_test: Callable, **kwargs):
+
+def _get_all_yaml_for_subcmd_get(
+    get_api_path: str, is_valid_config: bool, exit_code: Union[str, int], acceptable_error: bool = None
+) -> None:
+    is_valid_path = "valid" if is_valid_config else "invalid"
+    if is_valid_config is False and acceptable_error is not None:
+        config_folder = "warn" if acceptable_error else "error"
+        entire_config_path = (
+            str(pathlib.Path(__file__).parent.parent.parent),
+            "data",
+            "get_test",
+            is_valid_path,
+            config_folder,
+            "*.yaml",
+        )
+    else:
+        entire_config_path = (
+            str(pathlib.Path(__file__).parent.parent.parent),
+            "data",
+            "get_test",
+            is_valid_path,
+            "*.yaml",
+        )
+    yaml_dir = os.path.join(*entire_config_path)
+    global GET_YAML_PATHS_WITH_EX_CODE
+    for yaml_config_path in glob.glob(yaml_dir):
+        expected_exit_code = exit_code if isinstance(exit_code, str) and exit_code.isdigit() else str(exit_code)
+        one_test_scenario = (yaml_config_path, get_api_path, expected_exit_code)
+        GET_YAML_PATHS_WITH_EX_CODE.append(one_test_scenario)
+
+
+# With valid configuration
+_get_all_yaml_for_subcmd_get(get_api_path="/foo-home", is_valid_config=True, exit_code=0)
+_get_all_yaml_for_subcmd_get(get_api_path="/not-exist-api", is_valid_config=True, exit_code=1)
+
+# With invalid configuration
+_get_all_yaml_for_subcmd_get(get_api_path="/foo-home", is_valid_config=False, acceptable_error=True, exit_code=0)
+_get_all_yaml_for_subcmd_get(get_api_path="/foo-home", is_valid_config=False, acceptable_error=False, exit_code=1)
+_get_all_yaml_for_subcmd_get(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=True, exit_code=1)
+_get_all_yaml_for_subcmd_get(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=False, exit_code=1)
+
+
+class TestSubCmdGet(BaseCommandProcessorTestSpec):
+    @pytest.fixture(scope="function")
+    def cmd_ps(self) -> SubCmdGet:
+        return SubCmdGet()
+
+    @pytest.mark.parametrize(
+        ("yaml_config_path", "get_api_path", "expected_exit_code"),
+        GET_YAML_PATHS_WITH_EX_CODE,
+    )
+    def test_with_command_processor(
+        self, yaml_config_path: str, get_api_path: str, expected_exit_code: int, object_under_test: Callable, **kwargs
+    ):
         kwargs = {
+            "yaml_config_path": yaml_config_path,
+            "get_api_path": get_api_path,
+            "expected_exit_code": expected_exit_code,
             "cmd_ps": object_under_test,
         }
         self._test_process(**kwargs)
 
-    def test_with_run_entry_point(self, entry_point_under_test: Callable, **kwargs):
+    @pytest.mark.parametrize(
+        ("yaml_config_path", "get_api_path", "expected_exit_code"),
+        GET_YAML_PATHS_WITH_EX_CODE,
+    )
+    def test_with_run_entry_point(
+        self,
+        yaml_config_path: str,
+        get_api_path: str,
+        expected_exit_code: int,
+        entry_point_under_test: Callable,
+        **kwargs,
+    ):
         kwargs = {
+            "yaml_config_path": yaml_config_path,
+            "get_api_path": get_api_path,
+            "expected_exit_code": expected_exit_code,
             "cmd_ps": entry_point_under_test,
         }
         self._test_process(**kwargs)
 
-    def _test_process(self, cmd_ps: Callable):
+    def _test_process(self, yaml_config_path: str, get_api_path: str, expected_exit_code: int, cmd_ps: Callable):
         mock_parser_arg = _given_parser_args(
-            subcommand=_Test_SubCommand_Inspect,
-            config_path="./test/data/check_test/config/valid/sample-with_general_string_value.yaml",
+            subcommand=_Test_SubCommand_Get, config_path=yaml_config_path, get_api_path=get_api_path
         )
-        cmd_ps(mock_parser_arg)
+        with pytest.raises(SystemExit) as exc_info:
+            cmd_ps(mock_parser_arg)
+        assert str(expected_exit_code) == str(exc_info.value)
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
-        args_namespace.subcommand = SubCommand.Inspect
+        args_namespace.subcommand = SubCommand.Get
         args_namespace.config_path = _Test_Config
+        args_namespace.show_detail = True
+        args_namespace.show_as_format = _Show_Detail_As_Format
+        args_namespace.api_path = _Cmd_Arg_API_Path
+        args_namespace.http_method = _Cmd_Arg_HTTP_Method
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:
-        return SubCommand.Inspect
+        return SubCommand.Get
 
-    def _expected_argument_type(self) -> Type[SubcmdInspectArguments]:
-        return SubcmdInspectArguments
+    def _expected_argument_type(self) -> Type[SubcmdGetArguments]:
+        return SubcmdGetArguments
 
 
 def test_make_command_chain():

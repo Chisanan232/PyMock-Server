@@ -6,25 +6,32 @@ import pytest
 
 from pymock_api.model.cmd_args import (
     DeserializeParsedArgs,
+    SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdConfigArguments,
-    SubcmdInspectArguments,
+    SubcmdGetArguments,
     SubcmdRunArguments,
 )
+from pymock_api.model.enums import Format
 
 from ..._values import (
     _Bind_Host_And_Port,
+    _Cmd_Arg_API_Path,
+    _Cmd_Arg_HTTP_Method,
     _Generate_Sample,
     _Log_Level,
     _Print_Sample,
     _Sample_File_Path,
+    _Show_Detail_As_Format,
     _Swagger_API_Document_URL,
     _Test_App_Type,
     _Test_Config,
+    _Test_HTTP_Method,
+    _Test_HTTP_Resp,
+    _Test_SubCommand_Add,
     _Test_SubCommand_Check,
-    _Test_SubCommand_Config,
-    _Test_SubCommand_Inspect,
+    _Test_SubCommand_Get,
     _Test_SubCommand_Run,
+    _Test_URL,
     _Workers_Amount,
 )
 
@@ -56,20 +63,30 @@ class TestDeserialize:
         assert arguments.workers == _Workers_Amount.value
         assert arguments.log_level == _Log_Level.value
 
-    def test_parser_subcommand_config_arguments(self, deserialize: Type[DeserializeParsedArgs]):
+    def test_parser_subcommand_add_arguments(self, deserialize: Type[DeserializeParsedArgs]):
         namespace_args = {
-            "subcommand": _Test_SubCommand_Config,
+            "subcommand": _Test_SubCommand_Add,
             "generate_sample": _Generate_Sample,
             "print_sample": _Print_Sample,
             "file_path": _Sample_File_Path,
+            "api_config_path": _Sample_File_Path,
+            "api_path": _Test_URL,
+            "http_method": _Test_HTTP_Method,
+            "parameters": ['{"name": "arg1", "required": false, "default": "val1", "type": "str"}'],
+            "response": _Test_HTTP_Resp,
         }
         namespace = Namespace(**namespace_args)
-        arguments = deserialize.subcommand_config(namespace)
-        assert isinstance(arguments, SubcmdConfigArguments)
-        assert arguments.subparser_name == _Test_SubCommand_Config
+        arguments = deserialize.subcommand_add(namespace)
+        assert isinstance(arguments, SubcmdAddArguments)
+        assert arguments.subparser_name == _Test_SubCommand_Add
         assert arguments.generate_sample == _Generate_Sample
         assert arguments.print_sample == _Print_Sample
         assert arguments.sample_output_path == _Sample_File_Path
+        assert arguments.api_config_path == _Sample_File_Path
+        assert arguments.api_path == _Test_URL
+        assert arguments.http_method == _Test_HTTP_Method
+        assert arguments.parameters == [{"name": "arg1", "required": False, "default": "val1", "type": "str"}]
+        assert arguments.response == _Test_HTTP_Resp
 
     @pytest.mark.parametrize(
         (
@@ -138,16 +155,24 @@ class TestDeserialize:
         assert arguments.check_api_http_method is expected_check_props.http_method
         assert arguments.check_api_parameters is expected_check_props.api_parameters
 
-    def test_parser_subcommand_inspect_arguments(
+    def test_parser_subcommand_get_arguments(
         self,
         deserialize: Type[DeserializeParsedArgs],
     ):
         namespace_args = {
-            "subcommand": _Test_SubCommand_Inspect,
+            "subcommand": _Test_SubCommand_Get,
             "config_path": _Test_Config,
+            "show_detail": True,
+            "show_as_format": _Show_Detail_As_Format,
+            "api_path": _Cmd_Arg_API_Path,
+            "http_method": _Cmd_Arg_HTTP_Method,
         }
         namespace = Namespace(**namespace_args)
-        arguments = deserialize.subcommand_inspect(namespace)
-        assert isinstance(arguments, SubcmdInspectArguments)
-        assert arguments.subparser_name == _Test_SubCommand_Inspect
+        arguments = deserialize.subcommand_get(namespace)
+        assert isinstance(arguments, SubcmdGetArguments)
+        assert arguments.subparser_name == _Test_SubCommand_Get
         assert arguments.config_path == _Test_Config
+        assert arguments.show_detail == True
+        assert arguments.show_as_format == Format[_Show_Detail_As_Format.upper()]
+        assert arguments.api_path == _Cmd_Arg_API_Path
+        assert arguments.http_method == _Cmd_Arg_HTTP_Method

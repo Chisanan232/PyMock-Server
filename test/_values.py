@@ -154,7 +154,7 @@ _Test_App_Type: str = "flask"
 _Test_FastAPI_App_Type: str = "fastapi"
 
 # Test subcommand *config* options
-_Test_SubCommand_Config: str = "config"
+_Test_SubCommand_Add: str = "add"
 _Generate_Sample: bool = True
 _Print_Sample: bool = True
 _Sample_File_Path: str = "pytest-api.yaml"
@@ -163,5 +163,8 @@ _Sample_File_Path: str = "pytest-api.yaml"
 _Test_SubCommand_Check: str = "check"
 
 # Test subcommand *inspect* options
-_Test_SubCommand_Inspect: str = "inspect"
+_Test_SubCommand_Get: str = "get"
 _Swagger_API_Document_URL: str = "Swagger API document URL"
+_Cmd_Arg_API_Path: str = "/foo-home"
+_Cmd_Arg_HTTP_Method: str = "GET"
+_Show_Detail_As_Format: str = "text"

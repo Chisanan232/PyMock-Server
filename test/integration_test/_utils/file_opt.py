@@ -1,4 +1,5 @@
 import os
+from abc import ABCMeta, abstractmethod
 
 import pytest
 
@@ -7,42 +8,86 @@ try:
 except ImportError:
     from yaml import Dumper  # type: ignore
 
-from pymock_api._utils.file_opt import YAML
+from pymock_api._utils.file_opt import JSON, YAML, _BaseFileOperation
 
 from ..._values import _Test_Config_Value
-from .._spec import MockAPI_Config_Path, run_test
+from .._spec import (
+    MockAPI_Config_Json_Path,
+    MockAPI_Config_Yaml_Path,
+    json_factory,
+    run_test,
+    yaml_factory,
+)
 
 
-class TestYAML:
-    _Test_File: str = "pytest-yaml-write.yaml"
-
+class _BaseTestSuite(metaclass=ABCMeta):
     @pytest.fixture(scope="function")
-    def yaml_opt(self) -> YAML:
+    def file_opt(self) -> _BaseFileOperation:
         self._remove_test_config()
-        return YAML()
+        return self._under_test_object()
 
-    @run_test.with_file
-    def test_open_and_read(self, yaml_opt: YAML):
-        # Run target function
-        reading_data = yaml_opt.read(path=MockAPI_Config_Path)
+    @property
+    @abstractmethod
+    def _file_path(self) -> str:
+        pass
 
-        # Verify result
-        assert reading_data and isinstance(reading_data, dict)
-        assert reading_data == _Test_Config_Value
+    @abstractmethod
+    def _under_test_object(self) -> _BaseFileOperation:
+        pass
 
-    def test_write(self, yaml_opt: YAML):
+    @abstractmethod
+    def test_open_and_read(self, file_opt: _BaseFileOperation):
+        pass
+
+    def test_write(self, file_opt: _BaseFileOperation):
         try:
-            assert os.path.exists(self._Test_File) is False
-            config_data = yaml_opt.serialize(config=_Test_Config_Value)
-            yaml_opt.write(path=self._Test_File, config=config_data)
+            assert os.path.exists(self._file_path) is False
+            config_data = file_opt.serialize(config=_Test_Config_Value)
+            file_opt.write(path=self._file_path, config=config_data)
 
             assert isinstance(config_data, str)
-            assert os.path.exists(self._Test_File)
-            config = yaml_opt.read(self._Test_File)
+            assert os.path.exists(self._file_path)
+            config = file_opt.read(self._file_path)
             assert config == _Test_Config_Value
         finally:
             self._remove_test_config()
 
     def _remove_test_config(self):
-        if os.path.exists(self._Test_File):
-            os.remove(self._Test_File)
+        if os.path.exists(self._file_path):
+            os.remove(self._file_path)
+
+
+class TestYAML(_BaseTestSuite):
+    def _under_test_object(self) -> YAML:
+        return YAML()
+
+    @property
+    def _file_path(self) -> str:
+        return "pytest-yaml-write.yaml"
+
+    @run_test.with_file(yaml_factory)
+    def test_open_and_read(self, file_opt: _BaseFileOperation):
+        # Run target function
+        reading_data = file_opt.read(path=MockAPI_Config_Yaml_Path)
+
+        # Verify result
+        assert reading_data and isinstance(reading_data, dict)
+        assert reading_data == _Test_Config_Value
+
+
+class TestJSON(_BaseTestSuite):
+    def _under_test_object(self) -> JSON:
+        return JSON()
+
+    @property
+    def _file_path(self) -> str:
+        return "pytest-yaml-write.json"
+
+    @run_test.with_file(json_factory)
+    def test_open_and_read(self, file_opt: _BaseFileOperation):
+        # Run target function
+        reading_data = file_opt.read(path=MockAPI_Config_Json_Path)
+
+        # Verify result
+        assert reading_data and isinstance(reading_data, dict)
+        assert reading_data == _Test_Config_Value
