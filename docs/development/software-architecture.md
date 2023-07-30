@@ -391,6 +391,20 @@ class Arg_1(BaseSubCmdNewProcessOption):
 * ``name``: The attribute to get the option value from _argpars_.
 * ``help_description``: The description would be displayed if you run ``--help``.
 
+Finally, don't forget to let command line process know which sub-command line is its responsibility by overriding the class
+attribute ``responsible_subcommand``:
+
+```python hl_lines="6"
+# In module pymock_api.command.process
+
+# ... some code
+
+class SubCmdNewProcess(BaseCommandProcessor):
+    responsible_subcommand = SubCommand.NewProcess
+
+    # ... some code
+```
+
 Now, let's try to run the **_PyMock-API_** with new sub-command:
 
 ```console
