@@ -22,7 +22,7 @@ class TestSubCmdAddComponent:
     def component(self) -> SubCmdAddComponent:
         return SubCmdAddComponent()
 
-    def test_assert_error_with_empty_args(self, component: SubCmdAddComponent):
+    def test_assert_error_with_empty_api_config_path(self, component: SubCmdAddComponent):
         # Mock functions
         FakeYAML.write = MagicMock()
 
