@@ -118,9 +118,22 @@ class TestSubCmdAddComponent:
                 FakeYAML.write.assert_called_once_with(path=_Test_Config, config=api_config.serialize())
 
     @pytest.mark.parametrize(
-        ("http_method", "parameters", "response"),
+        ("url_path", "http_method", "parameters", "response"),
         [
             (
+                None,
+                "POST",
+                [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
+                "This is PyTest response",
+            ),
+            (
+                "",
+                "POST",
+                [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
+                "This is PyTest response",
+            ),
+            (
+                _Test_URL,
                 "POST",
                 [{"name": "arg1", "required": False, "default": "val1", "type": "str", "invalid_key": "val"}],
                 "This is PyTest response",
@@ -128,7 +141,12 @@ class TestSubCmdAddComponent:
         ],
     )
     def test_add_invalid_api(
-        self, http_method: Optional[str], parameters: List[dict], response: Optional[str], component: SubCmdAddComponent
+        self,
+        url_path: str,
+        http_method: Optional[str],
+        parameters: List[dict],
+        response: Optional[str],
+        component: SubCmdAddComponent,
     ):
         # Mock functions
         FakeYAML.serialize = MagicMock()
@@ -139,7 +157,7 @@ class TestSubCmdAddComponent:
                 args = SubcmdAddArguments(
                     subparser_name=_Test_SubCommand_Add,
                     api_config_path=_Test_Config,
-                    api_path=_Test_URL,
+                    api_path=url_path,
                     http_method=http_method,
                     parameters=parameters,
                     response=response,
@@ -148,6 +166,10 @@ class TestSubCmdAddComponent:
                     component.process(args)
                 assert str(exc_info.value) == "1"
 
-                mock_path_exist.assert_called_once_with(_Test_Config)
-                mock_instantiate_writer.assert_called_once()
+                if url_path:
+                    mock_path_exist.assert_called_once_with(_Test_Config)
+                    mock_instantiate_writer.assert_called_once()
+                else:
+                    mock_path_exist.assert_not_called()
+                    mock_instantiate_writer.assert_not_called()
                 FakeYAML.write.assert_not_called()
