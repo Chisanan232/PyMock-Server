@@ -16,10 +16,10 @@ class SubCmdAddComponent(BaseSubCmdComponent):
     def process(self, args: SubcmdAddArguments) -> None:  # type: ignore[override]
         # TODO: Add logic about using mapping file operation by the file extension.
         assert args.api_config_path, _option_cannot_be_empty_assertion("-o, --output")
-        yaml: YAML = YAML()
         if not args.api_info_is_complete():
             print(f"❌  API info is not enough to add new API.")
             sys.exit(1)
+        yaml: YAML = YAML()
         api_config = self._get_api_config(args)
         api_config = self._generate_api_config(api_config, args)
         yaml.write(path=args.api_config_path, config=api_config.serialize())  # type: ignore[arg-type]
