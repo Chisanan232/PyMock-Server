@@ -1,30 +1,20 @@
 import re
-from typing import List, Optional
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pymock_api import APIConfig
 from pymock_api._utils.file_opt import YAML
 from pymock_api.command.sample.component import SubCmdSampleComponent
-from pymock_api.model import MockAPI, generate_empty_config
 from pymock_api.model.cmd_args import SubcmdSampleArguments
 
-from ...._values import (
-    _Test_Config,
-    _Test_HTTP_Method,
-    _Test_HTTP_Resp,
-    _Test_SubCommand_Add,
-    _Test_URL,
-    _TestConfig,
-)
+from ...._values import _Test_SubCommand_Add
 
 
 class FakeYAML(YAML):
     pass
 
 
-class TestSubCmdConfigComponent:
+class TestSubCmdSampleComponent:
     @pytest.fixture(scope="class")
     def component(self) -> SubCmdSampleComponent:
         return SubCmdSampleComponent()
