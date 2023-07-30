@@ -8,6 +8,7 @@ from ..model import (
     SubcmdCheckArguments,
     SubcmdGetArguments,
     SubcmdRunArguments,
+    SubcmdSampleArguments,
     deserialize_args,
 )
 from .add import SubCmdAddComponent
@@ -16,6 +17,7 @@ from .component import BaseSubCmdComponent, NoSubCmdComponent
 from .get import SubCmdGetComponent
 from .options import MockAPICommandParser, SubCommand
 from .run import SubCmdRunComponent
+from .sample.component import SubCmdSampleComponent
 
 _COMMAND_CHAIN: List[Type["CommandProcessor"]] = []
 
@@ -168,3 +170,14 @@ class SubCmdGet(BaseCommandProcessor):
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdGetArguments:
         return deserialize_args.subcmd_get(self._parse_cmd_arguments(parser, cmd_args))
+
+
+class SubCmdSample(BaseCommandProcessor):
+    responsible_subcommand = SubCommand.Sample
+
+    @property
+    def _subcmd_component(self) -> SubCmdSampleComponent:
+        return SubCmdSampleComponent()
+
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdSampleArguments:
+        return deserialize_args.subcmd_sample(self._parse_cmd_arguments(parser, cmd_args))
