@@ -336,7 +336,7 @@ Object ``SubCommand`` is the standard for **_PyMock-API_** to recognize which su
 line here:
 
 ```python hl_lines="9"
-# In module pymock_api.cmd
+# In module pymock_api.command.options
 
 @dataclass
 class SubCommand:
@@ -352,7 +352,7 @@ class SubCommand:
 Add new class extends base class ``BaseSubCommand`` and set value at attribute ``sub_parser``.
 
 ```python
-# In module pymock_api.cmd
+# In module pymock_api.command.options
 
 class SubCommandNewProcessOption(BaseSubCommand):
     sub_parser: SubParserAttr = SubParserAttr(
@@ -366,7 +366,7 @@ class SubCommandNewProcessOption(BaseSubCommand):
 Instantiate a base class for adding options.
 
 ```python
-# In module pymock_api.cmd
+# In module pymock_api.command.options
 
 BaseSubCmdNewProcessOption: type = MetaCommandOption("BaseSubCmdNewProcessOption", (SubCommandNewProcessOption,), {})
 ```
@@ -378,7 +378,7 @@ It would auto-register this sub-command line into ``SUBCOMMAND``. We have sub-co
 Add new command option with extending ``BaseSubCmdNewProcessOption`` and set needed attributes in it:
 
 ```python
-# In module pymock_api.cmd
+# In module pymock_api.command.options
 
 class Arg_1(BaseSubCmdNewProcessOption):
 
@@ -429,7 +429,7 @@ If you want to use other file formatter, e.g., JSON, you could extend the base c
 to implement needed features.
 
 ```python
-# In module pymock_api.cmd
+# In module pymock_api.command.options
 
 # ... some code
 
@@ -667,13 +667,13 @@ The global variable ``foo_app`` is the variable which web application instance w
 the factory function to generate web application. Function ``setup_foosgi`` is the one which runs the web application which be
 set up by your own customized Python web framework.
 
-* Add option value in one specific function in module ``pymock_api.cmd_ps``
+* Add option value in one specific function in module ``pymock_api.command.process``
 
 Finally, we need to add a new value to let option ``--app-type`` could recognize and dispatch it to set up and run the web
 application by your own customized Python web framework.
 
 ```python hl_lines="19-20"
-# In module pymock_api.cmd_ps
+# In module pymock_api.command.process
 
 # Some code ...
 
