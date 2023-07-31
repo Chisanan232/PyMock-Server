@@ -18,6 +18,7 @@ from pymock_api.command.process import (
     SubCmdCheck,
     SubCmdGet,
     SubCmdRun,
+    SubCmdSample,
     make_command_chain,
     run_command_chain,
 )
@@ -27,6 +28,7 @@ from pymock_api.model import (
     SubcmdCheckArguments,
     SubcmdGetArguments,
     SubcmdRunArguments,
+    SubcmdSampleArguments,
 )
 from pymock_api.model.enums import Format
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
@@ -50,6 +52,7 @@ from ..._values import (
     _Test_SubCommand_Check,
     _Test_SubCommand_Get,
     _Test_SubCommand_Run,
+    _Test_SubCommand_Sample,
     _Test_URL,
     _Workers_Amount,
 )
@@ -371,79 +374,68 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         return SubCmdAdd()
 
     @pytest.mark.parametrize(
-        ("oprint", "generate", "output"),
+        ("url_path", "method", "params", "response"),
         [
-            (False, False, "test-api.yaml"),
-            (True, False, "test-api.yaml"),
-            (False, True, "test-api.yaml"),
-            (True, True, "test-api.yaml"),
+            ("/foo", "", [], ""),
+            ("/foo", "GET", [], ""),
+            ("/foo", "POST", [], "This is PyTest response"),
+            ("/foo", "PUT", [], "Wow testing."),
         ],
     )
-    def test_with_command_processor(self, oprint: bool, generate: bool, output: str, object_under_test: Callable):
+    def test_with_command_processor(
+        self, url_path: str, method: str, params: List[dict], response: str, object_under_test: Callable
+    ):
         kwargs = {
-            "oprint": oprint,
-            "generate": generate,
-            "output": output,
+            "url_path": url_path,
+            "method": method,
+            "params": params,
+            "response": response,
             "cmd_ps": object_under_test,
         }
         self._test_process(**kwargs)
 
     @pytest.mark.parametrize(
-        ("oprint", "generate", "output"),
+        ("url_path", "method", "params", "response"),
         [
-            (False, False, "test-api.yaml"),
-            (True, False, "test-api.yaml"),
-            (False, True, "test-api.yaml"),
-            (True, True, "test-api.yaml"),
+            ("/foo", "", "", ""),
+            ("/foo", "GET", [], ""),
+            ("/foo", "POST", [], "This is PyTest response"),
+            ("/foo", "PUT", [], "Wow testing."),
         ],
     )
-    def test_with_run_entry_point(self, oprint: bool, generate: bool, output: str, entry_point_under_test: Callable):
+    def test_with_run_entry_point(
+        self, url_path: str, method: str, params: List[dict], response: str, entry_point_under_test: Callable
+    ):
         kwargs = {
-            "oprint": oprint,
-            "generate": generate,
-            "output": output,
+            "url_path": url_path,
+            "method": method,
+            "params": params,
+            "response": response,
             "cmd_ps": entry_point_under_test,
         }
         self._test_process(**kwargs)
 
-    def _test_process(self, oprint: bool, generate: bool, output: str, cmd_ps: Callable):
+    def _test_process(self, url_path: str, method: str, params: List[dict], response: str, cmd_ps: Callable):
         FakeYAML.serialize = MagicMock()
         FakeYAML.write = MagicMock()
         mock_parser_arg = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
-            print_sample=oprint,
-            generate_sample=generate,
-            sample_output_path=output,
-            api_config_path="",
-            api_path=_Test_URL,
-            http_method=_Test_HTTP_Method,
-            parameters=[],
-            response=_Test_HTTP_Resp,
+            api_config_path=_Test_Config,
+            api_path=url_path,
+            http_method=method,
+            parameters=params,
+            response=response,
         )
 
-        with patch("builtins.print", autospec=True, side_effect=print) as mock_print:
-            with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
-                cmd_ps(mock_parser_arg)
+        with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+            cmd_ps(mock_parser_arg)
 
-                mock_instantiate_writer.assert_called_once()
-                FakeYAML.serialize.assert_called_once()
-
-                if oprint:
-                    mock_print.assert_has_calls([call(f"It will write below content into file {output}:")])
-                else:
-                    mock_print.assert_not_called()
-
-                if generate:
-                    FakeYAML.write.assert_called_once()
-                else:
-                    FakeYAML.write.assert_not_called()
+            mock_instantiate_writer.assert_called_once()
+            FakeYAML.write.assert_called_once()
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
         args_namespace.subcommand = SubCommand.Add
-        args_namespace.generate_sample = _Generate_Sample
-        args_namespace.print_sample = _Print_Sample
-        args_namespace.file_path = _Sample_File_Path
         args_namespace.api_config_path = ""
         args_namespace.api_path = _Test_URL
         args_namespace.http_method = _Test_HTTP_Method
@@ -654,6 +646,89 @@ class TestSubCmdGet(BaseCommandProcessorTestSpec):
 
     def _expected_argument_type(self) -> Type[SubcmdGetArguments]:
         return SubcmdGetArguments
+
+
+class TestSubCmdSample(BaseCommandProcessorTestSpec):
+    @pytest.fixture(scope="function")
+    def cmd_ps(self) -> SubCmdSample:
+        return SubCmdSample()
+
+    @pytest.mark.parametrize(
+        ("oprint", "generate", "output"),
+        [
+            (False, False, "test-api.yaml"),
+            (True, False, "test-api.yaml"),
+            (False, True, "test-api.yaml"),
+            (True, True, "test-api.yaml"),
+        ],
+    )
+    def test_with_command_processor(self, oprint: bool, generate: bool, output: str, object_under_test: Callable):
+        kwargs = {
+            "oprint": oprint,
+            "generate": generate,
+            "output": output,
+            "cmd_ps": object_under_test,
+        }
+        self._test_process(**kwargs)
+
+    @pytest.mark.parametrize(
+        ("oprint", "generate", "output"),
+        [
+            (False, False, "test-api.yaml"),
+            (True, False, "test-api.yaml"),
+            (False, True, "test-api.yaml"),
+            (True, True, "test-api.yaml"),
+        ],
+    )
+    def test_with_run_entry_point(self, oprint: bool, generate: bool, output: str, entry_point_under_test: Callable):
+        kwargs = {
+            "oprint": oprint,
+            "generate": generate,
+            "output": output,
+            "cmd_ps": entry_point_under_test,
+        }
+        self._test_process(**kwargs)
+
+    def _test_process(self, oprint: bool, generate: bool, output: str, cmd_ps: Callable):
+        FakeYAML.serialize = MagicMock()
+        FakeYAML.write = MagicMock()
+        mock_parser_arg = SubcmdSampleArguments(
+            subparser_name=_Test_SubCommand_Sample,
+            print_sample=oprint,
+            generate_sample=generate,
+            sample_output_path=output,
+        )
+
+        with patch("builtins.print", autospec=True, side_effect=print) as mock_print:
+            with patch("pymock_api.command.sample.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+                cmd_ps(mock_parser_arg)
+
+                mock_instantiate_writer.assert_called_once()
+                FakeYAML.serialize.assert_called_once()
+
+                if oprint:
+                    mock_print.assert_has_calls([call(f"It will write below content into file {output}:")])
+                else:
+                    mock_print.assert_not_called()
+
+                if generate:
+                    FakeYAML.write.assert_called_once()
+                else:
+                    FakeYAML.write.assert_not_called()
+
+    def _given_cmd_args_namespace(self) -> Namespace:
+        args_namespace = Namespace()
+        args_namespace.subcommand = SubCommand.Sample
+        args_namespace.generate_sample = _Generate_Sample
+        args_namespace.print_sample = _Print_Sample
+        args_namespace.file_path = _Sample_File_Path
+        return args_namespace
+
+    def _given_subcmd(self) -> Optional[str]:
+        return SubCommand.Sample
+
+    def _expected_argument_type(self) -> Type[SubcmdSampleArguments]:
+        return SubcmdSampleArguments
 
 
 def test_make_command_chain():

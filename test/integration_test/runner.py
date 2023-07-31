@@ -62,12 +62,14 @@ class TestHelp(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "-v, --version")
         self._should_contains_chars_in_result(cmd_running_result, "Subcommands:")
         self._should_contains_chars_in_result(
-            cmd_running_result, f"{SubCommand.Run},{SubCommand.Add},{SubCommand.Check},{SubCommand.Get}"
+            cmd_running_result,
+            f"{SubCommand.Run},{SubCommand.Sample},{SubCommand.Add},{SubCommand.Check},{SubCommand.Get}",
         )
         self._should_contains_chars_in_result(cmd_running_result, SubCommand.Run)
         self._should_contains_chars_in_result(cmd_running_result, SubCommand.Check)
         self._should_contains_chars_in_result(cmd_running_result, SubCommand.Add)
         self._should_contains_chars_in_result(cmd_running_result, SubCommand.Get)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Sample)
 
 
 class TestVersion(CommandFunctionTestSpec):

@@ -95,12 +95,12 @@ class TestSubCommandRun(CommandTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "--log-level LOG_LEVEL")
 
 
-class TestSubCommandConfig(CommandTestSpec):
+class TestSubCommandSample(CommandTestSpec):
     Terminate_Command_Running_When_Sniff_IP_Info: bool = False
 
     @property
     def options(self) -> str:
-        return "add --help"
+        return "sample --help"
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
@@ -114,7 +114,7 @@ class TestShowSampleConfiguration(CommandTestSpec):
 
     @property
     def options(self) -> str:
-        return "add -p"
+        return "sample -p"
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
         for api_name, api_config in Mocked_APIs.items():
@@ -132,7 +132,7 @@ class TestGenerateSampleConfiguration(CommandTestSpec):
 
     @property
     def options(self) -> str:
-        return f"add -g -o {self._Under_Test_Path}" if self._Under_Test_Path else "config -g"
+        return f"sample -g -o {self._Under_Test_Path}" if self._Under_Test_Path else "config -g"
 
     @pytest.mark.parametrize("config_path", [None, "output-test-api.yaml"])
     def test_command(self, config_path: str) -> None:

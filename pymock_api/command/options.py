@@ -229,6 +229,7 @@ class SubCommand:
     Add: str = "add"
     Check: str = "check"
     Get: str = "get"
+    Sample: str = "sample"
 
 
 class BaseSubCommand(CommandOption):
@@ -270,11 +271,19 @@ class SubCommandGetOption(BaseSubCommand):
     )
 
 
+class SubCommandSampleOption(BaseSubCommand):
+    sub_parser: SubParserAttr = SubParserAttr(
+        name=SubCommand.Sample,
+        help="Quickly display or generate a sample configuration helps to use this tool.",
+    )
+
+
 BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
 BaseSubCmdRunOption: type = MetaCommandOption("BaseSubCmdRunOption", (SubCommandRunOption,), {})
 BaseSubCmdAddOption: type = MetaCommandOption("BaseSubCmdAddOption", (SubCommandAddOption,), {})
 BaseSubCmdCheckOption: type = MetaCommandOption("BaseSubCmdCheckOption", (SubCommandCheckOption,), {})
 BaseSubCmdGetOption: type = MetaCommandOption("BaseSubCmdGetOption", (SubCommandGetOption,), {})
+BaseSubCmdSampleOption: type = MetaCommandOption("BaseSubCmdSampleOption", (SubCommandSampleOption,), {})
 
 
 class Version(BaseCmdOption):
@@ -343,7 +352,7 @@ class LegLevel(BaseSubCmdRunOption):
     _options: List[str] = ["critical", "error", "warning", "info", "debug", "trace"]
 
 
-class PrintSample(BaseSubCmdAddOption):
+class PrintSample(BaseSubCmdSampleOption):
     cli_option: str = "-p, --print-sample"
     name: str = "print_sample"
     help_description: str = "Print the sample configuration content."
@@ -352,7 +361,7 @@ class PrintSample(BaseSubCmdAddOption):
     default_value: bool = False
 
 
-class GenerateSample(BaseSubCmdAddOption):
+class GenerateSample(BaseSubCmdSampleOption):
     cli_option: str = "-g, --generate-sample"
     name: str = "generate_sample"
     help_description: str = "Create a sample configuration file."
@@ -361,7 +370,7 @@ class GenerateSample(BaseSubCmdAddOption):
     default_value: bool = False
 
 
-class Output(BaseSubCmdAddOption):
+class Output(BaseSubCmdSampleOption):
     cli_option: str = "-o, --output"
     name: str = "file_path"
     help_description: str = (
