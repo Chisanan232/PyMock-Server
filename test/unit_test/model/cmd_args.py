@@ -21,6 +21,7 @@ from ..._values import (
     _Generate_Sample,
     _Log_Level,
     _Print_Sample,
+    _Sample_Data_Type,
     _Sample_File_Path,
     _Show_Detail_As_Format,
     _Swagger_API_Document_URL,
@@ -179,7 +180,7 @@ class TestDeserialize:
             "generate_sample": _Generate_Sample,
             "print_sample": _Print_Sample,
             "file_path": _Sample_File_Path,
-            "sample_config_type": SampleType.ALL,
+            "sample_config_type": _Sample_Data_Type,
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_sample(namespace)
@@ -188,3 +189,4 @@ class TestDeserialize:
         assert arguments.generate_sample == _Generate_Sample
         assert arguments.print_sample == _Print_Sample
         assert arguments.sample_output_path == _Sample_File_Path
+        assert arguments.sample_config_type == SampleType.ALL
