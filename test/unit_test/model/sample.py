@@ -14,10 +14,10 @@ def test_get_sample_by_valid_type(st: SampleType):
         assert len(sample_data["mocked_apis"].keys()) == 3 + base_config_number
         all_sample_types = list(filter(lambda t: t is not SampleType.ALL, SampleType))
         for sample_type in all_sample_types:
-            assert sample_type in sample_data["mocked_apis"].keys()
+            assert sample_type.value in sample_data["mocked_apis"].keys()
     else:
         assert len(sample_data["mocked_apis"].keys()) == 1 + base_config_number
-        assert st in sample_data["mocked_apis"].keys()
+        assert st.value in sample_data["mocked_apis"].keys()
 
 
 @pytest.mark.parametrize("invalid_st", ["invalid_type"])
