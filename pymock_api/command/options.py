@@ -381,6 +381,15 @@ class Output(BaseSubCmdSampleOption):
     default_value: str = "sample-api.yaml"
 
 
+class DemoSampleType(BaseSubCmdSampleOption):
+    cli_option: str = "-t, --sample-config-type"
+    name: str = "sample_config_type"
+    help_description: str = "Which configuration type (the type means the response way) you want to demonstrate."
+    option_value_type: type = str
+    default_value: str = "all"
+    _options: List[str] = ["all", "response_as_str", "response_as_json", "response_with_file"]
+
+
 class APIConfigPath(BaseSubCmdAddOption):
     cli_option: str = "--api-config-path"
     name: str = "api_config_path"
