@@ -12,7 +12,7 @@ from pymock_api.model.cmd_args import (
     SubcmdRunArguments,
     SubcmdSampleArguments,
 )
-from pymock_api.model.enums import Format
+from pymock_api.model.enums import Format, SampleType
 
 from ..._values import (
     _Bind_Host_And_Port,
@@ -179,6 +179,7 @@ class TestDeserialize:
             "generate_sample": _Generate_Sample,
             "print_sample": _Print_Sample,
             "file_path": _Sample_File_Path,
+            "sample_config_type": SampleType.ALL,
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_sample(namespace)
