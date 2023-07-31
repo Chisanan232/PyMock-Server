@@ -1,4 +1,5 @@
 import copy
+import sys
 from argparse import ArgumentParser, Namespace
 from typing import List, Optional, Tuple, Type
 
@@ -180,4 +181,9 @@ class SubCmdSample(BaseCommandProcessor):
         return SubCmdSampleComponent()
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdSampleArguments:
-        return deserialize_args.subcmd_sample(self._parse_cmd_arguments(parser, cmd_args))
+        cmd_options = self._parse_cmd_arguments(parser, cmd_args)
+        try:
+            return deserialize_args.subcmd_sample(cmd_options)
+        except KeyError:
+            print(f"❌  Invalid value of option *--sample-config-type*: {cmd_options.sample_config_type}.")
+            sys.exit(1)
