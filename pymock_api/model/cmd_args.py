@@ -3,7 +3,7 @@ from argparse import Namespace
 from dataclasses import dataclass
 from typing import List, Optional
 
-from ..model.enums import Format
+from ..model.enums import Format, SampleType
 
 
 @dataclass(frozen=True)
@@ -65,6 +65,7 @@ class SubcmdSampleArguments(ParserArguments):
     generate_sample: bool
     print_sample: bool
     sample_output_path: str
+    sample_config_type: SampleType
 
 
 class DeserializeParsedArgs:
@@ -128,4 +129,5 @@ class DeserializeParsedArgs:
             generate_sample=args.generate_sample,
             print_sample=args.print_sample,
             sample_output_path=args.file_path,
+            sample_config_type=SampleType[str(args.sample_config_type).upper()],
         )

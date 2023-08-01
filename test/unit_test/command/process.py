@@ -30,7 +30,7 @@ from pymock_api.model import (
     SubcmdRunArguments,
     SubcmdSampleArguments,
 )
-from pymock_api.model.enums import Format
+from pymock_api.model.enums import Format, SampleType
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (
@@ -40,6 +40,7 @@ from ..._values import (
     _Generate_Sample,
     _Log_Level,
     _Print_Sample,
+    _Sample_Data_Type,
     _Sample_File_Path,
     _Show_Detail_As_Format,
     _Test_App_Type,
@@ -83,13 +84,10 @@ def _given_parser_args(
     elif subcommand == "add":
         return SubcmdAddArguments(
             subparser_name=subcommand,
-            print_sample=_Print_Sample,
-            generate_sample=_Generate_Sample,
-            sample_output_path=_Sample_File_Path,
             api_config_path=_Sample_File_Path,
             api_path=_Test_URL,
             http_method=_Test_HTTP_Method,
-            parameters="",
+            parameters=[],
             response=_Test_HTTP_Resp,
         )
     elif subcommand == "check":
@@ -697,6 +695,7 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
             print_sample=oprint,
             generate_sample=generate,
             sample_output_path=output,
+            sample_config_type=SampleType.ALL,
         )
 
         with patch("builtins.print", autospec=True, side_effect=print) as mock_print:
@@ -722,6 +721,7 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
         args_namespace.generate_sample = _Generate_Sample
         args_namespace.print_sample = _Print_Sample
         args_namespace.file_path = _Sample_File_Path
+        args_namespace.sample_config_type = _Sample_Data_Type
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:
@@ -729,6 +729,17 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
 
     def _expected_argument_type(self) -> Type[SubcmdSampleArguments]:
         return SubcmdSampleArguments
+
+    def test__parse_process_with_invalid_type(self, cmd_ps: SubCmdSample):
+        cmd_arg_namespace = self._given_cmd_args_namespace()
+        cmd_arg_namespace.sample_config_type = "invalid_type"
+        parser = Mock()
+        cmd_args = Mock()
+        with patch.object(cmd_ps, "_parse_cmd_arguments", return_value=cmd_arg_namespace) as mock_parse_cmd_arguments:
+            with pytest.raises(SystemExit) as exc_info:
+                cmd_ps._parse_process(parser, cmd_args)
+            mock_parse_cmd_arguments.assert_called_once_with(parser, cmd_args)
+            assert str(exc_info.value) == "1"
 
 
 def test_make_command_chain():

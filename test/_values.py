@@ -171,3 +171,4 @@ _Test_SubCommand_Sample: str = "sample"
 _Generate_Sample: bool = True
 _Print_Sample: bool = True
 _Sample_File_Path: str = "pytest-api.yaml"
+_Sample_Data_Type: str = "all"
