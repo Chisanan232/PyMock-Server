@@ -15,8 +15,8 @@ class SubCmdSampleComponent(BaseSubCmdComponent):
         sample_config = get_sample_by_type(args.sample_config_type)
         sample_data: str = yaml.serialize(config=sample_config)
         if args.print_sample:
-            print(f"It will write below content into file {args.sample_output_path}:")
             print(f"{sample_data}")
         if args.generate_sample:
             assert args.sample_output_path, _option_cannot_be_empty_assertion("-o, --output")
             yaml.write(path=args.sample_output_path, config=sample_data)
+            print(f"🍻  Write sample configuration into file {args.sample_output_path}.")
