@@ -3,7 +3,7 @@ from argparse import Namespace
 from dataclasses import dataclass
 from typing import List, Optional
 
-from ..model.enums import Format
+from ..model.enums import Format, SampleType
 
 
 @dataclass(frozen=True)
@@ -24,9 +24,6 @@ class SubcmdRunArguments(ParserArguments):
 
 @dataclass(frozen=True)
 class SubcmdAddArguments(ParserArguments):
-    generate_sample: bool
-    print_sample: bool
-    sample_output_path: str
     api_config_path: str
     api_path: str
     http_method: str
@@ -63,6 +60,14 @@ class SubcmdGetArguments(ParserArguments):
     http_method: str
 
 
+@dataclass(frozen=True)
+class SubcmdSampleArguments(ParserArguments):
+    generate_sample: bool
+    print_sample: bool
+    sample_output_path: str
+    sample_config_type: SampleType
+
+
 class DeserializeParsedArgs:
     """*Deserialize the object *argparse.Namespace* to *ParserArguments*"""
 
@@ -83,9 +88,6 @@ class DeserializeParsedArgs:
             args.parameters = list(map(lambda p: json.loads(p), args.parameters))
         return SubcmdAddArguments(
             subparser_name=args.subcommand,
-            generate_sample=args.generate_sample,
-            print_sample=args.print_sample,
-            sample_output_path=args.file_path,
             api_config_path=args.api_config_path,
             api_path=args.api_path,
             http_method=args.http_method,
@@ -118,4 +120,14 @@ class DeserializeParsedArgs:
             show_as_format=Format[str(args.show_as_format).upper()],
             api_path=args.api_path,
             http_method=args.http_method,
+        )
+
+    @classmethod
+    def subcommand_sample(cls, args: Namespace) -> SubcmdSampleArguments:
+        return SubcmdSampleArguments(
+            subparser_name=args.subcommand,
+            generate_sample=args.generate_sample,
+            print_sample=args.print_sample,
+            sample_output_path=args.file_path,
+            sample_config_type=SampleType[str(args.sample_config_type).upper()],
         )

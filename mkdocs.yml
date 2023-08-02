@@ -114,6 +114,7 @@ nav:
         - run: command-line-usage/subcmd-run.md
         - add: command-line-usage/subcmd-add.md
         - check: command-line-usage/subcmd-check.md
+        - sample: command-line-usage/subcmd-sample.md
   - Configure references:
     - Basic info: configure-references/config-basic-info.md
     - API: configure-references/mocked-apis.md

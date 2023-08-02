@@ -10,8 +10,9 @@ from pymock_api.model.cmd_args import (
     SubcmdCheckArguments,
     SubcmdGetArguments,
     SubcmdRunArguments,
+    SubcmdSampleArguments,
 )
-from pymock_api.model.enums import Format
+from pymock_api.model.enums import Format, SampleType
 
 from ..._values import (
     _Bind_Host_And_Port,
@@ -20,6 +21,7 @@ from ..._values import (
     _Generate_Sample,
     _Log_Level,
     _Print_Sample,
+    _Sample_Data_Type,
     _Sample_File_Path,
     _Show_Detail_As_Format,
     _Swagger_API_Document_URL,
@@ -31,6 +33,7 @@ from ..._values import (
     _Test_SubCommand_Check,
     _Test_SubCommand_Get,
     _Test_SubCommand_Run,
+    _Test_SubCommand_Sample,
     _Test_URL,
     _Workers_Amount,
 )
@@ -66,9 +69,6 @@ class TestDeserialize:
     def test_parser_subcommand_add_arguments(self, deserialize: Type[DeserializeParsedArgs]):
         namespace_args = {
             "subcommand": _Test_SubCommand_Add,
-            "generate_sample": _Generate_Sample,
-            "print_sample": _Print_Sample,
-            "file_path": _Sample_File_Path,
             "api_config_path": _Sample_File_Path,
             "api_path": _Test_URL,
             "http_method": _Test_HTTP_Method,
@@ -79,9 +79,6 @@ class TestDeserialize:
         arguments = deserialize.subcommand_add(namespace)
         assert isinstance(arguments, SubcmdAddArguments)
         assert arguments.subparser_name == _Test_SubCommand_Add
-        assert arguments.generate_sample == _Generate_Sample
-        assert arguments.print_sample == _Print_Sample
-        assert arguments.sample_output_path == _Sample_File_Path
         assert arguments.api_config_path == _Sample_File_Path
         assert arguments.api_path == _Test_URL
         assert arguments.http_method == _Test_HTTP_Method
@@ -176,3 +173,20 @@ class TestDeserialize:
         assert arguments.show_as_format == Format[_Show_Detail_As_Format.upper()]
         assert arguments.api_path == _Cmd_Arg_API_Path
         assert arguments.http_method == _Cmd_Arg_HTTP_Method
+
+    def test_parser_subcommand_sample_arguments(self, deserialize: Type[DeserializeParsedArgs]):
+        namespace_args = {
+            "subcommand": _Test_SubCommand_Sample,
+            "generate_sample": _Generate_Sample,
+            "print_sample": _Print_Sample,
+            "file_path": _Sample_File_Path,
+            "sample_config_type": _Sample_Data_Type,
+        }
+        namespace = Namespace(**namespace_args)
+        arguments = deserialize.subcommand_sample(namespace)
+        assert isinstance(arguments, SubcmdSampleArguments)
+        assert arguments.subparser_name == _Test_SubCommand_Sample
+        assert arguments.generate_sample == _Generate_Sample
+        assert arguments.print_sample == _Print_Sample
+        assert arguments.sample_output_path == _Sample_File_Path
+        assert arguments.sample_config_type == SampleType.ALL
