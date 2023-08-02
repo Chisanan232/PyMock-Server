@@ -231,7 +231,35 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
                 assert api_param.default == one_swagger_api_param["schema"]["default"]
 
     def _given_props(self, data_model: SwaggerConfig) -> None:
-        pass
+        params = APIParameter()
+        params.name = "arg1"
+        params.required = False
+        params.value_type = "string"
+        params.default = "default_value_pytest"
+
+        api = API()
+        api.path = "/test/v1/foo-home"
+        api.http_method = "POST"
+        api.parameters = [params]
+        api.response = {}
+
+        data_model.paths = [api]
 
     def _verify_api_config_model(self, under_test: APIConfig, data_from: SwaggerConfig) -> None:
-        pass
+        assert len(under_test.apis.apis.keys()) == len(data_from.paths)
+        for api_path, api_details in under_test.apis.apis.items():
+            expect_apis = list(filter(lambda a: api_path == a.path, data_from.paths))
+            assert expect_apis
+            expect_api = expect_apis[0]
+
+            assert api_details.url == expect_api.path
+            assert api_details.http.request.method == expect_api.http_method
+            for api_param in api_details.http.request.parameters:
+                api_param_in_data_from = list(filter(lambda _p: _p.name == api_param.name, expect_api.parameters))
+                assert len(api_param_in_data_from) == 1
+                param_data_from = api_param_in_data_from[0]
+                assert param_data_from is not None
+                assert api_param.required == param_data_from.required
+                assert api_param.value_type == param_data_from.value_type
+                assert api_param.default == param_data_from.default
+            assert api_details.http.response.value == json.dumps(expect_api.response)

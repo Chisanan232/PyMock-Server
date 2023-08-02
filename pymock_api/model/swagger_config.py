@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Type
 
 from pymock_api.model.api_config import APIConfig
 from pymock_api.model.api_config import APIParameter as PyMockAPIParameter
-from pymock_api.model.api_config import MockAPI, _Config
+from pymock_api.model.api_config import BaseConfig, MockAPI, MockAPIs, _Config
 
 Self = Any
 
@@ -92,4 +92,8 @@ class SwaggerConfig(BaseSwaggerDataModel):
         return self
 
     def to_api_config(self) -> APIConfig:
-        return APIConfig()
+        api_config = APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=""), apis={}))
+        assert api_config.apis is not None and api_config.apis.apis == {}
+        for swagger_api in self.paths:
+            api_config.apis.apis[swagger_api.path] = swagger_api.to_api_config()
+        return api_config
