@@ -7,6 +7,9 @@ from typing import List, Optional
 
 import pytest
 
+from pymock_api.model.api_config import APIConfig
+from pymock_api.model.api_config import APIParameter as PyMockAPIParameter
+from pymock_api.model.api_config import MockAPI, _Config
 from pymock_api.model.swagger_config import (
     API,
     APIParameter,
@@ -77,12 +80,25 @@ class _SwaggerDataModelTestSuite(metaclass=ABCMeta):
         assert deserialized_data
         self._verify_result(data=deserialized_data, og_data=swagger_api_doc_data)
 
+    def test_to_api_config(self, data_model: BaseSwaggerDataModel):
+        self._given_props(data_model)
+        new_data_model = data_model.to_api_config()
+        self._verify_api_config_model(new_data_model)
+
     @abstractmethod
     def _initial(self, data: BaseSwaggerDataModel) -> None:
         pass
 
     @abstractmethod
     def _verify_result(self, data: BaseSwaggerDataModel, og_data: dict) -> None:
+        pass
+
+    @abstractmethod
+    def _given_props(self, data_model: BaseSwaggerDataModel) -> None:
+        pass
+
+    @abstractmethod
+    def _verify_api_config_model(self, new_data_model: _Config) -> None:
         pass
 
 
@@ -106,6 +122,12 @@ class TestAPIParameters(_SwaggerDataModelTestSuite):
         assert data.required == og_data["required"]
         assert data.value_type == convert_js_type(og_data["schema"]["type"])
         assert data.default == og_data["schema"]["default"]
+
+    def _given_props(self, data_model: APIParameter) -> None:
+        pass
+
+    def _verify_api_config_model(self, new_data_model: PyMockAPIParameter) -> None:
+        pass
 
 
 class TestAPI(_SwaggerDataModelTestSuite):
@@ -142,6 +164,12 @@ class TestAPI(_SwaggerDataModelTestSuite):
                 assert api_param.value_type == convert_js_type(one_swagger_api_param["schema"]["type"])
                 assert api_param.default == one_swagger_api_param["schema"]["default"]
 
+    def _given_props(self, data_model: API) -> None:
+        pass
+
+    def _verify_api_config_model(self, new_data_model: MockAPI) -> None:
+        pass
+
 
 class TestSwaggerConfig(_SwaggerDataModelTestSuite):
     @pytest.fixture(scope="function")
@@ -174,3 +202,9 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
                 assert api_param.required == one_swagger_api_param["required"]
                 assert api_param.value_type == convert_js_type(one_swagger_api_param["schema"]["type"])
                 assert api_param.default == one_swagger_api_param["schema"]["default"]
+
+    def _given_props(self, data_model: SwaggerConfig) -> None:
+        pass
+
+    def _verify_api_config_model(self, new_data_model: APIConfig) -> None:
+        pass
