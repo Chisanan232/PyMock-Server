@@ -1,5 +1,9 @@
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Type
+
+from pymock_api.model.api_config import APIConfig
+from pymock_api.model.api_config import APIParameter as PyMockAPIParameter
+from pymock_api.model.api_config import MockAPI, _Config
 
 Self = Any
 
@@ -20,6 +24,10 @@ class BaseSwaggerDataModel(metaclass=ABCMeta):
     def deserialize(self, data: Dict) -> Self:
         pass
 
+    @abstractmethod
+    def to_api_config(self) -> _Config:
+        pass
+
 
 class APIParameter(BaseSwaggerDataModel):
     def __init__(self):
@@ -34,6 +42,9 @@ class APIParameter(BaseSwaggerDataModel):
         self.value_type = convert_js_type(data["schema"]["type"])
         self.default = data["schema"]["default"]
         return self
+
+    def to_api_config(self) -> PyMockAPIParameter:
+        return PyMockAPIParameter()
 
 
 class API(BaseSwaggerDataModel):
@@ -51,6 +62,9 @@ class API(BaseSwaggerDataModel):
             self.response = http_info["responses"]
         return self
 
+    def to_api_config(self) -> MockAPI:
+        return MockAPI()
+
 
 class SwaggerConfig(BaseSwaggerDataModel):
     def __init__(self):
@@ -63,3 +77,6 @@ class SwaggerConfig(BaseSwaggerDataModel):
             api.path = api_path
             self.paths.append(api)
         return self
+
+    def to_api_config(self) -> APIConfig:
+        return APIConfig()
