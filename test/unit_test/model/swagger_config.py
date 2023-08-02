@@ -172,10 +172,30 @@ class TestAPI(_SwaggerDataModelTestSuite):
                 assert api_param.default == one_swagger_api_param["schema"]["default"]
 
     def _given_props(self, data_model: API) -> None:
-        pass
+        params = APIParameter()
+        params.name = "arg1"
+        params.required = False
+        params.value_type = "string"
+        params.default = "default_value_pytest"
+
+        data_model.path = "/test/v1/foo-home"
+        data_model.http_method = "POST"
+        data_model.parameters = [params]
+        data_model.response = {}
 
     def _verify_api_config_model(self, under_test: MockAPI, data_from: API) -> None:
-        pass
+        assert under_test.url == data_from.path
+        assert under_test.http.request.method == data_from.http_method
+        assert len(under_test.http.request.parameters) == len(data_from.parameters)
+        for p in under_test.http.request.parameters:
+            api_param_in_data_from = list(filter(lambda _p: _p.name == p.name, data_from.parameters))
+            assert len(api_param_in_data_from) == 1
+            param_data_from = api_param_in_data_from[0]
+            assert p.name == param_data_from.name
+            assert p.required == param_data_from.required
+            assert p.value_type == param_data_from.value_type
+            assert p.default == param_data_from.default
+            assert p.value_format == ""
 
 
 class TestSwaggerConfig(_SwaggerDataModelTestSuite):

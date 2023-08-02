@@ -1,3 +1,4 @@
+import json
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List, Type
 
@@ -69,7 +70,13 @@ class API(BaseSwaggerDataModel):
         return self
 
     def to_api_config(self) -> MockAPI:
-        return MockAPI()
+        mock_api = MockAPI(url=self.path)
+        mock_api.set_request(
+            method=self.http_method,
+            parameters=list(map(lambda p: p.to_api_config(), self.parameters)),
+        )
+        mock_api.set_response(value=json.dumps(self.response))
+        return mock_api
 
 
 class SwaggerConfig(BaseSwaggerDataModel):
