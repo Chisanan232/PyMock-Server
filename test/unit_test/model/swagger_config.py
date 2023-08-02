@@ -8,6 +8,7 @@ from typing import List, Optional
 import pytest
 
 from pymock_api.model.swagger_config import (
+    APIParameter,
     BaseSwaggerDataModel,
     SwaggerConfig,
     convert_js_type,
@@ -82,6 +83,28 @@ class _SwaggerDataModelTestSuite(metaclass=ABCMeta):
     @abstractmethod
     def _verify_result(self, data: BaseSwaggerDataModel, og_data: dict) -> None:
         pass
+
+
+class TestAPIParameters(_SwaggerDataModelTestSuite):
+    @pytest.fixture(scope="function")
+    def data_model(self) -> APIParameter:
+        return APIParameter()
+
+    @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_PARAMETERS_JSON)
+    def test_deserialize(self, swagger_api_doc_data: dict, data_model: BaseSwaggerDataModel):
+        super().test_deserialize(swagger_api_doc_data, data_model)
+
+    def _initial(self, data: APIParameter) -> None:
+        data.name = ""
+        data.required = False
+        data.value_type = ""
+        data.default = None
+
+    def _verify_result(self, data: APIParameter, og_data: dict) -> None:
+        assert data is not None
+        assert data.required == og_data["required"]
+        assert data.value_type == convert_js_type(og_data["schema"]["type"])
+        assert data.default == og_data["schema"]["default"]
 
 
 class TestSwaggerConfig(_SwaggerDataModelTestSuite):
