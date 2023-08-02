@@ -8,6 +8,7 @@ from typing import List, Optional
 import pytest
 
 from pymock_api.model.swagger_config import (
+    API,
     APIParameter,
     BaseSwaggerDataModel,
     SwaggerConfig,
@@ -105,6 +106,41 @@ class TestAPIParameters(_SwaggerDataModelTestSuite):
         assert data.required == og_data["required"]
         assert data.value_type == convert_js_type(og_data["schema"]["type"])
         assert data.default == og_data["schema"]["default"]
+
+
+class TestAPI(_SwaggerDataModelTestSuite):
+    @pytest.fixture(scope="function")
+    def data_model(self) -> API:
+        return API()
+
+    @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_ONE_API_JSON)
+    def test_deserialize(self, swagger_api_doc_data: dict, data_model: BaseSwaggerDataModel):
+        super().test_deserialize(swagger_api_doc_data, data_model)
+
+    def _initial(self, data: API) -> None:
+        data.path = ""
+        data.http_method = ""
+        data.parameters = []
+        data.response = {}
+
+    def _verify_result(self, data: API, og_data: dict) -> None:
+        def _get_api_param(method: str, name: str) -> Optional[dict]:
+            swagger_api_params = og_data[method]["parameters"]
+            for param in swagger_api_params:
+                if param["name"] == name:
+                    return param
+            return None
+
+        for og_api_method, og_api_props in og_data.items():
+            assert data is not None
+            assert data.path == ""
+            assert data.http_method == og_api_method
+            for api_param in data.parameters:
+                one_swagger_api_param = _get_api_param(og_api_method, api_param.name)
+                assert one_swagger_api_param is not None
+                assert api_param.required == one_swagger_api_param["required"]
+                assert api_param.value_type == convert_js_type(one_swagger_api_param["schema"]["type"])
+                assert api_param.default == one_swagger_api_param["schema"]["default"]
 
 
 class TestSwaggerConfig(_SwaggerDataModelTestSuite):
