@@ -33,6 +33,8 @@ def test_fail_convert_js_type():
 
 
 SWAGGER_API_DOC_JSON: List[dict] = []
+SWAGGER_ONE_API_JSON: List[dict] = []
+SWAGGER_API_PARAMETERS_JSON: List[dict] = []
 
 
 def _get_all_swagger_api_doc() -> None:
@@ -47,7 +49,14 @@ def _get_all_swagger_api_doc() -> None:
     global SWAGGER_API_DOC_JSON
     for json_config_path in glob.glob(json_dir):
         with open(json_config_path, "r", encoding="utf-8") as file_stream:
-            SWAGGER_API_DOC_JSON.append(json.loads(file_stream.read()))
+            swagger_api_docs = json.loads(file_stream.read())
+            SWAGGER_API_DOC_JSON.append(swagger_api_docs)
+            apis: dict = swagger_api_docs["paths"]
+            for api_path, api_props in apis.items():
+                SWAGGER_ONE_API_JSON.append(api_props)
+                for api_detail in api_props.values():
+                    for param in api_detail["parameters"]:
+                        SWAGGER_API_PARAMETERS_JSON.append(param)
 
 
 _get_all_swagger_api_doc()
@@ -59,7 +68,7 @@ class _SwaggerDataModelTestSuite(metaclass=ABCMeta):
     def data_model(self) -> BaseSwaggerDataModel:
         pass
 
-    @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_DOC_JSON)
+    @pytest.mark.parametrize("swagger_api_doc_data", [])
     def test_deserialize(self, swagger_api_doc_data: dict, data_model: BaseSwaggerDataModel):
         self._initial(data=data_model)
         deserialized_data = data_model.deserialize(data=swagger_api_doc_data)
@@ -79,6 +88,10 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
     @pytest.fixture(scope="function")
     def data_model(self) -> SwaggerConfig:
         return SwaggerConfig()
+
+    @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_DOC_JSON)
+    def test_deserialize(self, swagger_api_doc_data: dict, data_model: BaseSwaggerDataModel):
+        super().test_deserialize(swagger_api_doc_data, data_model)
 
     def _initial(self, data: SwaggerConfig) -> None:
         data.paths = []
