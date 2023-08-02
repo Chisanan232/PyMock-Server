@@ -1,6 +1,6 @@
 import re
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from unittest.mock import Mock, patch
 
 import pytest
@@ -496,6 +496,49 @@ class TestMockAPI(ConfigTestSpec):
         assert sut_with_nothing.http.request.parameters == [
             APIParameter(name="arg1", required=False, default="val1", value_type="str")
         ]
+
+    @pytest.mark.parametrize(
+        "api_params",
+        [
+            None,
+            [],
+            [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
+            [APIParameter(name="arg2", required=False, default=0, value_type="int")],
+            [
+                {"name": "arg1", "required": False, "default": "val1", "type": "str"},
+                APIParameter(name="arg2", required=False, default=0, value_type="int"),
+            ],
+        ],
+    )
+    def test_set_valid_request_with_params(
+        self, api_params: Optional[List[Union[dict, APIParameter]]], sut_with_nothing: MockAPI
+    ):
+        ut_method = "POST"
+        ut_parameters = api_params
+        sut_with_nothing.set_request(method=ut_method, parameters=ut_parameters)
+
+        assert sut_with_nothing.http
+        assert sut_with_nothing.http.request
+        assert sut_with_nothing.http.request.method == ut_method
+        api_params_in_config = sut_with_nothing.http.request.parameters
+        assert len(api_params_in_config) == len(api_params or [])
+        if api_params:
+            for p in api_params_in_config:
+                one_params = list(
+                    filter(lambda _p: p.name == (_p.name if isinstance(_p, APIParameter) else _p["name"]), api_params)
+                )
+                assert one_params
+                expect_param = one_params[0]
+                assert p.name == (expect_param.name if isinstance(expect_param, APIParameter) else expect_param["name"])
+                assert p.required is (
+                    expect_param.required if isinstance(expect_param, APIParameter) else expect_param["required"]
+                )
+                assert p.value_type == (
+                    expect_param.value_type if isinstance(expect_param, APIParameter) else expect_param["type"]
+                )
+                assert p.default == (
+                    expect_param.default if isinstance(expect_param, APIParameter) else expect_param["default"]
+                )
 
     @pytest.mark.parametrize(
         "params",

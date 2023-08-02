@@ -424,8 +424,10 @@ class MockAPI(_Config):
         self.http = HTTP().deserialize(data=http_info) if http_info else None
         return self
 
-    def set_request(self, method: str = "GET", parameters: Optional[List[dict]] = None) -> None:
-        def _convert(param: dict) -> APIParameter:
+    def set_request(self, method: str = "GET", parameters: Optional[List[Union[dict, APIParameter]]] = None) -> None:
+        def _convert(param: Union[dict, APIParameter]) -> APIParameter:
+            if isinstance(param, APIParameter):
+                return param
             ap = APIParameter()
             ap_data_obj_fields = list(ap.__dataclass_fields__.keys())
             ap_data_obj_fields.pop(ap_data_obj_fields.index("value_type"))
@@ -434,7 +436,10 @@ class MockAPI(_Config):
                 raise ValueError("The data format of API parameter is incorrect.")
             return ap.deserialize(param)
 
-        params = list(map(_convert, parameters)) if parameters else []
+        if parameters and False in list(map(lambda p: isinstance(p, APIParameter), parameters)):
+            params = list(map(_convert, parameters))
+        else:
+            params = parameters or []  # type: ignore[assignment]
         if not self.http:
             self.http = HTTP(request=HTTPRequest(method=method, parameters=params), response=HTTPResponse())
         else:
