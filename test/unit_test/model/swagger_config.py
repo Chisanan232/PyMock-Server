@@ -83,7 +83,7 @@ class _SwaggerDataModelTestSuite(metaclass=ABCMeta):
     def test_to_api_config(self, data_model: BaseSwaggerDataModel):
         self._given_props(data_model)
         new_data_model = data_model.to_api_config()
-        self._verify_api_config_model(new_data_model)
+        self._verify_api_config_model(under_test=new_data_model, data_from=data_model)
 
     @abstractmethod
     def _initial(self, data: BaseSwaggerDataModel) -> None:
@@ -98,7 +98,7 @@ class _SwaggerDataModelTestSuite(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _verify_api_config_model(self, new_data_model: _Config) -> None:
+    def _verify_api_config_model(self, under_test: _Config, data_from: BaseSwaggerDataModel) -> None:
         pass
 
 
@@ -126,7 +126,7 @@ class TestAPIParameters(_SwaggerDataModelTestSuite):
     def _given_props(self, data_model: APIParameter) -> None:
         pass
 
-    def _verify_api_config_model(self, new_data_model: PyMockAPIParameter) -> None:
+    def _verify_api_config_model(self, under_test: PyMockAPIParameter, data_from: APIParameter) -> None:
         pass
 
 
@@ -167,7 +167,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
     def _given_props(self, data_model: API) -> None:
         pass
 
-    def _verify_api_config_model(self, new_data_model: MockAPI) -> None:
+    def _verify_api_config_model(self, under_test: MockAPI, data_from: API) -> None:
         pass
 
 
@@ -206,5 +206,5 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
     def _given_props(self, data_model: SwaggerConfig) -> None:
         pass
 
-    def _verify_api_config_model(self, new_data_model: APIConfig) -> None:
+    def _verify_api_config_model(self, under_test: APIConfig, data_from: SwaggerConfig) -> None:
         pass
