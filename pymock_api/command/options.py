@@ -230,6 +230,7 @@ class SubCommand:
     Check: str = "check"
     Get: str = "get"
     Sample: str = "sample"
+    Pull: str = "pull"
 
 
 class BaseSubCommand(CommandOption):
@@ -278,12 +279,20 @@ class SubCommandSampleOption(BaseSubCommand):
     )
 
 
+class SubCommandPullOption(BaseSubCommand):
+    sub_parser: SubParserAttr = SubParserAttr(
+        name=SubCommand.Pull,
+        help="Pull the API details from one specific source, e.g., Swagger API documentation.",
+    )
+
+
 BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
 BaseSubCmdRunOption: type = MetaCommandOption("BaseSubCmdRunOption", (SubCommandRunOption,), {})
 BaseSubCmdAddOption: type = MetaCommandOption("BaseSubCmdAddOption", (SubCommandAddOption,), {})
 BaseSubCmdCheckOption: type = MetaCommandOption("BaseSubCmdCheckOption", (SubCommandCheckOption,), {})
 BaseSubCmdGetOption: type = MetaCommandOption("BaseSubCmdGetOption", (SubCommandGetOption,), {})
 BaseSubCmdSampleOption: type = MetaCommandOption("BaseSubCmdSampleOption", (SubCommandSampleOption,), {})
+BaseSubCmdPullOption: type = MetaCommandOption("BaseSubCmdPullOption", (SubCommandPullOption,), {})
 
 
 class Version(BaseCmdOption):
