@@ -1,6 +1,6 @@
 import json
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List
 
 from pymock_api.model.api_config import APIConfig
 from pymock_api.model.api_config import APIParameter as PyMockAPIParameter
