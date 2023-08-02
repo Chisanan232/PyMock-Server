@@ -124,10 +124,17 @@ class TestAPIParameters(_SwaggerDataModelTestSuite):
         assert data.default == og_data["schema"]["default"]
 
     def _given_props(self, data_model: APIParameter) -> None:
-        pass
+        data_model.name = "arg1"
+        data_model.required = False
+        data_model.value_type = "string"
+        data_model.default = "default_value_pytest"
 
     def _verify_api_config_model(self, under_test: PyMockAPIParameter, data_from: APIParameter) -> None:
-        pass
+        assert under_test.name == data_from.name
+        assert under_test.required == data_from.required
+        assert under_test.value_type == data_from.value_type
+        assert under_test.default == data_from.default
+        assert under_test.value_format == ""
 
 
 class TestAPI(_SwaggerDataModelTestSuite):

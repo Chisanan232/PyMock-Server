@@ -44,7 +44,13 @@ class APIParameter(BaseSwaggerDataModel):
         return self
 
     def to_api_config(self) -> PyMockAPIParameter:
-        return PyMockAPIParameter()
+        return PyMockAPIParameter(
+            name=self.name,
+            required=self.required,
+            value_type=self.value_type,
+            default=self.default,
+            value_format="",
+        )
 
 
 class API(BaseSwaggerDataModel):
