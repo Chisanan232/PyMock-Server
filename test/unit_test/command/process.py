@@ -1,4 +1,5 @@
 import glob
+import json
 import os.path
 import pathlib
 import re
@@ -8,6 +9,12 @@ from typing import Callable, List, Optional, Type, Union
 from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
+from yaml import load as yaml_load
+
+try:
+    from yaml import CLoader as Loader
+except ImportError:
+    from yaml import Dumper, Loader  # type: ignore
 
 from pymock_api._utils.file_opt import YAML
 from pymock_api.command.options import SubCommand, get_all_subcommands
@@ -17,6 +24,7 @@ from pymock_api.command.process import (
     SubCmdAdd,
     SubCmdCheck,
     SubCmdGet,
+    SubCmdPull,
     SubCmdRun,
     SubCmdSample,
     make_command_chain,
@@ -27,6 +35,7 @@ from pymock_api.model import (
     SubcmdAddArguments,
     SubcmdCheckArguments,
     SubcmdGetArguments,
+    SubcmdPullArguments,
     SubcmdRunArguments,
     SubcmdSampleArguments,
 )
@@ -34,6 +43,7 @@ from pymock_api.model.enums import Format, SampleType
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (
+    _API_Doc_Source,
     _Bind_Host_And_Port,
     _Cmd_Arg_API_Path,
     _Cmd_Arg_HTTP_Method,
@@ -52,6 +62,7 @@ from ..._values import (
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
     _Test_SubCommand_Get,
+    _Test_SubCommand_Pull,
     _Test_SubCommand_Run,
     _Test_SubCommand_Sample,
     _Test_URL,
@@ -706,9 +717,9 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
                 FakeYAML.serialize.assert_called_once()
 
                 if oprint:
-                    mock_print.assert_has_calls([call(f"It will write below content into file {output}:")])
-                else:
                     mock_print.assert_not_called()
+                else:
+                    mock_print.assert_has_calls([call(f"🍻  Write sample configuration into file {output}:")])
 
                 if generate:
                     FakeYAML.write.assert_called_once()
@@ -740,6 +751,98 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
                 cmd_ps._parse_process(parser, cmd_args)
             mock_parse_cmd_arguments.assert_called_once_with(parser, cmd_args)
             assert str(exc_info.value) == "1"
+
+
+PULL_YAML_PATHS_WITH_CONFIG: List[tuple] = []
+
+
+def _get_all_yaml_for_subcmd_pull() -> None:
+    def _get_path(data_type: str, file_extension: str) -> str:
+        return os.path.join(
+            str(pathlib.Path(__file__).parent.parent.parent),
+            "data",
+            "pull_test",
+            data_type,
+            f"*.{file_extension}",
+        )
+
+    config_yaml_path = _get_path("config", "yaml")
+    swagger_json_path = _get_path("swagger", "json")
+
+    global PULL_YAML_PATHS_WITH_CONFIG
+    for yaml_config_path, json_path in zip(sorted(glob.glob(config_yaml_path)), sorted(glob.glob(swagger_json_path))):
+        one_test_scenario = (json_path, yaml_config_path)
+        PULL_YAML_PATHS_WITH_CONFIG.append(one_test_scenario)
+
+
+_get_all_yaml_for_subcmd_pull()
+
+
+class TestSubCmdPull(BaseCommandProcessorTestSpec):
+    @pytest.fixture(scope="function")
+    def cmd_ps(self) -> SubCmdPull:
+        return SubCmdPull()
+
+    @pytest.mark.parametrize(
+        ("swagger_config", "expected_config"),
+        PULL_YAML_PATHS_WITH_CONFIG,
+    )
+    def test_with_command_processor(self, swagger_config: str, expected_config: str, object_under_test: Callable):
+        kwargs = {
+            "swagger_config": swagger_config,
+            "expected_config": expected_config,
+            "cmd_ps": object_under_test,
+        }
+        self._test_process(**kwargs)
+
+    @pytest.mark.parametrize(
+        ("swagger_config", "expected_config"),
+        PULL_YAML_PATHS_WITH_CONFIG,
+    )
+    def test_with_run_entry_point(self, swagger_config: str, expected_config: str, entry_point_under_test: Callable):
+        kwargs = {
+            "swagger_config": swagger_config,
+            "expected_config": expected_config,
+            "cmd_ps": entry_point_under_test,
+        }
+        self._test_process(**kwargs)
+
+    def _test_process(self, swagger_config: str, expected_config: str, cmd_ps: Callable):
+        FakeYAML.write = MagicMock()
+        mock_parser_arg = SubcmdPullArguments(
+            subparser_name=_Test_SubCommand_Pull,
+            source=_API_Doc_Source,
+            config_path=_Test_Config,
+        )
+
+        with open(swagger_config, "r") as file:
+            swagger_json_data = json.loads(file.read())
+
+        with open(expected_config, "r") as file:
+            expected_config = yaml_load(file, Loader=Loader)
+
+        with patch("pymock_api.command.pull.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+            with patch(
+                "pymock_api.command.pull.component.URLLibHTTPClient.request", return_value=swagger_json_data
+            ) as mock_swagger_request:
+                cmd_ps(mock_parser_arg)
+
+                mock_instantiate_writer.assert_called_once()
+                mock_swagger_request.assert_called_once_with(method="GET", url=f"http://{_API_Doc_Source}/")
+                FakeYAML.write.assert_called_once_with(path=_Test_Config, config=expected_config)
+
+    def _given_cmd_args_namespace(self) -> Namespace:
+        args_namespace = Namespace()
+        args_namespace.subcommand = SubCommand.Pull
+        args_namespace.source = _API_Doc_Source
+        args_namespace.config_path = _Test_Config
+        return args_namespace
+
+    def _given_subcmd(self) -> Optional[str]:
+        return SubCommand.Pull
+
+    def _expected_argument_type(self) -> Type[SubcmdPullArguments]:
+        return SubcmdPullArguments
 
 
 def test_make_command_chain():
