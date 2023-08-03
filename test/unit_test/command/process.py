@@ -699,7 +699,10 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
         self._test_process(**kwargs)
 
     def _test_process(self, oprint: bool, generate: bool, output: str, cmd_ps: Callable):
-        FakeYAML.serialize = MagicMock()
+        sample_config = {
+            "name": "PyTest",
+        }
+        FakeYAML.serialize = MagicMock(return_value=f"{sample_config}")
         FakeYAML.write = MagicMock()
         mock_parser_arg = SubcmdSampleArguments(
             subparser_name=_Test_SubCommand_Sample,
@@ -710,21 +713,43 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
         )
 
         with patch("builtins.print", autospec=True, side_effect=print) as mock_print:
-            with patch("pymock_api.command.sample.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
-                cmd_ps(mock_parser_arg)
+            with patch(
+                "pymock_api.command.sample.component.get_sample_by_type", return_value=sample_config
+            ) as mock_get_sample_by_type:
+                with patch(
+                    "pymock_api.command.sample.component.YAML", return_value=FakeYAML
+                ) as mock_instantiate_writer:
+                    cmd_ps(mock_parser_arg)
 
-                mock_instantiate_writer.assert_called_once()
-                FakeYAML.serialize.assert_called_once()
+                    mock_instantiate_writer.assert_called_once()
+                    mock_get_sample_by_type.assert_called_once_with(mock_parser_arg.sample_config_type)
+                    FakeYAML.serialize.assert_called_once()
 
-                if oprint:
-                    mock_print.assert_not_called()
-                else:
-                    mock_print.assert_has_calls([call(f"🍻  Write sample configuration into file {output}:")])
-
-                if generate:
-                    FakeYAML.write.assert_called_once()
-                else:
-                    FakeYAML.write.assert_not_called()
+                    if oprint and generate:
+                        mock_print.assert_has_calls(
+                            [
+                                call(f"{sample_config}"),
+                                call(f"🍻  Write sample configuration into file {output}."),
+                            ]
+                        )
+                        FakeYAML.write.assert_called_once()
+                    elif oprint and not generate:
+                        mock_print.assert_has_calls(
+                            [
+                                call(f"{sample_config}"),
+                            ]
+                        )
+                        FakeYAML.write.assert_not_called()
+                    elif not oprint and generate:
+                        mock_print.assert_has_calls(
+                            [
+                                call(f"🍻  Write sample configuration into file {output}."),
+                            ]
+                        )
+                        FakeYAML.write.assert_called_once()
+                    else:
+                        mock_print.assert_not_called()
+                        FakeYAML.write.assert_not_called()
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
