@@ -50,7 +50,7 @@ class APIParameter(BaseSwaggerDataModel):
             required=self.required,
             value_type=self.value_type,
             default=self.default,
-            value_format="",
+            value_format=None,
         )
 
 
@@ -66,13 +66,13 @@ class API(BaseSwaggerDataModel):
             self.http_method = http_method
             self.parameters = list(map(lambda p: APIParameter().deserialize(data=p), http_info["parameters"]))
             # TODO: Process the response
-            self.response = http_info["responses"]
+            self.response = http_info["responses"]["200"]["content"]["application/json"]["schema"]
         return self
 
     def to_api_config(self) -> MockAPI:
         mock_api = MockAPI(url=self.path)
         mock_api.set_request(
-            method=self.http_method,
+            method=self.http_method.upper(),
             parameters=list(map(lambda p: p.to_api_config(), self.parameters)),
         )
         mock_api.set_response(value=json.dumps(self.response))
@@ -95,5 +95,5 @@ class SwaggerConfig(BaseSwaggerDataModel):
         api_config = APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=""), apis={}))
         assert api_config.apis is not None and api_config.apis.apis == {}
         for swagger_api in self.paths:
-            api_config.apis.apis[swagger_api.path] = swagger_api.to_api_config()
+            api_config.apis.apis[swagger_api.path[1:].replace("/", "_")] = swagger_api.to_api_config()
         return api_config

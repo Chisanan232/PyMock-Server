@@ -134,7 +134,7 @@ class TestAPIParameters(_SwaggerDataModelTestSuite):
         assert under_test.required == data_from.required
         assert under_test.value_type == data_from.value_type
         assert under_test.default == data_from.default
-        assert under_test.value_format == ""
+        assert under_test.value_format is None
 
 
 class TestAPI(_SwaggerDataModelTestSuite):
@@ -195,7 +195,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
             assert p.required == param_data_from.required
             assert p.value_type == param_data_from.value_type
             assert p.default == param_data_from.default
-            assert p.value_format == ""
+            assert p.value_format is None
 
 
 class TestSwaggerConfig(_SwaggerDataModelTestSuite):
@@ -248,7 +248,7 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
     def _verify_api_config_model(self, under_test: APIConfig, data_from: SwaggerConfig) -> None:
         assert len(under_test.apis.apis.keys()) == len(data_from.paths)
         for api_path, api_details in under_test.apis.apis.items():
-            expect_apis = list(filter(lambda a: api_path == a.path, data_from.paths))
+            expect_apis = list(filter(lambda a: api_path == a.path[1:].replace("/", "_"), data_from.paths))
             assert expect_apis
             expect_api = expect_apis[0]
 
