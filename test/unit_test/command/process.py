@@ -44,6 +44,7 @@ from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (
     _API_Doc_Source,
+    _Base_URL,
     _Bind_Host_And_Port,
     _Cmd_Arg_API_Path,
     _Cmd_Arg_HTTP_Method,
@@ -834,9 +835,11 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
 
     def _test_process(self, swagger_config: str, expected_config: str, cmd_ps: Callable):
         FakeYAML.write = MagicMock()
+        base_url = _Base_URL if ("has-base" in swagger_config and "has-base" in expected_config) else ""
         mock_parser_arg = SubcmdPullArguments(
             subparser_name=_Test_SubCommand_Pull,
             source=_API_Doc_Source,
+            base_url=base_url,
             config_path=_Test_Config,
         )
 
@@ -844,7 +847,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
             swagger_json_data = json.loads(file.read())
 
         with open(expected_config, "r") as file:
-            expected_config = yaml_load(file, Loader=Loader)
+            expected_config_data = yaml_load(file, Loader=Loader)
 
         with patch("pymock_api.command.pull.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
             with patch(
@@ -854,12 +857,13 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
 
                 mock_instantiate_writer.assert_called_once()
                 mock_swagger_request.assert_called_once_with(method="GET", url=f"http://{_API_Doc_Source}/")
-                FakeYAML.write.assert_called_once_with(path=_Test_Config, config=expected_config)
+                FakeYAML.write.assert_called_once_with(path=_Test_Config, config=expected_config_data)
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
         args_namespace.subcommand = SubCommand.Pull
         args_namespace.source = _API_Doc_Source
+        args_namespace.base_url = _Base_URL
         args_namespace.config_path = _Test_Config
         return args_namespace
 

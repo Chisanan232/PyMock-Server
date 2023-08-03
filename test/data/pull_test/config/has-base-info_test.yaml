@@ -3,7 +3,7 @@ description: ''
 mocked_apis:
   base:
     url: '/test/v1'
-  foo_home:
+  foo:
     url: '/foo'
     http:
       request:

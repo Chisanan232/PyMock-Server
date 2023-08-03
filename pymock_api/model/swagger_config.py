@@ -26,7 +26,7 @@ class BaseSwaggerDataModel(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def to_api_config(self) -> _Config:
+    def to_api_config(self, **kwargs) -> _Config:
         pass
 
 
@@ -44,7 +44,7 @@ class APIParameter(BaseSwaggerDataModel):
         self.default = data["schema"]["default"]
         return self
 
-    def to_api_config(self) -> PyMockAPIParameter:
+    def to_api_config(self) -> PyMockAPIParameter:  # type: ignore[override]
         return PyMockAPIParameter(
             name=self.name,
             required=self.required,
@@ -69,8 +69,8 @@ class API(BaseSwaggerDataModel):
             self.response = http_info["responses"]["200"]["content"]["application/json"]["schema"]
         return self
 
-    def to_api_config(self) -> MockAPI:
-        mock_api = MockAPI(url=self.path)
+    def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
+        mock_api = MockAPI(url=self.path.replace(base_url, ""))
         mock_api.set_request(
             method=self.http_method.upper(),
             parameters=list(map(lambda p: p.to_api_config(), self.parameters)),
@@ -91,9 +91,11 @@ class SwaggerConfig(BaseSwaggerDataModel):
             self.paths.append(api)
         return self
 
-    def to_api_config(self) -> APIConfig:
-        api_config = APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=""), apis={}))
+    def to_api_config(self, base_url: str = "") -> APIConfig:  # type: ignore[override]
+        api_config = APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=base_url), apis={}))
         assert api_config.apis is not None and api_config.apis.apis == {}
         for swagger_api in self.paths:
-            api_config.apis.apis[swagger_api.path[1:].replace("/", "_")] = swagger_api.to_api_config()
+            api_config.apis.apis[
+                swagger_api.path.replace(base_url, "")[1:].replace("/", "_")
+            ] = swagger_api.to_api_config(base_url=base_url)
         return api_config
