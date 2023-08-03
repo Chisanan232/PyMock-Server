@@ -17,6 +17,7 @@ from pymock_api.model.enums import Format, SampleType
 
 from ..._values import (
     _API_Doc_Source,
+    _Base_URL,
     _Bind_Host_And_Port,
     _Cmd_Arg_API_Path,
     _Cmd_Arg_HTTP_Method,
@@ -198,6 +199,7 @@ class TestDeserialize:
         namespace_args = {
             "subcommand": _Test_SubCommand_Pull,
             "source": _API_Doc_Source,
+            "base_url": _Base_URL,
             "config_path": _Test_Config,
         }
         namespace = Namespace(**namespace_args)
