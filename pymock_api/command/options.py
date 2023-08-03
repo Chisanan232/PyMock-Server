@@ -535,3 +535,18 @@ class GetWithHTTPMethod(BaseSubCmdGetOption):
         "This is an option for searching condition which cannot be used individually. Add "
         "condition of HTTP method to get the API info."
     )
+
+
+class Source(BaseSubCmdPullOption):
+    cli_option: str = "-s, --source"
+    name: str = "source"
+    help_description: str = "The source where keeps API details as documentation."
+
+
+class PullToConfigPath(BaseSubCmdPullOption):
+    cli_option: str = "-c, --config-path"
+    name: str = "config_path"
+    help_description: str = (
+        "The file path where program will write the deserialization result configuration of API documentation, e.g., "
+        "Swagger API documentation to it."
+    )
