@@ -68,6 +68,13 @@ class SubcmdSampleArguments(ParserArguments):
     sample_config_type: SampleType
 
 
+@dataclass(frozen=True)
+class SubcmdPullArguments(ParserArguments):
+    source: str
+    base_url: str
+    config_path: str
+
+
 class DeserializeParsedArgs:
     """*Deserialize the object *argparse.Namespace* to *ParserArguments*"""
 
@@ -130,4 +137,13 @@ class DeserializeParsedArgs:
             print_sample=args.print_sample,
             sample_output_path=args.file_path,
             sample_config_type=SampleType[str(args.sample_config_type).upper()],
+        )
+
+    @classmethod
+    def subcommand_pull(cls, args: Namespace) -> SubcmdPullArguments:
+        return SubcmdPullArguments(
+            subparser_name=args.subcommand,
+            source=args.source,
+            base_url=args.base_url,
+            config_path=args.config_path,
         )

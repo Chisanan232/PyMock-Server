@@ -172,3 +172,7 @@ _Generate_Sample: bool = True
 _Print_Sample: bool = True
 _Sample_File_Path: str = "pytest-api.yaml"
 _Sample_Data_Type: str = "all"
+
+# Test subcommand *config* options
+_Test_SubCommand_Pull: str = "pull"
+_API_Doc_Source: str = "127.0.0.1:8080"
