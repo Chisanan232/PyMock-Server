@@ -9,12 +9,14 @@ from pymock_api.model.cmd_args import (
     SubcmdAddArguments,
     SubcmdCheckArguments,
     SubcmdGetArguments,
+    SubcmdPullArguments,
     SubcmdRunArguments,
     SubcmdSampleArguments,
 )
 from pymock_api.model.enums import Format, SampleType
 
 from ..._values import (
+    _API_Doc_Source,
     _Bind_Host_And_Port,
     _Cmd_Arg_API_Path,
     _Cmd_Arg_HTTP_Method,
@@ -32,6 +34,7 @@ from ..._values import (
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
     _Test_SubCommand_Get,
+    _Test_SubCommand_Pull,
     _Test_SubCommand_Run,
     _Test_SubCommand_Sample,
     _Test_URL,
@@ -190,3 +193,16 @@ class TestDeserialize:
         assert arguments.print_sample == _Print_Sample
         assert arguments.sample_output_path == _Sample_File_Path
         assert arguments.sample_config_type == SampleType.ALL
+
+    def test_parser_subcommand_pull_arguments(self, deserialize: Type[DeserializeParsedArgs]):
+        namespace_args = {
+            "subcommand": _Test_SubCommand_Pull,
+            "source": _API_Doc_Source,
+            "config_path": _Test_Config,
+        }
+        namespace = Namespace(**namespace_args)
+        arguments = deserialize.subcommand_pull(namespace)
+        assert isinstance(arguments, SubcmdPullArguments)
+        assert arguments.subparser_name == _Test_SubCommand_Pull
+        assert arguments.source == _API_Doc_Source
+        assert arguments.config_path == _Test_Config

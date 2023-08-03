@@ -22,6 +22,7 @@ from .cmd_args import (
     SubcmdAddArguments,
     SubcmdCheckArguments,
     SubcmdGetArguments,
+    SubcmdPullArguments,
     SubcmdRunArguments,
     SubcmdSampleArguments,
 )
@@ -93,6 +94,19 @@ class deserialize_args:
 
         """
         return DeserializeParsedArgs.subcommand_sample(args)
+
+    @classmethod
+    def subcmd_pull(cls, args: Namespace) -> SubcmdPullArguments:
+        """Deserialize the object *argparse.Namespace* to *ParserArguments*.
+
+        Args:
+            args (Namespace): The arguments which be parsed from current command line.
+
+        Returns:
+            A *ParserArguments* type object.
+
+        """
+        return DeserializeParsedArgs.subcommand_pull(args)
 
 
 def deserialize_swagger_api_config(data: dict) -> SwaggerConfig:
