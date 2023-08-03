@@ -41,7 +41,7 @@ class SubCmdAddComponent(BaseSubCmdComponent):
             mocked_api.url = args.api_path.replace(base.url, "") if base else args.api_path
         if args.http_method or args.parameters:
             try:
-                mocked_api.set_request(method=args.http_method, parameters=args.parameters)
+                mocked_api.set_request(method=args.http_method, parameters=args.parameters)  # type: ignore[arg-type]
             except ValueError:
                 print("❌  The data format of API parameter is incorrect.")
                 sys.exit(1)

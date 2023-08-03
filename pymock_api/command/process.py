@@ -8,6 +8,7 @@ from ..model import (
     SubcmdAddArguments,
     SubcmdCheckArguments,
     SubcmdGetArguments,
+    SubcmdPullArguments,
     SubcmdRunArguments,
     SubcmdSampleArguments,
     deserialize_args,
@@ -17,6 +18,7 @@ from .check import SubCmdCheckComponent
 from .component import BaseSubCmdComponent, NoSubCmdComponent
 from .get import SubCmdGetComponent
 from .options import MockAPICommandParser, SubCommand
+from .pull.component import SubCmdPullComponent
 from .run import SubCmdRunComponent
 from .sample.component import SubCmdSampleComponent
 
@@ -187,3 +189,14 @@ class SubCmdSample(BaseCommandProcessor):
         except KeyError:
             print(f"❌  Invalid value of option *--sample-config-type*: {cmd_options.sample_config_type}.")
             sys.exit(1)
+
+
+class SubCmdPull(BaseCommandProcessor):
+    responsible_subcommand = SubCommand.Pull
+
+    @property
+    def _subcmd_component(self) -> SubCmdPullComponent:
+        return SubCmdPullComponent()
+
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdPullArguments:
+        return deserialize_args.subcmd_pull(self._parse_cmd_arguments(parser, cmd_args))
