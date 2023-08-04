@@ -46,9 +46,7 @@ def _get_all_swagger_api_doc() -> None:
     json_dir = os.path.join(
         str(pathlib.Path(__file__).parent.parent.parent),
         "data",
-        "check_test",
-        "diff_with_swagger",
-        "api_response",
+        "swagger_config_test",
         "*.json",
     )
     global SWAGGER_API_DOC_JSON
