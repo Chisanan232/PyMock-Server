@@ -1,0 +1,28 @@
+{
+    "description": {
+        "type": "str"
+    },
+    "file": {
+        "type": "file"
+    },
+    "filename": {
+        "type": "str"
+    },
+    "inputStream": {
+        "$ref": "#/definitions/InputStream"
+    },
+    "open": {
+        "type": "bool"
+    },
+    "readable": {
+        "type": "bool"
+    },
+    "uri": {
+        "type": "str",
+        "format": "uri"
+    },
+    "url": {
+        "type": "str",
+        "format": "url"
+    }
+}
