@@ -20,17 +20,33 @@ def convert_js_type(t: str) -> str:
         raise TypeError(f"Currently, it cannot parse JS type '{t}'.")
 
 
+ComponentDefinition: Dict[str, dict] = {}
+
+
 class BaseSwaggerDataModel(metaclass=ABCMeta):
     @abstractmethod
     def deserialize(self, data: Dict) -> Self:
         pass
 
+
+class Transferable(BaseSwaggerDataModel):
     @abstractmethod
     def to_api_config(self, **kwargs) -> _Config:
         pass
 
 
-class APIParameter(BaseSwaggerDataModel):
+class Tag(BaseSwaggerDataModel):
+    def __init__(self):
+        self.name: str = ""
+        self.description: str = ""
+
+    def deserialize(self, data: Dict) -> "Tag":
+        self.name = data["name"]
+        self.description = data["description"]
+        return self
+
+
+class APIParameter(Transferable):
     def __init__(self):
         self.name: str = ""
         self.required: bool = False
@@ -38,10 +54,27 @@ class APIParameter(BaseSwaggerDataModel):
         self.default: Any = None
 
     def deserialize(self, data: Dict) -> "APIParameter":
-        self.name = data["name"]
-        self.required = data["required"]
-        self.value_type = convert_js_type(data["schema"]["type"])
-        self.default = data["schema"]["default"]
+        def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
+            if i == len(paths) - 1:
+                return component_def_data[paths[i]]
+            else:
+                return _get_schema(component_def_data[paths[i]], paths, i + 1)
+
+        if "schema" in data.keys():
+            if "$ref" in data["schema"].keys():
+                schema_path = data["schema"]["$ref"].replace("#/", "").split("/")
+                request_body_params = _get_schema(ComponentDefinition, schema_path, 0)
+                request_body_params
+            else:
+                self.name = data["name"]
+                self.required = data["required"]
+                self.value_type = convert_js_type(data["schema"]["type"])
+                self.default = data["schema"]["default"]
+        else:
+            self.name = data["name"]
+            self.required = data["required"]
+            self.value_type = convert_js_type(data["type"])
+            self.default = data.get("default", None)
         return self
 
     def to_api_config(self) -> PyMockAPIParameter:  # type: ignore[override]
@@ -54,12 +87,13 @@ class APIParameter(BaseSwaggerDataModel):
         )
 
 
-class API(BaseSwaggerDataModel):
+class API(Transferable):
     def __init__(self):
         self.path: str = ""
         self.http_method: str = ""
         self.parameters: List[APIParameter] = []
         self.response: Dict = {}
+        self.tags: List[str] = []
 
     def deserialize(self, data: Dict) -> "API":
         for http_method, http_info in data.items():
@@ -67,6 +101,7 @@ class API(BaseSwaggerDataModel):
             self.parameters = list(map(lambda p: APIParameter().deserialize(data=p), http_info["parameters"]))
             # TODO: Process the response
             self.response = http_info["responses"]["200"]["content"]["application/json"]["schema"]
+            self.tags = data.get("tags", [])
         return self
 
     def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
@@ -79,9 +114,10 @@ class API(BaseSwaggerDataModel):
         return mock_api
 
 
-class SwaggerConfig(BaseSwaggerDataModel):
+class SwaggerConfig(Transferable):
     def __init__(self):
         self.paths: List[API] = []
+        self.tags: List[Tag] = []
 
     def deserialize(self, data: Dict) -> "SwaggerConfig":
         apis: dict = data["paths"]
@@ -89,6 +125,13 @@ class SwaggerConfig(BaseSwaggerDataModel):
             api = API().deserialize(data=api_props)
             api.path = api_path
             self.paths.append(api)
+
+        tags: List[dict] = data.get("tags", [])
+        self.tags = list(map(lambda t: Tag().deserialize(t), tags))
+
+        global ComponentDefinition
+        ComponentDefinition = data.get("definitions", {})
+
         return self
 
     def to_api_config(self, base_url: str = "") -> APIConfig:  # type: ignore[override]

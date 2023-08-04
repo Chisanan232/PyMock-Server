@@ -118,8 +118,12 @@ class TestAPIParameters(_SwaggerDataModelTestSuite):
     def _verify_result(self, data: APIParameter, og_data: dict) -> None:
         assert data is not None
         assert data.required == og_data["required"]
-        assert data.value_type == convert_js_type(og_data["schema"]["type"])
-        assert data.default == og_data["schema"]["default"]
+        if "schema" in og_data.keys():
+            assert data.value_type == convert_js_type(og_data["schema"]["type"])
+            assert data.default == og_data["schema"]["default"]
+        else:
+            assert data.value_type == convert_js_type(og_data["type"])
+            assert data.default == og_data.get("default", None)
 
     def _given_props(self, data_model: APIParameter) -> None:
         data_model.name = "arg1"
