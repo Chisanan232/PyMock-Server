@@ -23,6 +23,11 @@ def convert_js_type(t: str) -> str:
 ComponentDefinition: Dict[str, dict] = {}
 
 
+def set_component_definition(data: dict, key: str = "definitions") -> None:
+    global ComponentDefinition
+    ComponentDefinition = data.get(key, {})
+
+
 class BaseSwaggerDataModel(metaclass=ABCMeta):
     @abstractmethod
     def deserialize(self, data: Dict) -> Self:
@@ -129,8 +134,7 @@ class SwaggerConfig(Transferable):
         tags: List[dict] = data.get("tags", [])
         self.tags = list(map(lambda t: Tag().deserialize(t), tags))
 
-        global ComponentDefinition
-        ComponentDefinition = data.get("definitions", {})
+        set_component_definition(data)
 
         return self
 
