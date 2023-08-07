@@ -16,7 +16,10 @@ from pymock_api.model.swagger_config import (
     BaseSwaggerDataModel,
     SwaggerConfig,
     convert_js_type,
+    set_component_definition,
 )
+
+from ..._values import _Component_Definition
 
 
 @pytest.mark.parametrize(
@@ -56,8 +59,8 @@ def _get_all_swagger_api_doc() -> None:
             SWAGGER_API_DOC_JSON.append(swagger_api_docs)
             apis: dict = swagger_api_docs["paths"]
             for api_path, api_props in apis.items():
-                SWAGGER_ONE_API_JSON.append(api_props)
                 for api_detail in api_props.values():
+                    SWAGGER_ONE_API_JSON.append(api_detail)
                     for param in api_detail["parameters"]:
                         SWAGGER_API_PARAMETERS_JSON.append(param)
 
@@ -146,6 +149,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
 
     @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_ONE_API_JSON)
     def test_deserialize(self, swagger_api_doc_data: dict, data_model: BaseSwaggerDataModel):
+        set_component_definition(data=_Component_Definition, key="definitions")
         super().test_deserialize(swagger_api_doc_data, data_model)
 
     def _initial(self, data: API) -> None:
@@ -155,23 +159,26 @@ class TestAPI(_SwaggerDataModelTestSuite):
         data.response = {}
 
     def _verify_result(self, data: API, og_data: dict) -> None:
-        def _get_api_param(method: str, name: str) -> Optional[dict]:
-            swagger_api_params = og_data[method]["parameters"]
+        def _get_api_param(name: str) -> Optional[dict]:
+            swagger_api_params = og_data["parameters"]
             for param in swagger_api_params:
                 if param["name"] == name:
                     return param
             return None
 
-        for og_api_method, og_api_props in og_data.items():
-            assert data is not None
-            assert data.path == ""
-            assert data.http_method == og_api_method
-            for api_param in data.parameters:
-                one_swagger_api_param = _get_api_param(og_api_method, api_param.name)
-                assert one_swagger_api_param is not None
-                assert api_param.required == one_swagger_api_param["required"]
+        assert data is not None
+        assert data.path == ""
+        assert data.http_method == ""
+        for api_param in data.parameters:
+            one_swagger_api_param = _get_api_param(api_param.name)
+            assert one_swagger_api_param is not None
+            assert api_param.required == one_swagger_api_param["required"]
+            if api_param.has_schema(one_swagger_api_param):
                 assert api_param.value_type == convert_js_type(one_swagger_api_param["schema"]["type"])
-                assert api_param.default == one_swagger_api_param["schema"]["default"]
+                assert api_param.default == one_swagger_api_param["schema"].get("default", None)
+            else:
+                assert api_param.value_type == convert_js_type(one_swagger_api_param["type"])
+                assert api_param.default == one_swagger_api_param.get("default", None)
 
     def _given_props(self, data_model: API) -> None:
         params = APIParameter()
@@ -207,6 +214,7 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
 
     @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_DOC_JSON)
     def test_deserialize(self, swagger_api_doc_data: dict, data_model: BaseSwaggerDataModel):
+        set_component_definition(data=_Component_Definition, key="definitions")
         super().test_deserialize(swagger_api_doc_data, data_model)
 
     def _initial(self, data: SwaggerConfig) -> None:

@@ -16,11 +16,23 @@ def convert_js_type(t: str) -> str:
         return "int"
     elif t == "boolean":
         return "bool"
+    elif t == "array":
+        return "bool"
     else:
         raise TypeError(f"Currently, it cannot parse JS type '{t}'.")
 
 
 ComponentDefinition: Dict[str, dict] = {}
+
+
+def get_component_definition() -> Dict:
+    global ComponentDefinition
+    return ComponentDefinition
+
+
+def set_component_definition(data: dict, key: str = "definitions") -> None:
+    global ComponentDefinition
+    ComponentDefinition = data.get(key, {})
 
 
 class BaseSwaggerDataModel(metaclass=ABCMeta):
@@ -54,27 +66,13 @@ class APIParameter(Transferable):
         self.default: Any = None
 
     def deserialize(self, data: Dict) -> "APIParameter":
-        def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
-            if i == len(paths) - 1:
-                return component_def_data[paths[i]]
-            else:
-                return _get_schema(component_def_data[paths[i]], paths, i + 1)
-
-        if "schema" in data.keys():
-            if "$ref" in data["schema"].keys():
-                schema_path = data["schema"]["$ref"].replace("#/", "").split("/")
-                request_body_params = _get_schema(ComponentDefinition, schema_path, 0)
-                request_body_params
-            else:
-                self.name = data["name"]
-                self.required = data["required"]
-                self.value_type = convert_js_type(data["schema"]["type"])
-                self.default = data["schema"]["default"]
-        else:
-            self.name = data["name"]
-            self.required = data["required"]
-            self.value_type = convert_js_type(data["type"])
-            self.default = data.get("default", None)
+        print(f"[DEBUG in src] before handled, data: {data}")
+        handled_data = self.parse_schema(data)
+        print(f"[DEBUG in src] after handled, handled_data: {handled_data}")
+        self.name = handled_data["name"]
+        self.required = handled_data["required"]
+        self.value_type = convert_js_type(handled_data["type"])
+        self.default = handled_data.get("default", None)
         return self
 
     def to_api_config(self) -> PyMockAPIParameter:  # type: ignore[override]
@@ -86,6 +84,30 @@ class APIParameter(Transferable):
             value_format=None,
         )
 
+    def has_schema(self, data: Dict) -> bool:
+        return data.get("schema", None) is not None
+
+    def has_ref_in_schema(self, data: Dict) -> bool:
+        if self.has_schema(data):
+            return data["schema"].get("$ref", None) is not None
+        return False
+
+    def parse_schema(self, data: Dict, accept_no_schema: bool = True) -> dict:
+        if not self.has_schema(data):
+            if accept_no_schema:
+                return data
+            raise ValueError(f"This data '{data}' doesn't have key 'schema'.")
+
+        if self.has_ref_in_schema(data):
+            raise NotImplementedError
+        else:
+            return {
+                "name": data["name"],
+                "required": data["required"],
+                "type": data["schema"]["type"],
+                "default": data["schema"].get("default", None),
+            }
+
 
 class API(Transferable):
     def __init__(self):
@@ -96,13 +118,48 @@ class API(Transferable):
         self.tags: List[str] = []
 
     def deserialize(self, data: Dict) -> "API":
-        for http_method, http_info in data.items():
-            self.http_method = http_method
-            self.parameters = list(map(lambda p: APIParameter().deserialize(data=p), http_info["parameters"]))
-            # TODO: Process the response
-            self.response = http_info["responses"]["200"]["content"]["application/json"]["schema"]
-            self.tags = data.get("tags", [])
+        print(f"[DEBUG in API.deserialize] parsing: data: {data}")
+        config_api_parameters = APIParameter()
+        has_ref_in_schema_param = list(filter(config_api_parameters.has_ref_in_schema, data["parameters"]))
+        if has_ref_in_schema_param:
+            print("[DEBUG in src] has ref in schema")
+            assert len(data["parameters"]) == 1
+            handled_parameters = self._process_has_ref_parameters(data["parameters"][0])
+        else:
+            print("[DEBUG in src] does not has ref in schema")
+            handled_parameters = data["parameters"]
+        self.parameters = list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
+        # TODO: Process the response
+        self.response = data["responses"]["200"]
+        self.tags = data.get("tags", [])
         return self
+
+    def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
+        def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
+            if i == len(paths) - 1:
+                return component_def_data[paths[i]]
+            else:
+                return _get_schema(component_def_data[paths[i]], paths, i + 1)
+
+        config_api_parameters = APIParameter()
+        if not config_api_parameters.has_ref_in_schema(data):
+            raise ValueError("")
+
+        schema_path = data["schema"]["$ref"].replace("#/", "").split("/")[1:]
+        request_body_params = _get_schema(ComponentDefinition, schema_path, 0)
+        print(f"[DEBUG ub src] request_body_params: {request_body_params}")
+        # TODO: Should use the reference to get the details of parameters.
+        parameters: List[dict] = []
+        for param_name, param_props in request_body_params["properties"].items():
+            parameters.append(
+                {
+                    "name": param_name,
+                    "required": param_name in request_body_params["required"],
+                    "type": param_props["type"],
+                    "default": param_props.get("default", None),
+                }
+            )
+        return parameters
 
     def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
         mock_api = MockAPI(url=self.path.replace(base_url, ""))
@@ -122,9 +179,13 @@ class SwaggerConfig(Transferable):
     def deserialize(self, data: Dict) -> "SwaggerConfig":
         apis: dict = data["paths"]
         for api_path, api_props in apis.items():
-            api = API().deserialize(data=api_props)
-            api.path = api_path
-            self.paths.append(api)
+            print(f"[DEBUG in SwaggerConfig.deserialize] first layer parsing: api_props: {api_props}")
+            for one_api_http_method, one_api_details in api_props.items():
+                print(f"[DEBUG in SwaggerConfig.deserialize] second layer parsing: one_api_details: {one_api_details}")
+                api = API().deserialize(data=one_api_details)
+                api.path = api_path
+                api.http_method = one_api_http_method
+                self.paths.append(api)
 
         tags: List[dict] = data.get("tags", [])
         self.tags = list(map(lambda t: Tag().deserialize(t), tags))
