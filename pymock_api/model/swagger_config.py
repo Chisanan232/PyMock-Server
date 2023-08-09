@@ -119,20 +119,23 @@ class API(Transferable):
 
     def deserialize(self, data: Dict) -> "API":
         print(f"[DEBUG in API.deserialize] parsing: data: {data}")
-        config_api_parameters = APIParameter()
-        has_ref_in_schema_param = list(filter(config_api_parameters.has_ref_in_schema, data["parameters"]))
-        if has_ref_in_schema_param:
-            print("[DEBUG in src] has ref in schema")
-            assert len(data["parameters"]) == 1
-            handled_parameters = self._process_has_ref_parameters(data["parameters"][0])
-        else:
-            print("[DEBUG in src] does not has ref in schema")
-            handled_parameters = data["parameters"]
-        self.parameters = list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
+        self.parameters = self._process_api_params(data["parameters"])
         # TODO: Process the response
         self.response = data["responses"]["200"]
         self.tags = data.get("tags", [])
         return self
+
+    def _process_api_params(self, params_data: List[dict]) -> List["APIParameter"]:
+        config_api_parameters = APIParameter()
+        has_ref_in_schema_param = list(filter(config_api_parameters.has_ref_in_schema, params_data))
+        if has_ref_in_schema_param:
+            print("[DEBUG in src] has ref in schema")
+            assert len(params_data) == 1
+            handled_parameters = self._process_has_ref_parameters(params_data[0])
+        else:
+            print("[DEBUG in src] does not has ref in schema")
+            handled_parameters = params_data
+        return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
 
     def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
         def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
