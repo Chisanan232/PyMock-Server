@@ -3,7 +3,7 @@ import json
 import os
 import pathlib
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import pytest
 
@@ -43,7 +43,8 @@ def test_fail_convert_js_type():
 SWAGGER_API_DOC_JSON: List[tuple] = []
 SWAGGER_ONE_API_JSON: List[tuple] = []
 SWAGGER_API_PARAMETERS_JSON: List[tuple] = []
-SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API: List[List[dict]] = []
+SWAGGER_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
+SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
 
 
 def _get_all_swagger_api_doc() -> None:
@@ -62,11 +63,13 @@ def _get_all_swagger_api_doc() -> None:
             apis: dict = swagger_api_docs["paths"]
             for api_path, api_props in apis.items():
                 for api_detail in api_props.values():
-                    SWAGGER_ONE_API_JSON.append(api_detail)
-                    SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API.append(api_detail["parameters"])
+                    SWAGGER_ONE_API_JSON.append((api_detail, swagger_api_docs))
+                    SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API.append((api_detail["parameters"], swagger_api_docs))
                     for param in api_detail["parameters"]:
                         if param.get("schema", {}).get("$ref", None) is None:
                             SWAGGER_API_PARAMETERS_JSON.append(param)
+                        else:
+                            SWAGGER_API_PARAMETERS_JSON_FOR_API.append((param, swagger_api_docs))
 
 
 _get_all_swagger_api_doc()
@@ -151,9 +154,12 @@ class TestAPI(_SwaggerDataModelTestSuite):
     def data_model(self) -> API:
         return API()
 
-    @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_ONE_API_JSON)
-    def test_deserialize(self, swagger_api_doc_data: dict, data_model: BaseSwaggerDataModel):
-        set_component_definition(data=_Component_Definition, key="definitions")
+    @pytest.mark.parametrize(("swagger_api_doc_data", "entire_swagger_config"), SWAGGER_ONE_API_JSON)
+    def test_deserialize(
+        self, swagger_api_doc_data: dict, entire_swagger_config: dict, data_model: BaseSwaggerDataModel
+    ):
+        print(f"[DEBUG in test] entire_swagger_config: {entire_swagger_config}")
+        set_component_definition(data=entire_swagger_config, key="definitions")
         super().test_deserialize(swagger_api_doc_data, data_model)
 
     def _initial(self, data: API) -> None:
@@ -213,12 +219,36 @@ class TestAPI(_SwaggerDataModelTestSuite):
             assert p.default == param_data_from.default
             assert p.value_format is None
 
-    @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API)
-    def test__process_api_params(self, swagger_api_doc_data: List[dict], data_model: API):
+    @pytest.mark.parametrize(
+        ("swagger_api_doc_data", "entire_swagger_config"), SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API
+    )
+    def test__process_api_params(self, swagger_api_doc_data: List[dict], entire_swagger_config: dict, data_model: API):
+        # Pro-process
+        set_component_definition(data=entire_swagger_config, key="definitions")
+
+        # Run target function
         parameters = data_model._process_api_params(swagger_api_doc_data)
+
+        # Verify
         assert parameters and isinstance(parameters, list)
         assert len(parameters) == len(swagger_api_doc_data)
         type_checksum = list(map(lambda p: isinstance(p, APIParameter), parameters))
+        assert False not in type_checksum
+
+    @pytest.mark.parametrize(("swagger_api_doc_data", "entire_swagger_config"), SWAGGER_API_PARAMETERS_JSON_FOR_API)
+    def test__process_has_ref_parameters(
+        self, swagger_api_doc_data: dict, entire_swagger_config: dict, data_model: API
+    ):
+        # Pro-process
+        set_component_definition(data=entire_swagger_config, key="definitions")
+
+        # Run target function
+        parameters = data_model._process_has_ref_parameters(swagger_api_doc_data)
+
+        # Verify
+        assert parameters and isinstance(parameters, list)
+        assert len(parameters) == len(entire_swagger_config["definitions"]["UpdateFooRequest"]["properties"].keys())
+        type_checksum = list(map(lambda p: isinstance(p, dict), parameters))
         assert False not in type_checksum
 
 
