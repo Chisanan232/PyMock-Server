@@ -200,6 +200,6 @@ class SwaggerConfig(Transferable):
         assert api_config.apis is not None and api_config.apis.apis == {}
         for swagger_api in self.paths:
             api_config.apis.apis[
-                swagger_api.path.replace(base_url, "")[1:].replace("/", "_")
+                f"{swagger_api.http_method}_{swagger_api.path.replace(base_url, '')[1:].replace('/', '_')}"
             ] = swagger_api.to_api_config(base_url=base_url)
         return api_config
