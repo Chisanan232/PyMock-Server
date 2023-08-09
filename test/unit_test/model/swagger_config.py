@@ -43,6 +43,7 @@ def test_fail_convert_js_type():
 SWAGGER_API_DOC_JSON: List[tuple] = []
 SWAGGER_ONE_API_JSON: List[tuple] = []
 SWAGGER_API_PARAMETERS_JSON: List[tuple] = []
+SWAGGER_API_PARAMETERS_JSON_FOR_API: List[List[dict]] = []
 
 
 def _get_all_swagger_api_doc() -> None:
@@ -62,6 +63,7 @@ def _get_all_swagger_api_doc() -> None:
             for api_path, api_props in apis.items():
                 for api_detail in api_props.values():
                     SWAGGER_ONE_API_JSON.append(api_detail)
+                    SWAGGER_API_PARAMETERS_JSON_FOR_API.append(api_detail["parameters"])
                     for param in api_detail["parameters"]:
                         if param.get("schema", {}).get("$ref", None) is None:
                             SWAGGER_API_PARAMETERS_JSON.append(param)
@@ -210,6 +212,14 @@ class TestAPI(_SwaggerDataModelTestSuite):
             assert p.value_type == param_data_from.value_type
             assert p.default == param_data_from.default
             assert p.value_format is None
+
+    @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_PARAMETERS_JSON_FOR_API)
+    def test__process_api_params(self, swagger_api_doc_data: List[dict], data_model: API):
+        parameters = data_model._process_api_params(swagger_api_doc_data)
+        assert parameters and isinstance(parameters, list)
+        assert len(parameters) == len(swagger_api_doc_data)
+        type_checksum = list(map(lambda p: isinstance(p, APIParameter), parameters))
+        assert False not in type_checksum
 
 
 class TestSwaggerConfig(_SwaggerDataModelTestSuite):
