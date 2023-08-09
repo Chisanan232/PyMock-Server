@@ -149,6 +149,7 @@ class API(Transferable):
             raise ValueError("")
 
         schema_path = data["schema"]["$ref"].replace("#/", "").split("/")[1:]
+        # Operate the component definition object
         request_body_params = _get_schema(ComponentDefinition, schema_path, 0)
         print(f"[DEBUG ub src] request_body_params: {request_body_params}")
         # TODO: Should use the reference to get the details of parameters.
