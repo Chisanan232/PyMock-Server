@@ -19,8 +19,6 @@ from pymock_api.model.swagger_config import (
     set_component_definition,
 )
 
-from ..._values import _Component_Definition
-
 
 @pytest.mark.parametrize(
     ("js_type", "py_type"),
@@ -259,7 +257,7 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
 
     @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_DOC_JSON)
     def test_deserialize(self, swagger_api_doc_data: dict, data_model: BaseSwaggerDataModel):
-        set_component_definition(data=_Component_Definition, key="definitions")
+        set_component_definition(data=swagger_api_doc_data, key="definitions")
         super().test_deserialize(swagger_api_doc_data, data_model)
 
     def _initial(self, data: SwaggerConfig) -> None:
