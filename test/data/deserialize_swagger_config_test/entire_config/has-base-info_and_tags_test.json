@@ -269,10 +269,10 @@
         "UpdateFooRequest": {
             "type": "object",
             "required": [
-                "request_body"
+                "balances"
             ],
             "properties": {
-                "request_body": {
+                "balances": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/UpdateOneFooDto"
@@ -288,16 +288,16 @@
                 "id"
             ],
             "properties": {
+                "values": {
+                    "type": "number",
+                    "example": 23434,
+                    "description": "value"
+                },
                 "id": {
                     "type": "integer",
                     "format": "int64",
                     "example": 1,
                     "description": "ID"
-                },
-                "values": {
-                    "type": "number",
-                    "example": 23434,
-                    "description": "value"
                 }
             },
             "title": "UpdateOneFooDto"
