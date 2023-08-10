@@ -164,7 +164,6 @@ class TestAPI(_SwaggerDataModelTestSuite):
     def test_deserialize(
         self, swagger_api_doc_data: dict, entire_swagger_config: dict, data_model: BaseSwaggerDataModel
     ):
-        print(f"[DEBUG in test] entire_swagger_config: {entire_swagger_config}")
         set_component_definition(data=entire_swagger_config, key="definitions")
         super().test_deserialize(swagger_api_doc_data, data_model)
 

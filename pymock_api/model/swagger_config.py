@@ -66,9 +66,7 @@ class APIParameter(Transferable):
         self.default: Any = None
 
     def deserialize(self, data: Dict) -> "APIParameter":
-        print(f"[DEBUG in src] before handled, data: {data}")
         handled_data = self.parse_schema(data)
-        print(f"[DEBUG in src] after handled, handled_data: {handled_data}")
         self.name = handled_data["name"]
         self.required = handled_data["required"]
         self.value_type = convert_js_type(handled_data["type"])
@@ -118,7 +116,6 @@ class API(Transferable):
         self.tags: List[str] = []
 
     def deserialize(self, data: Dict) -> "API":
-        print(f"[DEBUG in API.deserialize] parsing: data: {data}")
         self.parameters = self._process_api_params(data["parameters"])
         # TODO: Process the response
         self.response = {}
@@ -129,11 +126,9 @@ class API(Transferable):
         config_api_parameters = APIParameter()
         has_ref_in_schema_param = list(filter(config_api_parameters.has_ref_in_schema, params_data))
         if has_ref_in_schema_param:
-            print("[DEBUG in src] has ref in schema")
             assert len(params_data) == 1
             handled_parameters = self._process_has_ref_parameters(params_data[0])
         else:
-            print("[DEBUG in src] does not has ref in schema")
             handled_parameters = params_data
         return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
 
@@ -151,7 +146,6 @@ class API(Transferable):
         schema_path = data["schema"]["$ref"].replace("#/", "").split("/")[1:]
         # Operate the component definition object
         request_body_params = _get_schema(get_component_definition(), schema_path, 0)
-        print(f"[DEBUG ub src] request_body_params: {request_body_params}")
         # TODO: Should use the reference to get the details of parameters.
         parameters: List[dict] = []
         for param_name, param_props in request_body_params["properties"].items():
@@ -183,9 +177,7 @@ class SwaggerConfig(Transferable):
     def deserialize(self, data: Dict) -> "SwaggerConfig":
         apis: dict = data["paths"]
         for api_path, api_props in apis.items():
-            print(f"[DEBUG in SwaggerConfig.deserialize] first layer parsing: api_props: {api_props}")
             for one_api_http_method, one_api_details in api_props.items():
-                print(f"[DEBUG in SwaggerConfig.deserialize] second layer parsing: one_api_details: {one_api_details}")
                 api = API().deserialize(data=one_api_details)
                 api.path = api_path
                 api.http_method = one_api_http_method
@@ -202,8 +194,6 @@ class SwaggerConfig(Transferable):
         api_config = APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=base_url), apis={}))
         assert api_config.apis is not None and api_config.apis.apis == {}
         for swagger_api in self.paths:
-            print(f"[DEBUG in src] swagger_api.path: {swagger_api.path}")
-            print(f"[DEBUG in src] swagger_api.path.replace(base_url,''): {swagger_api.path.replace(base_url, '')}")
             if swagger_api.path[0] == "/" and (base_url and base_url[0] != "/"):
                 base_url = f"/{base_url}"
             elif swagger_api.path[0] != "/" and (base_url and base_url[0] == "/"):
