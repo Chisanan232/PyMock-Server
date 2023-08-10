@@ -93,7 +93,7 @@ class APIParameter(Transferable):
     def has_schema(self, data: Dict) -> bool:
         return data.get("schema", None) is not None
 
-    def has_ref_in_schema(self, data: Dict) -> str:
+    def has_ref(self, data: Dict) -> str:
         if self.has_schema(data):
             has_schema_ref = data["schema"].get("$ref", None) is not None
             return "schema" if has_schema_ref else ""
@@ -107,7 +107,7 @@ class APIParameter(Transferable):
                 return data
             raise ValueError(f"This data '{data}' doesn't have key 'schema'.")
 
-        if self.has_ref_in_schema(data):
+        if self.has_ref(data):
             raise NotImplementedError
         else:
             return {
@@ -135,7 +135,7 @@ class API(Transferable):
 
     def _process_api_params(self, params_data: List[dict]) -> List["APIParameter"]:
         config_api_parameters = APIParameter()
-        has_ref_in_schema_param = list(filter(lambda p: config_api_parameters.has_ref_in_schema(p) != "", params_data))
+        has_ref_in_schema_param = list(filter(lambda p: config_api_parameters.has_ref(p) != "", params_data))
         print(f"[DEBUG in swagger_config.API._process_api_params] params_data: {params_data}")
         if has_ref_in_schema_param:
             assert len(params_data) == 1
@@ -154,7 +154,7 @@ class API(Transferable):
             items = param_props.get("items", None)
             print(f"[DEBUG in swagger_config.API._process_has_ref_parameters] before items: {items}")
             items_props = []
-            if items and config_api_parameters.has_ref_in_schema(items) != "":
+            if items and config_api_parameters.has_ref(items):
                 items = self._get_schema_ref(items)
                 print(f"[DEBUG in swagger_config.API._process_has_ref_parameters] after items: {items}")
                 # Sample data:
@@ -197,7 +197,7 @@ class API(Transferable):
                 return _get_schema(component_def_data[paths[i]], paths, i + 1)
 
         config_api_parameters = APIParameter()
-        has_ref = config_api_parameters.has_ref_in_schema(data)
+        has_ref = config_api_parameters.has_ref(data)
         if not has_ref:
             raise ValueError("This parameter has no ref in schema.")
         schema_path = (data["schema"]["$ref"] if has_ref == "schema" else data["$ref"]).replace("#/", "").split("/")[1:]
