@@ -194,11 +194,15 @@ class SwaggerConfig(Transferable):
         api_config = APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=base_url), apis={}))
         assert api_config.apis is not None and api_config.apis.apis == {}
         for swagger_api in self.paths:
-            if swagger_api.path[0] == "/" and (base_url and base_url[0] != "/"):
-                base_url = f"/{base_url}"
-            elif swagger_api.path[0] != "/" and (base_url and base_url[0] == "/"):
-                swagger_api.path = f"/{swagger_api.path}"
+            base_url = self._align_url_format(base_url, swagger_api)
             api_config.apis.apis[
                 "_".join([swagger_api.http_method, swagger_api.path.replace(base_url, "")[1:].replace("/", "_")])
             ] = swagger_api.to_api_config(base_url=base_url)
         return api_config
+
+    def _align_url_format(self, base_url: str, swagger_api: API) -> str:
+        if swagger_api.path[0] == "/" and (base_url and base_url[0] != "/"):
+            base_url = f"/{base_url}"
+        elif swagger_api.path[0] != "/" and (base_url and base_url[0] == "/"):
+            swagger_api.path = f"/{swagger_api.path}"
+        return base_url
