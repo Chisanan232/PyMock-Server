@@ -2,7 +2,7 @@ name: ''
 description: ''
 mocked_apis:
   base:
-    url: '/api/v1/billing'
+    url: '/api/v1/test'
   get_foo:
     url: '/foo'
     http:
@@ -20,27 +20,28 @@ mocked_apis:
             default:
             format:
       response:
-        value: './foo/get_foo.json'
+        value: '{}'
   put_foo:
     url: '/foo'
     http:
       request:
         method: 'PUT'
         parameters:
-          - name: 'request_body'
+          - name: 'balances'
             required: true
             type: list
-            items:
-              - name: "id"
-                required: true
-                type: int
-              - name: "value"
-                required: true
-                type: int
+# # New feature
+#            items:
+#              - name: "id"
+#                required: true
+#                type: int
+#              - name: "value"
+#                required: true
+#                type: int
             default:
             format:
       response:
-        value: './foo/put_foo.json'
+        value: '{}'
   get_foo-boo_export:
     url: '/foo-boo/export'
     http:
@@ -63,4 +64,4 @@ mocked_apis:
             default:
             format:
       response:
-        value: './foo/get_foo-boo.json'
+        value: '{}'

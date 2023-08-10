@@ -2,8 +2,8 @@ name: ''
 description: ''
 mocked_apis:
   base:
-    url: '/test/v1'
-  foo:
+    url: '/api/v1/test'
+  get_foo:
     url: '/foo'
     http:
       request:

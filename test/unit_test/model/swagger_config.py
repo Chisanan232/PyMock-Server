@@ -27,6 +27,7 @@ from pymock_api.model.swagger_config import (
         ("string", "str"),
         ("integer", "int"),
         ("boolean", "bool"),
+        ("array", "list"),
     ],
 )
 def test_convert_js_type(js_type: str, py_type: str):

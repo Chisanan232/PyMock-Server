@@ -17,7 +17,7 @@ def convert_js_type(t: str) -> str:
     elif t == "boolean":
         return "bool"
     elif t == "array":
-        return "bool"
+        return "list"
     else:
         raise TypeError(f"Currently, it cannot parse JS type '{t}'.")
 
@@ -121,7 +121,7 @@ class API(Transferable):
         print(f"[DEBUG in API.deserialize] parsing: data: {data}")
         self.parameters = self._process_api_params(data["parameters"])
         # TODO: Process the response
-        self.response = data["responses"]["200"]
+        self.response = {}
         self.tags = data.get("tags", [])
         return self
 
@@ -202,7 +202,13 @@ class SwaggerConfig(Transferable):
         api_config = APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=base_url), apis={}))
         assert api_config.apis is not None and api_config.apis.apis == {}
         for swagger_api in self.paths:
+            print(f"[DEBUG in src] swagger_api.path: {swagger_api.path}")
+            print(f"[DEBUG in src] swagger_api.path.replace(base_url,''): {swagger_api.path.replace(base_url, '')}")
+            if swagger_api.path[0] == "/" and (base_url and base_url[0] != "/"):
+                base_url = f"/{base_url}"
+            elif swagger_api.path[0] != "/" and (base_url and base_url[0] == "/"):
+                swagger_api.path = f"/{swagger_api.path}"
             api_config.apis.apis[
-                f"{swagger_api.http_method}_{swagger_api.path.replace(base_url, '')[1:].replace('/', '_')}"
+                "_".join([swagger_api.http_method, swagger_api.path.replace(base_url, "")[1:].replace("/", "_")])
             ] = swagger_api.to_api_config(base_url=base_url)
         return api_config

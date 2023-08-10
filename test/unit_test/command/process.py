@@ -11,6 +11,8 @@ from unittest.mock import MagicMock, Mock, call, patch
 import pytest
 from yaml import load as yaml_load
 
+from pymock_api.model.swagger_config import set_component_definition
+
 try:
     from yaml import CLoader as Loader
 except ImportError:
@@ -849,6 +851,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         with open(expected_config, "r") as file:
             expected_config_data = yaml_load(file, Loader=Loader)
 
+        set_component_definition(swagger_json_data)
         with patch("pymock_api.command.pull.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
             with patch(
                 "pymock_api.command.pull.component.URLLibHTTPClient.request", return_value=swagger_json_data
