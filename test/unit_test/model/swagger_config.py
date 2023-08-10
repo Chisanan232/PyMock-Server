@@ -147,6 +147,12 @@ class TestAPIParameters(_SwaggerDataModelTestSuite):
         assert under_test.default == data_from.default
         assert under_test.value_format is None
 
+    def test_parse_schema_with_invalid_value(self, data_model: APIParameter):
+        invalid_values = {}
+        with pytest.raises(ValueError) as exc_info:
+            data_model.parse_schema(invalid_values, accept_no_schema=False)
+        assert re.search(r".{0,64}doesn't have key 'schema'.{0,64}", str(exc_info.value), re.IGNORECASE)
+
 
 class TestAPI(_SwaggerDataModelTestSuite):
     @pytest.fixture(scope="function")
