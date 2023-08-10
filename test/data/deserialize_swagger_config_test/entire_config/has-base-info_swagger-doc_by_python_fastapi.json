@@ -5,7 +5,7 @@
     "version": "0.1.0"
   },
   "paths": {
-    "api/v1/test/foo": {
+    "/test/v1/foo": {
       "get": {
         "summary": "Foo Home",
         "operationId": "foo_home_test_v1_foo_get",

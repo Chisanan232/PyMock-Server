@@ -5,10 +5,10 @@
     "version": "0.1.0"
   },
   "paths": {
-    "api/v1/test/foo": {
+    "/foo": {
       "get": {
         "summary": "Foo Home",
-        "operationId": "foo_home_test_v1_foo_get",
+        "operationId": "foo_home_foo_get",
         "parameters": [
           {
             "required": false,

@@ -19,7 +19,7 @@ class APIConfigValue:
 
 _Config_Name: str = "pytest name"
 _Config_Description: str = "pytest description"
-_Base_URL: str = "/test/v1"
+_Base_URL: str = "/api/v1/test"
 _Test_URL: str = "/test-url"
 _Test_HTTP_Method: str = "GET"
 _Test_HTTP_Resp: str = "This is HTTP response for PyTest."
@@ -109,7 +109,7 @@ _YouTube_API_Content: dict = {"responseCode": "200", "errorMessage": "OK", "cont
 
 
 _Mocked_APIs: dict = {
-    "base": {"url": "/test/v1"},
+    "base": {"url": _Base_URL},
     "google_home": _Google_Home_Value,
     "test_home": _Test_Home,
     "youtube_home": _YouTube_Home_Value,

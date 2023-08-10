@@ -1,0 +1,67 @@
+name: ''
+description: ''
+mocked_apis:
+  base:
+    url: '/api/v1/test'
+  get_foo:
+    url: '/foo'
+    http:
+      request:
+        method: 'GET'
+        parameters:
+          - name: 'date'
+            required: true
+            type: str
+            default:
+            format:
+          - name: 'fooType'
+            required: true
+            type: str
+            default:
+            format:
+      response:
+        value: '{}'
+  put_foo:
+    url: '/foo'
+    http:
+      request:
+        method: 'PUT'
+        parameters:
+          - name: 'balances'
+            required: true
+            type: list
+# # New feature
+#            items:
+#              - name: "id"
+#                required: true
+#                type: int
+#              - name: "value"
+#                required: true
+#                type: int
+            default:
+            format:
+      response:
+        value: '{}'
+  get_foo-boo_export:
+    url: '/foo-boo/export'
+    http:
+      request:
+        method: 'GET'
+        parameters:
+          - name: 'arg1'
+            required: false
+            type: list
+            default:
+            format:
+          - name: 'arg2'
+            required: false
+            type: str
+            default:
+            format:
+          - name: 'datetime'
+            required: false
+            type: str
+            default:
+            format:
+      response:
+        value: '{}'
