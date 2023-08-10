@@ -201,8 +201,8 @@ class SwaggerConfig(Transferable):
         return api_config
 
     def _align_url_format(self, base_url: str, swagger_api: API) -> str:
-        if swagger_api.path[0] == "/" and (base_url and base_url[0] != "/"):
-            base_url = f"/{base_url}"
-        elif swagger_api.path[0] != "/" and (base_url and base_url[0] == "/"):
+        if swagger_api.path[0] != "/":
             swagger_api.path = f"/{swagger_api.path}"
+        if base_url and base_url[0] != "/":
+            base_url = f"/{base_url}"
         return base_url
