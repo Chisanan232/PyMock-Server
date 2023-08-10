@@ -452,6 +452,12 @@ class TestMockAPI(ConfigTestSpec):
         mock_deserialize.assert_not_called()
         assert re.search(r"Setter .{1,32} only accepts .{1,32} type object.", str(exc_info.value), re.IGNORECASE)
 
+    @pytest.mark.parametrize("invalid_value", [[], (), 123])
+    def test_prop_tag_with_invalid_obj(self, invalid_value: object, sut_with_nothing: MockAPI):
+        with pytest.raises(TypeError) as exc_info:
+            sut_with_nothing.tag = invalid_value
+        assert re.search("only accepts str type value", str(exc_info.value), re.IGNORECASE)
+
     def _expected_serialize_value(self) -> dict:
         return _TestConfig.Mock_API
 
