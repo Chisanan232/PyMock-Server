@@ -117,7 +117,7 @@ class IteratorItem(_Config):
         name: str = self._get_prop(data, prop="name")
         required: bool = self._get_prop(data, prop="required")
         value_type: type = self._get_prop(data, prop="value_type")
-        if not (name and value_type) or (required is None):
+        if not value_type or (required is None):
             return None
         return {
             "name": name,
@@ -153,6 +153,19 @@ class APIParameter(_Config):
             and self.items == other.items
         )
 
+    def __post_init__(self) -> None:
+        if self.items is not None:
+            if False in list(map(lambda i: isinstance(i, (dict, IteratorItem)), self.items)):
+                raise TypeError("")
+            self.items = [
+                IteratorItem(
+                    name=i.get("name", ""), value_type=i.get("value_type", "str"), required=i.get("required", True)
+                )
+                if isinstance(i, dict)
+                else i
+                for i in self.items
+            ]
+
     def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:
         name: str = self._get_prop(data, prop="name")
         required: bool = self._get_prop(data, prop="required")
@@ -169,6 +182,7 @@ class APIParameter(_Config):
             "format": value_format,
         }
         if self.items:
+            print(f"[DEBUG in api_config.APIParameter.serialize] self.items: {self.items}")
             serialized_data["items"] = [item.serialize() for item in self.items]
         return serialized_data
 

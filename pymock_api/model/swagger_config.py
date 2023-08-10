@@ -1,6 +1,6 @@
 import json
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from pymock_api.model.api_config import APIConfig
 from pymock_api.model.api_config import APIParameter as PyMockAPIParameter
@@ -64,22 +64,30 @@ class APIParameter(Transferable):
         self.required: bool = False
         self.value_type: str = ""
         self.default: Any = None
+        self.items: Optional[list] = None
 
     def deserialize(self, data: Dict) -> "APIParameter":
+        print(f"[DEBUG in swagger_config.APIParameter.deserialize] data: {data}")
         handled_data = self.parse_schema(data)
         self.name = handled_data["name"]
         self.required = handled_data["required"]
         self.value_type = convert_js_type(handled_data["type"])
         self.default = handled_data.get("default", None)
+        items = handled_data.get("items", None)
+        print(f"[DEBUG in swagger_config.APIParameter.deserialize] items: {items}")
+        if items is not None:
+            self.items = items if isinstance(items, list) else [items]
         return self
 
     def to_api_config(self) -> PyMockAPIParameter:  # type: ignore[override]
+        print(f"[DEBUG in swagger_config.APIParameter.to_api_config] self.items: {self.items}")
         return PyMockAPIParameter(
             name=self.name,
             required=self.required,
             value_type=self.value_type,
             default=self.default,
             value_format=None,
+            items=self.items,
         )
 
     def has_schema(self, data: Dict) -> bool:
@@ -130,6 +138,7 @@ class API(Transferable):
             handled_parameters = self._process_has_ref_parameters(params_data[0])
         else:
             handled_parameters = params_data
+        print(f"[DEBUG in swagger_config.API._process_api_params] handled_parameters: {handled_parameters}")
         return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
 
     def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
