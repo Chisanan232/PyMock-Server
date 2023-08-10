@@ -31,14 +31,13 @@ mocked_apis:
           - name: 'balances'
             required: true
             type: list
-# # New feature
-#            items:
-#              - name: "id"
-#                required: true
-#                type: int
-#              - name: "value"
-#                required: true
-#                type: int
+            items:
+              - name: "id"
+                required: true
+                type: int
+              - name: "value"
+                required: true
+                type: int
             default:
             format:
       response:
@@ -55,6 +54,9 @@ mocked_apis:
             type: list
             default:
             format:
+            items:
+              - required: true
+                type: str
           - name: 'arg2'
             required: false
             type: str
