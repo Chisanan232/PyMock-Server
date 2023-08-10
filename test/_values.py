@@ -109,7 +109,7 @@ _YouTube_API_Content: dict = {"responseCode": "200", "errorMessage": "OK", "cont
 
 
 _Mocked_APIs: dict = {
-    "base": {"url": "/test/v1"},
+    "base": {"url": _Base_URL},
     "google_home": _Google_Home_Value,
     "test_home": _Test_Home,
     "youtube_home": _YouTube_Home_Value,
