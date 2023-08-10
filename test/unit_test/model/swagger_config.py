@@ -14,8 +14,8 @@ from pymock_api.model.api_config import MockAPI, _Config
 from pymock_api.model.swagger_config import (
     API,
     APIParameter,
-    BaseSwaggerDataModel,
     SwaggerConfig,
+    Transferable,
     convert_js_type,
     set_component_definition,
 )
@@ -78,35 +78,35 @@ _get_all_swagger_api_doc()
 class _SwaggerDataModelTestSuite(metaclass=ABCMeta):
     @pytest.fixture(scope="function")
     @abstractmethod
-    def data_model(self) -> BaseSwaggerDataModel:
+    def data_model(self) -> Transferable:
         pass
 
     @pytest.mark.parametrize("swagger_api_doc_data", [])
-    def test_deserialize(self, swagger_api_doc_data: dict, data_model: BaseSwaggerDataModel):
+    def test_deserialize(self, swagger_api_doc_data: dict, data_model: Transferable):
         self._initial(data=data_model)
         deserialized_data = data_model.deserialize(data=swagger_api_doc_data)
         assert deserialized_data
         self._verify_result(data=deserialized_data, og_data=swagger_api_doc_data)
 
-    def test_to_api_config(self, data_model: BaseSwaggerDataModel):
+    def test_to_api_config(self, data_model: Transferable):
         self._given_props(data_model)
         new_data_model = data_model.to_api_config()
         self._verify_api_config_model(under_test=new_data_model, data_from=data_model)
 
     @abstractmethod
-    def _initial(self, data: BaseSwaggerDataModel) -> None:
+    def _initial(self, data: Transferable) -> None:
         pass
 
     @abstractmethod
-    def _verify_result(self, data: BaseSwaggerDataModel, og_data: dict) -> None:
+    def _verify_result(self, data: Transferable, og_data: dict) -> None:
         pass
 
     @abstractmethod
-    def _given_props(self, data_model: BaseSwaggerDataModel) -> None:
+    def _given_props(self, data_model: Transferable) -> None:
         pass
 
     @abstractmethod
-    def _verify_api_config_model(self, under_test: _Config, data_from: BaseSwaggerDataModel) -> None:
+    def _verify_api_config_model(self, under_test: _Config, data_from: Transferable) -> None:
         pass
 
 
@@ -116,7 +116,7 @@ class TestAPIParameters(_SwaggerDataModelTestSuite):
         return APIParameter()
 
     @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_PARAMETERS_JSON)
-    def test_deserialize(self, swagger_api_doc_data: dict, data_model: BaseSwaggerDataModel):
+    def test_deserialize(self, swagger_api_doc_data: dict, data_model: Transferable):
         super().test_deserialize(swagger_api_doc_data, data_model)
 
     def _initial(self, data: APIParameter) -> None:
@@ -161,9 +161,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
         return API()
 
     @pytest.mark.parametrize(("swagger_api_doc_data", "entire_swagger_config"), SWAGGER_ONE_API_JSON)
-    def test_deserialize(
-        self, swagger_api_doc_data: dict, entire_swagger_config: dict, data_model: BaseSwaggerDataModel
-    ):
+    def test_deserialize(self, swagger_api_doc_data: dict, entire_swagger_config: dict, data_model: Transferable):
         set_component_definition(data=entire_swagger_config, key="definitions")
         super().test_deserialize(swagger_api_doc_data, data_model)
 
@@ -272,7 +270,7 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
         return SwaggerConfig()
 
     @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_DOC_JSON)
-    def test_deserialize(self, swagger_api_doc_data: dict, data_model: BaseSwaggerDataModel):
+    def test_deserialize(self, swagger_api_doc_data: dict, data_model: Transferable):
         set_component_definition(data=swagger_api_doc_data, key="definitions")
         super().test_deserialize(swagger_api_doc_data, data_model)
 
