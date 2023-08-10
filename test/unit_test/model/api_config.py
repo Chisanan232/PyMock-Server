@@ -27,6 +27,7 @@ from ..._values import (
     _Test_API_Parameter,
     _Test_Config,
     _Test_HTTP_Resp,
+    _Test_Tag,
     _Test_URL,
     _TestConfig,
 )
@@ -84,7 +85,7 @@ class MockModel:
 
     @property
     def mock_api(self) -> Dict[str, MockAPI]:
-        return {"test_config": MockAPI(url=_Test_URL, http=self.http)}
+        return {"test_config": MockAPI(url=_Test_URL, http=self.http, tag=_Test_Tag)}
 
     @property
     def http(self) -> HTTP:
@@ -409,7 +410,7 @@ class TestBaseConfig(ConfigTestSpec):
 class TestMockAPI(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> MockAPI:
-        return MockAPI(url=_Test_URL, http=self._Mock_Model.http)
+        return MockAPI(url=_Test_URL, http=self._Mock_Model.http, tag=_Test_Tag)
 
     @pytest.fixture(scope="function")
     def sut_with_nothing(self) -> MockAPI:
@@ -460,6 +461,7 @@ class TestMockAPI(ConfigTestSpec):
         assert obj.http.request.method == _TestConfig.Request.get("method", None)
         assert obj.http.request.parameters == [self._Mock_Model.api_parameter]
         assert obj.http.response.value == _TestConfig.Response.get("value", None)
+        assert obj.tag == _Test_Tag
 
     @pytest.mark.parametrize(
         ("formatter", "format_object"),
@@ -496,6 +498,7 @@ class TestMockAPI(ConfigTestSpec):
         assert sut_with_nothing.http.request.parameters == [
             APIParameter(name="arg1", required=False, default="val1", value_type="str")
         ]
+        assert sut_with_nothing.tag == ""
 
     @pytest.mark.parametrize(
         "api_params",
@@ -539,6 +542,7 @@ class TestMockAPI(ConfigTestSpec):
                 assert p.default == (
                     expect_param.default if isinstance(expect_param, APIParameter) else expect_param["default"]
                 )
+        assert sut_with_nothing.tag == ""
 
     @pytest.mark.parametrize(
         "params",
@@ -566,6 +570,7 @@ class TestMockAPI(ConfigTestSpec):
         assert sut_with_nothing.http
         assert sut_with_nothing.http.response
         assert sut_with_nothing.http.response.value == ut_value
+        assert sut_with_nothing.tag == ""
 
 
 class TestHTTP(ConfigTestSpec):

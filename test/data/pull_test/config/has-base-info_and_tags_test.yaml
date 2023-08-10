@@ -21,6 +21,7 @@ mocked_apis:
             format:
       response:
         value: '{}'
+    tag: 'foo'
   put_foo:
     url: '/foo'
     http:
@@ -42,6 +43,7 @@ mocked_apis:
             format:
       response:
         value: '{}'
+    tag: 'foo'
   get_foo-boo_export:
     url: '/foo-boo/export'
     http:
@@ -65,3 +67,4 @@ mocked_apis:
             format:
       response:
         value: '{}'
+    tag: 'foo-boo'

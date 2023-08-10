@@ -345,10 +345,12 @@ class MockAPI(_Config):
 
     _url: Optional[str]
     _http: Optional[HTTP]
+    _tag: str = ""
 
-    def __init__(self, url: Optional[str] = None, http: Optional[HTTP] = None):
+    def __init__(self, url: Optional[str] = None, http: Optional[HTTP] = None, tag: str = ""):
         self._url = url
         self._http = http
+        self._tag = tag
 
     def _compare(self, other: "MockAPI") -> bool:
         return self.url == other.url and self.http == other.http
@@ -377,14 +379,26 @@ class MockAPI(_Config):
         else:
             self._http = None
 
+    @property
+    def tag(self) -> str:
+        return self._tag
+
+    @tag.setter
+    def tag(self, tag: str) -> None:
+        if not isinstance(tag, str):
+            raise TypeError("Setter *MockAPI.tag* only accepts str type value.")
+        self._tag = tag
+
     def serialize(self, data: Optional["MockAPI"] = None) -> Optional[Dict[str, Any]]:
         url = (data.url if data else None) or self._url
         http = (data.http if data else None) or self.http
         if not (url and http):
             return None
+        tag = (data.tag if data else None) or self.tag
         return {
             "url": url,
             "http": http.serialize(data=http),
+            "tag": tag,
         }
 
     @_Config._ensure_process_with_not_empty_value
@@ -421,6 +435,7 @@ class MockAPI(_Config):
         self.url = data.get("url", None)
         http_info = data.get("http", None)
         self.http = HTTP().deserialize(data=http_info) if http_info else None
+        self.tag = data.get("tag", "")
         return self
 
     def set_request(self, method: str = "GET", parameters: Optional[List[Union[dict, APIParameter]]] = None) -> None:

@@ -26,3 +26,4 @@ mocked_apis:
             format:
       response:
         value: '{}'
+    tag: ''

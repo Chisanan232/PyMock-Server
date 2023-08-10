@@ -160,7 +160,7 @@ class API(Transferable):
         return parameters
 
     def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
-        mock_api = MockAPI(url=self.path.replace(base_url, ""))
+        mock_api = MockAPI(url=self.path.replace(base_url, ""), tag=self.tags[0] if self.tags else "")
         mock_api.set_request(
             method=self.http_method.upper(),
             parameters=list(map(lambda p: p.to_api_config(), self.parameters)),

@@ -122,13 +122,15 @@ _Test_Config_Value: dict = {
     "mocked_apis": _Mocked_APIs,
 }
 
+_Test_Tag: str = "pytest-mocked-api"
+
 
 # Sample configuration content
 class _TestConfig:
     Request: dict = {"method": "GET", "parameters": [_Test_API_Parameter]}
     Response: Dict[str, str] = {"value": _Test_HTTP_Resp}
     Http: dict = {"request": Request, "response": Response}
-    Mock_API: dict = {"url": _Test_URL, "http": Http}
+    Mock_API: dict = {"url": _Test_URL, "http": Http, "tag": _Test_Tag}
     Base: dict = {"url": _Base_URL}
     Mock_APIs: dict = {"base": Base, "test_config": Mock_API}
     API_Config: dict = {
