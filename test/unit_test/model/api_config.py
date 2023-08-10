@@ -28,7 +28,9 @@ from ..._values import (
     _Test_API_Parameter,
     _Test_Config,
     _Test_HTTP_Resp,
+    _Test_Iterable_Parameter,
     _Test_Iterable_Parameter_Item_Name,
+    _Test_Iterable_Parameter_Items,
     _Test_Tag,
     _Test_URL,
     _TestConfig,
@@ -728,6 +730,7 @@ class TestAPIParameter(ConfigTestSpec):
         assert sut.default == _Test_API_Parameter["default"], _assertion_msg
         assert sut.value_type == _Test_API_Parameter["type"], _assertion_msg
         assert sut.value_format == _Test_API_Parameter["format"], _assertion_msg
+        assert sut.items is None, _assertion_msg
 
     def _expected_serialize_value(self) -> dict:
         return _Test_API_Parameter
@@ -739,6 +742,22 @@ class TestAPIParameter(ConfigTestSpec):
         assert obj.default == _Test_API_Parameter["default"]
         assert obj.value_type == _Test_API_Parameter["type"]
         assert obj.value_format == _Test_API_Parameter["format"]
+        assert obj.items is None
+
+    def test_serialize_api_parameter_with_iterable_items(self, sut_with_nothing: APIParameter):
+        sut_with_nothing.deserialize(_Test_Iterable_Parameter)
+        serialized_data = sut_with_nothing.serialize()
+        assert serialized_data == _Test_Iterable_Parameter
+
+    def test_deserialize_api_parameter_with_iterable_items(self, sut_with_nothing: APIParameter):
+        sut_with_nothing.deserialize(_Test_Iterable_Parameter)
+        assert sut_with_nothing.name == _Test_Iterable_Parameter["name"]
+        assert sut_with_nothing.required == _Test_Iterable_Parameter["required"]
+        assert sut_with_nothing.default == _Test_Iterable_Parameter["default"]
+        assert sut_with_nothing.value_type == _Test_Iterable_Parameter["type"]
+        assert sut_with_nothing.value_format == _Test_Iterable_Parameter["format"]
+        assert len(sut_with_nothing.items) == len(_Test_Iterable_Parameter_Items)
+        assert [item.serialize() for item in sut_with_nothing.items] == _Test_Iterable_Parameter["items"]
 
 
 class TestIteratorItem(ConfigTestSpec):

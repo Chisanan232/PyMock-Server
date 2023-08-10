@@ -43,13 +43,14 @@ _Test_Iterable_Parameter_Item_Value: dict = {
     "required": True,
     "type": "str",
 }
+_Test_Iterable_Parameter_Items: List[dict] = [_Test_Iterable_Parameter_Item_Name, _Test_Iterable_Parameter_Item_Value]
 _Test_Iterable_Parameter: dict = {
     "name": "iterable_param",
     "required": True,
     "default": None,
     "type": "list",
     "format": None,
-    "items": [_Test_Iterable_Parameter_Item_Name, _Test_Iterable_Parameter_Item_Value],
+    "items": _Test_Iterable_Parameter_Items,
 }
 
 # Sample API parameters

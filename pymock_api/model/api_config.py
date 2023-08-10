@@ -140,6 +140,7 @@ class APIParameter(_Config):
     default: Optional[Any] = None
     value_type: Optional[str] = None  # A type value as string
     value_format: Optional[str] = None
+    items: Optional[List[IteratorItem]] = None
 
     def _compare(self, other: "APIParameter") -> bool:
         # TODO: Let it could automatically scan what properties it has and compare all of their value.
@@ -149,6 +150,7 @@ class APIParameter(_Config):
             and self.default == other.default
             and self.value_type == other.value_type
             and self.value_format == other.value_format
+            and self.items == other.items
         )
 
     def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:
@@ -159,13 +161,16 @@ class APIParameter(_Config):
         value_format: str = self._get_prop(data, prop="value_format")
         if not (name and value_type) or (required is None):
             return None
-        return {
+        serialized_data = {
             "name": name,
             "required": required,
             "default": default,
             "type": value_type,
             "format": value_format,
         }
+        if self.items:
+            serialized_data["items"] = [item.serialize() for item in self.items]
+        return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["APIParameter"]:
@@ -174,6 +179,8 @@ class APIParameter(_Config):
         self.default = data.get("default", None)
         self.value_type = data.get("type", None)
         self.value_format = data.get("format", None)
+        items = [IteratorItem().deserialize(item) for item in data.get("items", [])]
+        self.items = items if items else None
         return self
 
 
