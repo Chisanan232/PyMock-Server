@@ -32,6 +32,26 @@ _Mock_API_HTTP: dict = {
     "response": Mock,
 }
 
+# Sample item of iterator
+_Test_Iterable_Parameter_Item_Name: dict = {
+    "name": "name",
+    "required": True,
+    "type": "str",
+}
+_Test_Iterable_Parameter_Item_Value: dict = {
+    "name": "value",
+    "required": True,
+    "type": "str",
+}
+_Test_Iterable_Parameter: dict = {
+    "name": "iterable_param",
+    "required": True,
+    "default": None,
+    "type": "list",
+    "format": None,
+    "items": [_Test_Iterable_Parameter_Item_Name, _Test_Iterable_Parameter_Item_Value],
+}
+
 # Sample API parameters
 _Test_API_Parameter: dict = {
     "name": "param1",
