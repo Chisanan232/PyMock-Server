@@ -146,7 +146,7 @@ class API(Transferable):
 
         config_api_parameters = APIParameter()
         if not config_api_parameters.has_ref_in_schema(data):
-            raise ValueError("")
+            raise ValueError("This parameter has no ref in schema.")
 
         schema_path = data["schema"]["$ref"].replace("#/", "").split("/")[1:]
         # Operate the component definition object

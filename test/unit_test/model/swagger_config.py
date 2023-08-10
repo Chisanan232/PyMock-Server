@@ -2,6 +2,7 @@ import glob
 import json
 import os
 import pathlib
+import re
 from abc import ABCMeta, abstractmethod
 from typing import List, Optional, Tuple
 
@@ -248,6 +249,15 @@ class TestAPI(_SwaggerDataModelTestSuite):
         assert len(parameters) == len(entire_swagger_config["definitions"]["UpdateFooRequest"]["properties"].keys())
         type_checksum = list(map(lambda p: isinstance(p, dict), parameters))
         assert False not in type_checksum
+
+    @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_PARAMETERS_JSON)
+    def test_fail__process_has_ref_parameters(self, swagger_api_doc_data: dict, data_model: API):
+        with pytest.raises(ValueError) as exc_info:
+            # Run target function
+            data_model._process_has_ref_parameters(swagger_api_doc_data)
+
+        # Verify
+        assert re.search(r".{1,64}no ref.{1,64}", str(exc_info.value), re.IGNORECASE)
 
 
 class TestSwaggerConfig(_SwaggerDataModelTestSuite):
