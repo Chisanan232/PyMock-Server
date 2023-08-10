@@ -235,7 +235,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
         assert False not in type_checksum
 
     @pytest.mark.parametrize(("swagger_api_doc_data", "entire_swagger_config"), SWAGGER_API_PARAMETERS_JSON_FOR_API)
-    def test__process_has_ref_parameters(
+    def test__process_has_ref_parameters_with_valid_value(
         self, swagger_api_doc_data: dict, entire_swagger_config: dict, data_model: API
     ):
         # Pro-process
@@ -251,7 +251,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
         assert False not in type_checksum
 
     @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_PARAMETERS_JSON)
-    def test_fail__process_has_ref_parameters(self, swagger_api_doc_data: dict, data_model: API):
+    def test__process_has_ref_parameters_with_invalid_value(self, swagger_api_doc_data: dict, data_model: API):
         with pytest.raises(ValueError) as exc_info:
             # Run target function
             data_model._process_has_ref_parameters(swagger_api_doc_data)
