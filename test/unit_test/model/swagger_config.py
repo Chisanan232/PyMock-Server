@@ -336,3 +336,19 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
                 assert api_param.value_type == param_data_from.value_type
                 assert api_param.default == param_data_from.default
             assert api_details.http.response.value == json.dumps(expect_api.response)
+
+    @pytest.mark.parametrize(
+        ("base_url", "api_path"),
+        [
+            ("/api/v1/test", "api/v1/test/foo-home"),
+            ("api/v1/test", "/api/v1/test/foo-home"),
+            ("/api/v1/test", "/api/v1/test/foo-home"),
+            ("api/v1/test", "api/v1/test/foo-home"),
+        ],
+    )
+    def test__align_url_format(self, base_url: str, api_path: str, data_model: SwaggerConfig):
+        api = API()
+        api.path = api_path
+        base_url = data_model._align_url_format(base_url, api)
+        assert re.search(r"/.{1,32}/.{1,32}/.{1,32}", base_url)
+        assert re.search(r"/.{1,32}/.{1,32}/.{1,32}/.{1,32}", api.path)
