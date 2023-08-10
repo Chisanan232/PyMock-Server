@@ -119,11 +119,13 @@ class IteratorItem(_Config):
         value_type: type = self._get_prop(data, prop="value_type")
         if not value_type or (required is None):
             return None
-        return {
-            "name": name,
+        serialized_data = {
             "required": required,
             "type": value_type,
         }
+        if name:
+            serialized_data["name"] = name
+        return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["IteratorItem"]:

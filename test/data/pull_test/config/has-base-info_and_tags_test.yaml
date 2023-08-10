@@ -11,13 +11,13 @@ mocked_apis:
         parameters:
           - name: 'date'
             required: true
-            type: str
             default:
+            type: str
             format:
           - name: 'fooType'
             required: true
-            type: str
             default:
+            type: str
             format:
       response:
         value: '{}'
@@ -30,16 +30,16 @@ mocked_apis:
         parameters:
           - name: 'balances'
             required: true
-            type: list
-            items:
-              - name: "id"
-                required: true
-                type: int
-              - name: "value"
-                required: true
-                type: int
             default:
+            type: list
             format:
+            items:
+              - required: true
+                type: int
+                name: "value"
+              - required: true
+                type: int
+                name: "id"
       response:
         value: '{}'
     tag: 'foo'
@@ -51,21 +51,21 @@ mocked_apis:
         parameters:
           - name: 'arg1'
             required: false
-            type: list
             default:
+            type: list
             format:
             items:
               - required: true
                 type: str
           - name: 'arg2'
             required: false
-            type: str
             default:
+            type: str
             format:
           - name: 'datetime'
             required: false
-            type: str
             default:
+            type: str
             format:
       response:
         value: '{}'
