@@ -150,7 +150,7 @@ class API(Transferable):
 
         schema_path = data["schema"]["$ref"].replace("#/", "").split("/")[1:]
         # Operate the component definition object
-        request_body_params = _get_schema(ComponentDefinition, schema_path, 0)
+        request_body_params = _get_schema(get_component_definition(), schema_path, 0)
         print(f"[DEBUG ub src] request_body_params: {request_body_params}")
         # TODO: Should use the reference to get the details of parameters.
         parameters: List[dict] = []
