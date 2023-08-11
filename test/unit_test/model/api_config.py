@@ -786,6 +786,20 @@ class TestAPIParameter(ConfigTestSpec):
             assert i.required == criteria["required"]
             assert i.value_type == criteria["type"]
 
+    def test_converting_at_prop_items_with_invalid_value(self):
+        with pytest.raises(TypeError) as exc_info:
+            APIParameter(
+                name="name",
+                required=False,
+                value_type="str",
+                items=[1, [], ()],
+            )
+        assert re.search(
+            r".{0,64}data type.{0,64}key \*items\*.{0,64}be dict or IteratorItem.{0,64}",
+            str(exc_info.value),
+            re.IGNORECASE,
+        )
+
 
 class TestIteratorItem(ConfigTestSpec):
     @pytest.fixture(scope="function")

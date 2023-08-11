@@ -161,7 +161,7 @@ class APIParameter(_Config):
 
     def _convert_items(self):
         if False in list(map(lambda i: isinstance(i, (dict, IteratorItem)), self.items)):
-            raise TypeError("")
+            raise TypeError("The data type of key *items* must be dict or IteratorItem.")
         self.items = [
             IteratorItem(name=i.get("name", ""), value_type=i.get("type", None), required=i.get("required", True))
             if isinstance(i, dict)
