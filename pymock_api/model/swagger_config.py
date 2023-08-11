@@ -22,6 +22,13 @@ def convert_js_type(t: str) -> str:
         raise TypeError(f"Currently, it cannot parse JS type '{t}'.")
 
 
+# TODO: Should clean the parsing process
+def ensure_type_is_python_type(t: str) -> str:
+    if t in ["string", "integer", "number", "boolean", "array"]:
+        return convert_js_type(t)
+    return t
+
+
 ComponentDefinition: Dict[str, dict] = {}
 
 
@@ -144,6 +151,9 @@ class API(Transferable):
             handled_parameters = self._process_has_ref_parameters(params_data[0])
         else:
             # TODO: Parsing the data type of key *items* should be valid type of Python realm
+            for param in params_data:
+                if param.get("items", None) is not None:
+                    param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
             handled_parameters = params_data
         print(f"[DEBUG in swagger_config.API._process_api_params] handled_parameters: {handled_parameters}")
         return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
