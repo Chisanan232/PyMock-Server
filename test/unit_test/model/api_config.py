@@ -30,6 +30,7 @@ from ..._values import (
     _Test_HTTP_Resp,
     _Test_Iterable_Parameter,
     _Test_Iterable_Parameter_Item_Name,
+    _Test_Iterable_Parameter_Item_Value,
     _Test_Iterable_Parameter_Items,
     _Test_Tag,
     _Test_URL,
@@ -758,6 +759,32 @@ class TestAPIParameter(ConfigTestSpec):
         assert sut_with_nothing.value_format == _Test_Iterable_Parameter["format"]
         assert len(sut_with_nothing.items) == len(_Test_Iterable_Parameter_Items)
         assert [item.serialize() for item in sut_with_nothing.items] == _Test_Iterable_Parameter["items"]
+
+    @pytest.mark.parametrize("items_value", [_Test_Iterable_Parameter])
+    def test_converting_at_prop_items_with_valid_value(self, items_value: dict):
+        under_test = APIParameter(
+            name=items_value["name"],
+            required=items_value["required"],
+            default=items_value["default"],
+            value_type=items_value["type"],
+            value_format=items_value["format"],
+            items=items_value["items"],
+        )
+        assert isinstance(under_test.items, list)
+        assert False not in list(map(lambda i: isinstance(i, IteratorItem), under_test.items))
+        for i in under_test.items:
+            assert i.name in [
+                _Test_Iterable_Parameter_Item_Name["name"],
+                _Test_Iterable_Parameter_Item_Value["name"],
+            ], _assertion_msg
+            if i.name == _Test_Iterable_Parameter_Item_Name["name"]:
+                criteria = _Test_Iterable_Parameter_Item_Name
+            elif i.name == _Test_Iterable_Parameter_Item_Value["name"]:
+                criteria = _Test_Iterable_Parameter_Item_Value
+            else:
+                raise ValueError("")
+            assert i.required == criteria["required"]
+            assert i.value_type == criteria["type"]
 
 
 class TestIteratorItem(ConfigTestSpec):
