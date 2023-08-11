@@ -69,6 +69,7 @@ class APIParameter(Transferable):
     def deserialize(self, data: Dict) -> "APIParameter":
         print(f"[DEBUG in swagger_config.APIParameter.deserialize] data: {data}")
         handled_data = self.parse_schema(data)
+        print(f"[DEBUG in swagger_config.APIParameter.deserialize] handled_data: {handled_data}")
         self.name = handled_data["name"]
         self.required = handled_data["required"]
         self.value_type = convert_js_type(handled_data["type"])
@@ -138,9 +139,11 @@ class API(Transferable):
         has_ref_in_schema_param = list(filter(lambda p: config_api_parameters.has_ref(p) != "", params_data))
         print(f"[DEBUG in swagger_config.API._process_api_params] params_data: {params_data}")
         if has_ref_in_schema_param:
+            # TODO: Ensure the value maps this condition is really only one
             assert len(params_data) == 1
             handled_parameters = self._process_has_ref_parameters(params_data[0])
         else:
+            # TODO: Parsing the data type of key *items* should be valid type of Python realm
             handled_parameters = params_data
         print(f"[DEBUG in swagger_config.API._process_api_params] handled_parameters: {handled_parameters}")
         return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
@@ -172,7 +175,7 @@ class API(Transferable):
                         {
                             "name": item_name,
                             "required": item_name in items["required"],
-                            "value_type": convert_js_type(item_prop["type"]),
+                            "type": convert_js_type(item_prop["type"]),
                             "default": item_prop.get("default", None),
                         }
                     )
