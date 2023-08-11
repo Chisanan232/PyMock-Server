@@ -157,16 +157,17 @@ class APIParameter(_Config):
 
     def __post_init__(self) -> None:
         if self.items is not None:
-            if False in list(map(lambda i: isinstance(i, (dict, IteratorItem)), self.items)):
-                raise TypeError("")
-            self.items = [
-                IteratorItem(
-                    name=i.get("name", ""), value_type=i.get("value_type", "str"), required=i.get("required", True)
-                )
-                if isinstance(i, dict)
-                else i
-                for i in self.items
-            ]
+            self._convert_items()
+
+    def _convert_items(self):
+        if False in list(map(lambda i: isinstance(i, (dict, IteratorItem)), self.items)):
+            raise TypeError("")
+        self.items = [
+            IteratorItem(name=i.get("name", ""), value_type=i.get("type", None), required=i.get("required", True))
+            if isinstance(i, dict)
+            else i
+            for i in self.items
+        ]
 
     def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:
         name: str = self._get_prop(data, prop="name")
