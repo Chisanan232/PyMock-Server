@@ -391,6 +391,40 @@ class TestMockAPIs(ConfigTestSpec):
         api_config = sut.get_api_config_by_url(url="Not exist this path's API config")
         assert api_config is None
 
+    def test_group_by_url(self, sut_with_nothing: MockAPIs):
+        foo_get_api = MockAPI(url="/foo")
+        foo_get_api.set_request(method="GET")
+
+        foo_post_api = MockAPI(url="/foo")
+        foo_post_api.set_request(method="POST")
+
+        foo_boo_api = MockAPI(url="/foo-boo")
+        foo_boo_api.set_request(method="GET")
+
+        sut_with_nothing.apis = {
+            "get_foo": foo_get_api,
+            "post_foo": foo_post_api,
+            "get_foo_boo": foo_boo_api,
+        }
+
+        aggregated_apis = sut_with_nothing.group_by_url()
+
+        assert len(aggregated_apis.keys()) == 2
+
+        assert "/foo" in aggregated_apis.keys() and "/foo-boo" in aggregated_apis.keys()
+        for val in aggregated_apis.values():
+            assert isinstance(val, list)
+            assert False not in list(map(lambda a: isinstance(a, MockAPI), val))
+
+        assert len(aggregated_apis["/foo"]) == 2
+        assert len(aggregated_apis["/foo-boo"]) == 1
+
+        assert [a.http.request.method for a in aggregated_apis["/foo"]] == [
+            foo_get_api.http.request.method,
+            foo_post_api.http.request.method,
+        ]
+        assert [a.http.request.method for a in aggregated_apis["/foo-boo"]] == [foo_boo_api.http.request.method]
+
 
 class TestBaseConfig(ConfigTestSpec):
     @pytest.fixture(scope="function")

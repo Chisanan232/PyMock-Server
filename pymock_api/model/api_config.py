@@ -681,6 +681,16 @@ class MockAPIs(_Config):
                 return self._apis[k]
         return None
 
+    def group_by_url(self) -> Dict[str, List[MockAPI]]:
+        apis = self._apis
+        aggregated_apis: Dict[str, List[MockAPI]] = {}
+        for api_name, api_config in apis.items():
+            assert api_config and api_config.url
+            one_url_details = aggregated_apis.get(api_config.url, [])
+            one_url_details.append(api_config)
+            aggregated_apis[api_config.url] = one_url_details
+        return aggregated_apis
+
 
 class APIConfig(_Config):
     """*The entire configuration*"""
