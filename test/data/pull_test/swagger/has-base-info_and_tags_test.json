@@ -284,11 +284,11 @@
         "UpdateOneFooDto": {
             "type": "object",
             "required": [
-                "values",
+                "value",
                 "id"
             ],
             "properties": {
-                "values": {
+                "value": {
                     "type": "number",
                     "example": 23434,
                     "description": "value"

@@ -207,6 +207,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
         data_model.http_method = "POST"
         data_model.parameters = [params]
         data_model.response = {}
+        data_model.tags = ["first tag", "second tag"]
 
     def _verify_api_config_model(self, under_test: MockAPI, data_from: API) -> None:
         assert under_test.url == data_from.path
@@ -221,6 +222,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
             assert p.value_type == param_data_from.value_type
             assert p.default == param_data_from.default
             assert p.value_format is None
+        assert under_test.tag == data_from.tags[0]
 
     @pytest.mark.parametrize(
         ("swagger_api_doc_data", "entire_swagger_config"), SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API

@@ -2,7 +2,6 @@
 
 content ...
 """
-import sys
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -106,12 +105,44 @@ class BaseConfig(_Config):
 
 
 @dataclass(eq=False)
+class IteratorItem(_Config):
+    name: str = field(default_factory=str)
+    required: Optional[bool] = None
+    value_type: Optional[str] = None  # A type value as string
+
+    def _compare(self, other: "IteratorItem") -> bool:
+        return self.name == other.name and self.required == other.required and self.value_type == other.value_type
+
+    def serialize(self, data: Optional["IteratorItem"] = None) -> Optional[Dict[str, Any]]:
+        name: str = self._get_prop(data, prop="name")
+        required: bool = self._get_prop(data, prop="required")
+        value_type: type = self._get_prop(data, prop="value_type")
+        if not value_type or (required is None):
+            return None
+        serialized_data = {
+            "required": required,
+            "type": value_type,
+        }
+        if name:
+            serialized_data["name"] = name
+        return serialized_data
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["IteratorItem"]:
+        self.name = data.get("name", None)
+        self.required = data.get("required", None)
+        self.value_type = data.get("type", None)
+        return self
+
+
+@dataclass(eq=False)
 class APIParameter(_Config):
     name: str = field(default_factory=str)
     required: Optional[bool] = None
     default: Optional[Any] = None
     value_type: Optional[str] = None  # A type value as string
     value_format: Optional[str] = None
+    items: Optional[List[IteratorItem]] = None
 
     def _compare(self, other: "APIParameter") -> bool:
         # TODO: Let it could automatically scan what properties it has and compare all of their value.
@@ -121,7 +152,22 @@ class APIParameter(_Config):
             and self.default == other.default
             and self.value_type == other.value_type
             and self.value_format == other.value_format
+            and self.items == other.items
         )
+
+    def __post_init__(self) -> None:
+        if self.items is not None:
+            self._convert_items()
+
+    def _convert_items(self):
+        if False in list(map(lambda i: isinstance(i, (dict, IteratorItem)), self.items)):
+            raise TypeError("The data type of key *items* must be dict or IteratorItem.")
+        self.items = [
+            IteratorItem(name=i.get("name", ""), value_type=i.get("type", None), required=i.get("required", True))
+            if isinstance(i, dict)
+            else i
+            for i in self.items
+        ]
 
     def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:
         name: str = self._get_prop(data, prop="name")
@@ -131,13 +177,17 @@ class APIParameter(_Config):
         value_format: str = self._get_prop(data, prop="value_format")
         if not (name and value_type) or (required is None):
             return None
-        return {
+        serialized_data = {
             "name": name,
             "required": required,
             "default": default,
             "type": value_type,
             "format": value_format,
         }
+        if self.items:
+            print(f"[DEBUG in api_config.APIParameter.serialize] self.items: {self.items}")
+            serialized_data["items"] = [item.serialize() for item in self.items]
+        return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["APIParameter"]:
@@ -146,6 +196,8 @@ class APIParameter(_Config):
         self.default = data.get("default", None)
         self.value_type = data.get("type", None)
         self.value_format = data.get("format", None)
+        items = [IteratorItem().deserialize(item) for item in data.get("items", [])]
+        self.items = items if items else None
         return self
 
 
@@ -346,10 +398,12 @@ class MockAPI(_Config):
 
     _url: Optional[str]
     _http: Optional[HTTP]
+    _tag: str = ""
 
-    def __init__(self, url: Optional[str] = None, http: Optional[HTTP] = None):
+    def __init__(self, url: Optional[str] = None, http: Optional[HTTP] = None, tag: str = ""):
         self._url = url
         self._http = http
+        self._tag = tag
 
     def _compare(self, other: "MockAPI") -> bool:
         return self.url == other.url and self.http == other.http
@@ -378,14 +432,26 @@ class MockAPI(_Config):
         else:
             self._http = None
 
+    @property
+    def tag(self) -> str:
+        return self._tag
+
+    @tag.setter
+    def tag(self, tag: str) -> None:
+        if not isinstance(tag, str):
+            raise TypeError("Setter *MockAPI.tag* only accepts str type value.")
+        self._tag = tag
+
     def serialize(self, data: Optional["MockAPI"] = None) -> Optional[Dict[str, Any]]:
         url = (data.url if data else None) or self._url
         http = (data.http if data else None) or self.http
         if not (url and http):
             return None
+        tag = (data.tag if data else None) or self.tag
         return {
             "url": url,
             "http": http.serialize(data=http),
+            "tag": tag,
         }
 
     @_Config._ensure_process_with_not_empty_value
@@ -422,6 +488,7 @@ class MockAPI(_Config):
         self.url = data.get("url", None)
         http_info = data.get("http", None)
         self.http = HTTP().deserialize(data=http_info) if http_info else None
+        self.tag = data.get("tag", "")
         return self
 
     def set_request(self, method: str = "GET", parameters: Optional[List[Union[dict, APIParameter]]] = None) -> None:

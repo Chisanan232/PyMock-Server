@@ -11,16 +11,17 @@ mocked_apis:
         parameters:
           - name: 'date'
             required: true
-            type: str
             default:
+            type: str
             format:
           - name: 'fooType'
             required: true
-            type: str
             default:
+            type: str
             format:
       response:
         value: '{}'
+    tag: 'foo'
   put_foo:
     url: '/foo'
     http:
@@ -29,19 +30,19 @@ mocked_apis:
         parameters:
           - name: 'balances'
             required: true
-            type: list
-# # New feature
-#            items:
-#              - name: "id"
-#                required: true
-#                type: int
-#              - name: "value"
-#                required: true
-#                type: int
             default:
+            type: list
             format:
+            items:
+              - required: true
+                type: int
+                name: "value"
+              - required: true
+                type: int
+                name: "id"
       response:
         value: '{}'
+    tag: 'foo'
   get_foo-boo_export:
     url: '/foo-boo/export'
     http:
@@ -50,18 +51,22 @@ mocked_apis:
         parameters:
           - name: 'arg1'
             required: false
-            type: list
             default:
+            type: list
             format:
+            items:
+              - required: true
+                type: str
           - name: 'arg2'
             required: false
-            type: str
             default:
+            type: str
             format:
           - name: 'datetime'
             required: false
-            type: str
             default:
+            type: str
             format:
       response:
         value: '{}'
+    tag: 'foo-boo'

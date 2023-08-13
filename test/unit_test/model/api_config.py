@@ -14,6 +14,7 @@ from pymock_api.model.api_config import (
     BaseConfig,
     HTTPRequest,
     HTTPResponse,
+    IteratorItem,
     MockAPI,
     MockAPIs,
     _Config,
@@ -27,6 +28,11 @@ from ..._values import (
     _Test_API_Parameter,
     _Test_Config,
     _Test_HTTP_Resp,
+    _Test_Iterable_Parameter,
+    _Test_Iterable_Parameter_Item_Name,
+    _Test_Iterable_Parameter_Item_Value,
+    _Test_Iterable_Parameter_Items,
+    _Test_Tag,
     _Test_URL,
     _TestConfig,
 )
@@ -84,7 +90,7 @@ class MockModel:
 
     @property
     def mock_api(self) -> Dict[str, MockAPI]:
-        return {"test_config": MockAPI(url=_Test_URL, http=self.http)}
+        return {"test_config": MockAPI(url=_Test_URL, http=self.http, tag=_Test_Tag)}
 
     @property
     def http(self) -> HTTP:
@@ -409,7 +415,7 @@ class TestBaseConfig(ConfigTestSpec):
 class TestMockAPI(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> MockAPI:
-        return MockAPI(url=_Test_URL, http=self._Mock_Model.http)
+        return MockAPI(url=_Test_URL, http=self._Mock_Model.http, tag=_Test_Tag)
 
     @pytest.fixture(scope="function")
     def sut_with_nothing(self) -> MockAPI:
@@ -451,6 +457,12 @@ class TestMockAPI(ConfigTestSpec):
         mock_deserialize.assert_not_called()
         assert re.search(r"Setter .{1,32} only accepts .{1,32} type object.", str(exc_info.value), re.IGNORECASE)
 
+    @pytest.mark.parametrize("invalid_value", [[], (), 123])
+    def test_prop_tag_with_invalid_obj(self, invalid_value: object, sut_with_nothing: MockAPI):
+        with pytest.raises(TypeError) as exc_info:
+            sut_with_nothing.tag = invalid_value
+        assert re.search("only accepts str type value", str(exc_info.value), re.IGNORECASE)
+
     def _expected_serialize_value(self) -> dict:
         return _TestConfig.Mock_API
 
@@ -460,6 +472,7 @@ class TestMockAPI(ConfigTestSpec):
         assert obj.http.request.method == _TestConfig.Request.get("method", None)
         assert obj.http.request.parameters == [self._Mock_Model.api_parameter]
         assert obj.http.response.value == _TestConfig.Response.get("value", None)
+        assert obj.tag == _Test_Tag
 
     @pytest.mark.parametrize(
         ("formatter", "format_object"),
@@ -496,6 +509,7 @@ class TestMockAPI(ConfigTestSpec):
         assert sut_with_nothing.http.request.parameters == [
             APIParameter(name="arg1", required=False, default="val1", value_type="str")
         ]
+        assert sut_with_nothing.tag == ""
 
     @pytest.mark.parametrize(
         "api_params",
@@ -539,6 +553,7 @@ class TestMockAPI(ConfigTestSpec):
                 assert p.default == (
                     expect_param.default if isinstance(expect_param, APIParameter) else expect_param["default"]
                 )
+        assert sut_with_nothing.tag == ""
 
     @pytest.mark.parametrize(
         "params",
@@ -566,6 +581,7 @@ class TestMockAPI(ConfigTestSpec):
         assert sut_with_nothing.http
         assert sut_with_nothing.http.response
         assert sut_with_nothing.http.response.value == ut_value
+        assert sut_with_nothing.tag == ""
 
 
 class TestHTTP(ConfigTestSpec):
@@ -715,6 +731,7 @@ class TestAPIParameter(ConfigTestSpec):
         assert sut.default == _Test_API_Parameter["default"], _assertion_msg
         assert sut.value_type == _Test_API_Parameter["type"], _assertion_msg
         assert sut.value_format == _Test_API_Parameter["format"], _assertion_msg
+        assert sut.items is None, _assertion_msg
 
     def _expected_serialize_value(self) -> dict:
         return _Test_API_Parameter
@@ -726,6 +743,90 @@ class TestAPIParameter(ConfigTestSpec):
         assert obj.default == _Test_API_Parameter["default"]
         assert obj.value_type == _Test_API_Parameter["type"]
         assert obj.value_format == _Test_API_Parameter["format"]
+        assert obj.items is None
+
+    def test_serialize_api_parameter_with_iterable_items(self, sut_with_nothing: APIParameter):
+        sut_with_nothing.deserialize(_Test_Iterable_Parameter)
+        serialized_data = sut_with_nothing.serialize()
+        assert serialized_data == _Test_Iterable_Parameter
+
+    def test_deserialize_api_parameter_with_iterable_items(self, sut_with_nothing: APIParameter):
+        sut_with_nothing.deserialize(_Test_Iterable_Parameter)
+        assert sut_with_nothing.name == _Test_Iterable_Parameter["name"]
+        assert sut_with_nothing.required == _Test_Iterable_Parameter["required"]
+        assert sut_with_nothing.default == _Test_Iterable_Parameter["default"]
+        assert sut_with_nothing.value_type == _Test_Iterable_Parameter["type"]
+        assert sut_with_nothing.value_format == _Test_Iterable_Parameter["format"]
+        assert len(sut_with_nothing.items) == len(_Test_Iterable_Parameter_Items)
+        assert [item.serialize() for item in sut_with_nothing.items] == _Test_Iterable_Parameter["items"]
+
+    @pytest.mark.parametrize("items_value", [_Test_Iterable_Parameter])
+    def test_converting_at_prop_items_with_valid_value(self, items_value: dict):
+        under_test = APIParameter(
+            name=items_value["name"],
+            required=items_value["required"],
+            default=items_value["default"],
+            value_type=items_value["type"],
+            value_format=items_value["format"],
+            items=items_value["items"],
+        )
+        assert isinstance(under_test.items, list)
+        assert False not in list(map(lambda i: isinstance(i, IteratorItem), under_test.items))
+        for i in under_test.items:
+            assert i.name in [
+                _Test_Iterable_Parameter_Item_Name["name"],
+                _Test_Iterable_Parameter_Item_Value["name"],
+            ], _assertion_msg
+            if i.name == _Test_Iterable_Parameter_Item_Name["name"]:
+                criteria = _Test_Iterable_Parameter_Item_Name
+            elif i.name == _Test_Iterable_Parameter_Item_Value["name"]:
+                criteria = _Test_Iterable_Parameter_Item_Value
+            else:
+                raise ValueError("")
+            assert i.required == criteria["required"]
+            assert i.value_type == criteria["type"]
+
+    def test_converting_at_prop_items_with_invalid_value(self):
+        with pytest.raises(TypeError) as exc_info:
+            APIParameter(
+                name="name",
+                required=False,
+                value_type="str",
+                items=[1, [], ()],
+            )
+        assert re.search(
+            r".{0,64}data type.{0,64}key \*items\*.{0,64}be dict or IteratorItem.{0,64}",
+            str(exc_info.value),
+            re.IGNORECASE,
+        )
+
+
+class TestIteratorItem(ConfigTestSpec):
+    @pytest.fixture(scope="function")
+    def sut(self) -> IteratorItem:
+        return IteratorItem(
+            name=_Test_Iterable_Parameter_Item_Name["name"],
+            required=_Test_Iterable_Parameter_Item_Name["required"],
+            value_type=_Test_Iterable_Parameter_Item_Name["type"],
+        )
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> IteratorItem:
+        return IteratorItem()
+
+    def test_value_attributes(self, sut: IteratorItem):
+        assert sut.name == _Test_Iterable_Parameter_Item_Name["name"], _assertion_msg
+        assert sut.required is _Test_Iterable_Parameter_Item_Name["required"], _assertion_msg
+        assert sut.value_type == _Test_Iterable_Parameter_Item_Name["type"], _assertion_msg
+
+    def _expected_serialize_value(self) -> Any:
+        return _Test_Iterable_Parameter_Item_Name
+
+    def _expected_deserialize_value(self, obj: IteratorItem) -> None:
+        assert isinstance(obj, IteratorItem)
+        assert obj.name == _Test_Iterable_Parameter_Item_Name["name"]
+        assert obj.required is _Test_Iterable_Parameter_Item_Name["required"]
+        assert obj.value_type == _Test_Iterable_Parameter_Item_Name["type"]
 
 
 class TestHTTPResponse(ConfigTestSpec):

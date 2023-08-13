@@ -40,6 +40,7 @@ from pymock_api.model import (
     SubcmdPullArguments,
     SubcmdRunArguments,
     SubcmdSampleArguments,
+    deserialize_swagger_api_config,
 )
 from pymock_api.model.enums import Format, SampleType
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
@@ -856,10 +857,58 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
             with patch(
                 "pymock_api.command.pull.component.URLLibHTTPClient.request", return_value=swagger_json_data
             ) as mock_swagger_request:
+                # Run target function
                 cmd_ps(mock_parser_arg)
 
                 mock_instantiate_writer.assert_called_once()
                 mock_swagger_request.assert_called_once_with(method="GET", url=f"http://{_API_Doc_Source}/")
+
+                # Run one core logic of target function
+                confirm_expected_config_data = (
+                    deserialize_swagger_api_config(swagger_json_data)
+                    .to_api_config(mock_parser_arg.base_url)
+                    .serialize()
+                )
+                assert expected_config_data["name"] == confirm_expected_config_data["name"]
+                assert expected_config_data["description"] == confirm_expected_config_data["description"]
+                assert len(expected_config_data["mocked_apis"].keys()) == len(
+                    confirm_expected_config_data["mocked_apis"].keys()
+                )
+                expected_config_data_keys = sorted(expected_config_data["mocked_apis"].keys())
+                confirm_expected_config_data_keys = sorted(confirm_expected_config_data["mocked_apis"].keys())
+                for expected_key, confirm_expected_key in zip(
+                    expected_config_data_keys, confirm_expected_config_data_keys
+                ):
+                    assert expected_key == confirm_expected_key
+                    if expected_key != "base":
+                        assert (
+                            expected_config_data["mocked_apis"][expected_key]["url"]
+                            == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["url"]
+                        )
+                        assert (
+                            expected_config_data["mocked_apis"][expected_key]["http"]["request"]["method"]
+                            == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["request"][
+                                "method"
+                            ]
+                        )
+                        assert (
+                            expected_config_data["mocked_apis"][expected_key]["http"]["request"]["parameters"]
+                            == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["request"][
+                                "parameters"
+                            ]
+                        )
+                        assert (
+                            expected_config_data["mocked_apis"][expected_key]["http"]["response"]["value"]
+                            == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["response"][
+                                "value"
+                            ]
+                        )
+                    else:
+                        assert (
+                            expected_config_data["mocked_apis"][expected_key]
+                            == confirm_expected_config_data["mocked_apis"][confirm_expected_key]
+                        )
+
                 FakeYAML.write.assert_called_once_with(path=_Test_Config, config=expected_config_data)
 
     def _given_cmd_args_namespace(self) -> Namespace:
