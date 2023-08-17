@@ -26,7 +26,14 @@ class BaseAppServer(metaclass=ABCMeta):
 
     def __init__(self):
         self._web_application = None
-        self._api_params: Dict[str, MockAPI] = {}
+        # The data structure would be:
+        # {
+        #     <API URL path>: {
+        #         <HTTP method>: <API details>
+        #     }
+        # }
+        self._api_params: Dict[str, Dict[str, MockAPI]] = {}
+        self._api_functions: Dict[str, str] = {}
 
     @property
     def web_application(self) -> Any:
@@ -45,25 +52,29 @@ class BaseAppServer(metaclass=ABCMeta):
         """
         pass
 
+    @abstractmethod
     def create_api(self, mocked_apis: MockAPIs) -> None:
-        for api_name, api_config in mocked_apis.apis.items():
-            if api_config:
-                annotate_function_pycode = self._annotate_function(api_name, api_config)
-                add_api_pycode = self._add_api(
-                    api_name, api_config, base_url=mocked_apis.base.url if mocked_apis.base else None
-                )
-                # pylint: disable=exec-used
-                exec(annotate_function_pycode)
-                # pylint: disable=exec-used
-                exec(add_api_pycode)
+        pass
 
-    def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
+    def _annotate_function(self, api_name: str, api_config: List[MockAPI]) -> str:
         initial_global_server = f"""global SERVER\nSERVER = self\n"""
         define_function_for_api = self._define_api_function_pycode(api_name, api_config)
         return initial_global_server + define_function_for_api
 
-    def _define_api_function_pycode(self, api_name: str, api_config: MockAPI) -> str:
-        return f"""def {api_name}() -> Union[str, dict]:
+    def _define_api_function_pycode(self, api_name: str, api_config: List[MockAPI]) -> str:
+        api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
+        # api_functions = []
+        # for ac in api_config:
+        #     function_name = f"{ac.http.request.method}_{api_function_name}"
+        #     api_function = f"""def {function_name}() -> Union[str, dict]:
+        #         {self._run_request_process_pycode()}
+        #         {self._handle_request_process_result_pycode()}
+        #         {self._generate_response_pycode(api_config)}
+        #     """
+        #     self._api_functions[api_function] = api_function
+        #     api_functions.append(api_function)
+        # return "".join(api_functions)
+        return f"""def {api_function_name}() -> Union[str, dict]:
             {self._run_request_process_pycode()}
             {self._handle_request_process_result_pycode()}
             {self._generate_response_pycode(api_config)}
@@ -80,10 +91,17 @@ class BaseAppServer(metaclass=ABCMeta):
             return process_result
         """
 
-    def _generate_response_pycode(self, api_config: MockAPI) -> str:
-        return f"""
+    def _generate_response_pycode(self, api_config: Union[MockAPI, List[MockAPI]]) -> str:
+        if isinstance(api_config, list):
+            return f"""
+        return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config[0], "response")).value}')
+            """
+        elif isinstance(api_config, MockAPI):
+            return f"""
         return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')
-        """
+            """
+        else:
+            raise TypeError
 
     def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
         assert api_config.http and getattr(
@@ -92,21 +110,44 @@ class BaseAppServer(metaclass=ABCMeta):
         return getattr(api_config.http, http_attr)
 
     @abstractmethod
-    def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        self._record_api_params_info(url=self.url_path(api_config=api_config, base_url=base_url), api_config=api_config)
+    def _add_api(self, api_name: str, api_config: List[MockAPI], base_url: Optional[str] = None) -> str:
+        if isinstance(api_config, list):
+            self._record_api_params_info(url=self.url_path(url=api_name, base_url=base_url), api_config=api_config)
+        else:
+            self._record_api_params_info(url=self.url_path(url=api_config, base_url=base_url), api_config=api_config)
         return ""
 
-    def url_path(self, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        return f"{base_url}{api_config.url}" if base_url else f"{api_config.url}"
+    def url_path(self, url: Union[str, MockAPI], base_url: Optional[str] = None) -> str:
+        if isinstance(url, str):
+            return f"{base_url}{url}" if base_url else f"{url}"
+        else:
+            print(f"[DEBUG in src for url_path] url: {url}")
+            print(f"[DEBUG in src for url_path] base_url: {base_url}")
+            return f"{base_url}{url.url}" if base_url else f"{url.url}"
 
-    def _record_api_params_info(self, url: str, api_config: MockAPI) -> None:
-        self._api_params[url] = api_config
+    def _record_api_params_info(self, url: str, api_config: List[MockAPI]) -> None:
+        if isinstance(api_config, list):
+            for ac in api_config:
+                url_details = self._api_params.get(url, {})
+                url_details[ac.http.request.method] = ac  # type: ignore[union-attr]
+                self._api_params[url] = url_details
+        elif isinstance(api_config, MockAPI):
+            print(f"[DEBUG in src for _record_api_params_info] url: {url}")
+            print(
+                f"[DEBUG in src for _record_api_params_info] api_config.http.request.method: {api_config.http.request.method}"
+            )
+            print(f"[DEBUG in src for _record_api_params_info] api_config: {api_config}")
+            url_details = self._api_params.get(url, {})
+            url_details[api_config.http.request.method] = api_config
+            self._api_params[url] = url_details
+        else:
+            raise TypeError("")
 
     def _request_process(self, **kwargs) -> "flask.Response":  # type: ignore
         request = self._get_current_request(**kwargs)
         req_params = self._get_current_api_parameters(**kwargs)
 
-        api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(request)].http.request.parameters  # type: ignore[union-attr]
+        api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(request)][self._get_current_request_http_method(request)].http.request.parameters  # type: ignore[union-attr]
         for param_info in api_params_info:
             # Check the required parameter
             one_req_param_value = req_params.get(param_info.name, None)
@@ -144,6 +185,10 @@ class BaseAppServer(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    def _get_current_request_http_method(self, request: Any) -> str:
+        pass
+
+    @abstractmethod
     def _generate_http_response(self, body: str, status_code: int) -> Any:
         pass
 
@@ -153,6 +198,21 @@ class FlaskServer(BaseAppServer):
 
     def setup(self) -> "flask.Flask":  # type: ignore
         return import_web_lib.flask().Flask(__name__)
+
+    def create_api(self, mocked_apis: MockAPIs) -> None:
+        aggregated_mocked_apis = mocked_apis.group_by_url()
+        for api_name, api_config in aggregated_mocked_apis.items():
+            if api_name and api_config:
+                annotate_function_pycode = self._annotate_function(api_name, api_config)
+                add_api_pycode = self._add_api(
+                    api_name, api_config, base_url=mocked_apis.base.url if mocked_apis.base else None
+                )
+                print(f"[DEBUG in src] annotate_function_pycode: {annotate_function_pycode}")
+                # pylint: disable=exec-used
+                exec(annotate_function_pycode)
+                # pylint: disable=exec-used
+                print(f"[DEBUG in src] add_api_pycode: {add_api_pycode}")
+                exec(add_api_pycode)
 
     def _get_current_request(self, **kwargs) -> "flask.Request":  # type: ignore
         return import_web_lib.flask().request
@@ -167,14 +227,19 @@ class FlaskServer(BaseAppServer):
     def _get_current_api_path(self, request: "flask.Request") -> str:  # type: ignore[name-defined]
         return request.path
 
+    def _get_current_request_http_method(self, request: "flask.Request") -> str:  # type: ignore[name-defined]
+        return request.method.upper()
+
     def _generate_http_response(self, body: str, status_code: int) -> "flask.Response":  # type: ignore
         return import_web_lib.flask().Response(body, status=status_code)
 
-    def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
+    def _add_api(self, api_name: str, api_config: List[MockAPI], base_url: Optional[str] = None) -> str:
         super()._add_api(api_name=api_name, api_config=api_config, base_url=base_url)
+        acceptance_method = [cast(HTTPRequest, self._ensure_http(ac, "request")).method for ac in api_config]
+        api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
         return f"""self.web_application.route(
-            "{self.url_path(api_config, base_url)}", methods=["{cast(HTTPRequest, self._ensure_http(api_config, "request")).method}"]
-            )({api_name})
+            "{self.url_path(api_name, base_url)}", methods={acceptance_method}
+            )({api_function_name})
         """
 
 
@@ -188,14 +253,28 @@ class FastAPIServer(BaseAppServer):
     def setup(self) -> "fastapi.FastAPI":  # type: ignore
         return import_web_lib.fastapi().FastAPI()
 
-    def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:
+    def create_api(self, mocked_apis: MockAPIs) -> None:
+        for api_name, api_config in mocked_apis.apis.items():
+            if api_name and api_config:
+                annotate_function_pycode = self._annotate_function(api_name, api_config)
+                add_api_pycode = self._add_api(
+                    api_name, api_config, base_url=mocked_apis.base.url if mocked_apis.base else None
+                )
+                print(f"[DEBUG in src] annotate_function_pycode: {annotate_function_pycode}")
+                # pylint: disable=exec-used
+                exec(annotate_function_pycode)
+                # pylint: disable=exec-used
+                print(f"[DEBUG in src] add_api_pycode: {add_api_pycode}")
+                exec(add_api_pycode)
+
+    def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:  # type: ignore[override]
         import_fastapi = "from fastapi import Request as FastAPIRequest\n"
         initial_global_server = f"""global SERVER\nSERVER = self\n"""
         define_params_model = self._annotate_api_parameters_model_pycode(api_name, api_config)
         define_function_for_api = self._define_api_function_pycode(api_name, api_config)
         return import_fastapi + initial_global_server + define_params_model + define_function_for_api
 
-    def _define_api_function_pycode(self, api_name: str, api_config: MockAPI) -> str:
+    def _define_api_function_pycode(self, api_name: str, api_config: MockAPI) -> str:  # type: ignore[override]
         # The code implementation is different if the HTTP method is *GET* or not
         if api_config.http.request.method.upper() != "GET":  # type: ignore[union-attr]
             api_func_signature = ""
@@ -243,6 +322,8 @@ class FastAPIServer(BaseAppServer):
             """
 
     def _api_name_as_camel_case(self, api_name: str) -> str:
+        # api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
+        # camel_case_api_name = "".join(map(lambda n: f"{n[0].upper()}{n[1:]}", api_function_name.split("_")))
         camel_case_api_name = "".join(map(lambda n: f"{n[0].upper()}{n[1:]}", api_name.split("_")))
         return f"{camel_case_api_name}Parameter"
 
@@ -289,7 +370,7 @@ class FastAPIServer(BaseAppServer):
         return kwargs.get("request")
 
     def _get_current_api_parameters(self, **kwargs) -> dict:
-        api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(kwargs["request"])].http.request.parameters  # type: ignore[union-attr]
+        api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(kwargs["request"])][self._get_current_request_http_method(kwargs["request"])].http.request.parameters  # type: ignore[union-attr]
         api_param_names = list(map(lambda e: e.name, api_params_info))
         api_param = {}
         if "model" in kwargs.keys():
@@ -301,14 +382,18 @@ class FastAPIServer(BaseAppServer):
     def _get_current_api_path(self, request: "fastapi.Request") -> str:  # type: ignore[name-defined]
         return request.scope["root_path"] + request.scope["route"].path
 
+    def _get_current_request_http_method(self, request: "fastapi.Request") -> str:  # type: ignore[name-defined]
+        return request.method.upper()
+
     def _generate_http_response(self, body: str, status_code: int) -> "fastapi.Response":  # type: ignore
         return import_web_lib.fastapi().Response(body, status_code=status_code)
 
-    def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
-        super()._add_api(api_name=api_name, api_config=api_config, base_url=base_url)
-        return f"""self.web_application.api_route(
-            path="{self.url_path(api_config, base_url)}", methods=["{cast(HTTPRequest, self._ensure_http(api_config, "request")).method}"]
-            )({api_name})
+    def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:  # type: ignore[override]
+        super()._add_api(api_name=api_name, api_config=api_config, base_url=base_url)  # type: ignore
+        http_method = api_config.http.request.method.lower()  # type: ignore
+        url_path = self.url_path(api_config.url, base_url)  # type: ignore
+        return f"""self.web_application.{http_method}(
+            path="{url_path}")({api_name})
         """
 
 
