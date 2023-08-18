@@ -92,7 +92,7 @@ class BaseAppServer(metaclass=ABCMeta):
         return f"""def {api_function_name}() -> Union[str, dict]:
             {self._run_request_process_pycode()}
             {self._handle_request_process_result_pycode()}
-            {self._generate_response_pycode(api_config)}
+            {self._generate_response_pycode()}
         """
 
     def _run_request_process_pycode(self, **kwargs) -> str:
@@ -106,7 +106,7 @@ class BaseAppServer(metaclass=ABCMeta):
             return process_result
         """
 
-    def _generate_response_pycode(self, api_config: Union[MockAPI, List[MockAPI]]) -> str:
+    def _generate_response_pycode(self) -> str:
         return f"""
         return SERVER._response_process()
         """
@@ -279,7 +279,7 @@ class FastAPIServer(BaseAppServer):
             return f"""def {api_name}({api_func_signature}request: FastAPIRequest):
                 {self._run_request_process_pycode()}
                 {self._handle_request_process_result_pycode()}
-                {self._generate_response_pycode(api_config)}
+                {self._generate_response_pycode()}
             """
         else:
             function_args = ""
@@ -311,7 +311,7 @@ class FastAPIServer(BaseAppServer):
                 {assign_value_to_model}
                 {self._run_request_process_pycode()}
                 {self._handle_request_process_result_pycode()}
-                {self._generate_response_pycode(api_config)}
+                {self._generate_response_pycode()}
             """
 
     def _api_name_as_camel_case(self, api_name: str) -> str:
@@ -359,7 +359,7 @@ class FastAPIServer(BaseAppServer):
         """
         )
 
-    def _generate_response_pycode(self, api_config: Union[MockAPI, List[MockAPI]]) -> str:
+    def _generate_response_pycode(self) -> str:
         return f"""
         return SERVER._response_process(request=request)
         """
