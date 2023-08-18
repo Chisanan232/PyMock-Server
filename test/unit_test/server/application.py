@@ -105,7 +105,7 @@ class AppServerTestSpec(metaclass=ABCMeta):
         request = self._mock_request(method=method, api_params=api_params)
 
         # Mock API attribute and function
-        sut._api_params = {"/test-api-path": MockAPI().deserialize(_TestConfig.Mock_API)}
+        sut._mock_api_details = {"/test-api-path": MockAPI().deserialize(_TestConfig.Mock_API)}
         sut._get_current_request = MagicMock(return_value=request)
 
         # Run target function
