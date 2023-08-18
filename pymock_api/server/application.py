@@ -52,8 +52,23 @@ class BaseAppServer(metaclass=ABCMeta):
         """
         pass
 
-    @abstractmethod
     def create_api(self, mocked_apis: MockAPIs) -> None:
+        aggregated_mocked_apis = self._get_all_api_details(mocked_apis)
+        for api_name, api_config in aggregated_mocked_apis.items():
+            if api_name and api_config:
+                annotate_function_pycode = self._annotate_function(api_name, api_config)  # type: ignore[arg-type]
+                add_api_pycode = self._add_api(
+                    api_name, api_config, base_url=mocked_apis.base.url if mocked_apis.base else None  # type: ignore[arg-type]
+                )
+                print(f"[DEBUG in src] annotate_function_pycode: {annotate_function_pycode}")
+                # pylint: disable=exec-used
+                exec(annotate_function_pycode)
+                # pylint: disable=exec-used
+                print(f"[DEBUG in src] add_api_pycode: {add_api_pycode}")
+                exec(add_api_pycode)
+
+    @abstractmethod
+    def _get_all_api_details(self, mocked_apis) -> Dict[str, Union[Optional[MockAPI], List[MockAPI]]]:
         pass
 
     def _annotate_function(self, api_name: str, api_config: List[MockAPI]) -> str:
@@ -199,22 +214,7 @@ class FlaskServer(BaseAppServer):
     def setup(self) -> "flask.Flask":  # type: ignore
         return import_web_lib.flask().Flask(__name__)
 
-    def create_api(self, mocked_apis: MockAPIs) -> None:
-        aggregated_mocked_apis = self._get_all_api_details(mocked_apis)
-        for api_name, api_config in aggregated_mocked_apis.items():
-            if api_name and api_config:
-                annotate_function_pycode = self._annotate_function(api_name, api_config)
-                add_api_pycode = self._add_api(
-                    api_name, api_config, base_url=mocked_apis.base.url if mocked_apis.base else None
-                )
-                print(f"[DEBUG in src] annotate_function_pycode: {annotate_function_pycode}")
-                # pylint: disable=exec-used
-                exec(annotate_function_pycode)
-                # pylint: disable=exec-used
-                print(f"[DEBUG in src] add_api_pycode: {add_api_pycode}")
-                exec(add_api_pycode)
-
-    def _get_all_api_details(self, mocked_apis: MockAPIs) -> Dict[str, List[MockAPI]]:
+    def _get_all_api_details(self, mocked_apis: MockAPIs) -> Dict[str, List[MockAPI]]:  # type: ignore[override]
         return mocked_apis.group_by_url()
 
     def _get_current_request(self, **kwargs) -> "flask.Request":  # type: ignore
@@ -256,22 +256,7 @@ class FastAPIServer(BaseAppServer):
     def setup(self) -> "fastapi.FastAPI":  # type: ignore
         return import_web_lib.fastapi().FastAPI()
 
-    def create_api(self, mocked_apis: MockAPIs) -> None:
-        all_api_details = self._get_all_api_details(mocked_apis)
-        for api_name, api_config in all_api_details.items():
-            if api_name and api_config:
-                annotate_function_pycode = self._annotate_function(api_name, api_config)
-                add_api_pycode = self._add_api(
-                    api_name, api_config, base_url=mocked_apis.base.url if mocked_apis.base else None
-                )
-                print(f"[DEBUG in src] annotate_function_pycode: {annotate_function_pycode}")
-                # pylint: disable=exec-used
-                exec(annotate_function_pycode)
-                # pylint: disable=exec-used
-                print(f"[DEBUG in src] add_api_pycode: {add_api_pycode}")
-                exec(add_api_pycode)
-
-    def _get_all_api_details(self, mocked_apis: MockAPIs) -> Dict[str, Optional[MockAPI]]:
+    def _get_all_api_details(self, mocked_apis: MockAPIs) -> Dict[str, Optional[MockAPI]]:  # type: ignore[override]
         return mocked_apis.apis
 
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:  # type: ignore[override]
