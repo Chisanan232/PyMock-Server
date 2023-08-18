@@ -200,7 +200,7 @@ class FlaskServer(BaseAppServer):
         return import_web_lib.flask().Flask(__name__)
 
     def create_api(self, mocked_apis: MockAPIs) -> None:
-        aggregated_mocked_apis = mocked_apis.group_by_url()
+        aggregated_mocked_apis = self._get_all_api_details(mocked_apis)
         for api_name, api_config in aggregated_mocked_apis.items():
             if api_name and api_config:
                 annotate_function_pycode = self._annotate_function(api_name, api_config)
@@ -213,6 +213,9 @@ class FlaskServer(BaseAppServer):
                 # pylint: disable=exec-used
                 print(f"[DEBUG in src] add_api_pycode: {add_api_pycode}")
                 exec(add_api_pycode)
+
+    def _get_all_api_details(self, mocked_apis: MockAPIs) -> Dict[str, List[MockAPI]]:
+        return mocked_apis.group_by_url()
 
     def _get_current_request(self, **kwargs) -> "flask.Request":  # type: ignore
         return import_web_lib.flask().request
@@ -254,7 +257,8 @@ class FastAPIServer(BaseAppServer):
         return import_web_lib.fastapi().FastAPI()
 
     def create_api(self, mocked_apis: MockAPIs) -> None:
-        for api_name, api_config in mocked_apis.apis.items():
+        all_api_details = self._get_all_api_details(mocked_apis)
+        for api_name, api_config in all_api_details.items():
             if api_name and api_config:
                 annotate_function_pycode = self._annotate_function(api_name, api_config)
                 add_api_pycode = self._add_api(
@@ -266,6 +270,9 @@ class FastAPIServer(BaseAppServer):
                 # pylint: disable=exec-used
                 print(f"[DEBUG in src] add_api_pycode: {add_api_pycode}")
                 exec(add_api_pycode)
+
+    def _get_all_api_details(self, mocked_apis: MockAPIs) -> Dict[str, Optional[MockAPI]]:
+        return mocked_apis.apis
 
     def _annotate_function(self, api_name: str, api_config: MockAPI) -> str:  # type: ignore[override]
         import_fastapi = "from fastapi import Request as FastAPIRequest\n"
