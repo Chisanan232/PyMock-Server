@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 from unittest.mock import Mock, patch
 
 import pytest
@@ -16,6 +16,9 @@ class FakeWebServer(BaseAppServer):
     def setup(self) -> Any:
         pass
 
+    def _get_all_api_details(self, mocked_apis) -> Dict[str, Union[Optional[MockAPI], List[MockAPI]]]:
+        pass
+
     def _request_process(self) -> None:
         pass
 
@@ -23,6 +26,9 @@ class FakeWebServer(BaseAppServer):
         pass
 
     def _get_current_api_path(self, request: Any) -> str:
+        pass
+
+    def _get_current_request_http_method(self, request: Any) -> str:
         pass
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
