@@ -120,13 +120,12 @@ class BaseAppServer(metaclass=ABCMeta):
     @abstractmethod
     def _add_api(self, api_name: str, api_config: Union[MockAPI, List[MockAPI]], base_url: Optional[str] = None) -> str:
         if isinstance(api_config, list):
-            self._record_api_params_info(url=self.url_path(url=api_name, base_url=base_url), api_config=api_config)
+            url = api_name
         elif isinstance(api_config, MockAPI):
-            self._record_api_params_info(
-                url=self.url_path(url=api_config.url, base_url=base_url), api_config=api_config
-            )
+            url = api_config.url  # type: ignore[assignment]
         else:
             raise TypeError
+        self._record_api_params_info(url=self.url_path(url=url, base_url=base_url), api_config=api_config)
         return ""
 
     def url_path(self, url: Optional[str], base_url: Optional[str] = None) -> str:
