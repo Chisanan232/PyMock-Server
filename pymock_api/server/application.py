@@ -32,7 +32,7 @@ class BaseAppServer(metaclass=ABCMeta):
         #         <HTTP method>: <API details>
         #     }
         # }
-        self._api_params: Dict[str, Dict[str, MockAPI]] = {}
+        self._mock_api_details: Dict[str, Dict[str, MockAPI]] = {}
         self._api_functions: Dict[str, str] = {}
 
     @property
@@ -143,18 +143,18 @@ class BaseAppServer(metaclass=ABCMeta):
     def _record_api_params_info(self, url: str, api_config: List[MockAPI]) -> None:
         if isinstance(api_config, list):
             for ac in api_config:
-                url_details = self._api_params.get(url, {})
+                url_details = self._mock_api_details.get(url, {})
                 url_details[ac.http.request.method] = ac  # type: ignore[union-attr]
-                self._api_params[url] = url_details
+                self._mock_api_details[url] = url_details
         elif isinstance(api_config, MockAPI):
             print(f"[DEBUG in src for _record_api_params_info] url: {url}")
             print(
                 f"[DEBUG in src for _record_api_params_info] api_config.http.request.method: {api_config.http.request.method}"
             )
             print(f"[DEBUG in src for _record_api_params_info] api_config: {api_config}")
-            url_details = self._api_params.get(url, {})
+            url_details = self._mock_api_details.get(url, {})
             url_details[api_config.http.request.method] = api_config
-            self._api_params[url] = url_details
+            self._mock_api_details[url] = url_details
         else:
             raise TypeError("")
 
@@ -162,7 +162,7 @@ class BaseAppServer(metaclass=ABCMeta):
         request = self._get_current_request(**kwargs)
         req_params = self._get_current_api_parameters(**kwargs)
 
-        api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(request)][self._get_current_request_http_method(request)].http.request.parameters  # type: ignore[union-attr]
+        api_params_info: List[APIParameter] = self._mock_api_details[self._get_current_api_path(request)][self._get_current_request_http_method(request)].http.request.parameters  # type: ignore[union-attr]
         for param_info in api_params_info:
             # Check the required parameter
             one_req_param_value = req_params.get(param_info.name, None)
@@ -362,7 +362,7 @@ class FastAPIServer(BaseAppServer):
         return kwargs.get("request")
 
     def _get_current_api_parameters(self, **kwargs) -> dict:
-        api_params_info: List[APIParameter] = self._api_params[self._get_current_api_path(kwargs["request"])][self._get_current_request_http_method(kwargs["request"])].http.request.parameters  # type: ignore[union-attr]
+        api_params_info: List[APIParameter] = self._mock_api_details[self._get_current_api_path(kwargs["request"])][self._get_current_request_http_method(kwargs["request"])].http.request.parameters  # type: ignore[union-attr]
         api_param_names = list(map(lambda e: e.name, api_params_info))
         api_param = {}
         if "model" in kwargs.keys():
