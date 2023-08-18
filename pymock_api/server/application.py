@@ -107,16 +107,9 @@ class BaseAppServer(metaclass=ABCMeta):
         """
 
     def _generate_response_pycode(self, api_config: Union[MockAPI, List[MockAPI]]) -> str:
-        if isinstance(api_config, list):
-            return f"""
-        return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config[0], "response")).value}')
-            """
-        elif isinstance(api_config, MockAPI):
-            return f"""
-        return _HTTPResponse.generate(data='{cast(HTTPResponse, self._ensure_http(api_config, "response")).value}')
-            """
-        else:
-            raise TypeError
+        return f"""
+        return SERVER._response_process()
+        """
 
     def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
         assert api_config.http and getattr(
@@ -186,6 +179,14 @@ class BaseAppServer(metaclass=ABCMeta):
                         status_code=400,
                     )
         return self._generate_http_response(body="OK.", status_code=200)
+
+    def _response_process(self, **kwargs) -> Union[str, dict]:
+        request = self._get_current_request(**kwargs)
+        api_params_info: MockAPI = self._mock_api_details[self._get_current_api_path(request)][
+            self._get_current_request_http_method(request)
+        ]
+        response_value = self._ensure_http(api_params_info, "response").value  # type: ignore[union-attr]
+        return _HTTPResponse.generate(data=response_value)
 
     @abstractmethod
     def _get_current_request(self, **kwargs) -> Any:
@@ -357,6 +358,11 @@ class FastAPIServer(BaseAppServer):
         process_result = SERVER._request_process(request=request)
         """
         )
+
+    def _generate_response_pycode(self, api_config: Union[MockAPI, List[MockAPI]]) -> str:
+        return f"""
+        return SERVER._response_process(request=request)
+        """
 
     def _get_current_request(self, **kwargs) -> "fastapi.Request":  # type: ignore[name-defined]
         return kwargs.get("request")
