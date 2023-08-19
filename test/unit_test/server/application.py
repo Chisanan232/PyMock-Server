@@ -170,6 +170,12 @@ class AppServerTestSpec(metaclass=ABCMeta):
     def _get_http_method_in_generating_code(self, method: str) -> str:
         pass
 
+    def test__record_api_params_info_with_invalid_value(self, sut: BaseAppServer):
+        ut_url = "This is URL path"
+        ut_api_config = "Invalid API configuration"
+        with pytest.raises(TypeError):
+            sut._record_api_params_info(url=ut_url, api_config=ut_api_config)
+
 
 class TestFlaskServer(AppServerTestSpec):
     @pytest.fixture(scope="function")
@@ -209,6 +215,13 @@ class TestFlaskServer(AppServerTestSpec):
 
     def _get_http_method_in_generating_code(self, method: str) -> str:
         return method
+
+    def test__add_api_with_invalid_value(self, sut: BaseAppServer):
+        ut_url = "This is URL path"
+        ut_api_config = MockAPI(url=ut_url)
+        with patch.object(sut, "_record_api_params_info"):
+            with pytest.raises(TypeError):
+                sut._add_api(api_name=ut_url, api_config=ut_api_config)
 
 
 class TestFastAPIServer(AppServerTestSpec):
@@ -265,6 +278,13 @@ class TestFastAPIServer(AppServerTestSpec):
 
     def _get_http_method_in_generating_code(self, method: str) -> str:
         return method.lower()
+
+    def test__add_api_with_invalid_value(self, sut: BaseAppServer):
+        ut_url = "This is URL path"
+        ut_api_config = ["Invalid API configuration"]
+        with patch.object(sut, "_record_api_params_info"):
+            with pytest.raises(TypeError):
+                sut._add_api(api_name=ut_url, api_config=ut_api_config)
 
 
 class TestInnerHTTPResponse:
