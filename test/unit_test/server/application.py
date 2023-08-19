@@ -73,13 +73,13 @@ class AppServerTestSpec(metaclass=ABCMeta):
             ), f"The web application server it generates should be *{self.expected_sut_type}* type object."
 
     def test_generate_pycode_about_annotating_function(self, sut: BaseAppServer):
-        for_test_api_name = "Function name"
+        for_test_api_name = "/Function/name"
         api = Mock(MockAPI(url=Mock(), http=Mock()))
         api.http.request.parameters = [APIParameter().deserialize(p) for p in _Test_API_Parameters]
 
         annotate_function_pycode = sut._annotate_function(api_name=for_test_api_name, api_config=api)
 
-        assert for_test_api_name in annotate_function_pycode
+        assert sut._api_controller_name(for_test_api_name) in annotate_function_pycode
 
     @pytest.mark.parametrize(
         ("method", "api_params", "error_msg_like", "expected_status_code"),
