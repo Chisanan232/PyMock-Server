@@ -210,6 +210,8 @@ class TestFastAPIServer(AppServerTestSpec):
             "route": route_prop,
         }
 
+        request.method = method
+
         # Just for testing, source code won't have any usage like this
         request.api_parameters = api_params
         return request
