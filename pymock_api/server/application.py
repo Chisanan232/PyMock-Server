@@ -78,17 +78,6 @@ class BaseAppServer(metaclass=ABCMeta):
 
     def _define_api_function_pycode(self, api_name: str, api_config: List[MockAPI]) -> str:
         api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
-        # api_functions = []
-        # for ac in api_config:
-        #     function_name = f"{ac.http.request.method}_{api_function_name}"
-        #     api_function = f"""def {function_name}() -> Union[str, dict]:
-        #         {self._run_request_process_pycode()}
-        #         {self._handle_request_process_result_pycode()}
-        #         {self._generate_response_pycode(api_config)}
-        #     """
-        #     self._api_functions[api_function] = api_function
-        #     api_functions.append(api_function)
-        # return "".join(api_functions)
         return f"""def {api_function_name}() -> Union[str, dict]:
             {self._run_request_process_pycode()}
             {self._handle_request_process_result_pycode()}
