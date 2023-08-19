@@ -141,31 +141,32 @@ class AppServerTestSpec(metaclass=ABCMeta):
     def _expected_response_type(self) -> Type[Any]:
         pass
 
-    @pytest.mark.parametrize(
-        ("base_url", "api_config"),
-        [
-            (None, Mock(MockAPI(url=Mock(), http=Mock()))),
-            ("Has base URL", Mock(MockAPI(url=Mock(), http=Mock()))),
-        ],
-    )
-    def test_generate_pycode_about_adding_api(
-        self, sut: BaseAppServer, base_url: Optional[str], api_config: Union[MockAPI, List[MockAPI]]
-    ):
+    @pytest.mark.parametrize("base_url", [None, "Has base URL"])
+    def test_generate_pycode_about_adding_api(self, sut: BaseAppServer, base_url: Optional[str]):
+        # TODO: Should think a better implementation of this test
         for_test_api_name = "Function name"
         for_test_url = "this is an url path"
         for_test_req_method = "HTTP method"
-        # api = Mock(MockAPI(url=Mock(), http=Mock()))
-        if isinstance(api_config, MockAPI):
-            api_config.url = for_test_url
-            api_config.http.request.method = for_test_req_method
+        api_config = Mock(MockAPI(url=Mock(), http=Mock()))
+        api_config.url = for_test_url
+        api_config.http.request.method = for_test_req_method
 
-        add_api_pycode = sut._add_api(api_name=for_test_api_name, api_config=api_config, base_url=base_url)
+        add_api_pycode = sut._add_api(
+            api_name=for_test_api_name, api_config=self._get_api_config_param(api_config), base_url=base_url
+        )
 
-        expected_url = f"{base_url}{for_test_url}" if base_url else for_test_url
         assert (
-            expected_url in add_api_pycode
+            self._get_url_criteria(base_url) in add_api_pycode
             and self._get_http_method_in_generating_code(for_test_req_method) in add_api_pycode
         )
+
+    @abstractmethod
+    def _get_api_config_param(self, api_config: MockAPI) -> Union[MockAPI, List[MockAPI]]:
+        pass
+
+    @abstractmethod
+    def _get_url_criteria(self, base_url: Optional[str]) -> str:
+        pass
 
     @abstractmethod
     def _get_http_method_in_generating_code(self, method: str) -> str:
@@ -201,6 +202,12 @@ class TestFlaskServer(AppServerTestSpec):
     @property
     def _expected_response_type(self) -> Type[FlaskResponse]:
         return FlaskResponse
+
+    def _get_api_config_param(self, api_config: MockAPI) -> List[MockAPI]:
+        return [api_config]
+
+    def _get_url_criteria(self, base_url: Optional[str]) -> str:
+        return "Function name"
 
     def _get_http_method_in_generating_code(self, method: str) -> str:
         return method
@@ -250,6 +257,13 @@ class TestFastAPIServer(AppServerTestSpec):
     @property
     def _expected_response_type(self) -> Type[FastAPIResponse]:
         return FastAPIResponse
+
+    def _get_api_config_param(self, api_config: MockAPI) -> MockAPI:
+        return api_config
+
+    def _get_url_criteria(self, base_url: Optional[str]) -> str:
+        for_test_url = "this is an url path"
+        return f"{base_url}{for_test_url}" if base_url else for_test_url
 
     def _get_http_method_in_generating_code(self, method: str) -> str:
         return method.lower()
