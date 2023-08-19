@@ -53,6 +53,9 @@ class BaseAppServer(metaclass=ABCMeta):
         pass
 
     def create_api(self, mocked_apis: MockAPIs) -> None:
+        """
+        [Entry point for generating Python code]
+        """
         aggregated_mocked_apis = self._get_all_api_details(mocked_apis)
         for api_name, api_config in aggregated_mocked_apis.items():
             if api_name and api_config:
@@ -69,14 +72,23 @@ class BaseAppServer(metaclass=ABCMeta):
 
     @abstractmethod
     def _get_all_api_details(self, mocked_apis) -> Dict[str, Union[Optional[MockAPI], List[MockAPI]]]:
+        """
+        Part of [Entry point for generating Python code]
+        """
         pass
 
     def _annotate_function(self, api_name: str, api_config: List[MockAPI]) -> str:
+        """
+        [Generating code]
+        """
         initial_global_server = f"""global SERVER\nSERVER = self\n"""
         define_function_for_api = self._define_api_function_pycode(api_name, api_config)
         return initial_global_server + define_function_for_api
 
     def _define_api_function_pycode(self, api_name: str, api_config: List[MockAPI]) -> str:
+        """
+        [Generating code]
+        """
         api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
         # api_functions = []
         # for ac in api_config:
@@ -96,22 +108,34 @@ class BaseAppServer(metaclass=ABCMeta):
         """
 
     def _run_request_process_pycode(self, **kwargs) -> str:
+        """
+        [Generating code]
+        """
         return """
         process_result = SERVER._request_process()
         """
 
     def _handle_request_process_result_pycode(self, **kwargs) -> str:
+        """
+        [Generating code]
+        """
         return """
         if process_result.status_code != 200:
             return process_result
         """
 
     def _generate_response_pycode(self) -> str:
+        """
+        [Generating code]
+        """
         return f"""
         return SERVER._response_process()
         """
 
     def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
+        """
+        [Data processing]
+        """
         assert api_config.http and getattr(
             api_config.http, http_attr
         ), "The configuration *HTTP* value should not be empty."
@@ -119,6 +143,9 @@ class BaseAppServer(metaclass=ABCMeta):
 
     @abstractmethod
     def _add_api(self, api_name: str, api_config: Union[MockAPI, List[MockAPI]], base_url: Optional[str] = None) -> str:
+        """
+        [Generating code] but doing data processing first
+        """
         if isinstance(api_config, list):
             url = api_name
         elif isinstance(api_config, MockAPI):
@@ -129,10 +156,17 @@ class BaseAppServer(metaclass=ABCMeta):
         return ""
 
     def url_path(self, url: Optional[str], base_url: Optional[str] = None) -> str:
+        """
+        [Data processing]
+        """
         assert url
         return f"{base_url}{url}" if base_url else f"{url}"
 
     def _record_api_params_info(self, url: str, api_config: Union[MockAPI, List[MockAPI]]) -> None:
+        """
+        [Generating code] but doing data processing first
+        This processing for the outer function which would be called by the generating code
+        """
         if isinstance(api_config, list):
             for ac in api_config:
                 url_details = self._mock_api_details.get(url, {})
@@ -146,6 +180,9 @@ class BaseAppServer(metaclass=ABCMeta):
             raise TypeError("")
 
     def _request_process(self, **kwargs) -> "flask.Response":  # type: ignore
+        """
+        [Request processing for generating code]
+        """
         request = self._get_current_request(**kwargs)
         req_params = self._get_current_api_parameters(**kwargs)
 
@@ -175,6 +212,9 @@ class BaseAppServer(metaclass=ABCMeta):
         return self._generate_http_response(body="OK.", status_code=200)
 
     def _response_process(self, **kwargs) -> Union[str, dict]:
+        """
+        [Response processing for generating code]
+        """
         request = self._get_current_request(**kwargs)
         api_params_info: MockAPI = self._mock_api_details[self._get_current_api_path(request)][
             self._get_current_request_http_method(request)
@@ -184,26 +224,44 @@ class BaseAppServer(metaclass=ABCMeta):
 
     @abstractmethod
     def _get_current_request(self, **kwargs) -> Any:
+        """
+        [Data processing for both HTTP request and response]
+        """
         pass
 
     @abstractmethod
     def _get_current_api_parameters(self, **kwargs) -> dict:
+        """
+        [Data processing for HTTP request]
+        """
         pass
 
     @abstractmethod
     def _get_current_api_path(self, request: Any) -> str:
+        """
+        [Data processing for both HTTP request and response]
+        """
         pass
 
     @abstractmethod
     def _get_current_request_http_method(self, request: Any) -> str:
+        """
+        [Data processing for both HTTP request and response]
+        """
         pass
 
     @abstractmethod
     def _generate_http_response(self, body: str, status_code: int) -> Any:
+        """
+        [Data processing for both HTTP request] (May also could provide this feature for HTTP response part?)
+        """
         pass
 
     @abstractmethod
     def _api_controller_name(self, api_name: str) -> str:
+        """
+        [Generating code] but doing data processing about naming function
+        """
         pass
 
 
