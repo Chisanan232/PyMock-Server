@@ -40,6 +40,9 @@ class FakeWebServer(BaseAppServer):
     def _generate_http_response(self, body: str, status_code: int) -> Any:
         pass
 
+    def _api_controller_name(self, api_name: str) -> str:
+        pass
+
 
 class TestMockHTTPServer:
     def test_instantiate_arg_config_path_by_default(self):
