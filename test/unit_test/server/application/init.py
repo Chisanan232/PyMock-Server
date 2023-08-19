@@ -23,7 +23,7 @@ from pymock_api.server.application import (
     _HTTPResponse,
 )
 
-from ..._values import _Test_API_Parameters, _TestConfig
+from ...._values import _Test_API_Parameters, _TestConfig
 
 MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
 

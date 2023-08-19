@@ -10,15 +10,9 @@ from abc import ABCMeta, abstractmethod
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Union, cast
 
-from .._utils.importing import import_web_lib
-from ..exceptions import FileFormatNotSupport
-from ..model.api_config import (
-    APIParameter,
-    HTTPRequest,
-    HTTPResponse,
-    MockAPI,
-    MockAPIs,
-)
+from ..._utils import import_web_lib
+from ...exceptions import FileFormatNotSupport
+from ...model import APIParameter, HTTPRequest, HTTPResponse, MockAPI, MockAPIs
 
 
 class BaseAppServer(metaclass=ABCMeta):
