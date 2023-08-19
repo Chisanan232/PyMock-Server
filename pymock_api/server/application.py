@@ -202,6 +202,10 @@ class BaseAppServer(metaclass=ABCMeta):
     def _generate_http_response(self, body: str, status_code: int) -> Any:
         pass
 
+    @abstractmethod
+    def _api_controller_name(self, api_name: str) -> str:
+        pass
+
 
 class FlaskServer(BaseAppServer):
     """*Build a web application with *Flask**"""
@@ -237,11 +241,13 @@ class FlaskServer(BaseAppServer):
         if not isinstance(api_config, list):
             raise TypeError("")
         acceptance_method = [cast(HTTPRequest, self._ensure_http(ac, "request")).method for ac in api_config]
-        api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
         return f"""self.web_application.route(
             "{self.url_path(api_name, base_url)}", methods={acceptance_method}
-            )({api_function_name})
+            )({self._api_controller_name(api_name)})
         """
+
+    def _api_controller_name(self, api_name: str) -> str:
+        return "_".join(api_name.split("/")[1:]).replace("-", "_")
 
 
 class FastAPIServer(BaseAppServer):
@@ -388,8 +394,11 @@ class FastAPIServer(BaseAppServer):
         http_method = api_config.http.request.method.lower()  # type: ignore[union-attr]
         url_path = self.url_path(api_config.url, base_url)
         return f"""self.web_application.{http_method}(
-            path="{url_path}")({api_name})
+            path="{url_path}")({self._api_controller_name(api_name)})
         """
+
+    def _api_controller_name(self, api_name: str) -> str:
+        return api_name
 
 
 class _HTTPResponse:
