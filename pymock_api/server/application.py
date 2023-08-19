@@ -380,6 +380,9 @@ class FastAPIServer(BaseAppServer):
 
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:  # type: ignore[override]
         super()._add_api(api_name=api_name, api_config=api_config, base_url=base_url)
+        # TODO: Should align the data structure and remove this checking
+        if not isinstance(api_config, MockAPI):
+            raise TypeError("")
         http_method = api_config.http.request.method.lower()  # type: ignore[union-attr]
         url_path = self.url_path(api_config.url, base_url)
         return f"""self.web_application.{http_method}(
