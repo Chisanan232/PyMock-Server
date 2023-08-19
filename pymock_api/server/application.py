@@ -233,6 +233,9 @@ class FlaskServer(BaseAppServer):
 
     def _add_api(self, api_name: str, api_config: List[MockAPI], base_url: Optional[str] = None) -> str:  # type: ignore[override]
         super()._add_api(api_name=api_name, api_config=api_config, base_url=base_url)
+        # TODO: Should align the data structure and remove this checking
+        if not isinstance(api_config, list):
+            raise TypeError("")
         acceptance_method = [cast(HTTPRequest, self._ensure_http(ac, "request")).method for ac in api_config]
         api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
         return f"""self.web_application.route(
