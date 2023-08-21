@@ -4,7 +4,11 @@ from unittest.mock import Mock, patch
 import pytest
 
 from pymock_api.model.api_config import APIConfig, MockAPI, MockAPIs
-from pymock_api.server.application import BaseAppServer, FlaskServer
+from pymock_api.server.application import (
+    BaseAppServer,
+    BaseWebServerCodeGenerator,
+    FlaskServer,
+)
 from pymock_api.server.mock import MockHTTPServer
 
 from ..._values import _Test_Config
@@ -14,6 +18,9 @@ mock_api_config = Mock(APIConfig(name=Mock(), description=Mock(), apis=Mock(Mock
 
 class FakeWebServer(BaseAppServer):
     def setup(self) -> Any:
+        pass
+
+    def init_code_generator(self) -> BaseWebServerCodeGenerator:
         pass
 
     def _get_all_api_details(self, mocked_apis) -> Dict[str, Union[Optional[MockAPI], List[MockAPI]]]:
