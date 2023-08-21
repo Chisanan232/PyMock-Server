@@ -96,6 +96,10 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
         else:
             raise TypeError("")
 
+    @abstractmethod
+    def _api_controller_name(self, api_name: str) -> str:
+        pass
+
 
 class FlaskCodeGenerator(BaseWebServerCodeGenerator):
     def add_api(self, api_name: str, api_config: Union[MockAPI, List[MockAPI]], base_url: Optional[str] = None) -> str:
