@@ -49,7 +49,7 @@ class FastAPIRequest(BaseCurrentRequest):
     def api_parameters(self, **kwargs) -> dict:
         mock_api_details = kwargs.get("mock_api_details", None)
         if not mock_api_details:
-            raise ValueError
+            raise ValueError("Missing necessary argument *mock_api_details*.")
         api_params_info: List[APIParameter] = mock_api_details[self.api_path(kwargs["request"])][
             self.http_method(kwargs["request"])
         ].http.request.parameters
