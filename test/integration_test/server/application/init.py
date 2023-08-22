@@ -11,12 +11,8 @@ from httpx import Response as FastAPIResponse
 
 from pymock_api.model import APIConfig, load_config
 from pymock_api.model.api_config import MockAPI
-from pymock_api.server.application import (
-    BaseAppServer,
-    FastAPIServer,
-    FlaskServer,
-    _HTTPResponse,
-)
+from pymock_api.server.application import BaseAppServer, FastAPIServer, FlaskServer
+from pymock_api.server.application.response import HTTPResponse as _HTTPResponse
 
 from ...._values import _Bind_Host_And_Port, _YouTube_API_Content
 from ..._spec import MockAPI_Config_Yaml_Path, file, yaml_factory

@@ -8,6 +8,8 @@ from pymock_api.server.application import (
     BaseAppServer,
     BaseWebServerCodeGenerator,
     FlaskServer,
+    HTTPRequestProcess,
+    HTTPResponseProcess,
 )
 from pymock_api.server.mock import MockHTTPServer
 
@@ -21,6 +23,12 @@ class FakeWebServer(BaseAppServer):
         pass
 
     def init_code_generator(self) -> BaseWebServerCodeGenerator:
+        pass
+
+    def init_http_request_process(self) -> HTTPRequestProcess:
+        pass
+
+    def init_http_response_process(self) -> HTTPResponseProcess:
         pass
 
     def _get_all_api_details(self, mocked_apis) -> Dict[str, Union[Optional[MockAPI], List[MockAPI]]]:
