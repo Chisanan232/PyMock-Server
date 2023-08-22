@@ -41,9 +41,6 @@ class FlaskRequest(BaseCurrentRequest):
     def http_method(self, request: "flask.Request") -> str:  # type: ignore[name-defined]
         return request.method.upper()
 
-    def _generate_http_response(self, body: str, status_code: int) -> "flask.Response":  # type: ignore
-        return import_web_lib.flask().Response(body, status=status_code)
-
 
 class FastAPIRequest(BaseCurrentRequest):
     def request_instance(self, **kwargs) -> "fastapi.Request":  # type: ignore[name-defined]
