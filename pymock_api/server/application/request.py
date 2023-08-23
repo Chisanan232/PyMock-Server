@@ -30,9 +30,33 @@ class FlaskRequest(BaseCurrentRequest):
 
     def api_parameters(self, **kwargs) -> dict:
         request: "flask.Request" = kwargs.get("request", self.request_instance())  # type: ignore
+        mock_api_details = kwargs.get("mock_api_details", None)
+        if not mock_api_details:
+            raise ValueError("Missing necessary argument *mock_api_details*.")
+        mock_api_params_info: List[APIParameter] = mock_api_details[self.api_path(request)][
+            self.http_method(request)
+        ].http.request.parameters
+        iterable_mock_api_params = list(filter(lambda p: p.value_type == "list", mock_api_params_info))
+
+        # Get general parameters
         api_params = request.args if request.method.upper() == "GET" else request.form or request.data or request.json
+        print(f"[DEBUG in src FlaskRequest.api_parameters] before api_params: {api_params}")
         if isinstance(api_params, bytes):
             api_params = json.loads(api_params.decode("utf-8"))
+
+        # Get iterable parameters
+        handled_api_params = {}
+        for mock_api_param in iterable_mock_api_params:
+            iterable_api_param = request.args.getlist(mock_api_param.name)
+            handled_api_params[mock_api_param.name] = iterable_api_param
+
+        if handled_api_params:
+            for k, v in api_params.items():
+                if k not in handled_api_params.keys():
+                    handled_api_params[k] = v
+            print(f"[DEBUG in src FlaskRequest.api_parameters] after handled_api_params: {handled_api_params}")
+            return handled_api_params
+        print(f"[DEBUG in src FlaskRequest.api_parameters] after api_params: {api_params}")
         return api_params
 
     def api_path(self, request: "flask.Request") -> str:  # type: ignore[name-defined]
