@@ -69,7 +69,7 @@ class HTTPRequestProcess(BaseHTTPProcess):
                 if param_info.value_type and not isinstance(one_req_param_value, locate(param_info.value_type)):  # type: ignore[arg-type]
                     return self._generate_http_response(
                         f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different with the "
-                        f"implementation of Back-End site (*{type(param_info.value_type)}*).",
+                        f"implementation of Back-End site (*{locate(param_info.value_type)}*).",
                         status_code=400,
                     )
                 # Check the data format of parameter
