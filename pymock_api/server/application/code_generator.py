@@ -128,11 +128,20 @@ class FlaskCodeGenerator(BaseWebServerCodeGenerator):
 
 class FastAPICodeGenerator(BaseWebServerCodeGenerator):
     def annotate_function(self, api_name: str, api_config: MockAPI) -> str:  # type: ignore[override]
-        import_fastapi = "from fastapi import Request as FastAPIRequest\n"
+        import_fastapi = "from fastapi import Query, Request as FastAPIRequest\n"
+        import_typing = "from typing import List, Union\n"
+        import_typing_ext = "from typing_extensions import Annotated\n"
         initial_global_server = f"""global SERVER\nSERVER = self\n"""
         define_params_model = self._annotate_api_parameters_model_pycode(api_name, api_config)
         define_function_for_api = self._define_api_function_pycode(api_name, api_config)
-        return import_fastapi + initial_global_server + define_params_model + define_function_for_api
+        return (
+            import_fastapi
+            + import_typing
+            + import_typing_ext
+            + initial_global_server
+            + define_params_model
+            + define_function_for_api
+        )
 
     def _define_api_function_pycode(self, api_name: str, api_config: MockAPI) -> str:  # type: ignore[override]
         # The code implementation is different if the HTTP method is *GET* or not
@@ -154,14 +163,22 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
             instantiate_model = ""
             # Process the function signature if API has parameter settings
             for param in api_config.http.request.parameters:  # type: ignore[union-attr]
-                if param.default is not None:
-                    if param.value_type == "str":
-                        default_value = f"'{param.default}'"
-                    else:
-                        default_value = f"{param.default}"
-                    function_args += f", {param.name}: {param.value_type} = {default_value}"
+                if param.value_type == "list":
+                    value_type = (
+                        "Annotated[Union[List[str], None], Query()] = None"
+                        if param.value_type == "list"
+                        else param.value_type
+                    )
+                    function_args += f", {param.name}: {value_type}"
                 else:
-                    function_args += f", {param.name}: {param.value_type} = None"
+                    if param.default is not None:
+                        if param.value_type == "str":
+                            default_value = f"'{param.default}'"
+                        else:
+                            default_value = f"{param.default}"
+                        function_args += f", {param.name}: {param.value_type} = {default_value}"
+                    else:
+                        function_args += f", {param.name}: {param.value_type} = None"
                 assign_value_to_model += f"""
         setattr(model, '{param.name}', {param.name})
                 """
