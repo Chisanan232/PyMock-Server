@@ -87,6 +87,7 @@ _Test_API_Parameters: List[dict] = [
     _Test_API_Parameter_With_Int,
     _Test_API_Parameter_With_Str,
     _Test_API_Parameter_Without_Default,
+    _Test_Iterable_Parameter,
 ]
 
 # Sample API for testing ('<base URL>/google' with GET)
@@ -98,6 +99,38 @@ _Google_Home_Value: dict = {
             "parameters": _Test_API_Parameters,
         },
         "response": {"value": "This is Google home API."},
+    },
+}
+
+_Post_Google_Home_Value: dict = {
+    "url": "/google",
+    "http": {
+        "request": {
+            "method": "POST",
+            "parameters": _Test_API_Parameters,
+        },
+        "response": {"value": "This is Google home API with POST method."},
+    },
+}
+
+_Put_Google_Home_Value: dict = {
+    "url": "/google",
+    "http": {
+        "request": {
+            "method": "PUT",
+            "parameters": [_Test_API_Parameter],
+        },
+        "response": {"value": "Change something successfully."},
+    },
+}
+
+_Delete_Google_Home_Value: dict = {
+    "url": "/google",
+    "http": {
+        "request": {
+            "method": "DELETE",
+        },
+        "response": {"value": "Delete successfully."},
     },
 }
 
@@ -132,6 +165,9 @@ _YouTube_API_Content: dict = {"responseCode": "200", "errorMessage": "OK", "cont
 _Mocked_APIs: dict = {
     "base": {"url": _Base_URL},
     "google_home": _Google_Home_Value,
+    "post_google_home": _Post_Google_Home_Value,
+    "put_google_home": _Put_Google_Home_Value,
+    "delete_google_home": _Delete_Google_Home_Value,
     "test_home": _Test_Home,
     "youtube_home": _YouTube_Home_Value,
 }
