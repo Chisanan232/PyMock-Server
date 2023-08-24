@@ -221,7 +221,11 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
             # Handle the class's attributes
             for prop in api_config.http.request.parameters:  # type: ignore[union-attr]
                 if prop.default is not None:
-                    define_parameters_model += f"    {prop.name}: {prop.value_type} = '{prop.default}'\n"
+                    if prop.value_type == "str":
+                        default_value = f"'{prop.default}'"
+                    else:
+                        default_value = f"{prop.default}"
+                    define_parameters_model += f"    {prop.name}: {prop.value_type} = {default_value}\n"
                 else:
                     if prop.required:
                         define_parameters_model += f"    {prop.name}: {prop.value_type}\n"
