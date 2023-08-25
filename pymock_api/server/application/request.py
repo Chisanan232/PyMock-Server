@@ -39,9 +39,8 @@ class FlaskRequest(BaseCurrentRequest):
         iterable_mock_api_params = list(filter(lambda p: p.value_type == "list", mock_api_params_info))
 
         # Get general parameters
-        api_params = request.args if request.method.upper() == "GET" else request.form or request.data or request.json
-        print(f"[DEBUG in src FlaskRequest.api_parameters] before api_params: {api_params}")
-        if isinstance(api_params, bytes):
+        api_params = request.args if request.method.upper() == "GET" else request.form or request.data
+        if api_params and isinstance(api_params, bytes):
             api_params = json.loads(api_params.decode("utf-8"))
 
         # Get iterable parameters
