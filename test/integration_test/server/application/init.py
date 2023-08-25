@@ -10,15 +10,29 @@ from flask.app import Response as FlaskResponse
 from httpx import Response as FastAPIResponse
 
 from pymock_api.model import APIConfig, load_config
-from pymock_api.model.api_config import MockAPI
+from pymock_api.model.api_config import APIParameter, MockAPI
 from pymock_api.server.application import BaseAppServer, FastAPIServer, FlaskServer
 from pymock_api.server.application.response import HTTPResponse as _HTTPResponse
 
-from ...._values import _YouTube_API_Content
+from ...._values import (
+    _Base_URL,
+    _Delete_Google_Home_Value,
+    _Google_Home_Value,
+    _Post_Google_Home_Value,
+    _Put_Google_Home_Value,
+    _Test_Home,
+    _Test_Iterable_Parameter,
+    _YouTube_API_Content,
+    _YouTube_Home_Value,
+)
 from ..._spec import MockAPI_Config_Yaml_Path, file, yaml_factory
 
 WebLibraryType = Any  # flask.Flask, fastapi.FastAPI
 ResponseType = Any  # FlaskResponse, FastAPIResponse
+
+
+def _test_api_attr(api: dict, payload: dict) -> tuple:
+    return f"{_Base_URL}{api['url']}", f"{api['http']['request']['method']}", payload
 
 
 class MockHTTPServerTestSpec:
@@ -57,47 +71,138 @@ class MockHTTPServerTestSpec:
     def client(self, mock_server_app: WebLibraryType) -> Union["flask.testing.FlaskClient", FastAPITestClient]:
         pass
 
-    def test_mock_apis(self, client: Union["flask.testing.FlaskClient", FastAPITestClient], api_config: APIConfig):
-        assert api_config.apis and api_config.apis.apis
-        for one_api_name, one_api_config in api_config.apis.apis.items():
-            # Send HTTP request to target API and get its response data
-            assert (
-                one_api_config
-                and one_api_config.http
-                and one_api_config.http.request
-                and one_api_config.http.request.method
-                and api_config.apis.base
-                and one_api_config.url
-            )
-            if one_api_config.http.request.method.lower() == "get":
-                params = self._client_get_req_func_params(one_api_config)
+    @pytest.mark.parametrize(
+        ("url", "http_method", "payload"),
+        [
+            _test_api_attr(
+                api=_Google_Home_Value,
+                payload={
+                    "param1": "any_format",
+                    "iterable_param": [
+                        {"name": "param1", "value": "value1"},
+                        {"name": "param2", "value": "value2"},
+                        {"name": "param3", "value": "value3"},
+                    ],
+                },
+            ),
+            _test_api_attr(
+                api=_Post_Google_Home_Value,
+                payload={
+                    "param1": "any_format",
+                    "iterable_param": [
+                        {"name": "param1", "value": "value1"},
+                        {"name": "param2", "value": "value2"},
+                        {"name": "param3", "value": "value3"},
+                    ],
+                },
+            ),
+            _test_api_attr(api=_Put_Google_Home_Value, payload={"param1": "any_format"}),
+            _test_api_attr(api=_Delete_Google_Home_Value, payload={}),
+            _test_api_attr(api=_Test_Home, payload={"param1": "any_format"}),
+            _test_api_attr(api=_YouTube_Home_Value, payload={"param1": "any_format"}),
+        ],
+    )
+    def test_mock_apis(
+        self,
+        url: str,
+        http_method: str,
+        payload: dict,
+        client: Union["flask.testing.FlaskClient", FastAPITestClient],
+        api_config: APIConfig,
+    ):
+        assert api_config.apis and api_config.apis.apis and api_config.apis.base
+        no_base_url = url.replace(api_config.apis.base.url, "")
+        one_api_configs = api_config.apis.get_all_api_config_by_url(no_base_url, base=api_config.apis.base)
+
+        if http_method.upper() == "GET":
+            request_params = self._client_get_req_func_params(one_api_configs[http_method.upper()])
+        else:
+            if payload:
+                request_params = {
+                    "json": payload,
+                    "headers": {"Content-Type": "application/json"},
+                }
             else:
-                params = self._client_non_get_req_func_params(one_api_config)
-            response = getattr(client, one_api_config.http.request.method.lower())(
-                api_config.apis.base.url + one_api_config.url, **params
-            )
-            under_test_http_resp = self._deserialize_response(response)
+                request_params = {
+                    "headers": {"Content-Type": "application/json"},
+                }
+        # TODO: Remove here code if done troubleshooting
+        import flask
 
-            # Get the expected result data
-            assert one_api_config.http.response
-            expected_http_resp = _HTTPResponse.generate(data=one_api_config.http.response.value)
+        if isinstance(client, flask.testing.FlaskClient) and http_method.upper() == "DELETE":
+            print(f"[DEBUG in test] run flask test client with delete")
+            # response = client.delete(url, headers={"Content-Type": "application/x-www-form-urlencoded"})
+            response = client.delete(url, headers={"accept": "application/json"})
+        else:
+            response = getattr(client, http_method.lower())(url, **request_params)
+        under_test_http_resp = self._deserialize_response(response)
 
-            # Verify the result data
-            assert (
-                under_test_http_resp == expected_http_resp
-            ), f"The response data should be the same at mocked API '{one_api_name}'."
+        # Get the expected result data
+        expected_http_resp = _HTTPResponse.generate(data=one_api_configs[http_method.upper()].http.response.value)  # type: ignore[union-attr]
+
+        # Verify the result data
+        assert (
+            under_test_http_resp == expected_http_resp
+        ), f"The response data should be the same at mocked API '{one_api_configs[http_method.upper()]}'."
+
+        # for one_api_name, one_api_config in api_config.apis.apis.items():
+        #     # Send HTTP request to target API and get its response data
+        #     assert (
+        #         one_api_config
+        #         and one_api_config.http
+        #         and one_api_config.http.request
+        #         and one_api_config.http.request.method
+        #         and api_config.apis.base
+        #         and one_api_config.url
+        #     )
+        #     if one_api_config.http.request.method.lower() == "get":
+        #         params = self._client_get_req_func_params(one_api_config)
+        #     else:
+        #         params = self._client_non_get_req_func_params(one_api_config)
+        #     response = getattr(client, one_api_config.http.request.method.lower())(
+        #         api_config.apis.base.url + one_api_config.url, **params
+        #     )
+        #     under_test_http_resp = self._deserialize_response(response)
+        #
+        #     # Get the expected result data
+        #     assert one_api_config.http.response
+        #     expected_http_resp = _HTTPResponse.generate(data=one_api_config.http.response.value)
+        #
+        #     # Verify the result data
+        #     assert (
+        #         under_test_http_resp == expected_http_resp
+        #     ), f"The response data should be the same at mocked API '{one_api_name}'."
 
     def _client_non_get_req_func_params(self, one_api_config: MockAPI) -> dict:
-        if one_api_config.http.request.parameters:  # type: ignore[union-attr]
-            return {
-                "json": {"param1": "any_format"},
-                "headers": {"Content-Type": "application/json"},
-            }
+        params = one_api_config.http.request.parameters  # type: ignore[union-attr]
+        if params:
+            if APIParameter().deserialize(data=_Test_Iterable_Parameter) in params:
+                return {
+                    "json": {
+                        "param1": "any_format",
+                        "iterable_param": [
+                            {"name": "param1", "value": "value1"},
+                            {"name": "param2", "value": "value2"},
+                            {"name": "param3", "value": "value3"},
+                        ],
+                    },
+                    "headers": {"Content-Type": "application/json"},
+                }
+            else:
+                return {
+                    "json": {"param1": "any_format"},
+                    "headers": {"Content-Type": "application/json"},
+                }
         else:
-            return {
-                "json": {},
-                "headers": {"Content-Type": "application/json"},
-            }
+            if one_api_config.http.request.method.upper() == "DELETE":  # type: ignore[union-attr]
+                return {
+                    # "headers": {"Content-Type": "application/json"},
+                }
+            else:
+                return {
+                    "json": {},
+                    "headers": {"Content-Type": "application/json"},
+                }
 
     @abstractmethod
     def _client_get_req_func_params(self, one_api_config: MockAPI) -> dict:
@@ -118,11 +223,25 @@ class TestMockHTTPServerWithFlaskApp(MockHTTPServerTestSpec):
         return mock_server_app.test_client()
 
     def _client_get_req_func_params(self, one_api_config: MockAPI) -> dict:
-        if one_api_config.http.request.parameters:  # type: ignore[union-attr]
-            return {
-                "query_string": {"param1": "any_format"},
-                "headers": {"Content-Type": "application/json"},
-            }
+        params = one_api_config.http.request.parameters  # type: ignore[union-attr]
+        if params:
+            if APIParameter().deserialize(data=_Test_Iterable_Parameter) in params:
+                return {
+                    "query_string": {
+                        "param1": "any_format",
+                        "iterable_param": [
+                            {"name": "param1", "value": "value1"},
+                            {"name": "param2", "value": "value2"},
+                            {"name": "param3", "value": "value3"},
+                        ],
+                    },
+                    "headers": {"Content-Type": "application/json"},
+                }
+            else:
+                return {
+                    "query_string": {"param1": "any_format"},
+                    "headers": {"Content-Type": "application/json"},
+                }
         else:
             return {
                 "query_string": {},
@@ -147,11 +266,25 @@ class TestMockHTTPServerWithFastAPIApp(MockHTTPServerTestSpec):
         return FastAPITestClient(mock_server_app)
 
     def _client_get_req_func_params(self, one_api_config: MockAPI) -> dict:
-        if one_api_config.http.request.parameters:  # type: ignore[union-attr]
-            return {
-                "params": {"param1": "any_format"},
-                "headers": {"Content-Type": "application/json"},
-            }
+        params = one_api_config.http.request.parameters  # type: ignore[union-attr]
+        if params:
+            if APIParameter().deserialize(data=_Test_Iterable_Parameter) in params:
+                return {
+                    "params": {
+                        "param1": "any_format",
+                        "iterable_param": [
+                            {"name": "param1", "value": "value1"},
+                            {"name": "param2", "value": "value2"},
+                            {"name": "param3", "value": "value3"},
+                        ],
+                    },
+                    "headers": {"Content-Type": "application/json"},
+                }
+            else:
+                return {
+                    "params": {"param1": "any_format"},
+                    "headers": {"Content-Type": "application/json"},
+                }
         else:
             return {
                 "params": {},

@@ -681,6 +681,14 @@ class MockAPIs(_Config):
                 return self._apis[k]
         return None
 
+    def get_all_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Dict[str, MockAPI]:
+        url = url.replace(base.url, "") if base else url
+        all_api_configs: Dict[str, MockAPI] = {}
+        for k, v in self._apis.items():
+            if v and v.url == url:
+                all_api_configs[v.http.request.method.upper()] = self._apis[k]  # type: ignore[union-attr,assignment]
+        return all_api_configs
+
     def group_by_url(self) -> Dict[str, List[MockAPI]]:
         apis = self._apis
         aggregated_apis: Dict[str, List[MockAPI]] = {}
