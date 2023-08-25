@@ -185,16 +185,17 @@ class RunMockApplicationTestSpec(CommandTestSpec, ABC):
         cls, api: str, http_method: str, expected_resp_content: str, resp_is_json_format: bool
     ) -> None:
         if http_method.upper() == "GET":
-            api_path = f"http://{_Bind_Host_And_Port.value}{api}?param1=any_format"
+            api_path = f"http://{_Bind_Host_And_Port.value}{api}\?param1\=any_format\&iterable_param\=test"
             option_data = ""
         else:
             api_path = f"http://{_Bind_Host_And_Port.value}{api}"
-            option_data = '-d \'{"param1": "any_format"}\''
-        curl_google_ps = subprocess.Popen(
-            f"curl {api_path} \
+            option_data = '-d \'{"param1": "any_format", "iterable_param": ["test_value"]}\''
+        curl_cmd_with_options = f"curl {api_path} \
               -X {http_method.upper()} \
               {option_data} \
-              -H 'Content-Type: application/json'",
+              -H 'Content-Type: application/json'"
+        curl_google_ps = subprocess.Popen(
+            curl_cmd_with_options,
             shell=True,
             stdout=subprocess.PIPE,
         )
