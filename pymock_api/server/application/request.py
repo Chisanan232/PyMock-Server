@@ -30,24 +30,29 @@ class FlaskRequest(BaseCurrentRequest):
 
     def api_parameters(self, **kwargs) -> dict:
         request: "flask.Request" = kwargs.get("request", self.request_instance())  # type: ignore
-        mock_api_details = kwargs.get("mock_api_details", None)
-        if not mock_api_details:
-            raise ValueError("Missing necessary argument *mock_api_details*.")
-        mock_api_params_info: List[APIParameter] = mock_api_details[self.api_path(request)][
-            self.http_method(request)
-        ].http.request.parameters
-        iterable_mock_api_params = list(filter(lambda p: p.value_type == "list", mock_api_params_info))
+        handled_api_params = {}
+        if request.method.upper() == "GET":
+            mock_api_details = kwargs.get("mock_api_details", None)
+            if not mock_api_details:
+                raise ValueError("Missing necessary argument *mock_api_details*.")
+            mock_api_params_info: List[APIParameter] = mock_api_details[self.api_path(request)][
+                self.http_method(request)
+            ].http.request.parameters
+            iterable_mock_api_params = list(filter(lambda p: p.value_type == "list", mock_api_params_info))
+
+            print(f"[DEBUG in src] iterable_mock_api_params: {iterable_mock_api_params}")
+            # Get iterable parameters (only for HTTP method *GET*)
+            for mock_api_param in iterable_mock_api_params:
+                iterable_api_param = request.args.getlist(mock_api_param.name)
+                print(f"[DEBUG in src] iterable_api_param: {iterable_api_param}")
+                handled_api_params[mock_api_param.name] = iterable_api_param
 
         # Get general parameters
         api_params = request.args if request.method.upper() == "GET" else request.form or request.data
+        print(f"[DEBUG in src] api_params: {api_params}")
         if api_params and isinstance(api_params, bytes):
             api_params = json.loads(api_params.decode("utf-8"))
-
-        # Get iterable parameters
-        handled_api_params = {}
-        for mock_api_param in iterable_mock_api_params:
-            iterable_api_param = request.args.getlist(mock_api_param.name)
-            handled_api_params[mock_api_param.name] = iterable_api_param
+            print(f"[DEBUG in src] try to JSONize api_params: {api_params}")
 
         if handled_api_params:
             for k, v in api_params.items():
