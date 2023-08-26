@@ -28,10 +28,10 @@ from ..._values import (
     _Test_API_Parameter,
     _Test_Config,
     _Test_HTTP_Resp,
-    _Test_Iterable_Parameter,
     _Test_Iterable_Parameter_Item_Name,
     _Test_Iterable_Parameter_Item_Value,
     _Test_Iterable_Parameter_Items,
+    _Test_Iterable_Parameter_With_MultiValue,
     _Test_Tag,
     _Test_URL,
     _TestConfig,
@@ -780,21 +780,23 @@ class TestAPIParameter(ConfigTestSpec):
         assert obj.items is None
 
     def test_serialize_api_parameter_with_iterable_items(self, sut_with_nothing: APIParameter):
-        sut_with_nothing.deserialize(_Test_Iterable_Parameter)
+        sut_with_nothing.deserialize(_Test_Iterable_Parameter_With_MultiValue)
         serialized_data = sut_with_nothing.serialize()
-        assert serialized_data == _Test_Iterable_Parameter
+        assert serialized_data == _Test_Iterable_Parameter_With_MultiValue
 
     def test_deserialize_api_parameter_with_iterable_items(self, sut_with_nothing: APIParameter):
-        sut_with_nothing.deserialize(_Test_Iterable_Parameter)
-        assert sut_with_nothing.name == _Test_Iterable_Parameter["name"]
-        assert sut_with_nothing.required == _Test_Iterable_Parameter["required"]
-        assert sut_with_nothing.default == _Test_Iterable_Parameter["default"]
-        assert sut_with_nothing.value_type == _Test_Iterable_Parameter["type"]
-        assert sut_with_nothing.value_format == _Test_Iterable_Parameter["format"]
+        sut_with_nothing.deserialize(_Test_Iterable_Parameter_With_MultiValue)
+        assert sut_with_nothing.name == _Test_Iterable_Parameter_With_MultiValue["name"]
+        assert sut_with_nothing.required == _Test_Iterable_Parameter_With_MultiValue["required"]
+        assert sut_with_nothing.default == _Test_Iterable_Parameter_With_MultiValue["default"]
+        assert sut_with_nothing.value_type == _Test_Iterable_Parameter_With_MultiValue["type"]
+        assert sut_with_nothing.value_format == _Test_Iterable_Parameter_With_MultiValue["format"]
         assert len(sut_with_nothing.items) == len(_Test_Iterable_Parameter_Items)
-        assert [item.serialize() for item in sut_with_nothing.items] == _Test_Iterable_Parameter["items"]
+        assert [item.serialize() for item in sut_with_nothing.items] == _Test_Iterable_Parameter_With_MultiValue[
+            "items"
+        ]
 
-    @pytest.mark.parametrize("items_value", [_Test_Iterable_Parameter])
+    @pytest.mark.parametrize("items_value", [_Test_Iterable_Parameter_With_MultiValue])
     def test_converting_at_prop_items_with_valid_value(self, items_value: dict):
         under_test = APIParameter(
             name=items_value["name"],

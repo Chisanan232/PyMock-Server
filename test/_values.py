@@ -44,7 +44,7 @@ _Test_Iterable_Parameter_Item_Value: dict = {
     "type": "str",
 }
 _Test_Iterable_Parameter_Items: List[dict] = [_Test_Iterable_Parameter_Item_Name, _Test_Iterable_Parameter_Item_Value]
-_Test_Iterable_Parameter: dict = {
+_Test_Iterable_Parameter_With_MultiValue: dict = {
     "name": "iterable_param",
     "required": True,
     "default": None,
@@ -87,7 +87,7 @@ _Test_API_Parameters: List[dict] = [
     _Test_API_Parameter_With_Int,
     _Test_API_Parameter_With_Str,
     _Test_API_Parameter_Without_Default,
-    _Test_Iterable_Parameter,
+    _Test_Iterable_Parameter_With_MultiValue,
 ]
 
 # Sample API for testing ('<base URL>/google' with GET)

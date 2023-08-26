@@ -21,7 +21,7 @@ from ...._values import (
     _Post_Google_Home_Value,
     _Put_Google_Home_Value,
     _Test_Home,
-    _Test_Iterable_Parameter,
+    _Test_Iterable_Parameter_With_MultiValue,
     _YouTube_API_Content,
     _YouTube_Home_Value,
 )
@@ -176,7 +176,7 @@ class MockHTTPServerTestSpec:
     def _client_non_get_req_func_params(self, one_api_config: MockAPI) -> dict:
         params = one_api_config.http.request.parameters  # type: ignore[union-attr]
         if params:
-            if APIParameter().deserialize(data=_Test_Iterable_Parameter) in params:
+            if APIParameter().deserialize(data=_Test_Iterable_Parameter_With_MultiValue) in params:
                 return {
                     "json": {
                         "param1": "any_format",
@@ -225,7 +225,7 @@ class TestMockHTTPServerWithFlaskApp(MockHTTPServerTestSpec):
     def _client_get_req_func_params(self, one_api_config: MockAPI) -> dict:
         params = one_api_config.http.request.parameters  # type: ignore[union-attr]
         if params:
-            if APIParameter().deserialize(data=_Test_Iterable_Parameter) in params:
+            if APIParameter().deserialize(data=_Test_Iterable_Parameter_With_MultiValue) in params:
                 return {
                     "query_string": {
                         "param1": "any_format",
@@ -268,7 +268,7 @@ class TestMockHTTPServerWithFastAPIApp(MockHTTPServerTestSpec):
     def _client_get_req_func_params(self, one_api_config: MockAPI) -> dict:
         params = one_api_config.http.request.parameters  # type: ignore[union-attr]
         if params:
-            if APIParameter().deserialize(data=_Test_Iterable_Parameter) in params:
+            if APIParameter().deserialize(data=_Test_Iterable_Parameter_With_MultiValue) in params:
                 return {
                     "params": {
                         "param1": "any_format",
