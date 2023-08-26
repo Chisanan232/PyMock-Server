@@ -44,6 +44,14 @@ _Test_Iterable_Parameter_Item_Value: dict = {
     "type": "str",
 }
 _Test_Iterable_Parameter_Items: List[dict] = [_Test_Iterable_Parameter_Item_Name, _Test_Iterable_Parameter_Item_Value]
+_Test_Iterable_Parameter_With_Single_Value: dict = {
+    "name": "single_iterable_param",
+    "required": True,
+    "default": None,
+    "type": "list",
+    "format": None,
+    "items": [_Test_Iterable_Parameter_Item_Name],
+}
 _Test_Iterable_Parameter_With_MultiValue: dict = {
     "name": "iterable_param",
     "required": True,
@@ -87,8 +95,20 @@ _Test_API_Parameters: List[dict] = [
     _Test_API_Parameter_With_Int,
     _Test_API_Parameter_With_Str,
     _Test_API_Parameter_Without_Default,
-    _Test_Iterable_Parameter_With_MultiValue,
 ]
+
+
+def _api_params(iterable_param_type: str) -> List[dict]:
+    params = _Test_API_Parameters.copy()
+    if iterable_param_type == "single":
+        params.append(_Test_Iterable_Parameter_With_Single_Value)
+        return params
+    elif iterable_param_type == "multiple":
+        params.append(_Test_Iterable_Parameter_With_MultiValue)
+        return params
+    else:
+        raise TypeError
+
 
 # Sample API for testing ('<base URL>/google' with GET)
 _Google_Home_Value: dict = {
@@ -96,7 +116,7 @@ _Google_Home_Value: dict = {
     "http": {
         "request": {
             "method": "GET",
-            "parameters": _Test_API_Parameters,
+            "parameters": _api_params("single"),
         },
         "response": {"value": "This is Google home API."},
     },
@@ -107,7 +127,7 @@ _Post_Google_Home_Value: dict = {
     "http": {
         "request": {
             "method": "POST",
-            "parameters": _Test_API_Parameters,
+            "parameters": _api_params("multiple"),
         },
         "response": {"value": "This is Google home API with POST method."},
     },

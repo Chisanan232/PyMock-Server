@@ -72,6 +72,35 @@ class HTTPRequestProcess(BaseHTTPProcess):
                         f"implementation of Back-End site (*{locate(param_info.value_type)}*).",
                         status_code=400,
                     )
+                # Check the element of list
+                if param_info.value_type and locate(param_info.value_type) is list and param_info.items:
+                    assert isinstance(one_req_param_value, list)
+                    for e in one_req_param_value:
+                        if len(param_info.items) > 1:
+                            assert isinstance(e, dict), "The data type of item object must be *dict* type."
+                            for item in param_info.items:
+                                if item.required is True and item.name not in e.keys():
+                                    return self._generate_http_response(
+                                        f"Miss required parameter *{param_info.name}.{item.name}*.",
+                                        status_code=400,
+                                    )
+                                if item.value_type and not isinstance(e[item.name], locate(item.value_type)):  # type: ignore[arg-type]
+                                    return self._generate_http_response(
+                                        f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different "
+                                        f"with the implementation of Back-End site (*{locate(param_info.value_type)}*).",
+                                        status_code=400,
+                                    )
+                        elif len(param_info.items) == 1:
+                            assert isinstance(
+                                e, (str, int, float)
+                            ), "The data type of item object must be *str*, *int* or *float* type."
+                            item = param_info.items[0]
+                            if item.value_type and not isinstance(e, locate(item.value_type)):  # type: ignore[arg-type]
+                                return self._generate_http_response(
+                                    f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different "
+                                    f"with the implementation of Back-End site (*{locate(param_info.value_type)}*).",
+                                    status_code=400,
+                                )
                 # Check the data format of parameter
                 if param_info.value_format and not re.search(
                     param_info.value_format, one_req_param_value, re.IGNORECASE

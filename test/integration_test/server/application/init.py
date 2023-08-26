@@ -78,11 +78,7 @@ class MockHTTPServerTestSpec:
                 api=_Google_Home_Value,
                 payload={
                     "param1": "any_format",
-                    "iterable_param": [
-                        {"name": "param1", "value": "value1"},
-                        {"name": "param2", "value": "value2"},
-                        {"name": "param3", "value": "value3"},
-                    ],
+                    "single_iterable_param": ["param1", "param2", "param3"],
                 },
             ),
             _test_api_attr(
@@ -115,7 +111,7 @@ class MockHTTPServerTestSpec:
         one_api_configs = api_config.apis.get_all_api_config_by_url(no_base_url, base=api_config.apis.base)
 
         if http_method.upper() == "GET":
-            request_params = self._client_get_req_func_params(one_api_configs[http_method.upper()])
+            request_params = self._client_get_req_func_params(one_api_configs[http_method.upper()], payload)
         else:
             if payload:
                 request_params = {
@@ -134,6 +130,7 @@ class MockHTTPServerTestSpec:
             # response = client.delete(url, headers={"Content-Type": "application/x-www-form-urlencoded"})
             response = client.delete(url, headers={"accept": "application/json"})
         else:
+            print(f"[DEBUG in test] request_params: {request_params}")
             response = getattr(client, http_method.lower())(url, **request_params)
         under_test_http_resp = self._deserialize_response(response)
 
@@ -205,7 +202,7 @@ class MockHTTPServerTestSpec:
                 }
 
     @abstractmethod
-    def _client_get_req_func_params(self, one_api_config: MockAPI) -> dict:
+    def _client_get_req_func_params(self, one_api_config: MockAPI, payload: dict) -> dict:
         pass
 
     @abstractmethod
@@ -222,24 +219,17 @@ class TestMockHTTPServerWithFlaskApp(MockHTTPServerTestSpec):
     def client(self, mock_server_app: flask.Flask) -> "flask.testing.FlaskClient":
         return mock_server_app.test_client()
 
-    def _client_get_req_func_params(self, one_api_config: MockAPI) -> dict:
+    def _client_get_req_func_params(self, one_api_config: MockAPI, payload: dict) -> dict:
         params = one_api_config.http.request.parameters  # type: ignore[union-attr]
         if params:
             if APIParameter().deserialize(data=_Test_Iterable_Parameter_With_MultiValue) in params:
                 return {
-                    "query_string": {
-                        "param1": "any_format",
-                        "iterable_param": [
-                            {"name": "param1", "value": "value1"},
-                            {"name": "param2", "value": "value2"},
-                            {"name": "param3", "value": "value3"},
-                        ],
-                    },
+                    "query_string": payload,
                     "headers": {"Content-Type": "application/json"},
                 }
             else:
                 return {
-                    "query_string": {"param1": "any_format"},
+                    "query_string": payload,
                     "headers": {"Content-Type": "application/json"},
                 }
         else:
@@ -265,24 +255,17 @@ class TestMockHTTPServerWithFastAPIApp(MockHTTPServerTestSpec):
     def client(self, mock_server_app: fastapi.FastAPI) -> FastAPITestClient:
         return FastAPITestClient(mock_server_app)
 
-    def _client_get_req_func_params(self, one_api_config: MockAPI) -> dict:
+    def _client_get_req_func_params(self, one_api_config: MockAPI, payload: dict) -> dict:
         params = one_api_config.http.request.parameters  # type: ignore[union-attr]
         if params:
             if APIParameter().deserialize(data=_Test_Iterable_Parameter_With_MultiValue) in params:
                 return {
-                    "params": {
-                        "param1": "any_format",
-                        "iterable_param": [
-                            {"name": "param1", "value": "value1"},
-                            {"name": "param2", "value": "value2"},
-                            {"name": "param3", "value": "value3"},
-                        ],
-                    },
+                    "params": payload,
                     "headers": {"Content-Type": "application/json"},
                 }
             else:
                 return {
-                    "params": {"param1": "any_format"},
+                    "params": payload,
                     "headers": {"Content-Type": "application/json"},
                 }
         else:

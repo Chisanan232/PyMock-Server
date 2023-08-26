@@ -185,7 +185,7 @@ class RunMockApplicationTestSpec(CommandTestSpec, ABC):
         cls, api: str, http_method: str, expected_resp_content: str, resp_is_json_format: bool
     ) -> None:
         if http_method.upper() == "GET":
-            api_path = f"http://{_Bind_Host_And_Port.value}{api}\?param1\=any_format\&iterable_param\=test"
+            api_path = f"http://{_Bind_Host_And_Port.value}{api}\?param1\=any_format\&single_iterable_param\=test"
             option_data = ""
         else:
             api_path = f"http://{_Bind_Host_And_Port.value}{api}"
