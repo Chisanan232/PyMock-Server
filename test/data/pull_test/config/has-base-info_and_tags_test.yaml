@@ -43,7 +43,7 @@ mocked_apis:
       response:
         value: '{}'
     tag: 'foo'
-  get_foo-boo_export:
+  get_foo_boo_export:
     url: '/foo-boo/export'
     http:
       request:

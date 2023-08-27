@@ -28,10 +28,10 @@ from ..._values import (
     _Test_API_Parameter,
     _Test_Config,
     _Test_HTTP_Resp,
-    _Test_Iterable_Parameter,
     _Test_Iterable_Parameter_Item_Name,
     _Test_Iterable_Parameter_Item_Value,
     _Test_Iterable_Parameter_Items,
+    _Test_Iterable_Parameter_With_MultiValue,
     _Test_Tag,
     _Test_URL,
     _TestConfig,
@@ -391,6 +391,40 @@ class TestMockAPIs(ConfigTestSpec):
         api_config = sut.get_api_config_by_url(url="Not exist this path's API config")
         assert api_config is None
 
+    def test_group_by_url(self, sut_with_nothing: MockAPIs):
+        foo_get_api = MockAPI(url="/foo")
+        foo_get_api.set_request(method="GET")
+
+        foo_post_api = MockAPI(url="/foo")
+        foo_post_api.set_request(method="POST")
+
+        foo_boo_api = MockAPI(url="/foo-boo")
+        foo_boo_api.set_request(method="GET")
+
+        sut_with_nothing.apis = {
+            "get_foo": foo_get_api,
+            "post_foo": foo_post_api,
+            "get_foo_boo": foo_boo_api,
+        }
+
+        aggregated_apis = sut_with_nothing.group_by_url()
+
+        assert len(aggregated_apis.keys()) == 2
+
+        assert "/foo" in aggregated_apis.keys() and "/foo-boo" in aggregated_apis.keys()
+        for val in aggregated_apis.values():
+            assert isinstance(val, list)
+            assert False not in list(map(lambda a: isinstance(a, MockAPI), val))
+
+        assert len(aggregated_apis["/foo"]) == 2
+        assert len(aggregated_apis["/foo-boo"]) == 1
+
+        assert [a.http.request.method for a in aggregated_apis["/foo"]] == [
+            foo_get_api.http.request.method,
+            foo_post_api.http.request.method,
+        ]
+        assert [a.http.request.method for a in aggregated_apis["/foo-boo"]] == [foo_boo_api.http.request.method]
+
 
 class TestBaseConfig(ConfigTestSpec):
     @pytest.fixture(scope="function")
@@ -746,21 +780,23 @@ class TestAPIParameter(ConfigTestSpec):
         assert obj.items is None
 
     def test_serialize_api_parameter_with_iterable_items(self, sut_with_nothing: APIParameter):
-        sut_with_nothing.deserialize(_Test_Iterable_Parameter)
+        sut_with_nothing.deserialize(_Test_Iterable_Parameter_With_MultiValue)
         serialized_data = sut_with_nothing.serialize()
-        assert serialized_data == _Test_Iterable_Parameter
+        assert serialized_data == _Test_Iterable_Parameter_With_MultiValue
 
     def test_deserialize_api_parameter_with_iterable_items(self, sut_with_nothing: APIParameter):
-        sut_with_nothing.deserialize(_Test_Iterable_Parameter)
-        assert sut_with_nothing.name == _Test_Iterable_Parameter["name"]
-        assert sut_with_nothing.required == _Test_Iterable_Parameter["required"]
-        assert sut_with_nothing.default == _Test_Iterable_Parameter["default"]
-        assert sut_with_nothing.value_type == _Test_Iterable_Parameter["type"]
-        assert sut_with_nothing.value_format == _Test_Iterable_Parameter["format"]
+        sut_with_nothing.deserialize(_Test_Iterable_Parameter_With_MultiValue)
+        assert sut_with_nothing.name == _Test_Iterable_Parameter_With_MultiValue["name"]
+        assert sut_with_nothing.required == _Test_Iterable_Parameter_With_MultiValue["required"]
+        assert sut_with_nothing.default == _Test_Iterable_Parameter_With_MultiValue["default"]
+        assert sut_with_nothing.value_type == _Test_Iterable_Parameter_With_MultiValue["type"]
+        assert sut_with_nothing.value_format == _Test_Iterable_Parameter_With_MultiValue["format"]
         assert len(sut_with_nothing.items) == len(_Test_Iterable_Parameter_Items)
-        assert [item.serialize() for item in sut_with_nothing.items] == _Test_Iterable_Parameter["items"]
+        assert [item.serialize() for item in sut_with_nothing.items] == _Test_Iterable_Parameter_With_MultiValue[
+            "items"
+        ]
 
-    @pytest.mark.parametrize("items_value", [_Test_Iterable_Parameter])
+    @pytest.mark.parametrize("items_value", [_Test_Iterable_Parameter_With_MultiValue])
     def test_converting_at_prop_items_with_valid_value(self, items_value: dict):
         under_test = APIParameter(
             name=items_value["name"],

@@ -322,7 +322,10 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
         assert len(under_test.apis.apis.keys()) == len(data_from.paths)
         for api_path, api_details in under_test.apis.apis.items():
             expect_apis = list(
-                filter(lambda a: api_path == f'{a.http_method}_{a.path[1:].replace("/", "_")}', data_from.paths)
+                filter(
+                    lambda a: api_path == f'{a.http_method}_{a.path[1:].replace("/", "_").replace("-", "_")}',
+                    data_from.paths,
+                )
             )
             assert expect_apis
             expect_api = expect_apis[0]

@@ -44,7 +44,15 @@ _Test_Iterable_Parameter_Item_Value: dict = {
     "type": "str",
 }
 _Test_Iterable_Parameter_Items: List[dict] = [_Test_Iterable_Parameter_Item_Name, _Test_Iterable_Parameter_Item_Value]
-_Test_Iterable_Parameter: dict = {
+_Test_Iterable_Parameter_With_Single_Value: dict = {
+    "name": "single_iterable_param",
+    "required": True,
+    "default": None,
+    "type": "list",
+    "format": None,
+    "items": [_Test_Iterable_Parameter_Item_Name],
+}
+_Test_Iterable_Parameter_With_MultiValue: dict = {
     "name": "iterable_param",
     "required": True,
     "default": None,
@@ -89,15 +97,60 @@ _Test_API_Parameters: List[dict] = [
     _Test_API_Parameter_Without_Default,
 ]
 
+
+def _api_params(iterable_param_type: str) -> List[dict]:
+    params = _Test_API_Parameters.copy()
+    if iterable_param_type == "single":
+        params.append(_Test_Iterable_Parameter_With_Single_Value)
+        return params
+    elif iterable_param_type == "multiple":
+        params.append(_Test_Iterable_Parameter_With_MultiValue)
+        return params
+    else:
+        raise TypeError
+
+
 # Sample API for testing ('<base URL>/google' with GET)
 _Google_Home_Value: dict = {
     "url": "/google",
     "http": {
         "request": {
             "method": "GET",
-            "parameters": _Test_API_Parameters,
+            "parameters": _api_params("single"),
         },
         "response": {"value": "This is Google home API."},
+    },
+}
+
+_Post_Google_Home_Value: dict = {
+    "url": "/google",
+    "http": {
+        "request": {
+            "method": "POST",
+            "parameters": _api_params("multiple"),
+        },
+        "response": {"value": "This is Google home API with POST method."},
+    },
+}
+
+_Put_Google_Home_Value: dict = {
+    "url": "/google",
+    "http": {
+        "request": {
+            "method": "PUT",
+            "parameters": [_Test_API_Parameter],
+        },
+        "response": {"value": "Change something successfully."},
+    },
+}
+
+_Delete_Google_Home_Value: dict = {
+    "url": "/google",
+    "http": {
+        "request": {
+            "method": "DELETE",
+        },
+        "response": {"value": "Delete successfully."},
     },
 }
 
@@ -132,6 +185,9 @@ _YouTube_API_Content: dict = {"responseCode": "200", "errorMessage": "OK", "cont
 _Mocked_APIs: dict = {
     "base": {"url": _Base_URL},
     "google_home": _Google_Home_Value,
+    "post_google_home": _Post_Google_Home_Value,
+    "put_google_home": _Put_Google_Home_Value,
+    "delete_google_home": _Delete_Google_Home_Value,
     "test_home": _Test_Home,
     "youtube_home": _YouTube_Home_Value,
 }
