@@ -42,6 +42,19 @@ def set_component_definition(data: dict, key: str = "definitions") -> None:
     ComponentDefinition = data.get(key, {})
 
 
+def has_schema(data: Dict) -> bool:
+    return data.get("schema", None) is not None
+
+
+def has_ref(data: Dict) -> str:
+    if has_schema(data):
+        has_schema_ref = data["schema"].get("$ref", None) is not None
+        return "schema" if has_schema_ref else ""
+    else:
+        _has_ref = data.get("$ref", None) is not None
+        return "ref" if _has_ref else ""
+
+
 class BaseSwaggerDataModel(metaclass=ABCMeta):
     @abstractmethod
     def deserialize(self, data: Dict) -> Self:
@@ -98,24 +111,13 @@ class APIParameter(Transferable):
             items=self.items,
         )
 
-    def has_schema(self, data: Dict) -> bool:
-        return data.get("schema", None) is not None
-
-    def has_ref(self, data: Dict) -> str:
-        if self.has_schema(data):
-            has_schema_ref = data["schema"].get("$ref", None) is not None
-            return "schema" if has_schema_ref else ""
-        else:
-            has_ref = data.get("$ref", None) is not None
-            return "ref" if has_ref else ""
-
     def parse_schema(self, data: Dict, accept_no_schema: bool = True) -> dict:
-        if not self.has_schema(data):
+        if not has_schema(data):
             if accept_no_schema:
                 return data
             raise ValueError(f"This data '{data}' doesn't have key 'schema'.")
 
-        if self.has_ref(data):
+        if has_ref(data):
             raise NotImplementedError
         else:
             return {
@@ -137,13 +139,13 @@ class API(Transferable):
     def deserialize(self, data: Dict) -> "API":
         self.parameters = self._process_api_params(data["parameters"])
         # TODO: Process the response
+        # status_200_response = data.get("responses", {}).get("200", {})
         self.response = {}
         self.tags = data.get("tags", [])
         return self
 
     def _process_api_params(self, params_data: List[dict]) -> List["APIParameter"]:
-        config_api_parameters = APIParameter()
-        has_ref_in_schema_param = list(filter(lambda p: config_api_parameters.has_ref(p) != "", params_data))
+        has_ref_in_schema_param = list(filter(lambda p: has_ref(p) != "", params_data))
         print(f"[DEBUG in swagger_config.API._process_api_params] params_data: {params_data}")
         if has_ref_in_schema_param:
             # TODO: Ensure the value maps this condition is really only one
@@ -162,12 +164,11 @@ class API(Transferable):
         request_body_params = self._get_schema_ref(data)
         # TODO: Should use the reference to get the details of parameters.
         parameters: List[dict] = []
-        config_api_parameters = APIParameter()
         for param_name, param_props in request_body_params["properties"].items():
             items = param_props.get("items", None)
             print(f"[DEBUG in swagger_config.API._process_has_ref_parameters] before items: {items}")
             items_props = []
-            if items and config_api_parameters.has_ref(items):
+            if items and has_ref(items):
                 items = self._get_schema_ref(items)
                 print(f"[DEBUG in swagger_config.API._process_has_ref_parameters] after items: {items}")
                 # Sample data:
@@ -209,11 +210,12 @@ class API(Transferable):
             else:
                 return _get_schema(component_def_data[paths[i]], paths, i + 1)
 
-        config_api_parameters = APIParameter()
-        has_ref = config_api_parameters.has_ref(data)
-        if not has_ref:
+        _has_ref = has_ref(data)
+        if not _has_ref:
             raise ValueError("This parameter has no ref in schema.")
-        schema_path = (data["schema"]["$ref"] if has_ref == "schema" else data["$ref"]).replace("#/", "").split("/")[1:]
+        schema_path = (
+            (data["schema"]["$ref"] if _has_ref == "schema" else data["$ref"]).replace("#/", "").split("/")[1:]
+        )
         # Operate the component definition object
         print(f"[DEBUG in swagger_config.API._get_schema_ref] schema_path: {schema_path}")
         return _get_schema(get_component_definition(), schema_path, 0)
