@@ -29,7 +29,7 @@ from pymock_api.server.application.response import (
     FlaskResponse,
 )
 
-from ...._values import _TestConfig
+from ...._values import _Google_Home_Value, _Post_Google_Home_Value, _TestConfig
 
 MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
 
@@ -77,7 +77,7 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
     @pytest.mark.parametrize(
         ("method", "api_params", "error_msg_like", "expected_status_code"),
         [
-            ("GET", {"param1": "any_format"}, None, 200),
+            ("GET", {"param1": "any_format", "single_iterable_param": ["param1", "param2", "param3"]}, None, 200),
             ("GET", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
             ("GET", {"param1": None}, ["Miss required parameter"], 400),
             ("GET", {"param1": 123}, ["type of data", "is different"], 400),
@@ -104,7 +104,10 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
         )
         # Mock API attribute and function
         sut_instance._mock_api_details = {
-            "/test-api-path": {_TestConfig.Request["method"]: MockAPI().deserialize(_TestConfig.Mock_API)}
+            "/test-api-path": {
+                _Google_Home_Value["http"]["request"]["method"]: MockAPI().deserialize(_Google_Home_Value),
+                _Post_Google_Home_Value["http"]["request"]["method"]: MockAPI().deserialize(_Post_Google_Home_Value),
+            }
         }
 
         # Run target function
@@ -161,10 +164,18 @@ class TestHTTPRequestProcessWithFlask(HTTPProcessTestSpec):
         return MockerModule(module_path="flask.Flask", return_value=FakeFlask("PyTest-Used"))
 
     def _mock_request(self, method: str, api_params: dict) -> Mock:
+        class DummyDict(dict):
+            def getlist(self):
+                pass
+
+        dd = DummyDict()
+        dd.update(**api_params)
+
         request = Mock()
         request.path = "/test-api-path"
         request.method = method
-        request.args = api_params
+        request.args = dd
+        request.args.getlist = MagicMock(return_value=[])  # type: ignore[method-assign]
         return request
 
     def _run_request_process_func(self, sut: HTTPRequestProcess, **kwargs) -> "flask.Response":  # type: ignore[name-defined,override]
