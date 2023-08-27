@@ -77,10 +77,13 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
     @pytest.mark.parametrize(
         ("method", "api_params", "error_msg_like", "expected_status_code"),
         [
+            # Valid request with *GET* HTTP method
             ("GET", {"param1": "any_format", "single_iterable_param": ["param1", "param2", "param3"]}, None, 200),
+            # Invalid request with *GET* HTTP method
             ("GET", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
             ("GET", {"param1": None}, ["Miss required parameter"], 400),
             ("GET", {"param1": 123}, ["type of data", "is different"], 400),
+            ("GET", {"param1": "any_format", "single_iterable_param": [123]}, ["type of data", "is different"], 400),
             ("GET", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
         ],
     )
@@ -164,6 +167,15 @@ class TestHTTPRequestProcessWithFlask(HTTPProcessTestSpec):
         return MockerModule(module_path="flask.Flask", return_value=FakeFlask("PyTest-Used"))
 
     def _mock_request(self, method: str, api_params: dict) -> Mock:
+        def _get_list_param() -> str:
+            has_single_iterable_param = api_params.get("single_iterable_param", None) is not None
+            has_iterable_param = api_params.get("iterable_param", None) is not None
+            if has_single_iterable_param:
+                return "single_iterable_param"
+            if has_iterable_param:
+                return "iterable_param"
+            return "just_mock"  # Doesn't have iterable parameter, so mock it as empty list.
+
         class DummyDict(dict):
             def getlist(self):
                 pass
@@ -175,7 +187,7 @@ class TestHTTPRequestProcessWithFlask(HTTPProcessTestSpec):
         request.path = "/test-api-path"
         request.method = method
         request.args = dd
-        request.args.getlist = MagicMock(return_value=[])  # type: ignore[method-assign]
+        request.args.getlist = MagicMock(return_value=api_params.get(_get_list_param(), []))  # type: ignore[method-assign]
         return request
 
     def _run_request_process_func(self, sut: HTTPRequestProcess, **kwargs) -> "flask.Response":  # type: ignore[name-defined,override]
