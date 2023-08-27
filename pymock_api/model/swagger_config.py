@@ -42,17 +42,19 @@ def set_component_definition(data: dict, key: str = "definitions") -> None:
     ComponentDefinition = data.get(key, {})
 
 
-def has_schema(data: Dict) -> bool:
-    return data.get("schema", None) is not None
+class _YamlSchema:
+    @classmethod
+    def has_schema(cls, data: Dict) -> bool:
+        return data.get("schema", None) is not None
 
-
-def has_ref(data: Dict) -> str:
-    if has_schema(data):
-        has_schema_ref = data["schema"].get("$ref", None) is not None
-        return "schema" if has_schema_ref else ""
-    else:
-        _has_ref = data.get("$ref", None) is not None
-        return "ref" if _has_ref else ""
+    @classmethod
+    def has_ref(cls, data: Dict) -> str:
+        if cls.has_schema(data):
+            has_schema_ref = data["schema"].get("$ref", None) is not None
+            return "schema" if has_schema_ref else ""
+        else:
+            _has_ref = data.get("$ref", None) is not None
+            return "ref" if _has_ref else ""
 
 
 class BaseSwaggerDataModel(metaclass=ABCMeta):
@@ -112,12 +114,12 @@ class APIParameter(Transferable):
         )
 
     def parse_schema(self, data: Dict, accept_no_schema: bool = True) -> dict:
-        if not has_schema(data):
+        if not _YamlSchema.has_schema(data):
             if accept_no_schema:
                 return data
             raise ValueError(f"This data '{data}' doesn't have key 'schema'.")
 
-        if has_ref(data):
+        if _YamlSchema.has_ref(data):
             raise NotImplementedError
         else:
             return {
@@ -145,7 +147,7 @@ class API(Transferable):
         return self
 
     def _process_api_params(self, params_data: List[dict]) -> List["APIParameter"]:
-        has_ref_in_schema_param = list(filter(lambda p: has_ref(p) != "", params_data))
+        has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", params_data))
         print(f"[DEBUG in swagger_config.API._process_api_params] params_data: {params_data}")
         if has_ref_in_schema_param:
             # TODO: Ensure the value maps this condition is really only one
@@ -168,7 +170,7 @@ class API(Transferable):
             items = param_props.get("items", None)
             print(f"[DEBUG in swagger_config.API._process_has_ref_parameters] before items: {items}")
             items_props = []
-            if items and has_ref(items):
+            if items and _YamlSchema.has_ref(items):
                 items = self._get_schema_ref(items)
                 print(f"[DEBUG in swagger_config.API._process_has_ref_parameters] after items: {items}")
                 # Sample data:
@@ -210,7 +212,7 @@ class API(Transferable):
             else:
                 return _get_schema(component_def_data[paths[i]], paths, i + 1)
 
-        _has_ref = has_ref(data)
+        _has_ref = _YamlSchema.has_ref(data)
         if not _has_ref:
             raise ValueError("This parameter has no ref in schema.")
         schema_path = (
