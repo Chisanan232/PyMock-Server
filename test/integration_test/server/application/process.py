@@ -84,7 +84,7 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
             ("GET", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
         ],
     )
-    def test_request_process(
+    def test_invalid_request_process(
         self,
         method: str,
         api_params: dict,
