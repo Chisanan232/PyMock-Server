@@ -56,6 +56,24 @@ class _YamlSchema:
             _has_ref = data.get("$ref", None) is not None
             return "ref" if _has_ref else ""
 
+    @classmethod
+    def get_schema_ref(cls, data: dict) -> dict:
+        def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
+            if i == len(paths) - 1:
+                return component_def_data[paths[i]]
+            else:
+                return _get_schema(component_def_data[paths[i]], paths, i + 1)
+
+        _has_ref = _YamlSchema.has_ref(data)
+        if not _has_ref:
+            raise ValueError("This parameter has no ref in schema.")
+        schema_path = (
+            (data["schema"]["$ref"] if _has_ref == "schema" else data["$ref"]).replace("#/", "").split("/")[1:]
+        )
+        # Operate the component definition object
+        print(f"[DEBUG in swagger_config.API._get_schema_ref] schema_path: {schema_path}")
+        return _get_schema(get_component_definition(), schema_path, 0)
+
 
 class BaseSwaggerDataModel(metaclass=ABCMeta):
     @abstractmethod
@@ -163,7 +181,7 @@ class API(Transferable):
         return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
 
     def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
-        request_body_params = self._get_schema_ref(data)
+        request_body_params = _YamlSchema.get_schema_ref(data)
         # TODO: Should use the reference to get the details of parameters.
         parameters: List[dict] = []
         for param_name, param_props in request_body_params["properties"].items():
@@ -171,7 +189,7 @@ class API(Transferable):
             print(f"[DEBUG in swagger_config.API._process_has_ref_parameters] before items: {items}")
             items_props = []
             if items and _YamlSchema.has_ref(items):
-                items = self._get_schema_ref(items)
+                items = _YamlSchema.get_schema_ref(items)
                 print(f"[DEBUG in swagger_config.API._process_has_ref_parameters] after items: {items}")
                 # Sample data:
                 # {
@@ -204,23 +222,6 @@ class API(Transferable):
                 }
             )
         return parameters
-
-    def _get_schema_ref(self, data: dict) -> dict:
-        def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
-            if i == len(paths) - 1:
-                return component_def_data[paths[i]]
-            else:
-                return _get_schema(component_def_data[paths[i]], paths, i + 1)
-
-        _has_ref = _YamlSchema.has_ref(data)
-        if not _has_ref:
-            raise ValueError("This parameter has no ref in schema.")
-        schema_path = (
-            (data["schema"]["$ref"] if _has_ref == "schema" else data["$ref"]).replace("#/", "").split("/")[1:]
-        )
-        # Operate the component definition object
-        print(f"[DEBUG in swagger_config.API._get_schema_ref] schema_path: {schema_path}")
-        return _get_schema(get_component_definition(), schema_path, 0)
 
     def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
         mock_api = MockAPI(url=self.path.replace(base_url, ""), tag=self.tags[0] if self.tags else "")
