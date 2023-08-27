@@ -85,6 +85,25 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
             ("GET", {"param1": 123}, ["type of data", "is different"], 400),
             ("GET", {"param1": "any_format", "single_iterable_param": [123]}, ["type of data", "is different"], 400),
             ("GET", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
+            # Valid request with *POST* HTTP method
+            ("POST", {"param1": "any_format", "iterable_param": [{"name": "param1", "value": "value1"}]}, None, 200),
+            # Invalid request with *POST* HTTP method
+            ("POST", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
+            ("POST", {"param1": None}, ["Miss required parameter"], 400),
+            ("POST", {"param1": 123}, ["type of data", "is different"], 400),
+            (
+                "POST",
+                {"param1": "any_format", "iterable_param": [{"name": "param1", "miss_param": "miss_param"}]},
+                ["Miss required parameter"],
+                400,
+            ),
+            (
+                "POST",
+                {"param1": "any_format", "iterable_param": [{"name": "param1", "value": 123}]},
+                ["type of data", "is different"],
+                400,
+            ),
+            ("POST", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
         ],
     )
     def test_invalid_request_process(
@@ -186,8 +205,12 @@ class TestHTTPRequestProcessWithFlask(HTTPProcessTestSpec):
         request = Mock()
         request.path = "/test-api-path"
         request.method = method
-        request.args = dd
-        request.args.getlist = MagicMock(return_value=api_params.get(_get_list_param(), []))  # type: ignore[method-assign]
+        if method.upper() == "GET":
+            request.args = dd
+            request.args.getlist = MagicMock(return_value=api_params.get(_get_list_param(), []))  # type: ignore[method-assign]
+        else:
+            request.form = None
+            request.data = dd
         return request
 
     def _run_request_process_func(self, sut: HTTPRequestProcess, **kwargs) -> "flask.Response":  # type: ignore[name-defined,override]
