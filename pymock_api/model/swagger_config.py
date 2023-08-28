@@ -1,5 +1,8 @@
 import json
+import random
+import string
 from abc import ABCMeta, abstractmethod
+from pydoc import locate
 from typing import Any, Dict, List, Optional
 
 from pymock_api.model.api_config import APIConfig
@@ -18,6 +21,8 @@ def convert_js_type(t: str) -> str:
         return "bool"
     elif t == "array":
         return "list"
+    elif t == "file":
+        return "file"
     else:
         raise TypeError(f"Currently, it cannot parse JS type '{t}'.")
 
@@ -158,9 +163,7 @@ class API(Transferable):
 
     def deserialize(self, data: Dict) -> "API":
         self.parameters = self._process_api_params(data["parameters"])
-        # TODO: Process the response
-        # status_200_response = data.get("responses", {}).get("200", {})
-        self.response = {}
+        self.response = self._process_response(data)
         self.tags = data.get("tags", [])
         return self
 
@@ -222,6 +225,68 @@ class API(Transferable):
                 }
             )
         return parameters
+
+    def _process_response(self, data: dict) -> dict:
+        status_200_response = data.get("responses", {}).get("200", {})
+        if _YamlSchema.has_schema(status_200_response):
+            response_schema = _YamlSchema.get_schema_ref(status_200_response)
+            print(f"[DEBUG in src] response_schema: {response_schema}")
+            response_data = {}
+            response_schema_properties = response_schema.get("properties", None)
+            if response_schema_properties:
+                print(f"[DEBUG in src] response_schema_properties: {response_schema_properties}")
+                for k, v in response_schema_properties.items():
+                    print(f"[DEBUG in src] v: {v}")
+                    if _YamlSchema.has_ref(v):
+                        v_ref = _YamlSchema.get_schema_ref(v)
+                        print(f"[DEBUG in src] v_ref: {v_ref}")
+                        k_value = "FIXME: Handle the reference"
+                    else:
+                        v_type = convert_js_type(v["type"])
+                        if locate(v_type) == list:
+                            single_response = _YamlSchema.get_schema_ref(v["items"])
+                            item = {}
+                            single_response_properties = single_response.get("properties", None)
+                            print(f"[DEBUG in src] single_response_properties: {single_response_properties}")
+                            if single_response_properties:
+                                for item_k, item_v in single_response["properties"].items():
+                                    print(f"[DEBUG in src] item_v: {item_v}")
+                                    print(f"[DEBUG in src] _YamlSchema.has_ref(item_v): {_YamlSchema.has_ref(item_v)}")
+                                    if _YamlSchema.has_ref(item_v):
+                                        # FIXME: Not sure how to handle this.
+                                        item_v_ref = _YamlSchema.get_schema_ref(item_v)
+                                        random_value = "FIXME: Handle input stream"
+                                    else:
+                                        item_type = convert_js_type(item_v["type"])
+                                        if locate(item_type) is str:
+                                            # lowercase_letters = string.ascii_lowercase
+                                            # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                                            random_value = "random string value"
+                                        elif locate(item_type) is int:
+                                            # random_value = int(
+                                            #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                                            random_value = "random integer value"
+                                        elif item_type is "file":
+                                            # TODO: Handle the file download feature
+                                            random_value = "file://test.json"
+                                        else:
+                                            raise ValueError
+                                    item[item_k] = random_value
+                            k_value = [item]  # type: ignore[assignment]
+                            # response_data[k] = [item]
+                        elif locate(v_type) == str:
+                            # lowercase_letters = string.ascii_lowercase
+                            # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                            k_value = "random string value"
+                        elif locate(v_type) == int:
+                            # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                            k_value = "random integer value"
+                        else:
+                            k_value = ""
+                    response_data[k] = k_value
+            return response_data
+        else:
+            return {}
 
     def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
         mock_api = MockAPI(url=self.path.replace(base_url, ""), tag=self.tags[0] if self.tags else "")
