@@ -252,25 +252,17 @@ class API(Transferable):
                                 for item_k, item_v in single_response["properties"].items():
                                     print(f"[DEBUG in src] item_v: {item_v}")
                                     print(f"[DEBUG in src] _YamlSchema.has_ref(item_v): {_YamlSchema.has_ref(item_v)}")
-                                    if _YamlSchema.has_ref(item_v):
-                                        # FIXME: Not sure how to handle this.
-                                        item_v_ref = _YamlSchema.get_schema_ref(item_v)
-                                        random_value = "FIXME: Handle input stream"
+                                    item_type = convert_js_type(item_v["type"])
+                                    if locate(item_type) is str:
+                                        # lowercase_letters = string.ascii_lowercase
+                                        # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                                        random_value = "random string value"
+                                    elif locate(item_type) is int:
+                                        # random_value = int(
+                                        #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                                        random_value = "random integer value"
                                     else:
-                                        item_type = convert_js_type(item_v["type"])
-                                        if locate(item_type) is str:
-                                            # lowercase_letters = string.ascii_lowercase
-                                            # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                                            random_value = "random string value"
-                                        elif locate(item_type) is int:
-                                            # random_value = int(
-                                            #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                                            random_value = "random integer value"
-                                        elif item_type is "file":
-                                            # TODO: Handle the file download feature
-                                            random_value = "file://test.json"
-                                        else:
-                                            raise ValueError
+                                        raise NotImplementedError
                                     item[item_k] = random_value
                             k_value = [item]  # type: ignore[assignment]
                             # response_data[k] = [item]
@@ -281,8 +273,13 @@ class API(Transferable):
                         elif locate(v_type) == int:
                             # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
                             k_value = "random integer value"
+                        elif locate(v_type) == bool:
+                            k_value = "random boolean value"
+                        elif v_type is "file":
+                            # TODO: Handle the file download feature
+                            k_value = "random file output stream"
                         else:
-                            k_value = ""
+                            raise NotImplementedError
                     response_data[k] = k_value
             return response_data
         else:
