@@ -228,62 +228,63 @@ class API(Transferable):
 
     def _process_response(self, data: dict) -> dict:
         status_200_response = data.get("responses", {}).get("200", {})
+        response_data = {}
         if _YamlSchema.has_schema(status_200_response):
             response_schema = _YamlSchema.get_schema_ref(status_200_response)
             print(f"[DEBUG in src] response_schema: {response_schema}")
-            response_data = {}
             response_schema_properties = response_schema.get("properties", None)
             if response_schema_properties:
                 print(f"[DEBUG in src] response_schema_properties: {response_schema_properties}")
                 for k, v in response_schema_properties.items():
                     print(f"[DEBUG in src] v: {v}")
-                    if _YamlSchema.has_ref(v):
-                        v_ref = _YamlSchema.get_schema_ref(v)
-                        print(f"[DEBUG in src] v_ref: {v_ref}")
-                        k_value = "FIXME: Handle the reference"
-                    else:
-                        v_type = convert_js_type(v["type"])
-                        if locate(v_type) == list:
-                            single_response = _YamlSchema.get_schema_ref(v["items"])
-                            item = {}
-                            single_response_properties = single_response.get("properties", None)
-                            print(f"[DEBUG in src] single_response_properties: {single_response_properties}")
-                            if single_response_properties:
-                                for item_k, item_v in single_response["properties"].items():
-                                    print(f"[DEBUG in src] item_v: {item_v}")
-                                    print(f"[DEBUG in src] _YamlSchema.has_ref(item_v): {_YamlSchema.has_ref(item_v)}")
-                                    item_type = convert_js_type(item_v["type"])
-                                    if locate(item_type) is str:
-                                        # lowercase_letters = string.ascii_lowercase
-                                        # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                                        random_value = "random string value"
-                                    elif locate(item_type) is int:
-                                        # random_value = int(
-                                        #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                                        random_value = "random integer value"
-                                    else:
-                                        raise NotImplementedError
-                                    item[item_k] = random_value
-                            k_value = [item]  # type: ignore[assignment]
-                            # response_data[k] = [item]
-                        elif locate(v_type) == str:
+                    response_data[k] = self._process_response_value(v)
+        return response_data
+
+    def _process_response_value(self, property_value: dict) -> str:
+        if _YamlSchema.has_ref(property_value):
+            # FIXME: Handle the reference
+            v_ref = _YamlSchema.get_schema_ref(property_value)
+            print(f"[DEBUG in src] v_ref: {v_ref}")
+            k_value = "FIXME: Handle the reference"
+        else:
+            v_type = convert_js_type(property_value["type"])
+            if locate(v_type) == list:
+                single_response = _YamlSchema.get_schema_ref(property_value["items"])
+                item = {}
+                single_response_properties = single_response.get("properties", None)
+                print(f"[DEBUG in src] single_response_properties: {single_response_properties}")
+                if single_response_properties:
+                    for item_k, item_v in single_response["properties"].items():
+                        print(f"[DEBUG in src] item_v: {item_v}")
+                        print(f"[DEBUG in src] _YamlSchema.has_ref(item_v): {_YamlSchema.has_ref(item_v)}")
+                        item_type = convert_js_type(item_v["type"])
+                        if locate(item_type) is str:
                             # lowercase_letters = string.ascii_lowercase
-                            # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                            k_value = "random string value"
-                        elif locate(v_type) == int:
-                            # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                            k_value = "random integer value"
-                        elif locate(v_type) == bool:
-                            k_value = "random boolean value"
-                        elif v_type is "file":
-                            # TODO: Handle the file download feature
-                            k_value = "random file output stream"
+                            # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                            random_value = "random string value"
+                        elif locate(item_type) is int:
+                            # random_value = int(
+                            #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                            random_value = "random integer value"
                         else:
                             raise NotImplementedError
-                    response_data[k] = k_value
-            return response_data
-        else:
-            return {}
+                        item[item_k] = random_value
+                k_value = [item]  # type: ignore[assignment]
+            elif locate(v_type) == str:
+                # lowercase_letters = string.ascii_lowercase
+                # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                k_value = "random string value"
+            elif locate(v_type) == int:
+                # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                k_value = "random integer value"
+            elif locate(v_type) == bool:
+                k_value = "random boolean value"
+            elif v_type is "file":
+                # TODO: Handle the file download feature
+                k_value = "random file output stream"
+            else:
+                raise NotImplementedError
+        return k_value
 
     def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
         mock_api = MockAPI(url=self.path.replace(base_url, ""), tag=self.tags[0] if self.tags else "")
