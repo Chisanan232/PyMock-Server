@@ -199,6 +199,9 @@
                 "url": {
                     "type": "string",
                     "format": "url"
+                },
+                "count": {
+                    "type": "integer"
                 }
             },
             "title": "Resource"
