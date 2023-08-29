@@ -1,5 +1,8 @@
 import json
+import random
+import string
 from abc import ABCMeta, abstractmethod
+from pydoc import locate
 from typing import Any, Dict, List, Optional
 
 from pymock_api.model.api_config import APIConfig
@@ -18,6 +21,8 @@ def convert_js_type(t: str) -> str:
         return "bool"
     elif t == "array":
         return "list"
+    elif t == "file":
+        return "file"
     else:
         raise TypeError(f"Currently, it cannot parse JS type '{t}'.")
 
@@ -40,6 +45,39 @@ def get_component_definition() -> Dict:
 def set_component_definition(data: dict, key: str = "definitions") -> None:
     global ComponentDefinition
     ComponentDefinition = data.get(key, {})
+
+
+class _YamlSchema:
+    @classmethod
+    def has_schema(cls, data: Dict) -> bool:
+        return data.get("schema", None) is not None
+
+    @classmethod
+    def has_ref(cls, data: Dict) -> str:
+        if cls.has_schema(data):
+            has_schema_ref = data["schema"].get("$ref", None) is not None
+            return "schema" if has_schema_ref else ""
+        else:
+            _has_ref = data.get("$ref", None) is not None
+            return "ref" if _has_ref else ""
+
+    @classmethod
+    def get_schema_ref(cls, data: dict) -> dict:
+        def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
+            if i == len(paths) - 1:
+                return component_def_data[paths[i]]
+            else:
+                return _get_schema(component_def_data[paths[i]], paths, i + 1)
+
+        _has_ref = _YamlSchema.has_ref(data)
+        if not _has_ref:
+            raise ValueError("This parameter has no ref in schema.")
+        schema_path = (
+            (data["schema"]["$ref"] if _has_ref == "schema" else data["$ref"]).replace("#/", "").split("/")[1:]
+        )
+        # Operate the component definition object
+        print(f"[DEBUG in swagger_config.API._get_schema_ref] schema_path: {schema_path}")
+        return _get_schema(get_component_definition(), schema_path, 0)
 
 
 class BaseSwaggerDataModel(metaclass=ABCMeta):
@@ -98,24 +136,13 @@ class APIParameter(Transferable):
             items=self.items,
         )
 
-    def has_schema(self, data: Dict) -> bool:
-        return data.get("schema", None) is not None
-
-    def has_ref(self, data: Dict) -> str:
-        if self.has_schema(data):
-            has_schema_ref = data["schema"].get("$ref", None) is not None
-            return "schema" if has_schema_ref else ""
-        else:
-            has_ref = data.get("$ref", None) is not None
-            return "ref" if has_ref else ""
-
     def parse_schema(self, data: Dict, accept_no_schema: bool = True) -> dict:
-        if not self.has_schema(data):
+        if not _YamlSchema.has_schema(data):
             if accept_no_schema:
                 return data
             raise ValueError(f"This data '{data}' doesn't have key 'schema'.")
 
-        if self.has_ref(data):
+        if _YamlSchema.has_ref(data):
             raise NotImplementedError
         else:
             return {
@@ -136,14 +163,12 @@ class API(Transferable):
 
     def deserialize(self, data: Dict) -> "API":
         self.parameters = self._process_api_params(data["parameters"])
-        # TODO: Process the response
-        self.response = {}
+        self.response = self._process_response(data)
         self.tags = data.get("tags", [])
         return self
 
     def _process_api_params(self, params_data: List[dict]) -> List["APIParameter"]:
-        config_api_parameters = APIParameter()
-        has_ref_in_schema_param = list(filter(lambda p: config_api_parameters.has_ref(p) != "", params_data))
+        has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", params_data))
         print(f"[DEBUG in swagger_config.API._process_api_params] params_data: {params_data}")
         if has_ref_in_schema_param:
             # TODO: Ensure the value maps this condition is really only one
@@ -159,16 +184,15 @@ class API(Transferable):
         return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
 
     def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
-        request_body_params = self._get_schema_ref(data)
+        request_body_params = _YamlSchema.get_schema_ref(data)
         # TODO: Should use the reference to get the details of parameters.
         parameters: List[dict] = []
-        config_api_parameters = APIParameter()
         for param_name, param_props in request_body_params["properties"].items():
             items = param_props.get("items", None)
             print(f"[DEBUG in swagger_config.API._process_has_ref_parameters] before items: {items}")
             items_props = []
-            if items and config_api_parameters.has_ref(items):
-                items = self._get_schema_ref(items)
+            if items and _YamlSchema.has_ref(items):
+                items = _YamlSchema.get_schema_ref(items)
                 print(f"[DEBUG in swagger_config.API._process_has_ref_parameters] after items: {items}")
                 # Sample data:
                 # {
@@ -202,21 +226,65 @@ class API(Transferable):
             )
         return parameters
 
-    def _get_schema_ref(self, data: dict) -> dict:
-        def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
-            if i == len(paths) - 1:
-                return component_def_data[paths[i]]
-            else:
-                return _get_schema(component_def_data[paths[i]], paths, i + 1)
+    def _process_response(self, data: dict) -> dict:
+        status_200_response = data.get("responses", {}).get("200", {})
+        response_data = {}
+        if _YamlSchema.has_schema(status_200_response):
+            response_schema = _YamlSchema.get_schema_ref(status_200_response)
+            print(f"[DEBUG in src] response_schema: {response_schema}")
+            response_schema_properties = response_schema.get("properties", None)
+            if response_schema_properties:
+                print(f"[DEBUG in src] response_schema_properties: {response_schema_properties}")
+                for k, v in response_schema_properties.items():
+                    print(f"[DEBUG in src] v: {v}")
+                    response_data[k] = self._process_response_value(v)
+        return response_data
 
-        config_api_parameters = APIParameter()
-        has_ref = config_api_parameters.has_ref(data)
-        if not has_ref:
-            raise ValueError("This parameter has no ref in schema.")
-        schema_path = (data["schema"]["$ref"] if has_ref == "schema" else data["$ref"]).replace("#/", "").split("/")[1:]
-        # Operate the component definition object
-        print(f"[DEBUG in swagger_config.API._get_schema_ref] schema_path: {schema_path}")
-        return _get_schema(get_component_definition(), schema_path, 0)
+    def _process_response_value(self, property_value: dict) -> str:
+        if _YamlSchema.has_ref(property_value):
+            # FIXME: Handle the reference
+            v_ref = _YamlSchema.get_schema_ref(property_value)
+            print(f"[DEBUG in src] v_ref: {v_ref}")
+            k_value = "FIXME: Handle the reference"
+        else:
+            v_type = convert_js_type(property_value["type"])
+            if locate(v_type) == list:
+                single_response = _YamlSchema.get_schema_ref(property_value["items"])
+                item = {}
+                single_response_properties = single_response.get("properties", None)
+                print(f"[DEBUG in src] single_response_properties: {single_response_properties}")
+                if single_response_properties:
+                    for item_k, item_v in single_response["properties"].items():
+                        print(f"[DEBUG in src] item_v: {item_v}")
+                        print(f"[DEBUG in src] _YamlSchema.has_ref(item_v): {_YamlSchema.has_ref(item_v)}")
+                        item_type = convert_js_type(item_v["type"])
+                        if locate(item_type) is str:
+                            # lowercase_letters = string.ascii_lowercase
+                            # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                            random_value = "random string value"
+                        elif locate(item_type) is int:
+                            # random_value = int(
+                            #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                            random_value = "random integer value"
+                        else:
+                            raise NotImplementedError
+                        item[item_k] = random_value
+                k_value = [item]  # type: ignore[assignment]
+            elif locate(v_type) == str:
+                # lowercase_letters = string.ascii_lowercase
+                # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                k_value = "random string value"
+            elif locate(v_type) == int:
+                # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                k_value = "random integer value"
+            elif locate(v_type) == bool:
+                k_value = "random boolean value"
+            elif v_type is "file":
+                # TODO: Handle the file download feature
+                k_value = "random file output stream"
+            else:
+                raise NotImplementedError
+        return k_value
 
     def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
         mock_api = MockAPI(url=self.path.replace(base_url, ""), tag=self.tags[0] if self.tags else "")

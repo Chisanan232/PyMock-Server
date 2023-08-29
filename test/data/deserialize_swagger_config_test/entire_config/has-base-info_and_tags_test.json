@@ -199,6 +199,9 @@
                 "url": {
                     "type": "string",
                     "format": "url"
+                },
+                "count": {
+                    "type": "integer"
                 }
             },
             "title": "Resource"
@@ -224,6 +227,28 @@
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/FooResponse"
+                    }
+                }
+            },
+            "title": "ResponseDTO«List«FooResponse»»"
+        },
+        "ResponseDTO«Unit»": {
+            "type": "object",
+            "required": [
+                "errorMessage",
+                "responseCode"
+            ],
+            "properties": {
+                "errorMessage": {
+                    "type": "string"
+                },
+                "responseCode": {
+                    "type": "string"
+                },
+                "responseData": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Unit"
                     }
                 }
             },

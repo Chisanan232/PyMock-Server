@@ -20,7 +20,7 @@ mocked_apis:
             type: str
             format:
       response:
-        value: '{}'
+        value: '{"errorMessage": "random string value", "responseCode": "random string value", "responseData": [{"id": "random integer value", "name": "random string value", "value1": "random string value", "value2": "random string value"}]}'
     tag: 'foo'
   put_foo:
     url: '/foo'
@@ -41,7 +41,7 @@ mocked_apis:
                 type: int
                 name: "id"
       response:
-        value: '{}'
+        value: '{"errorMessage": "random string value", "responseCode": "random string value", "responseData": [{}]}'
     tag: 'foo'
   get_foo_boo_export:
     url: '/foo-boo/export'
@@ -68,5 +68,5 @@ mocked_apis:
             type: str
             format:
       response:
-        value: '{}'
+        value: '{"description": "random string value", "file": "random file output stream", "filename": "random string value", "inputStream": "FIXME: Handle the reference", "open": "random boolean value", "readable": "random boolean value", "uri": "random string value", "url": "random string value"}'
     tag: 'foo-boo'
