@@ -118,7 +118,10 @@ _Google_Home_Value: dict = {
             "method": "GET",
             "parameters": _api_params("single"),
         },
-        "response": {"value": "This is Google home API."},
+        "response": {
+            "strategy": "string",
+            "value": "This is Google home API.",
+        },
     },
 }
 
@@ -129,7 +132,10 @@ _Post_Google_Home_Value: dict = {
             "method": "POST",
             "parameters": _api_params("multiple"),
         },
-        "response": {"value": "This is Google home API with POST method."},
+        "response": {
+            "strategy": "string",
+            "value": "This is Google home API with POST method.",
+        },
     },
 }
 
@@ -140,7 +146,10 @@ _Put_Google_Home_Value: dict = {
             "method": "PUT",
             "parameters": [_Test_API_Parameter],
         },
-        "response": {"value": "Change something successfully."},
+        "response": {
+            "strategy": "string",
+            "value": "Change something successfully.",
+        },
     },
 }
 
@@ -150,7 +159,10 @@ _Delete_Google_Home_Value: dict = {
         "request": {
             "method": "DELETE",
         },
-        "response": {"value": "Delete successfully."},
+        "response": {
+            "strategy": "string",
+            "value": "Delete successfully.",
+        },
     },
 }
 
@@ -162,7 +174,10 @@ _Test_Home: dict = {
             "method": "POST",
             "parameters": [_Test_API_Parameter],
         },
-        "response": {"value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }'},
+        "response": {
+            "strategy": "string",
+            "value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }',
+        },
     },
     "cookie": [{"TEST": "cookie_value"}],
 }
@@ -174,7 +189,10 @@ _YouTube_Home_Value: dict = {
         "request": {
             "method": "PUT",
         },
-        "response": {"value": "youtube.json"},
+        "response": {
+            "strategy": "file",
+            "path": "youtube.json",
+        },
     },
     "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
 }
@@ -205,7 +223,7 @@ _Test_Tag: str = "pytest-mocked-api"
 # Sample configuration content
 class _TestConfig:
     Request: dict = {"method": "GET", "parameters": [_Test_API_Parameter]}
-    Response: Dict[str, str] = {"value": _Test_HTTP_Resp}
+    Response: Dict[str, str] = {"strategy": "string", "value": _Test_HTTP_Resp}
     Http: dict = {"request": Request, "response": Response}
     Mock_API: dict = {"url": _Test_URL, "http": Http, "tag": _Test_Tag}
     Base: dict = {"url": _Base_URL}

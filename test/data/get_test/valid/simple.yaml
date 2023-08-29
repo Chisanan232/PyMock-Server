@@ -18,4 +18,5 @@ mocked_apis:
             type: bool
             default: false
       response:
+        strategy: string
         value: 'This is Foo home API.'

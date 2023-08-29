@@ -4,4 +4,5 @@ mocked_apis:
     http:
       request:
       response:
+        strategy: string
         value: 'This is Foo home API.'

@@ -10,4 +10,5 @@ mocked_apis:
             type: int
             default: 'arg1_default_value'
       response:
+        strategy: 'string'
         value: 'This is Foo home API.'

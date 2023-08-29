@@ -5,4 +5,5 @@ mocked_apis:
       request:
         method: 'GET'
       response:
-        value: ./not_exist.file
+        strategy: file
+        path: ./not_exist.file
