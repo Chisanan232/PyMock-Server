@@ -14,6 +14,7 @@ from ...model import (
 )
 from ...model.api_config import APIConfig
 from ...model.api_config import APIParameter as MockedAPIParameter
+from ...model.enums import ResponseStrategy
 from ...model.swagger_config import API as SwaggerAPI
 from ...model.swagger_config import APIParameter as SwaggerAPIParameter
 from ..component import BaseSubCmdComponent
@@ -161,9 +162,19 @@ class ValidityChecking(_BaseChecking):
                 continue
 
             assert one_api_config.http.response
+            http_response = one_api_config.http.response
+            if http_response.strategy is ResponseStrategy.STRING:
+                under_check_value = http_response.value
+            elif http_response.strategy is ResponseStrategy.FILE:
+                under_check_value = http_response.path
+            elif http_response.strategy is ResponseStrategy.OBJECT:
+                # TODO: Implement checking properties
+                under_check_value = http_response.properties  # type: ignore[assignment]
+            else:
+                raise TypeError
             self._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}.http.response.value",
-                config_value=one_api_config.http.response.value,
+                config_value=under_check_value,
                 valid_callback=self._chk_response_value_validity,
             )
         return api_config
