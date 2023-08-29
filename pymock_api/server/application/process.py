@@ -1,9 +1,10 @@
 import re
 from abc import ABC, ABCMeta, abstractmethod
 from pydoc import locate
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, cast
 
 from ...model.api_config import APIParameter, HTTPRequest, HTTPResponse, MockAPI
+from ...model.enums import ResponseStrategy
 from .request import BaseCurrentRequest
 from .response import BaseResponse
 from .response import HTTPResponse as MockHTTPResponse
@@ -122,7 +123,16 @@ class HTTPResponseProcess(BaseHTTPProcess):
         api_params_info: MockAPI = self.mock_api_details[self._get_current_api_path(request)][
             self._get_current_request_http_method(request)
         ]
-        response_value = self._ensure_http(api_params_info, "response").value  # type: ignore[union-attr]
+        response = cast(HTTPResponse, self._ensure_http(api_params_info, "response"))
+        if response.strategy is ResponseStrategy.STRING:
+            response_value = response.value
+        elif response.strategy is ResponseStrategy.FILE:
+            response_value = response.path
+        elif response.strategy is ResponseStrategy.OBJECT:
+            # TODO: Handle the properties as response
+            response_value = response.properties  # type: ignore[assignment]
+        else:
+            raise TypeError
         return MockHTTPResponse.generate(data=response_value)
 
     def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:

@@ -11,6 +11,7 @@ from httpx import Response as FastAPIResponse
 
 from pymock_api.model import APIConfig, load_config
 from pymock_api.model.api_config import APIParameter, MockAPI
+from pymock_api.model.enums import ResponseStrategy
 from pymock_api.server.application import BaseAppServer, FastAPIServer, FlaskServer
 from pymock_api.server.application.response import HTTPResponse as _HTTPResponse
 
@@ -135,7 +136,17 @@ class MockHTTPServerTestSpec:
         under_test_http_resp = self._deserialize_response(response)
 
         # Get the expected result data
-        expected_http_resp = _HTTPResponse.generate(data=one_api_configs[http_method.upper()].http.response.value)  # type: ignore[union-attr]
+        config_response = one_api_configs[http_method.upper()].http.response  # type: ignore[union-attr]
+        if config_response.strategy is ResponseStrategy.STRING:  # type: ignore[union-attr]
+            response_value = config_response.value  # type: ignore[union-attr]
+        elif config_response.strategy is ResponseStrategy.FILE:  # type: ignore[union-attr]
+            response_value = config_response.path  # type: ignore[union-attr]
+        elif config_response.strategy is ResponseStrategy.OBJECT:  # type: ignore[union-attr]
+            # TODO: Handle the properties
+            response_value = config_response.properties  # type: ignore[union-attr]
+        else:
+            assert False, f"Exist incorrect HTTP response strategy *{config_response.strategy}* in test."  # type: ignore[union-attr]
+        expected_http_resp = _HTTPResponse.generate(data=response_value)
 
         # Verify the result data
         assert (
