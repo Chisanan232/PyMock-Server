@@ -19,7 +19,7 @@ from pymock_api.model.api_config import (
     MockAPIs,
     _Config,
 )
-from pymock_api.model.enums import Format
+from pymock_api.model.enums import Format, ResponseStrategy
 
 from ..._values import (
     _Base_URL,
@@ -112,7 +112,7 @@ class MockModel:
 
     @property
     def http_response(self) -> HTTPResponse:
-        return HTTPResponse(value=_Test_HTTP_Resp)
+        return HTTPResponse(strategy=ResponseStrategy.STRING, value=_Test_HTTP_Resp)
 
 
 class ConfigTestSpec(metaclass=ABCMeta):
@@ -865,14 +865,14 @@ class TestIteratorItem(ConfigTestSpec):
         assert obj.value_type == _Test_Iterable_Parameter_Item_Name["type"]
 
 
-class TestHTTPResponse(ConfigTestSpec):
+class TestHTTPResponseWithStringStrategy(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> HTTPResponse:
-        return HTTPResponse(value=_Test_HTTP_Resp)
+        return HTTPResponse(strategy=ResponseStrategy.STRING, value=_Test_HTTP_Resp)
 
     @pytest.fixture(scope="function")
     def sut_with_nothing(self) -> HTTPResponse:
-        return HTTPResponse()
+        return HTTPResponse(strategy=ResponseStrategy.STRING)
 
     def test_value_attributes(self, sut: HTTPResponse):
         assert sut.value == _Test_HTTP_Resp, _assertion_msg
