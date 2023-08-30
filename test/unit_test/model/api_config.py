@@ -670,6 +670,11 @@ class TestMockAPI(ConfigTestSpec):
         assert under_test_response_value == response_value
         assert sut_with_nothing.tag == ""
 
+    def test_set_invalid_response(self, sut_with_nothing: MockAPI):
+        with pytest.raises(TypeError) as exc_info:
+            sut_with_nothing.set_response(strategy="Invalid response strategy")
+        assert re.search(r".{0,32}invalid response strategy.{0,32}", str(exc_info.value), re.IGNORECASE)
+
 
 class TestHTTP(ConfigTestSpec):
     @pytest.fixture(scope="function")
