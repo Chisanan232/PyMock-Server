@@ -356,15 +356,15 @@ class HTTPResponse(_Config):
         if self.strategy is not None:
             self._convert_strategy()
         if self.properties is not None:
-            self._convert_items()
+            self._convert_properties()
 
     def _convert_strategy(self) -> None:
         if isinstance(self.strategy, str):
             self.strategy = ResponseStrategy.to_enum(self.strategy)
 
-    def _convert_items(self):
+    def _convert_properties(self):
         if False in list(map(lambda i: isinstance(i, (dict, ResponseProperty)), self.properties)):
-            raise TypeError("The data type of key *items* must be dict or IteratorItem.")
+            raise TypeError("The data type of key *properties* must be dict or ResponseProperty.")
         self.properties = [ResponseProperty().deserialize(i) if isinstance(i, dict) else i for i in self.properties]
 
     def serialize(self, data: Optional["HTTPResponse"] = None) -> Optional[Dict[str, Any]]:
