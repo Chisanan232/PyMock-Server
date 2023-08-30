@@ -363,14 +363,9 @@ class HTTPResponse(_Config):
             self.strategy = ResponseStrategy.to_enum(self.strategy)
 
     def _convert_items(self):
-        if False in list(map(lambda i: isinstance(i, (dict, IteratorItem)), self.properties)):
+        if False in list(map(lambda i: isinstance(i, (dict, ResponseProperty)), self.properties)):
             raise TypeError("The data type of key *items* must be dict or IteratorItem.")
-        self.properties = [
-            IteratorItem(name=i.get("name", ""), value_type=i.get("type", None), required=i.get("required", True))
-            if isinstance(i, dict)
-            else i
-            for i in self.properties
-        ]
+        self.properties = [ResponseProperty().deserialize(i) if isinstance(i, dict) else i for i in self.properties]
 
     def serialize(self, data: Optional["HTTPResponse"] = None) -> Optional[Dict[str, Any]]:
         if self.strategy is ResponseStrategy.STRING:
@@ -654,16 +649,22 @@ class MockAPI(_Config):
                 if parameters:
                     self.http.request.parameters = params
 
-    def set_response(self, strategy: ResponseStrategy = ResponseStrategy.STRING, value: str = "") -> None:
-        # TODO: Add more argument for different HTTP response strategy
-        if not self.http:
-            self.http = HTTP(request=HTTPRequest(), response=HTTPResponse(strategy=strategy, value=value))
+    def set_response(
+        self, strategy: ResponseStrategy = ResponseStrategy.STRING, value: str = "", iterable_value: List = []
+    ) -> None:
+        if strategy is ResponseStrategy.STRING:
+            http_resp = HTTPResponse(strategy=strategy, value=value)
+        elif strategy is ResponseStrategy.FILE:
+            http_resp = HTTPResponse(strategy=strategy, path=value)
+        elif strategy is ResponseStrategy.OBJECT:
+            http_resp = HTTPResponse(strategy=strategy, properties=iterable_value)
         else:
-            if not self.http.response:
-                self.http.response = HTTPResponse(strategy=strategy, value=value)
-            else:
-                if value:
-                    self.http.response.value = value
+            raise TypeError(f"Invalid response strategy *{strategy}*.")
+
+        if not self.http:
+            self.http = HTTP(request=HTTPRequest(), response=http_resp)
+        else:
+            self.http.response = http_resp
 
     def format(self, f: Format) -> str:
         def _ensure_getting_serialized_data() -> Dict[str, Any]:

@@ -17,6 +17,7 @@ from pymock_api.model.api_config import (
     IteratorItem,
     MockAPI,
     MockAPIs,
+    ResponseProperty,
     _Config,
 )
 from pymock_api.model.enums import Format, ResponseStrategy
@@ -32,6 +33,7 @@ from ..._values import (
     _Test_Iterable_Parameter_Item_Value,
     _Test_Iterable_Parameter_Items,
     _Test_Iterable_Parameter_With_MultiValue,
+    _Test_Response_Properties,
     _Test_Tag,
     _Test_URL,
     _TestConfig,
@@ -113,6 +115,20 @@ class MockModel:
     @property
     def http_response(self) -> HTTPResponse:
         return HTTPResponse(strategy=ResponseStrategy.STRING, value=_Test_HTTP_Resp)
+
+    @property
+    def response_properties(self) -> List[ResponseProperty]:
+        prop_id = ResponseProperty(
+            name="id",
+            required=True,
+            value_type="int",
+        )
+        prop_name = ResponseProperty(
+            name="name",
+            required=True,
+            value_type="str",
+        )
+        return [prop_id, prop_name]
 
 
 class ConfigTestSpec(metaclass=ABCMeta):
@@ -606,27 +622,52 @@ class TestMockAPI(ConfigTestSpec):
     @pytest.mark.parametrize(
         ("http_resp", "response_strategy", "response_value"),
         [
+            # string strategy response
             (None, ResponseStrategy.STRING, "PyTest response"),
             (HTTP(), ResponseStrategy.STRING, "PyTest response"),
             (HTTP(response=HTTPResponse()), ResponseStrategy.STRING, "PyTest response"),
+            # file strategy response
+            (None, ResponseStrategy.FILE, "File path"),
+            (HTTP(), ResponseStrategy.FILE, "File path"),
+            (HTTP(response=HTTPResponse()), ResponseStrategy.FILE, "File path"),
+            # object strategy response with object value
+            (None, ResponseStrategy.OBJECT, MockModel().response_properties),
+            (HTTP(), ResponseStrategy.OBJECT, MockModel().response_properties),
+            (HTTP(response=HTTPResponse()), ResponseStrategy.OBJECT, MockModel().response_properties),
+            # object strategy response with dict value
+            (None, ResponseStrategy.OBJECT, _Test_Response_Properties),
+            (HTTP(), ResponseStrategy.OBJECT, _Test_Response_Properties),
+            (HTTP(response=HTTPResponse()), ResponseStrategy.OBJECT, _Test_Response_Properties),
         ],
     )
     def test_set_response(
         self,
         http_resp: Optional[HTTPResponse],
         response_strategy: ResponseStrategy,
-        response_value: str,
+        response_value: Union[str, list],
         sut_with_nothing: MockAPI,
     ):
         # Pro-process
         sut_with_nothing.http = http_resp
 
         assert sut_with_nothing.http == http_resp
-        sut_with_nothing.set_response(strategy=response_strategy, value=response_value)
+        if response_strategy is ResponseStrategy.OBJECT:
+            sut_with_nothing.set_response(strategy=response_strategy, iterable_value=response_value)
+        else:
+            sut_with_nothing.set_response(strategy=response_strategy, value=response_value)
 
         assert sut_with_nothing.http
         assert sut_with_nothing.http.response
-        assert sut_with_nothing.http.response.value == response_value
+        if response_strategy is ResponseStrategy.STRING:
+            under_test_response_value = sut_with_nothing.http.response.value
+        elif response_strategy is ResponseStrategy.FILE:
+            under_test_response_value = sut_with_nothing.http.response.path
+        elif response_strategy is ResponseStrategy.OBJECT:
+            under_test_response_value = sut_with_nothing.http.response.properties
+            response_value = [ResponseProperty().deserialize(v) if isinstance(v, dict) else v for v in response_value]
+        else:
+            assert False, "Invalid response strategy."
+        assert under_test_response_value == response_value
         assert sut_with_nothing.tag == ""
 
 

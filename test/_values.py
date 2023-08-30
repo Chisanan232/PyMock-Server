@@ -98,6 +98,32 @@ _Test_API_Parameters: List[dict] = [
 ]
 
 
+_Test_Response_Property_Int: dict = {
+    "name": "id",
+    "required": True,
+    "type": "int",
+    "format": None,
+}
+_Test_Response_Property_Str: dict = {
+    "name": "name",
+    "required": True,
+    "type": "str",
+    "format": None,
+}
+_Test_Response_Property_List: dict = {
+    "name": "keys",
+    "required": False,
+    "type": "list",
+    "format": None,
+    "items": _Test_Iterable_Parameter_Items,
+}
+_Test_Response_Properties: List[dict] = [
+    _Test_Response_Property_Int,
+    _Test_Response_Property_Str,
+    _Test_Response_Property_List,
+]
+
+
 def _api_params(iterable_param_type: str) -> List[dict]:
     params = _Test_API_Parameters.copy()
     if iterable_param_type == "single":
