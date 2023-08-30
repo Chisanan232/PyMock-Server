@@ -34,6 +34,7 @@ from ..._values import (
     _Test_Iterable_Parameter_Items,
     _Test_Iterable_Parameter_With_MultiValue,
     _Test_Response_Properties,
+    _Test_Response_Property_List,
     _Test_Tag,
     _Test_URL,
     _TestConfig,
@@ -921,6 +922,55 @@ class TestIteratorItem(ConfigTestSpec):
         assert obj.name == _Test_Iterable_Parameter_Item_Name["name"]
         assert obj.required is _Test_Iterable_Parameter_Item_Name["required"]
         assert obj.value_type == _Test_Iterable_Parameter_Item_Name["type"]
+
+
+class TestResponseProperty(ConfigTestSpec):
+    @pytest.fixture(scope="function")
+    def sut(self) -> ResponseProperty:
+        return ResponseProperty(
+            name=_Test_Response_Property_List["name"],
+            required=_Test_Response_Property_List["required"],
+            value_type=_Test_Response_Property_List["type"],
+            value_format=_Test_Response_Property_List["format"],
+            items=_Test_Response_Property_List["items"],
+        )
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> ResponseProperty:
+        return ResponseProperty()
+
+    def test_value_attributes(self, sut: ResponseProperty):
+        assert sut.name == _Test_Response_Property_List["name"], _assertion_msg
+        assert sut.required is _Test_Response_Property_List["required"], _assertion_msg
+        assert sut.value_type == _Test_Response_Property_List["type"], _assertion_msg
+        assert sut.value_format == _Test_Response_Property_List["format"], _assertion_msg
+        assert isinstance(sut.items, list)
+        for item in sut.items:
+            assert list(filter(lambda i: i["name"] == item.name, _Test_Response_Property_List["items"]))
+            assert list(filter(lambda i: i["required"] == item.required, _Test_Response_Property_List["items"]))
+            assert list(filter(lambda i: i["type"] == item.value_type, _Test_Response_Property_List["items"]))
+
+    def _expected_serialize_value(self) -> Any:
+        return _Test_Response_Property_List
+
+    def _expected_deserialize_value(self, obj: ResponseProperty) -> None:
+        assert isinstance(obj, ResponseProperty)
+        assert obj.name == _Test_Response_Property_List["name"]
+        assert obj.required is _Test_Response_Property_List["required"]
+        assert obj.value_type == _Test_Response_Property_List["type"]
+        assert obj.value_format == _Test_Response_Property_List["format"]
+        assert isinstance(obj.items, list)
+        for item in obj.items:
+            assert list(filter(lambda i: i["name"] == item.name, _Test_Response_Property_List["items"]))
+            assert list(filter(lambda i: i["required"] == item.required, _Test_Response_Property_List["items"]))
+            assert list(filter(lambda i: i["type"] == item.value_type, _Test_Response_Property_List["items"]))
+
+    def test_convert_invalid_items(self, sut_with_nothing: ResponseProperty):
+        with pytest.raises(TypeError) as exc_info:
+            ResponseProperty(items=["invalid element"])
+        assert re.search(
+            r".{0,32}key \*items\*.{0,32}be dict or IteratorItem.{0,32}", str(exc_info.value), re.IGNORECASE
+        )
 
 
 class TestHTTPResponseWithStringStrategy(ConfigTestSpec):
