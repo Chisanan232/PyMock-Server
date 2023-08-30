@@ -371,7 +371,7 @@ class HTTPResponse(_Config):
         strategy: ResponseStrategy = self.strategy or ResponseStrategy.to_enum(self._get_prop(data, prop="strategy"))
         if strategy is ResponseStrategy.STRING:
             value: str = self._get_prop(data, prop="value")
-            if not value:
+            if not strategy or not value:
                 return None
             return {
                 "strategy": strategy.value,
@@ -379,7 +379,7 @@ class HTTPResponse(_Config):
             }
         elif strategy is ResponseStrategy.FILE:
             path: str = self._get_prop(data, prop="path")
-            if not path:
+            if not strategy or not path:
                 return None
             return {
                 "strategy": strategy.value,
@@ -388,7 +388,7 @@ class HTTPResponse(_Config):
         elif strategy is ResponseStrategy.OBJECT:
             all_properties = (data or self).properties if (data and data.properties) or self.properties else None
             properties = [prop.serialize() for prop in (all_properties or [])]
-            if not properties:
+            if not strategy or not properties:
                 return None
             return {
                 "strategy": strategy.value,
