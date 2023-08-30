@@ -993,6 +993,42 @@ class TestHTTPResponse(ConfigTestSpec):
         assert obj.value == _TestConfig.Response.get("value", None)
 
     @pytest.mark.parametrize(
+        ("compare", "be_compared"),
+        [
+            (ResponseStrategy.STRING, ResponseStrategy.FILE),
+            (ResponseStrategy.FILE, ResponseStrategy.OBJECT),
+            (ResponseStrategy.OBJECT, ResponseStrategy.STRING),
+        ],
+    )
+    def test_invalid_compare(self, compare: ResponseStrategy, be_compared: ResponseStrategy):
+        with pytest.raises(TypeError) as exc_info:
+            HTTPResponse(strategy=compare) == HTTPResponse(strategy=be_compared)
+        assert re.search(
+            r".{0,32}different HTTP response strategy.{0,32}cannot compare.{0,32}", str(exc_info.value), re.IGNORECASE
+        )
+
+    @pytest.mark.parametrize(
+        ("strategy", "expected_strategy"),
+        [
+            ("string", ResponseStrategy.STRING),
+            ("file", ResponseStrategy.FILE),
+            ("object", ResponseStrategy.OBJECT),
+        ],
+    )
+    def test_set_str_type_strategy(self, strategy: str, expected_strategy: ResponseStrategy):
+        resp = HTTPResponse(strategy=strategy)
+        assert resp.strategy is expected_strategy
+
+    def test_invalid_set_properties(self):
+        with pytest.raises(TypeError) as exc_info:
+            HTTPResponse(properties=["invalid property value"])
+        assert re.search(
+            r".{0,32}data type.{0,32}\*properties\*.{0,32}be dict or ResponseProperty.{0,32}",
+            str(exc_info.value),
+            re.IGNORECASE,
+        )
+
+    @pytest.mark.parametrize(
         "response",
         [
             HTTPResponse(strategy=ResponseStrategy.STRING),
