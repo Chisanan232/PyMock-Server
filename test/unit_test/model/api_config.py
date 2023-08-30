@@ -603,18 +603,30 @@ class TestMockAPI(ConfigTestSpec):
             sut_with_nothing.set_request(method=ut_method, parameters=ut_parameters)
         assert re.search(r".{1,64}format.{1,64}is incorrect.{1,64}", str(exc_info.value), re.IGNORECASE)
 
-    @pytest.mark.parametrize("http_resp", [None, HTTP(), HTTP(response=HTTPResponse())])
-    def test_set_response(self, http_resp: Optional[HTTPResponse], sut_with_nothing: MockAPI):
+    @pytest.mark.parametrize(
+        ("http_resp", "response_strategy", "response_value"),
+        [
+            (None, ResponseStrategy.STRING, "PyTest response"),
+            (HTTP(), ResponseStrategy.STRING, "PyTest response"),
+            (HTTP(response=HTTPResponse()), ResponseStrategy.STRING, "PyTest response"),
+        ],
+    )
+    def test_set_response(
+        self,
+        http_resp: Optional[HTTPResponse],
+        response_strategy: ResponseStrategy,
+        response_value: str,
+        sut_with_nothing: MockAPI,
+    ):
         # Pro-process
         sut_with_nothing.http = http_resp
 
         assert sut_with_nothing.http == http_resp
-        ut_value = "PyTest response"
-        sut_with_nothing.set_response(value=ut_value)
+        sut_with_nothing.set_response(strategy=response_strategy, value=response_value)
 
         assert sut_with_nothing.http
         assert sut_with_nothing.http.response
-        assert sut_with_nothing.http.response.value == ut_value
+        assert sut_with_nothing.http.response.value == response_value
         assert sut_with_nothing.tag == ""
 
 
