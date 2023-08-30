@@ -640,7 +640,7 @@ class TestMockAPI(ConfigTestSpec):
             (HTTP(response=HTTPResponse()), ResponseStrategy.OBJECT, _Test_Response_Properties),
         ],
     )
-    def test_set_response(
+    def test_set_valid_response(
         self,
         http_resp: Optional[HTTPResponse],
         response_strategy: ResponseStrategy,
