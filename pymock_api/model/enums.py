@@ -21,13 +21,6 @@ class ResponseStrategy(Enum):
     OBJECT: str = "object"
 
     @staticmethod
-    def to_str(v: Union[str, "ResponseStrategy"]) -> str:
-        if isinstance(v, str):
-            return v
-        else:
-            return v.name
-
-    @staticmethod
     def to_enum(v: Union[str, "ResponseStrategy"]) -> "ResponseStrategy":
         if isinstance(v, str):
             return ResponseStrategy(v.lower())
