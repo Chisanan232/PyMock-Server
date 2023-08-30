@@ -368,29 +368,30 @@ class HTTPResponse(_Config):
         self.properties = [ResponseProperty().deserialize(i) if isinstance(i, dict) else i for i in self.properties]
 
     def serialize(self, data: Optional["HTTPResponse"] = None) -> Optional[Dict[str, Any]]:
-        if self.strategy is ResponseStrategy.STRING:
+        strategy: ResponseStrategy = self.strategy or ResponseStrategy.to_enum(self._get_prop(data, prop="strategy"))
+        if strategy is ResponseStrategy.STRING:
             value: str = self._get_prop(data, prop="value")
             if not value:
                 return None
             return {
-                "strategy": self.strategy.value,
+                "strategy": strategy.value,
                 "value": value,
             }
-        elif self.strategy is ResponseStrategy.FILE:
+        elif strategy is ResponseStrategy.FILE:
             path: str = self._get_prop(data, prop="path")
             if not path:
                 return None
             return {
-                "strategy": self.strategy.value,
+                "strategy": strategy.value,
                 "path": path,
             }
-        elif self.strategy is ResponseStrategy.OBJECT:
+        elif strategy is ResponseStrategy.OBJECT:
             all_properties = (data or self).properties if (data and data.properties) or self.properties else None
             properties = [prop.serialize() for prop in (all_properties or [])]
             if not properties:
                 return None
             return {
-                "strategy": self.strategy.value,
+                "strategy": strategy.value,
                 "properties": properties,
             }
         else:
