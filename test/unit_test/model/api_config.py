@@ -1027,3 +1027,31 @@ class TestHTTPResponse(ConfigTestSpec):
     )
     def test_serialize_with_strategy(self, response: HTTPResponse, expected_data: dict):
         assert response.serialize() == expected_data
+
+    @pytest.mark.parametrize(
+        ("data", "expected_response"),
+        [
+            (
+                {"strategy": ResponseStrategy.STRING.value, "value": "OK"},
+                HTTPResponse(strategy=ResponseStrategy.STRING, value="OK"),
+            ),
+            (
+                {"strategy": ResponseStrategy.FILE.value, "path": "file path"},
+                HTTPResponse(strategy=ResponseStrategy.FILE, path="file path"),
+            ),
+            (
+                {
+                    "strategy": ResponseStrategy.OBJECT.value,
+                    "properties": [p.serialize() for p in MockModel().response_properties],
+                },
+                HTTPResponse(strategy=ResponseStrategy.OBJECT, properties=MockModel().response_properties),
+            ),
+        ],
+    )
+    def test_valid_deserialize_with_strategy(self, data: dict, expected_response: HTTPResponse):
+        assert HTTPResponse().deserialize(data=data) == expected_response
+
+    def test_invalid_deserialize_with_strategy(self):
+        with pytest.raises(ValueError) as exc_info:
+            HTTPResponse().deserialize(data={"miss strategy": ""})
+        assert re.search(r".{0,32}strategy.{0,32}cannot be empty.{0,32}", str(exc_info.value), re.IGNORECASE)
