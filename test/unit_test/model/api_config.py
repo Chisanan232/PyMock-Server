@@ -973,7 +973,7 @@ class TestResponseProperty(ConfigTestSpec):
         )
 
 
-class TestHTTPResponseWithStringStrategy(ConfigTestSpec):
+class TestHTTPResponse(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> HTTPResponse:
         return HTTPResponse(strategy=ResponseStrategy.STRING, value=_Test_HTTP_Resp)
@@ -991,3 +991,39 @@ class TestHTTPResponseWithStringStrategy(ConfigTestSpec):
     def _expected_deserialize_value(self, obj: HTTPResponse) -> None:
         assert isinstance(obj, HTTPResponse)
         assert obj.value == _TestConfig.Response.get("value", None)
+
+    @pytest.mark.parametrize(
+        "response",
+        [
+            HTTPResponse(strategy=ResponseStrategy.STRING),
+            HTTPResponse(strategy=ResponseStrategy.FILE),
+            HTTPResponse(path="file path"),
+            HTTPResponse(strategy=ResponseStrategy.OBJECT),
+            HTTPResponse(properties=MockModel().response_properties),
+        ],
+    )
+    def test_serialize_as_none_with_strategy(self, response: HTTPResponse):
+        assert response.serialize() is None
+
+    @pytest.mark.parametrize(
+        ("response", "expected_data"),
+        [
+            (
+                HTTPResponse(strategy=ResponseStrategy.STRING, value="OK"),
+                {"strategy": ResponseStrategy.STRING.value, "value": "OK"},
+            ),
+            (
+                HTTPResponse(strategy=ResponseStrategy.FILE, path="file path"),
+                {"strategy": ResponseStrategy.FILE.value, "path": "file path"},
+            ),
+            (
+                HTTPResponse(strategy=ResponseStrategy.OBJECT, properties=MockModel().response_properties),
+                {
+                    "strategy": ResponseStrategy.OBJECT.value,
+                    "properties": [p.serialize() for p in MockModel().response_properties],
+                },
+            ),
+        ],
+    )
+    def test_serialize_with_strategy(self, response: HTTPResponse, expected_data: dict):
+        assert response.serialize() == expected_data
