@@ -94,7 +94,7 @@ class HTTPResponse:
                 response[v.name] = value
             return response
         else:
-            raise TypeError
+            raise TypeError(f"Cannot identify invalid HTTP response strategy *{data.strategy}*.")
 
     @classmethod
     def _is_file(cls, path: str) -> bool:

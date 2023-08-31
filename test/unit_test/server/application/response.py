@@ -1,8 +1,9 @@
 import json
 import os
+import re
 from pydoc import locate
 from typing import Type
-from unittest.mock import mock_open, patch
+from unittest.mock import Mock, mock_open, patch
 
 import pytest
 
@@ -51,6 +52,12 @@ class _MockHTTPResponse:
     @staticmethod
     def with_object_strategy() -> HTTPResponse:
         return HTTPResponse(strategy=ResponseStrategy.OBJECT, properties=_HTTP_Response_Properties_With_Object_Strategy)
+
+    @staticmethod
+    def with_invalid_strategy() -> HTTPResponse:
+        http_response = Mock()
+        http_response.strategy = "invalid strategy"
+        return http_response
 
 
 class TestInnerHTTPResponse:
@@ -147,3 +154,8 @@ class TestInnerHTTPResponse:
                             assert False, "Invalid data type of response for verifying."
             else:
                 assert False, "Invalid data type of response for verifying."
+
+    def test_response_with_invalid_strategy(self, http_resp: Type[_HTTPResponse]):
+        with pytest.raises(TypeError) as exc_info:
+            http_resp.generate(data=_MockHTTPResponse.with_invalid_strategy())
+        assert re.search(r".{0,32}invalid.{0,32}", str(exc_info.value), re.IGNORECASE)
