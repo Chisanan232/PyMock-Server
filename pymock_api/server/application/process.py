@@ -124,16 +124,7 @@ class HTTPResponseProcess(BaseHTTPProcess):
             self._get_current_request_http_method(request)
         ]
         response = cast(HTTPResponse, self._ensure_http(api_params_info, "response"))
-        if response.strategy is ResponseStrategy.STRING:
-            response_value = response.value
-        elif response.strategy is ResponseStrategy.FILE:
-            response_value = response.path
-        elif response.strategy is ResponseStrategy.OBJECT:
-            # TODO: Handle the properties as response
-            response_value = response.properties  # type: ignore[assignment]
-        else:
-            raise TypeError
-        return MockHTTPResponse.generate(data=response_value)
+        return MockHTTPResponse.generate(data=response)
 
     def _ensure_http(self, api_config: MockAPI, http_attr: str) -> Union[HTTPRequest, HTTPResponse]:
         assert api_config.http and getattr(

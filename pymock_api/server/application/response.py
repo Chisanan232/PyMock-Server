@@ -1,10 +1,13 @@
 import json
 import os
 from abc import ABCMeta, abstractmethod
+from pydoc import locate
 from typing import Any, List, Union
 
 from ..._utils import import_web_lib
 from ...exceptions import FileFormatNotSupport
+from ...model.api_config import HTTPResponse as MockAPIHTTPResponseConfig
+from ...model.enums import ResponseStrategy
 
 
 class BaseResponse(metaclass=ABCMeta):
@@ -35,7 +38,7 @@ class HTTPResponse:
     valid_file_format: List[str] = ["json"]
 
     @classmethod
-    def generate(cls, data: str) -> Union[str, dict]:
+    def generate(cls, data: MockAPIHTTPResponseConfig) -> Union[str, dict]:
         """Generate the HTTP response by the data. It would try to parse it as JSON format data in the beginning. If it
         works, it returns the handled data which is JSON format. But if it gets fail, it would change to check whether
         it is a file path or not. If it is, it would search and read the file to get the content value and parse it to
@@ -48,12 +51,50 @@ class HTTPResponse:
             A string type or dict type value.
 
         """
-        try:
-            return json.loads(data)
-        except:  # pylint: disable=broad-except, bare-except
-            if cls._is_file(path=data):
-                return cls._read_file(path=data)
-        return data
+        if data.strategy is ResponseStrategy.STRING:
+            response_value = data.value
+            try:
+                return json.loads(response_value)
+            except:  # pylint: disable=broad-except, bare-except
+                return response_value
+        elif data.strategy is ResponseStrategy.FILE:
+            file_path = data.path
+            if cls._is_file(path=file_path):
+                return cls._read_file(path=file_path)
+            # FIXME: Here would be invalid value as file path. How to handle it?
+            return data.path
+        elif data.strategy is ResponseStrategy.OBJECT:
+            response_properties = data.properties
+            response = {}
+            for v in response_properties:
+                # TODO: Handle the value with key *format*
+                assert v.value_type
+                if locate(v.value_type) is str:
+                    # lowercase_letters = string.ascii_lowercase
+                    # value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                    value = "random string"
+                elif locate(v.value_type) is int:
+                    # value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                    value = "random integer"
+                elif locate(v.value_type) is list:
+                    value = []  # type: ignore[assignment]
+                    for i in v.items or []:
+                        item = {}
+                        assert i.value_type
+                        if locate(i.value_type) is str:
+                            item_value = "random string"
+                        elif locate(i.value_type) is int:
+                            item_value = "random integer"
+                        else:
+                            raise NotImplementedError
+                        item[i.name] = item_value
+                        value.append(item)  # type: ignore[attr-defined]
+                else:
+                    raise NotImplementedError
+                response[v.name] = value
+            return response
+        else:
+            raise TypeError
 
     @classmethod
     def _is_file(cls, path: str) -> bool:

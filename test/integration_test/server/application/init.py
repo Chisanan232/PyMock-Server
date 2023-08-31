@@ -137,16 +137,16 @@ class MockHTTPServerTestSpec:
 
         # Get the expected result data
         config_response = one_api_configs[http_method.upper()].http.response  # type: ignore[union-attr]
-        if config_response.strategy is ResponseStrategy.STRING:  # type: ignore[union-attr]
-            response_value = config_response.value  # type: ignore[union-attr]
-        elif config_response.strategy is ResponseStrategy.FILE:  # type: ignore[union-attr]
-            response_value = config_response.path  # type: ignore[union-attr]
-        elif config_response.strategy is ResponseStrategy.OBJECT:  # type: ignore[union-attr]
-            # TODO: Handle the properties
-            response_value = config_response.properties  # type: ignore[union-attr]
-        else:
-            assert False, f"Exist incorrect HTTP response strategy *{config_response.strategy}* in test."  # type: ignore[union-attr]
-        expected_http_resp = _HTTPResponse.generate(data=response_value)
+        # if config_response.strategy is ResponseStrategy.STRING:  # type: ignore[union-attr]
+        #     response_value = config_response.value  # type: ignore[union-attr]
+        # elif config_response.strategy is ResponseStrategy.FILE:  # type: ignore[union-attr]
+        #     response_value = config_response.path  # type: ignore[union-attr]
+        # elif config_response.strategy is ResponseStrategy.OBJECT:  # type: ignore[union-attr]
+        #     # TODO: Handle the properties
+        #     response_value = config_response.properties  # type: ignore[union-attr]
+        # else:
+        #     assert False, f"Exist incorrect HTTP response strategy *{config_response.strategy}* in test."  # type: ignore[union-attr]
+        expected_http_resp = _HTTPResponse.generate(data=config_response)  # type: ignore[arg-type]
 
         # Verify the result data
         assert (
