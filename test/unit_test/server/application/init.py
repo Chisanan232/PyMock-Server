@@ -15,12 +15,6 @@ from pymock_api.server.application import BaseAppServer, FastAPIServer, FlaskSer
 
 MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
 
-_General_String_Value: str = "This is test message for PyTest."
-_Json_File_Name: str = "test.json"
-_Json_File_Content: dict = {"responseCode": "200", "errorMessage": "OK", "content": "This is YouTube home."}
-_Not_Exist_File_Name: str = "not_exist.json"
-_Not_Json_File_Name: str = "test.yaml"
-
 
 class FakeFlask(Flask):
     pass

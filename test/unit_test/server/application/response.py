@@ -1,13 +1,6 @@
 import json
 import os
 from pydoc import locate
-from test.unit_test.server.application.init import (
-    _General_String_Value,
-    _Json_File_Content,
-    _Json_File_Name,
-    _Not_Exist_File_Name,
-    _Not_Json_File_Name,
-)
 from typing import Type
 from unittest.mock import mock_open, patch
 
@@ -18,7 +11,15 @@ from pymock_api.model import HTTPResponse
 from pymock_api.model.enums import ResponseStrategy
 from pymock_api.server.application.response import HTTPResponse as _HTTPResponse
 
-from ...._values import _HTTP_Response_Properties_With_Object_Strategy
+from ...._values import (
+    _General_String_Value,
+    _HTTP_Response_Properties_With_Object_Strategy,
+    _Json_File_Content,
+    _Json_File_Name,
+    _Not_Exist_File_Name,
+    _Not_Json_File_Name,
+    _Unexpected_File_Name,
+)
 
 
 class _MockHTTPResponse:
@@ -42,6 +43,10 @@ class _MockHTTPResponse:
     @staticmethod
     def with_not_json_file_strategy() -> HTTPResponse:
         return HTTPResponse(strategy=ResponseStrategy.FILE, path=_Not_Json_File_Name)
+
+    @staticmethod
+    def with_unexpected_file_strategy() -> HTTPResponse:
+        return HTTPResponse(strategy=ResponseStrategy.FILE, path=_Unexpected_File_Name)
 
     @staticmethod
     def with_object_strategy() -> HTTPResponse:
@@ -93,6 +98,14 @@ class TestInnerHTTPResponse:
                 expected_err_msg = f"It doesn't support reading '{', '.join(http_resp.valid_file_format)}' format file."
                 assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
                 mock_file_stream.assert_not_called()
+
+    def test_response_with_unexpected_file_name(self, http_resp: Type[_HTTPResponse]):
+        with patch("builtins.open", mock_open(read_data=None)) as mock_file_stream:
+            # Run target function to test
+            response = http_resp.generate(data=_MockHTTPResponse.with_unexpected_file_strategy())
+            # Verify result
+            assert response == _Unexpected_File_Name
+            mock_file_stream.assert_not_called()
 
     def test_response_with_object(self, http_resp: Type[_HTTPResponse]):
         resp_data = http_resp.generate(data=_MockHTTPResponse.with_object_strategy())

@@ -97,6 +97,13 @@ _Test_API_Parameters: List[dict] = [
     _Test_API_Parameter_Without_Default,
 ]
 
+# Test HTTP response
+_General_String_Value: str = "This is test message for PyTest."
+_Json_File_Name: str = "test.json"
+_Json_File_Content: dict = {"responseCode": "200", "errorMessage": "OK", "content": "This is YouTube home."}
+_Not_Exist_File_Name: str = "not_exist.json"
+_Not_Json_File_Name: str = "test.yaml"
+_Unexpected_File_Name: str = ".file"
 
 _Test_Response_Property_Int: dict = {
     "name": "id",
