@@ -78,8 +78,8 @@ class HTTPResponse:
                     value = "random integer"
                 elif locate(v.value_type) is list:
                     value = []  # type: ignore[assignment]
+                    item = {}
                     for i in v.items or []:
-                        item = {}
                         assert i.value_type
                         if locate(i.value_type) is str:
                             item_value = "random string"

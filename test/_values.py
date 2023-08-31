@@ -226,6 +226,43 @@ _YouTube_Home_Value: dict = {
 _YouTube_API_Content: dict = {"responseCode": "200", "errorMessage": "OK", "content": "This is YouTube home."}
 
 # Sample API for testing ('<base URL>/test' with POST and object type strategy of HTTP response)
+_HTTP_Response_Properties_With_Object_Strategy = [
+    {
+        "name": "id",
+        "required": True,
+        "type": "int",
+        "format": None,
+    },
+    {
+        "name": "role",
+        "required": True,
+        "type": "str",
+        "format": None,
+    },
+    {
+        "name": "details",
+        "required": False,
+        "type": "list",
+        "format": None,
+        "items": [
+            {
+                "name": "name",
+                "required": True,
+                "type": "str",
+            },
+            {
+                "name": "level",
+                "required": True,
+                "type": "int",
+            },
+            {
+                "name": "key",
+                "required": True,
+                "type": "str",
+            },
+        ],
+    },
+]
 _Foo_Object_Value: dict = {
     "url": "/foo-object",
     "http": {
@@ -234,43 +271,7 @@ _Foo_Object_Value: dict = {
         },
         "response": {
             "strategy": "object",
-            "properties": [
-                {
-                    "name": "id",
-                    "required": True,
-                    "type": "int",
-                    "format": None,
-                },
-                {
-                    "name": "role",
-                    "required": True,
-                    "type": "str",
-                    "format": None,
-                },
-                {
-                    "name": "details",
-                    "required": False,
-                    "type": "list",
-                    "format": None,
-                    "items": [
-                        {
-                            "name": "name",
-                            "required": True,
-                            "type": "str",
-                        },
-                        {
-                            "name": "level",
-                            "required": True,
-                            "type": "int",
-                        },
-                        {
-                            "name": "key",
-                            "required": True,
-                            "type": "str",
-                        },
-                    ],
-                },
-            ],
+            "properties": _HTTP_Response_Properties_With_Object_Strategy,
         },
     },
     "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],

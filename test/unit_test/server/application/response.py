@@ -1,5 +1,6 @@
 import json
 import os
+from pydoc import locate
 from test.unit_test.server.application.init import (
     _General_String_Value,
     _Json_File_Content,
@@ -16,6 +17,8 @@ from pymock_api.exceptions import FileFormatNotSupport
 from pymock_api.model import HTTPResponse
 from pymock_api.model.enums import ResponseStrategy
 from pymock_api.server.application.response import HTTPResponse as _HTTPResponse
+
+from ...._values import _HTTP_Response_Properties_With_Object_Strategy
 
 
 class _MockHTTPResponse:
@@ -42,7 +45,7 @@ class _MockHTTPResponse:
 
     @staticmethod
     def with_object_strategy() -> HTTPResponse:
-        return HTTPResponse(strategy=ResponseStrategy.OBJECT, properties=[])
+        return HTTPResponse(strategy=ResponseStrategy.OBJECT, properties=_HTTP_Response_Properties_With_Object_Strategy)
 
 
 class TestInnerHTTPResponse:
@@ -90,3 +93,44 @@ class TestInnerHTTPResponse:
                 expected_err_msg = f"It doesn't support reading '{', '.join(http_resp.valid_file_format)}' format file."
                 assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
                 mock_file_stream.assert_not_called()
+
+    def test_response_with_object(self, http_resp: Type[_HTTPResponse]):
+        resp_data = http_resp.generate(data=_MockHTTPResponse.with_object_strategy())
+        """
+        {'details': [{'key': 'random string',
+                      'level': 'random integer',
+                      'name': 'random string'},
+                     {'key': 'random string',
+                      'level': 'random integer',
+                      'name': 'random string'},
+                     {'key': 'random string',
+                      'level': 'random integer',
+                      'name': 'random string'}],
+         'id': 'random integer',
+         'role': 'random string'}
+        """
+        assert resp_data
+        for k, v in resp_data.items():
+            prop = list(filter(lambda p: p["name"] == k, _HTTP_Response_Properties_With_Object_Strategy))
+            assert prop and len(prop) == 1
+
+            # TODO: Change to here easy and clear verify
+            # assert isinstance(v, locate(prop[0]["type"]))
+            if locate(prop[0]["type"]) is str:
+                assert v == "random string"
+            elif locate(prop[0]["type"]) is int:
+                assert v == "random integer"
+            elif locate(prop[0]["type"]) is list:
+                assert type(v) is list
+                for v_ele in v:
+                    for v_ele_k, v_ele_v in v_ele.items():
+                        v_list_ele = list(filter(lambda p: p["name"] == v_ele_k, prop[0]["items"]))
+                        assert v_list_ele and len(v_list_ele) == 1
+                        if locate(v_list_ele[0]["type"]) is str:
+                            assert v_ele_v == "random string"
+                        elif locate(v_list_ele[0]["type"]) is int:
+                            assert v_ele_v == "random integer"
+                        else:
+                            assert False, "Invalid data type of response for verifying."
+            else:
+                assert False, "Invalid data type of response for verifying."
