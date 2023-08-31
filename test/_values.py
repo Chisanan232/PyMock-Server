@@ -225,6 +225,57 @@ _YouTube_Home_Value: dict = {
 
 _YouTube_API_Content: dict = {"responseCode": "200", "errorMessage": "OK", "content": "This is YouTube home."}
 
+# Sample API for testing ('<base URL>/test' with POST and object type strategy of HTTP response)
+_Foo_Object_Value: dict = {
+    "url": "/foo-object",
+    "http": {
+        "request": {
+            "method": "POST",
+        },
+        "response": {
+            "strategy": "object",
+            "properties": [
+                {
+                    "name": "id",
+                    "required": True,
+                    "type": "int",
+                    "format": None,
+                },
+                {
+                    "name": "role",
+                    "required": True,
+                    "type": "str",
+                    "format": None,
+                },
+                {
+                    "name": "details",
+                    "required": False,
+                    "type": "list",
+                    "format": None,
+                    "items": [
+                        {
+                            "name": "name",
+                            "required": True,
+                            "type": "str",
+                        },
+                        {
+                            "name": "level",
+                            "required": True,
+                            "type": "int",
+                        },
+                        {
+                            "name": "key",
+                            "required": True,
+                            "type": "str",
+                        },
+                    ],
+                },
+            ],
+        },
+    },
+    "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
+}
+
 
 _Mocked_APIs: dict = {
     "base": {"url": _Base_URL},
@@ -234,6 +285,7 @@ _Mocked_APIs: dict = {
     "delete_google_home": _Delete_Google_Home_Value,
     "test_home": _Test_Home,
     "youtube_home": _YouTube_Home_Value,
+    "foo_object": _Foo_Object_Value,
 }
 
 _Test_Config_Value: dict = {
