@@ -11,6 +11,7 @@ import pytest
 from pymock_api.model.api_config import APIConfig
 from pymock_api.model.api_config import APIParameter as PyMockAPIParameter
 from pymock_api.model.api_config import MockAPI, _Config
+from pymock_api.model.enums import ResponseStrategy
 from pymock_api.model.swagger_config import (
     API,
     APIParameter,
@@ -206,7 +207,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
         data_model.path = "/test/v1/foo-home"
         data_model.http_method = "POST"
         data_model.parameters = [params]
-        data_model.response = {}
+        data_model.response = {"strategy": ResponseStrategy.STRING, "data": "OK"}
         data_model.tags = ["first tag", "second tag"]
 
     def _verify_api_config_model(self, under_test: MockAPI, data_from: API) -> None:
@@ -314,7 +315,7 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
         api.path = "/test/v1/foo-home"
         api.http_method = "POST"
         api.parameters = [params]
-        api.response = {}
+        api.response = {"strategy": ResponseStrategy.STRING, "data": "OK"}
 
         data_model.paths = [api]
 
@@ -340,7 +341,8 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
                 assert api_param.required == param_data_from.required
                 assert api_param.value_type == param_data_from.value_type
                 assert api_param.default == param_data_from.default
-            assert api_details.http.response.value == json.dumps(expect_api.response)
+            assert api_details.http.response.strategy == expect_api.response["strategy"]
+            assert api_details.http.response.value == expect_api.response["data"]
 
     @pytest.mark.parametrize(
         ("base_url", "api_path"),

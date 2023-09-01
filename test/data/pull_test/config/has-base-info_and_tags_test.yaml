@@ -20,8 +20,33 @@ mocked_apis:
             type: str
             format:
       response:
-        strategy: string
-        value: '{"errorMessage": "random string value", "responseCode": "random string value", "responseData": [{"id": "random integer value", "name": "random string value", "value1": "random string value", "value2": "random string value"}]}'
+        strategy: object
+        properties:
+          - name: errorMessage
+            required: True
+            type: str
+            format:
+          - name: responseCode
+            required: True
+            type: str
+            format:
+          - name: responseData
+            required: False
+            type: list
+            format:
+            items:
+              - name: id
+                required: True
+                type: int
+              - name: name
+                required: True
+                type: str
+              - name: value1
+                required: True
+                type: str
+              - name: value2
+                required: True
+                type: str
     tag: 'foo'
   put_foo:
     url: '/foo'
@@ -42,8 +67,20 @@ mocked_apis:
                 type: int
                 name: "id"
       response:
-        strategy: string
-        value: '{"errorMessage": "random string value", "responseCode": "random string value", "responseData": [{}]}'
+        strategy: object
+        properties:
+          - name: errorMessage
+            required: True
+            type: str
+            format:
+          - name: responseCode
+            required: True
+            type: str
+            format:
+          - name: responseData
+            required: False
+            type: list
+            format:
     tag: 'foo'
   get_foo_boo_export:
     url: '/foo-boo/export'
@@ -70,6 +107,40 @@ mocked_apis:
             type: str
             format:
       response:
-        strategy: string
-        value: '{"description": "random string value", "file": "random file output stream", "filename": "random string value", "inputStream": "FIXME: Handle the reference", "open": "random boolean value", "readable": "random boolean value", "uri": "random string value", "url": "random string value"}'
+        strategy: object
+        properties:
+          - name: description
+            required: True
+            type: str
+            format:
+          # TODO: implement file stream
+          - name: file
+            required: True
+            type: file
+            format:
+          - name: filename
+            required: True
+            type: str
+            format:
+          # TODO: implement file stream
+          - name: inputStream
+            required: True
+            type: file
+            format:
+          - name: open
+            required: True
+            type: bool
+            format:
+          - name: readable
+            required: True
+            type: bool
+            format:
+          - name: uri
+            required: True
+            type: str
+            format:
+          - name: url
+            required: True
+            type: str
+            format:
     tag: 'foo-boo'
