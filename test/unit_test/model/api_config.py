@@ -132,6 +132,9 @@ class MockModel:
         return [prop_id, prop_name]
 
 
+MOCK_MODEL = MockModel()
+
+
 class ConfigTestSpec(metaclass=ABCMeta):
     _Mock_Model = MockModel()
 
@@ -626,19 +629,27 @@ class TestMockAPI(ConfigTestSpec):
             # string strategy response
             (None, ResponseStrategy.STRING, "PyTest response"),
             (HTTP(), ResponseStrategy.STRING, "PyTest response"),
-            (HTTP(response=HTTPResponse()), ResponseStrategy.STRING, "PyTest response"),
+            (HTTP(response=HTTPResponse(strategy=ResponseStrategy.STRING)), ResponseStrategy.STRING, "PyTest response"),
             # file strategy response
             (None, ResponseStrategy.FILE, "File path"),
             (HTTP(), ResponseStrategy.FILE, "File path"),
-            (HTTP(response=HTTPResponse()), ResponseStrategy.FILE, "File path"),
+            (HTTP(response=HTTPResponse(strategy=ResponseStrategy.STRING)), ResponseStrategy.FILE, "File path"),
             # object strategy response with object value
             (None, ResponseStrategy.OBJECT, MockModel().response_properties),
             (HTTP(), ResponseStrategy.OBJECT, MockModel().response_properties),
-            (HTTP(response=HTTPResponse()), ResponseStrategy.OBJECT, MockModel().response_properties),
+            (
+                HTTP(response=HTTPResponse(strategy=ResponseStrategy.STRING)),
+                ResponseStrategy.OBJECT,
+                MockModel().response_properties,
+            ),
             # object strategy response with dict value
             (None, ResponseStrategy.OBJECT, _Test_Response_Properties),
             (HTTP(), ResponseStrategy.OBJECT, _Test_Response_Properties),
-            (HTTP(response=HTTPResponse()), ResponseStrategy.OBJECT, _Test_Response_Properties),
+            (
+                HTTP(response=HTTPResponse(strategy=ResponseStrategy.STRING)),
+                ResponseStrategy.OBJECT,
+                _Test_Response_Properties,
+            ),
         ],
     )
     def test_set_valid_response(
@@ -726,7 +737,7 @@ class TestHTTP(ConfigTestSpec):
         ("setting_val", "should_call_deserialize"),
         [
             ({"test": "test"}, True),
-            (Mock(HTTPResponse()), False),
+            (MOCK_MODEL.http_response, False),
         ],
     )
     @patch.object(HTTPResponse, "deserialize", return_value=MOCK_RETURN_VALUE)
@@ -985,6 +996,12 @@ class TestHTTPResponse(ConfigTestSpec):
     def test_value_attributes(self, sut: HTTPResponse):
         assert sut.value == _Test_HTTP_Resp, _assertion_msg
 
+    def test_serialize_with_none(self, sut_with_nothing: _Config):
+        serialized_data = sut_with_nothing.serialize()
+        assert serialized_data is not None
+        assert serialized_data["strategy"] == ResponseStrategy.STRING.value
+        assert serialized_data["value"] == ""
+
     def _expected_serialize_value(self) -> dict:
         return _TestConfig.Response
 
@@ -1021,7 +1038,7 @@ class TestHTTPResponse(ConfigTestSpec):
 
     def test_invalid_set_properties(self):
         with pytest.raises(TypeError) as exc_info:
-            HTTPResponse(properties=["invalid property value"])
+            HTTPResponse(strategy=ResponseStrategy.OBJECT, properties=["invalid property value"])
         assert re.search(
             r".{0,32}data type.{0,32}\*properties\*.{0,32}be dict or ResponseProperty.{0,32}",
             str(exc_info.value),
@@ -1031,15 +1048,33 @@ class TestHTTPResponse(ConfigTestSpec):
     @pytest.mark.parametrize(
         "response",
         [
-            HTTPResponse(strategy=ResponseStrategy.STRING),
-            HTTPResponse(strategy=ResponseStrategy.FILE),
-            HTTPResponse(path="file path"),
-            HTTPResponse(strategy=ResponseStrategy.OBJECT),
-            HTTPResponse(properties=MockModel().response_properties),
+            HTTPResponse(strategy=None, value="some string value"),
+            HTTPResponse(strategy=None, path="file path"),
+            HTTPResponse(strategy=None, properties=MockModel().response_properties),
         ],
     )
     def test_serialize_as_none_with_strategy(self, response: HTTPResponse):
-        assert response.serialize() is None
+        with pytest.raises(ValueError) as exc_info:
+            response.serialize()
+        assert re.search(r".{0,32}strategy.{0,32}missing.{0,32}", str(exc_info.value), re.IGNORECASE)
+
+    @pytest.mark.parametrize(
+        ("response", "verify_key"),
+        [
+            (HTTPResponse(strategy=ResponseStrategy.STRING, value=None), "value"),
+            (HTTPResponse(strategy=ResponseStrategy.FILE, path=None), "path"),
+            (HTTPResponse(strategy=ResponseStrategy.OBJECT, properties=None), "properties"),
+            (HTTPResponse(strategy=ResponseStrategy.STRING, value=""), "value"),
+            (HTTPResponse(strategy=ResponseStrategy.FILE, path=""), "path"),
+            (HTTPResponse(strategy=ResponseStrategy.OBJECT, properties=[]), "properties"),
+        ],
+    )
+    def test_serialize_with_strategy_and_empty_value(self, response: HTTPResponse, verify_key: str):
+        serialized_data = response.serialize()
+        assert serialized_data is not None
+        assert serialized_data["strategy"] == response.strategy.value
+        verify_value = [] if response.strategy is ResponseStrategy.OBJECT else getattr(response, verify_key)
+        assert serialized_data[verify_key] == verify_value
 
     @pytest.mark.parametrize(
         ("response", "expected_data"),

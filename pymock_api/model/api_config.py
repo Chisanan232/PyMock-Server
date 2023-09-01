@@ -314,7 +314,7 @@ class ResponseProperty(_Config):
         self.required = data.get("required", None)
         self.value_type = data.get("type", None)
         self.value_format = data.get("format", None)
-        items = [IteratorItem().deserialize(item) for item in data.get("items", [])]
+        items = [IteratorItem().deserialize(item) for item in (data.get("items", []) or [])]
         self.items = items if items else None
         return self
 
@@ -323,7 +323,7 @@ class ResponseProperty(_Config):
 class HTTPResponse(_Config):
     """*The **http.response** section in **mocked_apis.<api>***"""
 
-    strategy: ResponseStrategy = ResponseStrategy.STRING
+    strategy: Optional[ResponseStrategy] = None
     """
     Strategy:
     * string: Return the value as string data directly.
@@ -341,6 +341,8 @@ class HTTPResponse(_Config):
     properties: List[ResponseProperty] = field(default_factory=list)
 
     def _compare(self, other: "HTTPResponse") -> bool:
+        if not self.strategy:
+            raise ValueError("Miss necessary argument *strategy*.")
         if self.strategy is not other.strategy:
             raise TypeError("Different HTTP response strategy cannot compare with each other.")
         if ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.STRING:
@@ -369,18 +371,16 @@ class HTTPResponse(_Config):
 
     def serialize(self, data: Optional["HTTPResponse"] = None) -> Optional[Dict[str, Any]]:
         strategy: ResponseStrategy = self.strategy or ResponseStrategy.to_enum(self._get_prop(data, prop="strategy"))
+        if not strategy:
+            raise ValueError("Necessary argument *strategy* is missing.")
         if strategy is ResponseStrategy.STRING:
             value: str = self._get_prop(data, prop="value")
-            if not strategy or not value:
-                return None
             return {
                 "strategy": strategy.value,
                 "value": value,
             }
         elif strategy is ResponseStrategy.FILE:
             path: str = self._get_prop(data, prop="path")
-            if not strategy or not path:
-                return None
             return {
                 "strategy": strategy.value,
                 "path": path,
@@ -388,8 +388,6 @@ class HTTPResponse(_Config):
         elif strategy is ResponseStrategy.OBJECT:
             all_properties = (data or self).properties if (data and data.properties) or self.properties else None
             properties = [prop.serialize() for prop in (all_properties or [])]
-            if not strategy or not properties:
-                return None
             return {
                 "strategy": strategy.value,
                 "properties": properties,
