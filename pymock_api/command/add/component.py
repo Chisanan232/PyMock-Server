@@ -5,6 +5,7 @@ from ..._utils import YAML
 from ...model import generate_empty_config, load_config
 from ...model.api_config import APIConfig, MockAPI
 from ...model.cmd_args import SubcmdAddArguments
+from ...model.enums import ResponseStrategy
 from ..component import BaseSubCmdComponent
 
 
@@ -45,6 +46,10 @@ class SubCmdAddComponent(BaseSubCmdComponent):
             except ValueError:
                 print("❌  The data format of API parameter is incorrect.")
                 sys.exit(1)
-        mocked_api.set_response(strategy=args.response_strategy, value=args.response)
+        if args.response_strategy is ResponseStrategy.OBJECT:
+            # TODO: Set the HTTP response data model if strategy is *object* type
+            mocked_api.set_response(strategy=args.response_strategy, iterable_value=[])
+        else:
+            mocked_api.set_response(strategy=args.response_strategy, value=args.response)
         api_config.apis.apis[args.api_path] = mocked_api
         return api_config
