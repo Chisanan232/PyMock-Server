@@ -2,6 +2,8 @@ from collections import namedtuple
 from typing import Dict, List
 from unittest.mock import Mock
 
+from pymock_api.model.enums import ResponseStrategy
+
 
 class APIConfigValue:
     @property
@@ -338,6 +340,7 @@ _Test_FastAPI_App_Type: str = "fastapi"
 
 # Test subcommand *config* options
 _Test_SubCommand_Add: str = "add"
+_Test_Response_Strategy: ResponseStrategy = ResponseStrategy.STRING
 
 # Test subcommand *check* options
 _Test_SubCommand_Check: str = "check"

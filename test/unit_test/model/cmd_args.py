@@ -32,6 +32,7 @@ from ..._values import (
     _Test_Config,
     _Test_HTTP_Method,
     _Test_HTTP_Resp,
+    _Test_Response_Strategy,
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
     _Test_SubCommand_Get,
@@ -77,6 +78,7 @@ class TestDeserialize:
             "api_path": _Test_URL,
             "http_method": _Test_HTTP_Method,
             "parameters": ['{"name": "arg1", "required": false, "default": "val1", "type": "str"}'],
+            "response_strategy": _Test_Response_Strategy,
             "response": _Test_HTTP_Resp,
         }
         namespace = Namespace(**namespace_args)

@@ -3,7 +3,7 @@ from argparse import Namespace
 from dataclasses import dataclass
 from typing import List, Optional
 
-from ..model.enums import Format, SampleType
+from ..model.enums import Format, ResponseStrategy, SampleType
 
 
 @dataclass(frozen=True)
@@ -28,6 +28,7 @@ class SubcmdAddArguments(ParserArguments):
     api_path: str
     http_method: str
     parameters: List[dict]
+    response_strategy: ResponseStrategy
     response: str
 
     def api_info_is_complete(self) -> bool:
@@ -99,6 +100,7 @@ class DeserializeParsedArgs:
             api_path=args.api_path,
             http_method=args.http_method,
             parameters=args.parameters,
+            response_strategy=ResponseStrategy.to_enum(args.response_strategy),
             response=args.response,
         )
 

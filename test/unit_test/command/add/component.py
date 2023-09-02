@@ -10,7 +10,12 @@ from pymock_api.command.add.component import SubCmdAddComponent
 from pymock_api.model import generate_empty_config
 from pymock_api.model.cmd_args import SubcmdAddArguments
 
-from ...._values import _Test_Config, _Test_SubCommand_Add, _Test_URL
+from ...._values import (
+    _Test_Config,
+    _Test_Response_Strategy,
+    _Test_SubCommand_Add,
+    _Test_URL,
+)
 
 
 class FakeYAML(YAML):
@@ -32,6 +37,7 @@ class TestSubCmdAddComponent:
             api_path="",
             http_method="",
             parameters=[],
+            response_strategy=_Test_Response_Strategy,
             response="",
         )
 
@@ -65,6 +71,7 @@ class TestSubCmdAddComponent:
                         api_path=_Test_URL,
                         http_method="GET",
                         parameters=[],
+                        response_strategy=_Test_Response_Strategy,
                         response="OK",
                     )
                     component._get_api_config(args)
@@ -106,6 +113,8 @@ class TestSubCmdAddComponent:
                     api_path=_Test_URL,
                     http_method=http_method,
                     parameters=parameters,
+                    # TODO: Change to use parameter to set it
+                    response_strategy=_Test_Response_Strategy,
                     response=response,
                 )
                 component.process(args)
@@ -160,6 +169,8 @@ class TestSubCmdAddComponent:
                     api_path=url_path,
                     http_method=http_method,
                     parameters=parameters,
+                    # TODO: Change to use parameter to set it
+                    response_strategy=_Test_Response_Strategy,
                     response=response,
                 )
                 with pytest.raises(SystemExit) as exc_info:

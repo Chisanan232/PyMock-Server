@@ -42,7 +42,7 @@ from pymock_api.model import (
     SubcmdSampleArguments,
     deserialize_swagger_api_config,
 )
-from pymock_api.model.enums import Format, SampleType
+from pymock_api.model.enums import Format, ResponseStrategy, SampleType
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (
@@ -63,6 +63,7 @@ from ..._values import (
     _Test_FastAPI_App_Type,
     _Test_HTTP_Method,
     _Test_HTTP_Resp,
+    _Test_Response_Strategy,
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
     _Test_SubCommand_Get,
@@ -103,6 +104,7 @@ def _given_parser_args(
             api_path=_Test_URL,
             http_method=_Test_HTTP_Method,
             parameters=[],
+            response_strategy=ResponseStrategy.STRING,
             response=_Test_HTTP_Resp,
         )
     elif subcommand == "check":
@@ -437,6 +439,8 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
             api_path=url_path,
             http_method=method,
             parameters=params,
+            # TODO: Change to use parameter to set it
+            response_strategy=_Test_Response_Strategy,
             response=response,
         )
 
@@ -453,6 +457,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         args_namespace.api_path = _Test_URL
         args_namespace.http_method = _Test_HTTP_Method
         args_namespace.parameters = ""
+        args_namespace.response_strategy = _Test_Response_Strategy
         args_namespace.response = _Test_HTTP_Resp
         return args_namespace
 
