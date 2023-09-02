@@ -338,7 +338,7 @@ _Test_Auto_Type: str = "auto"
 _Test_App_Type: str = "flask"
 _Test_FastAPI_App_Type: str = "fastapi"
 
-# Test subcommand *config* options
+# Test subcommand *add* options
 _Test_SubCommand_Add: str = "add"
 _Test_Response_Strategy: ResponseStrategy = ResponseStrategy.STRING
 
@@ -352,13 +352,13 @@ _Cmd_Arg_API_Path: str = "/foo-home"
 _Cmd_Arg_HTTP_Method: str = "GET"
 _Show_Detail_As_Format: str = "text"
 
-# Test subcommand *config* options
+# Test subcommand *sample* options
 _Test_SubCommand_Sample: str = "sample"
 _Generate_Sample: bool = True
 _Print_Sample: bool = True
 _Sample_File_Path: str = "pytest-api.yaml"
 _Sample_Data_Type: str = "all"
 
-# Test subcommand *config* options
+# Test subcommand *pull* options
 _Test_SubCommand_Pull: str = "pull"
 _API_Doc_Source: str = "127.0.0.1:8080"
