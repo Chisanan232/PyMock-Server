@@ -105,7 +105,7 @@ def _given_parser_args(
             http_method=_Test_HTTP_Method,
             parameters=[],
             response_strategy=ResponseStrategy.STRING,
-            response=_Test_HTTP_Resp,
+            response_value=_Test_HTTP_Resp,
         )
     elif subcommand == "check":
         return SubcmdCheckArguments(
@@ -441,7 +441,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
             parameters=params,
             # TODO: Change to use parameter to set it
             response_strategy=_Test_Response_Strategy,
-            response=response,
+            response_value=[response],
         )
 
         with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
@@ -458,7 +458,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         args_namespace.http_method = _Test_HTTP_Method
         args_namespace.parameters = ""
         args_namespace.response_strategy = _Test_Response_Strategy
-        args_namespace.response = _Test_HTTP_Resp
+        args_namespace.response_value = _Test_HTTP_Resp
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:

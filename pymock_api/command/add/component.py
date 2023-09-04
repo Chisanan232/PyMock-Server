@@ -50,6 +50,7 @@ class SubCmdAddComponent(BaseSubCmdComponent):
             # TODO: Set the HTTP response data model if strategy is *object* type
             mocked_api.set_response(strategy=args.response_strategy, iterable_value=[])
         else:
-            mocked_api.set_response(strategy=args.response_strategy, value=args.response)
+            assert isinstance(args.response_value[0], str), "The data type must be *str*."
+            mocked_api.set_response(strategy=args.response_strategy, value=args.response_value[0])
         api_config.apis.apis[args.api_path] = mocked_api
         return api_config

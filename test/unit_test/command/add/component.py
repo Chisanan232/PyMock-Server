@@ -38,7 +38,7 @@ class TestSubCmdAddComponent:
             http_method="",
             parameters=[],
             response_strategy=_Test_Response_Strategy,
-            response="",
+            response_value=[""],
         )
 
         # Run target function to test
@@ -72,7 +72,7 @@ class TestSubCmdAddComponent:
                         http_method="GET",
                         parameters=[],
                         response_strategy=_Test_Response_Strategy,
-                        response="OK",
+                        response_value=["OK"],
                     )
                     component._get_api_config(args)
 
@@ -115,7 +115,7 @@ class TestSubCmdAddComponent:
                     parameters=parameters,
                     # TODO: Change to use parameter to set it
                     response_strategy=_Test_Response_Strategy,
-                    response=response,
+                    response_value=[response],
                 )
                 component.process(args)
 
@@ -171,7 +171,7 @@ class TestSubCmdAddComponent:
                     parameters=parameters,
                     # TODO: Change to use parameter to set it
                     response_strategy=_Test_Response_Strategy,
-                    response=response,
+                    response_value=[response],
                 )
                 with pytest.raises(SystemExit) as exc_info:
                     component.process(args)

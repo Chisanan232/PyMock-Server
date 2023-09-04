@@ -1,7 +1,7 @@
 import json
 from argparse import Namespace
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from ..model.enums import Format, ResponseStrategy, SampleType
 
@@ -29,7 +29,7 @@ class SubcmdAddArguments(ParserArguments):
     http_method: str
     parameters: List[dict]
     response_strategy: ResponseStrategy
-    response: str
+    response_value: List[Union[str, dict]]
 
     def api_info_is_complete(self) -> bool:
         def _string_is_not_empty(s: Optional[str]) -> bool:
@@ -92,16 +92,24 @@ class DeserializeParsedArgs:
 
     @classmethod
     def subcommand_add(cls, args: Namespace) -> SubcmdAddArguments:
+        args.response_strategy = ResponseStrategy.to_enum(args.response_strategy)
         if args.parameters:
             args.parameters = list(map(lambda p: json.loads(p), args.parameters))
+        if args.response_value:
+            args.response_value = list(
+                map(
+                    lambda resp: json.loads(resp) if args.response_strategy is ResponseStrategy.OBJECT else resp,
+                    args.response_value,
+                )
+            )
         return SubcmdAddArguments(
             subparser_name=args.subcommand,
             api_config_path=args.api_config_path,
             api_path=args.api_path,
             http_method=args.http_method,
             parameters=args.parameters,
-            response_strategy=ResponseStrategy.to_enum(args.response_strategy),
-            response=args.response,
+            response_strategy=args.response_strategy,
+            response_value=args.response_value,
         )
 
     @classmethod

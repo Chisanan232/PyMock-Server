@@ -79,7 +79,7 @@ class TestDeserialize:
             "http_method": _Test_HTTP_Method,
             "parameters": ['{"name": "arg1", "required": false, "default": "val1", "type": "str"}'],
             "response_strategy": _Test_Response_Strategy,
-            "response": _Test_HTTP_Resp,
+            "response_value": [_Test_HTTP_Resp],
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_add(namespace)
@@ -89,7 +89,7 @@ class TestDeserialize:
         assert arguments.api_path == _Test_URL
         assert arguments.http_method == _Test_HTTP_Method
         assert arguments.parameters == [{"name": "arg1", "required": False, "default": "val1", "type": "str"}]
-        assert arguments.response == _Test_HTTP_Resp
+        assert arguments.response_value == [_Test_HTTP_Resp]
 
     @pytest.mark.parametrize(
         (
