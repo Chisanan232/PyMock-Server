@@ -17,6 +17,7 @@ from pymock_api.model.swagger_config import (
     APIParameter,
     SwaggerConfig,
     Transferable,
+    _YamlSchema,
     convert_js_type,
     set_component_definition,
 )
@@ -46,6 +47,8 @@ SWAGGER_ONE_API_JSON: List[tuple] = []
 SWAGGER_API_PARAMETERS_JSON: List[tuple] = []
 SWAGGER_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
 SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
+SWAGGER_API_RESPONSES_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
+SWAGGER_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
 
 
 def _get_all_swagger_api_doc() -> None:
@@ -64,8 +67,28 @@ def _get_all_swagger_api_doc() -> None:
             apis: dict = swagger_api_docs["paths"]
             for api_path, api_props in apis.items():
                 for api_detail in api_props.values():
+                    # For testing API details
                     SWAGGER_ONE_API_JSON.append((api_detail, swagger_api_docs))
+
+                    # For testing API response
+                    for strategy in ResponseStrategy:
+                        SWAGGER_API_RESPONSES_FOR_API.append((strategy, api_detail, swagger_api_docs))
+
+                    # For testing API response properties
+                    status_200_response = api_detail.get("responses", {}).get("200", {})
+                    set_component_definition(data=swagger_api_docs, key="definitions")
+                    if _YamlSchema.has_schema(status_200_response):
+                        response_schema = _YamlSchema.get_schema_ref(status_200_response)
+                        response_schema_properties = response_schema.get("properties", None)
+                        if response_schema_properties:
+                            for k, v in response_schema_properties.items():
+                                for strategy in ResponseStrategy:
+                                    SWAGGER_API_RESPONSES_PROPERTY_FOR_API.append((strategy, v, swagger_api_docs))
+
+                    # For testing API request parameters
                     SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API.append((api_detail["parameters"], swagger_api_docs))
+
+                    # For testing API request parameters
                     for param in api_detail["parameters"]:
                         if param.get("schema", {}).get("$ref", None) is None:
                             SWAGGER_API_PARAMETERS_JSON.append(param)
@@ -229,7 +252,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
         ("swagger_api_doc_data", "entire_swagger_config"), SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API
     )
     def test__process_api_params(self, swagger_api_doc_data: List[dict], entire_swagger_config: dict, data_model: API):
-        # Pro-process
+        # Pre-process
         set_component_definition(data=entire_swagger_config, key="definitions")
 
         # Run target function
@@ -245,7 +268,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
     def test__process_has_ref_parameters_with_valid_value(
         self, swagger_api_doc_data: dict, entire_swagger_config: dict, data_model: API
     ):
-        # Pro-process
+        # Pre-process
         set_component_definition(data=entire_swagger_config, key="definitions")
 
         # Run target function
@@ -265,6 +288,81 @@ class TestAPI(_SwaggerDataModelTestSuite):
 
         # Verify
         assert re.search(r".{1,64}no ref.{1,64}", str(exc_info.value), re.IGNORECASE)
+
+    @pytest.mark.parametrize(("strategy", "api_detail", "entire_config"), SWAGGER_API_RESPONSES_FOR_API)
+    def test__process_http_response(
+        self, strategy: ResponseStrategy, api_detail: dict, entire_config: dict, data_model: API
+    ):
+        # Pre-process
+        set_component_definition(data=entire_config, key="definitions")
+
+        # Run target function under test
+        response_data = data_model._process_response(data=api_detail, strategy=strategy)
+        print(f"[DEBUG in test] response_data: {response_data}")
+
+        # Verify
+        assert response_data and isinstance(response_data, dict)
+        data_details = response_data["data"]
+        if strategy is ResponseStrategy.OBJECT:
+            assert data_details is not None and isinstance(data_details, list)
+            for d in data_details:
+                assert d["name"]
+                assert d["type"]
+                assert d["required"] is not None
+                assert d["format"] is None  # FIXME: Should activate this verify after support this feature
+                if d["type"] == "list":
+                    assert d["items"] is not None
+                    for item in d["items"]:
+                        assert item["name"]
+                        assert item["type"]
+                        assert item["required"] is not None
+        else:
+            assert data_details is not None and isinstance(data_details, dict)
+            for v in data_details.values():
+                if isinstance(v, str):
+                    assert v in [
+                        "random string value",
+                        "random integer value",
+                        "random boolean value",
+                        "random file output stream",
+                        "FIXME: Handle the reference",
+                    ]
+                else:
+                    for item in v:
+                        for item_value in item.values():
+                            assert item_value in ["random string value", "random integer value", "random boolean value"]
+
+    @pytest.mark.parametrize(
+        ("strategy", "api_response_detail", "entire_config"), SWAGGER_API_RESPONSES_PROPERTY_FOR_API
+    )
+    def test__process_response_value(
+        self, strategy: ResponseStrategy, api_response_detail: dict, entire_config: dict, data_model: API
+    ):
+        # Pre-process
+        set_component_definition(data=entire_config, key="definitions")
+
+        # Run target function under test
+        response_prop_data = data_model._process_response_value(property_value=api_response_detail, strategy=strategy)
+
+        # Verify
+        if strategy is ResponseStrategy.OBJECT:
+            assert response_prop_data and isinstance(response_prop_data, dict)
+            for resp_k, resp_v in response_prop_data.items():
+                assert resp_k in ["name", "required", "type", "format", "items", "FIXME"]
+        else:
+            assert response_prop_data and isinstance(response_prop_data, (str, list))
+            if response_prop_data and isinstance(response_prop_data, str):
+                assert response_prop_data in [
+                    "random string value",
+                    "random integer value",
+                    "random boolean value",
+                    "random file output stream",
+                    "FIXME: Handle the reference",
+                ]
+            else:
+                for item in response_prop_data:
+                    for item_value in item.values():
+                        assert item_value in ["random string value", "random integer value", "random boolean value"]
 
 
 class TestSwaggerConfig(_SwaggerDataModelTestSuite):

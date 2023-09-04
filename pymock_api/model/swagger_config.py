@@ -327,42 +327,43 @@ class API(Transferable):
                         "format": None,
                         "items": None,
                     }
-            if locate(v_type) == list:
-                single_response = _YamlSchema.get_schema_ref(property_value["items"])
-                item = {}
-                single_response_properties = single_response.get("properties", None)
-                print(f"[DEBUG in src] single_response_properties: {single_response_properties}")
-                if single_response_properties:
-                    for item_k, item_v in single_response["properties"].items():
-                        print(f"[DEBUG in src] item_v: {item_v}")
-                        print(f"[DEBUG in src] _YamlSchema.has_ref(item_v): {_YamlSchema.has_ref(item_v)}")
-                        item_type = convert_js_type(item_v["type"])
-                        if locate(item_type) is str:
-                            # lowercase_letters = string.ascii_lowercase
-                            # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                            random_value = "random string value"
-                        elif locate(item_type) is int:
-                            # random_value = int(
-                            #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                            random_value = "random integer value"
-                        else:
-                            raise NotImplementedError
-                        item[item_k] = random_value
-                k_value = [item]  # type: ignore[assignment]
-            elif locate(v_type) == str:
-                # lowercase_letters = string.ascii_lowercase
-                # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                k_value = "random string value"
-            elif locate(v_type) == int:
-                # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                k_value = "random integer value"
-            elif locate(v_type) == bool:
-                k_value = "random boolean value"
-            elif v_type is "file":
-                # TODO: Handle the file download feature
-                k_value = "random file output stream"
             else:
-                raise NotImplementedError
+                if locate(v_type) == list:
+                    single_response = _YamlSchema.get_schema_ref(property_value["items"])
+                    item = {}
+                    single_response_properties = single_response.get("properties", None)
+                    print(f"[DEBUG in src] single_response_properties: {single_response_properties}")
+                    if single_response_properties:
+                        for item_k, item_v in single_response["properties"].items():
+                            print(f"[DEBUG in src] item_v: {item_v}")
+                            print(f"[DEBUG in src] _YamlSchema.has_ref(item_v): {_YamlSchema.has_ref(item_v)}")
+                            item_type = convert_js_type(item_v["type"])
+                            if locate(item_type) is str:
+                                # lowercase_letters = string.ascii_lowercase
+                                # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                                random_value = "random string value"
+                            elif locate(item_type) is int:
+                                # random_value = int(
+                                #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                                random_value = "random integer value"
+                            else:
+                                raise NotImplementedError
+                            item[item_k] = random_value
+                    k_value = [item]  # type: ignore[assignment]
+                elif locate(v_type) == str:
+                    # lowercase_letters = string.ascii_lowercase
+                    # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                    k_value = "random string value"
+                elif locate(v_type) == int:
+                    # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                    k_value = "random integer value"
+                elif locate(v_type) == bool:
+                    k_value = "random boolean value"
+                elif v_type is "file":
+                    # TODO: Handle the file download feature
+                    k_value = "random file output stream"
+                else:
+                    raise NotImplementedError
         return k_value
 
     def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
