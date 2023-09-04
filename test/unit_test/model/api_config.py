@@ -1,3 +1,4 @@
+import random
 import re
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional, Union
@@ -1012,6 +1013,21 @@ class TestHTTPResponse(ConfigTestSpec):
     @pytest.mark.parametrize(
         ("compare", "be_compared"),
         [
+            (None, random.choice([s for s in ResponseStrategy])),
+            (None, None),
+        ],
+    )
+    def test_invalid_compare_with_missing_strategy(self, compare: ResponseStrategy, be_compared: ResponseStrategy):
+        with pytest.raises(ValueError) as exc_info:
+            HTTPResponse(strategy=compare) == HTTPResponse(strategy=be_compared)
+        assert re.search(r".{0,32}Miss.{0,32}strategy.{0,32}", str(exc_info.value), re.IGNORECASE)
+
+    @pytest.mark.parametrize(
+        ("compare", "be_compared"),
+        [
+            (ResponseStrategy.STRING, None),
+            (ResponseStrategy.FILE, None),
+            (ResponseStrategy.OBJECT, None),
             (ResponseStrategy.STRING, ResponseStrategy.FILE),
             (ResponseStrategy.FILE, ResponseStrategy.OBJECT),
             (ResponseStrategy.OBJECT, ResponseStrategy.STRING),
