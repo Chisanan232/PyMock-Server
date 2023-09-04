@@ -162,10 +162,14 @@ class API(Transferable):
         self.response: Dict = {}
         self.tags: List[str] = []
 
+        self.process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
+
     def deserialize(self, data: Dict) -> "API":
         self.parameters = self._process_api_params(data["parameters"])
-        # TODO: How to set the HTTP response strategy?
-        self.response = self._process_response(data, data.get("strategy", ResponseStrategy.OBJECT))
+        # FIXME: Does it have better way to set the HTTP response strategy?
+        if not self.process_response_strategy:
+            raise ValueError("Please set the strategy how it should process HTTP response.")
+        self.response = self._process_response(data, self.process_response_strategy)
         self.tags = data.get("tags", [])
         return self
 
@@ -262,6 +266,10 @@ class API(Transferable):
                             response_data["data"], dict
                         ), "The response data type must be *dict* if its HTTP response strategy is not object."
                         response_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
+        else:
+            response_schema = status_200_response.get("content", {}).get("application/json", {}).get("schema", {})
+            if response_schema:
+                raise NotImplementedError("Not support set HTTP response by this way in current version.")
         return response_data
 
     def _process_response_value(self, property_value: dict, strategy: ResponseStrategy) -> Union[str, dict]:
