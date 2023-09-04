@@ -88,18 +88,22 @@ class TestSubCmdAddComponent:
                         mock_generate_empty_config.assert_called_once()
 
     @pytest.mark.parametrize(
-        ("http_method", "parameters", "response"),
+        ("http_method", "parameters", "response_value"),
         [
             (None, [], None),
             (
                 "POST",
                 [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
-                "This is PyTest response",
+                ["This is PyTest response"],
             ),
         ],
     )
     def test_add_valid_api(
-        self, http_method: Optional[str], parameters: List[dict], response: Optional[str], component: SubCmdAddComponent
+        self,
+        http_method: Optional[str],
+        parameters: List[dict],
+        response_value: Optional[List[str]],
+        component: SubCmdAddComponent,
     ):
         # Mock functions
         FakeYAML.serialize = MagicMock()
@@ -115,7 +119,7 @@ class TestSubCmdAddComponent:
                     parameters=parameters,
                     # TODO: Change to use parameter to set it
                     response_strategy=_Test_Response_Strategy,
-                    response_value=[response],
+                    response_value=response_value,
                 )
                 component.process(args)
 
@@ -127,25 +131,25 @@ class TestSubCmdAddComponent:
                 FakeYAML.write.assert_called_once_with(path=_Test_Config, config=api_config.serialize())
 
     @pytest.mark.parametrize(
-        ("url_path", "http_method", "parameters", "response"),
+        ("url_path", "http_method", "parameters", "response_value"),
         [
             (
                 None,
                 "POST",
                 [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
-                "This is PyTest response",
+                ["This is PyTest response"],
             ),
             (
                 "",
                 "POST",
                 [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
-                "This is PyTest response",
+                ["This is PyTest response"],
             ),
             (
                 _Test_URL,
                 "POST",
                 [{"name": "arg1", "required": False, "default": "val1", "type": "str", "invalid_key": "val"}],
-                "This is PyTest response",
+                ["This is PyTest response"],
             ),
         ],
     )
@@ -154,7 +158,7 @@ class TestSubCmdAddComponent:
         url_path: str,
         http_method: Optional[str],
         parameters: List[dict],
-        response: Optional[str],
+        response_value: Optional[List[str]],
         component: SubCmdAddComponent,
     ):
         # Mock functions
@@ -171,7 +175,7 @@ class TestSubCmdAddComponent:
                     parameters=parameters,
                     # TODO: Change to use parameter to set it
                     response_strategy=_Test_Response_Strategy,
-                    response_value=[response],
+                    response_value=response_value,
                 )
                 with pytest.raises(SystemExit) as exc_info:
                     component.process(args)
