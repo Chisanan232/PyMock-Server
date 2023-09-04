@@ -165,10 +165,10 @@ class API(Transferable):
         self.process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
 
     def deserialize(self, data: Dict) -> "API":
-        self.parameters = self._process_api_params(data["parameters"])
         # FIXME: Does it have better way to set the HTTP response strategy?
         if not self.process_response_strategy:
             raise ValueError("Please set the strategy how it should process HTTP response.")
+        self.parameters = self._process_api_params(data["parameters"])
         self.response = self._process_response(data, self.process_response_strategy)
         self.tags = data.get("tags", [])
         return self

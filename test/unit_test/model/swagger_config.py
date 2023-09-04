@@ -189,6 +189,12 @@ class TestAPI(_SwaggerDataModelTestSuite):
         set_component_definition(data=entire_swagger_config, key="definitions")
         super().test_deserialize(swagger_api_doc_data, data_model)
 
+    def test_invalid_deserialize(self, data_model: API):
+        data_model.process_response_strategy = None
+        with pytest.raises(ValueError) as exc_info:
+            data_model.deserialize(data={})
+        assert re.search(r".{0,32}strategy.{0,32}", str(exc_info.value), re.IGNORECASE)
+
     def _initial(self, data: API) -> None:
         data.path = ""
         data.http_method = ""
