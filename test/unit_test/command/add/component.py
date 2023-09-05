@@ -98,6 +98,15 @@ class TestSubCmdAddComponent:
                 _Test_Response_Strategy,
                 ["This is PyTest response"],
             ),
+            (
+                "PUT",
+                [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
+                ResponseStrategy.OBJECT,
+                [
+                    {"name": "id", "required": True, "type": "int", "format": None, "items": None},
+                    {"name": "name", "required": True, "type": "str", "format": None, "items": None},
+                ],
+            ),
         ],
     )
     def test_add_valid_api(
@@ -155,6 +164,13 @@ class TestSubCmdAddComponent:
                 [{"name": "arg1", "required": False, "default": "val1", "type": "str", "invalid_key": "val"}],
                 _Test_Response_Strategy,
                 ["This is PyTest response"],
+            ),
+            (
+                _Test_URL,
+                "PUT",
+                [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
+                _Test_Response_Strategy,
+                [{"invalid data structure": ""}],
             ),
         ],
     )
