@@ -2,7 +2,6 @@ import json
 import pathlib
 import re
 import sys
-import traceback
 from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Optional
 
