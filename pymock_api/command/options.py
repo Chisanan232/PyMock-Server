@@ -436,6 +436,7 @@ class AddResponseStrategy(BaseSubCmdAddOption):
     name: str = "response_strategy"
     help_description: str = "Set HTTP response strategy of one specific API."
     option_value_type: type = str
+    _options: List[str] = ["string", "file", "object"]
 
 
 class AddResponse(BaseSubCmdAddOption):
