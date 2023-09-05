@@ -389,33 +389,40 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         return SubCmdAdd()
 
     @pytest.mark.parametrize(
-        ("url_path", "method", "params", "response_value"),
+        ("url_path", "method", "params", "response_strategy", "response_value"),
         [
-            ("/foo", "", [], [""]),
-            ("/foo", "GET", [], [""]),
-            ("/foo", "POST", [], ["This is PyTest response"]),
-            ("/foo", "PUT", [], ["Wow testing."]),
+            ("/foo", "", [], _Test_Response_Strategy, [""]),
+            ("/foo", "GET", [], _Test_Response_Strategy, [""]),
+            ("/foo", "POST", [], _Test_Response_Strategy, ["This is PyTest response"]),
+            ("/foo", "PUT", [], _Test_Response_Strategy, ["Wow testing."]),
         ],
     )
     def test_with_command_processor(
-        self, url_path: str, method: str, params: List[dict], response_value: List[str], object_under_test: Callable
+        self,
+        url_path: str,
+        method: str,
+        params: List[dict],
+        response_strategy: ResponseStrategy,
+        response_value: List[str],
+        object_under_test: Callable,
     ):
         kwargs = {
             "url_path": url_path,
             "method": method,
             "params": params,
+            "response_strategy": response_strategy,
             "response_value": response_value,
             "cmd_ps": object_under_test,
         }
         self._test_process(**kwargs)
 
     @pytest.mark.parametrize(
-        ("url_path", "method", "params", "response_value"),
+        ("url_path", "method", "params", "response_strategy", "response_value"),
         [
-            ("/foo", "", "", [""]),
-            ("/foo", "GET", [], [""]),
-            ("/foo", "POST", [], ["This is PyTest response"]),
-            ("/foo", "PUT", [], ["Wow testing."]),
+            ("/foo", "", "", _Test_Response_Strategy, [""]),
+            ("/foo", "GET", [], _Test_Response_Strategy, [""]),
+            ("/foo", "POST", [], _Test_Response_Strategy, ["This is PyTest response"]),
+            ("/foo", "PUT", [], _Test_Response_Strategy, ["Wow testing."]),
         ],
     )
     def test_with_run_entry_point(
@@ -423,6 +430,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         url_path: str,
         method: str,
         params: List[dict],
+        response_strategy: ResponseStrategy,
         response_value: List[str],
         entry_point_under_test: Callable,
     ):
@@ -430,13 +438,20 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
             "url_path": url_path,
             "method": method,
             "params": params,
+            "response_strategy": response_strategy,
             "response_value": response_value,
             "cmd_ps": entry_point_under_test,
         }
         self._test_process(**kwargs)
 
     def _test_process(
-        self, url_path: str, method: str, params: List[dict], response_value: List[str], cmd_ps: Callable
+        self,
+        url_path: str,
+        method: str,
+        params: List[dict],
+        response_strategy: ResponseStrategy,
+        response_value: List[str],
+        cmd_ps: Callable,
     ):
         FakeYAML.serialize = MagicMock()
         FakeYAML.write = MagicMock()
@@ -446,8 +461,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
             api_path=url_path,
             http_method=method,
             parameters=params,
-            # TODO: Change to use parameter to set it
-            response_strategy=_Test_Response_Strategy,
+            response_strategy=response_strategy,
             response_value=response_value,
         )
 
