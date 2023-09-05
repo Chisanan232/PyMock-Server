@@ -15,6 +15,7 @@ from ...model import (
 )
 from ...model.api_config import APIConfig
 from ...model.api_config import APIParameter as MockedAPIParameter
+from ...model.api_config import ResponseProperty
 from ...model.enums import ResponseStrategy
 from ...model.swagger_config import API as SwaggerAPI
 from ...model.swagger_config import APIParameter as SwaggerAPIParameter
@@ -172,37 +173,82 @@ class ValidityChecking(_BaseChecking):
             assert one_api_config.http.response
             http_response = one_api_config.http.response
             assert http_response.strategy in ResponseStrategy
+            config_key = ""
             under_check_value = None
             if http_response.strategy is ResponseStrategy.STRING:
                 under_check_value = http_response.value
+                config_key = f"mocked_apis.{one_api_name}.http.response.value"
             elif http_response.strategy is ResponseStrategy.FILE:
                 under_check_value = http_response.path
+                config_key = f"mocked_apis.{one_api_name}.http.response.path"
             elif http_response.strategy is ResponseStrategy.OBJECT:
-                # TODO: Implement checking properties
                 under_check_value = http_response.properties  # type: ignore[assignment]
+                config_key = f"mocked_apis.{one_api_name}.http.response.properties"
             self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}.http.response.value",
+                config_key=config_key,
                 config_value=under_check_value,
                 valid_callback=self._chk_response_value_validity,
             )
         return api_config
 
-    def _chk_response_value_validity(self, config_key: str, config_value: Any) -> bool:
-        try:
-            json.loads(config_value)
-        except:
-            if re.search(r"\w{1,32}\.\w{1,8}", config_value):
-                if not pathlib.Path(config_value).exists():
-                    print("The file which is the response content doesn't exist.")
+    def _chk_response_value_validity(self, config_key: str, config_value: Any) -> bool:  # type: ignore[return]
+        response_strategy = config_key.split(".")[-1]
+        assert response_strategy in [
+            "value",
+            "path",
+            "properties",
+        ], f"It has unexpected schema usage '{config_key}' in configuration."
+        if response_strategy == "value":
+            assert isinstance(
+                config_value, str
+            ), "If HTTP response strategy is *string*, the data type of response value must be *str*."
+            if re.search(r"\{.{0,99999999}}", config_value):
+                try:
+                    json.loads(config_value)
+                except:
+                    print(
+                        "If HTTP response strategy is *string* and its value seems like JSON format, its format is not a valid JSON format."
+                    )
                     self._config_is_wrong = True
                     if self._stop_if_fail:
                         sys.exit(1)
                     return False
-            # else:
-            #     print("Data content format is incorrect")
-            #     sys.exit(1)
             return True
-        else:
+        elif response_strategy == "path":
+            assert isinstance(
+                config_value, str
+            ), "If HTTP response strategy is *file*, the data type of response value must be *str*."
+            if not pathlib.Path(config_value).exists():
+                print("The file which is the response content doesn't exist.")
+                self._config_is_wrong = True
+                if self._stop_if_fail:
+                    sys.exit(1)
+                return False
+            return True
+        elif response_strategy == "properties":
+            assert isinstance(
+                config_value, list
+            ), "If HTTP response strategy is *object*, the data type of response value must be *list*."
+            for v in config_value:
+                assert isinstance(v, ResponseProperty)
+                if not v.name:
+                    print("Attribute *name* is necessary of data model *ResponseProperty*.")
+                    self._config_is_wrong = True
+                    if self._stop_if_fail:
+                        sys.exit(1)
+                    return False
+                if v.required is None:
+                    print("Attribute *required* is necessary of data model *ResponseProperty*.")
+                    self._config_is_wrong = True
+                    if self._stop_if_fail:
+                        sys.exit(1)
+                    return False
+                if not v.value_type:
+                    print("Attribute *value_type* is necessary of data model *ResponseProperty*.")
+                    self._config_is_wrong = True
+                    if self._stop_if_fail:
+                        sys.exit(1)
+                    return False
             return True
 
     def _setting_should_not_be_none(
