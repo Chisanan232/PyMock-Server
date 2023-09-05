@@ -389,7 +389,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         return SubCmdAdd()
 
     @pytest.mark.parametrize(
-        ("url_path", "method", "params", "response"),
+        ("url_path", "method", "params", "response_value"),
         [
             ("/foo", "", [], ""),
             ("/foo", "GET", [], ""),
@@ -398,19 +398,19 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         ],
     )
     def test_with_command_processor(
-        self, url_path: str, method: str, params: List[dict], response: str, object_under_test: Callable
+        self, url_path: str, method: str, params: List[dict], response_value: str, object_under_test: Callable
     ):
         kwargs = {
             "url_path": url_path,
             "method": method,
             "params": params,
-            "response": response,
+            "response_value": response_value,
             "cmd_ps": object_under_test,
         }
         self._test_process(**kwargs)
 
     @pytest.mark.parametrize(
-        ("url_path", "method", "params", "response"),
+        ("url_path", "method", "params", "response_value"),
         [
             ("/foo", "", "", ""),
             ("/foo", "GET", [], ""),
@@ -419,18 +419,18 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         ],
     )
     def test_with_run_entry_point(
-        self, url_path: str, method: str, params: List[dict], response: str, entry_point_under_test: Callable
+        self, url_path: str, method: str, params: List[dict], response_value: str, entry_point_under_test: Callable
     ):
         kwargs = {
             "url_path": url_path,
             "method": method,
             "params": params,
-            "response": response,
+            "response_value": response_value,
             "cmd_ps": entry_point_under_test,
         }
         self._test_process(**kwargs)
 
-    def _test_process(self, url_path: str, method: str, params: List[dict], response: str, cmd_ps: Callable):
+    def _test_process(self, url_path: str, method: str, params: List[dict], response_value: str, cmd_ps: Callable):
         FakeYAML.serialize = MagicMock()
         FakeYAML.write = MagicMock()
         mock_parser_arg = SubcmdAddArguments(
@@ -441,7 +441,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
             parameters=params,
             # TODO: Change to use parameter to set it
             response_strategy=_Test_Response_Strategy,
-            response_value=[response],
+            response_value=[response_value],
         )
 
         with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
