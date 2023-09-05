@@ -395,6 +395,15 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
             ("/foo", "GET", [], _Test_Response_Strategy, [""]),
             ("/foo", "POST", [], _Test_Response_Strategy, ["This is PyTest response"]),
             ("/foo", "PUT", [], _Test_Response_Strategy, ["Wow testing."]),
+            ("/foo-file", "PUT", [], ResponseStrategy.FILE, [_Test_Config]),
+            (
+                "/foo-object",
+                "PUT",
+                [],
+                ResponseStrategy.OBJECT,
+                [{"name": "arg", "required": True, "type": "str", "format": None}],
+            ),
+            ("/foo-object", "PUT", [], ResponseStrategy.OBJECT, []),
         ],
     )
     def test_with_command_processor(
@@ -423,6 +432,15 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
             ("/foo", "GET", [], _Test_Response_Strategy, [""]),
             ("/foo", "POST", [], _Test_Response_Strategy, ["This is PyTest response"]),
             ("/foo", "PUT", [], _Test_Response_Strategy, ["Wow testing."]),
+            ("/foo-file", "PUT", [], ResponseStrategy.FILE, [_Test_Config]),
+            (
+                "/foo-object",
+                "PUT",
+                [],
+                ResponseStrategy.OBJECT,
+                [{"name": "arg", "required": True, "type": "str", "format": None}],
+            ),
+            ("/foo-object", "PUT", [], ResponseStrategy.OBJECT, []),
         ],
     )
     def test_with_run_entry_point(
