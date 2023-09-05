@@ -2,6 +2,7 @@ import json
 import pathlib
 import re
 import sys
+import traceback
 from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Optional
 
@@ -26,7 +27,14 @@ class SubCmdCheckComponent(BaseSubCmdComponent):
         self._check_config: _BaseCheckingFactory = ConfigCheckingFactory()
 
     def process(self, args: SubcmdCheckArguments) -> None:  # type: ignore[override]
-        api_config: Optional[APIConfig] = load_config(path=args.config_path)
+        try:
+            api_config: Optional[APIConfig] = load_config(path=args.config_path)
+        except ValueError as e:
+            if re.search(r"is not a valid " + re.escape(ResponseStrategy.__name__), str(e), re.IGNORECASE):
+                invalid_strategy = str(e).split("'")[1]
+                print(f"*{invalid_strategy}* is a invalid HTTP response strategy.")
+                sys.exit(1)
+            raise e
 
         valid_api_config = self._check_config.validity(args=args, api_config=api_config)
         if args.swagger_doc_url:
@@ -163,6 +171,8 @@ class ValidityChecking(_BaseChecking):
 
             assert one_api_config.http.response
             http_response = one_api_config.http.response
+            assert http_response.strategy in ResponseStrategy
+            under_check_value = None
             if http_response.strategy is ResponseStrategy.STRING:
                 under_check_value = http_response.value
             elif http_response.strategy is ResponseStrategy.FILE:
@@ -170,8 +180,6 @@ class ValidityChecking(_BaseChecking):
             elif http_response.strategy is ResponseStrategy.OBJECT:
                 # TODO: Implement checking properties
                 under_check_value = http_response.properties  # type: ignore[assignment]
-            else:
-                raise TypeError
             self._setting_should_not_be_none(
                 config_key=f"mocked_apis.{one_api_name}.http.response.value",
                 config_value=under_check_value,
