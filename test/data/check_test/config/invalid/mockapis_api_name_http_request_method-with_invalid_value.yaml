@@ -5,4 +5,5 @@ mocked_apis:
       request:
         method: 'INVALID'
       response:
+        strategy: string
         value: 'This is Google home API.'

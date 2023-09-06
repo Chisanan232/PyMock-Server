@@ -17,6 +17,7 @@ from pymock_api.server.application.response import HTTPResponse as _HTTPResponse
 from ...._values import (
     _Base_URL,
     _Delete_Google_Home_Value,
+    _Foo_Object_Value,
     _Google_Home_Value,
     _Post_Google_Home_Value,
     _Put_Google_Home_Value,
@@ -96,6 +97,7 @@ class MockHTTPServerTestSpec:
             _test_api_attr(api=_Delete_Google_Home_Value, payload={}),
             _test_api_attr(api=_Test_Home, payload={"param1": "any_format"}),
             _test_api_attr(api=_YouTube_Home_Value, payload={"param1": "any_format"}),
+            _test_api_attr(api=_Foo_Object_Value, payload={"param1": "any_format"}),
         ],
     )
     def test_mock_apis(
@@ -135,40 +137,13 @@ class MockHTTPServerTestSpec:
         under_test_http_resp = self._deserialize_response(response)
 
         # Get the expected result data
-        expected_http_resp = _HTTPResponse.generate(data=one_api_configs[http_method.upper()].http.response.value)  # type: ignore[union-attr]
+        config_response = one_api_configs[http_method.upper()].http.response  # type: ignore[union-attr]
+        expected_http_resp = _HTTPResponse.generate(data=config_response)  # type: ignore[arg-type]
 
         # Verify the result data
         assert (
             under_test_http_resp == expected_http_resp
         ), f"The response data should be the same at mocked API '{one_api_configs[http_method.upper()]}'."
-
-        # for one_api_name, one_api_config in api_config.apis.apis.items():
-        #     # Send HTTP request to target API and get its response data
-        #     assert (
-        #         one_api_config
-        #         and one_api_config.http
-        #         and one_api_config.http.request
-        #         and one_api_config.http.request.method
-        #         and api_config.apis.base
-        #         and one_api_config.url
-        #     )
-        #     if one_api_config.http.request.method.lower() == "get":
-        #         params = self._client_get_req_func_params(one_api_config)
-        #     else:
-        #         params = self._client_non_get_req_func_params(one_api_config)
-        #     response = getattr(client, one_api_config.http.request.method.lower())(
-        #         api_config.apis.base.url + one_api_config.url, **params
-        #     )
-        #     under_test_http_resp = self._deserialize_response(response)
-        #
-        #     # Get the expected result data
-        #     assert one_api_config.http.response
-        #     expected_http_resp = _HTTPResponse.generate(data=one_api_config.http.response.value)
-        #
-        #     # Verify the result data
-        #     assert (
-        #         under_test_http_resp == expected_http_resp
-        #     ), f"The response data should be the same at mocked API '{one_api_name}'."
 
     def _client_non_get_req_func_params(self, one_api_config: MockAPI) -> dict:
         params = one_api_config.http.request.parameters  # type: ignore[union-attr]

@@ -24,5 +24,6 @@ mocked_apis:
             default: false
             format:
       response:
-        value: '{}'
+        strategy: object
+        properties: []
     tag: ''

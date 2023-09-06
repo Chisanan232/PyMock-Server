@@ -431,10 +431,19 @@ class AddParameters(BaseSubCmdAddOption):
     default_value: str = ""
 
 
+class AddResponseStrategy(BaseSubCmdAddOption):
+    cli_option: str = "--response-strategy"
+    name: str = "response_strategy"
+    help_description: str = "Set HTTP response strategy of one specific API."
+    option_value_type: type = str
+    _options: List[str] = ["string", "file", "object"]
+
+
 class AddResponse(BaseSubCmdAddOption):
-    cli_option: str = "--response"
-    name: str = "response"
+    cli_option: str = "--response-value"
+    name: str = "response_value"
     help_description: str = "Set HTTP response value of one specific API."
+    action: str = "append"
     option_value_type: type = str
     default_value: str = "OK."
 

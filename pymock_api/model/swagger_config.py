@@ -3,11 +3,12 @@ import random
 import string
 from abc import ABCMeta, abstractmethod
 from pydoc import locate
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from pymock_api.model.api_config import APIConfig
 from pymock_api.model.api_config import APIParameter as PyMockAPIParameter
 from pymock_api.model.api_config import BaseConfig, MockAPI, MockAPIs, _Config
+from pymock_api.model.enums import ResponseStrategy
 
 Self = Any
 
@@ -161,9 +162,14 @@ class API(Transferable):
         self.response: Dict = {}
         self.tags: List[str] = []
 
+        self.process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
+
     def deserialize(self, data: Dict) -> "API":
+        # FIXME: Does it have better way to set the HTTP response strategy?
+        if not self.process_response_strategy:
+            raise ValueError("Please set the strategy how it should process HTTP response.")
         self.parameters = self._process_api_params(data["parameters"])
-        self.response = self._process_response(data)
+        self.response = self._process_response(data, self.process_response_strategy)
         self.tags = data.get("tags", [])
         return self
 
@@ -226,9 +232,18 @@ class API(Transferable):
             )
         return parameters
 
-    def _process_response(self, data: dict) -> dict:
+    def _process_response(self, data: dict, strategy: ResponseStrategy) -> dict:
         status_200_response = data.get("responses", {}).get("200", {})
-        response_data = {}
+        if strategy is ResponseStrategy.OBJECT:
+            response_data = {
+                "strategy": strategy,
+                "data": [],
+            }
+        else:
+            response_data = {
+                "strategy": strategy,
+                "data": {},
+            }
         if _YamlSchema.has_schema(status_200_response):
             response_schema = _YamlSchema.get_schema_ref(status_200_response)
             print(f"[DEBUG in src] response_schema: {response_schema}")
@@ -237,53 +252,118 @@ class API(Transferable):
                 print(f"[DEBUG in src] response_schema_properties: {response_schema_properties}")
                 for k, v in response_schema_properties.items():
                     print(f"[DEBUG in src] v: {v}")
-                    response_data[k] = self._process_response_value(v)
+                    if strategy is ResponseStrategy.OBJECT:
+                        response_data_prop = self._process_response_value(property_value=v, strategy=strategy)
+                        assert isinstance(response_data_prop, dict)
+                        response_data_prop["name"] = k
+                        response_data_prop["required"] = k in response_schema.get("required", [k])
+                        assert isinstance(
+                            response_data["data"], list
+                        ), "The response data type must be *list* if its HTTP response strategy is object."
+                        response_data["data"].append(response_data_prop)
+                    else:
+                        assert isinstance(
+                            response_data["data"], dict
+                        ), "The response data type must be *dict* if its HTTP response strategy is not object."
+                        response_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
+        else:
+            response_schema = status_200_response.get("content", {}).get("application/json", {}).get("schema", {})
+            if response_schema:
+                raise NotImplementedError("Not support set HTTP response by this way in current version.")
         return response_data
 
-    def _process_response_value(self, property_value: dict) -> str:
+    def _process_response_value(self, property_value: dict, strategy: ResponseStrategy) -> Union[str, dict]:
         if _YamlSchema.has_ref(property_value):
             # FIXME: Handle the reference
             v_ref = _YamlSchema.get_schema_ref(property_value)
             print(f"[DEBUG in src] v_ref: {v_ref}")
-            k_value = "FIXME: Handle the reference"
+            if strategy is ResponseStrategy.OBJECT:
+                return {
+                    "name": "",
+                    # TODO: Set the *required* property correctly
+                    "required": True,
+                    # TODO: Set the *type* property correctly
+                    "type": "file",
+                    # TODO: Set the *format* property correctly
+                    "format": None,
+                    "items": [],
+                    "FIXME": "Handle the reference",
+                }
+            else:
+                k_value = "FIXME: Handle the reference"
         else:
             v_type = convert_js_type(property_value["type"])
-            if locate(v_type) == list:
-                single_response = _YamlSchema.get_schema_ref(property_value["items"])
-                item = {}
-                single_response_properties = single_response.get("properties", None)
-                print(f"[DEBUG in src] single_response_properties: {single_response_properties}")
-                if single_response_properties:
-                    for item_k, item_v in single_response["properties"].items():
-                        print(f"[DEBUG in src] item_v: {item_v}")
-                        print(f"[DEBUG in src] _YamlSchema.has_ref(item_v): {_YamlSchema.has_ref(item_v)}")
-                        item_type = convert_js_type(item_v["type"])
-                        if locate(item_type) is str:
-                            # lowercase_letters = string.ascii_lowercase
-                            # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                            random_value = "random string value"
-                        elif locate(item_type) is int:
-                            # random_value = int(
-                            #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                            random_value = "random integer value"
-                        else:
-                            raise NotImplementedError
-                        item[item_k] = random_value
-                k_value = [item]  # type: ignore[assignment]
-            elif locate(v_type) == str:
-                # lowercase_letters = string.ascii_lowercase
-                # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                k_value = "random string value"
-            elif locate(v_type) == int:
-                # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                k_value = "random integer value"
-            elif locate(v_type) == bool:
-                k_value = "random boolean value"
-            elif v_type is "file":
-                # TODO: Handle the file download feature
-                k_value = "random file output stream"
+            if strategy is ResponseStrategy.OBJECT:
+                if locate(v_type) == list:
+                    response_data_prop = {
+                        "name": "",
+                        # TODO: Set the *required* property correctly
+                        "required": True,
+                        "type": v_type,
+                        # TODO: Set the *format* property correctly
+                        "format": None,
+                        "items": [],
+                    }
+
+                    single_response = _YamlSchema.get_schema_ref(property_value["items"])
+                    single_response_properties = single_response.get("properties", None)
+                    if single_response_properties:
+                        for item_k, item_v in single_response["properties"].items():
+                            item_type = convert_js_type(item_v["type"])
+                            # TODO: Set the *required* property correctly
+                            item = {"name": item_k, "required": True, "type": item_type}
+                            assert isinstance(
+                                response_data_prop["items"], list
+                            ), "The data type of property *items* must be *list*."
+                            response_data_prop["items"].append(item)
+                    return response_data_prop
+                else:
+                    return {
+                        "name": "",
+                        # TODO: Set the *required* property correctly
+                        "required": True,
+                        "type": v_type,
+                        # TODO: Set the *format* property correctly
+                        "format": None,
+                        "items": None,
+                    }
             else:
-                raise NotImplementedError
+                if locate(v_type) == list:
+                    single_response = _YamlSchema.get_schema_ref(property_value["items"])
+                    item = {}
+                    single_response_properties = single_response.get("properties", None)
+                    print(f"[DEBUG in src] single_response_properties: {single_response_properties}")
+                    if single_response_properties:
+                        for item_k, item_v in single_response["properties"].items():
+                            print(f"[DEBUG in src] item_v: {item_v}")
+                            print(f"[DEBUG in src] _YamlSchema.has_ref(item_v): {_YamlSchema.has_ref(item_v)}")
+                            item_type = convert_js_type(item_v["type"])
+                            if locate(item_type) is str:
+                                # lowercase_letters = string.ascii_lowercase
+                                # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                                random_value = "random string value"
+                            elif locate(item_type) is int:
+                                # random_value = int(
+                                #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                                random_value = "random integer value"
+                            else:
+                                raise NotImplementedError
+                            item[item_k] = random_value
+                    k_value = [item]  # type: ignore[assignment]
+                elif locate(v_type) == str:
+                    # lowercase_letters = string.ascii_lowercase
+                    # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                    k_value = "random string value"
+                elif locate(v_type) == int:
+                    # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                    k_value = "random integer value"
+                elif locate(v_type) == bool:
+                    k_value = "random boolean value"
+                elif v_type is "file":
+                    # TODO: Handle the file download feature
+                    k_value = "random file output stream"
+                else:
+                    raise NotImplementedError
         return k_value
 
     def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
@@ -292,7 +372,11 @@ class API(Transferable):
             method=self.http_method.upper(),
             parameters=list(map(lambda p: p.to_api_config(), self.parameters)),
         )
-        mock_api.set_response(value=json.dumps(self.response))
+        resp_strategy = self.response["strategy"]
+        if resp_strategy is ResponseStrategy.OBJECT:
+            mock_api.set_response(strategy=resp_strategy, iterable_value=self.response["data"])
+        else:
+            mock_api.set_response(strategy=resp_strategy, value=self.response["data"])
         return mock_api
 
 

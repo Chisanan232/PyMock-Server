@@ -42,7 +42,7 @@ from pymock_api.model import (
     SubcmdSampleArguments,
     deserialize_swagger_api_config,
 )
-from pymock_api.model.enums import Format, SampleType
+from pymock_api.model.enums import Format, ResponseStrategy, SampleType
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (
@@ -63,6 +63,7 @@ from ..._values import (
     _Test_FastAPI_App_Type,
     _Test_HTTP_Method,
     _Test_HTTP_Resp,
+    _Test_Response_Strategy,
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
     _Test_SubCommand_Get,
@@ -103,7 +104,8 @@ def _given_parser_args(
             api_path=_Test_URL,
             http_method=_Test_HTTP_Method,
             parameters=[],
-            response=_Test_HTTP_Resp,
+            response_strategy=ResponseStrategy.STRING,
+            response_value=_Test_HTTP_Resp,
         )
     elif subcommand == "check":
         return SubcmdCheckArguments(
@@ -387,48 +389,88 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         return SubCmdAdd()
 
     @pytest.mark.parametrize(
-        ("url_path", "method", "params", "response"),
+        ("url_path", "method", "params", "response_strategy", "response_value"),
         [
-            ("/foo", "", [], ""),
-            ("/foo", "GET", [], ""),
-            ("/foo", "POST", [], "This is PyTest response"),
-            ("/foo", "PUT", [], "Wow testing."),
+            ("/foo", "", [], _Test_Response_Strategy, [""]),
+            ("/foo", "GET", [], _Test_Response_Strategy, [""]),
+            ("/foo", "POST", [], _Test_Response_Strategy, ["This is PyTest response"]),
+            ("/foo", "PUT", [], _Test_Response_Strategy, ["Wow testing."]),
+            ("/foo-file", "PUT", [], ResponseStrategy.FILE, [_Test_Config]),
+            (
+                "/foo-object",
+                "PUT",
+                [],
+                ResponseStrategy.OBJECT,
+                [{"name": "arg", "required": True, "type": "str", "format": None}],
+            ),
+            ("/foo-object", "PUT", [], ResponseStrategy.OBJECT, []),
         ],
     )
     def test_with_command_processor(
-        self, url_path: str, method: str, params: List[dict], response: str, object_under_test: Callable
+        self,
+        url_path: str,
+        method: str,
+        params: List[dict],
+        response_strategy: ResponseStrategy,
+        response_value: List[str],
+        object_under_test: Callable,
     ):
         kwargs = {
             "url_path": url_path,
             "method": method,
             "params": params,
-            "response": response,
+            "response_strategy": response_strategy,
+            "response_value": response_value,
             "cmd_ps": object_under_test,
         }
         self._test_process(**kwargs)
 
     @pytest.mark.parametrize(
-        ("url_path", "method", "params", "response"),
+        ("url_path", "method", "params", "response_strategy", "response_value"),
         [
-            ("/foo", "", "", ""),
-            ("/foo", "GET", [], ""),
-            ("/foo", "POST", [], "This is PyTest response"),
-            ("/foo", "PUT", [], "Wow testing."),
+            ("/foo", "", "", _Test_Response_Strategy, [""]),
+            ("/foo", "GET", [], _Test_Response_Strategy, [""]),
+            ("/foo", "POST", [], _Test_Response_Strategy, ["This is PyTest response"]),
+            ("/foo", "PUT", [], _Test_Response_Strategy, ["Wow testing."]),
+            ("/foo-file", "PUT", [], ResponseStrategy.FILE, [_Test_Config]),
+            (
+                "/foo-object",
+                "PUT",
+                [],
+                ResponseStrategy.OBJECT,
+                [{"name": "arg", "required": True, "type": "str", "format": None}],
+            ),
+            ("/foo-object", "PUT", [], ResponseStrategy.OBJECT, []),
         ],
     )
     def test_with_run_entry_point(
-        self, url_path: str, method: str, params: List[dict], response: str, entry_point_under_test: Callable
+        self,
+        url_path: str,
+        method: str,
+        params: List[dict],
+        response_strategy: ResponseStrategy,
+        response_value: List[str],
+        entry_point_under_test: Callable,
     ):
         kwargs = {
             "url_path": url_path,
             "method": method,
             "params": params,
-            "response": response,
+            "response_strategy": response_strategy,
+            "response_value": response_value,
             "cmd_ps": entry_point_under_test,
         }
         self._test_process(**kwargs)
 
-    def _test_process(self, url_path: str, method: str, params: List[dict], response: str, cmd_ps: Callable):
+    def _test_process(
+        self,
+        url_path: str,
+        method: str,
+        params: List[dict],
+        response_strategy: ResponseStrategy,
+        response_value: List[str],
+        cmd_ps: Callable,
+    ):
         FakeYAML.serialize = MagicMock()
         FakeYAML.write = MagicMock()
         mock_parser_arg = SubcmdAddArguments(
@@ -437,7 +479,8 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
             api_path=url_path,
             http_method=method,
             parameters=params,
-            response=response,
+            response_strategy=response_strategy,
+            response_value=response_value,
         )
 
         with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
@@ -453,7 +496,8 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         args_namespace.api_path = _Test_URL
         args_namespace.http_method = _Test_HTTP_Method
         args_namespace.parameters = ""
-        args_namespace.response = _Test_HTTP_Resp
+        args_namespace.response_strategy = _Test_Response_Strategy
+        args_namespace.response_value = _Test_HTTP_Resp
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:
@@ -858,17 +902,34 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
                 "pymock_api.command.pull.component.URLLibHTTPClient.request", return_value=swagger_json_data
             ) as mock_swagger_request:
                 # Run target function
+                print(f"[DEBUG in test] run target function: {cmd_ps}")
                 cmd_ps(mock_parser_arg)
 
                 mock_instantiate_writer.assert_called_once()
                 mock_swagger_request.assert_called_once_with(method="GET", url=f"http://{_API_Doc_Source}/")
 
                 # Run one core logic of target function
+                print(f"[DEBUG in test] run one core logic of target function")
+                debug_swagger_api_config = deserialize_swagger_api_config(swagger_json_data)
+                print(f"[DEBUG in test] debug_swagger_api_config: {debug_swagger_api_config}")
+                debug_api_config = debug_swagger_api_config.to_api_config(mock_parser_arg.base_url)
+                print(f"[DEBUG in test] debug_api_config: {debug_api_config}")
+                print(f"[DEBUG in test] debug_api_config.apis.apis: {debug_api_config.apis.apis}")
+                print(f"[DEBUG in test] debug_api_config.apis.apis['get_foo']: {debug_api_config.apis.apis['get_foo']}")
+                print(
+                    f"[DEBUG in test] debug_api_config.apis.apis['get_foo'].http.request: {debug_api_config.apis.apis['get_foo'].http.request}"
+                )
+                print(
+                    f"[DEBUG in test] debug_api_config.apis.apis['get_foo'].http.response: {debug_api_config.apis.apis['get_foo'].http.response}"
+                )
+                print(f"[DEBUG in test] debug_api_config.serialize(): {debug_api_config.serialize()}")
                 confirm_expected_config_data = (
                     deserialize_swagger_api_config(swagger_json_data)
                     .to_api_config(mock_parser_arg.base_url)
                     .serialize()
                 )
+                print(f"[DEBUG in test] expected_config_data: {expected_config_data}")
+                print(f"[DEBUG in test] confirm_expected_config_data: {confirm_expected_config_data}")
                 assert expected_config_data["name"] == confirm_expected_config_data["name"]
                 assert expected_config_data["description"] == confirm_expected_config_data["description"]
                 assert len(expected_config_data["mocked_apis"].keys()) == len(
@@ -881,29 +942,49 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
                 ):
                     assert expected_key == confirm_expected_key
                     if expected_key != "base":
+                        # Verify mock API URL
                         assert (
                             expected_config_data["mocked_apis"][expected_key]["url"]
                             == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["url"]
                         )
+                        # Verify mock API request properties - HTTP method
                         assert (
                             expected_config_data["mocked_apis"][expected_key]["http"]["request"]["method"]
                             == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["request"][
                                 "method"
                             ]
                         )
+                        # Verify mock API request properties - request parameters
                         assert (
                             expected_config_data["mocked_apis"][expected_key]["http"]["request"]["parameters"]
                             == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["request"][
                                 "parameters"
                             ]
                         )
+                        # Verify mock API response properties
                         assert (
-                            expected_config_data["mocked_apis"][expected_key]["http"]["response"]["value"]
+                            expected_config_data["mocked_apis"][expected_key]["http"]["response"]["strategy"]
                             == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["response"][
-                                "value"
+                                "strategy"
                             ]
                         )
+                        assert expected_config_data["mocked_apis"][expected_key]["http"]["response"].get(
+                            "value", None
+                        ) == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["response"].get(
+                            "value", None
+                        )
+                        assert expected_config_data["mocked_apis"][expected_key]["http"]["response"].get(
+                            "path", None
+                        ) == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["response"].get(
+                            "path", None
+                        )
+                        assert expected_config_data["mocked_apis"][expected_key]["http"]["response"].get(
+                            "properties", None
+                        ) == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["response"].get(
+                            "properties", None
+                        )
                     else:
+                        # Verify base info
                         assert (
                             expected_config_data["mocked_apis"][expected_key]
                             == confirm_expected_config_data["mocked_apis"][confirm_expected_key]

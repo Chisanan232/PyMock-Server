@@ -5,5 +5,6 @@ mocked_apis:
       request:
         method: 'GET'
       response:
-        strategy: string
-        value: 'This is Google home.'
+        strategy: object
+        properties:
+          - no_name: for_test_checking_invalid_attribute

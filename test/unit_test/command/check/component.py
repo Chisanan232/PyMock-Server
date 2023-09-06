@@ -184,6 +184,27 @@ class TestSubCmdCheckComponent:
                     subcmd.process(mock_parser_arg)
                 assert expected_exit_code in str(exc_info.value)
 
+    @pytest.mark.parametrize(
+        ("mock_exception", "stop_if_fail"),
+        [
+            (RuntimeError, True),
+            (ValueError("not match invalid strategy error message"), True),
+            (RuntimeError, False),
+            (ValueError("not match invalid strategy error message"), False),
+        ],
+    )
+    def test_process_raise_unexpected_exception(
+        self, mock_exception: Exception, stop_if_fail: bool, subcmd: SubCmdCheckComponent
+    ):
+        mock_parser_arg = _given_parser_args(
+            subcommand=_Test_SubCommand_Check, swagger_doc_url=_Swagger_API_Document_URL, stop_if_fail=stop_if_fail
+        )
+        MagicMock()
+        with patch("pymock_api.command.check.component.load_config", side_effect=mock_exception) as mock_load_config:
+            with pytest.raises(Exception):
+                subcmd.process(mock_parser_arg)
+            mock_load_config.assert_called_once()
+
 
 class TestValidityChecking:
     @pytest.fixture(scope="class")

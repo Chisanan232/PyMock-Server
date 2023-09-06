@@ -9,8 +9,14 @@ from pymock_api._utils.file_opt import YAML
 from pymock_api.command.add.component import SubCmdAddComponent
 from pymock_api.model import generate_empty_config
 from pymock_api.model.cmd_args import SubcmdAddArguments
+from pymock_api.model.enums import ResponseStrategy
 
-from ...._values import _Test_Config, _Test_SubCommand_Add, _Test_URL
+from ...._values import (
+    _Test_Config,
+    _Test_Response_Strategy,
+    _Test_SubCommand_Add,
+    _Test_URL,
+)
 
 
 class FakeYAML(YAML):
@@ -32,7 +38,8 @@ class TestSubCmdAddComponent:
             api_path="",
             http_method="",
             parameters=[],
-            response="",
+            response_strategy=_Test_Response_Strategy,
+            response_value=[""],
         )
 
         # Run target function to test
@@ -65,7 +72,8 @@ class TestSubCmdAddComponent:
                         api_path=_Test_URL,
                         http_method="GET",
                         parameters=[],
-                        response="OK",
+                        response_strategy=_Test_Response_Strategy,
+                        response_value=["OK"],
                     )
                     component._get_api_config(args)
 
@@ -81,18 +89,33 @@ class TestSubCmdAddComponent:
                         mock_generate_empty_config.assert_called_once()
 
     @pytest.mark.parametrize(
-        ("http_method", "parameters", "response"),
+        ("http_method", "parameters", "response_strategy", "response_value"),
         [
-            (None, [], None),
+            (None, [], _Test_Response_Strategy, None),
             (
                 "POST",
                 [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
-                "This is PyTest response",
+                _Test_Response_Strategy,
+                ["This is PyTest response"],
+            ),
+            (
+                "PUT",
+                [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
+                ResponseStrategy.OBJECT,
+                [
+                    {"name": "id", "required": True, "type": "int", "format": None, "items": None},
+                    {"name": "name", "required": True, "type": "str", "format": None, "items": None},
+                ],
             ),
         ],
     )
     def test_add_valid_api(
-        self, http_method: Optional[str], parameters: List[dict], response: Optional[str], component: SubCmdAddComponent
+        self,
+        http_method: Optional[str],
+        parameters: List[dict],
+        response_strategy: ResponseStrategy,
+        response_value: Optional[List[str]],
+        component: SubCmdAddComponent,
     ):
         # Mock functions
         FakeYAML.serialize = MagicMock()
@@ -106,7 +129,8 @@ class TestSubCmdAddComponent:
                     api_path=_Test_URL,
                     http_method=http_method,
                     parameters=parameters,
-                    response=response,
+                    response_strategy=response_strategy,
+                    response_value=response_value,
                 )
                 component.process(args)
 
@@ -118,25 +142,35 @@ class TestSubCmdAddComponent:
                 FakeYAML.write.assert_called_once_with(path=_Test_Config, config=api_config.serialize())
 
     @pytest.mark.parametrize(
-        ("url_path", "http_method", "parameters", "response"),
+        ("url_path", "http_method", "parameters", "response_strategy", "response_value"),
         [
             (
                 None,
                 "POST",
                 [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
-                "This is PyTest response",
+                _Test_Response_Strategy,
+                ["This is PyTest response"],
             ),
             (
                 "",
                 "POST",
                 [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
-                "This is PyTest response",
+                _Test_Response_Strategy,
+                ["This is PyTest response"],
             ),
             (
                 _Test_URL,
                 "POST",
                 [{"name": "arg1", "required": False, "default": "val1", "type": "str", "invalid_key": "val"}],
-                "This is PyTest response",
+                _Test_Response_Strategy,
+                ["This is PyTest response"],
+            ),
+            (
+                _Test_URL,
+                "PUT",
+                [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
+                _Test_Response_Strategy,
+                [{"invalid data structure": ""}],
             ),
         ],
     )
@@ -145,7 +179,8 @@ class TestSubCmdAddComponent:
         url_path: str,
         http_method: Optional[str],
         parameters: List[dict],
-        response: Optional[str],
+        response_strategy: ResponseStrategy,
+        response_value: Optional[List[str]],
         component: SubCmdAddComponent,
     ):
         # Mock functions
@@ -160,7 +195,8 @@ class TestSubCmdAddComponent:
                     api_path=url_path,
                     http_method=http_method,
                     parameters=parameters,
-                    response=response,
+                    response_strategy=response_strategy,
+                    response_value=response_value,
                 )
                 with pytest.raises(SystemExit) as exc_info:
                     component.process(args)
