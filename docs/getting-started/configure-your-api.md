@@ -99,10 +99,11 @@ We have done the second condition! It leaves only one condition about HTTP respo
 
 #### Response
 
-All the HTTP response settings would be managed under key ``http.response``. Currently, it only one attribute ``value``
-could set. Let's set the value at it directly:
+All the HTTP response settings would be managed under key ``http.response``. About the HTTP response configuration, it has 
+multiple [strategies](/configure-references/mocked-apis/#mocked_apisapi-namehttpresponsestrategy) for setting the return 
+value format. For easily and quickly demonstrating the HTTP response setting, let's use ``string`` strategy right now.
 
-```yaml hl_lines="7-8"
+```yaml hl_lines="7-9"
 mocked_apis:
   foo_home:
     url: '/foo'
@@ -110,6 +111,7 @@ mocked_apis:
       request:
         method: 'GET'
       response:
+        strategy: string
         value: 'This is Foo home API.'
 ```
 
