@@ -8,7 +8,7 @@ This configuration section is the major function because here settings would dec
 The basic information of all APIs. It would apply this section settings for all APIs.
 
 
-## ``mocked_apis.base.url``
+### ``url``
 
 The URL basic information of all APIs. It would apply the URL path to all API path. Let's give you an example to demonstrate:
 

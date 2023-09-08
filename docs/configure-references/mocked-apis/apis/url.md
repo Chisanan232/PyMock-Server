@@ -1,10 +1,5 @@
 # URL
 
-## ``mocked_apis.<API name>``
-
-The API you target to mock. The API name must be unique.
-
-
 ## ``mocked_apis.<API name>.url``
 
 The URL path of API. Bellow are demonstrations the difference between only API and API with basic information settings:

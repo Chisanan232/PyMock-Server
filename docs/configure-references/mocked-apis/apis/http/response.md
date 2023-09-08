@@ -5,7 +5,7 @@
 This section is responsible for all settings of HTTP response.
 
 
-## ``mocked_apis.<API name>.http.response.strategy``
+## ``strategy``
 
 About the HTTP response data format, it has 3 different strategies provide developers to set and use in their development.
 
@@ -31,7 +31,7 @@ About the HTTP response data format, it has 3 different strategies provide devel
 
 ## String strategy
 
-### ``mocked_apis.<API name>.http.response.value``
+### ``value``
 
 The API response value it would use to return directly. It would try to parse data as JSON format, and it would respond 
 string type value if it parses fail.
@@ -39,7 +39,7 @@ string type value if it parses fail.
 
 ## File strategy
 
-### ``mocked_apis.<API name>.http.response.path``
+### ``path``
 
 A file path which content is the API response value. It would detect the file extension and check whether it's valid or not. 
 If it is, it would try to access the file by the path to get the content as response value. If it isn't, it would raise an 
@@ -50,33 +50,33 @@ Currently, it only supports _JSON_ file.
 
 ## Object strategy
 
-### ``mocked_apis.<API name>.http.response.properties``
+### ``properties``
 
 Express the response value as object of software realm. It accepts list type settings which would be combined as JSON format 
 value to return.
 
 
-### ``mocked_apis.<API name>.http.response.properties[*].name``
+#### ``properties[*].name``
 
 The naming of value.
 
 
-### ``mocked_apis.<API name>.http.response.properties[*].required``
+#### ``properties[*].required``
 
 Whether value is required to response or not.
 
 
-### ``mocked_apis.<API name>.http.response.properties[*].type``
+#### ``properties[*].type``
 
 The data type of value. Please use Pythonic way to set this option.
 
 
-### ``mocked_apis.<API name>.http.response.properties[*].format``
+#### ``properties[*].format``
 
 The data format.
 
 
-### ``mocked_apis.<API name>.http.response.properties[*].items``
+#### ``properties[*].items``
 
 If the data type of value is list type, it should use this key to configure its element details. The element detail follow 
 [item element settings](/configure-references/mocked-apis/apis/http/request/#itemstype).

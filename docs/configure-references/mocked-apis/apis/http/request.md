@@ -5,17 +5,17 @@
 This section is responsible for all settings of HTTP request.
 
 
-## ``mocked_apis.<API name>.http.request.method``
+## ``method``
 
 The HTTP method which be accepted by API.
 
 
-## ``mocked_apis.<API name>.http.request.parameters``
+## ``parameters``
 
 The parameter settings of API.
 
 
-## ``mocked_apis.<API name>.http.request.parameters[*].name``
+### ``parameters[*].name``
 
 The name of parameter.
 
@@ -62,18 +62,18 @@ Then you could use the parameter ``arg1`` of API ``/foo-home``.
     ```
 
 
-## ``mocked_apis.<API name>.http.request.parameters[*].required``
+### ``parameters[*].required``
 
 This is a boolean type value. If it's ``true``, web server would respond 400 error if the request misses the argument. Nor
 it would ignore it.
 
 
-## ``mocked_apis.<API name>.http.request.parameters[*].default``
+### ``parameters[*].default``
 
 The default value of parameter. If the parameter in request is empty or ``None`` value, it would use this value to process.
 
 
-## ``mocked_apis.<API name>.http.request.parameters[*].type``
+### ``parameters[*].type``
 
 The data type of the parameter value API should accept. The setting value should be a valid type for Python realm, i.e.,
 string type value as ``str``, integer type value as ``int``, etc. 
@@ -91,13 +91,13 @@ string type value as ``str``, integer type value as ``int``, etc.
     * Key-value map type value: ```dict```
 
 
-## ``mocked_apis.<API name>.http.request.parameters[*].format``
+### ``parameters[*].format``
 
 A regular expression of parameter value API should accept. It would respond 400 error if the parameter value format is not
 satisfied.
 
 
-## ``mocked_apis.<API name>.http.request.parameters[*].items``
+### ``parameters[*].items``
 
 If the data type of parameter value is list type, it should use this key to configure its element details. The element detail 
 follow [item element settings](#items-element-settings).

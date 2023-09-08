@@ -13,14 +13,14 @@ of configuring mocked API. Following are the common features it provides current
 * [Basic information](#mocked_apisbase)
 
 
-## ``mocked_apis.base``
+### ``base``
 
 The basic information of all APIs. It would apply this section settings for all APIs.
 
 [Here](/configure-references/mocked-apis/base) is the configuration details.
 
 
-## ``mocked_apis.<API name>``
+### ``<API name>``
 
 The API you target to mock. The API name must be unique.
 

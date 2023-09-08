@@ -6,14 +6,14 @@ The detail settings about HTTP. It has 2 major sections need to configure: [requ
 [response](#mocked_apisapi-namehttpresponse).
 
 
-## ``mocked_apis.<API name>.http.request``
+### ``request``
 
 This section is responsible for all settings of HTTP request.
 
 [Here](/configure-references/mocked-apis/apis/http/request) is the configuration details.
 
 
-## ``mocked_apis.<API name>.http.response``
+### ``response``
 
 This section is responsible for all settings of HTTP response.
 
