@@ -119,7 +119,17 @@ nav:
         - pull: command-line-usage/subcmd-pull.md
   - Configure references:
     - Basic info: configure-references/config-basic-info.md
-    - API: configure-references/mocked-apis.md
+    - Mocked API:
+      - configure-references/mocked-apis/index.md
+      - Base:
+        - configure-references/mocked-apis/base/index.md
+      - API:
+        - configure-references/mocked-apis/apis/index.md
+        - URL: configure-references/mocked-apis/apis/url.md
+        - HTTP:
+          - configure-references/mocked-apis/apis/http/index.md
+          - HTTP request: configure-references/mocked-apis/apis/http/request.md
+          - HTTP response: configure-references/mocked-apis/apis/http/response.md
   - Development:
     - development/index.md
     - How it works: development/how-it-works.md
