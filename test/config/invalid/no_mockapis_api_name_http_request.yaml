@@ -1,7 +1,0 @@
-mocked_apis:
-  google_home:
-    url: '/google'
-    http:
-      request:
-      response:
-        value: 'This is Google home API.'

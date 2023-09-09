@@ -16,8 +16,10 @@ on:
       - "mkdocs.yml"
       - "README.md"
 #       For Docker feature
+      - "scripts/ci/**-docker-**.sh"
       - "scripts/docker/**"
       - "Dockerfile"
+      - "README-DOCKER.md"
 #       Others
       - ".gitcommitrules"
       - ".gitignore"
@@ -40,8 +42,10 @@ on:
       - "mkdocs.yml"
       - "README.md"
 #       For Docker feature
+      - "scripts/ci/**-docker-**.sh"
       - "scripts/docker/**"
       - "Dockerfile"
+      - "README-DOCKER.md"
 #       Others
       - ".gitcommitrules"
       - ".gitignore"

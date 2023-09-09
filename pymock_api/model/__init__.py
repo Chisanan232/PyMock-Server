@@ -6,14 +6,27 @@ content ...
 from argparse import Namespace
 from typing import Optional
 
-from .api_config import APIConfig
+from .api_config import (
+    HTTP,
+    APIConfig,
+    APIParameter,
+    BaseConfig,
+    HTTPRequest,
+    HTTPResponse,
+    MockAPI,
+    MockAPIs,
+)
 from .cmd_args import (
     DeserializeParsedArgs,
     ParserArguments,
+    SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdConfigArguments,
+    SubcmdGetArguments,
+    SubcmdPullArguments,
     SubcmdRunArguments,
+    SubcmdSampleArguments,
 )
+from .swagger_config import SwaggerConfig
 
 
 class deserialize_args:
@@ -31,7 +44,7 @@ class deserialize_args:
         return DeserializeParsedArgs.subcommand_run(args)
 
     @classmethod
-    def subcmd_config(cls, args: Namespace) -> SubcmdConfigArguments:
+    def subcmd_add(cls, args: Namespace) -> SubcmdAddArguments:
         """Deserialize the object *argparse.Namespace* to *ParserArguments*.
 
         Args:
@@ -41,7 +54,7 @@ class deserialize_args:
             A *ParserArguments* type object.
 
         """
-        return DeserializeParsedArgs.subcommand_config(args)
+        return DeserializeParsedArgs.subcommand_add(args)
 
     @classmethod
     def subcmd_check(cls, args: Namespace) -> SubcmdCheckArguments:
@@ -56,6 +69,53 @@ class deserialize_args:
         """
         return DeserializeParsedArgs.subcommand_check(args)
 
+    @classmethod
+    def subcmd_get(cls, args: Namespace) -> SubcmdGetArguments:
+        """Deserialize the object *argparse.Namespace* to *ParserArguments*.
+
+        Args:
+            args (Namespace): The arguments which be parsed from current command line.
+
+        Returns:
+            A *ParserArguments* type object.
+
+        """
+        return DeserializeParsedArgs.subcommand_get(args)
+
+    @classmethod
+    def subcmd_sample(cls, args: Namespace) -> SubcmdSampleArguments:
+        """Deserialize the object *argparse.Namespace* to *ParserArguments*.
+
+        Args:
+            args (Namespace): The arguments which be parsed from current command line.
+
+        Returns:
+            A *ParserArguments* type object.
+
+        """
+        return DeserializeParsedArgs.subcommand_sample(args)
+
+    @classmethod
+    def subcmd_pull(cls, args: Namespace) -> SubcmdPullArguments:
+        """Deserialize the object *argparse.Namespace* to *ParserArguments*.
+
+        Args:
+            args (Namespace): The arguments which be parsed from current command line.
+
+        Returns:
+            A *ParserArguments* type object.
+
+        """
+        return DeserializeParsedArgs.subcommand_pull(args)
+
+
+def deserialize_swagger_api_config(data: dict) -> SwaggerConfig:
+    return SwaggerConfig().deserialize(data=data)
+
 
 def load_config(path: str) -> Optional[APIConfig]:
     return APIConfig().from_yaml(path=path)
+
+
+def generate_empty_config(name: str = "", description: str = "") -> APIConfig:
+    return APIConfig(name=name, description=description, apis=MockAPIs(base=BaseConfig(url=""), apis={}))

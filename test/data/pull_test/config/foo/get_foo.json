@@ -1,0 +1,15 @@
+{
+    "id": {
+        "type": "int",
+        "format": "int64"
+    },
+    "name": {
+        "type": "str"
+    },
+    "value1": {
+        "type": "str"
+    },
+    "value2": {
+        "type": "str"
+    }
+}

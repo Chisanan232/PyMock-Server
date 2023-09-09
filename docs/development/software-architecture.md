@@ -87,7 +87,7 @@ All codes belong to here section, they all are responsible for **what thing woul
 
 [software architecture - command line processor]: ../../images/development/cmd_ps_software_architecture.drawio.png
 
-* It has 3 base classes:
+* It has 4 base classes:
     * ``MetaCommand``
 
         It's a metaclass for instantiating base class. It would auto-register objects which extends the base class be instantiated
@@ -97,6 +97,12 @@ All codes belong to here section, they all are responsible for **what thing woul
 
         It defines all attributes and functions for subclass to reuse or override to implement customize logic.
 
+    * ``BaseSubCmdComponent``
+
+        This is the base class should be extended by all subclasses which is the core running logic implementation of one specific
+        sub-command line. And it also needs to be the return value of property ``_subcmd_component`` of each subclass which extends
+        base class ``CommandProcessor``.
+
     * ``BaseCommandProcessor``
 
         This is the base class which should be extended by all subclasses. This object be instantiated by metaclass ``MetaCommand``
@@ -104,7 +110,9 @@ All codes belong to here section, they all are responsible for **what thing woul
 
 * The list be used by function ``dispatch_command_processor`` is protected variable ``_COMMAND_CHAIN``.
 * All subclasses, i.e., ``NoSubCmd``, ``SubCmdRun``, etc., extend ``BaseCommandProcessor`` and implement what thing they need
-to do if user run the command.
+to do if user run the command includes returning which component they should use to run the core logic of the sub-command line.
+* All subclasses, i.e., ``NoSubCmdComponent``, ``SubCmdRunComponent``, etc., extend ``BaseSubCmdComponent`` and implement the
+truly core logic of the sub-command line with its options.
 
 ??? note "The great idea about **auto-register** refer to source code of project **_Gunicorn_**"
 
@@ -179,21 +187,88 @@ class deserialize_args:
 
 * SubCommand process
 
-Now, it has sub-command line option data object and deserialization, we could implement what thing it should do:
+Now, it has sub-command line option data object and deserialization, we could implement what thing it should do.
 
-```python
-# In module pymock_api.cmd_ps
-  
-# ... some code
+Here, we have 2 choices to implement: 
 
-class SubCmdNewProcess(BaseCommandProcessor):
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdNewProcessArguments:
-        return deserialize_args.subcmd_new_process(self._parse_cmd_arguments(parser, cmd_args))
+1. Override the function ``_run`` directly.
+2. Add new class extends class ``BaseSubCmdComponent`` and implement property ``_subcmd_component``.
 
-    def _run(self, args: SubcmdNewProcessArguments) -> None:
-        # Do something ...
-        print(f"This is new sub-command line and get option *arg_1*: {args.arg_1}.")
-```
+Let's demonstrate all way to implement to you and explain their difference.
+
+  1. Override the function ``_run`` directly.
+    
+    In default, function ``_run`` would run the sub-command line core logic through the objects in component layer. In the other
+    words, we also could override it directly without implement anything in component layer.
+    
+    * Pros:
+    
+        * Decrease the number of class for implementing or maintaining.
+        * For the simple or easy logic, implement by this way could be more clear and short.
+    
+    * Cons:
+    
+        * For the complex logic or large-scale feature, implement by this way would let the code in this module to be dirty and
+          complex so that developers be more harder to manage or maintain it.
+    
+    ```python
+    # In module pymock_api.command.process
+    
+    # ... some code
+    
+    class SubCmdNewProcess(BaseCommandProcessor):
+        def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdNewProcessArguments:
+            return deserialize_args.subcmd_new_process(self._parse_cmd_arguments(parser, cmd_args))
+    
+        def _run(self, args: SubcmdNewProcessArguments) -> None:
+            # Do something ...
+            print(f"This is new sub-command line and get option *arg_1*: {args.arg_1}.")
+    ```
+
+  2. Add new class extends class ``BaseSubCmdComponent`` and implement property ``_subcmd_component``.
+    
+    Implement and manage the core logic in component layer. And the **_command.process_** module only needs to know which component
+    object is responsible of this feature.
+    
+    * Pros:
+    
+        * Decoupling the logics sub-command line processor and core logic of the sub-command line.
+        * Could be more higher cohesion of the core logic of sub-command line with its options.
+        * No matter how the sub-command logic complex is, it still could be more easier and maitainable for management.
+    
+    * Cons:
+    
+        * More classes, more management.
+        * If the core logic is very easy and short, this way is a little laborious.
+    
+    Implement the core logic in component layer:
+
+    ```python
+    # In module pymock_api.command.new_subcmd.component
+      
+    # ... some code
+    
+    class SubCmdNewProcessComponent(BaseSubCmdComponent):
+        def process(self, args: SubcmdNewProcessArguments) -> None:
+            # Do something ...
+            print(f"This is new sub-command line and get option *arg_1*: {args.arg_1}.")
+    ```
+    
+    Remember that it needs to let command line processor know which component object it should use to run the sub-command line core logic:
+
+    ```python
+    # In module pymock_api.command.process
+    
+    # ... some code
+    
+    class SubCmdNewProcess(BaseCommandProcessor):
+        @property
+        def _subcmd_component(self) -> SubCmdRunComponent:
+            return SubCmdNewProcessComponent()
+    
+        def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdNewProcessArguments:
+            return deserialize_args.subcmd_new_process(self._parse_cmd_arguments(parser, cmd_args))
+    ```
 
 We finish all things if we want to extend one new sub-command line! Let's try to run it:
 
@@ -260,8 +335,8 @@ You'll have 4 things:
 Object ``SubCommand`` is the standard for **_PyMock-API_** to recognize which sub-command it has. So let's add one new sub-command
 line here:
 
-```python hl_lines="7"
-# In module pymock_api.cmd
+```python hl_lines="9"
+# In module pymock_api.command.options
 
 @dataclass
 class SubCommand:
@@ -277,7 +352,7 @@ class SubCommand:
 Add new class extends base class ``BaseSubCommand`` and set value at attribute ``sub_parser``.
 
 ```python
-# In module pymock_api.cmd
+# In module pymock_api.command.options
 
 class SubCommandNewProcessOption(BaseSubCommand):
     sub_parser: SubParserAttr = SubParserAttr(
@@ -291,7 +366,7 @@ class SubCommandNewProcessOption(BaseSubCommand):
 Instantiate a base class for adding options.
 
 ```python
-# In module pymock_api.cmd
+# In module pymock_api.command.options
 
 BaseSubCmdNewProcessOption: type = MetaCommandOption("BaseSubCmdNewProcessOption", (SubCommandNewProcessOption,), {})
 ```
@@ -303,7 +378,7 @@ It would auto-register this sub-command line into ``SUBCOMMAND``. We have sub-co
 Add new command option with extending ``BaseSubCmdNewProcessOption`` and set needed attributes in it:
 
 ```python
-# In module pymock_api.cmd
+# In module pymock_api.command.options
 
 class Arg_1(BaseSubCmdNewProcessOption):
 
@@ -315,6 +390,20 @@ class Arg_1(BaseSubCmdNewProcessOption):
 * ``cli_option``: Define the option usage via command line.
 * ``name``: The attribute to get the option value from _argpars_.
 * ``help_description``: The description would be displayed if you run ``--help``.
+
+Finally, don't forget to let command line process know which sub-command line is its responsibility by overriding the class
+attribute ``responsible_subcommand``:
+
+```python hl_lines="6"
+# In module pymock_api.command.process
+
+# ... some code
+
+class SubCmdNewProcess(BaseCommandProcessor):
+    responsible_subcommand = SubCommand.NewProcess
+
+    # ... some code
+```
 
 Now, let's try to run the **_PyMock-API_** with new sub-command:
 
@@ -354,7 +443,7 @@ If you want to use other file formatter, e.g., JSON, you could extend the base c
 to implement needed features.
 
 ```python
-# In module pymock_api.cmd
+# In module pymock_api.command.options
 
 # ... some code
 
@@ -592,13 +681,13 @@ The global variable ``foo_app`` is the variable which web application instance w
 the factory function to generate web application. Function ``setup_foosgi`` is the one which runs the web application which be
 set up by your own customized Python web framework.
 
-* Add option value in one specific function in module ``pymock_api.cmd_ps``
+* Add option value in one specific function in module ``pymock_api.command.process``
 
 Finally, we need to add a new value to let option ``--app-type`` could recognize and dispatch it to set up and run the web
 application by your own customized Python web framework.
 
 ```python hl_lines="19-20"
-# In module pymock_api.cmd_ps
+# In module pymock_api.command.process
 
 # Some code ...
 

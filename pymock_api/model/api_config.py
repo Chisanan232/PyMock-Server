@@ -2,12 +2,12 @@
 
 content ...
 """
-
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from .._utils.file_opt import YAML, _BaseFileOperation
+from .._utils.file_opt import JSON, YAML, _BaseFileOperation
+from ..model.enums import Format, ResponseStrategy
 
 # The truly semantically is more near like following:
 #
@@ -105,12 +105,44 @@ class BaseConfig(_Config):
 
 
 @dataclass(eq=False)
+class IteratorItem(_Config):
+    name: str = field(default_factory=str)
+    required: Optional[bool] = None
+    value_type: Optional[str] = None  # A type value as string
+
+    def _compare(self, other: "IteratorItem") -> bool:
+        return self.name == other.name and self.required == other.required and self.value_type == other.value_type
+
+    def serialize(self, data: Optional["IteratorItem"] = None) -> Optional[Dict[str, Any]]:
+        name: str = self._get_prop(data, prop="name")
+        required: bool = self._get_prop(data, prop="required")
+        value_type: type = self._get_prop(data, prop="value_type")
+        if not value_type or (required is None):
+            return None
+        serialized_data = {
+            "required": required,
+            "type": value_type,
+        }
+        if name:
+            serialized_data["name"] = name
+        return serialized_data
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["IteratorItem"]:
+        self.name = data.get("name", None)
+        self.required = data.get("required", None)
+        self.value_type = data.get("type", None)
+        return self
+
+
+@dataclass(eq=False)
 class APIParameter(_Config):
     name: str = field(default_factory=str)
     required: Optional[bool] = None
     default: Optional[Any] = None
     value_type: Optional[str] = None  # A type value as string
     value_format: Optional[str] = None
+    items: Optional[List[IteratorItem]] = None
 
     def _compare(self, other: "APIParameter") -> bool:
         # TODO: Let it could automatically scan what properties it has and compare all of their value.
@@ -120,7 +152,22 @@ class APIParameter(_Config):
             and self.default == other.default
             and self.value_type == other.value_type
             and self.value_format == other.value_format
+            and self.items == other.items
         )
+
+    def __post_init__(self) -> None:
+        if self.items is not None:
+            self._convert_items()
+
+    def _convert_items(self):
+        if False in list(map(lambda i: isinstance(i, (dict, IteratorItem)), self.items)):
+            raise TypeError("The data type of key *items* must be dict or IteratorItem.")
+        self.items = [
+            IteratorItem(name=i.get("name", ""), value_type=i.get("type", None), required=i.get("required", True))
+            if isinstance(i, dict)
+            else i
+            for i in self.items
+        ]
 
     def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:
         name: str = self._get_prop(data, prop="name")
@@ -128,15 +175,19 @@ class APIParameter(_Config):
         default: str = self._get_prop(data, prop="default")
         value_type: type = self._get_prop(data, prop="value_type")
         value_format: str = self._get_prop(data, prop="value_format")
-        if not (name and value_type and value_format) or (required is None):
+        if not (name and value_type) or (required is None):
             return None
-        return {
+        serialized_data = {
             "name": name,
             "required": required,
             "default": default,
             "type": value_type,
             "format": value_format,
         }
+        if self.items:
+            print(f"[DEBUG in api_config.APIParameter.serialize] self.items: {self.items}")
+            serialized_data["items"] = [item.serialize() for item in self.items]
+        return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["APIParameter"]:
@@ -145,6 +196,8 @@ class APIParameter(_Config):
         self.default = data.get("default", None)
         self.value_type = data.get("type", None)
         self.value_format = data.get("format", None)
+        items = [IteratorItem().deserialize(item) for item in data.get("items", [])]
+        self.items = items if items else None
         return self
 
 
@@ -199,23 +252,148 @@ class HTTPRequest(_Config):
         self.parameters = [APIParameter().deserialize(data=parameter) for parameter in parameters] if parameters else []
         return self
 
+    def get_one_param_by_name(self, name: str) -> Optional[APIParameter]:
+        for param in self.parameters:
+            if param.name == name:
+                return param
+        return None
+
+
+@dataclass(eq=False)
+class ResponseProperty(_Config):
+    name: str = field(default_factory=str)
+    required: Optional[bool] = None
+    value_type: Optional[str] = None  # A type value as string
+    value_format: Optional[str] = None
+    items: Optional[List[IteratorItem]] = None
+
+    def _compare(self, other: "ResponseProperty") -> bool:
+        return (
+            self.name == other.name
+            and self.required == other.required
+            and self.value_type == other.value_type
+            and self.value_format == other.value_format
+            and self.items == other.items
+        )
+
+    def __post_init__(self) -> None:
+        if self.items is not None:
+            self._convert_items()
+
+    def _convert_items(self):
+        if False in list(map(lambda i: isinstance(i, (dict, IteratorItem)), self.items)):
+            raise TypeError("The data type of key *items* must be dict or IteratorItem.")
+        self.items = [
+            IteratorItem(name=i.get("name", ""), value_type=i.get("type", None), required=i.get("required", True))
+            if isinstance(i, dict)
+            else i
+            for i in self.items
+        ]
+
+    def serialize(self, data: Optional["ResponseProperty"] = None) -> Optional[Dict[str, Any]]:
+        name: str = self._get_prop(data, prop="name")
+        required: bool = self._get_prop(data, prop="required")
+        value_type: type = self._get_prop(data, prop="value_type")
+        value_format: str = self._get_prop(data, prop="value_format")
+        if not (name and value_type) or (required is None):
+            return None
+        serialized_data = {
+            "name": name,
+            "required": required,
+            "type": value_type,
+            "format": value_format,
+        }
+        if self.items:
+            print(f"[DEBUG in api_config.ResponseProperty.serialize] self.items: {self.items}")
+            serialized_data["items"] = [item.serialize() for item in self.items]
+        return serialized_data
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["ResponseProperty"]:
+        self.name = data.get("name", None)
+        self.required = data.get("required", None)
+        self.value_type = data.get("type", None)
+        self.value_format = data.get("format", None)
+        items = [IteratorItem().deserialize(item) for item in (data.get("items", []) or [])]
+        self.items = items if items else None
+        return self
+
 
 @dataclass(eq=False)
 class HTTPResponse(_Config):
     """*The **http.response** section in **mocked_apis.<api>***"""
 
+    strategy: Optional[ResponseStrategy] = None
+    """
+    Strategy:
+    * string: Return the value as string data directly.
+    * file: Return the data which be recorded in the file path as response.
+    * object: Return the response which be composed as object by some properties.
+    """
+
+    # Strategy: string
     value: str = field(default_factory=str)
 
+    # Strategy: file
+    path: str = field(default_factory=str)
+
+    # Strategy: object
+    properties: List[ResponseProperty] = field(default_factory=list)
+
     def _compare(self, other: "HTTPResponse") -> bool:
-        return self.value == other.value
+        if not self.strategy:
+            raise ValueError("Miss necessary argument *strategy*.")
+        if self.strategy is not other.strategy:
+            raise TypeError("Different HTTP response strategy cannot compare with each other.")
+        if ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.STRING:
+            return self.value == other.value
+        elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.FILE:
+            return self.path == other.path
+        elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.OBJECT:
+            return self.properties == other.properties
+        else:
+            raise NotImplementedError
+
+    def __post_init__(self) -> None:
+        if self.strategy is not None:
+            self._convert_strategy()
+        if self.properties is not None:
+            self._convert_properties()
+
+    def _convert_strategy(self) -> None:
+        if isinstance(self.strategy, str):
+            self.strategy = ResponseStrategy.to_enum(self.strategy)
+
+    def _convert_properties(self):
+        if False in list(map(lambda i: isinstance(i, (dict, ResponseProperty)), self.properties)):
+            raise TypeError("The data type of key *properties* must be dict or ResponseProperty.")
+        self.properties = [ResponseProperty().deserialize(i) if isinstance(i, dict) else i for i in self.properties]
 
     def serialize(self, data: Optional["HTTPResponse"] = None) -> Optional[Dict[str, Any]]:
-        value: str = self._get_prop(data, prop="value")
-        if not value:
-            return None
-        return {
-            "value": value,
-        }
+        strategy: ResponseStrategy = self.strategy or ResponseStrategy.to_enum(self._get_prop(data, prop="strategy"))
+        if not strategy:
+            raise ValueError("Necessary argument *strategy* is missing.")
+        if strategy is ResponseStrategy.STRING:
+            value: str = self._get_prop(data, prop="value")
+            return {
+                "strategy": strategy.value,
+                "value": value,
+            }
+        elif strategy is ResponseStrategy.FILE:
+            path: str = self._get_prop(data, prop="path")
+            return {
+                "strategy": strategy.value,
+                "path": path,
+            }
+        elif strategy is ResponseStrategy.OBJECT:
+            all_properties = (data or self).properties if (data and data.properties) or self.properties else None
+            properties = [prop.serialize() for prop in (all_properties or [])]
+            return {
+                "strategy": strategy.value,
+                "properties": properties,
+            }
+        else:
+            raise NotImplementedError
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["HTTPResponse"]:
@@ -239,7 +417,18 @@ class HTTPResponse(_Config):
             A **HTTPResponse** type object.
 
         """
-        self.value = data.get("value", None)
+        self.strategy = ResponseStrategy.to_enum(data.get("strategy", None))
+        if not self.strategy:
+            raise ValueError("Schema key *strategy* cannot be empty.")
+        if self.strategy is ResponseStrategy.STRING:
+            self.value = data.get("value", None)
+        elif self.strategy is ResponseStrategy.FILE:
+            self.path = data.get("path", None)
+        elif self.strategy is ResponseStrategy.OBJECT:
+            properties = [ResponseProperty().deserialize(prop) for prop in data.get("properties", [])]
+            self.properties = properties if properties else None  # type: ignore[assignment]
+        else:
+            raise NotImplementedError
         return self
 
 
@@ -339,10 +528,12 @@ class MockAPI(_Config):
 
     _url: Optional[str]
     _http: Optional[HTTP]
+    _tag: str = ""
 
-    def __init__(self, url: Optional[str] = None, http: Optional[HTTP] = None):
+    def __init__(self, url: Optional[str] = None, http: Optional[HTTP] = None, tag: str = ""):
         self._url = url
         self._http = http
+        self._tag = tag
 
     def _compare(self, other: "MockAPI") -> bool:
         return self.url == other.url and self.http == other.http
@@ -371,14 +562,26 @@ class MockAPI(_Config):
         else:
             self._http = None
 
+    @property
+    def tag(self) -> str:
+        return self._tag
+
+    @tag.setter
+    def tag(self, tag: str) -> None:
+        if not isinstance(tag, str):
+            raise TypeError("Setter *MockAPI.tag* only accepts str type value.")
+        self._tag = tag
+
     def serialize(self, data: Optional["MockAPI"] = None) -> Optional[Dict[str, Any]]:
         url = (data.url if data else None) or self._url
         http = (data.http if data else None) or self.http
         if not (url and http):
             return None
+        tag = (data.tag if data else None) or self.tag
         return {
             "url": url,
             "http": http.serialize(data=http),
+            "tag": tag,
         }
 
     @_Config._ensure_process_with_not_empty_value
@@ -415,7 +618,65 @@ class MockAPI(_Config):
         self.url = data.get("url", None)
         http_info = data.get("http", None)
         self.http = HTTP().deserialize(data=http_info) if http_info else None
+        self.tag = data.get("tag", "")
         return self
+
+    def set_request(self, method: str = "GET", parameters: Optional[List[Union[dict, APIParameter]]] = None) -> None:
+        def _convert(param: Union[dict, APIParameter]) -> APIParameter:
+            if isinstance(param, APIParameter):
+                return param
+            ap = APIParameter()
+            ap_data_obj_fields = list(ap.__dataclass_fields__.keys())
+            ap_data_obj_fields.pop(ap_data_obj_fields.index("value_type"))
+            ap_data_obj_fields.append("type")
+            if False in list(map(lambda p: p in ap_data_obj_fields, param.keys())):
+                raise ValueError("The data format of API parameter is incorrect.")
+            return ap.deserialize(param)
+
+        if parameters and False in list(map(lambda p: isinstance(p, APIParameter), parameters)):
+            params = list(map(_convert, parameters))
+        else:
+            params = parameters or []  # type: ignore[assignment]
+        if not self.http:
+            self.http = HTTP(request=HTTPRequest(method=method, parameters=params), response=HTTPResponse())
+        else:
+            if not self.http.request:
+                self.http.request = HTTPRequest(method=method, parameters=params)
+            else:
+                if method:
+                    self.http.request.method = method
+                if parameters:
+                    self.http.request.parameters = params
+
+    def set_response(
+        self, strategy: ResponseStrategy = ResponseStrategy.STRING, value: str = "", iterable_value: List = []
+    ) -> None:
+        if strategy is ResponseStrategy.STRING:
+            http_resp = HTTPResponse(strategy=strategy, value=value)
+        elif strategy is ResponseStrategy.FILE:
+            http_resp = HTTPResponse(strategy=strategy, path=value)
+        elif strategy is ResponseStrategy.OBJECT:
+            http_resp = HTTPResponse(strategy=strategy, properties=iterable_value)
+        else:
+            raise TypeError(f"Invalid response strategy *{strategy}*.")
+
+        if not self.http:
+            self.http = HTTP(request=HTTPRequest(), response=http_resp)
+        else:
+            self.http.response = http_resp
+
+    def format(self, f: Format) -> str:
+        def _ensure_getting_serialized_data() -> Dict[str, Any]:
+            serialized_data = self.serialize()
+            assert serialized_data, "It must have non-empty value for formatting."
+            return serialized_data
+
+        if f == Format.JSON:
+            return JSON().serialize(_ensure_getting_serialized_data())
+        elif f == Format.YAML:
+            return YAML().serialize(_ensure_getting_serialized_data())
+        else:
+            raise ValueError(f"Not support the format feature as {f}.")
 
 
 class MockAPIs(_Config):
@@ -550,6 +811,31 @@ class MockAPIs(_Config):
             self.apis[mock_api_name] = MockAPI().deserialize(data=data.get(mock_api_name, None))
         return self
 
+    def get_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Optional[MockAPI]:
+        url = url.replace(base.url, "") if base else url
+        for k, v in self._apis.items():
+            if v and v.url == url:
+                return self._apis[k]
+        return None
+
+    def get_all_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Dict[str, MockAPI]:
+        url = url.replace(base.url, "") if base else url
+        all_api_configs: Dict[str, MockAPI] = {}
+        for k, v in self._apis.items():
+            if v and v.url == url:
+                all_api_configs[v.http.request.method.upper()] = self._apis[k]  # type: ignore[union-attr,assignment]
+        return all_api_configs
+
+    def group_by_url(self) -> Dict[str, List[MockAPI]]:
+        apis = self._apis
+        aggregated_apis: Dict[str, List[MockAPI]] = {}
+        for api_name, api_config in apis.items():
+            assert api_config and api_config.url
+            one_url_details = aggregated_apis.get(api_config.url, [])
+            one_url_details.append(api_config)
+            aggregated_apis[api_config.url] = one_url_details
+        return aggregated_apis
+
 
 class APIConfig(_Config):
     """*The entire configuration*"""
@@ -614,7 +900,7 @@ class APIConfig(_Config):
         name = (data.name if data else None) or self.name
         description = (data.description if data else None) or self.description
         apis = (data.apis if data else None) or self.apis
-        if not (name and description and apis):
+        if not apis:
             return None
         return {
             "name": name,

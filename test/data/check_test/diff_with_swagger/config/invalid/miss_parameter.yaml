@@ -1,0 +1,14 @@
+mocked_apis:
+  foo_home:
+    url: '/foo'
+    http:
+      request:
+        method: 'GET'
+        parameters:
+          - name: 'missArg'
+            required: false
+            type: str
+            default: 'missing'
+      response:
+        strategy: 'string'
+        value: 'This is Foo home API.'
