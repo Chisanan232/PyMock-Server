@@ -73,7 +73,7 @@ jobs:
 
   all-test_codecov:
 #    name: Organize and generate the testing report and upload it to Codecov
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event_name == 'pull_request' }}
     needs: [run_unit-test, run_integration-test]
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/organize_and_generate_test_cov_reports.yaml@v4
     with:
