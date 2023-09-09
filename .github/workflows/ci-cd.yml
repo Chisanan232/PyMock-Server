@@ -16,6 +16,7 @@ on:
       - "mkdocs.yml"
       - "README.md"
 #       For Docker feature
+      - ".github/workflows/docker.yaml"
       - "scripts/ci/**-docker-**.sh"
       - "scripts/docker/**"
       - "Dockerfile"
@@ -42,6 +43,7 @@ on:
       - "mkdocs.yml"
       - "README.md"
 #       For Docker feature
+      - ".github/workflows/docker.yaml"
       - "scripts/ci/**-docker-**.sh"
       - "scripts/docker/**"
       - "Dockerfile"
