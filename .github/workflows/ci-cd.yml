@@ -10,12 +10,6 @@ on:
       - "develop/**"
       - "release"
       - "master"
-    branches-ignore:
-#     Focus on the git branch which may affect features or tests
-      - "develop/doc**"
-      - "develop/**doc"
-      - "**doc"
-      - "doc**"
     paths-ignore:
 #     For documentation
       - ".github/ISSUE_TEMPLATE/**"
