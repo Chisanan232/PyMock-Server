@@ -4,12 +4,6 @@ on:
   push:
     branches:
       - "develop/**"
-    branches-ignore:
-#     Focus on the git branch which may affect features or tests
-      - "develop/doc**"
-      - "develop/**doc"
-      - "**doc"
-      - "doc**"
 
   pull_request:
     branches:
@@ -22,27 +16,26 @@ on:
       - "develop/**doc"
       - "**doc"
       - "doc**"
-
-  paths-ignore:
-#       For documentation
-    - ".github/ISSUE_TEMPLATE/**"
-    - ".github/workflows/documentation.yaml"
-    - "docs/**"
-    - "**/*.md"
-    - "mkdocs.yml"
-    - "README.md"
-#       For Docker feature
-    - ".github/workflows/docker.yaml"
-    - "scripts/ci/**-docker-**.sh"
-    - "scripts/docker/**"
-    - "Dockerfile"
-    - "README-DOCKER.md"
-#       Others
-    - ".gitcommitrules"
-    - ".gitignore"
-    - ".pre-commit-config.yaml"
-    - ".pylintrc"
-    - "LICENSE"
+    paths-ignore:
+#     For documentation
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/documentation.yaml"
+      - "docs/**"
+      - "**/*.md"
+      - "mkdocs.yml"
+      - "README.md"
+#     For Docker feature
+      - ".github/workflows/docker.yaml"
+      - "scripts/ci/**-docker-**.sh"
+      - "scripts/docker/**"
+      - "Dockerfile"
+      - "README-DOCKER.md"
+#     Others
+      - ".gitcommitrules"
+      - ".gitignore"
+      - ".pre-commit-config.yaml"
+      - ".pylintrc"
+      - "LICENSE"
 
 jobs:
   prep-testbed_unit-test:
