@@ -4,19 +4,24 @@ on:
   push:
     branches:
       - "develop/**"
+    branches-ignore:
+#     Focus on the git branch which may affect features or tests
+      - "develop/doc**"
+      - "develop/**doc"
+      - "**doc"
+      - "doc**"
 
   pull_request:
     branches:
       - "develop/**"
       - "release"
       - "master"
-
-  branches-ignore:
-#       Focus on the git branch which may affect features or tests
-    - "develop/doc**"
-    - "develop/**doc"
-    - "**doc"
-    - "doc**"
+    branches-ignore:
+#     Focus on the git branch which may affect features or tests
+      - "develop/doc**"
+      - "develop/**doc"
+      - "**doc"
+      - "doc**"
 
   paths-ignore:
 #       For documentation
