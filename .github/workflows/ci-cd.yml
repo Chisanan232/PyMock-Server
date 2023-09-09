@@ -1,10 +1,14 @@
 name: CI
 
 on:
+  # For the push event, it only sniffs branch 'develop/**' and let anything changes triggers CI for be safe of source
+  # code.
   push:
     branches:
       - "develop/**"
 
+  # For the pull request event, it sniffs branch 'develop/**', 'release' and 'master' and make sure anything would be
+  # fine without any issue before review and merge.
   pull_request:
     branches:
       - "develop/**"
