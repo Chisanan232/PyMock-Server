@@ -128,7 +128,7 @@ jobs:
   pre-building_test:
 #    name: Check about it could work finely by installing the Python package with setup.py file
     needs: [codecov_finish, sonarcloud_finish]
-    if: ${{ github.ref_name == 'release' || github.ref_name == 'master' && github.event_name == 'push' }}
+    if: ${{ github.ref_name == 'release' || github.ref_name == 'master' }}
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/pre-building_test.yaml@develop
     with:
       build-type: poetry
