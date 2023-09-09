@@ -23,6 +23,7 @@ on:
     - ".github/ISSUE_TEMPLATE/**"
     - ".github/workflows/documentation.yaml"
     - "docs/**"
+    - "**/*.md"
     - "mkdocs.yml"
     - "README.md"
 #       For Docker feature
