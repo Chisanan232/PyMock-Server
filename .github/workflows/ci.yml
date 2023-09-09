@@ -135,30 +135,3 @@ jobs:
       python_package_name: pymock-api
       test_shell_in_python: from pymock_api.model import APIConfig
       test_shell: mock-api --help
-
-
-#  build_git-tag_and_create_github-release:
-##    name: Build git tag and GitHub release if it needs
-#    needs: pre-building_test
-#    if: ${{ github.ref_name == 'master' && github.event_name == 'push' }}
-#    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/build_git-tag_and_create_github-release.yaml@v4
-#    secrets:
-#      github_auth_token: ${{ secrets.GITHUB_TOKEN }}
-#    with:
-#      project_type: python-package
-#      project_name: pymock_api
-#      software_version_format: general-3
-#
-#
-#  push_python_pkg_to_pypi:
-##    name: Check about it could work finely by installing the Python package with setup.py file
-#    needs: build_git-tag_and_create_github-release
-#    if: ${{ github.ref_name == 'master' && github.event_name == 'push' }}
-#    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/push_pkg_to_pypi.yaml@v4
-#    with:
-#      release-type: ${{ needs.build_git-tag_and_create_github-release.outputs.python_release_version }}
-#      push-to-PyPI: official
-#    secrets:
-#      pypi_user: ${{ secrets.PYPI_USERNAME }}
-#      pypi_token: ${{ secrets.PYPI_PASSWORD }}
-
