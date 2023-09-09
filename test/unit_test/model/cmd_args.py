@@ -9,12 +9,15 @@ from pymock_api.model.cmd_args import (
     SubcmdAddArguments,
     SubcmdCheckArguments,
     SubcmdGetArguments,
+    SubcmdPullArguments,
     SubcmdRunArguments,
     SubcmdSampleArguments,
 )
 from pymock_api.model.enums import Format, SampleType
 
 from ..._values import (
+    _API_Doc_Source,
+    _Base_URL,
     _Bind_Host_And_Port,
     _Cmd_Arg_API_Path,
     _Cmd_Arg_HTTP_Method,
@@ -29,9 +32,11 @@ from ..._values import (
     _Test_Config,
     _Test_HTTP_Method,
     _Test_HTTP_Resp,
+    _Test_Response_Strategy,
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
     _Test_SubCommand_Get,
+    _Test_SubCommand_Pull,
     _Test_SubCommand_Run,
     _Test_SubCommand_Sample,
     _Test_URL,
@@ -73,7 +78,8 @@ class TestDeserialize:
             "api_path": _Test_URL,
             "http_method": _Test_HTTP_Method,
             "parameters": ['{"name": "arg1", "required": false, "default": "val1", "type": "str"}'],
-            "response": _Test_HTTP_Resp,
+            "response_strategy": _Test_Response_Strategy,
+            "response_value": [_Test_HTTP_Resp],
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_add(namespace)
@@ -83,7 +89,7 @@ class TestDeserialize:
         assert arguments.api_path == _Test_URL
         assert arguments.http_method == _Test_HTTP_Method
         assert arguments.parameters == [{"name": "arg1", "required": False, "default": "val1", "type": "str"}]
-        assert arguments.response == _Test_HTTP_Resp
+        assert arguments.response_value == [_Test_HTTP_Resp]
 
     @pytest.mark.parametrize(
         (
@@ -190,3 +196,17 @@ class TestDeserialize:
         assert arguments.print_sample == _Print_Sample
         assert arguments.sample_output_path == _Sample_File_Path
         assert arguments.sample_config_type == SampleType.ALL
+
+    def test_parser_subcommand_pull_arguments(self, deserialize: Type[DeserializeParsedArgs]):
+        namespace_args = {
+            "subcommand": _Test_SubCommand_Pull,
+            "source": _API_Doc_Source,
+            "base_url": _Base_URL,
+            "config_path": _Test_Config,
+        }
+        namespace = Namespace(**namespace_args)
+        arguments = deserialize.subcommand_pull(namespace)
+        assert isinstance(arguments, SubcmdPullArguments)
+        assert arguments.subparser_name == _Test_SubCommand_Pull
+        assert arguments.source == _API_Doc_Source
+        assert arguments.config_path == _Test_Config

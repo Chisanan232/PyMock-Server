@@ -230,6 +230,7 @@ class SubCommand:
     Check: str = "check"
     Get: str = "get"
     Sample: str = "sample"
+    Pull: str = "pull"
 
 
 class BaseSubCommand(CommandOption):
@@ -278,12 +279,20 @@ class SubCommandSampleOption(BaseSubCommand):
     )
 
 
+class SubCommandPullOption(BaseSubCommand):
+    sub_parser: SubParserAttr = SubParserAttr(
+        name=SubCommand.Pull,
+        help="Pull the API details from one specific source, e.g., Swagger API documentation.",
+    )
+
+
 BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
 BaseSubCmdRunOption: type = MetaCommandOption("BaseSubCmdRunOption", (SubCommandRunOption,), {})
 BaseSubCmdAddOption: type = MetaCommandOption("BaseSubCmdAddOption", (SubCommandAddOption,), {})
 BaseSubCmdCheckOption: type = MetaCommandOption("BaseSubCmdCheckOption", (SubCommandCheckOption,), {})
 BaseSubCmdGetOption: type = MetaCommandOption("BaseSubCmdGetOption", (SubCommandGetOption,), {})
 BaseSubCmdSampleOption: type = MetaCommandOption("BaseSubCmdSampleOption", (SubCommandSampleOption,), {})
+BaseSubCmdPullOption: type = MetaCommandOption("BaseSubCmdPullOption", (SubCommandPullOption,), {})
 
 
 class Version(BaseCmdOption):
@@ -422,10 +431,19 @@ class AddParameters(BaseSubCmdAddOption):
     default_value: str = ""
 
 
+class AddResponseStrategy(BaseSubCmdAddOption):
+    cli_option: str = "--response-strategy"
+    name: str = "response_strategy"
+    help_description: str = "Set HTTP response strategy of one specific API."
+    option_value_type: type = str
+    _options: List[str] = ["string", "file", "object"]
+
+
 class AddResponse(BaseSubCmdAddOption):
-    cli_option: str = "--response"
-    name: str = "response"
+    cli_option: str = "--response-value"
+    name: str = "response_value"
     help_description: str = "Set HTTP response value of one specific API."
+    action: str = "append"
     option_value_type: type = str
     default_value: str = "OK."
 
@@ -525,4 +543,25 @@ class GetWithHTTPMethod(BaseSubCmdGetOption):
     help_description: str = (
         "This is an option for searching condition which cannot be used individually. Add "
         "condition of HTTP method to get the API info."
+    )
+
+
+class Source(BaseSubCmdPullOption):
+    cli_option: str = "-s, --source"
+    name: str = "source"
+    help_description: str = "The source where keeps API details as documentation."
+
+
+class PullBaseURL(BaseSubCmdPullOption):
+    cli_option: str = "--base-url"
+    name: str = "base_url"
+    help_description: str = "The base URL which must be the part of path all the APIs begin with."
+
+
+class PullToConfigPath(BaseSubCmdPullOption):
+    cli_option: str = "-c, --config-path"
+    name: str = "config_path"
+    help_description: str = (
+        "The file path where program will write the deserialization result configuration of API documentation, e.g., "
+        "Swagger API documentation to it."
     )

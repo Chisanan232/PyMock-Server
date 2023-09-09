@@ -8,6 +8,8 @@ from pymock_api.model import (
 )
 
 from ..._values import (
+    _API_Doc_Source,
+    _Base_URL,
     _Bind_Host_And_Port,
     _Generate_Sample,
     _Log_Level,
@@ -19,6 +21,7 @@ from ..._values import (
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
     _Test_SubCommand_Get,
+    _Test_SubCommand_Pull,
     _Test_SubCommand_Run,
     _Workers_Amount,
 )
@@ -75,6 +78,19 @@ def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
     }
     namespace = Namespace(**namespace_args)
     deserialize_args.subcmd_get(namespace)
+    mock_parser_arguments.assert_called_once_with(namespace)
+
+
+@patch.object(DeserializeParsedArgs, "subcommand_pull")
+def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
+    namespace_args = {
+        "subcommand": _Test_SubCommand_Pull,
+        "source": _API_Doc_Source,
+        "base_url": _Base_URL,
+        "config_path": _Test_Config,
+    }
+    namespace = Namespace(**namespace_args)
+    deserialize_args.subcmd_pull(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
 
 

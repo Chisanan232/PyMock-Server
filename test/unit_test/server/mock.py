@@ -1,10 +1,16 @@
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 from unittest.mock import Mock, patch
 
 import pytest
 
 from pymock_api.model.api_config import APIConfig, MockAPI, MockAPIs
-from pymock_api.server.application import BaseAppServer, FlaskServer
+from pymock_api.server.application import (
+    BaseAppServer,
+    BaseWebServerCodeGenerator,
+    FlaskServer,
+    HTTPRequestProcess,
+    HTTPResponseProcess,
+)
 from pymock_api.server.mock import MockHTTPServer
 
 from ..._values import _Test_Config
@@ -16,6 +22,18 @@ class FakeWebServer(BaseAppServer):
     def setup(self) -> Any:
         pass
 
+    def init_code_generator(self) -> BaseWebServerCodeGenerator:
+        pass
+
+    def init_http_request_process(self) -> HTTPRequestProcess:
+        pass
+
+    def init_http_response_process(self) -> HTTPResponseProcess:
+        pass
+
+    def _get_all_api_details(self, mocked_apis) -> Dict[str, Union[Optional[MockAPI], List[MockAPI]]]:
+        pass
+
     def _request_process(self) -> None:
         pass
 
@@ -25,6 +43,9 @@ class FakeWebServer(BaseAppServer):
     def _get_current_api_path(self, request: Any) -> str:
         pass
 
+    def _get_current_request_http_method(self, request: Any) -> str:
+        pass
+
     def _add_api(self, api_name: str, api_config: MockAPI, base_url: Optional[str] = None) -> str:
         pass
 
@@ -32,6 +53,9 @@ class FakeWebServer(BaseAppServer):
         pass
 
     def _generate_http_response(self, body: str, status_code: int) -> Any:
+        pass
+
+    def _api_controller_name(self, api_name: str) -> str:
         pass
 
 

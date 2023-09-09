@@ -1,9 +1,9 @@
 import json
 from argparse import Namespace
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from ..model.enums import Format, SampleType
+from ..model.enums import Format, ResponseStrategy, SampleType
 
 
 @dataclass(frozen=True)
@@ -28,7 +28,8 @@ class SubcmdAddArguments(ParserArguments):
     api_path: str
     http_method: str
     parameters: List[dict]
-    response: str
+    response_strategy: ResponseStrategy
+    response_value: List[Union[str, dict]]
 
     def api_info_is_complete(self) -> bool:
         def _string_is_not_empty(s: Optional[str]) -> bool:
@@ -68,6 +69,13 @@ class SubcmdSampleArguments(ParserArguments):
     sample_config_type: SampleType
 
 
+@dataclass(frozen=True)
+class SubcmdPullArguments(ParserArguments):
+    source: str
+    base_url: str
+    config_path: str
+
+
 class DeserializeParsedArgs:
     """*Deserialize the object *argparse.Namespace* to *ParserArguments*"""
 
@@ -84,15 +92,24 @@ class DeserializeParsedArgs:
 
     @classmethod
     def subcommand_add(cls, args: Namespace) -> SubcmdAddArguments:
+        args.response_strategy = ResponseStrategy.to_enum(args.response_strategy)
         if args.parameters:
             args.parameters = list(map(lambda p: json.loads(p), args.parameters))
+        if args.response_value:
+            args.response_value = list(
+                map(
+                    lambda resp: json.loads(resp) if args.response_strategy is ResponseStrategy.OBJECT else resp,
+                    args.response_value,
+                )
+            )
         return SubcmdAddArguments(
             subparser_name=args.subcommand,
             api_config_path=args.api_config_path,
             api_path=args.api_path,
             http_method=args.http_method,
             parameters=args.parameters,
-            response=args.response,
+            response_strategy=args.response_strategy,
+            response_value=args.response_value,
         )
 
     @classmethod
@@ -130,4 +147,13 @@ class DeserializeParsedArgs:
             print_sample=args.print_sample,
             sample_output_path=args.file_path,
             sample_config_type=SampleType[str(args.sample_config_type).upper()],
+        )
+
+    @classmethod
+    def subcommand_pull(cls, args: Namespace) -> SubcmdPullArguments:
+        return SubcmdPullArguments(
+            subparser_name=args.subcommand,
+            source=args.source,
+            base_url=args.base_url,
+            config_path=args.config_path,
         )
