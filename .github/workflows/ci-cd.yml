@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - "develop/**"
-      - "release"
-      - "release-**"
-      - "release/**"
-      - "master"
     paths-ignore:
 #       For documentation
       - ".github/ISSUE_TEMPLATE/**"
@@ -32,8 +28,6 @@ on:
     branches:
       - "develop/**"
       - "release"
-      - "release-**"
-      - "release/**"
       - "master"
     paths-ignore:
 #       For documentation
