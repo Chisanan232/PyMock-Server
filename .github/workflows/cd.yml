@@ -29,7 +29,6 @@ on:
 jobs:
   build_git-tag_and_create_github-release:
 #    name: Build git tag and GitHub release if it needs
-    if: ${{ github.ref_name == 'master' && github.event_name == 'push' }}
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/build_git-tag_and_create_github-release.yaml@v4
     secrets:
       github_auth_token: ${{ secrets.GITHUB_TOKEN }}
@@ -42,7 +41,6 @@ jobs:
   push_python_pkg_to_pypi:
 #    name: Check about it could work finely by installing the Python package with setup.py file
     needs: build_git-tag_and_create_github-release
-    if: ${{ github.ref_name == 'master' && github.event_name == 'push' }}
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/push_pkg_to_pypi.yaml@v4
     with:
       release-type: ${{ needs.build_git-tag_and_create_github-release.outputs.python_release_version }}
