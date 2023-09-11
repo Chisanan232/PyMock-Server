@@ -1,0 +1,7 @@
+name: ''
+description: ''
+mocked_apis:
+  base:
+  get_foo:
+    extend_values: template
+    tag: ''

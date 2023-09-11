@@ -1,0 +1,50 @@
+name: CD
+
+on:
+  # Run the deployment about publishing the Python source code to PyPI.
+  push:
+    branches:
+      - "master"
+    paths-ignore:
+#     For documentation
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/documentation.yaml"
+      - "docs/**"
+      - "**/*.md"
+      - "mkdocs.yml"
+      - "README.md"
+#     For Docker feature
+      - ".github/workflows/docker.yaml"
+      - "scripts/ci/**-docker-**.sh"
+      - "scripts/docker/**"
+      - "Dockerfile"
+      - "README-DOCKER.md"
+#     Others
+      - ".gitcommitrules"
+      - ".gitignore"
+      - ".pre-commit-config.yaml"
+      - ".pylintrc"
+      - "LICENSE"
+
+jobs:
+  build_git-tag_and_create_github-release:
+#    name: Build git tag and GitHub release if it needs
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/build_git-tag_and_create_github-release.yaml@v4
+    secrets:
+      github_auth_token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      project_type: python-package
+      project_name: pymock_api
+      software_version_format: general-3
+
+
+  push_python_pkg_to_pypi:
+#    name: Check about it could work finely by installing the Python package with setup.py file
+    needs: build_git-tag_and_create_github-release
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/push_pkg_to_pypi.yaml@v4
+    with:
+      release-type: ${{ needs.build_git-tag_and_create_github-release.outputs.python_release_version }}
+      push-to-PyPI: official
+    secrets:
+      pypi_user: ${{ secrets.PYPI_USERNAME }}
+      pypi_token: ${{ secrets.PYPI_PASSWORD }}

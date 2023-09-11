@@ -1,0 +1,52 @@
+name: ''
+description: ''
+mocked_apis:
+  template:    # Optional
+    api:
+      base_file_path: './'
+      config_path:
+      config_path_format: '{{ api.base_file_path }}{{ api.tag }}/{{ api.__name__ }}.yaml'
+    request:
+      base_file_path: './'
+      config_path:
+      config_path_format: '{{ api.base_file_path }}{{ api.tag }}/{{ api.__name__ }}-request.yaml'
+    response:
+      base_file_path: './'
+      config_path:
+      config_path_format: '{{ api.base_file_path }}{{ api.tag }}/{{ api.__name__ }}-response.yaml'
+    apply:    # Which mocked APIs should apply template values
+      api:    # Which mocked APIs should apply template values to its entire settings includes URL, request and response
+        - get_foo
+        - post_foo
+        - get_foo-boo_export
+      request:    # Which mocked APIs should apply template values to its request setting only
+        - put_foo
+      response:    # Which mocked APIs should apply template values to its response setting only
+        - put_foo
+  base:
+    url: '/api/v1/test'
+#  template_values: # All the mocked APIs would use template properties
+#    - get_foo
+#    - put_foo
+#  template_request_values: # All the mocked APIs would use template properties
+#    - get_foo
+#    - put_foo
+#  template_response_values: # All the mocked APIs would use template properties
+#    - get_foo
+#    - put_foo
+  get_foo:
+    values: template    # Extend the values from which section. Default is section *template*
+    props: template    # Extend the values from which section. Default is section *template*
+    attrs: template    # Extend the values from which section. Default is section *template*
+  put_foo:
+#    config_path: ./foo/put_foo.yaml
+    url: /foo
+    http:
+      request_values: template
+      response_values: template
+    tag: 'foo'
+  get_foo-boo_export:
+#    config_path_format: '{api.base_file_path}{api.tag}/{api.__name__}.yaml'
+    values: template
+    apply_template_value: true
+    tag: 'foo-boo'

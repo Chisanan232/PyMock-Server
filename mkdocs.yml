@@ -112,12 +112,24 @@ nav:
       - subcommand:
         - command-line-usage/index.md
         - run: command-line-usage/subcmd-run.md
+        - get: command-line-usage/subcmd-get.md
         - add: command-line-usage/subcmd-add.md
         - check: command-line-usage/subcmd-check.md
         - sample: command-line-usage/subcmd-sample.md
+        - pull: command-line-usage/subcmd-pull.md
   - Configure references:
     - Basic info: configure-references/config-basic-info.md
-    - API: configure-references/mocked-apis.md
+    - Mocked API:
+      - configure-references/mocked-apis/index.md
+      - Base:
+        - configure-references/mocked-apis/base/index.md
+      - API:
+        - configure-references/mocked-apis/apis/index.md
+        - URL: configure-references/mocked-apis/apis/url.md
+        - HTTP:
+          - configure-references/mocked-apis/apis/http/index.md
+          - HTTP request: configure-references/mocked-apis/apis/http/request.md
+          - HTTP response: configure-references/mocked-apis/apis/http/response.md
   - Development:
     - development/index.md
     - How it works: development/how-it-works.md
