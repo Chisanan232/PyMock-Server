@@ -1,7 +1,20 @@
 name: ''
 description: ''
 mocked_apis:
-  base:
-  get_foo:
-    extend_values: template
-    tag: ''
+  template:
+    api:
+      base_file_path: './'
+      config_path:
+      config_path_format: '{{ api.tag }}/{{ api.__name__ }}.yaml'
+    request:
+      base_file_path: './'
+      config_path:
+      config_path_format: '{{ api.tag }}/{{ api.__name__ }}-request.yaml'
+    response:
+      base_file_path: './'
+      config_path:
+      config_path_format: '{{ api.tag }}/{{ api.__name__ }}-response.yaml'
+    apply:
+      scan_strategy: file_name_first
+      api:
+        - get_foo
