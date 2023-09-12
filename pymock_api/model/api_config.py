@@ -110,6 +110,10 @@ class TemplateSetting(_Config, ABC):
     config_path: str = field(default_factory=str)
     config_path_format: str = field(default_factory=str)
 
+    def __post_init__(self) -> None:
+        if not self.config_path_format:
+            self.config_path_format = self._default_config_path_format
+
     def _compare(self, other: "TemplateSetting") -> bool:
         return (
             self.base_file_path == other.base_file_path
@@ -118,14 +122,18 @@ class TemplateSetting(_Config, ABC):
         )
 
     def serialize(self, data: Optional["TemplateSetting"] = None) -> Optional[Dict[str, Any]]:
+        base_file_path: str = self._get_prop(data, prop="base_file_path")
+        config_path: str = self._get_prop(data, prop="config_path")
+        config_path_format: str = self._get_prop(data, prop="config_path_format")
         return {
-            "base_file_path": self.base_file_path,
-            "config_path": self.config_path,
-            "config_path_format": self.config_path_format,
+            "base_file_path": base_file_path,
+            "config_path": config_path,
+            "config_path_format": config_path_format,
         }
 
+    @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateSetting"]:
-        self.base_file_path = data.get("config_path_format", "./")
+        self.base_file_path = data.get("base_file_path", "./")
         self.config_path = data.get("config_path", "")
         self.config_path_format = data.get("config_path_format", self._default_config_path_format)
         return self
@@ -134,6 +142,24 @@ class TemplateSetting(_Config, ABC):
     @abstractmethod
     def _default_config_path_format(self) -> str:
         pass
+
+
+class TemplateAPI(TemplateSetting):
+    @property
+    def _default_config_path_format(self) -> str:
+        return "{{ api.tag }}/{{ api.__name__ }}.yaml"
+
+
+class TemplateRequest(TemplateSetting):
+    @property
+    def _default_config_path_format(self) -> str:
+        return "{{ api.tag }}/{{ api.__name__ }}-request.yaml"
+
+
+class TemplateResponse(TemplateSetting):
+    @property
+    def _default_config_path_format(self) -> str:
+        return "{{ api.tag }}/{{ api.__name__ }}-response.yaml"
 
 
 @dataclass(eq=False)
