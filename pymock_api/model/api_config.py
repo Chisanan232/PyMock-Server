@@ -757,41 +757,43 @@ class MockAPIs(_Config):
 
             {
                 'base': {'url': '/test/v1'},
-                'google_home': {
-                    'url': '/google',
-                    'http': {
-                        'request': {
-                            'method': 'GET',
-                            'parameters': [{'param1': 'val1'}]
-                        },
-                        'response': {
-                            'value': 'This is Google home API.'
+                'apis': {
+                    'google_home': {
+                        'url': '/google',
+                        'http': {
+                            'request': {
+                                'method': 'GET',
+                                'parameters': [{'param1': 'val1'}]
+                            },
+                            'response': {
+                                'value': 'This is Google home API.'
+                            }
                         }
+                    },
+                    'test_home': {
+                        'url': '/google',
+                        'http': {
+                            'request': {
+                                'method': 'GET',
+                                'parameters': [{'param1': 'val1'}]
+                            },
+                            'response': {
+                                'value': '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }'
+                            }
+                        },
+                        'cookie': [{'TEST': 'cookie_value'}]
+                    },
+                    'youtube_home': {
+                        'url': '/youtube',
+                        'http': {
+                            'request': {
+                                'method': 'GET',
+                                'parameters': [{'param1': 'val1'}]
+                            },
+                            'response': {'value': 'youtube.json'}
+                        },
+                        'cookie': [{'USERNAME': 'test'}, {'SESSION_EXPIRED': '2023-12-31T00:00:00.000'}]
                     }
-                },
-                'test_home': {
-                    'url': '/google',
-                    'http': {
-                        'request': {
-                            'method': 'GET',
-                            'parameters': [{'param1': 'val1'}]
-                        },
-                        'response': {
-                            'value': '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }'
-                        }
-                    },
-                    'cookie': [{'TEST': 'cookie_value'}]
-                },
-                'youtube_home': {
-                    'url': '/youtube',
-                    'http': {
-                        'request': {
-                            'method': 'GET',
-                            'parameters': [{'param1': 'val1'}]
-                        },
-                        'response': {'value': 'youtube.json'}
-                    },
-                    'cookie': [{'USERNAME': 'test'}, {'SESSION_EXPIRED': '2023-12-31T00:00:00.000'}]
                 }
             }
 
@@ -922,43 +924,45 @@ class APIConfig(_Config):
                 'description': 'This is a test for the usage demonstration.',
                 'mocked_apis': {
                     'base': {'url': '/test/v1'},
-                    'google_home': {
-                        'url': '/google',
-                        'http': {
-                            'request': {
-                                'method': 'GET',
-                                'parameters': [{'param1': 'val1'}]
-                            },
-                            'response': {
-                                'value': 'This is Google home API.'
+                    'apis': {
+                        'google_home': {
+                            'url': '/google',
+                            'http': {
+                                'request': {
+                                    'method': 'GET',
+                                    'parameters': [{'param1': 'val1'}]
+                                },
+                                'response': {
+                                    'value': 'This is Google home API.'
+                                }
                             }
+                        },
+                        'test_home': {
+                            'url': '/google',
+                            'http': {
+                                'request': {
+                                    'method': 'GET',
+                                    'parameters': [{'param1': 'val1'}]
+                                },
+                                'response': {
+                                    'value': '{
+                                        "responseCode": "200", "errorMessage": "OK", "content": "This is Test home."
+                                    }'
+                                }
+                            },
+                            'cookie': [{'TEST': 'cookie_value'}]
+                        },
+                        'youtube_home': {
+                            'url': '/youtube',
+                            'http': {
+                                'request': {
+                                    'method': 'GET',
+                                    'parameters': [{'param1': 'val1'}]
+                                },
+                                'response': {'value': 'youtube.json'}
+                            },
+                            'cookie': [{'USERNAME': 'test'}, {'SESSION_EXPIRED': '2023-12-31T00:00:00.000'}]
                         }
-                    },
-                    'test_home': {
-                        'url': '/google',
-                        'http': {
-                            'request': {
-                                'method': 'GET',
-                                'parameters': [{'param1': 'val1'}]
-                            },
-                            'response': {
-                                'value': '{
-                                    "responseCode": "200", "errorMessage": "OK", "content": "This is Test home."
-                                }'
-                            }
-                        },
-                        'cookie': [{'TEST': 'cookie_value'}]
-                    },
-                    'youtube_home': {
-                        'url': '/youtube',
-                        'http': {
-                            'request': {
-                                'method': 'GET',
-                                'parameters': [{'param1': 'val1'}]
-                            },
-                            'response': {'value': 'youtube.json'}
-                        },
-                        'cookie': [{'USERNAME': 'test'}, {'SESSION_EXPIRED': '2023-12-31T00:00:00.000'}]
                     }
                 }
             }
