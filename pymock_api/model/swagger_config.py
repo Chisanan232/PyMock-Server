@@ -359,7 +359,7 @@ class API(Transferable):
                     k_value = "random integer value"
                 elif locate(v_type) == bool:
                     k_value = "random boolean value"
-                elif v_type is "file":
+                elif v_type == "file":
                     # TODO: Handle the file download feature
                     k_value = "random file output stream"
                 else:
