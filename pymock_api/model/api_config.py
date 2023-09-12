@@ -819,8 +819,9 @@ class MockAPIs(_Config):
         # Processing section *apis*
         mocked_apis_info = data.get("apis", {})
         self.apis = {}
-        for mock_api_name in mocked_apis_info.keys():
-            self.apis[mock_api_name] = MockAPI().deserialize(data=mocked_apis_info.get(mock_api_name, None))
+        if mocked_apis_info:
+            for mock_api_name in mocked_apis_info.keys():
+                self.apis[mock_api_name] = MockAPI().deserialize(data=mocked_apis_info.get(mock_api_name, None))
         return self
 
     def get_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Optional[MockAPI]:
