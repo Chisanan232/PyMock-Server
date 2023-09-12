@@ -2,7 +2,7 @@
 
 content ...
 """
-from abc import ABCMeta, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -102,6 +102,38 @@ class BaseConfig(_Config):
         """
         self.url = data.get("url", None)
         return self
+
+
+@dataclass(eq=False)
+class TemplateSetting(_Config, ABC):
+    base_file_path: str = "./"
+    config_path: str = field(default_factory=str)
+    config_path_format: str = field(default_factory=str)
+
+    def _compare(self, other: "TemplateSetting") -> bool:
+        return (
+            self.base_file_path == other.base_file_path
+            and self.config_path == other.config_path
+            and self.config_path_format == other.config_path_format
+        )
+
+    def serialize(self, data: Optional["TemplateSetting"] = None) -> Optional[Dict[str, Any]]:
+        return {
+            "base_file_path": self.base_file_path,
+            "config_path": self.config_path,
+            "config_path_format": self.config_path_format,
+        }
+
+    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateSetting"]:
+        self.base_file_path = data.get("config_path_format", "./")
+        self.config_path = data.get("config_path", "")
+        self.config_path_format = data.get("config_path_format", self._default_config_path_format)
+        return self
+
+    @property
+    @abstractmethod
+    def _default_config_path_format(self) -> str:
+        pass
 
 
 @dataclass(eq=False)
