@@ -1,4 +1,5 @@
 mocked_apis:
-  google_home:
-    url: '/google'
-    http:
+  apis:
+    google_home:
+      url: '/google'
+      http:

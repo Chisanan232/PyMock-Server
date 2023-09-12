@@ -289,13 +289,15 @@ _Foo_Object_Value: dict = {
 
 _Mocked_APIs: dict = {
     "base": {"url": _Base_URL},
-    "google_home": _Google_Home_Value,
-    "post_google_home": _Post_Google_Home_Value,
-    "put_google_home": _Put_Google_Home_Value,
-    "delete_google_home": _Delete_Google_Home_Value,
-    "test_home": _Test_Home,
-    "youtube_home": _YouTube_Home_Value,
-    "foo_object": _Foo_Object_Value,
+    "apis": {
+        "google_home": _Google_Home_Value,
+        "post_google_home": _Post_Google_Home_Value,
+        "put_google_home": _Put_Google_Home_Value,
+        "delete_google_home": _Delete_Google_Home_Value,
+        "test_home": _Test_Home,
+        "youtube_home": _YouTube_Home_Value,
+        "foo_object": _Foo_Object_Value,
+    },
 }
 
 _Test_Config_Value: dict = {
@@ -315,7 +317,7 @@ class _TestConfig:
     Http: dict = {"request": Request, "response": Response}
     Mock_API: dict = {"url": _Test_URL, "http": Http, "tag": _Test_Tag}
     Base: dict = {"url": _Base_URL}
-    Mock_APIs: dict = {"base": Base, "test_config": Mock_API}
+    Mock_APIs: dict = {"base": Base, "apis": {"test_config": Mock_API}}
     API_Config: dict = {
         "name": _Config_Name,
         "description": _Config_Description,

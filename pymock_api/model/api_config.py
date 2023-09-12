@@ -739,11 +739,19 @@ class MockAPIs(_Config):
         apis = (data.apis if data else None) or self.apis
         if not (base and apis):
             return None
-        api_info = {
+
+        # Process section *base*
+        api_info = {  # type: ignore[var-annotated]
             "base": BaseConfig().serialize(data=base),
+            "apis": {},
         }
+
+        # Process section *apis*
+        all_mocked_apis = {}
         for api_name, api_config in apis.items():
-            api_info[api_name] = MockAPI().serialize(data=api_config)
+            all_mocked_apis[api_name] = MockAPI().serialize(data=api_config)
+        api_info["apis"] = all_mocked_apis
+
         return api_info
 
     @_Config._ensure_process_with_not_empty_value
@@ -757,41 +765,43 @@ class MockAPIs(_Config):
 
             {
                 'base': {'url': '/test/v1'},
-                'google_home': {
-                    'url': '/google',
-                    'http': {
-                        'request': {
-                            'method': 'GET',
-                            'parameters': [{'param1': 'val1'}]
-                        },
-                        'response': {
-                            'value': 'This is Google home API.'
+                'apis': {
+                    'google_home': {
+                        'url': '/google',
+                        'http': {
+                            'request': {
+                                'method': 'GET',
+                                'parameters': [{'param1': 'val1'}]
+                            },
+                            'response': {
+                                'value': 'This is Google home API.'
+                            }
                         }
+                    },
+                    'test_home': {
+                        'url': '/google',
+                        'http': {
+                            'request': {
+                                'method': 'GET',
+                                'parameters': [{'param1': 'val1'}]
+                            },
+                            'response': {
+                                'value': '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }'
+                            }
+                        },
+                        'cookie': [{'TEST': 'cookie_value'}]
+                    },
+                    'youtube_home': {
+                        'url': '/youtube',
+                        'http': {
+                            'request': {
+                                'method': 'GET',
+                                'parameters': [{'param1': 'val1'}]
+                            },
+                            'response': {'value': 'youtube.json'}
+                        },
+                        'cookie': [{'USERNAME': 'test'}, {'SESSION_EXPIRED': '2023-12-31T00:00:00.000'}]
                     }
-                },
-                'test_home': {
-                    'url': '/google',
-                    'http': {
-                        'request': {
-                            'method': 'GET',
-                            'parameters': [{'param1': 'val1'}]
-                        },
-                        'response': {
-                            'value': '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }'
-                        }
-                    },
-                    'cookie': [{'TEST': 'cookie_value'}]
-                },
-                'youtube_home': {
-                    'url': '/youtube',
-                    'http': {
-                        'request': {
-                            'method': 'GET',
-                            'parameters': [{'param1': 'val1'}]
-                        },
-                        'response': {'value': 'youtube.json'}
-                    },
-                    'cookie': [{'USERNAME': 'test'}, {'SESSION_EXPIRED': '2023-12-31T00:00:00.000'}]
                 }
             }
 
@@ -802,13 +812,16 @@ class MockAPIs(_Config):
             A **MockAPIs** type object.
 
         """
+        # Processing section *base*
         base_info = data.get("base", None)
         self.base = BaseConfig().deserialize(data=base_info)
+
+        # Processing section *apis*
+        mocked_apis_info = data.get("apis", {})
         self.apis = {}
-        for mock_api_name in data.keys():
-            if mock_api_name == "base":
-                continue
-            self.apis[mock_api_name] = MockAPI().deserialize(data=data.get(mock_api_name, None))
+        if mocked_apis_info:
+            for mock_api_name in mocked_apis_info.keys():
+                self.apis[mock_api_name] = MockAPI().deserialize(data=mocked_apis_info.get(mock_api_name, None))
         return self
 
     def get_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Optional[MockAPI]:
@@ -922,43 +935,45 @@ class APIConfig(_Config):
                 'description': 'This is a test for the usage demonstration.',
                 'mocked_apis': {
                     'base': {'url': '/test/v1'},
-                    'google_home': {
-                        'url': '/google',
-                        'http': {
-                            'request': {
-                                'method': 'GET',
-                                'parameters': [{'param1': 'val1'}]
-                            },
-                            'response': {
-                                'value': 'This is Google home API.'
+                    'apis': {
+                        'google_home': {
+                            'url': '/google',
+                            'http': {
+                                'request': {
+                                    'method': 'GET',
+                                    'parameters': [{'param1': 'val1'}]
+                                },
+                                'response': {
+                                    'value': 'This is Google home API.'
+                                }
                             }
+                        },
+                        'test_home': {
+                            'url': '/google',
+                            'http': {
+                                'request': {
+                                    'method': 'GET',
+                                    'parameters': [{'param1': 'val1'}]
+                                },
+                                'response': {
+                                    'value': '{
+                                        "responseCode": "200", "errorMessage": "OK", "content": "This is Test home."
+                                    }'
+                                }
+                            },
+                            'cookie': [{'TEST': 'cookie_value'}]
+                        },
+                        'youtube_home': {
+                            'url': '/youtube',
+                            'http': {
+                                'request': {
+                                    'method': 'GET',
+                                    'parameters': [{'param1': 'val1'}]
+                                },
+                                'response': {'value': 'youtube.json'}
+                            },
+                            'cookie': [{'USERNAME': 'test'}, {'SESSION_EXPIRED': '2023-12-31T00:00:00.000'}]
                         }
-                    },
-                    'test_home': {
-                        'url': '/google',
-                        'http': {
-                            'request': {
-                                'method': 'GET',
-                                'parameters': [{'param1': 'val1'}]
-                            },
-                            'response': {
-                                'value': '{
-                                    "responseCode": "200", "errorMessage": "OK", "content": "This is Test home."
-                                }'
-                            }
-                        },
-                        'cookie': [{'TEST': 'cookie_value'}]
-                    },
-                    'youtube_home': {
-                        'url': '/youtube',
-                        'http': {
-                            'request': {
-                                'method': 'GET',
-                                'parameters': [{'param1': 'val1'}]
-                            },
-                            'response': {'value': 'youtube.json'}
-                        },
-                        'cookie': [{'USERNAME': 'test'}, {'SESSION_EXPIRED': '2023-12-31T00:00:00.000'}]
                     }
                 }
             }

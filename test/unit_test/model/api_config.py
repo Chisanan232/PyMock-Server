@@ -212,7 +212,9 @@ class TestAPIConfig(ConfigTestSpec):
         assert sut.name == _Config_Name, _assertion_msg
         assert sut.description == _Config_Description, _assertion_msg
         assert sut.apis.base.url == _TestConfig.API_Config.get("mocked_apis").get("base").get("url"), _assertion_msg
-        assert list(sut.apis.apis.keys())[0] in _TestConfig.API_Config.get("mocked_apis").keys(), _assertion_msg
+        assert (
+            list(sut.apis.apis.keys())[0] in _TestConfig.API_Config.get("mocked_apis").get("apis").keys()
+        ), _assertion_msg
 
     @pytest.mark.parametrize(
         ("setting_val", "should_call_deserialize"),
@@ -255,7 +257,9 @@ class TestAPIConfig(ConfigTestSpec):
         assert obj.name == _Config_Name
         assert obj.description == _Config_Description
         assert obj.apis.base.url == _TestConfig.API_Config.get("mocked_apis").get("base").get("url")
-        assert list(obj.apis.apis.keys())[0] in _TestConfig.API_Config.get("mocked_apis").keys(), _assertion_msg
+        assert (
+            list(obj.apis.apis.keys())[0] in _TestConfig.API_Config.get("mocked_apis").get("apis").keys()
+        ), _assertion_msg
 
     @patch("pymock_api._utils.file_opt.YAML.read", return_value=_TestConfig.API_Config)
     def test_from_yaml_file(self, mock_read_yaml: Mock, sut: APIConfig):
@@ -378,7 +382,7 @@ class TestMockAPIs(ConfigTestSpec):
         "test_data",
         [
             {"base": "base_info"},
-            {"base": "base_info", "api_name": "api_info"},
+            {"base": "base_info", "apis": {"api_name": "api_info"}},
         ],
     )
     @patch.object(MockAPI, "deserialize", return_value=None)
