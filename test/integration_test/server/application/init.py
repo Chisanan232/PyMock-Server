@@ -124,16 +124,7 @@ class MockHTTPServerTestSpec:
                 request_params = {
                     "headers": {"Content-Type": "application/json"},
                 }
-        # TODO: Remove here code if done troubleshooting
-        import flask
-
-        if isinstance(client, flask.testing.FlaskClient) and http_method.upper() == "DELETE":
-            print(f"[DEBUG in test] run flask test client with delete")
-            # response = client.delete(url, headers={"Content-Type": "application/x-www-form-urlencoded"})
-            response = client.delete(url, headers={"accept": "application/json"})
-        else:
-            print(f"[DEBUG in test] request_params: {request_params}")
-            response = getattr(client, http_method.lower())(url, **request_params)
+        response = getattr(client, http_method.lower())(url, **request_params)
         under_test_http_resp = self._deserialize_response(response)
 
         # Get the expected result data
