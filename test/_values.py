@@ -34,6 +34,27 @@ _Mock_API_HTTP: dict = {
     "response": Mock,
 }
 
+
+def generate_mock_template(tail_naming: str = "") -> dict:
+    return {
+        "base_file_path": "./",
+        "config_path": "",
+        "config_path_format": "{{ api.tag }}/{{ api.__name__ }}.yaml"
+        if not tail_naming
+        else ("{{ api.tag }}/{{ api.__name__ }}" + f"-{tail_naming}" + ".yaml"),
+    }
+
+
+_Mock_Template_API_Setting: dict = generate_mock_template()
+_Mock_Template_API_Request_Setting: dict = generate_mock_template("request")
+_Mock_Template_API_Response_Setting: dict = generate_mock_template("response")
+
+_Mock_Template_Setting: dict = {
+    "api": _Mock_Template_API_Setting,
+    "request": _Mock_Template_API_Request_Setting,
+    "response": _Mock_Template_API_Response_Setting,
+}
+
 # Sample item of iterator
 _Test_Iterable_Parameter_Item_Name: dict = {
     "name": "name",
@@ -288,6 +309,7 @@ _Foo_Object_Value: dict = {
 
 
 _Mocked_APIs: dict = {
+    "template": _Mock_Template_Setting,
     "base": {"url": _Base_URL},
     "apis": {
         "google_home": _Google_Home_Value,
@@ -317,7 +339,13 @@ class _TestConfig:
     Http: dict = {"request": Request, "response": Response}
     Mock_API: dict = {"url": _Test_URL, "http": Http, "tag": _Test_Tag}
     Base: dict = {"url": _Base_URL}
-    Mock_APIs: dict = {"base": Base, "apis": {"test_config": Mock_API}}
+    Mock_APIs: dict = {
+        "template": _Mock_Template_Setting,
+        "base": Base,
+        "apis": {
+            "test_config": Mock_API,
+        },
+    }
     API_Config: dict = {
         "name": _Config_Name,
         "description": _Config_Description,

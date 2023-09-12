@@ -1,7 +1,7 @@
 import random
 import re
-from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List, Optional, Union
+from abc import ABC, ABCMeta, abstractmethod
+from typing import Any, Dict, List, Optional, Type, Union
 from unittest.mock import Mock, patch
 
 import pytest
@@ -19,6 +19,10 @@ from pymock_api.model.api_config import (
     MockAPI,
     MockAPIs,
     ResponseProperty,
+    TemplateAPI,
+    TemplateRequest,
+    TemplateResponse,
+    TemplateSetting,
     _Config,
 )
 from pymock_api.model.enums import Format, ResponseStrategy
@@ -27,6 +31,9 @@ from ..._values import (
     _Base_URL,
     _Config_Description,
     _Config_Name,
+    _Mock_Template_API_Request_Setting,
+    _Mock_Template_API_Response_Setting,
+    _Mock_Template_API_Setting,
     _Test_API_Parameter,
     _Test_Config,
     _Test_HTTP_Resp,
@@ -469,6 +476,85 @@ class TestBaseConfig(ConfigTestSpec):
     def _expected_deserialize_value(self, obj: BaseConfig) -> None:
         assert isinstance(obj, BaseConfig)
         assert obj.url == _Base_URL
+
+
+class TemplateSettingTestSuite(ConfigTestSpec, ABC):
+    @property
+    @abstractmethod
+    def under_test_data(self) -> dict:
+        pass
+
+    @property
+    @abstractmethod
+    def sut_object(self) -> Type[TemplateSetting]:
+        pass
+
+    @pytest.fixture(scope="function")
+    def sut(self) -> TemplateSetting:
+        args = {
+            "base_file_path": self.under_test_data["base_file_path"],
+            "config_path": self.under_test_data["config_path"],
+            "config_path_format": self.under_test_data["config_path_format"],
+        }
+        return self.sut_object(**args)
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> TemplateSetting:
+        return self.sut_object()
+
+    def test_eq_operation_with_valid_object(self, sut: TemplateSetting, sut_with_nothing: TemplateSetting):
+        sut.base_file_path = "./tmp"
+        super().test_eq_operation_with_valid_object(sut, sut_with_nothing)
+
+    def test_serialize_with_none(self, sut_with_nothing: TemplateSetting):
+        assert sut_with_nothing.serialize() is not None
+        assert sut_with_nothing.base_file_path == "./"
+        assert sut_with_nothing.config_path == ""
+        assert sut_with_nothing.config_path_format == self.under_test_data["config_path_format"]
+
+    def test_value_attributes(self, sut: TemplateSetting):
+        assert sut.base_file_path == self.under_test_data["base_file_path"]
+        assert sut.config_path == self.under_test_data["config_path"]
+        assert sut.config_path_format == self.under_test_data["config_path_format"]
+
+    def _expected_serialize_value(self) -> dict:
+        return self.under_test_data
+
+    def _expected_deserialize_value(self, obj: TemplateSetting) -> None:
+        assert isinstance(obj, self.sut_object)
+        assert obj.base_file_path == self.under_test_data["base_file_path"]
+        assert obj.config_path == self.under_test_data["config_path"]
+        assert obj.config_path_format == self.under_test_data["config_path_format"]
+
+
+class TestTemplateAPI(TemplateSettingTestSuite):
+    @property
+    def under_test_data(self) -> dict:
+        return _Mock_Template_API_Setting
+
+    @property
+    def sut_object(self) -> Type[TemplateSetting]:
+        return TemplateAPI
+
+
+class TestTemplateRequest(TemplateSettingTestSuite):
+    @property
+    def under_test_data(self) -> dict:
+        return _Mock_Template_API_Request_Setting
+
+    @property
+    def sut_object(self) -> Type[TemplateSetting]:
+        return TemplateRequest
+
+
+class TestTemplateResponse(TemplateSettingTestSuite):
+    @property
+    def under_test_data(self) -> dict:
+        return _Mock_Template_API_Response_Setting
+
+    @property
+    def sut_object(self) -> Type[TemplateSetting]:
+        return TemplateResponse
 
 
 class TestMockAPI(ConfigTestSpec):
