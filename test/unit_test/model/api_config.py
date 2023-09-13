@@ -736,6 +736,12 @@ class TestTemplateApply(ConfigTestSpec):
         assert obj.scan_strategy.value == _Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy")
         assert obj.api == _Mock_Template_Apply_Has_Tag_Setting.get("api")
 
+    def test_serialize_with_invalid_scan_strategy(self, sut_with_nothing: TemplateApply):
+        with pytest.raises(ValueError) as exc_info:
+            sut_with_nothing.scan_strategy = "invalid strategy"
+            sut_with_nothing.serialize()
+        assert re.search(r"", str(exc_info.value), re.IGNORECASE)
+
 
 class TestTemplateConfig(ConfigTestSpec):
     @pytest.fixture(scope="function")
