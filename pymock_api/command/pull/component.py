@@ -15,6 +15,8 @@ class SubCmdPullComponent(BaseSubCmdComponent):
         swagger_api_doc = self._get_swagger_config(swagger_url=f"http://{args.source}/")
         api_config = swagger_api_doc.to_api_config(base_url=args.base_url)
         print("Write the API configuration to file ...")
+        # TODO: Add command line option to control this setting
+        api_config.set_template_in_config = False
         self._file.write(path=args.config_path, config=api_config.serialize())
         print(f"All configuration has been writen in file '{args.config_path}'.")
 

@@ -885,6 +885,8 @@ class MockAPIs(_Config):
     _base: Optional[BaseConfig]
     _apis: Dict[str, Optional[MockAPI]]
 
+    _need_template_in_config: bool = True
+
     def __init__(
         self,
         template: Optional[TemplateConfig] = None,
@@ -954,6 +956,14 @@ class MockAPIs(_Config):
         else:
             self._apis = {}
 
+    @property
+    def set_template_in_config(self) -> bool:
+        return self._need_template_in_config
+
+    @set_template_in_config.setter
+    def set_template_in_config(self, _set: bool) -> None:
+        self._need_template_in_config = _set
+
     def serialize(self, data: Optional["MockAPIs"] = None) -> Optional[Dict[str, Any]]:
         template = (data.template if data else None) or self.template
         base = (data.base if data else None) or self.base
@@ -963,10 +973,11 @@ class MockAPIs(_Config):
 
         # Process section *base*
         api_info = {  # type: ignore[var-annotated]
-            "template": template.serialize(),
             "base": BaseConfig().serialize(data=base),
             "apis": {},
         }
+        if self._need_template_in_config:
+            api_info["template"] = template.serialize()
 
         # Process section *apis*
         all_mocked_apis = {}
@@ -1036,6 +1047,8 @@ class MockAPIs(_Config):
         """
         # Processing section *template*
         template_info = data.get("template", {})
+        if not template_info:
+            self._need_template_in_config = False
         self.template = TemplateConfig().deserialize(data=template_info)
 
         # Processing section *base*
@@ -1084,6 +1097,7 @@ class APIConfig(_Config):
     _apis: Optional[MockAPIs]
 
     _configuration: _BaseFileOperation = YAML()
+    _need_template_in_config: bool = True
 
     def __init__(self, name: str = "", description: str = "", apis: Optional[MockAPIs] = None):
         self._name = name
@@ -1135,16 +1149,25 @@ class APIConfig(_Config):
         else:
             self._apis = None
 
+    @property
+    def set_template_in_config(self) -> bool:
+        return self._need_template_in_config
+
+    @set_template_in_config.setter
+    def set_template_in_config(self, _set: bool) -> None:
+        self._need_template_in_config = _set
+
     def serialize(self, data: Optional["APIConfig"] = None) -> Optional[Dict[str, Any]]:
         name = (data.name if data else None) or self.name
         description = (data.description if data else None) or self.description
         apis = (data.apis if data else None) or self.apis
         if not apis:
             return None
+        apis.set_template_in_config = self.set_template_in_config
         return {
             "name": name,
             "description": description,
-            "mocked_apis": MockAPIs().serialize(data=apis),
+            "mocked_apis": apis.serialize(),
         }
 
     @_Config._ensure_process_with_not_empty_value
@@ -1215,7 +1238,9 @@ class APIConfig(_Config):
         self.description = data.get("description", None)
         mocked_apis = data.get("mocked_apis", None)
         if mocked_apis:
-            self.apis = MockAPIs().deserialize(data=mocked_apis)
+            mock_apis_data_model = MockAPIs()
+            mock_apis_data_model.set_template_in_config = self.set_template_in_config
+            self.apis = mock_apis_data_model.deserialize(data=mocked_apis)
         return self
 
     def from_yaml(self, path: str) -> Optional["APIConfig"]:

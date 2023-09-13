@@ -910,24 +910,11 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
 
                 # Run one core logic of target function
                 print(f"[DEBUG in test] run one core logic of target function")
-                debug_swagger_api_config = deserialize_swagger_api_config(swagger_json_data)
-                print(f"[DEBUG in test] debug_swagger_api_config: {debug_swagger_api_config}")
-                debug_api_config = debug_swagger_api_config.to_api_config(mock_parser_arg.base_url)
-                print(f"[DEBUG in test] debug_api_config: {debug_api_config}")
-                print(f"[DEBUG in test] debug_api_config.apis.apis: {debug_api_config.apis.apis}")
-                print(f"[DEBUG in test] debug_api_config.apis.apis['get_foo']: {debug_api_config.apis.apis['get_foo']}")
-                print(
-                    f"[DEBUG in test] debug_api_config.apis.apis['get_foo'].http.request: {debug_api_config.apis.apis['get_foo'].http.request}"
+                confirm_expected_api_config = deserialize_swagger_api_config(swagger_json_data).to_api_config(
+                    mock_parser_arg.base_url
                 )
-                print(
-                    f"[DEBUG in test] debug_api_config.apis.apis['get_foo'].http.response: {debug_api_config.apis.apis['get_foo'].http.response}"
-                )
-                print(f"[DEBUG in test] debug_api_config.serialize(): {debug_api_config.serialize()}")
-                confirm_expected_config_data = (
-                    deserialize_swagger_api_config(swagger_json_data)
-                    .to_api_config(mock_parser_arg.base_url)
-                    .serialize()
-                )
+                confirm_expected_api_config.set_template_in_config = False
+                confirm_expected_config_data = confirm_expected_api_config.serialize()
                 print(f"[DEBUG in test] expected_config_data: {expected_config_data}")
                 print(f"[DEBUG in test] confirm_expected_config_data: {confirm_expected_config_data}")
                 assert expected_config_data["name"] == confirm_expected_config_data["name"]
