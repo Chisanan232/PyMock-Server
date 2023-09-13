@@ -27,6 +27,7 @@ from pymock_api.model.api_config import (
     TemplateSetting,
     TemplateValues,
     _Config,
+    _TemplatableConfig,
 )
 from pymock_api.model.enums import Format, ResponseStrategy, TemplateApplyScanStrategy
 
@@ -34,6 +35,7 @@ from ..._values import (
     _Base_URL,
     _Config_Description,
     _Config_Name,
+    _Mock_Templatable_Setting,
     _Mock_Template_API_Request_Setting,
     _Mock_Template_API_Response_Setting,
     _Mock_Template_API_Setting,
@@ -223,6 +225,37 @@ class ConfigTestSpec(metaclass=ABCMeta):
 
     def test_deserialize_with_invalid_data(self, sut_with_nothing: _Config):
         assert sut_with_nothing.deserialize(data={}) == {}
+
+
+class TemplatableConfigTestSuite(ConfigTestSpec, ABC):
+    def test_apply_template_props_default_value(self, sut: _TemplatableConfig):
+        assert sut.apply_template_props is True
+
+    def test_apply_template_props_should_be_serialize_if_has_in_config(self, sut_with_nothing: _TemplatableConfig):
+        # Given data
+        has_prop_apply_template_props = self._expected_serialize_value().copy()
+        has_prop_apply_template_props.update(_Mock_Templatable_Setting)
+
+        # Run target function
+        deserialized_sut = sut_with_nothing.deserialize(has_prop_apply_template_props)
+        serialized_sut = deserialized_sut.serialize()
+
+        # Verify
+        assert serialized_sut.get("apply_template_props", None) is not None
+        assert serialized_sut["apply_template_props"] is _Mock_Templatable_Setting["apply_template_props"]
+
+    def test_apply_template_props_should_not_be_serialize_if_not_has_in_config(
+        self, sut_with_nothing: _TemplatableConfig
+    ):
+        # Given data
+        not_has_prop_apply_template_props = self._expected_serialize_value().copy()
+
+        # Run target function
+        deserialized_sut = sut_with_nothing.deserialize(not_has_prop_apply_template_props)
+        serialized_sut = deserialized_sut.serialize()
+
+        # Verify
+        assert serialized_sut.get("apply_template_props", None) is None
 
 
 class TestAPIConfig(ConfigTestSpec):
@@ -689,7 +722,7 @@ class TestTemplateConfig(ConfigTestSpec):
         assert obj.apply.serialize() == _Mock_Template_Setting.get("apply")
 
 
-class TestMockAPI(ConfigTestSpec):
+class TestMockAPI(TemplatableConfigTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> MockAPI:
         return MockAPI(url=_Test_URL, http=self._Mock_Model.http, tag=_Test_Tag)
@@ -911,7 +944,7 @@ class TestMockAPI(ConfigTestSpec):
         assert re.search(r".{0,32}invalid response strategy.{0,32}", str(exc_info.value), re.IGNORECASE)
 
 
-class TestHTTP(ConfigTestSpec):
+class TestHTTP(TemplatableConfigTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> HTTP:
         return HTTP(request=self._Mock_Model.http_request, response=self._Mock_Model.http_response)
@@ -998,7 +1031,7 @@ class TestHTTP(ConfigTestSpec):
         assert obj.response.value == _TestConfig.Response.get("value", None)
 
 
-class TestHTTPReqeust(ConfigTestSpec):
+class TestHTTPReqeust(TemplatableConfigTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> HTTPRequest:
         return HTTPRequest(method=_TestConfig.Request.get("method", None), parameters=[self._Mock_Model.api_parameter])
@@ -1207,7 +1240,7 @@ class TestResponseProperty(ConfigTestSpec):
         )
 
 
-class TestHTTPResponse(ConfigTestSpec):
+class TestHTTPResponse(TemplatableConfigTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> HTTPResponse:
         return HTTPResponse(strategy=ResponseStrategy.STRING, value=_Test_HTTP_Resp)

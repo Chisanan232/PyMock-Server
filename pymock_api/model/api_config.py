@@ -62,6 +62,33 @@ class _Config(metaclass=ABCMeta):
 
 
 @dataclass(eq=False)
+class _TemplatableConfig(_Config, ABC):
+    apply_template_props: bool = True
+
+    _has_apply_template_props_in_config: bool = False
+
+    def _compare(self, other: SelfType) -> bool:
+        return self.apply_template_props == other.apply_template_props
+
+    def serialize(self, data: Optional[SelfType] = None) -> Optional[Dict[str, Any]]:
+        apply_template_props: bool = self._get_prop(data, prop="apply_template_props")
+        if self._has_apply_template_props_in_config:
+            return {
+                "apply_template_props": apply_template_props,
+            }
+        else:
+            return {}
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional[SelfType]:
+        apply_template_props = data.get("apply_template_props", None)
+        if apply_template_props is not None:
+            self._has_apply_template_props_in_config = True
+            self.apply_template_props = apply_template_props
+        return self
+
+
+@dataclass(eq=False)
 class BaseConfig(_Config):
     """*The **base** section in **mocked_apis***"""
 
@@ -340,14 +367,15 @@ class APIParameter(_Config):
 
 
 @dataclass(eq=False)
-class HTTPRequest(_Config):
+class HTTPRequest(_TemplatableConfig):
     """*The **http.request** section in **mocked_apis.<api>***"""
 
     method: str = field(default_factory=str)
     parameters: List[APIParameter] = field(default_factory=list)
 
     def _compare(self, other: "HTTPRequest") -> bool:
-        return self.method == other.method and self.parameters == other.parameters
+        templatable_config = super()._compare(other)
+        return templatable_config and self.method == other.method and self.parameters == other.parameters
 
     def serialize(self, data: Optional["HTTPRequest"] = None) -> Optional[Dict[str, Any]]:
         method: str = self._get_prop(data, prop="method")
@@ -355,10 +383,15 @@ class HTTPRequest(_Config):
         parameters = [param.serialize() for param in (all_parameters or [])]
         if not (method and parameters):
             return None
-        return {
-            "method": method,
-            "parameters": parameters,
-        }
+        serialized_data = super().serialize(data)
+        assert serialized_data is not None
+        serialized_data.update(
+            {
+                "method": method,
+                "parameters": parameters,
+            }
+        )
+        return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["HTTPRequest"]:
@@ -383,6 +416,7 @@ class HTTPRequest(_Config):
             A **HTTPRequest** type object.
 
         """
+        super().deserialize(data)
         self.method = data.get("method", None)
         parameters: List[dict] = data.get("parameters", None)
         if parameters and not isinstance(parameters, list):
@@ -458,7 +492,7 @@ class ResponseProperty(_Config):
 
 
 @dataclass(eq=False)
-class HTTPResponse(_Config):
+class HTTPResponse(_TemplatableConfig):
     """*The **http.response** section in **mocked_apis.<api>***"""
 
     strategy: Optional[ResponseStrategy] = None
@@ -479,16 +513,17 @@ class HTTPResponse(_Config):
     properties: List[ResponseProperty] = field(default_factory=list)
 
     def _compare(self, other: "HTTPResponse") -> bool:
+        templatable_config = super()._compare(other)
         if not self.strategy:
             raise ValueError("Miss necessary argument *strategy*.")
         if self.strategy is not other.strategy:
             raise TypeError("Different HTTP response strategy cannot compare with each other.")
         if ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.STRING:
-            return self.value == other.value
+            return templatable_config and self.value == other.value
         elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.FILE:
-            return self.path == other.path
+            return templatable_config and self.path == other.path
         elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.OBJECT:
-            return self.properties == other.properties
+            return templatable_config and self.properties == other.properties
         else:
             raise NotImplementedError
 
@@ -508,28 +543,39 @@ class HTTPResponse(_Config):
         self.properties = [ResponseProperty().deserialize(i) if isinstance(i, dict) else i for i in self.properties]
 
     def serialize(self, data: Optional["HTTPResponse"] = None) -> Optional[Dict[str, Any]]:
+        serialized_data = super().serialize(data)
+        assert serialized_data is not None
         strategy: ResponseStrategy = self.strategy or ResponseStrategy.to_enum(self._get_prop(data, prop="strategy"))
         if not strategy:
             raise ValueError("Necessary argument *strategy* is missing.")
         if strategy is ResponseStrategy.STRING:
             value: str = self._get_prop(data, prop="value")
-            return {
-                "strategy": strategy.value,
-                "value": value,
-            }
+            serialized_data.update(
+                {
+                    "strategy": strategy.value,
+                    "value": value,
+                }
+            )
+            return serialized_data
         elif strategy is ResponseStrategy.FILE:
             path: str = self._get_prop(data, prop="path")
-            return {
-                "strategy": strategy.value,
-                "path": path,
-            }
+            serialized_data.update(
+                {
+                    "strategy": strategy.value,
+                    "path": path,
+                }
+            )
+            return serialized_data
         elif strategy is ResponseStrategy.OBJECT:
             all_properties = (data or self).properties if (data and data.properties) or self.properties else None
             properties = [prop.serialize() for prop in (all_properties or [])]
-            return {
-                "strategy": strategy.value,
-                "properties": properties,
-            }
+            serialized_data.update(
+                {
+                    "strategy": strategy.value,
+                    "properties": properties,
+                }
+            )
+            return serialized_data
         else:
             raise NotImplementedError
 
@@ -555,6 +601,7 @@ class HTTPResponse(_Config):
             A **HTTPResponse** type object.
 
         """
+        super().deserialize(data)
         self.strategy = ResponseStrategy.to_enum(data.get("strategy", None))
         if not self.strategy:
             raise ValueError("Schema key *strategy* cannot be empty.")
@@ -570,7 +617,7 @@ class HTTPResponse(_Config):
         return self
 
 
-class HTTP(_Config):
+class HTTP(_TemplatableConfig):
     """*The **http** section in **mocked_apis.<api>***"""
 
     _request: Optional[HTTPRequest]
@@ -581,7 +628,8 @@ class HTTP(_Config):
         self._response = response
 
     def _compare(self, other: "HTTP") -> bool:
-        return self.request == other.request and self.response == other.response
+        templatable_config = super()._compare(other)
+        return templatable_config and self.request == other.request and self.response == other.response
 
     @property
     def request(self) -> Optional[HTTPRequest]:
@@ -621,10 +669,15 @@ class HTTP(_Config):
         if not (req and resp):
             return None
 
-        return {
-            "request": req,
-            "response": resp,
-        }
+        serialized_data = super().serialize(data)
+        assert serialized_data is not None
+        serialized_data.update(
+            {
+                "request": req,
+                "response": resp,
+            }
+        )
+        return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["HTTP"]:
@@ -654,6 +707,7 @@ class HTTP(_Config):
             A **HTTP** type object.
 
         """
+        super().deserialize(data)
         req = data.get("request", None)
         resp = data.get("response", None)
         self.request = HTTPRequest().deserialize(data=req) if req else None
@@ -661,7 +715,7 @@ class HTTP(_Config):
         return self
 
 
-class MockAPI(_Config):
+class MockAPI(_TemplatableConfig):
     """*The **<api>** section in **mocked_apis***"""
 
     _url: Optional[str]
@@ -674,7 +728,8 @@ class MockAPI(_Config):
         self._tag = tag
 
     def _compare(self, other: "MockAPI") -> bool:
-        return self.url == other.url and self.http == other.http
+        templatable_config = super()._compare(other)
+        return templatable_config and self.url == other.url and self.http == other.http
 
     @property
     def url(self) -> Optional[str]:
@@ -716,11 +771,16 @@ class MockAPI(_Config):
         if not (url and http):
             return None
         tag = (data.tag if data else None) or self.tag
-        return {
-            "url": url,
-            "http": http.serialize(data=http),
-            "tag": tag,
-        }
+        serialized_data = super().serialize(data)
+        assert serialized_data is not None
+        serialized_data.update(
+            {
+                "url": url,
+                "http": http.serialize(data=http),
+                "tag": tag,
+            }
+        )
+        return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["MockAPI"]:
@@ -753,6 +813,7 @@ class MockAPI(_Config):
             A **MockAPI** type object.
 
         """
+        super().deserialize(data)
         self.url = data.get("url", None)
         http_info = data.get("http", None)
         self.http = HTTP().deserialize(data=http_info) if http_info else None

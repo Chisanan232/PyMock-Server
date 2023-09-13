@@ -81,6 +81,10 @@ _Mock_Template_Setting: dict = {
     "apply": _Mock_Template_Apply_Has_Tag_Setting,
 }
 
+_Mock_Templatable_Setting: dict = {
+    "apply_template_props": False,
+}
+
 
 # Sample item of iterator
 _Test_Iterable_Parameter_Item_Name: dict = {
