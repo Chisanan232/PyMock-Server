@@ -24,6 +24,7 @@ from pymock_api.model.api_config import (
     TemplateRequest,
     TemplateResponse,
     TemplateSetting,
+    TemplateValues,
     _Config,
 )
 from pymock_api.model.enums import Format, ResponseStrategy
@@ -36,6 +37,7 @@ from ..._values import (
     _Mock_Template_API_Response_Setting,
     _Mock_Template_API_Setting,
     _Mock_Template_Apply_Has_Tag_Setting,
+    _Mock_Template_Values_Setting,
     _Test_API_Parameter,
     _Test_Config,
     _Test_HTTP_Resp,
@@ -96,6 +98,24 @@ class MockModel:
     @property
     def mock_apis(self) -> MockAPIs:
         return MockAPIs(base=self.base_config, apis=self.mock_api)
+
+    @property
+    def template_values_api(self) -> TemplateAPI:
+        return TemplateAPI()
+
+    @property
+    def template_values_request(self) -> TemplateRequest:
+        return TemplateRequest()
+
+    @property
+    def template_values_response(self) -> TemplateResponse:
+        return TemplateResponse()
+
+    @property
+    def template_values(self) -> TemplateValues:
+        return TemplateValues(
+            api=self.template_values_api, request=self.template_values_request, response=self.template_values_response
+        )
 
     @property
     def base_config(self) -> BaseConfig:
@@ -588,6 +608,40 @@ class TestTemplateApply(ConfigTestSpec):
         assert isinstance(obj, TemplateApply)
         assert obj.scan_strategy.value == _Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy")
         assert obj.api == _Mock_Template_Apply_Has_Tag_Setting.get("api")
+
+
+class TestTemplateValues(ConfigTestSpec):
+    @pytest.fixture(scope="function")
+    def sut(self) -> TemplateValues:
+        return TemplateValues(
+            api=MOCK_MODEL.template_values_api,
+            request=MOCK_MODEL.template_values_request,
+            response=MOCK_MODEL.template_values_response,
+        )
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> TemplateValues:
+        return TemplateValues()
+
+    def test_value_attributes(self, sut: TemplateValues):
+        assert sut.api == MOCK_MODEL.template_values_api
+        assert sut.request == MOCK_MODEL.template_values_request
+        assert sut.response == MOCK_MODEL.template_values_response
+
+    def test_serialize_with_none(self, sut_with_nothing: TemplateValues):
+        sut_with_nothing.api = None
+        sut_with_nothing.request = None
+        sut_with_nothing.response = None
+        super().test_serialize_with_none(sut_with_nothing)
+
+    def _expected_serialize_value(self) -> dict:
+        return _Mock_Template_Values_Setting
+
+    def _expected_deserialize_value(self, obj: TemplateValues) -> None:
+        assert isinstance(obj, TemplateValues)
+        assert obj.api.serialize() == _Mock_Template_Values_Setting.get("api")
+        assert obj.request.serialize() == _Mock_Template_Values_Setting.get("request")
+        assert obj.response.serialize() == _Mock_Template_Values_Setting.get("response")
 
 
 class TestMockAPI(ConfigTestSpec):

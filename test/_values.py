@@ -49,10 +49,14 @@ _Mock_Template_API_Setting: dict = generate_mock_template()
 _Mock_Template_API_Request_Setting: dict = generate_mock_template("request")
 _Mock_Template_API_Response_Setting: dict = generate_mock_template("response")
 
-_Mock_Template_Setting: dict = {
+_Mock_Template_Values_Setting: dict = {
     "api": _Mock_Template_API_Setting,
     "request": _Mock_Template_API_Request_Setting,
     "response": _Mock_Template_API_Response_Setting,
+}
+
+_Mock_Template_Setting: dict = {
+    "values": _Mock_Template_Values_Setting,
 }
 
 _Mock_Template_Apply_Has_Tag_Setting: dict = {

@@ -191,6 +191,32 @@ class TemplateApply(_Config):
 
 
 @dataclass(eq=False)
+class TemplateValues(_Config):
+    api: TemplateAPI = TemplateAPI()
+    request: TemplateRequest = TemplateRequest()
+    response: TemplateResponse = TemplateResponse()
+
+    def _compare(self, other: "TemplateValues") -> bool:
+        return self.api is other.api and self.request == other.request and self.response == other.response
+
+    def serialize(self, data: Optional["TemplateValues"] = None) -> Optional[Dict[str, Any]]:
+        api = self.api or self._get_prop(data, prop="api")
+        request = self.request or self._get_prop(data, prop="request")
+        response = self.response or self._get_prop(data, prop="response")
+        if not (api and request and response):
+            # TODO: Should raise exception?
+            return None
+        return {"api": api.serialize(), "request": request.serialize(), "response": response.serialize()}
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateValues"]:
+        self.api = TemplateAPI().deserialize(data.get("api", {}))
+        self.request = TemplateRequest().deserialize(data.get("request", {}))
+        self.response = TemplateResponse().deserialize(data.get("response", {}))
+        return self
+
+
+@dataclass(eq=False)
 class IteratorItem(_Config):
     name: str = field(default_factory=str)
     required: Optional[bool] = None
