@@ -579,37 +579,6 @@ class TestTemplateResponse(TemplateSettingTestSuite):
         return TemplateResponse
 
 
-class TestTemplateApply(ConfigTestSpec):
-    @pytest.fixture(scope="function")
-    def sut(self) -> TemplateApply:
-        return TemplateApply(
-            scan_strategy=_Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy"),
-            api=_Mock_Template_Apply_Has_Tag_Setting.get("api"),
-        )
-
-    @pytest.fixture(scope="function")
-    def sut_with_nothing(self) -> TemplateApply:
-        return TemplateApply(scan_strategy=_Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy"))
-
-    def test_value_attributes(self, sut: TemplateApply):
-        assert sut.scan_strategy == _Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy")
-        assert sut.api == _Mock_Template_Apply_Has_Tag_Setting.get("api")
-
-    def test_serialize_with_none(self, sut_with_nothing: TemplateApply):
-        serialized_data = sut_with_nothing.serialize()
-        assert serialized_data is not None
-        assert serialized_data["scan_strategy"] == _Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy")
-        assert serialized_data["api"] == []
-
-    def _expected_serialize_value(self) -> dict:
-        return _Mock_Template_Apply_Has_Tag_Setting
-
-    def _expected_deserialize_value(self, obj: TemplateApply) -> None:
-        assert isinstance(obj, TemplateApply)
-        assert obj.scan_strategy.value == _Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy")
-        assert obj.api == _Mock_Template_Apply_Has_Tag_Setting.get("api")
-
-
 class TestTemplateValues(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> TemplateValues:
@@ -642,6 +611,37 @@ class TestTemplateValues(ConfigTestSpec):
         assert obj.api.serialize() == _Mock_Template_Values_Setting.get("api")
         assert obj.request.serialize() == _Mock_Template_Values_Setting.get("request")
         assert obj.response.serialize() == _Mock_Template_Values_Setting.get("response")
+
+
+class TestTemplateApply(ConfigTestSpec):
+    @pytest.fixture(scope="function")
+    def sut(self) -> TemplateApply:
+        return TemplateApply(
+            scan_strategy=_Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy"),
+            api=_Mock_Template_Apply_Has_Tag_Setting.get("api"),
+        )
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> TemplateApply:
+        return TemplateApply(scan_strategy=_Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy"))
+
+    def test_value_attributes(self, sut: TemplateApply):
+        assert sut.scan_strategy == _Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy")
+        assert sut.api == _Mock_Template_Apply_Has_Tag_Setting.get("api")
+
+    def test_serialize_with_none(self, sut_with_nothing: TemplateApply):
+        serialized_data = sut_with_nothing.serialize()
+        assert serialized_data is not None
+        assert serialized_data["scan_strategy"] == _Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy")
+        assert serialized_data["api"] == []
+
+    def _expected_serialize_value(self) -> dict:
+        return _Mock_Template_Apply_Has_Tag_Setting
+
+    def _expected_deserialize_value(self, obj: TemplateApply) -> None:
+        assert isinstance(obj, TemplateApply)
+        assert obj.scan_strategy.value == _Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy")
+        assert obj.api == _Mock_Template_Apply_Has_Tag_Setting.get("api")
 
 
 class TestMockAPI(ConfigTestSpec):
