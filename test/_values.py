@@ -55,10 +55,6 @@ _Mock_Template_Values_Setting: dict = {
     "response": _Mock_Template_API_Response_Setting,
 }
 
-_Mock_Template_Setting: dict = {
-    "values": _Mock_Template_Values_Setting,
-}
-
 _Mock_Template_Apply_Has_Tag_Setting: dict = {
     "scan_strategy": "file_name_first",
     "api": [
@@ -78,6 +74,12 @@ def generate_template_apply(scan_strategy: str, api: List) -> dict:
         "scan_strategy": scan_strategy,
         "api": api,
     }
+
+
+_Mock_Template_Setting: dict = {
+    "values": _Mock_Template_Values_Setting,
+    "apply": _Mock_Template_Apply_Has_Tag_Setting,
+}
 
 
 # Sample item of iterator

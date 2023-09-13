@@ -197,15 +197,15 @@ class TemplateApply(_Config):
         return self.scan_strategy is other.scan_strategy and self.api == other.api
 
     def serialize(self, data: Optional["TemplateApply"] = None) -> Optional[Dict[str, Any]]:
-        scan_strategy: TemplateApplyScanStrategy = self.scan_strategy or TemplateApplyScanStrategy.to_enum(
-            self._get_prop(data, prop="scan_strategy")
+        scan_strategy: TemplateApplyScanStrategy = TemplateApplyScanStrategy.to_enum(
+            self.scan_strategy or self._get_prop(data, prop="scan_strategy")
         )
         if not scan_strategy:
             raise ValueError("Necessary argument *scan_strategy* is missing.")
 
         api: str = self._get_prop(data, prop="api")
         return {
-            "scan_strategy": scan_strategy,
+            "scan_strategy": scan_strategy.value,
             "api": api,
         }
 
@@ -213,6 +213,32 @@ class TemplateApply(_Config):
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateApply"]:
         self.scan_strategy = TemplateApplyScanStrategy.to_enum(data.get("scan_strategy", None))
         self.api = data.get("api")  # type: ignore[assignment]
+        return self
+
+
+@dataclass(eq=False)
+class TemplateConfig(_Config):
+    values: TemplateValues = TemplateValues()
+    apply: TemplateApply = TemplateApply(scan_strategy=TemplateApplyScanStrategy.FILE_NAME_FIRST)
+
+    def _compare(self, other: "TemplateConfig") -> bool:
+        return self.values == other.values and self.apply == other.apply
+
+    def serialize(self, data: Optional["TemplateConfig"] = None) -> Optional[Dict[str, Any]]:
+        values: TemplateValues = self.values or self._get_prop(data, prop="values")
+        apply: TemplateApply = self.apply or self._get_prop(data, prop="apply")
+        if not (values and apply):
+            # TODO: Should it ranse an exception outside?
+            return None
+        return {
+            "values": values.serialize(),
+            "apply": apply.serialize(),
+        }
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfig"]:
+        self.values = TemplateValues().deserialize(data.get("values", {}))
+        self.apply = TemplateApply().deserialize(data.get("apply", {}))
         return self
 
 
