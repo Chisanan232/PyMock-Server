@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from .._utils.file_opt import JSON, YAML, _BaseFileOperation
-from ..model.enums import Format, ResponseStrategy
+from ..model.enums import Format, ResponseStrategy, TemplateApplyScanStrategy
 
 # The truly semantically is more near like following:
 #
@@ -160,6 +160,34 @@ class TemplateResponse(TemplateSetting):
     @property
     def _default_config_path_format(self) -> str:
         return "{{ api.tag }}/{{ api.__name__ }}-response.yaml"
+
+
+@dataclass(eq=False)
+class TemplateApply(_Config):
+    scan_strategy: Optional[TemplateApplyScanStrategy] = None
+    api: List[Union[str, Dict[str, List[str]]]] = field(default_factory=list)
+
+    def _compare(self, other: "TemplateApply") -> bool:
+        return self.scan_strategy is other.scan_strategy and self.api == other.api
+
+    def serialize(self, data: Optional["TemplateApply"] = None) -> Optional[Dict[str, Any]]:
+        scan_strategy: TemplateApplyScanStrategy = self.scan_strategy or TemplateApplyScanStrategy.to_enum(
+            self._get_prop(data, prop="scan_strategy")
+        )
+        if not scan_strategy:
+            raise ValueError("Necessary argument *scan_strategy* is missing.")
+
+        api: str = self._get_prop(data, prop="api")
+        return {
+            "scan_strategy": scan_strategy,
+            "api": api,
+        }
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateApply"]:
+        self.scan_strategy = TemplateApplyScanStrategy.to_enum(data.get("scan_strategy", None))
+        self.api = data.get("api")  # type: ignore[assignment]
+        return self
 
 
 @dataclass(eq=False)

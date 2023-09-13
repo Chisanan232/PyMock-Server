@@ -55,6 +55,27 @@ _Mock_Template_Setting: dict = {
     "response": _Mock_Template_API_Response_Setting,
 }
 
+_Mock_Template_Apply_Has_Tag_Setting: dict = {
+    "scan_strategy": "file_name_first",
+    "api": [
+        {"foo": ["get_foo", "put_foo"]},
+        {"foo-boo": ["get_foo-boo_export"]},
+    ],
+}
+
+_Mock_Template_Apply_No_Tag_Setting: dict = {
+    "scan_strategy": "file_name_first",
+    "api": ["get_foo", "put_foo"],
+}
+
+
+def generate_template_apply(scan_strategy: str, api: List) -> dict:
+    return {
+        "scan_strategy": scan_strategy,
+        "api": api,
+    }
+
+
 # Sample item of iterator
 _Test_Iterable_Parameter_Item_Name: dict = {
     "name": "name",
