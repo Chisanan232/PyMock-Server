@@ -196,7 +196,7 @@ class TemplateValues(_Config):
     response: TemplateResponse = TemplateResponse()
 
     def _compare(self, other: "TemplateValues") -> bool:
-        return self.api is other.api and self.request == other.request and self.response == other.response
+        return self.api == other.api and self.request == other.request and self.response == other.response
 
     def serialize(self, data: Optional["TemplateValues"] = None) -> Optional[Dict[str, Any]]:
         api = self.api or self._get_prop(data, prop="api")
@@ -881,10 +881,17 @@ class MockAPI(_TemplatableConfig):
 class MockAPIs(_Config):
     """*The **mocked_apis** section*"""
 
+    _template: TemplateConfig
     _base: Optional[BaseConfig]
     _apis: Dict[str, Optional[MockAPI]]
 
-    def __init__(self, base: Optional[BaseConfig] = None, apis: Dict[str, Optional[MockAPI]] = {}):
+    def __init__(
+        self,
+        template: Optional[TemplateConfig] = None,
+        base: Optional[BaseConfig] = None,
+        apis: Dict[str, Optional[MockAPI]] = {},
+    ):
+        self._template = TemplateConfig() if template is None else template
         self._base = base
         self._apis = apis
 
@@ -893,6 +900,20 @@ class MockAPIs(_Config):
 
     def _compare(self, other: "MockAPIs") -> bool:
         return self.base == other.base and self.apis == other.apis
+
+    @property
+    def template(self) -> TemplateConfig:
+        return self._template
+
+    @template.setter
+    def template(self, template: Union[dict, TemplateConfig]) -> None:
+        if template:
+            if isinstance(template, dict):
+                self._template = TemplateConfig().deserialize(data=template)
+            elif isinstance(template, TemplateConfig):
+                self._template = template
+            else:
+                raise TypeError("Setter *MockAPIs.template* only accepts dict or TemplateConfig type object.")
 
     @property
     def base(self) -> Optional[BaseConfig]:
@@ -934,6 +955,7 @@ class MockAPIs(_Config):
             self._apis = {}
 
     def serialize(self, data: Optional["MockAPIs"] = None) -> Optional[Dict[str, Any]]:
+        template = (data.template if data else None) or self.template
         base = (data.base if data else None) or self.base
         apis = (data.apis if data else None) or self.apis
         if not (base and apis):
@@ -941,6 +963,7 @@ class MockAPIs(_Config):
 
         # Process section *base*
         api_info = {  # type: ignore[var-annotated]
+            "template": template.serialize(),
             "base": BaseConfig().serialize(data=base),
             "apis": {},
         }
@@ -1011,6 +1034,10 @@ class MockAPIs(_Config):
             A **MockAPIs** type object.
 
         """
+        # Processing section *template*
+        template_info = data.get("template", {})
+        self.template = TemplateConfig().deserialize(data=template_info)
+
         # Processing section *base*
         base_info = data.get("base", None)
         self.base = BaseConfig().deserialize(data=base_info)

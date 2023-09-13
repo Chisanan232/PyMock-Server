@@ -101,7 +101,7 @@ def test_config_get_prop():
 class MockModel:
     @property
     def mock_apis(self) -> MockAPIs:
-        return MockAPIs(base=self.base_config, apis=self.mock_api)
+        return MockAPIs(template=self.template_config, base=self.base_config, apis=self.mock_api)
 
     @property
     def template_values_api(self) -> TemplateAPI:
@@ -270,7 +270,7 @@ class TestAPIConfig(ConfigTestSpec):
     def test___len___with_value(self, sut: APIConfig):
         sut.apis = _TestConfig.Mock_APIs
         assert len(sut) == len(
-            list(filter(lambda k: k != "base", _TestConfig.Mock_APIs.keys()))
+            list(filter(lambda k: k not in ["base", "template"], _TestConfig.Mock_APIs.keys()))
         ), "The size of *APIConfig* data object should be same as *MockAPIs* data object."
 
     def test___len___with_non_value(self):
@@ -300,7 +300,7 @@ class TestAPIConfig(ConfigTestSpec):
         ],
     )
     @patch.object(MockAPIs, "deserialize", return_value=MOCK_RETURN_VALUE)
-    def test_prop_apiswith_valid_obj(
+    def test_prop_apis_with_valid_obj(
         self,
         mock_deserialize: Mock,
         setting_val: Union[dict, BaseConfig],
@@ -354,7 +354,9 @@ class TestAPIConfig(ConfigTestSpec):
 class TestMockAPIs(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> MockAPIs:
-        return MockAPIs(base=self._Mock_Model.base_config, apis=self._Mock_Model.mock_api)
+        return MockAPIs(
+            template=MOCK_MODEL.template_config, base=self._Mock_Model.base_config, apis=self._Mock_Model.mock_api
+        )
 
     @pytest.fixture(scope="function")
     def sut_with_nothing(self) -> MockAPIs:
@@ -366,8 +368,42 @@ class TestMockAPIs(ConfigTestSpec):
         ), f"The size of *MockAPIs* data object should be same as object '{self._Mock_Model.mock_api}'."
 
     def test_value_attributes(self, sut: MockAPIs):
+        assert sut.template == MOCK_MODEL.template_config, _assertion_msg
         assert sut.base == self._Mock_Model.base_config, _assertion_msg
         assert sut.apis == self._Mock_Model.mock_api, _assertion_msg
+
+    @pytest.mark.parametrize(
+        ("setting_val", "should_call_deserialize"),
+        [
+            ({}, False),
+            ({"test": "test"}, True),
+            (TemplateConfig(), False),
+        ],
+    )
+    @patch.object(TemplateConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_template_with_valid_obj(
+        self,
+        mock_deserialize: Mock,
+        setting_val: Union[dict, TemplateConfig],
+        should_call_deserialize: bool,
+        sut_with_nothing: MockAPIs,
+    ):
+        # Run target function
+        sut_with_nothing.template = setting_val
+        # Verify the running result
+        if should_call_deserialize:
+            mock_deserialize.assert_called_once_with(data=setting_val)
+            assert sut_with_nothing.template == MOCK_RETURN_VALUE
+        else:
+            mock_deserialize.assert_not_called()
+            assert sut_with_nothing.template == TemplateConfig()
+
+    @patch.object(TemplateConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_template_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: MockAPIs):
+        with pytest.raises(TypeError) as exc_info:
+            sut_with_nothing.template = "Invalid object"
+        mock_deserialize.assert_not_called()
+        assert re.search(r"Setter .{1,32} only accepts .{1,32} type object.", str(exc_info.value), re.IGNORECASE)
 
     @pytest.mark.parametrize(
         ("setting_val", "should_call_deserialize"),
@@ -456,18 +492,25 @@ class TestMockAPIs(ConfigTestSpec):
     @pytest.mark.parametrize(
         "test_data",
         [
-            {"base": "base_info"},
-            {"base": "base_info", "apis": {"api_name": "api_info"}},
+            {"template": "template_setting", "base": "base_info"},
+            {"template": "template_setting", "base": "base_info", "apis": {"api_name": "api_info"}},
         ],
     )
     @patch.object(MockAPI, "deserialize", return_value=None)
     @patch.object(BaseConfig, "deserialize", return_value=None)
+    @patch.object(TemplateConfig, "deserialize", return_value=None)
     def test_deserialize_with_nonideal_value(
-        self, mock_deserialize_base: Mock, mock_deserialize_mock_api: Mock, test_data: dict, sut_with_nothing: MockAPIs
+        self,
+        mock_deserialize_template: Mock,
+        mock_deserialize_base: Mock,
+        mock_deserialize_mock_api: Mock,
+        test_data: dict,
+        sut_with_nothing: MockAPIs,
     ):
         assert sut_with_nothing.deserialize(data=test_data) is not None
+        mock_deserialize_template.assert_called_once_with(data="template_setting")
         mock_deserialize_base.assert_called_once_with(data="base_info")
-        if len(test_data.keys()) > 1:
+        if len(test_data.keys()) > 2:
             mock_deserialize_mock_api.assert_called_once_with(data="api_info")
         else:
             mock_deserialize_mock_api.assert_not_called()
@@ -637,6 +680,10 @@ class TestTemplateValues(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut_with_nothing(self) -> TemplateValues:
         return TemplateValues()
+
+    def test_eq_operation_with_valid_object(self, sut: _Config, sut_with_nothing: _Config):
+        # NOTE: TemplateConfig has default value
+        assert sut == sut_with_nothing
 
     def test_value_attributes(self, sut: TemplateValues):
         assert sut.api == MOCK_MODEL.template_values_api
