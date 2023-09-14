@@ -2,7 +2,7 @@ from collections import namedtuple
 from typing import Dict, List
 from unittest.mock import Mock
 
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.enums import ResponseStrategy, TemplateApplyScanStrategy
 
 
 class APIConfigValue:
@@ -55,8 +55,10 @@ _Mock_Template_Values_Setting: dict = {
     "response": _Mock_Template_API_Response_Setting,
 }
 
+_Mock_Template_Apply_Scan_Strategy: TemplateApplyScanStrategy = TemplateApplyScanStrategy.FILE_NAME_FIRST
+
 _Mock_Template_Apply_Has_Tag_Setting: dict = {
-    "scan_strategy": "file_name_first",
+    "scan_strategy": _Mock_Template_Apply_Scan_Strategy.value,
     "api": [
         {"foo": ["get_foo", "put_foo"]},
         {"foo-boo": ["get_foo-boo_export"]},
@@ -64,7 +66,7 @@ _Mock_Template_Apply_Has_Tag_Setting: dict = {
 }
 
 _Mock_Template_Apply_No_Tag_Setting: dict = {
-    "scan_strategy": "file_name_first",
+    "scan_strategy": _Mock_Template_Apply_Scan_Strategy.value,
     "api": ["get_foo", "put_foo"],
 }
 

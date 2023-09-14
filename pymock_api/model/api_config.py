@@ -224,11 +224,15 @@ class TemplateApply(_Config):
         return self.scan_strategy is other.scan_strategy and self.api == other.api
 
     def serialize(self, data: Optional["TemplateApply"] = None) -> Optional[Dict[str, Any]]:
-        scan_strategy: TemplateApplyScanStrategy = TemplateApplyScanStrategy.to_enum(
-            self.scan_strategy or self._get_prop(data, prop="scan_strategy")
+        scan_strategy: TemplateApplyScanStrategy = self.scan_strategy or TemplateApplyScanStrategy.to_enum(
+            self._get_prop(data, prop="scan_strategy")
         )
         if not scan_strategy:
             raise ValueError("Necessary argument *scan_strategy* is missing.")
+        if not isinstance(scan_strategy, TemplateApplyScanStrategy):
+            raise TypeError(
+                "Argument *scan_strategy* data type is invalid. It only accepts *TemplateApplyScanStrategy* type value."
+            )
 
         api: str = self._get_prop(data, prop="api")
         return {
@@ -239,6 +243,8 @@ class TemplateApply(_Config):
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateApply"]:
         self.scan_strategy = TemplateApplyScanStrategy.to_enum(data.get("scan_strategy", None))
+        if not self.scan_strategy:
+            raise ValueError("Schema key *scan_strategy* cannot be empty.")
         self.api = data.get("api")  # type: ignore[assignment]
         return self
 
@@ -548,6 +554,8 @@ class HTTPResponse(_TemplatableConfig):
         strategy: ResponseStrategy = self.strategy or ResponseStrategy.to_enum(self._get_prop(data, prop="strategy"))
         if not strategy:
             raise ValueError("Necessary argument *strategy* is missing.")
+        if not isinstance(strategy, ResponseStrategy):
+            raise TypeError("Argument *strategy* data type is invalid. It only accepts *ResponseStrategy* type value.")
         if strategy is ResponseStrategy.STRING:
             value: str = self._get_prop(data, prop="value")
             serialized_data.update(
