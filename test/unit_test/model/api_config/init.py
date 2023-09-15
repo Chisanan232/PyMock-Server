@@ -310,26 +310,6 @@ class TestMockAPIs(ConfigTestSpec):
         assert [a.http.request.method for a in aggregated_apis["/foo-boo"]] == [foo_boo_api.http.request.method]
 
 
-class TestBaseConfig(ConfigTestSpec):
-    @pytest.fixture(scope="function")
-    def sut(self) -> BaseConfig:
-        return BaseConfig(url=_Base_URL)
-
-    @pytest.fixture(scope="function")
-    def sut_with_nothing(self) -> BaseConfig:
-        return BaseConfig()
-
-    def test_value_attributes(self, sut: BaseConfig):
-        assert sut.url == _Base_URL, _assertion_msg
-
-    def _expected_serialize_value(self) -> dict:
-        return _TestConfig.Base
-
-    def _expected_deserialize_value(self, obj: BaseConfig) -> None:
-        assert isinstance(obj, BaseConfig)
-        assert obj.url == _Base_URL
-
-
 class TemplateSettingTestSuite(ConfigTestSpec, ABC):
     @property
     @abstractmethod

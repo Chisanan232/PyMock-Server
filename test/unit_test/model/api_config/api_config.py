@@ -10,7 +10,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_api.model import APIConfig, BaseConfig, MockAPIs
+from pymock_api.model import APIConfig, MockAPIs
+from pymock_api.model.api_config import BaseConfig
 
 
 class TestAPIConfig(ConfigTestSpec):

@@ -18,13 +18,13 @@ import pytest
 from pymock_api.model import (
     HTTP,
     APIParameter,
-    BaseConfig,
     HTTPRequest,
     HTTPResponse,
     MockAPI,
     MockAPIs,
 )
 from pymock_api.model.api_config import (
+    BaseConfig,
     ResponseProperty,
     TemplateAPI,
     TemplateApply,
