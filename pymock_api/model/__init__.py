@@ -6,7 +6,7 @@ content ...
 from argparse import Namespace
 from typing import Optional
 
-from .api_config.api_config import APIConfig
+from .api_config import APIConfig
 from .api_config.apis import (
     HTTP,
     APIParameter,

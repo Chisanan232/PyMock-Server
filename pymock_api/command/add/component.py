@@ -1,8 +1,9 @@
 import os
 import sys
 
+from ... import APIConfig
 from ..._utils import YAML
-from ...model import APIConfig, MockAPI, generate_empty_config, load_config
+from ...model import MockAPI, generate_empty_config, load_config
 from ...model.cmd_args import SubcmdAddArguments
 from ...model.enums import ResponseStrategy
 from ..component import BaseSubCmdComponent

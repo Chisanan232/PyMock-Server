@@ -5,9 +5,9 @@ import sys
 from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Optional
 
+from ... import APIConfig
 from ..._utils.api_client import URLLibHTTPClient
 from ...model import (
-    APIConfig,
     SubcmdCheckArguments,
     SwaggerConfig,
     deserialize_swagger_api_config,

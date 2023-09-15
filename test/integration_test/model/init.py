@@ -5,7 +5,8 @@ from typing import Any, List
 
 import pytest
 
-from pymock_api.model import APIConfig, load_config
+from pymock_api import APIConfig
+from pymock_api.model import load_config
 
 from .._spec import MockAPI_Config_Yaml_Path, run_test, yaml_factory
 

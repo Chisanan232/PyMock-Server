@@ -12,6 +12,7 @@ except ImportError:
 
 import pytest
 
+from pymock_api import APIConfig
 from pymock_api.command.get.component import (
     APIInfoDisplayChain,
     DisplayAsJsonFormat,
@@ -20,7 +21,7 @@ from pymock_api.command.get.component import (
     SubCmdGetComponent,
     _BaseDisplayFormat,
 )
-from pymock_api.model import APIConfig, MockAPI
+from pymock_api.model import MockAPI
 from pymock_api.model.cmd_args import SubcmdGetArguments
 from pymock_api.model.enums import Format
 
