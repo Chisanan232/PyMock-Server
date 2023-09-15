@@ -6,14 +6,14 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Optional
 
 from ..._utils.api_client import URLLibHTTPClient
-from ...model import APIConfig
-from ...model import APIParameter as MockedAPIParameter
 from ...model import (
+    APIConfig,
     SubcmdCheckArguments,
     SwaggerConfig,
     deserialize_swagger_api_config,
     load_config,
 )
+from ...model.api_config.apis import APIParameter as MockedAPIParameter
 from ...model.api_config.apis import ResponseProperty
 from ...model.enums import ResponseStrategy
 from ...model.swagger_config import API as SwaggerAPI
