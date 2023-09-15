@@ -20,7 +20,8 @@ from pymock_api.command.get.component import (
     SubCmdGetComponent,
     _BaseDisplayFormat,
 )
-from pymock_api.model.api_config import APIConfig, MockAPI
+from pymock_api.model import APIConfig
+from pymock_api.model.api_config import MockAPI
 from pymock_api.model.cmd_args import SubcmdGetArguments
 from pymock_api.model.enums import Format
 

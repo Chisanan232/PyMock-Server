@@ -8,7 +8,6 @@ from typing import Optional
 
 from .api_config import (
     HTTP,
-    APIConfig,
     APIParameter,
     BaseConfig,
     HTTPRequest,
@@ -16,6 +15,7 @@ from .api_config import (
     MockAPI,
     MockAPIs,
 )
+from .api_config.api_config import APIConfig
 from .cmd_args import (
     DeserializeParsedArgs,
     ParserArguments,

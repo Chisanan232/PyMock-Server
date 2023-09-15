@@ -4,10 +4,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pymock_api import APIConfig
 from pymock_api._utils.file_opt import YAML
 from pymock_api.command.add.component import SubCmdAddComponent
-from pymock_api.model import generate_empty_config
+from pymock_api.model import APIConfig, generate_empty_config
 from pymock_api.model.cmd_args import SubcmdAddArguments
 from pymock_api.model.enums import ResponseStrategy
 

@@ -5,8 +5,8 @@ This module provides objects for mocking APIs as a web application with differen
 
 from typing import Any, Optional
 
-from ..model import load_config
-from ..model.api_config import APIConfig, MockAPIs
+from ..model import APIConfig, load_config
+from ..model.api_config import MockAPIs
 from .application import BaseAppServer, FlaskServer
 
 
