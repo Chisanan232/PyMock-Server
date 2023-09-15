@@ -31,7 +31,7 @@ from pymock_api.model.api_config import (
 )
 from pymock_api.model.enums import Format, ResponseStrategy, TemplateApplyScanStrategy
 
-from ..._values import (
+from ...._values import (
     _Base_URL,
     _Config_Description,
     _Config_Name,
