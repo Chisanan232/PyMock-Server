@@ -65,6 +65,11 @@ class _Config(metaclass=ABCMeta):
 class _TemplatableConfig(_Config, ABC):
     apply_template_props: bool = True
 
+    # The settings which could be set by section *template* or override the values
+    base_file_path: str = "./"
+    config_path: str = field(default_factory=str)
+    config_path_format: str = field(default_factory=str)
+
     _has_apply_template_props_in_config: bool = False
 
     def _compare(self, other: SelfType) -> bool:
