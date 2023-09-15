@@ -2,8 +2,8 @@ from typing import Any, Dict, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
-from ...model import MockAPIs
 from ._base import _Config
+from .apis import MockAPIs
 
 
 class APIConfig(_Config):

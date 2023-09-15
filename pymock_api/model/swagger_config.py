@@ -6,8 +6,9 @@ from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
 from pymock_api.model import APIConfig
-from pymock_api.model.api_config import APIParameter as PyMockAPIParameter
-from pymock_api.model.api_config import BaseConfig, MockAPI, MockAPIs, _Config
+from pymock_api.model import APIParameter as PyMockAPIParameter
+from pymock_api.model import MockAPI, MockAPIs
+from pymock_api.model.api_config import BaseConfig, _Config
 from pymock_api.model.enums import ResponseStrategy
 
 Self = Any

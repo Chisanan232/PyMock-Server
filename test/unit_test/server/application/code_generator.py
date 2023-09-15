@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_api.model.api_config import APIParameter, MockAPI
+from pymock_api.model import APIParameter, MockAPI
 from pymock_api.server.application.code_generator import (
     BaseWebServerCodeGenerator,
     FastAPICodeGenerator,

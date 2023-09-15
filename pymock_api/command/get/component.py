@@ -5,8 +5,7 @@ import sys
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Optional, cast
 
-from ...model import load_config
-from ...model.api_config import MockAPI
+from ...model import MockAPI, load_config
 from ...model.cmd_args import SubcmdGetArguments
 from ...model.enums import Format
 from ..component import BaseSubCmdComponent

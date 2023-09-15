@@ -2,8 +2,7 @@ import os
 import sys
 
 from ..._utils import YAML
-from ...model import APIConfig, generate_empty_config, load_config
-from ...model.api_config import MockAPI
+from ...model import APIConfig, MockAPI, generate_empty_config, load_config
 from ...model.cmd_args import SubcmdAddArguments
 from ...model.enums import ResponseStrategy
 from ..component import BaseSubCmdComponent

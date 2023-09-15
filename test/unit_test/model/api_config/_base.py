@@ -23,12 +23,8 @@ from pymock_api.model import (
     MockAPI,
     MockAPIs,
 )
-from pymock_api.model.api_config import (
-    BaseConfig,
-    ResponseProperty,
-    TemplateConfig,
-    _Config,
-)
+from pymock_api.model.api_config import BaseConfig, TemplateConfig, _Config
+from pymock_api.model.api_config.apis import ResponseProperty
 from pymock_api.model.api_config.template import (
     TemplateAPI,
     TemplateApply,
