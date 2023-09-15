@@ -1,9 +1,9 @@
 from typing import Any, Dict, Optional, Union
 
-from pymock_api._utils import YAML
-from pymock_api._utils.file_opt import _BaseFileOperation
-from pymock_api.model import MockAPIs
-from pymock_api.model.api_config import _Config
+from ..._utils import YAML
+from ..._utils.file_opt import _BaseFileOperation
+from ...model import MockAPIs
+from ._base import _Config
 
 
 class APIConfig(_Config):
