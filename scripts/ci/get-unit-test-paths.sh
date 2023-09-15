@@ -7,6 +7,7 @@ declare -a init_tests
 declare -a utils_tests
 declare -a model_tests
 declare -a model_api_config_tests
+declare -a model_api_config_apis_tests
 declare -a server_tests
 declare -a server_application_tests
 declare -a server_sgi_tests
@@ -32,6 +33,11 @@ getalltests() {
         # shellcheck disable=SC2124
         # shellcheck disable=SC2178
         utils_tests=${alltestpaths[@]}
+    elif echo "$1" | grep -q "apis";
+    then
+        # shellcheck disable=SC2124
+        # shellcheck disable=SC2178
+        model_api_config_apis_tests=${alltestpaths[@]}
     elif echo "$1" | grep -q "api_config";
     then
         # shellcheck disable=SC2124
@@ -98,6 +104,7 @@ init_path=./test/unit_test/
 utils_path=./test/unit_test/_utils/
 model_path=./test/unit_test/model/
 model_api_config_path=./test/unit_test/model/api_config/
+model_api_config_apis_path=./test/unit_test/model/api_config/apis/
 server_path=./test/unit_test/server/
 server_application_path=./test/unit_test/server/application/
 server_sgi_path=./test/unit_test/server/sgi/
@@ -112,6 +119,7 @@ getalltests $init_path
 getalltests $utils_path
 getalltests $model_path
 getalltests $model_api_config_path
+getalltests $model_api_config_apis_path
 getalltests $server_path
 getalltests $server_application_path
 getalltests $server_sgi_path
@@ -122,7 +130,7 @@ getalltests $subcommand_check_path
 getalltests $subcommand_get_path
 getalltests $subcommand_sample_path
 
-dest=( "${init_tests[@]} ${utils_tests[@]} ${model_tests[@]} ${model_api_config_tests[@]} ${server_tests[@]} ${server_application_tests[@]} ${server_sgi_tests[@]} ${command_tests[@]} ${subcommand_run_tests[@]} ${subcommand_add_tests[@]} ${subcommand_check_tests[@]} ${subcommand_get_tests[@]} ${subcommand_sample_tests[@]}" )
+dest=( "${init_tests[@]} ${utils_tests[@]} ${model_tests[@]} ${model_api_config_tests[@]} ${model_api_config_apis_tests[@]} ${server_tests[@]} ${server_application_tests[@]} ${server_sgi_tests[@]} ${command_tests[@]} ${subcommand_run_tests[@]} ${subcommand_add_tests[@]} ${subcommand_check_tests[@]} ${subcommand_get_tests[@]} ${subcommand_sample_tests[@]}" )
 
 if echo "$runtime_os" | grep -q "windows";
 then

@@ -11,7 +11,7 @@ from pymock_api.model import HTTP, APIParameter, HTTPRequest, HTTPResponse, Mock
 from pymock_api.model.api_config import IteratorItem, ResponseProperty, _Config
 from pymock_api.model.enums import Format, ResponseStrategy
 
-from ...._values import (
+from ....._values import (
     _Test_API_Parameter,
     _Test_HTTP_Resp,
     _Test_Iterable_Parameter_Item_Name,
@@ -24,14 +24,14 @@ from ...._values import (
     _Test_URL,
     _TestConfig,
 )
-from ._base import (
+from .._base import (
     MOCK_MODEL,
     MOCK_RETURN_VALUE,
     ConfigTestSpec,
     MockModel,
     _assertion_msg,
 )
-from .template import TemplatableConfigTestSuite
+from ..template import TemplatableConfigTestSuite
 
 
 class TestMockAPI(TemplatableConfigTestSuite):
