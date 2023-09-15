@@ -6,8 +6,8 @@ from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from .._utils.file_opt import JSON, YAML, _BaseFileOperation
-from ..model.enums import Format, ResponseStrategy, TemplateApplyScanStrategy
+from ..._utils.file_opt import JSON, YAML, _BaseFileOperation
+from ...model.enums import Format, ResponseStrategy, TemplateApplyScanStrategy
 
 # The truly semantically is more near like following:
 #
