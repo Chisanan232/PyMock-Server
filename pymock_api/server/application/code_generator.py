@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import Dict, List, Optional, Union, cast
 
-from ...model import HTTPResponse, MockAPI
-from ...model.api_config.apis import HTTPRequest
+from ...model import MockAPI
+from ...model.api_config.apis import HTTPRequest, HTTPResponse
 
 
 class BaseWebServerCodeGenerator(metaclass=ABCMeta):

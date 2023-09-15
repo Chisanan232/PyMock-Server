@@ -15,9 +15,14 @@ from unittest.mock import Mock
 
 import pytest
 
-from pymock_api.model import HTTP, HTTPResponse, MockAPI, MockAPIs
-from pymock_api.model.api_config import BaseConfig, TemplateConfig, _Config
-from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, ResponseProperty
+from pymock_api.model import HTTP, MockAPI, MockAPIs
+from pymock_api.model.api_config import (
+    BaseConfig,
+    ResponseProperty,
+    TemplateConfig,
+    _Config,
+)
+from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
 from pymock_api.model.api_config.template import (
     TemplateAPI,
     TemplateApply,

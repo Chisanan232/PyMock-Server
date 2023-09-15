@@ -8,7 +8,7 @@ from unittest.mock import Mock, mock_open, patch
 import pytest
 
 from pymock_api.exceptions import FileFormatNotSupport
-from pymock_api.model import HTTPResponse
+from pymock_api.model.api_config.apis import HTTPResponse
 from pymock_api.model.enums import ResponseStrategy
 from pymock_api.server.application.response import HTTPResponse as _HTTPResponse
 

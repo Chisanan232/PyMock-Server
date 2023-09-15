@@ -13,8 +13,8 @@ from ...model import (
     deserialize_swagger_api_config,
     load_config,
 )
+from ...model.api_config import ResponseProperty
 from ...model.api_config.apis import APIParameter as MockedAPIParameter
-from ...model.api_config.apis import ResponseProperty
 from ...model.enums import ResponseStrategy
 from ...model.swagger_config import API as SwaggerAPI
 from ...model.swagger_config import APIParameter as SwaggerAPIParameter
