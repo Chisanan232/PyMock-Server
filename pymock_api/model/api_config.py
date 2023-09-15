@@ -2,12 +2,12 @@
 
 content ...
 """
-from abc import ABCMeta, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from .._utils.file_opt import JSON, YAML, _BaseFileOperation
-from ..model.enums import Format, ResponseStrategy
+from ..model.enums import Format, ResponseStrategy, TemplateApplyScanStrategy
 
 # The truly semantically is more near like following:
 #
@@ -62,6 +62,38 @@ class _Config(metaclass=ABCMeta):
 
 
 @dataclass(eq=False)
+class _TemplatableConfig(_Config, ABC):
+    apply_template_props: bool = True
+
+    # The settings which could be set by section *template* or override the values
+    base_file_path: str = "./"
+    config_path: str = field(default_factory=str)
+    config_path_format: str = field(default_factory=str)
+
+    _has_apply_template_props_in_config: bool = False
+
+    def _compare(self, other: SelfType) -> bool:
+        return self.apply_template_props == other.apply_template_props
+
+    def serialize(self, data: Optional[SelfType] = None) -> Optional[Dict[str, Any]]:
+        apply_template_props: bool = self._get_prop(data, prop="apply_template_props")
+        if self._has_apply_template_props_in_config:
+            return {
+                "apply_template_props": apply_template_props,
+            }
+        else:
+            return {}
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional[SelfType]:
+        apply_template_props = data.get("apply_template_props", None)
+        if apply_template_props is not None:
+            self._has_apply_template_props_in_config = True
+            self.apply_template_props = apply_template_props
+        return self
+
+
+@dataclass(eq=False)
 class BaseConfig(_Config):
     """*The **base** section in **mocked_apis***"""
 
@@ -101,6 +133,150 @@ class BaseConfig(_Config):
 
         """
         self.url = data.get("url", None)
+        return self
+
+
+@dataclass(eq=False)
+class TemplateSetting(_Config, ABC):
+    base_file_path: str = "./"
+    config_path: str = field(default_factory=str)
+    config_path_format: str = field(default_factory=str)
+
+    def __post_init__(self) -> None:
+        if not self.config_path_format:
+            self.config_path_format = self._default_config_path_format
+
+    def _compare(self, other: "TemplateSetting") -> bool:
+        return (
+            self.base_file_path == other.base_file_path
+            and self.config_path == other.config_path
+            and self.config_path_format == other.config_path_format
+        )
+
+    def serialize(self, data: Optional["TemplateSetting"] = None) -> Optional[Dict[str, Any]]:
+        base_file_path: str = self._get_prop(data, prop="base_file_path")
+        config_path: str = self._get_prop(data, prop="config_path")
+        config_path_format: str = self._get_prop(data, prop="config_path_format")
+        return {
+            "base_file_path": base_file_path,
+            "config_path": config_path,
+            "config_path_format": config_path_format,
+        }
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateSetting"]:
+        self.base_file_path = data.get("base_file_path", "./")
+        self.config_path = data.get("config_path", "")
+        self.config_path_format = data.get("config_path_format", self._default_config_path_format)
+        return self
+
+    @property
+    @abstractmethod
+    def _default_config_path_format(self) -> str:
+        pass
+
+
+class TemplateAPI(TemplateSetting):
+    @property
+    def _default_config_path_format(self) -> str:
+        return "{{ api.tag }}/{{ api.__name__ }}.yaml"
+
+
+class TemplateRequest(TemplateSetting):
+    @property
+    def _default_config_path_format(self) -> str:
+        return "{{ api.tag }}/{{ api.__name__ }}-request.yaml"
+
+
+class TemplateResponse(TemplateSetting):
+    @property
+    def _default_config_path_format(self) -> str:
+        return "{{ api.tag }}/{{ api.__name__ }}-response.yaml"
+
+
+@dataclass(eq=False)
+class TemplateValues(_Config):
+    api: TemplateAPI = TemplateAPI()
+    request: TemplateRequest = TemplateRequest()
+    response: TemplateResponse = TemplateResponse()
+
+    def _compare(self, other: "TemplateValues") -> bool:
+        return self.api == other.api and self.request == other.request and self.response == other.response
+
+    def serialize(self, data: Optional["TemplateValues"] = None) -> Optional[Dict[str, Any]]:
+        api = self.api or self._get_prop(data, prop="api")
+        request = self.request or self._get_prop(data, prop="request")
+        response = self.response or self._get_prop(data, prop="response")
+        if not (api and request and response):
+            # TODO: Should raise exception?
+            return None
+        return {"api": api.serialize(), "request": request.serialize(), "response": response.serialize()}
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateValues"]:
+        self.api = TemplateAPI().deserialize(data.get("api", {}))
+        self.request = TemplateRequest().deserialize(data.get("request", {}))
+        self.response = TemplateResponse().deserialize(data.get("response", {}))
+        return self
+
+
+@dataclass(eq=False)
+class TemplateApply(_Config):
+    scan_strategy: Optional[TemplateApplyScanStrategy] = None
+    api: List[Union[str, Dict[str, List[str]]]] = field(default_factory=list)
+
+    def _compare(self, other: "TemplateApply") -> bool:
+        return self.scan_strategy is other.scan_strategy and self.api == other.api
+
+    def serialize(self, data: Optional["TemplateApply"] = None) -> Optional[Dict[str, Any]]:
+        scan_strategy: TemplateApplyScanStrategy = self.scan_strategy or TemplateApplyScanStrategy.to_enum(
+            self._get_prop(data, prop="scan_strategy")
+        )
+        if not scan_strategy:
+            raise ValueError("Necessary argument *scan_strategy* is missing.")
+        if not isinstance(scan_strategy, TemplateApplyScanStrategy):
+            raise TypeError(
+                "Argument *scan_strategy* data type is invalid. It only accepts *TemplateApplyScanStrategy* type value."
+            )
+
+        api: str = self._get_prop(data, prop="api")
+        return {
+            "scan_strategy": scan_strategy.value,
+            "api": api,
+        }
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateApply"]:
+        self.scan_strategy = TemplateApplyScanStrategy.to_enum(data.get("scan_strategy", None))
+        if not self.scan_strategy:
+            raise ValueError("Schema key *scan_strategy* cannot be empty.")
+        self.api = data.get("api")  # type: ignore[assignment]
+        return self
+
+
+@dataclass(eq=False)
+class TemplateConfig(_Config):
+    values: TemplateValues = TemplateValues()
+    apply: TemplateApply = TemplateApply(scan_strategy=TemplateApplyScanStrategy.FILE_NAME_FIRST)
+
+    def _compare(self, other: "TemplateConfig") -> bool:
+        return self.values == other.values and self.apply == other.apply
+
+    def serialize(self, data: Optional["TemplateConfig"] = None) -> Optional[Dict[str, Any]]:
+        values: TemplateValues = self.values or self._get_prop(data, prop="values")
+        apply: TemplateApply = self.apply or self._get_prop(data, prop="apply")
+        if not (values and apply):
+            # TODO: Should it ranse an exception outside?
+            return None
+        return {
+            "values": values.serialize(),
+            "apply": apply.serialize(),
+        }
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfig"]:
+        self.values = TemplateValues().deserialize(data.get("values", {}))
+        self.apply = TemplateApply().deserialize(data.get("apply", {}))
         return self
 
 
@@ -202,14 +378,15 @@ class APIParameter(_Config):
 
 
 @dataclass(eq=False)
-class HTTPRequest(_Config):
+class HTTPRequest(_TemplatableConfig):
     """*The **http.request** section in **mocked_apis.<api>***"""
 
     method: str = field(default_factory=str)
     parameters: List[APIParameter] = field(default_factory=list)
 
     def _compare(self, other: "HTTPRequest") -> bool:
-        return self.method == other.method and self.parameters == other.parameters
+        templatable_config = super()._compare(other)
+        return templatable_config and self.method == other.method and self.parameters == other.parameters
 
     def serialize(self, data: Optional["HTTPRequest"] = None) -> Optional[Dict[str, Any]]:
         method: str = self._get_prop(data, prop="method")
@@ -217,10 +394,15 @@ class HTTPRequest(_Config):
         parameters = [param.serialize() for param in (all_parameters or [])]
         if not (method and parameters):
             return None
-        return {
-            "method": method,
-            "parameters": parameters,
-        }
+        serialized_data = super().serialize(data)
+        assert serialized_data is not None
+        serialized_data.update(
+            {
+                "method": method,
+                "parameters": parameters,
+            }
+        )
+        return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["HTTPRequest"]:
@@ -245,6 +427,7 @@ class HTTPRequest(_Config):
             A **HTTPRequest** type object.
 
         """
+        super().deserialize(data)
         self.method = data.get("method", None)
         parameters: List[dict] = data.get("parameters", None)
         if parameters and not isinstance(parameters, list):
@@ -320,7 +503,7 @@ class ResponseProperty(_Config):
 
 
 @dataclass(eq=False)
-class HTTPResponse(_Config):
+class HTTPResponse(_TemplatableConfig):
     """*The **http.response** section in **mocked_apis.<api>***"""
 
     strategy: Optional[ResponseStrategy] = None
@@ -341,16 +524,17 @@ class HTTPResponse(_Config):
     properties: List[ResponseProperty] = field(default_factory=list)
 
     def _compare(self, other: "HTTPResponse") -> bool:
+        templatable_config = super()._compare(other)
         if not self.strategy:
             raise ValueError("Miss necessary argument *strategy*.")
         if self.strategy is not other.strategy:
             raise TypeError("Different HTTP response strategy cannot compare with each other.")
         if ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.STRING:
-            return self.value == other.value
+            return templatable_config and self.value == other.value
         elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.FILE:
-            return self.path == other.path
+            return templatable_config and self.path == other.path
         elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.OBJECT:
-            return self.properties == other.properties
+            return templatable_config and self.properties == other.properties
         else:
             raise NotImplementedError
 
@@ -370,28 +554,41 @@ class HTTPResponse(_Config):
         self.properties = [ResponseProperty().deserialize(i) if isinstance(i, dict) else i for i in self.properties]
 
     def serialize(self, data: Optional["HTTPResponse"] = None) -> Optional[Dict[str, Any]]:
+        serialized_data = super().serialize(data)
+        assert serialized_data is not None
         strategy: ResponseStrategy = self.strategy or ResponseStrategy.to_enum(self._get_prop(data, prop="strategy"))
         if not strategy:
             raise ValueError("Necessary argument *strategy* is missing.")
+        if not isinstance(strategy, ResponseStrategy):
+            raise TypeError("Argument *strategy* data type is invalid. It only accepts *ResponseStrategy* type value.")
         if strategy is ResponseStrategy.STRING:
             value: str = self._get_prop(data, prop="value")
-            return {
-                "strategy": strategy.value,
-                "value": value,
-            }
+            serialized_data.update(
+                {
+                    "strategy": strategy.value,
+                    "value": value,
+                }
+            )
+            return serialized_data
         elif strategy is ResponseStrategy.FILE:
             path: str = self._get_prop(data, prop="path")
-            return {
-                "strategy": strategy.value,
-                "path": path,
-            }
+            serialized_data.update(
+                {
+                    "strategy": strategy.value,
+                    "path": path,
+                }
+            )
+            return serialized_data
         elif strategy is ResponseStrategy.OBJECT:
             all_properties = (data or self).properties if (data and data.properties) or self.properties else None
             properties = [prop.serialize() for prop in (all_properties or [])]
-            return {
-                "strategy": strategy.value,
-                "properties": properties,
-            }
+            serialized_data.update(
+                {
+                    "strategy": strategy.value,
+                    "properties": properties,
+                }
+            )
+            return serialized_data
         else:
             raise NotImplementedError
 
@@ -417,6 +614,7 @@ class HTTPResponse(_Config):
             A **HTTPResponse** type object.
 
         """
+        super().deserialize(data)
         self.strategy = ResponseStrategy.to_enum(data.get("strategy", None))
         if not self.strategy:
             raise ValueError("Schema key *strategy* cannot be empty.")
@@ -432,7 +630,7 @@ class HTTPResponse(_Config):
         return self
 
 
-class HTTP(_Config):
+class HTTP(_TemplatableConfig):
     """*The **http** section in **mocked_apis.<api>***"""
 
     _request: Optional[HTTPRequest]
@@ -443,7 +641,8 @@ class HTTP(_Config):
         self._response = response
 
     def _compare(self, other: "HTTP") -> bool:
-        return self.request == other.request and self.response == other.response
+        templatable_config = super()._compare(other)
+        return templatable_config and self.request == other.request and self.response == other.response
 
     @property
     def request(self) -> Optional[HTTPRequest]:
@@ -483,10 +682,15 @@ class HTTP(_Config):
         if not (req and resp):
             return None
 
-        return {
-            "request": req,
-            "response": resp,
-        }
+        serialized_data = super().serialize(data)
+        assert serialized_data is not None
+        serialized_data.update(
+            {
+                "request": req,
+                "response": resp,
+            }
+        )
+        return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["HTTP"]:
@@ -516,6 +720,7 @@ class HTTP(_Config):
             A **HTTP** type object.
 
         """
+        super().deserialize(data)
         req = data.get("request", None)
         resp = data.get("response", None)
         self.request = HTTPRequest().deserialize(data=req) if req else None
@@ -523,7 +728,7 @@ class HTTP(_Config):
         return self
 
 
-class MockAPI(_Config):
+class MockAPI(_TemplatableConfig):
     """*The **<api>** section in **mocked_apis***"""
 
     _url: Optional[str]
@@ -536,7 +741,8 @@ class MockAPI(_Config):
         self._tag = tag
 
     def _compare(self, other: "MockAPI") -> bool:
-        return self.url == other.url and self.http == other.http
+        templatable_config = super()._compare(other)
+        return templatable_config and self.url == other.url and self.http == other.http
 
     @property
     def url(self) -> Optional[str]:
@@ -578,11 +784,16 @@ class MockAPI(_Config):
         if not (url and http):
             return None
         tag = (data.tag if data else None) or self.tag
-        return {
-            "url": url,
-            "http": http.serialize(data=http),
-            "tag": tag,
-        }
+        serialized_data = super().serialize(data)
+        assert serialized_data is not None
+        serialized_data.update(
+            {
+                "url": url,
+                "http": http.serialize(data=http),
+                "tag": tag,
+            }
+        )
+        return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["MockAPI"]:
@@ -615,6 +826,7 @@ class MockAPI(_Config):
             A **MockAPI** type object.
 
         """
+        super().deserialize(data)
         self.url = data.get("url", None)
         http_info = data.get("http", None)
         self.http = HTTP().deserialize(data=http_info) if http_info else None
@@ -682,10 +894,19 @@ class MockAPI(_Config):
 class MockAPIs(_Config):
     """*The **mocked_apis** section*"""
 
+    _template: TemplateConfig
     _base: Optional[BaseConfig]
     _apis: Dict[str, Optional[MockAPI]]
 
-    def __init__(self, base: Optional[BaseConfig] = None, apis: Dict[str, Optional[MockAPI]] = {}):
+    _need_template_in_config: bool = True
+
+    def __init__(
+        self,
+        template: Optional[TemplateConfig] = None,
+        base: Optional[BaseConfig] = None,
+        apis: Dict[str, Optional[MockAPI]] = {},
+    ):
+        self._template = TemplateConfig() if template is None else template
         self._base = base
         self._apis = apis
 
@@ -694,6 +915,20 @@ class MockAPIs(_Config):
 
     def _compare(self, other: "MockAPIs") -> bool:
         return self.base == other.base and self.apis == other.apis
+
+    @property
+    def template(self) -> TemplateConfig:
+        return self._template
+
+    @template.setter
+    def template(self, template: Union[dict, TemplateConfig]) -> None:
+        if template:
+            if isinstance(template, dict):
+                self._template = TemplateConfig().deserialize(data=template)
+            elif isinstance(template, TemplateConfig):
+                self._template = template
+            else:
+                raise TypeError("Setter *MockAPIs.template* only accepts dict or TemplateConfig type object.")
 
     @property
     def base(self) -> Optional[BaseConfig]:
@@ -734,7 +969,16 @@ class MockAPIs(_Config):
         else:
             self._apis = {}
 
+    @property
+    def set_template_in_config(self) -> bool:
+        return self._need_template_in_config
+
+    @set_template_in_config.setter
+    def set_template_in_config(self, _set: bool) -> None:
+        self._need_template_in_config = _set
+
     def serialize(self, data: Optional["MockAPIs"] = None) -> Optional[Dict[str, Any]]:
+        template = (data.template if data else None) or self.template
         base = (data.base if data else None) or self.base
         apis = (data.apis if data else None) or self.apis
         if not (base and apis):
@@ -745,6 +989,8 @@ class MockAPIs(_Config):
             "base": BaseConfig().serialize(data=base),
             "apis": {},
         }
+        if self._need_template_in_config:
+            api_info["template"] = template.serialize()
 
         # Process section *apis*
         all_mocked_apis = {}
@@ -812,6 +1058,12 @@ class MockAPIs(_Config):
             A **MockAPIs** type object.
 
         """
+        # Processing section *template*
+        template_info = data.get("template", {})
+        if not template_info:
+            self._need_template_in_config = False
+        self.template = TemplateConfig().deserialize(data=template_info)
+
         # Processing section *base*
         base_info = data.get("base", None)
         self.base = BaseConfig().deserialize(data=base_info)
@@ -858,6 +1110,7 @@ class APIConfig(_Config):
     _apis: Optional[MockAPIs]
 
     _configuration: _BaseFileOperation = YAML()
+    _need_template_in_config: bool = True
 
     def __init__(self, name: str = "", description: str = "", apis: Optional[MockAPIs] = None):
         self._name = name
@@ -909,16 +1162,25 @@ class APIConfig(_Config):
         else:
             self._apis = None
 
+    @property
+    def set_template_in_config(self) -> bool:
+        return self._need_template_in_config
+
+    @set_template_in_config.setter
+    def set_template_in_config(self, _set: bool) -> None:
+        self._need_template_in_config = _set
+
     def serialize(self, data: Optional["APIConfig"] = None) -> Optional[Dict[str, Any]]:
         name = (data.name if data else None) or self.name
         description = (data.description if data else None) or self.description
         apis = (data.apis if data else None) or self.apis
         if not apis:
             return None
+        apis.set_template_in_config = self.set_template_in_config
         return {
             "name": name,
             "description": description,
-            "mocked_apis": MockAPIs().serialize(data=apis),
+            "mocked_apis": apis.serialize(),
         }
 
     @_Config._ensure_process_with_not_empty_value
@@ -989,7 +1251,9 @@ class APIConfig(_Config):
         self.description = data.get("description", None)
         mocked_apis = data.get("mocked_apis", None)
         if mocked_apis:
-            self.apis = MockAPIs().deserialize(data=mocked_apis)
+            mock_apis_data_model = MockAPIs()
+            mock_apis_data_model.set_template_in_config = self.set_template_in_config
+            self.apis = mock_apis_data_model.deserialize(data=mocked_apis)
         return self
 
     def from_yaml(self, path: str) -> Optional["APIConfig"]:

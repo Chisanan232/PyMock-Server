@@ -1,7 +1,7 @@
 import random
 import re
-from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List, Optional, Union
+from abc import ABC, ABCMeta, abstractmethod
+from typing import Any, Dict, List, Optional, Type, Union
 from unittest.mock import Mock, patch
 
 import pytest
@@ -19,14 +19,30 @@ from pymock_api.model.api_config import (
     MockAPI,
     MockAPIs,
     ResponseProperty,
+    TemplateAPI,
+    TemplateApply,
+    TemplateConfig,
+    TemplateRequest,
+    TemplateResponse,
+    TemplateSetting,
+    TemplateValues,
     _Config,
+    _TemplatableConfig,
 )
-from pymock_api.model.enums import Format, ResponseStrategy
+from pymock_api.model.enums import Format, ResponseStrategy, TemplateApplyScanStrategy
 
 from ..._values import (
     _Base_URL,
     _Config_Description,
     _Config_Name,
+    _Mock_Templatable_Setting,
+    _Mock_Template_API_Request_Setting,
+    _Mock_Template_API_Response_Setting,
+    _Mock_Template_API_Setting,
+    _Mock_Template_Apply_Has_Tag_Setting,
+    _Mock_Template_Apply_Scan_Strategy,
+    _Mock_Template_Setting,
+    _Mock_Template_Values_Setting,
     _Test_API_Parameter,
     _Test_Config,
     _Test_HTTP_Resp,
@@ -86,7 +102,36 @@ def test_config_get_prop():
 class MockModel:
     @property
     def mock_apis(self) -> MockAPIs:
-        return MockAPIs(base=self.base_config, apis=self.mock_api)
+        return MockAPIs(template=self.template_config, base=self.base_config, apis=self.mock_api)
+
+    @property
+    def template_values_api(self) -> TemplateAPI:
+        return TemplateAPI()
+
+    @property
+    def template_values_request(self) -> TemplateRequest:
+        return TemplateRequest()
+
+    @property
+    def template_values_response(self) -> TemplateResponse:
+        return TemplateResponse()
+
+    @property
+    def template_values(self) -> TemplateValues:
+        return TemplateValues(
+            api=self.template_values_api, request=self.template_values_request, response=self.template_values_response
+        )
+
+    @property
+    def template_apply(self) -> TemplateApply:
+        return TemplateApply(
+            scan_strategy=_Mock_Template_Apply_Scan_Strategy,
+            api=_Mock_Template_Apply_Has_Tag_Setting["api"],
+        )
+
+    @property
+    def template_config(self) -> TemplateConfig:
+        return TemplateConfig(values=self.template_values, apply=self.template_apply)
 
     @property
     def base_config(self) -> BaseConfig:
@@ -183,6 +228,37 @@ class ConfigTestSpec(metaclass=ABCMeta):
         assert sut_with_nothing.deserialize(data={}) == {}
 
 
+class TemplatableConfigTestSuite(ConfigTestSpec, ABC):
+    def test_apply_template_props_default_value(self, sut: _TemplatableConfig):
+        assert sut.apply_template_props is True
+
+    def test_apply_template_props_should_be_serialize_if_has_in_config(self, sut_with_nothing: _TemplatableConfig):
+        # Given data
+        has_prop_apply_template_props = self._expected_serialize_value().copy()
+        has_prop_apply_template_props.update(_Mock_Templatable_Setting)
+
+        # Run target function
+        deserialized_sut = sut_with_nothing.deserialize(has_prop_apply_template_props)
+        serialized_sut = deserialized_sut.serialize()
+
+        # Verify
+        assert serialized_sut.get("apply_template_props", None) is not None
+        assert serialized_sut["apply_template_props"] is _Mock_Templatable_Setting["apply_template_props"]
+
+    def test_apply_template_props_should_not_be_serialize_if_not_has_in_config(
+        self, sut_with_nothing: _TemplatableConfig
+    ):
+        # Given data
+        not_has_prop_apply_template_props = self._expected_serialize_value().copy()
+
+        # Run target function
+        deserialized_sut = sut_with_nothing.deserialize(not_has_prop_apply_template_props)
+        serialized_sut = deserialized_sut.serialize()
+
+        # Verify
+        assert serialized_sut.get("apply_template_props", None) is None
+
+
 class TestAPIConfig(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> APIConfig:
@@ -195,7 +271,7 @@ class TestAPIConfig(ConfigTestSpec):
     def test___len___with_value(self, sut: APIConfig):
         sut.apis = _TestConfig.Mock_APIs
         assert len(sut) == len(
-            list(filter(lambda k: k != "base", _TestConfig.Mock_APIs.keys()))
+            list(filter(lambda k: k not in ["base", "template"], _TestConfig.Mock_APIs.keys()))
         ), "The size of *APIConfig* data object should be same as *MockAPIs* data object."
 
     def test___len___with_non_value(self):
@@ -225,7 +301,7 @@ class TestAPIConfig(ConfigTestSpec):
         ],
     )
     @patch.object(MockAPIs, "deserialize", return_value=MOCK_RETURN_VALUE)
-    def test_prop_apiswith_valid_obj(
+    def test_prop_apis_with_valid_obj(
         self,
         mock_deserialize: Mock,
         setting_val: Union[dict, BaseConfig],
@@ -279,7 +355,9 @@ class TestAPIConfig(ConfigTestSpec):
 class TestMockAPIs(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> MockAPIs:
-        return MockAPIs(base=self._Mock_Model.base_config, apis=self._Mock_Model.mock_api)
+        return MockAPIs(
+            template=MOCK_MODEL.template_config, base=self._Mock_Model.base_config, apis=self._Mock_Model.mock_api
+        )
 
     @pytest.fixture(scope="function")
     def sut_with_nothing(self) -> MockAPIs:
@@ -291,8 +369,42 @@ class TestMockAPIs(ConfigTestSpec):
         ), f"The size of *MockAPIs* data object should be same as object '{self._Mock_Model.mock_api}'."
 
     def test_value_attributes(self, sut: MockAPIs):
+        assert sut.template == MOCK_MODEL.template_config, _assertion_msg
         assert sut.base == self._Mock_Model.base_config, _assertion_msg
         assert sut.apis == self._Mock_Model.mock_api, _assertion_msg
+
+    @pytest.mark.parametrize(
+        ("setting_val", "should_call_deserialize"),
+        [
+            ({}, False),
+            ({"test": "test"}, True),
+            (TemplateConfig(), False),
+        ],
+    )
+    @patch.object(TemplateConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_template_with_valid_obj(
+        self,
+        mock_deserialize: Mock,
+        setting_val: Union[dict, TemplateConfig],
+        should_call_deserialize: bool,
+        sut_with_nothing: MockAPIs,
+    ):
+        # Run target function
+        sut_with_nothing.template = setting_val
+        # Verify the running result
+        if should_call_deserialize:
+            mock_deserialize.assert_called_once_with(data=setting_val)
+            assert sut_with_nothing.template == MOCK_RETURN_VALUE
+        else:
+            mock_deserialize.assert_not_called()
+            assert sut_with_nothing.template == TemplateConfig()
+
+    @patch.object(TemplateConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
+    def test_prop_template_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: MockAPIs):
+        with pytest.raises(TypeError) as exc_info:
+            sut_with_nothing.template = "Invalid object"
+        mock_deserialize.assert_not_called()
+        assert re.search(r"Setter .{1,32} only accepts .{1,32} type object.", str(exc_info.value), re.IGNORECASE)
 
     @pytest.mark.parametrize(
         ("setting_val", "should_call_deserialize"),
@@ -381,18 +493,25 @@ class TestMockAPIs(ConfigTestSpec):
     @pytest.mark.parametrize(
         "test_data",
         [
-            {"base": "base_info"},
-            {"base": "base_info", "apis": {"api_name": "api_info"}},
+            {"template": "template_setting", "base": "base_info"},
+            {"template": "template_setting", "base": "base_info", "apis": {"api_name": "api_info"}},
         ],
     )
     @patch.object(MockAPI, "deserialize", return_value=None)
     @patch.object(BaseConfig, "deserialize", return_value=None)
+    @patch.object(TemplateConfig, "deserialize", return_value=None)
     def test_deserialize_with_nonideal_value(
-        self, mock_deserialize_base: Mock, mock_deserialize_mock_api: Mock, test_data: dict, sut_with_nothing: MockAPIs
+        self,
+        mock_deserialize_template: Mock,
+        mock_deserialize_base: Mock,
+        mock_deserialize_mock_api: Mock,
+        test_data: dict,
+        sut_with_nothing: MockAPIs,
     ):
         assert sut_with_nothing.deserialize(data=test_data) is not None
+        mock_deserialize_template.assert_called_once_with(data="template_setting")
         mock_deserialize_base.assert_called_once_with(data="base_info")
-        if len(test_data.keys()) > 1:
+        if len(test_data.keys()) > 2:
             mock_deserialize_mock_api.assert_called_once_with(data="api_info")
         else:
             mock_deserialize_mock_api.assert_not_called()
@@ -471,7 +590,211 @@ class TestBaseConfig(ConfigTestSpec):
         assert obj.url == _Base_URL
 
 
-class TestMockAPI(ConfigTestSpec):
+class TemplateSettingTestSuite(ConfigTestSpec, ABC):
+    @property
+    @abstractmethod
+    def under_test_data(self) -> dict:
+        pass
+
+    @property
+    @abstractmethod
+    def sut_object(self) -> Type[TemplateSetting]:
+        pass
+
+    @pytest.fixture(scope="function")
+    def sut(self) -> TemplateSetting:
+        args = {
+            "base_file_path": self.under_test_data["base_file_path"],
+            "config_path": self.under_test_data["config_path"],
+            "config_path_format": self.under_test_data["config_path_format"],
+        }
+        return self.sut_object(**args)
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> TemplateSetting:
+        return self.sut_object()
+
+    def test_eq_operation_with_valid_object(self, sut: TemplateSetting, sut_with_nothing: TemplateSetting):
+        sut.base_file_path = "./tmp"
+        super().test_eq_operation_with_valid_object(sut, sut_with_nothing)
+
+    def test_serialize_with_none(self, sut_with_nothing: TemplateSetting):
+        assert sut_with_nothing.serialize() is not None
+        assert sut_with_nothing.base_file_path == "./"
+        assert sut_with_nothing.config_path == ""
+        assert sut_with_nothing.config_path_format == self.under_test_data["config_path_format"]
+
+    def test_value_attributes(self, sut: TemplateSetting):
+        assert sut.base_file_path == self.under_test_data["base_file_path"]
+        assert sut.config_path == self.under_test_data["config_path"]
+        assert sut.config_path_format == self.under_test_data["config_path_format"]
+
+    def _expected_serialize_value(self) -> dict:
+        return self.under_test_data
+
+    def _expected_deserialize_value(self, obj: TemplateSetting) -> None:
+        assert isinstance(obj, self.sut_object)
+        assert obj.base_file_path == self.under_test_data["base_file_path"]
+        assert obj.config_path == self.under_test_data["config_path"]
+        assert obj.config_path_format == self.under_test_data["config_path_format"]
+
+
+class TestTemplateAPI(TemplateSettingTestSuite):
+    @property
+    def under_test_data(self) -> dict:
+        return _Mock_Template_API_Setting
+
+    @property
+    def sut_object(self) -> Type[TemplateSetting]:
+        return TemplateAPI
+
+
+class TestTemplateRequest(TemplateSettingTestSuite):
+    @property
+    def under_test_data(self) -> dict:
+        return _Mock_Template_API_Request_Setting
+
+    @property
+    def sut_object(self) -> Type[TemplateSetting]:
+        return TemplateRequest
+
+
+class TestTemplateResponse(TemplateSettingTestSuite):
+    @property
+    def under_test_data(self) -> dict:
+        return _Mock_Template_API_Response_Setting
+
+    @property
+    def sut_object(self) -> Type[TemplateSetting]:
+        return TemplateResponse
+
+
+class TestTemplateValues(ConfigTestSpec):
+    @pytest.fixture(scope="function")
+    def sut(self) -> TemplateValues:
+        return TemplateValues(
+            api=MOCK_MODEL.template_values_api,
+            request=MOCK_MODEL.template_values_request,
+            response=MOCK_MODEL.template_values_response,
+        )
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> TemplateValues:
+        return TemplateValues()
+
+    def test_eq_operation_with_valid_object(self, sut: _Config, sut_with_nothing: _Config):
+        # NOTE: TemplateConfig has default value
+        assert sut == sut_with_nothing
+
+    def test_value_attributes(self, sut: TemplateValues):
+        assert sut.api == MOCK_MODEL.template_values_api
+        assert sut.request == MOCK_MODEL.template_values_request
+        assert sut.response == MOCK_MODEL.template_values_response
+
+    def test_serialize_with_none(self, sut_with_nothing: TemplateValues):
+        sut_with_nothing.api = None
+        sut_with_nothing.request = None
+        sut_with_nothing.response = None
+        super().test_serialize_with_none(sut_with_nothing)
+
+    def _expected_serialize_value(self) -> dict:
+        return _Mock_Template_Values_Setting
+
+    def _expected_deserialize_value(self, obj: TemplateValues) -> None:
+        assert isinstance(obj, TemplateValues)
+        assert obj.api.serialize() == _Mock_Template_Values_Setting.get("api")
+        assert obj.request.serialize() == _Mock_Template_Values_Setting.get("request")
+        assert obj.response.serialize() == _Mock_Template_Values_Setting.get("response")
+
+
+class TestTemplateApply(ConfigTestSpec):
+    @pytest.fixture(scope="function")
+    def sut(self) -> TemplateApply:
+        return TemplateApply(
+            scan_strategy=_Mock_Template_Apply_Scan_Strategy,
+            api=_Mock_Template_Apply_Has_Tag_Setting.get("api"),
+        )
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> TemplateApply:
+        return TemplateApply(scan_strategy=_Mock_Template_Apply_Scan_Strategy)
+
+    def test_value_attributes(self, sut: TemplateApply):
+        assert sut.scan_strategy == _Mock_Template_Apply_Scan_Strategy
+        assert sut.api == _Mock_Template_Apply_Has_Tag_Setting.get("api")
+
+    def test_serialize_with_none(self, sut_with_nothing: TemplateApply):
+        serialized_data = sut_with_nothing.serialize()
+        assert serialized_data is not None
+        assert serialized_data["scan_strategy"] == _Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy")
+        assert serialized_data["api"] == []
+
+    def _expected_serialize_value(self) -> dict:
+        return _Mock_Template_Apply_Has_Tag_Setting
+
+    def _expected_deserialize_value(self, obj: TemplateApply) -> None:
+        assert isinstance(obj, TemplateApply)
+        assert obj.scan_strategy == _Mock_Template_Apply_Scan_Strategy
+        assert obj.api == _Mock_Template_Apply_Has_Tag_Setting.get("api")
+
+    def test_deserialize_with_missing_strategy(self):
+        with pytest.raises(ValueError) as exc_info:
+            TemplateApply().deserialize(data={"miss strategy": ""})
+        assert re.search(r".{0,32}scan_strategy.{0,32}cannot be empty.{0,32}", str(exc_info.value), re.IGNORECASE)
+
+    @pytest.mark.parametrize(
+        ("scan_strategy", "expected_exception", "regular_expression"),
+        [
+            (None, ValueError, r".{0,64}argument \*scan_strategy\* is missing.{0,64}"),
+            ("invalid strategy", TypeError, r".{0,128}data type is invalid.{0,128}"),
+        ],
+    )
+    def test_serialize_with_invalid_scan_strategy(
+        self,
+        scan_strategy: Any,
+        expected_exception: Exception,
+        regular_expression: str,
+        sut_with_nothing: TemplateApply,
+    ):
+        with pytest.raises(expected_exception) as exc_info:
+            sut_with_nothing.scan_strategy = scan_strategy
+            sut_with_nothing.serialize()
+        assert re.search(regular_expression, str(exc_info.value), re.IGNORECASE)
+
+
+class TestTemplateConfig(ConfigTestSpec):
+    @pytest.fixture(scope="function")
+    def sut(self) -> TemplateConfig:
+        return TemplateConfig(values=MOCK_MODEL.template_values, apply=MOCK_MODEL.template_apply)
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> TemplateConfig:
+        return TemplateConfig()
+
+    def test_value_attributes(self, sut: TemplateConfig):
+        # Verify section *values*
+        assert sut.values.api == MOCK_MODEL.template_values_api
+        assert sut.values.request == MOCK_MODEL.template_values_request
+        assert sut.values.response == MOCK_MODEL.template_values_response
+
+        # Verify section *apply*
+        assert sut.apply == MOCK_MODEL.template_apply
+
+    def test_serialize_with_none(self, sut_with_nothing: TemplateConfig):
+        sut_with_nothing.values = None
+        sut_with_nothing.apply = None
+        super().test_serialize_with_none(sut_with_nothing)
+
+    def _expected_serialize_value(self) -> dict:
+        return _Mock_Template_Setting
+
+    def _expected_deserialize_value(self, obj: TemplateConfig) -> None:
+        assert isinstance(obj, TemplateConfig)
+        assert obj.values.serialize() == _Mock_Template_Setting.get("values")
+        assert obj.apply.serialize() == _Mock_Template_Setting.get("apply")
+
+
+class TestMockAPI(TemplatableConfigTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> MockAPI:
         return MockAPI(url=_Test_URL, http=self._Mock_Model.http, tag=_Test_Tag)
@@ -693,7 +1016,7 @@ class TestMockAPI(ConfigTestSpec):
         assert re.search(r".{0,32}invalid response strategy.{0,32}", str(exc_info.value), re.IGNORECASE)
 
 
-class TestHTTP(ConfigTestSpec):
+class TestHTTP(TemplatableConfigTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> HTTP:
         return HTTP(request=self._Mock_Model.http_request, response=self._Mock_Model.http_response)
@@ -780,7 +1103,7 @@ class TestHTTP(ConfigTestSpec):
         assert obj.response.value == _TestConfig.Response.get("value", None)
 
 
-class TestHTTPReqeust(ConfigTestSpec):
+class TestHTTPReqeust(TemplatableConfigTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> HTTPRequest:
         return HTTPRequest(method=_TestConfig.Request.get("method", None), parameters=[self._Mock_Model.api_parameter])
@@ -989,7 +1312,7 @@ class TestResponseProperty(ConfigTestSpec):
         )
 
 
-class TestHTTPResponse(ConfigTestSpec):
+class TestHTTPResponse(TemplatableConfigTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> HTTPResponse:
         return HTTPResponse(strategy=ResponseStrategy.STRING, value=_Test_HTTP_Resp)
@@ -1142,7 +1465,13 @@ class TestHTTPResponse(ConfigTestSpec):
     def test_valid_deserialize_with_strategy(self, data: dict, expected_response: HTTPResponse):
         assert HTTPResponse().deserialize(data=data) == expected_response
 
-    def test_invalid_deserialize_with_strategy(self):
+    def test_deserialize_with_missing_strategy(self):
         with pytest.raises(ValueError) as exc_info:
             HTTPResponse().deserialize(data={"miss strategy": ""})
         assert re.search(r".{0,32}strategy.{0,32}cannot be empty.{0,32}", str(exc_info.value), re.IGNORECASE)
+
+    def test_serialize_with_invalid_strategy(self, sut_with_nothing: HTTPResponse):
+        with pytest.raises(TypeError) as exc_info:
+            sut_with_nothing.strategy = "invalid strategy"
+            sut_with_nothing.serialize()
+        assert re.search(r".{0,128}data type is invalid.{0,128}", str(exc_info.value), re.IGNORECASE)

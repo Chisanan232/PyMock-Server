@@ -2,7 +2,7 @@ from collections import namedtuple
 from typing import Dict, List
 from unittest.mock import Mock
 
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.enums import ResponseStrategy, TemplateApplyScanStrategy
 
 
 class APIConfigValue:
@@ -33,6 +33,60 @@ _Mock_API_HTTP: dict = {
     "request": Mock,
     "response": Mock,
 }
+
+
+def generate_mock_template(tail_naming: str = "") -> dict:
+    return {
+        "base_file_path": "./",
+        "config_path": "",
+        "config_path_format": "{{ api.tag }}/{{ api.__name__ }}.yaml"
+        if not tail_naming
+        else ("{{ api.tag }}/{{ api.__name__ }}" + f"-{tail_naming}" + ".yaml"),
+    }
+
+
+_Mock_Template_API_Setting: dict = generate_mock_template()
+_Mock_Template_API_Request_Setting: dict = generate_mock_template("request")
+_Mock_Template_API_Response_Setting: dict = generate_mock_template("response")
+
+_Mock_Template_Values_Setting: dict = {
+    "api": _Mock_Template_API_Setting,
+    "request": _Mock_Template_API_Request_Setting,
+    "response": _Mock_Template_API_Response_Setting,
+}
+
+_Mock_Template_Apply_Scan_Strategy: TemplateApplyScanStrategy = TemplateApplyScanStrategy.FILE_NAME_FIRST
+
+_Mock_Template_Apply_Has_Tag_Setting: dict = {
+    "scan_strategy": _Mock_Template_Apply_Scan_Strategy.value,
+    "api": [
+        {"foo": ["get_foo", "put_foo"]},
+        {"foo-boo": ["get_foo-boo_export"]},
+    ],
+}
+
+_Mock_Template_Apply_No_Tag_Setting: dict = {
+    "scan_strategy": _Mock_Template_Apply_Scan_Strategy.value,
+    "api": ["get_foo", "put_foo"],
+}
+
+
+def generate_template_apply(scan_strategy: str, api: List) -> dict:
+    return {
+        "scan_strategy": scan_strategy,
+        "api": api,
+    }
+
+
+_Mock_Template_Setting: dict = {
+    "values": _Mock_Template_Values_Setting,
+    "apply": _Mock_Template_Apply_Has_Tag_Setting,
+}
+
+_Mock_Templatable_Setting: dict = {
+    "apply_template_props": False,
+}
+
 
 # Sample item of iterator
 _Test_Iterable_Parameter_Item_Name: dict = {
@@ -288,6 +342,7 @@ _Foo_Object_Value: dict = {
 
 
 _Mocked_APIs: dict = {
+    "template": _Mock_Template_Setting,
     "base": {"url": _Base_URL},
     "apis": {
         "google_home": _Google_Home_Value,
@@ -317,7 +372,13 @@ class _TestConfig:
     Http: dict = {"request": Request, "response": Response}
     Mock_API: dict = {"url": _Test_URL, "http": Http, "tag": _Test_Tag}
     Base: dict = {"url": _Base_URL}
-    Mock_APIs: dict = {"base": Base, "apis": {"test_config": Mock_API}}
+    Mock_APIs: dict = {
+        "template": _Mock_Template_Setting,
+        "base": Base,
+        "apis": {
+            "test_config": Mock_API,
+        },
+    }
     API_Config: dict = {
         "name": _Config_Name,
         "description": _Config_Description,

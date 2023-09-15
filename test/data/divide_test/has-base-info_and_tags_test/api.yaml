@@ -2,18 +2,19 @@ name: ''
 description: ''
 mocked_apis:
   template:    # Optional
-    api:
-      base_file_path: './'    # Default value should be current path './'
-      config_path:    # Default value should be None or empty string
-      config_path_format: '{{ api.tag }}/{{ api.__name__ }}.yaml'    # ex. ./foo/get_foo.yaml
-    request:
-      base_file_path: './'
-      config_path:
-      config_path_format: '{{ api.tag }}/{{ api.__name__ }}-request.yaml'
-    response:
-      base_file_path: './'
-      config_path:
-      config_path_format: '{{ api.tag }}/{{ api.__name__ }}-response.yaml'
+    values:
+      api:
+        base_file_path: './'    # Default value should be current path './'
+        config_path:    # Default value should be None or empty string
+        config_path_format: '{{ api.tag }}/{{ api.__name__ }}.yaml'    # ex. ./foo/get_foo.yaml
+      request:
+        base_file_path: './'
+        config_path:
+        config_path_format: '{{ api.tag }}/{{ api.__name__ }}-request.yaml'
+      response:
+        base_file_path: './'
+        config_path:
+        config_path_format: '{{ api.tag }}/{{ api.__name__ }}-response.yaml'
     apply:    # Which mocked APIs should apply template values
       # Have 4 different strategy for scanning files to load configuration:
       # 1. by_file_name: auto-use the format to find satisfied file naming to configure
