@@ -26,13 +26,15 @@ from pymock_api.model import (
 from pymock_api.model.api_config import (
     BaseConfig,
     ResponseProperty,
+    TemplateConfig,
+    _Config,
+)
+from pymock_api.model.api_config.template import (
     TemplateAPI,
     TemplateApply,
-    TemplateConfig,
     TemplateRequest,
     TemplateResponse,
     TemplateValues,
-    _Config,
 )
 from pymock_api.model.enums import ResponseStrategy
 
