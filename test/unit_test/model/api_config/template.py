@@ -1,11 +1,9 @@
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Type, Union
-from unittest.mock import Mock, patch
+from typing import Any, Type
 
 import pytest
 
-from pymock_api.model import BaseConfig, MockAPI, MockAPIs
 from pymock_api.model.api_config import TemplateConfig, _Config, _TemplatableConfig
 from pymock_api.model.api_config.template import (
     TemplateAPI,
@@ -17,7 +15,6 @@ from pymock_api.model.api_config.template import (
 )
 
 from ...._values import (
-    _Base_URL,
     _Mock_Templatable_Setting,
     _Mock_Template_API_Request_Setting,
     _Mock_Template_API_Response_Setting,
@@ -26,11 +23,8 @@ from ...._values import (
     _Mock_Template_Apply_Scan_Strategy,
     _Mock_Template_Setting,
     _Mock_Template_Values_Setting,
-    _Test_HTTP_Resp,
-    _Test_URL,
-    _TestConfig,
 )
-from ._base import MOCK_MODEL, MOCK_RETURN_VALUE, ConfigTestSpec, _assertion_msg
+from ._base import MOCK_MODEL, ConfigTestSpec
 
 
 class TemplatableConfigTestSuite(ConfigTestSpec, ABC):
@@ -62,224 +56,6 @@ class TemplatableConfigTestSuite(ConfigTestSpec, ABC):
 
         # Verify
         assert serialized_sut.get("apply_template_props", None) is None
-
-
-class TestMockAPIs(ConfigTestSpec):
-    @pytest.fixture(scope="function")
-    def sut(self) -> MockAPIs:
-        return MockAPIs(
-            template=MOCK_MODEL.template_config, base=self._Mock_Model.base_config, apis=self._Mock_Model.mock_api
-        )
-
-    @pytest.fixture(scope="function")
-    def sut_with_nothing(self) -> MockAPIs:
-        return MockAPIs()
-
-    def test___len__(self, sut: MockAPIs):
-        assert len(sut) == len(
-            self._Mock_Model.mock_api.keys()
-        ), f"The size of *MockAPIs* data object should be same as object '{self._Mock_Model.mock_api}'."
-
-    def test_value_attributes(self, sut: MockAPIs):
-        assert sut.template == MOCK_MODEL.template_config, _assertion_msg
-        assert sut.base == self._Mock_Model.base_config, _assertion_msg
-        assert sut.apis == self._Mock_Model.mock_api, _assertion_msg
-
-    @pytest.mark.parametrize(
-        ("setting_val", "should_call_deserialize"),
-        [
-            ({}, False),
-            ({"test": "test"}, True),
-            (TemplateConfig(), False),
-        ],
-    )
-    @patch.object(TemplateConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
-    def test_prop_template_with_valid_obj(
-        self,
-        mock_deserialize: Mock,
-        setting_val: Union[dict, TemplateConfig],
-        should_call_deserialize: bool,
-        sut_with_nothing: MockAPIs,
-    ):
-        # Run target function
-        sut_with_nothing.template = setting_val
-        # Verify the running result
-        if should_call_deserialize:
-            mock_deserialize.assert_called_once_with(data=setting_val)
-            assert sut_with_nothing.template == MOCK_RETURN_VALUE
-        else:
-            mock_deserialize.assert_not_called()
-            assert sut_with_nothing.template == TemplateConfig()
-
-    @patch.object(TemplateConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
-    def test_prop_template_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: MockAPIs):
-        with pytest.raises(TypeError) as exc_info:
-            sut_with_nothing.template = "Invalid object"
-        mock_deserialize.assert_not_called()
-        assert re.search(r"Setter .{1,32} only accepts .{1,32} type object.", str(exc_info.value), re.IGNORECASE)
-
-    @pytest.mark.parametrize(
-        ("setting_val", "should_call_deserialize"),
-        [
-            ({}, False),
-            ({"test": "test"}, True),
-            (Mock(BaseConfig()), False),
-        ],
-    )
-    @patch.object(BaseConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
-    def test_prop_base_with_valid_obj(
-        self,
-        mock_deserialize: Mock,
-        setting_val: Union[dict, BaseConfig],
-        should_call_deserialize: bool,
-        sut_with_nothing: MockAPIs,
-    ):
-        # Run target function
-        sut_with_nothing.base = setting_val
-        # Verify the running result
-        if should_call_deserialize:
-            mock_deserialize.assert_called_once_with(data=setting_val)
-            assert sut_with_nothing.base == MOCK_RETURN_VALUE
-        else:
-            mock_deserialize.assert_not_called()
-            assert sut_with_nothing.base == (setting_val if setting_val else None)
-
-    @patch.object(BaseConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
-    def test_prop_base_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: MockAPIs):
-        with pytest.raises(TypeError) as exc_info:
-            sut_with_nothing.base = "Invalid object"
-        mock_deserialize.assert_not_called()
-        assert re.search(r"Setter .{1,32} only accepts .{1,32} type object.", str(exc_info.value), re.IGNORECASE)
-
-    @pytest.mark.parametrize(
-        ("setting_val", "should_call_deserialize"),
-        [
-            ({}, False),
-            ({"test": "test"}, True),
-            ({"test": Mock(MockAPI())}, False),
-        ],
-    )
-    @patch.object(MockAPI, "deserialize", return_value=MOCK_RETURN_VALUE)
-    def test_prop_apis_with_valid_obj(
-        self,
-        mock_deserialize: Mock,
-        setting_val: Union[dict, BaseConfig],
-        should_call_deserialize: bool,
-        sut_with_nothing: MockAPIs,
-    ):
-        # Run target function
-        sut_with_nothing.apis = setting_val
-        # Verify the running result
-        if should_call_deserialize:
-            expected_apis = {}
-            for api_name, api_value in setting_val.items():
-                mock_deserialize.assert_called_once_with(data=api_value)
-                expected_apis[api_name] = MOCK_RETURN_VALUE
-                assert sut_with_nothing.apis[api_name] == MOCK_RETURN_VALUE
-            assert sut_with_nothing.apis == expected_apis
-        else:
-            mock_deserialize.assert_not_called()
-            assert sut_with_nothing.apis == setting_val
-
-    @pytest.mark.parametrize(
-        ("setting_val", "expected_err", "err_msg_regex"),
-        [
-            ("Invalid object", TypeError, r"Setter .{1,32} only accepts .{1,32} type object."),
-            ({"t1": "test", "t2": Mock(MockAPI())}, ValueError, r".{1,32} multiple types .{1,64} unify .{1,32} type"),
-        ],
-    )
-    @patch.object(MockAPI, "deserialize", return_value=MOCK_RETURN_VALUE)
-    def test_prop_apis_with_invalid_obj(
-        self,
-        mock_deserialize: Mock,
-        setting_val: Union[str, dict],
-        expected_err: Exception,
-        err_msg_regex,
-        sut_with_nothing: MockAPIs,
-    ):
-        with pytest.raises(expected_err) as exc_info:
-            sut_with_nothing.apis = setting_val
-        mock_deserialize.assert_not_called()
-        assert re.search(err_msg_regex, str(exc_info.value), re.IGNORECASE)
-
-    @pytest.mark.parametrize(
-        "test_data",
-        [
-            {"template": "template_setting", "base": "base_info"},
-            {"template": "template_setting", "base": "base_info", "apis": {"api_name": "api_info"}},
-        ],
-    )
-    @patch.object(MockAPI, "deserialize", return_value=None)
-    @patch.object(BaseConfig, "deserialize", return_value=None)
-    @patch.object(TemplateConfig, "deserialize", return_value=None)
-    def test_deserialize_with_nonideal_value(
-        self,
-        mock_deserialize_template: Mock,
-        mock_deserialize_base: Mock,
-        mock_deserialize_mock_api: Mock,
-        test_data: dict,
-        sut_with_nothing: MockAPIs,
-    ):
-        assert sut_with_nothing.deserialize(data=test_data) is not None
-        mock_deserialize_template.assert_called_once_with(data="template_setting")
-        mock_deserialize_base.assert_called_once_with(data="base_info")
-        if len(test_data.keys()) > 2:
-            mock_deserialize_mock_api.assert_called_once_with(data="api_info")
-        else:
-            mock_deserialize_mock_api.assert_not_called()
-
-    def _expected_serialize_value(self) -> Any:
-        return _TestConfig.Mock_APIs
-
-    def _expected_deserialize_value(self, obj: MockAPIs) -> None:
-        assert isinstance(obj, MockAPIs)
-        assert obj.base.url == _Base_URL
-        assert obj.apis == self._Mock_Model.mock_api
-
-    def test_get_api_config_by_url(self, sut: MockAPIs):
-        api_config = sut.get_api_config_by_url(url=_Test_URL)
-        assert api_config.url == _Test_URL
-        assert api_config.http.request.method == _TestConfig.Request.get("method")
-        assert api_config.http.request.parameters == [self._Mock_Model.api_parameter]
-        assert api_config.http.response.value == _Test_HTTP_Resp
-
-    def test_fail_get_api_config_by_url(self, sut: MockAPIs):
-        api_config = sut.get_api_config_by_url(url="Not exist this path's API config")
-        assert api_config is None
-
-    def test_group_by_url(self, sut_with_nothing: MockAPIs):
-        foo_get_api = MockAPI(url="/foo")
-        foo_get_api.set_request(method="GET")
-
-        foo_post_api = MockAPI(url="/foo")
-        foo_post_api.set_request(method="POST")
-
-        foo_boo_api = MockAPI(url="/foo-boo")
-        foo_boo_api.set_request(method="GET")
-
-        sut_with_nothing.apis = {
-            "get_foo": foo_get_api,
-            "post_foo": foo_post_api,
-            "get_foo_boo": foo_boo_api,
-        }
-
-        aggregated_apis = sut_with_nothing.group_by_url()
-
-        assert len(aggregated_apis.keys()) == 2
-
-        assert "/foo" in aggregated_apis.keys() and "/foo-boo" in aggregated_apis.keys()
-        for val in aggregated_apis.values():
-            assert isinstance(val, list)
-            assert False not in list(map(lambda a: isinstance(a, MockAPI), val))
-
-        assert len(aggregated_apis["/foo"]) == 2
-        assert len(aggregated_apis["/foo-boo"]) == 1
-
-        assert [a.http.request.method for a in aggregated_apis["/foo"]] == [
-            foo_get_api.http.request.method,
-            foo_post_api.http.request.method,
-        ]
-        assert [a.http.request.method for a in aggregated_apis["/foo-boo"]] == [foo_boo_api.http.request.method]
 
 
 class TemplateSettingTestSuite(ConfigTestSpec, ABC):

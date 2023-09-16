@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
 from ..._utils import import_web_lib
-from ...model import MockAPIs
+from ...model.api_config import MockAPIs
 from ...model.api_config.apis import MockAPI
 from .code_generator import (
     BaseWebServerCodeGenerator,

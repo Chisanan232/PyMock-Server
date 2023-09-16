@@ -6,15 +6,8 @@ content ...
 from argparse import Namespace
 from typing import Optional
 
-from .api_config import APIConfig
-from .api_config.apis import (
-    HTTP,
-    APIParameter,
-    HTTPRequest,
-    HTTPResponse,
-    MockAPI,
-    MockAPIs,
-)
+from .api_config import APIConfig, MockAPIs
+from .api_config.apis import HTTP, APIParameter, HTTPRequest, HTTPResponse, MockAPI
 from .api_config.base import BaseConfig
 from .cmd_args import (
     DeserializeParsedArgs,
