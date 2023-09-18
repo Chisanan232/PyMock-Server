@@ -206,7 +206,8 @@ class MockAPIs(_Config):
         # FIXME: This logic should align with the template apply strategy.
         else:
             # Run dividing feature process
-            # 1. Use the templatable values set target file paths and list all of them (hint: glob.glob).
+            # 1. Use the templatable values set target file paths and list all of them
+            #       (hint: glob.glob, os.path.isdir, os.path.isfile).
             # 2. Read the file and deserialize its content as data model.
             # 3. Set the data model at current object's property.
             # 4. Run step #1 to step #3 again and again until finish reading all files.
