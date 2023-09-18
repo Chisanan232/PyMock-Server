@@ -203,6 +203,15 @@ class MockAPIs(_Config):
         if mocked_apis_info:
             for mock_api_name in mocked_apis_info.keys():
                 self.apis[mock_api_name] = MockAPI().deserialize(data=mocked_apis_info.get(mock_api_name, None))
+        # FIXME: This logic should align with the template apply strategy.
+        else:
+            # Run dividing feature process
+            # 1. Use the templatable values set target file paths and list all of them (hint: glob.glob).
+            # 2. Read the file and deserialize its content as data model.
+            # 3. Set the data model at current object's property.
+            # 4. Run step #1 to step #3 again and again until finish reading all files.
+            # 5. Extract the core logic as template method to object *TemplatableConfig*.
+            pass
         return self
 
     def get_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Optional[MockAPI]:
