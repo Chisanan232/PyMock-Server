@@ -2,6 +2,7 @@ name: ''
 description: ''
 mocked_apis:
   template:    # Optional
+    activate: true
     values:
       api:
         base_file_path: './'    # Default value should be current path './'

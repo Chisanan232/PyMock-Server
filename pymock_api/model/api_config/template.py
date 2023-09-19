@@ -126,25 +126,29 @@ class TemplateApply(_Config):
 
 @dataclass(eq=False)
 class TemplateConfig(_Config):
+    activate: bool = False
     values: TemplateValues = TemplateValues()
     apply: TemplateApply = TemplateApply(scan_strategy=TemplateApplyScanStrategy.FILE_NAME_FIRST)
 
     def _compare(self, other: "TemplateConfig") -> bool:
-        return self.values == other.values and self.apply == other.apply
+        return self.activate == other.activate and self.values == other.values and self.apply == other.apply
 
     def serialize(self, data: Optional["TemplateConfig"] = None) -> Optional[Dict[str, Any]]:
+        activate: bool = self.activate or self._get_prop(data, prop="activate")
         values: TemplateValues = self.values or self._get_prop(data, prop="values")
         apply: TemplateApply = self.apply or self._get_prop(data, prop="apply")
-        if not (values and apply):
+        if not (values and apply and activate is not None):
             # TODO: Should it ranse an exception outside?
             return None
         return {
+            "activate": activate,
             "values": values.serialize(),
             "apply": apply.serialize(),
         }
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfig"]:
+        self.activate = data.get("activate", False)
         self.values = TemplateValues().deserialize(data.get("values", {}))
         self.apply = TemplateApply().deserialize(data.get("apply", {}))
         return self
