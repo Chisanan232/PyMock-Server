@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
 from ...._utils import YAML
@@ -8,21 +9,21 @@ from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 
 
+@dataclass(eq=False)
 class HTTP(_TemplatableConfig):
     """*The **http** section in **mocked_apis.<api>***"""
 
-    _request: Optional[HTTPRequest]
-    _response: Optional[HTTPResponse]
+    request: Optional[HTTPRequest] = None
+    response: Optional[HTTPResponse] = None
 
-    def __init__(self, request: Optional[HTTPRequest] = None, response: Optional[HTTPResponse] = None):
-        self._request = request
-        self._response = response
+    _request: Optional[HTTPRequest] = field(init=False, repr=False)
+    _response: Optional[HTTPResponse] = field(init=False, repr=False)
 
     def _compare(self, other: "HTTP") -> bool:
         templatable_config = super()._compare(other)
         return templatable_config and self.request == other.request and self.response == other.response
 
-    @property
+    @property  # type: ignore[no-redef]
     def request(self) -> Optional[HTTPRequest]:
         return self._request
 
@@ -33,12 +34,15 @@ class HTTP(_TemplatableConfig):
                 self._request = HTTPRequest().deserialize(data=req)
             elif isinstance(req, HTTPRequest):
                 self._request = req
+            elif isinstance(req, property):
+                # For initialing
+                self._request = None
             else:
                 raise TypeError("Setter *HTTP.request* only accepts dict or HTTPRequest type object.")
         else:
             self._request = None
 
-    @property
+    @property  # type: ignore[no-redef]
     def response(self) -> Optional[HTTPResponse]:
         return self._response
 
@@ -49,6 +53,9 @@ class HTTP(_TemplatableConfig):
                 self._response = HTTPResponse().deserialize(data=resp)
             elif isinstance(resp, HTTPResponse):
                 self._response = resp
+            elif isinstance(resp, property):
+                # For initialing
+                self._response = None
             else:
                 raise TypeError("Setter *HTTP.response* only accepts dict or HTTPResponse type object.")
         else:
@@ -106,31 +113,31 @@ class HTTP(_TemplatableConfig):
         return self
 
 
+@dataclass(eq=False)
 class MockAPI(_TemplatableConfig):
     """*The **<api>** section in **mocked_apis***"""
 
-    _url: Optional[str]
-    _http: Optional[HTTP]
-    _tag: str = ""
+    url: str = field(default_factory=str)
+    http: Optional[HTTP] = None
+    tag: str = field(default_factory=str)
 
-    def __init__(self, url: Optional[str] = None, http: Optional[HTTP] = None, tag: str = ""):
-        self._url = url
-        self._http = http
-        self._tag = tag
+    _url: str = field(init=False, repr=False)
+    _http: Optional[HTTP] = field(init=False, repr=False)
+    _tag: str = field(init=False, repr=False)
 
     def _compare(self, other: "MockAPI") -> bool:
         templatable_config = super()._compare(other)
         return templatable_config and self.url == other.url and self.http == other.http
 
-    @property
+    @property  # type: ignore[no-redef]
     def url(self) -> Optional[str]:
         return self._url
 
     @url.setter
-    def url(self, url: Optional[str]) -> None:
+    def url(self, url: str) -> None:
         self._url = url
 
-    @property
+    @property  # type: ignore[no-redef]
     def http(self) -> Optional[HTTP]:
         return self._http
 
@@ -141,23 +148,30 @@ class MockAPI(_TemplatableConfig):
                 self._http = HTTP().deserialize(data=http)
             elif isinstance(http, HTTP):
                 self._http = http
+            elif isinstance(http, property):
+                # For initialing
+                self._http = None
             else:
-                raise TypeError("Setter *MockAPI.http* only accepts dict or HTTP type object.")
+                raise TypeError(f"Setter *MockAPI.http* only accepts dict or HTTP type object. But it got '{http}'.")
         else:
             self._http = None
 
-    @property
+    @property  # type: ignore[no-redef]
     def tag(self) -> str:
         return self._tag
 
     @tag.setter
     def tag(self, tag: str) -> None:
-        if not isinstance(tag, str):
-            raise TypeError("Setter *MockAPI.tag* only accepts str type value.")
-        self._tag = tag
+        if isinstance(tag, str):
+            self._tag = tag
+        elif isinstance(tag, property):
+            # For initialing
+            self._tag = ""
+        else:
+            raise TypeError(f"Setter *MockAPI.tag* only accepts str type value. But it got '{tag}'.")
 
     def serialize(self, data: Optional["MockAPI"] = None) -> Optional[Dict[str, Any]]:
-        url = (data.url if data else None) or self._url
+        url = (data.url if data else None) or self.url
         http = (data.http if data else None) or self.http
         if not (url and http):
             return None
