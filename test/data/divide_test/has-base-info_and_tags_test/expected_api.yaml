@@ -83,7 +83,7 @@ mocked_apis:
               type: list
               format:
       tag: 'foo'
-    get_foo_boo_export:
+    get_foo-boo_export:
       url: '/foo-boo/export'
       http:
         request:
