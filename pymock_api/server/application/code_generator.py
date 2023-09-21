@@ -67,7 +67,7 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
         if isinstance(api_config, list):
             url = api_name
         elif isinstance(api_config, MockAPI):
-            url = api_config.url  # type: ignore[assignment]
+            url = api_config.url
         else:
             raise TypeError
         self._record_api_params_info(url=self.url_path(url=url, base_url=base_url), api_config=api_config)
