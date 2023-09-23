@@ -248,7 +248,7 @@ class MockAPIs(_Config):
             # Deserialize YAML config content as PyMock data model
             mock_api_config = self._deserialize_template_yaml_config(yaml_config)
             # Set the data model in config
-            self.apis[mock_api_config_name] = mock_api_config
+            self._set_config_in_data_model(mock_api_config, key=mock_api_config_name)
 
         # TODO: Modify to use property *config_path* or *config_path_format*
         # all_paths = glob.glob(f"{base_path}**/[!_*]*.yaml", recursive=True)
@@ -268,6 +268,12 @@ class MockAPIs(_Config):
 
     def _deserialize_template_yaml_config(self, yaml_config: Dict) -> MockAPI:
         return MockAPI().deserialize(data=yaml_config)
+
+    def _set_config_in_data_model(self, config: MockAPI, **kwargs) -> None:
+        path = kwargs.get("key", None)
+        if not path:
+            raise ValueError(f"Miss necessary argument *key* in '{self.__class__.__name__}._set_config_in_data_model'.")
+        self.apis[path] = config
 
     def get_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Optional[MockAPI]:
         url = url.replace(base.url, "") if base else url
