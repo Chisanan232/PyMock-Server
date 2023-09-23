@@ -244,7 +244,10 @@ class MockAPIs(_Config):
 
         def _set_mock_api_config(_path: str) -> None:
             mock_api_config_name = os.path.basename(_path).replace(".yaml", "")
-            mock_api_config = MockAPI().deserialize(data=self._configuration.read(_path))
+            yaml_config = self._configuration.read(_path)
+            # Deserialize YAML config content as PyMock data model
+            mock_api_config = self._deserialize_template_yaml_config(yaml_config)
+            # Set the data model in config
             self.apis[mock_api_config_name] = mock_api_config
 
         # TODO: Modify to use property *config_path* or *config_path_format*
@@ -262,6 +265,9 @@ class MockAPIs(_Config):
                 assert os.path.isfile(path) is True
                 # Doesn't have tag, it's config
                 _set_mock_api_config(path)
+
+    def _deserialize_template_yaml_config(self, yaml_config: Dict) -> MockAPI:
+        return MockAPI().deserialize(data=yaml_config)
 
     def get_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Optional[MockAPI]:
         url = url.replace(base.url, "") if base else url
