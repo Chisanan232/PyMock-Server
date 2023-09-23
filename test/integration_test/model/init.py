@@ -28,7 +28,7 @@ def _get_all_yaml_for_dividing() -> None:
     different_scenarios_data_folder = os.listdir(_get_path())
     for f in different_scenarios_data_folder:
         yaml_dir = _get_path(scenario_folder=f, yaml_file_naming="api.yaml")
-        expected_yaml_dir = _get_path(scenario_folder=f, yaml_file_naming="expected_api.yaml")
+        expected_yaml_dir = _get_path(scenario_folder=f, yaml_file_naming="_expected_api.yaml")
         global DIVIDING_YAML_PATHS
         for yaml_config_path, expected_yaml_config_path in zip(glob.glob(yaml_dir), glob.glob(expected_yaml_dir)):
             one_test_scenario = (yaml_config_path, expected_yaml_config_path)
@@ -61,12 +61,8 @@ class TestInitFunctions:
             expected_err_msg = f"The target configuration file {self.not_exist_file_path} doesn't exist."
             assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
 
-    @pytest.mark.skip(reason="FIXME: Feature still not implement")
     @pytest.mark.parametrize(("yaml_config_path", "expected_yaml_config_path"), DIVIDING_YAML_PATHS)
     def test_load_config_with_dividing_feature(self, yaml_config_path: str, expected_yaml_config_path: str):
-        print(f"[DEBUG in test] yaml_config_path: {yaml_config_path}")
-        print(f"[DEBUG in test] expected_yaml_config_path: {expected_yaml_config_path}")
-
         # Run utility function loads configuration to get config data
         dividing_config = load_config(yaml_config_path)
         expected_config = load_config(expected_yaml_config_path)
@@ -84,17 +80,16 @@ class TestInitFunctions:
         assert expected_config.apis is not None
 
         # Check section *base*
-        assert dividing_config.apis.base is not None
-        assert expected_config.apis.base is not None
-        assert dividing_config.apis.base.serialize() == expected_config.apis.base.serialize()
+        if "no-base" not in yaml_config_path:
+            assert dividing_config.apis.base is not None
+            assert expected_config.apis.base is not None
+            assert dividing_config.apis.base.serialize() == expected_config.apis.base.serialize()
 
         # Check section *apis*
         assert dividing_config.apis.apis is not None
         assert expected_config.apis.apis is not None
         expected_config_apis = expected_config.apis.apis
         for api_name, api_config in dividing_config.apis.apis.items():
-            print(f"[DEBUG in test] api_name: {api_name}")
-            print(f"[DEBUG in test] api_config: {api_config}")
             expected_api_config = expected_config_apis[api_name]
             assert api_config is not None
             assert expected_api_config is not None
