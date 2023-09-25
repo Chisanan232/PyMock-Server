@@ -251,14 +251,16 @@ class MockAPIs(_Config):
             self._set_config_in_data_model(mock_api_config, key=mock_api_config_name)
 
         # TODO: Modify to use property *config_path* or *config_path_format*
+        customize_config_file_format = "**"
+        config_file_format = f"[!_**]{customize_config_file_format}"
         # all_paths = glob.glob(f"{base_path}**/[!_*]*.yaml", recursive=True)
-        all_paths = glob.glob(f"{base_path}[!_**]**")
+        all_paths = glob.glob(f"{base_path}{config_file_format}")
         all_paths.remove(f"{base_path}{self.config_file_name}")
         for path in all_paths:
             if os.path.isdir(path):
                 # Has tag as directory
                 # TODO: Modify to use property *config_path* or *config_path_format*
-                for path_with_tag in glob.glob(f"{path}/[!_]**.yaml"):
+                for path_with_tag in glob.glob(f"{path}/{config_file_format}.yaml"):
                     # In the tag directory, it's config
                     _set_mock_api_config(path_with_tag)
             else:
