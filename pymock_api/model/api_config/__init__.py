@@ -2,8 +2,6 @@
 
 content ...
 """
-import glob
-import os
 from typing import Any, Dict, List, Optional, Union
 
 from ..._utils import YAML
@@ -29,7 +27,6 @@ class MockAPIs(_Config, TemplateConfigLoadable):
     _base: Optional[BaseConfig]
     _apis: Dict[str, Optional[MockAPI]]
 
-    _config_file_name: str = "api.yaml"
     _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
 
@@ -101,14 +98,6 @@ class MockAPIs(_Config, TemplateConfigLoadable):
                 self._apis = apis  # type: ignore
         else:
             self._apis = {}
-
-    @property
-    def config_file_name(self) -> str:
-        return self._config_file_name
-
-    @config_file_name.setter
-    def config_file_name(self, n: str) -> None:
-        self._config_file_name = n
 
     @property
     def set_template_in_config(self) -> bool:
@@ -224,49 +213,9 @@ class MockAPIs(_Config, TemplateConfigLoadable):
                     self._load_templatable_config()
         return self
 
-    def _load_templatable_config(self) -> None:
-        # Run dividing feature process
-        # 1. Use the templatable values set target file paths and list all of them
-        #       (hint: glob.glob, os.path.isdir, os.path.isfile).
-        # 2. Read the file and deserialize its content as data model.
-        # 3. Set the data model at current object's property.
-        # 4. Run step #1 to step #3 again and again until finish reading all files.
-        # 5. Extract the core logic as template method to object *TemplatableConfig*.
-        base_path = self.template.values.api.base_file_path
-        # # Has tag or doesn't have tag
-        # apply_apis = self.template.apply.api
-        # if isinstance(apply_apis[0], str):
-        #     pass
-        # elif isinstance(apply_apis[0], dict):
-        #     pass
-        # else:
-        #     pass
-
-        def _set_mock_api_config(_path: str) -> None:
-            mock_api_config_name = os.path.basename(_path).replace(".yaml", "")
-            yaml_config = self._configuration.read(_path)
-            # Deserialize YAML config content as PyMock data model
-            mock_api_config = self._deserialize_template_yaml_config(yaml_config)
-            # Set the data model in config
-            self._set_config_in_data_model(mock_api_config, key=mock_api_config_name)
-
-        # TODO: Modify to use property *config_path* or *config_path_format*
-        customize_config_file_format = "**"
-        config_file_format = f"[!_**]{customize_config_file_format}"
-        # all_paths = glob.glob(f"{base_path}**/[!_*]*.yaml", recursive=True)
-        all_paths = glob.glob(f"{base_path}{config_file_format}")
-        all_paths.remove(f"{base_path}{self.config_file_name}")
-        for path in all_paths:
-            if os.path.isdir(path):
-                # Has tag as directory
-                # TODO: Modify to use property *config_path* or *config_path_format*
-                for path_with_tag in glob.glob(f"{path}/{config_file_format}.yaml"):
-                    # In the tag directory, it's config
-                    _set_mock_api_config(path_with_tag)
-            else:
-                assert os.path.isfile(path) is True
-                # Doesn't have tag, it's config
-                _set_mock_api_config(path)
+    @property
+    def _config_base_path(self) -> str:
+        return self.template.values.api.base_file_path
 
     def _deserialize_template_yaml_config(self, yaml_config: Dict) -> MockAPI:
         return MockAPI().deserialize(data=yaml_config)

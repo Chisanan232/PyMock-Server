@@ -1,7 +1,10 @@
+import glob
+import os
 from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
+from ..._utils.file_opt import YAML, _BaseFileOperation
 from ...model.enums import TemplateApplyScanStrategy
 from ._base import _Config
 
@@ -125,8 +128,66 @@ class TemplateApply(_Config):
 
 
 class TemplateConfigLoadable(metaclass=ABCMeta):
-    @abstractmethod
+    """The data model which could load template configuration."""
+
+    _config_file_name: str = "api.yaml"
+    _configuration: _BaseFileOperation = YAML()
+
+    @property
+    def config_file_name(self) -> str:
+        return self._config_file_name
+
+    @config_file_name.setter
+    def config_file_name(self, n: str) -> None:
+        self._config_file_name = n
+
     def _load_templatable_config(self) -> None:
+        # Run dividing feature process
+        # 1. Use the templatable values set target file paths and list all of them
+        #       (hint: glob.glob, os.path.isdir, os.path.isfile).
+        # 2. Read the file and deserialize its content as data model.
+        # 3. Set the data model at current object's property.
+        # 4. Run step #1 to step #3 again and again until finish reading all files.
+        # 5. Extract the core logic as template method to object *TemplatableConfig*.
+
+        # # Has tag or doesn't have tag
+        # apply_apis = self.template.apply.api
+        # if isinstance(apply_apis[0], str):
+        #     pass
+        # elif isinstance(apply_apis[0], dict):
+        #     pass
+        # else:
+        #     pass
+
+        def _set_mock_api_config(_path: str) -> None:
+            mock_api_config_name = os.path.basename(_path).replace(".yaml", "")
+            yaml_config = self._configuration.read(_path)
+            # Deserialize YAML config content as PyMock data model
+            mock_api_config = self._deserialize_template_yaml_config(yaml_config)
+            # Set the data model in config
+            self._set_config_in_data_model(mock_api_config, key=mock_api_config_name)
+
+        # TODO: Modify to use property *config_path* or *config_path_format*
+        customize_config_file_format = "**"
+        config_file_format = f"[!_**]{customize_config_file_format}"
+        # all_paths = glob.glob(f"{self._base_path}**/[!_*]*.yaml", recursive=True)
+        all_paths = glob.glob(f"{self._config_base_path}{config_file_format}")
+        all_paths.remove(f"{self._config_base_path}{self.config_file_name}")
+        for path in all_paths:
+            if os.path.isdir(path):
+                # Has tag as directory
+                # TODO: Modify to use property *config_path* or *config_path_format*
+                for path_with_tag in glob.glob(f"{path}/{config_file_format}.yaml"):
+                    # In the tag directory, it's config
+                    _set_mock_api_config(path_with_tag)
+            else:
+                assert os.path.isfile(path) is True
+                # Doesn't have tag, it's config
+                _set_mock_api_config(path)
+
+    @property
+    @abstractmethod
+    def _config_base_path(self) -> str:
         pass
 
     @abstractmethod
@@ -140,6 +201,8 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
 
 @dataclass(eq=False)
 class TemplateConfig(_Config):
+    """The data model which could be set details attribute by section *template*."""
+
     activate: bool = False
     values: TemplateValues = TemplateValues()
     apply: TemplateApply = TemplateApply(scan_strategy=TemplateApplyScanStrategy.FILE_NAME_FIRST)
