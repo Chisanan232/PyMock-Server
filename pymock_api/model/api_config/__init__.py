@@ -19,10 +19,10 @@ from .apis import (
 )
 from .base import BaseConfig
 from .item import IteratorItem
-from .template import TemplateConfig
+from .template import TemplateConfig, TemplateConfigLoadable
 
 
-class MockAPIs(_Config):
+class MockAPIs(_Config, TemplateConfigLoadable):
     """*The **mocked_apis** section*"""
 
     _template: TemplateConfig
@@ -271,7 +271,7 @@ class MockAPIs(_Config):
     def _deserialize_template_yaml_config(self, yaml_config: Dict) -> MockAPI:
         return MockAPI().deserialize(data=yaml_config)
 
-    def _set_config_in_data_model(self, config: MockAPI, **kwargs) -> None:
+    def _set_config_in_data_model(self, config: MockAPI, **kwargs) -> None:  # type: ignore[override]
         path = kwargs.get("key", None)
         if not path:
             raise ValueError(f"Miss necessary argument *key* in '{self.__class__.__name__}._set_config_in_data_model'.")

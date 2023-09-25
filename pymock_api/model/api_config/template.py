@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
@@ -122,6 +122,20 @@ class TemplateApply(_Config):
             raise ValueError("Schema key *scan_strategy* cannot be empty.")
         self.api = data.get("api")  # type: ignore[assignment]
         return self
+
+
+class TemplateConfigLoadable(metaclass=ABCMeta):
+    @abstractmethod
+    def _load_templatable_config(self) -> None:
+        pass
+
+    @abstractmethod
+    def _deserialize_template_yaml_config(self, yaml_config: Dict) -> _Config:
+        pass
+
+    @abstractmethod
+    def _set_config_in_data_model(self, config: _Config, **kwargs) -> None:
+        pass
 
 
 @dataclass(eq=False)
