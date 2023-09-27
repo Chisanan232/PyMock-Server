@@ -171,32 +171,35 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
                 # TODO: Modify to use property *config_path* or *config_path_format*
                 for path_with_tag in glob.glob(f"{path}/{config_file_format}.yaml"):
                     # In the tag directory, it's config
-                    self._set_template_config(path_with_tag)
+                    self._deserialize_and_set_template_config(path_with_tag)
             else:
                 assert os.path.isfile(path) is True
                 # Doesn't have tag, it's config
-                self._set_template_config(path)
+                self._deserialize_and_set_template_config(path)
 
     @property
     @abstractmethod
     def _config_base_path(self) -> str:
         pass
 
-    def _set_template_config(self, _path: str) -> None:
-        # Read YAML config
-        mock_api_config_name = os.path.basename(_path).replace(".yaml", "")
-        yaml_config = self._configuration.read(_path)
-        # Deserialize YAML config content as PyMock data model
-        mock_api_config = self._deserialize_template_yaml_config(yaml_config)
-        # Set the data model in config
-        self._set_config_in_data_model(mock_api_config, key=mock_api_config_name)
+    def _deserialize_and_set_template_config(self, path: str) -> None:
+        config = self._deserialize_template_config(path)
+        assert config is not None, "Configuration should not be empty."
+        self._set_template_config(config)
 
+    def _deserialize_template_config(self, path: str) -> Optional[_Config]:
+        # Read YAML config
+        yaml_config = self._configuration.read(path)
+        # Deserialize YAML config content as PyMock data model
+        return self._deserialize_as_template_config.deserialize(yaml_config)
+
+    @property
     @abstractmethod
-    def _deserialize_template_yaml_config(self, yaml_config: Dict) -> _Config:
+    def _deserialize_as_template_config(self) -> _Config:
         pass
 
     @abstractmethod
-    def _set_config_in_data_model(self, config: _Config, **kwargs) -> None:
+    def _set_template_config(self, config: _Config, **kwargs) -> None:
         pass
 
 

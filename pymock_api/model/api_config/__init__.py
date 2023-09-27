@@ -2,6 +2,7 @@
 
 content ...
 """
+import os
 from typing import Any, Dict, List, Optional, Union
 
 from ..._utils import YAML
@@ -217,14 +218,20 @@ class MockAPIs(_Config, TemplateConfigLoadable):
     def _config_base_path(self) -> str:
         return self.template.values.api.base_file_path
 
-    def _deserialize_template_yaml_config(self, yaml_config: Dict) -> MockAPI:
-        return MockAPI().deserialize(data=yaml_config)
+    def _deserialize_and_set_template_config(self, path: str) -> None:
+        config = self._deserialize_template_config(path)
+        assert isinstance(config, MockAPI)
+        self._set_template_config(config, path=path)
 
-    def _set_config_in_data_model(self, config: MockAPI, **kwargs) -> None:  # type: ignore[override]
-        path = kwargs.get("key", None)
-        if not path:
-            raise ValueError(f"Miss necessary argument *key* in '{self.__class__.__name__}._set_config_in_data_model'.")
-        self.apis[path] = config
+    @property
+    def _deserialize_as_template_config(self) -> MockAPI:
+        return MockAPI()
+
+    def _set_template_config(self, config: MockAPI, **kwargs) -> None:  # type: ignore[override]
+        # Read YAML config
+        mock_api_config_name = os.path.basename(kwargs["path"]).replace(".yaml", "")
+        # Set the data model in config
+        self.apis[mock_api_config_name] = config
 
     def get_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Optional[MockAPI]:
         url = url.replace(base.url, "") if base else url
