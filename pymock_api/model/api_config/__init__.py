@@ -218,11 +218,6 @@ class MockAPIs(_Config, TemplateConfigLoadable):
     def _config_base_path(self) -> str:
         return self.template.values.api.base_file_path
 
-    def _deserialize_and_set_template_config(self, path: str) -> None:
-        config = self._deserialize_template_config(path)
-        assert isinstance(config, MockAPI)
-        self._set_template_config(config, path=path)
-
     @property
     def _deserialize_as_template_config(self) -> MockAPI:
         return MockAPI()

@@ -185,7 +185,10 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     def _deserialize_and_set_template_config(self, path: str) -> None:
         config = self._deserialize_template_config(path)
         assert config is not None, "Configuration should not be empty."
-        self._set_template_config(config)
+        args = {
+            "path": path,
+        }
+        self._set_template_config(config, **args)
 
     def _deserialize_template_config(self, path: str) -> Optional[_Config]:
         # Read YAML config
