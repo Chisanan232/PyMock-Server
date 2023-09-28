@@ -21,6 +21,7 @@ from ...._values import (
     _Mock_Template_API_Setting,
     _Mock_Template_Apply_Has_Tag_Setting,
     _Mock_Template_Apply_Scan_Strategy,
+    _Mock_Template_Config_Activate,
     _Mock_Template_Setting,
     _Mock_Template_Values_Setting,
 )
@@ -233,22 +234,28 @@ class TestTemplateApply(ConfigTestSpec):
 class TestTemplateConfig(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> TemplateConfig:
-        return TemplateConfig(values=MOCK_MODEL.template_values, apply=MOCK_MODEL.template_apply)
+        return TemplateConfig(
+            activate=_Mock_Template_Config_Activate, values=MOCK_MODEL.template_values, apply=MOCK_MODEL.template_apply
+        )
 
     @pytest.fixture(scope="function")
     def sut_with_nothing(self) -> TemplateConfig:
         return TemplateConfig()
 
     def test_value_attributes(self, sut: TemplateConfig):
-        # Verify section *values*
+        # Verify properties of section *template*
+        assert sut.activate == MOCK_MODEL.template_config.activate
+
+        # Verify section *template.values*
         assert sut.values.api == MOCK_MODEL.template_values_api
         assert sut.values.request == MOCK_MODEL.template_values_request
         assert sut.values.response == MOCK_MODEL.template_values_response
 
-        # Verify section *apply*
+        # Verify section *template.apply*
         assert sut.apply == MOCK_MODEL.template_apply
 
     def test_serialize_with_none(self, sut_with_nothing: TemplateConfig):
+        sut_with_nothing.activate = None
         sut_with_nothing.values = None
         sut_with_nothing.apply = None
         super().test_serialize_with_none(sut_with_nothing)
@@ -258,5 +265,6 @@ class TestTemplateConfig(ConfigTestSpec):
 
     def _expected_deserialize_value(self, obj: TemplateConfig) -> None:
         assert isinstance(obj, TemplateConfig)
+        assert obj.activate == _Mock_Template_Setting.get("activate")
         assert obj.values.serialize() == _Mock_Template_Setting.get("values")
         assert obj.apply.serialize() == _Mock_Template_Setting.get("apply")

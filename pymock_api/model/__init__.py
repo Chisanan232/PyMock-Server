@@ -107,7 +107,10 @@ def deserialize_swagger_api_config(data: dict) -> SwaggerConfig:
 
 
 def load_config(path: str) -> Optional[APIConfig]:
-    return APIConfig().from_yaml(path=path)
+    api_config = APIConfig()
+    only_config_file_name = path.split("/")[-1]
+    api_config.config_file_name = only_config_file_name
+    return api_config.from_yaml(path=path)
 
 
 def generate_empty_config(name: str = "", description: str = "") -> APIConfig:

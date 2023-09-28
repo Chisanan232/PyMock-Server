@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from pymock_api.model import MockAPI
-from pymock_api.model.api_config.apis import APIParameter
+from pymock_api.model.api_config.apis import HTTP, APIParameter
 from pymock_api.server.application.code_generator import (
     BaseWebServerCodeGenerator,
     FastAPICodeGenerator,
@@ -23,7 +23,7 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
 
     def test_generate_pycode_about_annotating_function(self, sut: BaseWebServerCodeGenerator):
         for_test_api_name = "/Function/name"
-        api = Mock(MockAPI(url=Mock(), http=Mock()))
+        api = Mock(MockAPI(url=Mock(), http=Mock(HTTP())))
         api.http.request.parameters = [APIParameter().deserialize(p) for p in _Test_API_Parameters]
 
         annotate_function_pycode = sut.annotate_function(api_name=for_test_api_name, api_config=api)
@@ -36,7 +36,7 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
         for_test_api_name = "Function name"
         for_test_url = "this is an url path"
         for_test_req_method = "HTTP method"
-        api_config = Mock(MockAPI(url=Mock(), http=Mock()))
+        api_config = Mock(MockAPI(url=Mock(), http=Mock(HTTP())))
         api_config.url = for_test_url
         api_config.http.request.method = for_test_req_method
 

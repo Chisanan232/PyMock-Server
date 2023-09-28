@@ -2,6 +2,7 @@
 
 content ...
 """
+import os
 from typing import Any, Dict, List, Optional, Union
 
 from ..._utils import YAML
@@ -17,16 +18,17 @@ from .apis import (
 )
 from .base import BaseConfig
 from .item import IteratorItem
-from .template import TemplateConfig
+from .template import TemplateConfig, TemplateConfigLoadable
 
 
-class MockAPIs(_Config):
+class MockAPIs(_Config, TemplateConfigLoadable):
     """*The **mocked_apis** section*"""
 
     _template: TemplateConfig
     _base: Optional[BaseConfig]
     _apis: Dict[str, Optional[MockAPI]]
 
+    _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
 
     def __init__(
@@ -203,7 +205,28 @@ class MockAPIs(_Config):
         if mocked_apis_info:
             for mock_api_name in mocked_apis_info.keys():
                 self.apis[mock_api_name] = MockAPI().deserialize(data=mocked_apis_info.get(mock_api_name, None))
+        # FIXME: This logic should align with the template apply strategy.
+        else:
+            if self.template.activate:
+                scan_strategy = self.template.apply.scan_strategy
+                # TODO: Modify to builder pattern to control the process
+                if scan_strategy:
+                    self._load_templatable_config()
         return self
+
+    @property
+    def _config_base_path(self) -> str:
+        return self.template.values.api.base_file_path
+
+    @property
+    def _deserialize_as_template_config(self) -> MockAPI:
+        return MockAPI()
+
+    def _set_template_config(self, config: MockAPI, **kwargs) -> None:  # type: ignore[override]
+        # Read YAML config
+        mock_api_config_name = os.path.basename(kwargs["path"]).replace(".yaml", "")
+        # Set the data model in config
+        self.apis[mock_api_config_name] = config
 
     def get_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Optional[MockAPI]:
         url = url.replace(base.url, "") if base else url
@@ -238,6 +261,7 @@ class APIConfig(_Config):
     _description: str = ""
     _apis: Optional[MockAPIs]
 
+    _config_file_name: str = "api.yaml"
     _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
 
@@ -298,6 +322,14 @@ class APIConfig(_Config):
     @set_template_in_config.setter
     def set_template_in_config(self, _set: bool) -> None:
         self._need_template_in_config = _set
+
+    @property
+    def config_file_name(self) -> str:
+        return self._config_file_name
+
+    @config_file_name.setter
+    def config_file_name(self, n: str) -> None:
+        self._config_file_name = n
 
     def serialize(self, data: Optional["APIConfig"] = None) -> Optional[Dict[str, Any]]:
         name = (data.name if data else None) or self.name
@@ -382,6 +414,7 @@ class APIConfig(_Config):
         if mocked_apis:
             mock_apis_data_model = MockAPIs()
             mock_apis_data_model.set_template_in_config = self.set_template_in_config
+            mock_apis_data_model.config_file_name = self.config_file_name
             self.apis = mock_apis_data_model.deserialize(data=mocked_apis)
         return self
 

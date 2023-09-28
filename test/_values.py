@@ -78,7 +78,10 @@ def generate_template_apply(scan_strategy: str, api: List) -> dict:
     }
 
 
+_Mock_Template_Config_Activate: bool = False
+
 _Mock_Template_Setting: dict = {
+    "activate": _Mock_Template_Config_Activate,
     "values": _Mock_Template_Values_Setting,
     "apply": _Mock_Template_Apply_Has_Tag_Setting,
 }

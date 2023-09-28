@@ -4,6 +4,7 @@ from test._values import (
     _Base_URL,
     _Mock_Template_Apply_Has_Tag_Setting,
     _Mock_Template_Apply_Scan_Strategy,
+    _Mock_Template_Config_Activate,
     _Test_API_Parameter,
     _Test_HTTP_Resp,
     _Test_Tag,
@@ -68,7 +69,9 @@ class MockModel:
 
     @property
     def template_config(self) -> TemplateConfig:
-        return TemplateConfig(values=self.template_values, apply=self.template_apply)
+        return TemplateConfig(
+            activate=_Mock_Template_Config_Activate, values=self.template_values, apply=self.template_apply
+        )
 
     @property
     def base_config(self) -> BaseConfig:

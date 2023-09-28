@@ -1,18 +1,20 @@
+# Swagger API documentation config from Kotlin Spring library
 name: ''
 description: ''
 mocked_apis:
   template:    # Optional
+    activate: true
     values:
       api:
-        base_file_path: './'    # Default value should be current path './'
+        base_file_path: './test/data/divide_test/has-base-info_and_tags_test/'    # Default value should be current path './'
         config_path:    # Default value should be None or empty string
         config_path_format: '{{ api.tag }}/{{ api.__name__ }}.yaml'    # ex. ./foo/get_foo.yaml
       request:
-        base_file_path: './'
+        base_file_path: './test/data/divide_test/has-base-info_and_tags_test/'
         config_path:
         config_path_format: '{{ api.tag }}/{{ api.__name__ }}-request.yaml'
       response:
-        base_file_path: './'
+        base_file_path: './test/data/divide_test/has-base-info_and_tags_test/'
         config_path:
         config_path_format: '{{ api.tag }}/{{ api.__name__ }}-response.yaml'
     apply:    # Which mocked APIs should apply template values
