@@ -1,5 +1,7 @@
+import fnmatch
 import glob
 import os
+import re
 from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
@@ -169,17 +171,23 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
             if os.path.isdir(path):
                 # Has tag as directory
                 # TODO: Modify to use property *config_path* or *config_path_format*
-                for path_with_tag in glob.glob(f"{path}/{config_file_format}.yaml"):
+                for path_with_tag in glob.glob(f"{path}/{self._config_file_format}.yaml"):
                     # In the tag directory, it's config
                     self._deserialize_and_set_template_config(path_with_tag)
             else:
                 assert os.path.isfile(path) is True
-                # Doesn't have tag, it's config
-                self._deserialize_and_set_template_config(path)
+                if fnmatch.fnmatch(path, f"{self._config_file_format}.yaml"):
+                    # Doesn't have tag, it's config
+                    self._deserialize_and_set_template_config(path)
 
     @property
     @abstractmethod
     def _config_base_path(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def _config_file_format(self) -> str:
         pass
 
     def _deserialize_and_set_template_config(self, path: str) -> None:

@@ -219,14 +219,20 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         return self.template.values.api.base_file_path
 
     @property
+    def _config_file_format(self) -> str:
+        return self.template.values.api.config_path_format
+
+    @property
     def _deserialize_as_template_config(self) -> MockAPI:
         return MockAPI()
 
     def _set_template_config(self, config: MockAPI, **kwargs) -> None:  # type: ignore[override]
         # Read YAML config
         mock_api_config_name = os.path.basename(kwargs["path"]).replace(".yaml", "")
+        format_rule_string = self._config_file_format.replace("**", "")
+        mock_api_config_key = mock_api_config_name.replace(format_rule_string, "")
         # Set the data model in config
-        self.apis[mock_api_config_name] = config
+        self.apis[mock_api_config_key] = config
 
     def get_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Optional[MockAPI]:
         url = url.replace(base.url, "") if base else url
