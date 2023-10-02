@@ -255,6 +255,7 @@ class _TemplatableConfig(_Config, ABC):
     config_path: str = field(default_factory=str)
     config_path_format: str = field(default_factory=str)
 
+    _current_template: TemplateConfig = TemplateConfig()
     _has_apply_template_props_in_config: bool = False
 
     def _compare(self, other: SelfType) -> bool:

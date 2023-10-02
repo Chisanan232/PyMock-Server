@@ -109,8 +109,8 @@ class HTTP(_TemplatableConfig):
         super().deserialize(data)
         req = data.get("request", None)
         resp = data.get("response", None)
-        self.request = HTTPRequest().deserialize(data=req) if req else None
-        self.response = HTTPResponse().deserialize(data=resp) if resp else None
+        self.request = HTTPRequest(_current_template=self._current_template).deserialize(data=req) if req else None
+        self.response = HTTPResponse(_current_template=self._current_template).deserialize(data=resp) if resp else None
         return self
 
 
@@ -222,7 +222,7 @@ class MockAPI(_TemplatableConfig):
         super().deserialize(data)
         self.url = data.get("url", None)
         http_info = data.get("http", None)
-        self.http = HTTP().deserialize(data=http_info) if http_info else None
+        self.http = HTTP(_current_template=self._current_template).deserialize(data=http_info) if http_info else None
         self.tag = data.get("tag", "")
         return self
 

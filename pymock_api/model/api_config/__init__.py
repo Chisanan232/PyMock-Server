@@ -204,7 +204,9 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         self.apis = {}
         if mocked_apis_info:
             for mock_api_name in mocked_apis_info.keys():
-                self.apis[mock_api_name] = MockAPI().deserialize(data=mocked_apis_info.get(mock_api_name, None))
+                self.apis[mock_api_name] = MockAPI(_current_template=self.template).deserialize(
+                    data=mocked_apis_info.get(mock_api_name, None)
+                )
         # FIXME: This logic should align with the template apply strategy.
         else:
             if self.template.activate:
@@ -224,7 +226,7 @@ class MockAPIs(_Config, TemplateConfigLoadable):
 
     @property
     def _deserialize_as_template_config(self) -> MockAPI:
-        return MockAPI()
+        return MockAPI(_current_template=self.template)
 
     def _set_template_config(self, config: MockAPI, **kwargs) -> None:  # type: ignore[override]
         # Read YAML config
