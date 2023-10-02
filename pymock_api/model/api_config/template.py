@@ -272,8 +272,11 @@ class _TemplatableConfig(_Config, ABC):
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional[SelfType]:
-        apply_template_props = data.get("apply_template_props", None)
-        if apply_template_props is not None:
-            self._has_apply_template_props_in_config = True
-            self.apply_template_props = apply_template_props
+        def _update_template_prop(key: Any) -> None:
+            value = data.get(key, None)
+            if value is not None:
+                self._has_apply_template_props_in_config = True
+                setattr(self, key, value)
+
+        _update_template_prop("apply_template_props")
         return self
