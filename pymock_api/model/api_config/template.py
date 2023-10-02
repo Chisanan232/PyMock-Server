@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from ..._utils.file_opt import YAML, _BaseFileOperation
 from ...model.enums import TemplateApplyScanStrategy
-from ._base import _Config
+from ._base import SelfType, _Config
 
 
 @dataclass(eq=False)
@@ -244,3 +244,35 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     @abstractmethod
     def _set_template_config(self, config: _Config, **kwargs) -> None:
         pass
+
+
+@dataclass(eq=False)
+class _TemplatableConfig(_Config, ABC):
+    apply_template_props: bool = True
+
+    # The settings which could be set by section *template* or override the values
+    base_file_path: str = "./"
+    config_path: str = field(default_factory=str)
+    config_path_format: str = field(default_factory=str)
+
+    _has_apply_template_props_in_config: bool = False
+
+    def _compare(self, other: SelfType) -> bool:
+        return self.apply_template_props == other.apply_template_props
+
+    def serialize(self, data: Optional[SelfType] = None) -> Optional[Dict[str, Any]]:
+        apply_template_props: bool = self._get_prop(data, prop="apply_template_props")
+        if self._has_apply_template_props_in_config:
+            return {
+                "apply_template_props": apply_template_props,
+            }
+        else:
+            return {}
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional[SelfType]:
+        apply_template_props = data.get("apply_template_props", None)
+        if apply_template_props is not None:
+            self._has_apply_template_props_in_config = True
+            self.apply_template_props = apply_template_props
+        return self

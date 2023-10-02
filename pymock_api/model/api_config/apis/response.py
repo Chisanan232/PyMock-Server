@@ -2,8 +2,9 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from ...enums import ResponseStrategy
-from .._base import _Config, _TemplatableConfig
+from .._base import _Config
 from ..item import IteratorItem
+from ..template import _TemplatableConfig
 
 
 @dataclass(eq=False)

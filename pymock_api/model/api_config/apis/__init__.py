@@ -4,7 +4,8 @@ from typing import Any, Dict, List, Optional, Union
 from ...._utils import YAML
 from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
-from .._base import _Config, _TemplatableConfig
+from .._base import _Config
+from ..template import _TemplatableConfig
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 
