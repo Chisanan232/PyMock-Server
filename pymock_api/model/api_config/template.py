@@ -279,4 +279,7 @@ class _TemplatableConfig(_Config, ABC):
                 setattr(self, key, value)
 
         _update_template_prop("apply_template_props")
+        _update_template_prop("base_file_path")
+        _update_template_prop("config_path")
+        _update_template_prop("config_path_format")
         return self
