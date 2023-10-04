@@ -1,6 +1,7 @@
 import fnmatch
 import glob
 import os
+import pathlib
 import re
 from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
@@ -234,11 +235,14 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         # Read YAML config
         yaml_config = self._configuration.read(path)
         # Deserialize YAML config content as PyMock data model
-        return self._deserialize_as_template_config.deserialize(yaml_config)
+        config = self._deserialize_as_template_config
+        config.base_file_path = str(pathlib.Path(path).parent)
+        config.config_path = pathlib.Path(path).name
+        return config.deserialize(yaml_config)
 
     @property
     @abstractmethod
-    def _deserialize_as_template_config(self) -> _Config:
+    def _deserialize_as_template_config(self) -> "_TemplatableConfig":
         pass
 
     @abstractmethod
@@ -255,8 +259,12 @@ class _TemplatableConfig(_Config, ABC):
     config_path: str = field(default_factory=str)
     config_path_format: str = field(default_factory=str)
 
+    # Attributes for inner usage
     _current_template: TemplateConfig = TemplateConfig()
     _has_apply_template_props_in_config: bool = False
+
+    # Component for inner usage
+    _configuration: _BaseFileOperation = YAML()
 
     def _compare(self, other: SelfType) -> bool:
         return self.apply_template_props == other.apply_template_props
@@ -283,3 +291,23 @@ class _TemplatableConfig(_Config, ABC):
         _update_template_prop("config_path")
         _update_template_prop("config_path_format")
         return self
+
+    def _get_dividing_config(self, data: dict) -> dict:
+        base_path = self.base_file_path or self._template_base_file_path
+        config_file_path = self.config_path or self._template_config_file_path
+        dividing_config_path = str(pathlib.Path(base_path, config_file_path))
+        if os.path.exists(dividing_config_path):
+            assert os.path.isfile(dividing_config_path) is True
+            dividing_data = self._configuration.read(dividing_config_path)
+            data.update(**dividing_data)
+        return data
+
+    @property
+    @abstractmethod
+    def _template_base_file_path(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def _template_config_file_path(self) -> str:
+        pass

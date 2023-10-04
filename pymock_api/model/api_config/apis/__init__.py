@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 from ...._utils import YAML
 from ...._utils.file_opt import JSON
@@ -106,12 +106,32 @@ class HTTP(_TemplatableConfig):
             A **HTTP** type object.
 
         """
+
+        def _deserialize_data_model(data_model: Type[_TemplatableConfig], _data: dict) -> Optional[_TemplatableConfig]:
+            if _data:
+                config = data_model(_current_template=self._current_template)
+                config.base_file_path = self.base_file_path
+                config.config_path = self.config_path.replace(
+                    "-http", "-request" if issubclass(data_model, HTTPRequest) else "-response"
+                )
+                return config.deserialize(data=_data)
+            else:
+                return None
+
         super().deserialize(data)
         req = data.get("request", None)
         resp = data.get("response", None)
-        self.request = HTTPRequest(_current_template=self._current_template).deserialize(data=req) if req else None
-        self.response = HTTPResponse(_current_template=self._current_template).deserialize(data=resp) if resp else None
+        self.request = _deserialize_data_model(HTTPRequest, req)  # type: ignore[assignment]
+        self.response = _deserialize_data_model(HTTPResponse, resp)  # type: ignore[assignment]
         return self
+
+    @property
+    def _template_base_file_path(self) -> str:
+        return ""
+
+    @property
+    def _template_config_file_path(self) -> str:
+        return ""
 
 
 @dataclass(eq=False)
@@ -219,10 +239,25 @@ class MockAPI(_TemplatableConfig):
             A **MockAPI** type object.
 
         """
+
+        def _deserialize_data_model(data_model: Type[_TemplatableConfig], _data: dict) -> Optional[_TemplatableConfig]:
+            if _data:
+                config = data_model(_current_template=self._current_template)
+                config.base_file_path = self.base_file_path
+                config.config_path = self.config_path.replace("-api", "-http")
+                return config.deserialize(data=_data)
+            else:
+                return None
+
         super().deserialize(data)
+
+        # FIXME: Extract the running process order as a single function
+        if self.apply_template_props:
+            data = self._get_dividing_config(data)
+
         self.url = data.get("url", None)
         http_info = data.get("http", None)
-        self.http = HTTP(_current_template=self._current_template).deserialize(data=http_info) if http_info else None
+        self.http = _deserialize_data_model(HTTP, http_info)  # type: ignore[assignment]
         self.tag = data.get("tag", "")
         return self
 
@@ -282,3 +317,11 @@ class MockAPI(_TemplatableConfig):
             return YAML().serialize(_ensure_getting_serialized_data())
         else:
             raise ValueError(f"Not support the format feature as {f}.")
+
+    @property
+    def _template_base_file_path(self) -> str:
+        return self._current_template.values.api.base_file_path
+
+    @property
+    def _template_config_file_path(self) -> str:
+        return self._current_template.values.api.config_path_format

@@ -1,6 +1,9 @@
+import glob
+import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from ...._utils.file_opt import YAML, _BaseFileOperation
 from ...enums import ResponseStrategy
 from .._base import _Config
 from ..item import IteratorItem
@@ -180,6 +183,11 @@ class HTTPResponse(_TemplatableConfig):
 
         """
         super().deserialize(data)
+
+        # FIXME: Extract the running process order as a single function
+        if self.apply_template_props:
+            data = self._get_dividing_config(data)
+
         self.strategy = ResponseStrategy.to_enum(data.get("strategy", None))
         if not self.strategy:
             raise ValueError("Schema key *strategy* cannot be empty.")
@@ -193,3 +201,11 @@ class HTTPResponse(_TemplatableConfig):
         else:
             raise NotImplementedError
         return self
+
+    @property
+    def _template_base_file_path(self) -> str:
+        return self._current_template.values.response.base_file_path
+
+    @property
+    def _template_config_file_path(self) -> str:
+        return self._current_template.values.response.config_path_format
