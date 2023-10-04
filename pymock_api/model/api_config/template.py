@@ -55,19 +55,19 @@ class TemplateSetting(_Config, ABC):
 class TemplateAPI(TemplateSetting):
     @property
     def _default_config_path_format(self) -> str:
-        return "{{ api.tag }}/{{ api.__name__ }}.yaml"
+        return "**-api.yaml"
 
 
 class TemplateRequest(TemplateSetting):
     @property
     def _default_config_path_format(self) -> str:
-        return "{{ api.tag }}/{{ api.__name__ }}-request.yaml"
+        return "**-request.yaml"
 
 
 class TemplateResponse(TemplateSetting):
     @property
     def _default_config_path_format(self) -> str:
-        return "{{ api.tag }}/{{ api.__name__ }}-response.yaml"
+        return "**-response.yaml"
 
 
 @dataclass(eq=False)
