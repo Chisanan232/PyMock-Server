@@ -208,12 +208,11 @@ class MockAPIs(_Config, TemplateConfigLoadable):
                     data=mocked_apis_info.get(mock_api_name, None)
                 )
         # FIXME: This logic should align with the template apply strategy.
-        else:
-            if self.template.activate:
-                scan_strategy = self.template.apply.scan_strategy
-                # TODO: Modify to builder pattern to control the process
-                if scan_strategy:
-                    self._load_templatable_config()
+        if self.template.activate:
+            scan_strategy = self.template.apply.scan_strategy
+            # TODO: Modify to builder pattern to control the process
+            if scan_strategy:
+                self._load_templatable_config()
         return self
 
     @property
