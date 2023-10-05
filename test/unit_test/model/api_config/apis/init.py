@@ -255,7 +255,7 @@ class TestHTTP(TemplatableConfigTestSuite):
         ("setting_val", "should_call_deserialize"),
         [
             ({"test": "test"}, True),
-            (Mock(HTTPRequest()), False),
+            (MOCK_MODEL.http_request, False),
         ],
     )
     @patch.object(HTTPRequest, "deserialize", return_value=MOCK_RETURN_VALUE)
