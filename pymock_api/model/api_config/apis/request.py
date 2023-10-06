@@ -1,8 +1,12 @@
+import glob
+import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from .._base import _Config, _TemplatableConfig
+from ...._utils.file_opt import YAML, _BaseFileOperation
+from .._base import _Config
 from ..item import IteratorItem
+from ..template import _TemplatableConfig
 
 
 @dataclass(eq=False)
@@ -78,6 +82,8 @@ class HTTPRequest(_TemplatableConfig):
     method: str = field(default_factory=str)
     parameters: List[APIParameter] = field(default_factory=list)
 
+    _configuration: _BaseFileOperation = YAML()
+
     def _compare(self, other: "HTTPRequest") -> bool:
         templatable_config = super()._compare(other)
         return templatable_config and self.method == other.method and self.parameters == other.parameters
@@ -122,12 +128,25 @@ class HTTPRequest(_TemplatableConfig):
 
         """
         super().deserialize(data)
+
+        # FIXME: Extract the running process order as a single function
+        if self.apply_template_props:
+            data = self._get_dividing_config(data)
+
         self.method = data.get("method", None)
         parameters: List[dict] = data.get("parameters", None)
         if parameters and not isinstance(parameters, list):
             raise TypeError("Argument *parameters* should be a list type value.")
         self.parameters = [APIParameter().deserialize(data=parameter) for parameter in parameters] if parameters else []
         return self
+
+    # @property
+    # def _template_base_file_path(self) -> str:
+    #     return self._current_template.values.request.base_file_path
+    #
+    # @property
+    # def _template_config_file_path(self) -> str:
+    #     return self._current_template.values.request.config_path_format
 
     def get_one_param_by_name(self, name: str) -> Optional[APIParameter]:
         for param in self.parameters:

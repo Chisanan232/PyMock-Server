@@ -6,15 +6,15 @@ mocked_apis:
     activate: true
     values:
       api:
-        base_file_path: './test/data/divide_test/has-base-info_and_tags_test/'    # Default value should be current path './'
+        base_file_path: './test/data/divide_test/has-base-info_and_tags_has_mocked_apis_with_divide_http_test/'    # Default value should be current path './'
         config_path:    # Default value should be None or empty string
         config_path_format: '**-api'    # ex. ./foo/get_foo.yaml
       request:
-        base_file_path: './test/data/divide_test/has-base-info_and_tags_test/'
+        base_file_path: './test/data/divide_test/has-base-info_and_tags_has_mocked_apis_with_divide_http_test/'
         config_path:
         config_path_format: '**-request'
       response:
-        base_file_path: './test/data/divide_test/has-base-info_and_tags_test/'
+        base_file_path: './test/data/divide_test/has-base-info_and_tags_has_mocked_apis_with_divide_http_test/'
         config_path:
         config_path_format: '**-response'
     apply:    # Which mocked APIs should apply template values
@@ -32,3 +32,9 @@ mocked_apis:
           - get_foo-boo_export
   base:
     url: '/api/v1/test'
+  apis:
+    put_foo:
+      apply_template_props: True
+      base_file_path: './test/data/divide_test/has-base-info_and_tags_has_mocked_apis_with_divide_http_test/foo'
+      config_path:
+      config_path_format: '**-api'

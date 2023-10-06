@@ -39,13 +39,11 @@ def generate_mock_template(tail_naming: str = "") -> dict:
     return {
         "base_file_path": "./",
         "config_path": "",
-        "config_path_format": "{{ api.tag }}/{{ api.__name__ }}.yaml"
-        if not tail_naming
-        else ("{{ api.tag }}/{{ api.__name__ }}" + f"-{tail_naming}" + ".yaml"),
+        "config_path_format": "**.yaml" if not tail_naming else ("**" + f"-{tail_naming}" + ".yaml"),
     }
 
 
-_Mock_Template_API_Setting: dict = generate_mock_template()
+_Mock_Template_API_Setting: dict = generate_mock_template("api")
 _Mock_Template_API_Request_Setting: dict = generate_mock_template("request")
 _Mock_Template_API_Response_Setting: dict = generate_mock_template("response")
 

@@ -1,5 +1,4 @@
-from abc import ABC, ABCMeta, abstractmethod
-from dataclasses import dataclass, field
+from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, Dict, Optional
 
 # The truly semantically is more near like following:
@@ -52,35 +51,3 @@ class _Config(metaclass=ABCMeta):
         if not hasattr(data, prop) and not hasattr(self, prop):
             raise AttributeError(f"Cannot find attribute {prop} in objects {data} or {self}.")
         return (getattr(data, prop) if data else None) or getattr(self, prop)
-
-
-@dataclass(eq=False)
-class _TemplatableConfig(_Config, ABC):
-    apply_template_props: bool = True
-
-    # The settings which could be set by section *template* or override the values
-    base_file_path: str = "./"
-    config_path: str = field(default_factory=str)
-    config_path_format: str = field(default_factory=str)
-
-    _has_apply_template_props_in_config: bool = False
-
-    def _compare(self, other: SelfType) -> bool:
-        return self.apply_template_props == other.apply_template_props
-
-    def serialize(self, data: Optional[SelfType] = None) -> Optional[Dict[str, Any]]:
-        apply_template_props: bool = self._get_prop(data, prop="apply_template_props")
-        if self._has_apply_template_props_in_config:
-            return {
-                "apply_template_props": apply_template_props,
-            }
-        else:
-            return {}
-
-    @_Config._ensure_process_with_not_empty_value
-    def deserialize(self, data: Dict[str, Any]) -> Optional[SelfType]:
-        apply_template_props = data.get("apply_template_props", None)
-        if apply_template_props is not None:
-            self._has_apply_template_props_in_config = True
-            self.apply_template_props = apply_template_props
-        return self

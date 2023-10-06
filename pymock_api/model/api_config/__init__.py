@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
-from ._base import _Config, _TemplatableConfig
+from ._base import _Config
 from .apis import (
     HTTP,
     APIParameter,
@@ -18,7 +18,7 @@ from .apis import (
 )
 from .base import BaseConfig
 from .item import IteratorItem
-from .template import TemplateConfig, TemplateConfigLoadable
+from .template import TemplateConfig, TemplateConfigLoadable, _TemplatableConfig
 
 
 class MockAPIs(_Config, TemplateConfigLoadable):
@@ -204,14 +204,15 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         self.apis = {}
         if mocked_apis_info:
             for mock_api_name in mocked_apis_info.keys():
-                self.apis[mock_api_name] = MockAPI().deserialize(data=mocked_apis_info.get(mock_api_name, None))
+                self.apis[mock_api_name] = MockAPI(_current_template=self.template).deserialize(
+                    data=mocked_apis_info.get(mock_api_name, None)
+                )
         # FIXME: This logic should align with the template apply strategy.
-        else:
-            if self.template.activate:
-                scan_strategy = self.template.apply.scan_strategy
-                # TODO: Modify to builder pattern to control the process
-                if scan_strategy:
-                    self._load_templatable_config()
+        if self.template.activate:
+            scan_strategy = self.template.apply.scan_strategy
+            # TODO: Modify to builder pattern to control the process
+            if scan_strategy:
+                self._load_templatable_config()
         return self
 
     @property
@@ -219,14 +220,20 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         return self.template.values.api.base_file_path
 
     @property
+    def _config_file_format(self) -> str:
+        return self.template.values.api.config_path_format
+
+    @property
     def _deserialize_as_template_config(self) -> MockAPI:
-        return MockAPI()
+        return MockAPI(_current_template=self.template)
 
     def _set_template_config(self, config: MockAPI, **kwargs) -> None:  # type: ignore[override]
         # Read YAML config
         mock_api_config_name = os.path.basename(kwargs["path"]).replace(".yaml", "")
+        format_rule_string = self._config_file_format.replace("**", "")
+        mock_api_config_key = mock_api_config_name.replace(format_rule_string, "")
         # Set the data model in config
-        self.apis[mock_api_config_name] = config
+        self.apis[mock_api_config_key] = config
 
     def get_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Optional[MockAPI]:
         url = url.replace(base.url, "") if base else url

@@ -1,12 +1,15 @@
+import fnmatch
 import glob
 import os
+import pathlib
+import re
 from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
 from ..._utils.file_opt import YAML, _BaseFileOperation
 from ...model.enums import TemplateApplyScanStrategy
-from ._base import _Config
+from ._base import SelfType, _Config
 
 
 @dataclass(eq=False)
@@ -52,19 +55,19 @@ class TemplateSetting(_Config, ABC):
 class TemplateAPI(TemplateSetting):
     @property
     def _default_config_path_format(self) -> str:
-        return "{{ api.tag }}/{{ api.__name__ }}.yaml"
+        return "**-api.yaml"
 
 
 class TemplateRequest(TemplateSetting):
     @property
     def _default_config_path_format(self) -> str:
-        return "{{ api.tag }}/{{ api.__name__ }}-request.yaml"
+        return "**-request.yaml"
 
 
 class TemplateResponse(TemplateSetting):
     @property
     def _default_config_path_format(self) -> str:
-        return "{{ api.tag }}/{{ api.__name__ }}-response.yaml"
+        return "**-response.yaml"
 
 
 @dataclass(eq=False)
@@ -127,6 +130,38 @@ class TemplateApply(_Config):
         return self
 
 
+@dataclass(eq=False)
+class TemplateConfig(_Config):
+    """The data model which could be set details attribute by section *template*."""
+
+    activate: bool = False
+    values: TemplateValues = TemplateValues()
+    apply: TemplateApply = TemplateApply(scan_strategy=TemplateApplyScanStrategy.FILE_NAME_FIRST)
+
+    def _compare(self, other: "TemplateConfig") -> bool:
+        return self.activate == other.activate and self.values == other.values and self.apply == other.apply
+
+    def serialize(self, data: Optional["TemplateConfig"] = None) -> Optional[Dict[str, Any]]:
+        activate: bool = self.activate or self._get_prop(data, prop="activate")
+        values: TemplateValues = self.values or self._get_prop(data, prop="values")
+        apply: TemplateApply = self.apply or self._get_prop(data, prop="apply")
+        if not (values and apply and activate is not None):
+            # TODO: Should it ranse an exception outside?
+            return None
+        return {
+            "activate": activate,
+            "values": values.serialize(),
+            "apply": apply.serialize(),
+        }
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfig"]:
+        self.activate = data.get("activate", False)
+        self.values = TemplateValues().deserialize(data.get("values", {}))
+        self.apply = TemplateApply().deserialize(data.get("apply", {}))
+        return self
+
+
 class TemplateConfigLoadable(metaclass=ABCMeta):
     """The data model which could load template configuration."""
 
@@ -169,17 +204,23 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
             if os.path.isdir(path):
                 # Has tag as directory
                 # TODO: Modify to use property *config_path* or *config_path_format*
-                for path_with_tag in glob.glob(f"{path}/{config_file_format}.yaml"):
+                for path_with_tag in glob.glob(f"{path}/{self._config_file_format}.yaml"):
                     # In the tag directory, it's config
                     self._deserialize_and_set_template_config(path_with_tag)
             else:
                 assert os.path.isfile(path) is True
-                # Doesn't have tag, it's config
-                self._deserialize_and_set_template_config(path)
+                if fnmatch.fnmatch(path, f"{self._config_file_format}.yaml"):
+                    # Doesn't have tag, it's config
+                    self._deserialize_and_set_template_config(path)
 
     @property
     @abstractmethod
     def _config_base_path(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def _config_file_format(self) -> str:
         pass
 
     def _deserialize_and_set_template_config(self, path: str) -> None:
@@ -194,11 +235,14 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         # Read YAML config
         yaml_config = self._configuration.read(path)
         # Deserialize YAML config content as PyMock data model
-        return self._deserialize_as_template_config.deserialize(yaml_config)
+        config = self._deserialize_as_template_config
+        config.base_file_path = str(pathlib.Path(path).parent)
+        config.config_path = pathlib.Path(path).name
+        return config.deserialize(yaml_config)
 
     @property
     @abstractmethod
-    def _deserialize_as_template_config(self) -> _Config:
+    def _deserialize_as_template_config(self) -> "_TemplatableConfig":
         pass
 
     @abstractmethod
@@ -207,32 +251,66 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
 
 
 @dataclass(eq=False)
-class TemplateConfig(_Config):
-    """The data model which could be set details attribute by section *template*."""
+class _TemplatableConfig(_Config, ABC):
+    apply_template_props: bool = True
 
-    activate: bool = False
-    values: TemplateValues = TemplateValues()
-    apply: TemplateApply = TemplateApply(scan_strategy=TemplateApplyScanStrategy.FILE_NAME_FIRST)
+    # The settings which could be set by section *template* or override the values
+    base_file_path: str = "./"
+    config_path: str = field(default_factory=str)
+    config_path_format: str = field(default_factory=str)
 
-    def _compare(self, other: "TemplateConfig") -> bool:
-        return self.activate == other.activate and self.values == other.values and self.apply == other.apply
+    # Attributes for inner usage
+    _current_template: TemplateConfig = TemplateConfig()
+    _has_apply_template_props_in_config: bool = False
 
-    def serialize(self, data: Optional["TemplateConfig"] = None) -> Optional[Dict[str, Any]]:
-        activate: bool = self.activate or self._get_prop(data, prop="activate")
-        values: TemplateValues = self.values or self._get_prop(data, prop="values")
-        apply: TemplateApply = self.apply or self._get_prop(data, prop="apply")
-        if not (values and apply and activate is not None):
-            # TODO: Should it ranse an exception outside?
-            return None
-        return {
-            "activate": activate,
-            "values": values.serialize(),
-            "apply": apply.serialize(),
-        }
+    # Component for inner usage
+    _configuration: _BaseFileOperation = YAML()
+
+    def _compare(self, other: SelfType) -> bool:
+        return self.apply_template_props == other.apply_template_props
+
+    def serialize(self, data: Optional[SelfType] = None) -> Optional[Dict[str, Any]]:
+        apply_template_props: bool = self._get_prop(data, prop="apply_template_props")
+        if self._has_apply_template_props_in_config:
+            return {
+                "apply_template_props": apply_template_props,
+            }
+        else:
+            return {}
 
     @_Config._ensure_process_with_not_empty_value
-    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfig"]:
-        self.activate = data.get("activate", False)
-        self.values = TemplateValues().deserialize(data.get("values", {}))
-        self.apply = TemplateApply().deserialize(data.get("apply", {}))
+    def deserialize(self, data: Dict[str, Any]) -> Optional[SelfType]:
+        def _update_template_prop(key: Any) -> None:
+            value = data.get(key, None)
+            if value is not None:
+                self._has_apply_template_props_in_config = True
+                setattr(self, key, value)
+
+        _update_template_prop("apply_template_props")
+        _update_template_prop("base_file_path")
+        _update_template_prop("config_path")
+        _update_template_prop("config_path_format")
         return self
+
+    def _get_dividing_config(self, data: dict) -> dict:
+        # base_path = self.base_file_path or self._template_base_file_path
+        # config_file_path = self.config_path or self._template_config_file_path
+        base_path = self.base_file_path
+        config_file_path = self.config_path
+        dividing_config_path = str(pathlib.Path(base_path, config_file_path))
+        if dividing_config_path and os.path.exists(dividing_config_path) and os.path.isfile(dividing_config_path):
+            # assert os.path.isfile(dividing_config_path) is True
+            dividing_data = self._configuration.read(dividing_config_path)
+            data.update(**dividing_data)
+        return data
+
+    # FIXME: Wait for make sure the spec of configuration
+    # @property
+    # @abstractmethod
+    # def _template_base_file_path(self) -> str:
+    #     pass
+    #
+    # @property
+    # @abstractmethod
+    # def _template_config_file_path(self) -> str:
+    #     pass

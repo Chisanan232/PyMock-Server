@@ -6,15 +6,15 @@ mocked_apis:
     activate: true
     values:
       api:
-        base_file_path: './test/data/divide_test/has-base-info_test/'
+        base_file_path: './test/data/divide_test/has-base-info_divide_http_test/'
         config_path:
         config_path_format: '**-api'
       request:
-        base_file_path: './test/data/divide_test/has-base-info_test/'
+        base_file_path: './test/data/divide_test/has-base-info_divide_http_test/'
         config_path:
         config_path_format: '**-request'
       response:
-        base_file_path: './test/data/divide_test/has-base-info_test/'
+        base_file_path: './test/data/divide_test/has-base-info_divide_http_test/'
         config_path:
         config_path_format: '**-response'
     apply:
@@ -23,3 +23,8 @@ mocked_apis:
         - get_foo
   base:
     url: '/api/v1/test'
+  apis:
+    get_foo:
+      apply_template_props: True
+      config_path:
+      config_path_format: '**-api'

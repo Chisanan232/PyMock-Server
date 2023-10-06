@@ -8,15 +8,15 @@ mocked_apis:
       api:
         base_file_path: './test/data/divide_test/no-base-info_test/'
         config_path:
-        config_path_format: '{{ api.tag }}/{{ api.__name__ }}.yaml'
+        config_path_format: '**-api'
       request:
         base_file_path: './test/data/divide_test/no-base-info_test/'
         config_path:
-        config_path_format: '{{ api.tag }}/{{ api.__name__ }}-request.yaml'
+        config_path_format: '**-request'
       response:
         base_file_path: './test/data/divide_test/no-base-info_test/'
         config_path:
-        config_path_format: '{{ api.tag }}/{{ api.__name__ }}-response.yaml'
+        config_path_format: '**-response'
     apply:
       scan_strategy: file_name_first
       api:
