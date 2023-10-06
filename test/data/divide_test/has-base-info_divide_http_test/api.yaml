@@ -5,16 +5,14 @@ mocked_apis:
   template:
     activate: true
     values:
+      base_file_path: './test/data/divide_test/has-base-info_divide_http_test/'
       api:
-        base_file_path: './test/data/divide_test/has-base-info_divide_http_test/'
         config_path:
         config_path_format: '**-api'
       request:
-        base_file_path: './test/data/divide_test/has-base-info_divide_http_test/'
         config_path:
         config_path_format: '**-request'
       response:
-        base_file_path: './test/data/divide_test/has-base-info_divide_http_test/'
         config_path:
         config_path_format: '**-response'
     apply:

@@ -5,16 +5,14 @@ mocked_apis:
   template:    # Optional
     activate: true
     values:
+      base_file_path: './test/data/divide_test/has-base-info_and_tags_test/'    # Default value should be current path './'
       api:
-        base_file_path: './test/data/divide_test/has-base-info_and_tags_test/'    # Default value should be current path './'
         config_path:    # Default value should be None or empty string
         config_path_format: '**-api'    # ex. ./foo/get_foo.yaml
       request:
-        base_file_path: './test/data/divide_test/has-base-info_and_tags_test/'
         config_path:
         config_path_format: '**-request'
       response:
-        base_file_path: './test/data/divide_test/has-base-info_and_tags_test/'
         config_path:
         config_path_format: '**-response'
     apply:    # Which mocked APIs should apply template values
