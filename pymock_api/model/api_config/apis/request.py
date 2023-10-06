@@ -140,13 +140,13 @@ class HTTPRequest(_TemplatableConfig):
         self.parameters = [APIParameter().deserialize(data=parameter) for parameter in parameters] if parameters else []
         return self
 
-    @property
-    def _template_base_file_path(self) -> str:
-        return self._current_template.values.request.base_file_path
-
-    @property
-    def _template_config_file_path(self) -> str:
-        return self._current_template.values.request.config_path_format
+    # @property
+    # def _template_base_file_path(self) -> str:
+    #     return self._current_template.values.request.base_file_path
+    #
+    # @property
+    # def _template_config_file_path(self) -> str:
+    #     return self._current_template.values.request.config_path_format
 
     def get_one_param_by_name(self, name: str) -> Optional[APIParameter]:
         for param in self.parameters:

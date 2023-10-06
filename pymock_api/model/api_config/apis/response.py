@@ -202,10 +202,10 @@ class HTTPResponse(_TemplatableConfig):
             raise NotImplementedError
         return self
 
-    @property
-    def _template_base_file_path(self) -> str:
-        return self._current_template.values.response.base_file_path
-
-    @property
-    def _template_config_file_path(self) -> str:
-        return self._current_template.values.response.config_path_format
+    # @property
+    # def _template_base_file_path(self) -> str:
+    #     return self._current_template.values.response.base_file_path
+    #
+    # @property
+    # def _template_config_file_path(self) -> str:
+    #     return self._current_template.values.response.config_path_format

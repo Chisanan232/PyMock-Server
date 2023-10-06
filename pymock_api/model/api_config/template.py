@@ -293,21 +293,24 @@ class _TemplatableConfig(_Config, ABC):
         return self
 
     def _get_dividing_config(self, data: dict) -> dict:
-        base_path = self.base_file_path or self._template_base_file_path
-        config_file_path = self.config_path or self._template_config_file_path
+        # base_path = self.base_file_path or self._template_base_file_path
+        # config_file_path = self.config_path or self._template_config_file_path
+        base_path = self.base_file_path
+        config_file_path = self.config_path
         dividing_config_path = str(pathlib.Path(base_path, config_file_path))
-        if os.path.exists(dividing_config_path):
-            assert os.path.isfile(dividing_config_path) is True
+        if dividing_config_path and os.path.exists(dividing_config_path) and os.path.isfile(dividing_config_path):
+            # assert os.path.isfile(dividing_config_path) is True
             dividing_data = self._configuration.read(dividing_config_path)
             data.update(**dividing_data)
         return data
 
-    @property
-    @abstractmethod
-    def _template_base_file_path(self) -> str:
-        pass
-
-    @property
-    @abstractmethod
-    def _template_config_file_path(self) -> str:
-        pass
+    # FIXME: Wait for make sure the spec of configuration
+    # @property
+    # @abstractmethod
+    # def _template_base_file_path(self) -> str:
+    #     pass
+    #
+    # @property
+    # @abstractmethod
+    # def _template_config_file_path(self) -> str:
+    #     pass
