@@ -14,7 +14,6 @@ from ._base import SelfType, _Config
 
 @dataclass(eq=False)
 class TemplateSetting(_Config, ABC):
-    config_path: str = field(default_factory=str)
     config_path_format: str = field(default_factory=str)
 
     def __post_init__(self) -> None:
@@ -22,19 +21,16 @@ class TemplateSetting(_Config, ABC):
             self.config_path_format = self._default_config_path_format
 
     def _compare(self, other: "TemplateSetting") -> bool:
-        return self.config_path == other.config_path and self.config_path_format == other.config_path_format
+        return self.config_path_format == other.config_path_format
 
     def serialize(self, data: Optional["TemplateSetting"] = None) -> Optional[Dict[str, Any]]:
-        config_path: str = self._get_prop(data, prop="config_path")
         config_path_format: str = self._get_prop(data, prop="config_path_format")
         return {
-            "config_path": config_path,
             "config_path_format": config_path_format,
         }
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateSetting"]:
-        self.config_path = data.get("config_path", "")
         self.config_path_format = data.get("config_path_format", self._default_config_path_format)
         return self
 
