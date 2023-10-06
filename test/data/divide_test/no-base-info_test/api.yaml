@@ -7,13 +7,10 @@ mocked_apis:
     values:
       base_file_path: './test/data/divide_test/no-base-info_test/'
       api:
-        config_path:
         config_path_format: '**-api'
       request:
-        config_path:
         config_path_format: '**-request'
       response:
-        config_path:
         config_path_format: '**-response'
     apply:
       scan_strategy: file_name_first

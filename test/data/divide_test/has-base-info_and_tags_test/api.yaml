@@ -7,13 +7,10 @@ mocked_apis:
     values:
       base_file_path: './test/data/divide_test/has-base-info_and_tags_test/'    # Default value should be current path './'
       api:
-        config_path:    # Default value should be None or empty string
         config_path_format: '**-api'    # ex. ./foo/get_foo.yaml
       request:
-        config_path:
         config_path_format: '**-request'
       response:
-        config_path:
         config_path_format: '**-response'
     apply:    # Which mocked APIs should apply template values
       # Have 4 different strategy for scanning files to load configuration:
