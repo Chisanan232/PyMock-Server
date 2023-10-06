@@ -217,7 +217,7 @@ class MockAPIs(_Config, TemplateConfigLoadable):
 
     @property
     def _config_base_path(self) -> str:
-        return self.template.values.api.base_file_path
+        return self.template.values.base_file_path
 
     @property
     def _config_file_format(self) -> str:
