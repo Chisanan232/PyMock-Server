@@ -74,7 +74,6 @@ class TemplateSettingTestSuite(ConfigTestSpec, ABC):
     @pytest.fixture(scope="function")
     def sut(self) -> TemplateSetting:
         args = {
-            "config_path": self.under_test_data["config_path"],
             "config_path_format": self.under_test_data["config_path_format"],
         }
         return self.sut_object(**args)
@@ -84,16 +83,14 @@ class TemplateSettingTestSuite(ConfigTestSpec, ABC):
         return self.sut_object()
 
     def test_eq_operation_with_valid_object(self, sut: TemplateSetting, sut_with_nothing: TemplateSetting):
-        sut.config_path = "./tmp.yaml"
+        sut.config_path_format = "**-tmp"
         super().test_eq_operation_with_valid_object(sut, sut_with_nothing)
 
     def test_serialize_with_none(self, sut_with_nothing: TemplateSetting):
         assert sut_with_nothing.serialize() is not None
-        assert sut_with_nothing.config_path == ""
         assert sut_with_nothing.config_path_format == self.under_test_data["config_path_format"]
 
     def test_value_attributes(self, sut: TemplateSetting):
-        assert sut.config_path == self.under_test_data["config_path"]
         assert sut.config_path_format == self.under_test_data["config_path_format"]
 
     def _expected_serialize_value(self) -> dict:
@@ -101,7 +98,6 @@ class TemplateSettingTestSuite(ConfigTestSpec, ABC):
 
     def _expected_deserialize_value(self, obj: TemplateSetting) -> None:
         assert isinstance(obj, self.sut_object)
-        assert obj.config_path == self.under_test_data["config_path"]
         assert obj.config_path_format == self.under_test_data["config_path_format"]
 
 
