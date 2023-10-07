@@ -190,6 +190,7 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         self._config_file_name = n
 
     def _load_mocked_apis_config(self, mocked_apis_data: dict) -> None:
+        # TODO: Has a attribute to control it should be loaded first or finally
         self._load_mocked_apis_from_data(mocked_apis_data)
         # FIXME: This logic should align with the template apply strategy.
         if self._template_config.activate:
@@ -197,11 +198,13 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
             # TODO: Modify to builder pattern to control the process
             if scan_strategy is TemplateApplyScanStrategy.FILE_NAME_FIRST:
                 self._load_templatable_config()
+                self._load_templatable_config_by_apply()
             # TODO: Implement the workflow of loading configuration
-            # elif scan_strategy is TemplateApplyScanStrategy.CONFIG_LIST_FIRST:
-            #     self._load_templatable_config()
-            # elif scan_strategy is TemplateApplyScanStrategy.BY_FILE_NAME:
-            #     self._load_templatable_config()
+            elif scan_strategy is TemplateApplyScanStrategy.CONFIG_LIST_FIRST:
+                self._load_templatable_config_by_apply()
+                self._load_templatable_config()
+            elif scan_strategy is TemplateApplyScanStrategy.BY_FILE_NAME:
+                self._load_templatable_config()
             elif scan_strategy is TemplateApplyScanStrategy.BY_CONFIG_LIST:
                 self._load_templatable_config_by_apply()
             else:
