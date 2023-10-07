@@ -1,32 +1,6 @@
 url: '/foo'
 http:
-  request:
-    method: 'PUT'
-    parameters:
-      - name: 'balances'
-        required: true
-        default:
-        type: list
-        format:
-        items:
-          - required: true
-            type: int
-            name: "value"
-          - required: true
-            type: int
-            name: "id"
-  response:
-    strategy: object
-    properties:
-      - name: errorMessage
-        required: True
-        type: str
-        format:
-      - name: responseCode
-        required: True
-        type: str
-        format:
-      - name: responseData
-        required: False
-        type: list
-        format:
+  apply_template_props: True
+  base_file_path: './test/data/divide_test/has-base-info_and_tags_has_mocked_apis_with_divide_http_test/foo'
+  config_path:
+  config_path_format: '**-http'
