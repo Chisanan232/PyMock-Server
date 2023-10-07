@@ -189,7 +189,8 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     def config_file_name(self, n: str) -> None:
         self._config_file_name = n
 
-    def _load_mocked_apis_config(self) -> None:
+    def _load_mocked_apis_config(self, mocked_apis_data: dict) -> None:
+        self._load_mocked_apis_from_data(mocked_apis_data)
         # FIXME: This logic should align with the template apply strategy.
         if self._template_config.activate:
             scan_strategy = self._template_config.apply.scan_strategy
@@ -303,6 +304,21 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
 
     @abstractmethod
     def _set_template_config(self, config: _Config, **kwargs) -> None:
+        pass
+
+    def _load_mocked_apis_from_data(self, mocked_apis_data: dict) -> None:
+        self._set_mocked_apis()
+        if mocked_apis_data:
+            for mock_api_name in mocked_apis_data.keys():
+                self._set_mocked_apis(
+                    api_key=mock_api_name,
+                    api_config=self._deserialize_as_template_config.deserialize(
+                        data=mocked_apis_data.get(mock_api_name, None)
+                    ),
+                )
+
+    @abstractmethod
+    def _set_mocked_apis(self, api_key: str = "", api_config: Optional[_Config] = None) -> None:
         pass
 
 
