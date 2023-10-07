@@ -200,7 +200,6 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         self.base = BaseConfig().deserialize(data=base_info)
 
         # Processing section *apis*
-        # TODO: Integrate here logic into function *_load_mocked_apis_config*
         mocked_apis_info = data.get("apis", {})
         self._load_mocked_apis_config(mocked_apis_info)
         return self
