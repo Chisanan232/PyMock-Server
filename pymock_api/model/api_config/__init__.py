@@ -234,16 +234,12 @@ class MockAPIs(_Config, TemplateConfigLoadable):
                 )
 
     @property
-    def _config_base_path(self) -> str:
-        return self.template.values.base_file_path
+    def _template_config(self) -> TemplateConfig:
+        return self.template
 
     @property
     def _config_file_format(self) -> str:
         return self.template.values.api.config_path_format
-
-    @property
-    def _apply_apis(self) -> List[Union[str, Dict[str, List[str]]]]:
-        return self.template.apply.api
 
     @property
     def _deserialize_as_template_config(self) -> MockAPI:

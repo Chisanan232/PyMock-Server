@@ -210,8 +210,9 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         customize_config_file_format = "**"
         config_file_format = f"[!_**]{customize_config_file_format}"
         # all_paths = glob.glob(f"{self._base_path}**/[!_*]*.yaml", recursive=True)
-        all_paths = glob.glob(f"{self._config_base_path}{config_file_format}")
-        all_paths.remove(f"{self._config_base_path}{self.config_file_name}")
+        config_base_path = self._template_config.values.base_file_path
+        all_paths = glob.glob(f"{config_base_path}{config_file_format}")
+        all_paths.remove(f"{config_base_path}{self.config_file_name}")
         for path in all_paths:
             if os.path.isdir(path):
                 # Has tag as directory
@@ -226,15 +227,16 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
                     self._deserialize_and_set_template_config(path)
 
     def _load_templatable_config_by_apply(self) -> None:
-        apply_apis = self._apply_apis
+        apply_apis = self._template_config.apply.api
         all_ele_is_dict = list(map(lambda e: isinstance(e, dict), apply_apis))
         config_path_format = self._config_file_format
+        config_base_path = self._template_config.values.base_file_path
         if False in all_ele_is_dict:
             # no tag API
             for api in apply_apis:
                 assert isinstance(api, str)
                 api_config = config_path_format.replace("**", api)
-                config_path = str(pathlib.Path(self._config_base_path, f"{api_config}.yaml"))
+                config_path = str(pathlib.Path(config_base_path, f"{api_config}.yaml"))
                 self._deserialize_and_set_template_config(config_path)
         else:
             # API with tag
@@ -243,22 +245,17 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
                 for tag, apis in tag_apis.items():
                     for api in apis:
                         api_config = config_path_format.replace("**", api)
-                        config_path = str(pathlib.Path(self._config_base_path, tag, f"{api_config}.yaml"))
+                        config_path = str(pathlib.Path(config_base_path, tag, f"{api_config}.yaml"))
                         self._deserialize_and_set_template_config(config_path)
 
     @property
     @abstractmethod
-    def _config_base_path(self) -> str:
+    def _template_config(self) -> TemplateConfig:
         pass
 
     @property
     @abstractmethod
     def _config_file_format(self) -> str:
-        pass
-
-    @property
-    @abstractmethod
-    def _apply_apis(self) -> List[Union[str, Dict[str, List[str]]]]:
         pass
 
     def _deserialize_and_set_template_config(self, path: str) -> None:
