@@ -212,23 +212,6 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
                 )
 
     def _load_templatable_config(self) -> None:
-        # Run dividing feature process
-        # 1. Use the templatable values set target file paths and list all of them
-        #       (hint: glob.glob, os.path.isdir, os.path.isfile).
-        # 2. Read the file and deserialize its content as data model.
-        # 3. Set the data model at current object's property.
-        # 4. Run step #1 to step #3 again and again until finish reading all files.
-        # 5. Extract the core logic as template method to object *TemplatableConfig*.
-
-        # # Has tag or doesn't have tag
-        # apply_apis = self.template.apply.api
-        # if isinstance(apply_apis[0], str):
-        #     pass
-        # elif isinstance(apply_apis[0], dict):
-        #     pass
-        # else:
-        #     pass
-
         # TODO: Modify to use property *config_path* or *config_path_format*
         customize_config_file_format = "**"
         config_file_format = f"[!_**]{customize_config_file_format}"
