@@ -201,15 +201,27 @@ class MockAPIs(_Config, TemplateConfigLoadable):
 
         # Processing section *apis*
         # TODO: Integrate here logic into function *_load_mocked_apis_config*
-        mocked_apis_info = data.get("apis", {})
-        self.apis = {}
-        if mocked_apis_info:
-            for mock_api_name in mocked_apis_info.keys():
-                self.apis[mock_api_name] = MockAPI(_current_template=self.template).deserialize(
-                    data=mocked_apis_info.get(mock_api_name, None)
-                )
+        self._load_mocked_apis_from_data(data)
         self._load_mocked_apis_config()
         return self
+
+    def _load_mocked_apis_from_data(self, data: dict) -> None:
+        mocked_apis_info = data.get("apis", {})
+        self._set_mocked_apis()
+        if mocked_apis_info:
+            for mock_api_name in mocked_apis_info.keys():
+                self._set_mocked_apis(
+                    api_key=mock_api_name,
+                    api_config=MockAPI(_current_template=self._template_config).deserialize(
+                        data=mocked_apis_info.get(mock_api_name, None)
+                    ),
+                )
+
+    def _set_mocked_apis(self, api_key: str = "", api_config: Optional[MockAPI] = None) -> None:
+        if api_key and api_config:
+            self.apis[api_key] = api_config
+        else:
+            self.apis = {}
 
     @property
     def _template_config(self) -> TemplateConfig:
