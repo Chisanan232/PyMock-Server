@@ -120,10 +120,6 @@ class HTTP(_TemplatableConfig):
 
         super().deserialize(data)
 
-        # FIXME: Extract the running process order as a single function
-        if self.apply_template_props:
-            data = self._get_dividing_config(data)
-
         req = data.get("request", None)
         resp = data.get("response", None)
         self.request = _deserialize_data_model(HTTPRequest, req)  # type: ignore[assignment]
@@ -255,10 +251,6 @@ class MockAPI(_TemplatableConfig):
                 return None
 
         super().deserialize(data)
-
-        # FIXME: Extract the running process order as a single function
-        if self.apply_template_props:
-            data = self._get_dividing_config(data)
 
         self.url = data.get("url", None)
         http_info = data.get("http", None)

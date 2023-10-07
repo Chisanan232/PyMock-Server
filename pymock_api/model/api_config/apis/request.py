@@ -129,10 +129,6 @@ class HTTPRequest(_TemplatableConfig):
         """
         super().deserialize(data)
 
-        # FIXME: Extract the running process order as a single function
-        if self.apply_template_props:
-            data = self._get_dividing_config(data)
-
         self.method = data.get("method", None)
         parameters: List[dict] = data.get("parameters", None)
         if parameters and not isinstance(parameters, list):
