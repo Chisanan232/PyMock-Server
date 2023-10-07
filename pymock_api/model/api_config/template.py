@@ -14,8 +14,6 @@ from ._base import SelfType, _Config
 
 @dataclass(eq=False)
 class TemplateSetting(_Config, ABC):
-    base_file_path: str = "./"
-    config_path: str = field(default_factory=str)
     config_path_format: str = field(default_factory=str)
 
     def __post_init__(self) -> None:
@@ -23,26 +21,16 @@ class TemplateSetting(_Config, ABC):
             self.config_path_format = self._default_config_path_format
 
     def _compare(self, other: "TemplateSetting") -> bool:
-        return (
-            self.base_file_path == other.base_file_path
-            and self.config_path == other.config_path
-            and self.config_path_format == other.config_path_format
-        )
+        return self.config_path_format == other.config_path_format
 
     def serialize(self, data: Optional["TemplateSetting"] = None) -> Optional[Dict[str, Any]]:
-        base_file_path: str = self._get_prop(data, prop="base_file_path")
-        config_path: str = self._get_prop(data, prop="config_path")
         config_path_format: str = self._get_prop(data, prop="config_path_format")
         return {
-            "base_file_path": base_file_path,
-            "config_path": config_path,
             "config_path_format": config_path_format,
         }
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateSetting"]:
-        self.base_file_path = data.get("base_file_path", "./")
-        self.config_path = data.get("config_path", "")
         self.config_path_format = data.get("config_path_format", self._default_config_path_format)
         return self
 
@@ -72,24 +60,37 @@ class TemplateResponse(TemplateSetting):
 
 @dataclass(eq=False)
 class TemplateValues(_Config):
+    base_file_path: str = "./"
     api: TemplateAPI = TemplateAPI()
     request: TemplateRequest = TemplateRequest()
     response: TemplateResponse = TemplateResponse()
 
     def _compare(self, other: "TemplateValues") -> bool:
-        return self.api == other.api and self.request == other.request and self.response == other.response
+        return (
+            self.base_file_path == other.base_file_path
+            and self.api == other.api
+            and self.request == other.request
+            and self.response == other.response
+        )
 
     def serialize(self, data: Optional["TemplateValues"] = None) -> Optional[Dict[str, Any]]:
+        base_file_path: str = self._get_prop(data, prop="base_file_path")
         api = self.api or self._get_prop(data, prop="api")
         request = self.request or self._get_prop(data, prop="request")
         response = self.response or self._get_prop(data, prop="response")
         if not (api and request and response):
             # TODO: Should raise exception?
             return None
-        return {"api": api.serialize(), "request": request.serialize(), "response": response.serialize()}
+        return {
+            "base_file_path": base_file_path,
+            "api": api.serialize(),
+            "request": request.serialize(),
+            "response": response.serialize(),
+        }
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateValues"]:
+        self.base_file_path = data.get("base_file_path", "./")
         self.api = TemplateAPI().deserialize(data.get("api", {}))
         self.request = TemplateRequest().deserialize(data.get("request", {}))
         self.response = TemplateResponse().deserialize(data.get("response", {}))
