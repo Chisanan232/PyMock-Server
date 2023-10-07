@@ -1,5 +1,6 @@
 import re
 from abc import ABC, ABCMeta, abstractmethod
+from enum import Enum
 from test._values import (
     _Base_URL,
     _Mock_Template_Apply_Has_Tag_Setting,
@@ -12,7 +13,7 @@ from test._values import (
     _TestConfig,
 )
 from typing import Any, Dict, List
-from unittest.mock import Mock, PropertyMock, patch
+from unittest.mock import MagicMock, Mock, PropertyMock, call, patch
 
 import pytest
 
@@ -32,7 +33,7 @@ from pymock_api.model.api_config.template import (
     TemplateResponse,
     TemplateValues,
 )
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.enums import ResponseStrategy, TemplateApplyScanStrategy
 
 _assertion_msg = "Its property's value should be same as we set."
 MOCK_RETURN_VALUE: Mock = Mock()
@@ -169,7 +170,68 @@ class ConfigTestSpec(metaclass=ABCMeta):
         assert sut_with_nothing.deserialize(data={}) == {}
 
 
+class LoadConfigFunction(Enum):
+    """
+    Here values are the function naming of object *TemplateConfigLoadable* which loads configuration
+    """
+
+    FROM_DATA: str = "_load_mocked_apis_from_data"
+    BY_FILE: str = "_load_templatable_config"
+    BY_APPLY: str = "_load_templatable_config_by_apply"
+
+
 class TemplateConfigLoadableTestSuite(ConfigTestSpec, ABC):
+    @pytest.mark.parametrize(
+        ("strategy", "expected_func_run_order"),
+        [
+            (
+                TemplateApplyScanStrategy.FILE_NAME_FIRST,
+                [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_FILE, LoadConfigFunction.BY_APPLY],
+            ),
+            (
+                TemplateApplyScanStrategy.CONFIG_LIST_FIRST,
+                [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_APPLY, LoadConfigFunction.BY_FILE],
+            ),
+            (TemplateApplyScanStrategy.BY_FILE_NAME, [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_FILE]),
+            (TemplateApplyScanStrategy.BY_CONFIG_LIST, [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_APPLY]),
+        ],
+    )
+    def test_loading_configuration_workflow(
+        self, strategy: TemplateApplyScanStrategy, expected_func_run_order: List[LoadConfigFunction], sut: _Config
+    ):
+        assert isinstance(sut, TemplateConfigLoadable)
+        expected_func_run_order = [func.value for func in expected_func_run_order]
+
+        # Parent mock object for mocking target functions
+        mock_parent = Mock()
+        # Magic mock the target function
+        for func in expected_func_run_order:
+            setattr(sut, func, MagicMock())
+        # Annotate some functions as magic functions
+        for func in expected_func_run_order:
+            setattr(mock_parent, func, getattr(sut, func))
+
+        # Generate criteria of the function running order
+        criteria_order = []
+        for func in expected_func_run_order:
+            if func == "_load_mocked_apis_from_data":
+                criteria = getattr(call, func)({})
+            else:
+                criteria = getattr(call, func)()
+            criteria_order.append(criteria)
+
+        template_config = TemplateConfig(
+            activate=True,
+            apply=TemplateApply(scan_strategy=strategy),
+        )
+        with patch(
+            "pymock_api.model.api_config.MockAPIs._template_config",
+            new_callable=PropertyMock,
+            return_value=template_config,
+        ):
+            sut._load_mocked_apis_config({})
+            mock_parent.assert_has_calls(criteria_order)
+
     def test_load_mocked_apis_with_invalid_scan_strategy(self, sut: _Config):
         assert isinstance(sut, TemplateConfigLoadable)
 
