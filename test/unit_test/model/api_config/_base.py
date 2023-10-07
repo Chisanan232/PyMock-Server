@@ -183,5 +183,5 @@ class TemplateConfigLoadableTestSuite(ConfigTestSpec, ABC):
                 new_callable=PropertyMock,
                 return_value=invalid_template_config,
             ):
-                sut._load_mocked_apis_config()
+                sut._load_mocked_apis_config({})
         assert re.search(r".{0,32}invalid.{0,32}strategy.{0,32}", str(exc_info.value), re.IGNORECASE)
