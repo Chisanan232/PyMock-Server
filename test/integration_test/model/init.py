@@ -89,6 +89,9 @@ class TestInitFunctions:
         assert dividing_config.apis.apis is not None
         assert expected_config.apis.apis is not None
         expected_config_apis = expected_config.apis.apis
+        # Compare the key of all mocked APIs
+        assert dividing_config.apis.apis.keys() == expected_config.apis.apis.keys()
+        # Compare the details of each mocked API
         for api_name, api_config in dividing_config.apis.apis.items():
             expected_api_config = expected_config_apis[api_name]
             assert api_config is not None

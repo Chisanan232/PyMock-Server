@@ -1,5 +1,5 @@
 import re
-from abc import ABCMeta, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from test._values import (
     _Base_URL,
     _Mock_Template_Apply_Has_Tag_Setting,
@@ -12,7 +12,7 @@ from test._values import (
     _TestConfig,
 )
 from typing import Any, Dict, List
-from unittest.mock import Mock
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 
@@ -27,6 +27,7 @@ from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResp
 from pymock_api.model.api_config.template import (
     TemplateAPI,
     TemplateApply,
+    TemplateConfigLoadable,
     TemplateRequest,
     TemplateResponse,
     TemplateValues,
@@ -166,3 +167,21 @@ class ConfigTestSpec(metaclass=ABCMeta):
 
     def test_deserialize_with_invalid_data(self, sut_with_nothing: _Config):
         assert sut_with_nothing.deserialize(data={}) == {}
+
+
+class TemplateConfigLoadableTestSuite(ConfigTestSpec, ABC):
+    def test_load_mocked_apis_with_invalid_scan_strategy(self, sut: _Config):
+        assert isinstance(sut, TemplateConfigLoadable)
+
+        invalid_template_config = TemplateConfig(
+            activate=True,
+            apply=TemplateApply(scan_strategy="invalid_scan_strategy"),
+        )
+        with pytest.raises(RuntimeError) as exc_info:
+            with patch(
+                "pymock_api.model.api_config.MockAPIs._template_config",
+                new_callable=PropertyMock,
+                return_value=invalid_template_config,
+            ):
+                sut._load_mocked_apis_config()
+        assert re.search(r".{0,32}invalid.{0,32}strategy.{0,32}", str(exc_info.value), re.IGNORECASE)

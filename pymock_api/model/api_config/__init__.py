@@ -200,6 +200,7 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         self.base = BaseConfig().deserialize(data=base_info)
 
         # Processing section *apis*
+        # TODO: Integrate here logic into function *_load_mocked_apis_config*
         mocked_apis_info = data.get("apis", {})
         self.apis = {}
         if mocked_apis_info:
@@ -207,17 +208,12 @@ class MockAPIs(_Config, TemplateConfigLoadable):
                 self.apis[mock_api_name] = MockAPI(_current_template=self.template).deserialize(
                     data=mocked_apis_info.get(mock_api_name, None)
                 )
-        # FIXME: This logic should align with the template apply strategy.
-        if self.template.activate:
-            scan_strategy = self.template.apply.scan_strategy
-            # TODO: Modify to builder pattern to control the process
-            if scan_strategy:
-                self._load_templatable_config()
+        self._load_mocked_apis_config()
         return self
 
     @property
-    def _config_base_path(self) -> str:
-        return self.template.values.base_file_path
+    def _template_config(self) -> TemplateConfig:
+        return self.template
 
     @property
     def _config_file_format(self) -> str:

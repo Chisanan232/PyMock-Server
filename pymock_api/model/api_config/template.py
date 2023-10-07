@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from ..._utils.file_opt import YAML, _BaseFileOperation
 from ...model.enums import TemplateApplyScanStrategy
+from ..enums import TemplateApplyScanStrategy
 from ._base import SelfType, _Config
 
 
@@ -188,6 +189,26 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     def config_file_name(self, n: str) -> None:
         self._config_file_name = n
 
+    def _load_mocked_apis_config(self) -> None:
+        # FIXME: This logic should align with the template apply strategy.
+        if self._template_config.activate:
+            scan_strategy = self._template_config.apply.scan_strategy
+            # TODO: Modify to builder pattern to control the process
+            if scan_strategy is TemplateApplyScanStrategy.FILE_NAME_FIRST:
+                self._load_templatable_config()
+            # TODO: Implement the workflow of loading configuration
+            # elif scan_strategy is TemplateApplyScanStrategy.CONFIG_LIST_FIRST:
+            #     self._load_templatable_config()
+            # elif scan_strategy is TemplateApplyScanStrategy.BY_FILE_NAME:
+            #     self._load_templatable_config()
+            elif scan_strategy is TemplateApplyScanStrategy.BY_CONFIG_LIST:
+                self._load_templatable_config_by_apply()
+            else:
+                all_valid_strategy = ", ".join([f"'{strategy}'" for strategy in TemplateApplyScanStrategy])
+                raise RuntimeError(
+                    f"Invalid template scanning strategy. Please configure valid strategy: {all_valid_strategy}."
+                )
+
     def _load_templatable_config(self) -> None:
         # Run dividing feature process
         # 1. Use the templatable values set target file paths and list all of them
@@ -210,8 +231,9 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         customize_config_file_format = "**"
         config_file_format = f"[!_**]{customize_config_file_format}"
         # all_paths = glob.glob(f"{self._base_path}**/[!_*]*.yaml", recursive=True)
-        all_paths = glob.glob(f"{self._config_base_path}{config_file_format}")
-        all_paths.remove(f"{self._config_base_path}{self.config_file_name}")
+        config_base_path = self._template_config.values.base_file_path
+        all_paths = glob.glob(f"{config_base_path}{config_file_format}")
+        all_paths.remove(f"{config_base_path}{self.config_file_name}")
         for path in all_paths:
             if os.path.isdir(path):
                 # Has tag as directory
@@ -225,9 +247,31 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
                     # Doesn't have tag, it's config
                     self._deserialize_and_set_template_config(path)
 
+    def _load_templatable_config_by_apply(self) -> None:
+        apply_apis = self._template_config.apply.api
+        all_ele_is_dict = list(map(lambda e: isinstance(e, dict), apply_apis))
+        config_path_format = self._config_file_format
+        config_base_path = self._template_config.values.base_file_path
+        if False in all_ele_is_dict:
+            # no tag API
+            for api in apply_apis:
+                assert isinstance(api, str)
+                api_config = config_path_format.replace("**", api)
+                config_path = str(pathlib.Path(config_base_path, f"{api_config}.yaml"))
+                self._deserialize_and_set_template_config(config_path)
+        else:
+            # API with tag
+            for tag_apis in apply_apis:
+                assert isinstance(tag_apis, dict)
+                for tag, apis in tag_apis.items():
+                    for api in apis:
+                        api_config = config_path_format.replace("**", api)
+                        config_path = str(pathlib.Path(config_base_path, tag, f"{api_config}.yaml"))
+                        self._deserialize_and_set_template_config(config_path)
+
     @property
     @abstractmethod
-    def _config_base_path(self) -> str:
+    def _template_config(self) -> TemplateConfig:
         pass
 
     @property
