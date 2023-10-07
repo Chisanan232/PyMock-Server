@@ -46,6 +46,12 @@ class TemplateAPI(TemplateSetting):
         return "**-api.yaml"
 
 
+class TemplateHTTP(TemplateSetting):
+    @property
+    def _default_config_path_format(self) -> str:
+        return "**-http.yaml"
+
+
 class TemplateRequest(TemplateSetting):
     @property
     def _default_config_path_format(self) -> str:
@@ -62,6 +68,7 @@ class TemplateResponse(TemplateSetting):
 class TemplateValues(_Config):
     base_file_path: str = "./"
     api: TemplateAPI = TemplateAPI()
+    http: TemplateHTTP = TemplateHTTP()
     request: TemplateRequest = TemplateRequest()
     response: TemplateResponse = TemplateResponse()
 
@@ -69,6 +76,7 @@ class TemplateValues(_Config):
         return (
             self.base_file_path == other.base_file_path
             and self.api == other.api
+            and self.http == other.http
             and self.request == other.request
             and self.response == other.response
         )
@@ -76,6 +84,7 @@ class TemplateValues(_Config):
     def serialize(self, data: Optional["TemplateValues"] = None) -> Optional[Dict[str, Any]]:
         base_file_path: str = self._get_prop(data, prop="base_file_path")
         api = self.api or self._get_prop(data, prop="api")
+        http = self.http or self._get_prop(data, prop="http")
         request = self.request or self._get_prop(data, prop="request")
         response = self.response or self._get_prop(data, prop="response")
         if not (api and request and response):
@@ -84,6 +93,7 @@ class TemplateValues(_Config):
         return {
             "base_file_path": base_file_path,
             "api": api.serialize(),
+            "http": http.serialize(),
             "request": request.serialize(),
             "response": response.serialize(),
         }
@@ -92,6 +102,7 @@ class TemplateValues(_Config):
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateValues"]:
         self.base_file_path = data.get("base_file_path", "./")
         self.api = TemplateAPI().deserialize(data.get("api", {}))
+        self.http = TemplateHTTP().deserialize(data.get("http", {}))
         self.request = TemplateRequest().deserialize(data.get("request", {}))
         self.response = TemplateResponse().deserialize(data.get("response", {}))
         return self
