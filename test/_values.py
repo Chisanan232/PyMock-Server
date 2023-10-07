@@ -43,12 +43,14 @@ def generate_mock_template(tail_naming: str = "") -> dict:
 
 _Mock_Base_File_Path: str = "./"
 _Mock_Template_API_Setting: dict = generate_mock_template("api")
+_Mock_Template_HTTP_Setting: dict = generate_mock_template("http")
 _Mock_Template_API_Request_Setting: dict = generate_mock_template("request")
 _Mock_Template_API_Response_Setting: dict = generate_mock_template("response")
 
 _Mock_Template_Values_Setting: dict = {
     "base_file_path": _Mock_Base_File_Path,
     "api": _Mock_Template_API_Setting,
+    "http": _Mock_Template_HTTP_Setting,
     "request": _Mock_Template_API_Request_Setting,
     "response": _Mock_Template_API_Response_Setting,
 }

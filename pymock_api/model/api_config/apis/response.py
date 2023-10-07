@@ -184,10 +184,6 @@ class HTTPResponse(_TemplatableConfig):
         """
         super().deserialize(data)
 
-        # FIXME: Extract the running process order as a single function
-        if self.apply_template_props:
-            data = self._get_dividing_config(data)
-
         self.strategy = ResponseStrategy.to_enum(data.get("strategy", None))
         if not self.strategy:
             raise ValueError("Schema key *strategy* cannot be empty.")

@@ -8,6 +8,7 @@ from pymock_api.model.api_config import TemplateConfig, _Config, _TemplatableCon
 from pymock_api.model.api_config.template import (
     TemplateAPI,
     TemplateApply,
+    TemplateHTTP,
     TemplateRequest,
     TemplateResponse,
     TemplateSetting,
@@ -23,6 +24,7 @@ from ...._values import (
     _Mock_Template_Apply_Has_Tag_Setting,
     _Mock_Template_Apply_Scan_Strategy,
     _Mock_Template_Config_Activate,
+    _Mock_Template_HTTP_Setting,
     _Mock_Template_Setting,
     _Mock_Template_Values_Setting,
 )
@@ -109,6 +111,16 @@ class TestTemplateAPI(TemplateSettingTestSuite):
     @property
     def sut_object(self) -> Type[TemplateSetting]:
         return TemplateAPI
+
+
+class TestTemplateHTTP(TemplateSettingTestSuite):
+    @property
+    def under_test_data(self) -> dict:
+        return _Mock_Template_HTTP_Setting
+
+    @property
+    def sut_object(self) -> Type[TemplateHTTP]:
+        return TemplateHTTP
 
 
 class TestTemplateRequest(TemplateSettingTestSuite):

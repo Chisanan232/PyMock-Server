@@ -8,6 +8,8 @@ mocked_apis:
       base_file_path: './test/data/divide_test/no-base-info_test/'
       api:
         config_path_format: '**-api'
+      http:
+        config_path_format: '**-http'
       request:
         config_path_format: '**-request'
       response:
