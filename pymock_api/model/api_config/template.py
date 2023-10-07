@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from ..._utils.file_opt import YAML, _BaseFileOperation
 from ...model.enums import TemplateApplyScanStrategy
+from ..enums import TemplateApplyScanStrategy
 from ._base import SelfType, _Config
 
 
@@ -187,6 +188,26 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     @config_file_name.setter
     def config_file_name(self, n: str) -> None:
         self._config_file_name = n
+
+    def _load_mocked_apis_config(self) -> None:
+        # FIXME: This logic should align with the template apply strategy.
+        if self._template_config.activate:
+            scan_strategy = self._template_config.apply.scan_strategy
+            # TODO: Modify to builder pattern to control the process
+            if scan_strategy is TemplateApplyScanStrategy.FILE_NAME_FIRST:
+                self._load_templatable_config()
+            # TODO: Implement the workflow of loading configuration
+            # elif scan_strategy is TemplateApplyScanStrategy.CONFIG_LIST_FIRST:
+            #     self._load_templatable_config()
+            # elif scan_strategy is TemplateApplyScanStrategy.BY_FILE_NAME:
+            #     self._load_templatable_config()
+            elif scan_strategy is TemplateApplyScanStrategy.BY_CONFIG_LIST:
+                self._load_templatable_config_by_apply()
+            else:
+                all_valid_strategy = ", ".join([f"'{strategy}'" for strategy in TemplateApplyScanStrategy])
+                raise RuntimeError(
+                    f"Invalid template scanning strategy. Please configure valid strategy: {all_valid_strategy}."
+                )
 
     def _load_templatable_config(self) -> None:
         # Run dividing feature process

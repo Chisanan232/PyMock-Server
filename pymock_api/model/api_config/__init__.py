@@ -3,12 +3,10 @@
 content ...
 """
 import os
-import pathlib
 from typing import Any, Dict, List, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
-from ..enums import TemplateApplyScanStrategy
 from ._base import _Config
 from .apis import (
     HTTP,
@@ -212,26 +210,6 @@ class MockAPIs(_Config, TemplateConfigLoadable):
                 )
         self._load_mocked_apis_config()
         return self
-
-    def _load_mocked_apis_config(self) -> None:
-        # FIXME: This logic should align with the template apply strategy.
-        if self.template.activate:
-            scan_strategy = self.template.apply.scan_strategy
-            # TODO: Modify to builder pattern to control the process
-            if scan_strategy is TemplateApplyScanStrategy.FILE_NAME_FIRST:
-                self._load_templatable_config()
-            # TODO: Implement the workflow of loading configuration
-            # elif scan_strategy is TemplateApplyScanStrategy.CONFIG_LIST_FIRST:
-            #     self._load_templatable_config()
-            # elif scan_strategy is TemplateApplyScanStrategy.BY_FILE_NAME:
-            #     self._load_templatable_config()
-            elif scan_strategy is TemplateApplyScanStrategy.BY_CONFIG_LIST:
-                self._load_templatable_config_by_apply()
-            else:
-                all_valid_strategy = ", ".join([f"'{strategy}'" for strategy in TemplateApplyScanStrategy])
-                raise RuntimeError(
-                    f"Invalid template scanning strategy. Please configure valid strategy: {all_valid_strategy}."
-                )
 
     @property
     def _template_config(self) -> TemplateConfig:
