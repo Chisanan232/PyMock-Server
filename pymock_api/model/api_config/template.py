@@ -225,6 +225,27 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
                     # Doesn't have tag, it's config
                     self._deserialize_and_set_template_config(path)
 
+    def _load_templatable_config_by_apply(self) -> None:
+        apply_apis = self._apply_apis
+        all_ele_is_dict = list(map(lambda e: isinstance(e, dict), apply_apis))
+        config_path_format = self._config_file_format
+        if False in all_ele_is_dict:
+            # no tag API
+            for api in apply_apis:
+                assert isinstance(api, str)
+                api_config = config_path_format.replace("**", api)
+                config_path = str(pathlib.Path(self._config_base_path, f"{api_config}.yaml"))
+                self._deserialize_and_set_template_config(config_path)
+        else:
+            # API with tag
+            for tag_apis in apply_apis:
+                assert isinstance(tag_apis, dict)
+                for tag, apis in tag_apis.items():
+                    for api in apis:
+                        api_config = config_path_format.replace("**", api)
+                        config_path = str(pathlib.Path(self._config_base_path, tag, f"{api_config}.yaml"))
+                        self._deserialize_and_set_template_config(config_path)
+
     @property
     @abstractmethod
     def _config_base_path(self) -> str:
@@ -233,6 +254,11 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     @property
     @abstractmethod
     def _config_file_format(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def _apply_apis(self) -> List[Union[str, Dict[str, List[str]]]]:
         pass
 
     def _deserialize_and_set_template_config(self, path: str) -> None:

@@ -3,10 +3,12 @@
 content ...
 """
 import os
+import pathlib
 from typing import Any, Dict, List, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
+from ..enums import TemplateApplyScanStrategy
 from ._base import _Config
 from .apis import (
     HTTP,
@@ -211,8 +213,20 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         if self.template.activate:
             scan_strategy = self.template.apply.scan_strategy
             # TODO: Modify to builder pattern to control the process
-            if scan_strategy:
+            if scan_strategy is TemplateApplyScanStrategy.FILE_NAME_FIRST:
                 self._load_templatable_config()
+            # TODO: Implement the workflow of loading configuration
+            # elif scan_strategy is TemplateApplyScanStrategy.CONFIG_LIST_FIRST:
+            #     self._load_templatable_config()
+            # elif scan_strategy is TemplateApplyScanStrategy.BY_FILE_NAME:
+            #     self._load_templatable_config()
+            elif scan_strategy is TemplateApplyScanStrategy.BY_CONFIG_LIST:
+                self._load_templatable_config_by_apply()
+            else:
+                all_valid_strategy = ", ".join([f"'{strategy}'" for strategy in TemplateApplyScanStrategy])
+                raise RuntimeError(
+                    f"Invalid template scanning strategy. Please configure valid strategy: {all_valid_strategy}."
+                )
         return self
 
     @property
@@ -222,6 +236,10 @@ class MockAPIs(_Config, TemplateConfigLoadable):
     @property
     def _config_file_format(self) -> str:
         return self.template.values.api.config_path_format
+
+    @property
+    def _apply_apis(self) -> List[Union[str, Dict[str, List[str]]]]:
+        return self.template.apply.api
 
     @property
     def _deserialize_as_template_config(self) -> MockAPI:
