@@ -202,6 +202,7 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         self.base = BaseConfig().deserialize(data=base_info)
 
         # Processing section *apis*
+        # TODO: Integrate here logic into function *_load_mocked_apis_config*
         mocked_apis_info = data.get("apis", {})
         self.apis = {}
         if mocked_apis_info:
@@ -209,6 +210,10 @@ class MockAPIs(_Config, TemplateConfigLoadable):
                 self.apis[mock_api_name] = MockAPI(_current_template=self.template).deserialize(
                     data=mocked_apis_info.get(mock_api_name, None)
                 )
+        self._load_mocked_apis_config()
+        return self
+
+    def _load_mocked_apis_config(self) -> None:
         # FIXME: This logic should align with the template apply strategy.
         if self.template.activate:
             scan_strategy = self.template.apply.scan_strategy
@@ -227,7 +232,6 @@ class MockAPIs(_Config, TemplateConfigLoadable):
                 raise RuntimeError(
                     f"Invalid template scanning strategy. Please configure valid strategy: {all_valid_strategy}."
                 )
-        return self
 
     @property
     def _config_base_path(self) -> str:
