@@ -200,16 +200,15 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         self.base = BaseConfig().deserialize(data=base_info)
 
         # Processing section *apis*
-        # TODO: Integrate here logic into function *_load_mocked_apis_config*
         mocked_apis_info = data.get("apis", {})
-        self.apis = {}
-        if mocked_apis_info:
-            for mock_api_name in mocked_apis_info.keys():
-                self.apis[mock_api_name] = MockAPI(_current_template=self.template).deserialize(
-                    data=mocked_apis_info.get(mock_api_name, None)
-                )
-        self._load_mocked_apis_config()
+        self._load_mocked_apis_config(mocked_apis_info)
         return self
+
+    def _set_mocked_apis(self, api_key: str = "", api_config: Optional[MockAPI] = None) -> None:  # type: ignore[override]
+        if api_key and api_config:
+            self.apis[api_key] = api_config
+        else:
+            self.apis = {}
 
     @property
     def _template_config(self) -> TemplateConfig:

@@ -189,18 +189,20 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     def config_file_name(self, n: str) -> None:
         self._config_file_name = n
 
-    def _load_mocked_apis_config(self) -> None:
-        # FIXME: This logic should align with the template apply strategy.
+    def _load_mocked_apis_config(self, mocked_apis_data: dict) -> None:
+        # TODO: Has a attribute to control it should be loaded first or finally
+        self._load_mocked_apis_from_data(mocked_apis_data)
         if self._template_config.activate:
             scan_strategy = self._template_config.apply.scan_strategy
             # TODO: Modify to builder pattern to control the process
             if scan_strategy is TemplateApplyScanStrategy.FILE_NAME_FIRST:
                 self._load_templatable_config()
-            # TODO: Implement the workflow of loading configuration
-            # elif scan_strategy is TemplateApplyScanStrategy.CONFIG_LIST_FIRST:
-            #     self._load_templatable_config()
-            # elif scan_strategy is TemplateApplyScanStrategy.BY_FILE_NAME:
-            #     self._load_templatable_config()
+                self._load_templatable_config_by_apply()
+            elif scan_strategy is TemplateApplyScanStrategy.CONFIG_LIST_FIRST:
+                self._load_templatable_config_by_apply()
+                self._load_templatable_config()
+            elif scan_strategy is TemplateApplyScanStrategy.BY_FILE_NAME:
+                self._load_templatable_config()
             elif scan_strategy is TemplateApplyScanStrategy.BY_CONFIG_LIST:
                 self._load_templatable_config_by_apply()
             else:
@@ -210,23 +212,6 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
                 )
 
     def _load_templatable_config(self) -> None:
-        # Run dividing feature process
-        # 1. Use the templatable values set target file paths and list all of them
-        #       (hint: glob.glob, os.path.isdir, os.path.isfile).
-        # 2. Read the file and deserialize its content as data model.
-        # 3. Set the data model at current object's property.
-        # 4. Run step #1 to step #3 again and again until finish reading all files.
-        # 5. Extract the core logic as template method to object *TemplatableConfig*.
-
-        # # Has tag or doesn't have tag
-        # apply_apis = self.template.apply.api
-        # if isinstance(apply_apis[0], str):
-        #     pass
-        # elif isinstance(apply_apis[0], dict):
-        #     pass
-        # else:
-        #     pass
-
         # TODO: Modify to use property *config_path* or *config_path_format*
         customize_config_file_format = "**"
         config_file_format = f"[!_**]{customize_config_file_format}"
@@ -303,6 +288,21 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
 
     @abstractmethod
     def _set_template_config(self, config: _Config, **kwargs) -> None:
+        pass
+
+    def _load_mocked_apis_from_data(self, mocked_apis_data: dict) -> None:
+        self._set_mocked_apis()
+        if mocked_apis_data:
+            for mock_api_name in mocked_apis_data.keys():
+                self._set_mocked_apis(
+                    api_key=mock_api_name,
+                    api_config=self._deserialize_as_template_config.deserialize(
+                        data=mocked_apis_data.get(mock_api_name, None)
+                    ),
+                )
+
+    @abstractmethod
+    def _set_mocked_apis(self, api_key: str = "", api_config: Optional[_Config] = None) -> None:
         pass
 
 
