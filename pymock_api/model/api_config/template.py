@@ -8,9 +8,47 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
 from ..._utils.file_opt import YAML, _BaseFileOperation
-from ...model.enums import TemplateApplyScanStrategy
+from ...model.enums import ConfigLoadingOrder
 from ..enums import TemplateApplyScanStrategy
 from ._base import SelfType, _Config
+
+
+@dataclass(eq=False)
+class LoadConfig(_Config):
+    includes_apis: bool = True
+    order: List[ConfigLoadingOrder] = field(default_factory=list)
+
+    _default_order: List[ConfigLoadingOrder] = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self._default_order = [ConfigLoadingOrder.APIs]
+        if self.order is not None:
+            self._convert_order()
+
+    def _convert_order(self) -> None:
+        is_str = list(map(lambda e: isinstance(e, str), self.order))
+        if True in is_str:
+            if isinstance(self.order, str):
+                self.order = [ConfigLoadingOrder.to_enum(o) for o in self.order]
+
+    def _compare(self, other: "LoadConfig") -> bool:
+        return self.includes_apis == other.includes_apis and self.order == other.order
+
+    def serialize(self, data: Optional["LoadConfig"] = None) -> Optional[Dict[str, Any]]:
+        includes_apis: bool = self._get_prop(data, prop="includes_apis")
+        order: List[str] = self._get_prop(data, prop="order")
+        if not order:
+            order = [str(o.value) for o in self._default_order]
+        return {
+            "includes_apis": includes_apis,
+            "order": order,
+        }
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["LoadConfig"]:
+        self.includes_apis = data.get("includes_apis", True)
+        self.order = [ConfigLoadingOrder.to_enum(o) for o in data.get("order", self._default_order)]
+        return self
 
 
 @dataclass(eq=False)
@@ -148,14 +186,21 @@ class TemplateConfig(_Config):
     """The data model which could be set details attribute by section *template*."""
 
     activate: bool = False
+    load_config: LoadConfig = LoadConfig()
     values: TemplateValues = TemplateValues()
     apply: TemplateApply = TemplateApply(scan_strategy=TemplateApplyScanStrategy.FILE_NAME_FIRST)
 
     def _compare(self, other: "TemplateConfig") -> bool:
-        return self.activate == other.activate and self.values == other.values and self.apply == other.apply
+        return (
+            self.activate == other.activate
+            and self.load_config == other.load_config
+            and self.values == other.values
+            and self.apply == other.apply
+        )
 
     def serialize(self, data: Optional["TemplateConfig"] = None) -> Optional[Dict[str, Any]]:
         activate: bool = self.activate or self._get_prop(data, prop="activate")
+        load_config: LoadConfig = self.load_config or self._get_prop(data, prop="load_config")
         values: TemplateValues = self.values or self._get_prop(data, prop="values")
         apply: TemplateApply = self.apply or self._get_prop(data, prop="apply")
         if not (values and apply and activate is not None):
@@ -163,6 +208,7 @@ class TemplateConfig(_Config):
             return None
         return {
             "activate": activate,
+            "load_config": load_config.serialize(),
             "values": values.serialize(),
             "apply": apply.serialize(),
         }
@@ -170,6 +216,7 @@ class TemplateConfig(_Config):
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfig"]:
         self.activate = data.get("activate", False)
+        self.load_config = LoadConfig().deserialize(data.get("load_config", {}))
         self.values = TemplateValues().deserialize(data.get("values", {}))
         self.apply = TemplateApply().deserialize(data.get("apply", {}))
         return self
