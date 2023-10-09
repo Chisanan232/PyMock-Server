@@ -6,6 +6,7 @@ import pytest
 
 from pymock_api.model.api_config import TemplateConfig, _Config, _TemplatableConfig
 from pymock_api.model.api_config.template import (
+    LoadConfig,
     TemplateAPI,
     TemplateApply,
     TemplateHTTP,
@@ -17,6 +18,7 @@ from pymock_api.model.api_config.template import (
 
 from ...._values import (
     _Mock_Base_File_Path,
+    _Mock_Load_Config,
     _Mock_Templatable_Setting,
     _Mock_Template_API_Request_Setting,
     _Mock_Template_API_Response_Setting,
@@ -29,6 +31,37 @@ from ...._values import (
     _Mock_Template_Values_Setting,
 )
 from ._base import MOCK_MODEL, ConfigTestSpec
+
+
+class TestLoadConfig(ConfigTestSpec):
+    @pytest.fixture(scope="function")
+    def sut(self) -> LoadConfig:
+        return LoadConfig(
+            includes_apis=_Mock_Load_Config["includes_apis"],
+            order=_Mock_Load_Config["order"],
+        )
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> LoadConfig:
+        return LoadConfig()
+
+    def test_serialize_with_none(self, sut_with_nothing: LoadConfig):
+        assert sut_with_nothing.serialize() is not None
+        serialized_data = sut_with_nothing.serialize()
+        assert serialized_data["includes_apis"] is True
+        assert serialized_data["order"] == [o.value for o in getattr(sut_with_nothing, "_default_order")]
+
+    def test_value_attributes(self, sut: LoadConfig):
+        assert sut.includes_apis == _Mock_Load_Config["includes_apis"]
+        assert sut.order == _Mock_Load_Config["order"]
+
+    def _expected_serialize_value(self) -> dict:
+        return _Mock_Load_Config
+
+    def _expected_deserialize_value(self, obj: LoadConfig) -> None:
+        assert isinstance(obj, LoadConfig)
+        assert obj.includes_apis == _Mock_Load_Config["includes_apis"]
+        assert [o.value for o in obj.order] == _Mock_Load_Config["order"]
 
 
 class TemplatableConfigTestSuite(ConfigTestSpec, ABC):
