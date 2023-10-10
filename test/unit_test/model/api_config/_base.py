@@ -85,7 +85,10 @@ class MockModel:
     @property
     def template_config(self) -> TemplateConfig:
         return TemplateConfig(
-            activate=_Mock_Template_Config_Activate, values=self.template_values, apply=self.template_apply
+            activate=_Mock_Template_Config_Activate,
+            load_config=self.load_config,
+            values=self.template_values,
+            apply=self.template_apply,
         )
 
     @property
