@@ -278,7 +278,7 @@ class TestTemplateConfig(ConfigTestSpec):
     def sut(self) -> TemplateConfig:
         return TemplateConfig(
             activate=_Mock_Template_Config_Activate,
-            load_config=MOCK_MODEL.load_config,
+            load_config=MOCK_MODEL.template_load_config,
             values=MOCK_MODEL.template_values,
             apply=MOCK_MODEL.template_apply,
         )

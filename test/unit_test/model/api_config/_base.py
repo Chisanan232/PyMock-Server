@@ -76,7 +76,7 @@ class MockModel:
         )
 
     @property
-    def load_config(self) -> LoadConfig:
+    def template_load_config(self) -> LoadConfig:
         return LoadConfig(
             includes_apis=_Mock_Load_Config["includes_apis"],
             order=_Mock_Load_Config["order"],
@@ -86,7 +86,7 @@ class MockModel:
     def template_config(self) -> TemplateConfig:
         return TemplateConfig(
             activate=_Mock_Template_Config_Activate,
-            load_config=self.load_config,
+            load_config=self.template_load_config,
             values=self.template_values,
             apply=self.template_apply,
         )
