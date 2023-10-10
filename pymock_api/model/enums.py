@@ -54,7 +54,7 @@ ConfigLoadingFunction: Dict[str, Optional[Callable]] = {
 def set_loading_function(**kwargs) -> None:
     global ConfigLoadingFunction
     if False in [v in ConfigLoadingFunction.keys() for v in kwargs.keys()]:
-        raise KeyError("")
+        raise KeyError("The arguments only have *apis*, *file* and *apply* for setting loading function data.")
     ConfigLoadingFunction.update(**kwargs)
 
 
