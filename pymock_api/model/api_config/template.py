@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
 from ..._utils.file_opt import YAML, _BaseFileOperation
-from ...model.enums import ConfigLoadingOrder
+from ...model.enums import ConfigLoadingOrder, set_loading_function
 from ..enums import TemplateApplyScanStrategy
 from ._base import SelfType, _Config
 
@@ -227,6 +227,13 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     _config_file_name: str = "api.yaml"
     _configuration: _BaseFileOperation = YAML()
 
+    def __init__(self):
+        set_loading_function(
+            apis=self._load_mocked_apis_from_data,
+            apply=self._load_templatable_config_by_apply,
+            file=self._load_templatable_config,
+        )
+
     @property
     def config_file_name(self) -> str:
         return self._config_file_name
@@ -236,6 +243,13 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         self._config_file_name = n
 
     def _load_mocked_apis_config(self, mocked_apis_data: dict) -> None:
+        # NOTE: New feature of loading configuration by section *mocked_apis.template.load_config
+        if self._template_config.activate:
+            for load_config in self._template_config.load_config.order:
+                args = (mocked_apis_data,) if load_config is ConfigLoadingOrder.APIs else ()
+                load_config.get_loading_function()(*args)
+
+        # FIXME: Deprecate and remove here logic
         # TODO: Has a attribute to control it should be loaded first or finally
         self._load_mocked_apis_from_data(mocked_apis_data)
         if self._template_config.activate:
@@ -264,7 +278,8 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         # all_paths = glob.glob(f"{self._base_path}**/[!_*]*.yaml", recursive=True)
         config_base_path = self._template_config.values.base_file_path
         all_paths = glob.glob(f"{config_base_path}{config_file_format}")
-        all_paths.remove(f"{config_base_path}{self.config_file_name}")
+        if os.path.exists(f"{config_base_path}{self.config_file_name}"):
+            all_paths.remove(f"{config_base_path}{self.config_file_name}")
         for path in all_paths:
             if os.path.isdir(path):
                 # Has tag as directory

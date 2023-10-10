@@ -37,6 +37,7 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         base: Optional[BaseConfig] = None,
         apis: Dict[str, Optional[MockAPI]] = {},
     ):
+        super().__init__()
         self._template = TemplateConfig() if template is None else template
         self._base = base
         self._apis = apis
