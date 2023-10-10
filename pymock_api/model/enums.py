@@ -71,7 +71,4 @@ class ConfigLoadingOrder(Enum):
             return v
 
     def get_loading_function(self) -> Callable:
-        loading_function = ConfigLoadingFunction[self.value]
-        if loading_function is None:
-            raise ValueError("")
-        return loading_function
+        return ConfigLoadingFunction[self.value]  # type: ignore[return-value]
