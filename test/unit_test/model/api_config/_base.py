@@ -3,6 +3,7 @@ from abc import ABC, ABCMeta, abstractmethod
 from enum import Enum
 from test._values import (
     _Base_URL,
+    _Mock_Load_Config,
     _Mock_Template_Apply_Has_Tag_Setting,
     _Mock_Template_Apply_Scan_Strategy,
     _Mock_Template_Config_Activate,
@@ -26,6 +27,7 @@ from pymock_api.model.api_config import (
 )
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
 from pymock_api.model.api_config.template import (
+    LoadConfig,
     TemplateAPI,
     TemplateApply,
     TemplateConfigLoadable,
@@ -33,7 +35,11 @@ from pymock_api.model.api_config.template import (
     TemplateResponse,
     TemplateValues,
 )
-from pymock_api.model.enums import ResponseStrategy, TemplateApplyScanStrategy
+from pymock_api.model.enums import (
+    ConfigLoadingOrder,
+    ResponseStrategy,
+    TemplateApplyScanStrategy,
+)
 
 _assertion_msg = "Its property's value should be same as we set."
 MOCK_RETURN_VALUE: Mock = Mock()
@@ -67,6 +73,13 @@ class MockModel:
         return TemplateApply(
             scan_strategy=_Mock_Template_Apply_Scan_Strategy,
             api=_Mock_Template_Apply_Has_Tag_Setting["api"],
+        )
+
+    @property
+    def load_config(self) -> LoadConfig:
+        return LoadConfig(
+            includes_apis=_Mock_Load_Config["includes_apis"],
+            order=_Mock_Load_Config["order"],
         )
 
     @property

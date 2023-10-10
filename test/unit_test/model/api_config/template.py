@@ -277,7 +277,10 @@ class TestTemplateConfig(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> TemplateConfig:
         return TemplateConfig(
-            activate=_Mock_Template_Config_Activate, values=MOCK_MODEL.template_values, apply=MOCK_MODEL.template_apply
+            activate=_Mock_Template_Config_Activate,
+            load_config=MOCK_MODEL.load_config,
+            values=MOCK_MODEL.template_values,
+            apply=MOCK_MODEL.template_apply,
         )
 
     @pytest.fixture(scope="function")
