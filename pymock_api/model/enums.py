@@ -71,8 +71,6 @@ class ConfigLoadingOrder(Enum):
             return v
 
     def get_loading_function(self) -> Callable:
-        if self not in ConfigLoadingOrder:
-            raise TypeError("")
         loading_function = ConfigLoadingFunction[self.value]
         if loading_function is None:
             raise ValueError("")
