@@ -28,8 +28,7 @@ class LoadConfig(_Config):
     def _convert_order(self) -> None:
         is_str = list(map(lambda e: isinstance(e, str), self.order))
         if True in is_str:
-            if isinstance(self.order, str):
-                self.order = [ConfigLoadingOrder.to_enum(o) for o in self.order]
+            self.order = [ConfigLoadingOrder.to_enum(o) for o in self.order]
 
     def _compare(self, other: "LoadConfig") -> bool:
         return self.includes_apis == other.includes_apis and self.order == other.order

@@ -53,7 +53,7 @@ class TestLoadConfig(ConfigTestSpec):
 
     def test_value_attributes(self, sut: LoadConfig):
         assert sut.includes_apis == _Mock_Load_Config["includes_apis"]
-        assert sut.order == _Mock_Load_Config["order"]
+        assert [o.value for o in sut.order] == _Mock_Load_Config["order"]
 
     def _expected_serialize_value(self) -> dict:
         return _Mock_Load_Config
