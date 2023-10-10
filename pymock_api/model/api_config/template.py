@@ -36,12 +36,12 @@ class LoadConfig(_Config):
 
     def serialize(self, data: Optional["LoadConfig"] = None) -> Optional[Dict[str, Any]]:
         includes_apis: bool = self._get_prop(data, prop="includes_apis")
-        order: List[str] = self._get_prop(data, prop="order")
+        order: List[Union[str, ConfigLoadingOrder]] = self._get_prop(data, prop="order")
         if not order:
             order = [str(o.value) for o in self._default_order]
         return {
             "includes_apis": includes_apis,
-            "order": order,
+            "order": [o.value if isinstance(o, ConfigLoadingOrder) else o for o in order],
         }
 
     @_Config._ensure_process_with_not_empty_value
