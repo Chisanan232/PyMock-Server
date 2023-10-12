@@ -323,11 +323,11 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         self._set_mocked_apis()
         if mocked_apis_data:
             for mock_api_name in mocked_apis_data.keys():
+                api_config = self._deserialize_as_template_config
+                api_config.config_path = f"{mock_api_name}-api.yaml"
                 self._set_mocked_apis(
                     api_key=mock_api_name,
-                    api_config=self._deserialize_as_template_config.deserialize(
-                        data=mocked_apis_data.get(mock_api_name, None)
-                    ),
+                    api_config=api_config.deserialize(data=mocked_apis_data.get(mock_api_name, None)),
                 )
 
     @abstractmethod
@@ -340,9 +340,11 @@ class _TemplatableConfig(_Config, ABC):
     apply_template_props: bool = True
 
     # The settings which could be set by section *template* or override the values
-    base_file_path: str = "./"
+    base_file_path: str = ""
     config_path: str = field(default_factory=str)
     config_path_format: str = field(default_factory=str)
+
+    _default_base_file_path: str = "./"
 
     # Attributes for inner usage
     _current_template: TemplateConfig = TemplateConfig()
@@ -382,7 +384,10 @@ class _TemplatableConfig(_Config, ABC):
         return self
 
     def _get_dividing_config(self, data: dict) -> dict:
-        dividing_config_path = str(pathlib.Path(self.base_file_path, self.config_path))
+        base_file_path = (
+            self.base_file_path or self._current_template.values.base_file_path or self._default_base_file_path
+        )
+        dividing_config_path = str(pathlib.Path(base_file_path, self.config_path))
         if dividing_config_path and os.path.exists(dividing_config_path) and os.path.isfile(dividing_config_path):
             dividing_data = self._configuration.read(dividing_config_path)
             data.update(**dividing_data)
