@@ -243,33 +243,19 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         self._config_file_name = n
 
     def _load_mocked_apis_config(self, mocked_apis_data: dict) -> None:
-        # NOTE: New feature of loading configuration by section *mocked_apis.template.load_config
-        if self._template_config.activate:
-            for load_config in self._template_config.load_config.order:
-                args = (mocked_apis_data,) if load_config is ConfigLoadingOrder.APIs else ()
-                load_config.get_loading_function()(*args)
+        loading_order = self._template_config.load_config.order
 
-        # FIXME: Deprecate and remove here logic
-        # TODO: Has a attribute to control it should be loaded first or finally
-        self._load_mocked_apis_from_data(mocked_apis_data)
+        if self._template_config.load_config.includes_apis:
+            if (ConfigLoadingOrder.APIs not in loading_order) or (
+                ConfigLoadingOrder.APIs in loading_order and not self._template_config.activate
+            ):
+                self._load_mocked_apis_from_data(mocked_apis_data)
+
         if self._template_config.activate:
-            scan_strategy = self._template_config.apply.scan_strategy
-            # TODO: Modify to builder pattern to control the process
-            if scan_strategy is TemplateApplyScanStrategy.FILE_NAME_FIRST:
-                self._load_templatable_config()
-                self._load_templatable_config_by_apply()
-            elif scan_strategy is TemplateApplyScanStrategy.CONFIG_LIST_FIRST:
-                self._load_templatable_config_by_apply()
-                self._load_templatable_config()
-            elif scan_strategy is TemplateApplyScanStrategy.BY_FILE_NAME:
-                self._load_templatable_config()
-            elif scan_strategy is TemplateApplyScanStrategy.BY_CONFIG_LIST:
-                self._load_templatable_config_by_apply()
-            else:
-                all_valid_strategy = ", ".join([f"'{strategy}'" for strategy in TemplateApplyScanStrategy])
-                raise RuntimeError(
-                    f"Invalid template scanning strategy. Please configure valid strategy: {all_valid_strategy}."
-                )
+            for load_config in loading_order:
+                args = (mocked_apis_data,)
+                args = load_config.get_loading_function_args(*args)  # type: ignore[assignment]
+                load_config.get_loading_function()(*args)
 
     def _load_templatable_config(self) -> None:
         # TODO: Modify to use property *config_path* or *config_path_format*

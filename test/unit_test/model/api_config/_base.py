@@ -260,19 +260,3 @@ class TemplateConfigLoadableTestSuite(ConfigTestSpec, ABC):
             sut._load_mocked_apis_config({})
             # Verify the running result
             mock_parent.assert_has_calls(criteria_order)
-
-    def test_load_mocked_apis_with_invalid_scan_strategy(self, sut: _Config):
-        assert isinstance(sut, TemplateConfigLoadable)
-
-        invalid_template_config = TemplateConfig(
-            activate=True,
-            apply=TemplateApply(scan_strategy="invalid_scan_strategy"),
-        )
-        with pytest.raises(RuntimeError) as exc_info:
-            with patch(
-                "pymock_api.model.api_config.MockAPIs._template_config",
-                new_callable=PropertyMock,
-                return_value=invalid_template_config,
-            ):
-                sut._load_mocked_apis_config({})
-        assert re.search(r".{0,32}invalid.{0,32}strategy.{0,32}", str(exc_info.value), re.IGNORECASE)

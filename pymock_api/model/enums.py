@@ -1,7 +1,7 @@
 from collections import namedtuple
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 
 
 class Format(Enum):
@@ -72,3 +72,9 @@ class ConfigLoadingOrder(Enum):
 
     def get_loading_function(self) -> Callable:
         return ConfigLoadingFunction[self.value]  # type: ignore[return-value]
+
+    def get_loading_function_args(self, *args) -> Optional[tuple]:
+        if self is ConfigLoadingOrder.APIs:
+            if args:
+                return args
+        return ()
