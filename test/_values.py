@@ -67,13 +67,6 @@ _Mock_Template_Apply_No_Tag_Setting: dict = {
 }
 
 
-def generate_template_apply(scan_strategy: str, api: List) -> dict:
-    return {
-        "scan_strategy": scan_strategy,
-        "api": api,
-    }
-
-
 _Mock_Template_Config_Activate: bool = False
 
 _Mock_Load_Config: dict = {
