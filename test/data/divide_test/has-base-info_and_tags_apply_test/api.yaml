@@ -7,9 +7,7 @@ mocked_apis:
     load_config:
       includes_apis: True
       order:
-        - 'apis'    # Load the setting in section *mocked_apis.apis*
         - 'apply'    # Load the setting by scanning files which naming be ruled by section *mocked_apis.template.apply*
-        - 'file'    # Load the setting by scanning files directly
     values:
       base_file_path: './test/data/divide_test/has-base-info_and_tags_apply_test/'    # Default value should be current path './'
       api:

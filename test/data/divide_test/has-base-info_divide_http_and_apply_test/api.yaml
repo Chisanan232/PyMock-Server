@@ -7,9 +7,7 @@ mocked_apis:
     load_config:
       includes_apis: True
       order:
-        - 'apis'
         - 'apply'
-        - 'file'
     values:
       base_file_path: './test/data/divide_test/has-base-info_divide_http_test/'
       api:
