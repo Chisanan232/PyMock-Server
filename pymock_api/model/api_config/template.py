@@ -242,7 +242,6 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
                 load_config.get_loading_function()(*args)
 
     def _load_templatable_config(self) -> None:
-        # TODO: Modify to use property *config_path* or *config_path_format*
         customize_config_file_format = "**"
         config_file_format = f"[!_**]{customize_config_file_format}"
         # all_paths = glob.glob(f"{self._base_path}**/[!_*]*.yaml", recursive=True)
@@ -253,7 +252,6 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         for path in all_paths:
             if os.path.isdir(path):
                 # Has tag as directory
-                # TODO: Modify to use property *config_path* or *config_path_format*
                 for path_with_tag in glob.glob(f"{path}/{self._config_file_format}.yaml"):
                     # In the tag directory, it's config
                     self._deserialize_and_set_template_config(path_with_tag)
