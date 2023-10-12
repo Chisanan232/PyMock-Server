@@ -378,7 +378,6 @@ class _TemplatableConfig(_Config, ABC):
         _update_template_prop("config_path")
         _update_template_prop("config_path_format")
 
-        # FIXME: Extract the running process order as a single function
         if self.apply_template_props:
             data = self._get_dividing_config(data)
         return self
