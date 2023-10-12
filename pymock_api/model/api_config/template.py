@@ -384,12 +384,10 @@ class _TemplatableConfig(_Config, ABC):
 
     def _get_dividing_config(self, data: dict) -> dict:
         # base_path = self.base_file_path or self._template_base_file_path
-        # config_file_path = self.config_path or self._template_config_file_path
         base_path = self.base_file_path
         config_file_path = self.config_path
         dividing_config_path = str(pathlib.Path(base_path, config_file_path))
         if dividing_config_path and os.path.exists(dividing_config_path) and os.path.isfile(dividing_config_path):
-            # assert os.path.isfile(dividing_config_path) is True
             dividing_data = self._configuration.read(dividing_config_path)
             data.update(**dividing_data)
         return data
