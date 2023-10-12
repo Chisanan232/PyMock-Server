@@ -393,14 +393,3 @@ class _TemplatableConfig(_Config, ABC):
             dividing_data = self._configuration.read(dividing_config_path)
             data.update(**dividing_data)
         return data
-
-    # FIXME: Wait for make sure the spec of configuration
-    # @property
-    # @abstractmethod
-    # def _template_base_file_path(self) -> str:
-    #     pass
-    #
-    # @property
-    # @abstractmethod
-    # def _template_config_file_path(self) -> str:
-    #     pass
