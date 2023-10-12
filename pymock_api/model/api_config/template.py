@@ -9,7 +9,6 @@ from typing import Any, Dict, List, Optional, Union
 
 from ..._utils.file_opt import YAML, _BaseFileOperation
 from ...model.enums import ConfigLoadingOrder, set_loading_function
-from ..enums import TemplateApplyScanStrategy
 from ._base import SelfType, _Config
 
 
@@ -148,34 +147,19 @@ class TemplateValues(_Config):
 
 @dataclass(eq=False)
 class TemplateApply(_Config):
-    scan_strategy: Optional[TemplateApplyScanStrategy] = None
     api: List[Union[str, Dict[str, List[str]]]] = field(default_factory=list)
 
     def _compare(self, other: "TemplateApply") -> bool:
-        return self.scan_strategy is other.scan_strategy and self.api == other.api
+        return self.api == other.api
 
     def serialize(self, data: Optional["TemplateApply"] = None) -> Optional[Dict[str, Any]]:
-        scan_strategy: TemplateApplyScanStrategy = self.scan_strategy or TemplateApplyScanStrategy.to_enum(
-            self._get_prop(data, prop="scan_strategy")
-        )
-        if not scan_strategy:
-            raise ValueError("Necessary argument *scan_strategy* is missing.")
-        if not isinstance(scan_strategy, TemplateApplyScanStrategy):
-            raise TypeError(
-                "Argument *scan_strategy* data type is invalid. It only accepts *TemplateApplyScanStrategy* type value."
-            )
-
         api: str = self._get_prop(data, prop="api")
         return {
-            "scan_strategy": scan_strategy.value,
             "api": api,
         }
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateApply"]:
-        self.scan_strategy = TemplateApplyScanStrategy.to_enum(data.get("scan_strategy", None))
-        if not self.scan_strategy:
-            raise ValueError("Schema key *scan_strategy* cannot be empty.")
         self.api = data.get("api")  # type: ignore[assignment]
         return self
 
@@ -187,7 +171,7 @@ class TemplateConfig(_Config):
     activate: bool = False
     load_config: LoadConfig = LoadConfig()
     values: TemplateValues = TemplateValues()
-    apply: TemplateApply = TemplateApply(scan_strategy=TemplateApplyScanStrategy.FILE_NAME_FIRST)
+    apply: TemplateApply = TemplateApply()
 
     def _compare(self, other: "TemplateConfig") -> bool:
         return (

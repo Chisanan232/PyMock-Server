@@ -30,20 +30,6 @@ class ResponseStrategy(Enum):
             return v
 
 
-class TemplateApplyScanStrategy(Enum):
-    BY_FILE_NAME: str = "by_file_name"
-    BY_CONFIG_LIST: str = "by_config_list"
-    FILE_NAME_FIRST: str = "file_name_first"
-    CONFIG_LIST_FIRST: str = "config_list_first"
-
-    @staticmethod
-    def to_enum(v: Union[str, "TemplateApplyScanStrategy"]) -> "TemplateApplyScanStrategy":
-        if isinstance(v, str):
-            return TemplateApplyScanStrategy(v.lower())
-        else:
-            return v
-
-
 ConfigLoadingFunction: Dict[str, Optional[Callable]] = {
     "apis": None,
     "apply": None,

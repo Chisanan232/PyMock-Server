@@ -5,7 +5,6 @@ from test._values import (
     _Base_URL,
     _Mock_Load_Config,
     _Mock_Template_Apply_Has_Tag_Setting,
-    _Mock_Template_Apply_Scan_Strategy,
     _Mock_Template_Config_Activate,
     _Test_API_Parameter,
     _Test_HTTP_Resp,
@@ -38,7 +37,6 @@ from pymock_api.model.api_config.template import (
 from pymock_api.model.enums import (
     ConfigLoadingOrder,
     ResponseStrategy,
-    TemplateApplyScanStrategy,
     set_loading_function,
 )
 
@@ -72,7 +70,6 @@ class MockModel:
     @property
     def template_apply(self) -> TemplateApply:
         return TemplateApply(
-            scan_strategy=_Mock_Template_Apply_Scan_Strategy,
             api=_Mock_Template_Apply_Has_Tag_Setting["api"],
         )
 

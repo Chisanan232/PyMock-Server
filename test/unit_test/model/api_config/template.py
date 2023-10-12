@@ -24,7 +24,6 @@ from ...._values import (
     _Mock_Template_API_Response_Setting,
     _Mock_Template_API_Setting,
     _Mock_Template_Apply_Has_Tag_Setting,
-    _Mock_Template_Apply_Scan_Strategy,
     _Mock_Template_Config_Activate,
     _Mock_Template_HTTP_Setting,
     _Mock_Template_Setting,
@@ -222,22 +221,19 @@ class TestTemplateApply(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> TemplateApply:
         return TemplateApply(
-            scan_strategy=_Mock_Template_Apply_Scan_Strategy,
             api=_Mock_Template_Apply_Has_Tag_Setting.get("api"),
         )
 
     @pytest.fixture(scope="function")
     def sut_with_nothing(self) -> TemplateApply:
-        return TemplateApply(scan_strategy=_Mock_Template_Apply_Scan_Strategy)
+        return TemplateApply()
 
     def test_value_attributes(self, sut: TemplateApply):
-        assert sut.scan_strategy == _Mock_Template_Apply_Scan_Strategy
         assert sut.api == _Mock_Template_Apply_Has_Tag_Setting.get("api")
 
     def test_serialize_with_none(self, sut_with_nothing: TemplateApply):
         serialized_data = sut_with_nothing.serialize()
         assert serialized_data is not None
-        assert serialized_data["scan_strategy"] == _Mock_Template_Apply_Has_Tag_Setting.get("scan_strategy")
         assert serialized_data["api"] == []
 
     def _expected_serialize_value(self) -> dict:
@@ -245,32 +241,7 @@ class TestTemplateApply(ConfigTestSpec):
 
     def _expected_deserialize_value(self, obj: TemplateApply) -> None:
         assert isinstance(obj, TemplateApply)
-        assert obj.scan_strategy == _Mock_Template_Apply_Scan_Strategy
         assert obj.api == _Mock_Template_Apply_Has_Tag_Setting.get("api")
-
-    def test_deserialize_with_missing_strategy(self):
-        with pytest.raises(ValueError) as exc_info:
-            TemplateApply().deserialize(data={"miss strategy": ""})
-        assert re.search(r".{0,32}scan_strategy.{0,32}cannot be empty.{0,32}", str(exc_info.value), re.IGNORECASE)
-
-    @pytest.mark.parametrize(
-        ("scan_strategy", "expected_exception", "regular_expression"),
-        [
-            (None, ValueError, r".{0,64}argument \*scan_strategy\* is missing.{0,64}"),
-            ("invalid strategy", TypeError, r".{0,128}data type is invalid.{0,128}"),
-        ],
-    )
-    def test_serialize_with_invalid_scan_strategy(
-        self,
-        scan_strategy: Any,
-        expected_exception: Exception,
-        regular_expression: str,
-        sut_with_nothing: TemplateApply,
-    ):
-        with pytest.raises(expected_exception) as exc_info:
-            sut_with_nothing.scan_strategy = scan_strategy
-            sut_with_nothing.serialize()
-        assert re.search(regular_expression, str(exc_info.value), re.IGNORECASE)
 
 
 class TestTemplateConfig(ConfigTestSpec):
