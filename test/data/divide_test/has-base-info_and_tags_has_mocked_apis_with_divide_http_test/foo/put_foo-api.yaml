@@ -1,6 +1,0 @@
-url: '/foo'
-http:
-  apply_template_props: True
-  base_file_path: './test/data/divide_test/has-base-info_and_tags_has_mocked_apis_with_divide_http_test/foo'
-  config_path:
-  config_path_format: '**-http'

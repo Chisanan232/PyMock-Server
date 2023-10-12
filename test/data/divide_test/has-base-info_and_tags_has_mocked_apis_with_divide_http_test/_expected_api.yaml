@@ -50,7 +50,7 @@ mocked_apis:
                   required: True
                   type: str
       tag: 'foo'
-    put_foo:
+    special_put_foo:
       url: '/foo'
       http:
         request:
