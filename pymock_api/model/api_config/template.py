@@ -369,6 +369,7 @@ class _TemplatableConfig(_Config, ABC):
             value = data.get(key, None)
             if value is not None:
                 self._has_apply_template_props_in_config = True
+                # Note: Override the value which be set by upper layer from template config
                 setattr(self, key, value)
 
         _update_template_prop("apply_template_props")
@@ -381,10 +382,7 @@ class _TemplatableConfig(_Config, ABC):
         return self
 
     def _get_dividing_config(self, data: dict) -> dict:
-        # base_path = self.base_file_path or self._template_base_file_path
-        base_path = self.base_file_path
-        config_file_path = self.config_path
-        dividing_config_path = str(pathlib.Path(base_path, config_file_path))
+        dividing_config_path = str(pathlib.Path(self.base_file_path, self.config_path))
         if dividing_config_path and os.path.exists(dividing_config_path) and os.path.isfile(dividing_config_path):
             dividing_data = self._configuration.read(dividing_config_path)
             data.update(**dividing_data)
