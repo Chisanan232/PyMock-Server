@@ -22,3 +22,4 @@ mocked_apis:
     get_foo:
       apply_template_props: True
       config_path_format: '**-special_api'
+#      config_path_format: '{{ api.name }}-special_api'
