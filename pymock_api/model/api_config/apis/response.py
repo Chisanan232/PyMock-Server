@@ -82,6 +82,8 @@ class HTTPResponse(_TemplatableConfig):
     * object: Return the response which be composed as object by some properties.
     """
 
+    config_file_tail: str = "-response"
+
     # Strategy: string
     value: str = field(default_factory=str)
 

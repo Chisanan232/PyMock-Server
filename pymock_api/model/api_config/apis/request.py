@@ -79,6 +79,8 @@ class APIParameter(_Config):
 class HTTPRequest(_TemplatableConfig):
     """*The **http.request** section in **mocked_apis.<api>***"""
 
+    config_file_tail: str = "-request"
+
     method: str = field(default_factory=str)
     parameters: List[APIParameter] = field(default_factory=list)
 

@@ -324,7 +324,7 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         if mocked_apis_data:
             for mock_api_name in mocked_apis_data.keys():
                 api_config = self._deserialize_as_template_config
-                api_config.config_path = f"{mock_api_name}-api.yaml"
+                api_config.config_path = f"{mock_api_name}{api_config.config_file_tail}.yaml"
                 self._set_mocked_apis(
                     api_key=mock_api_name,
                     api_config=api_config.deserialize(data=mocked_apis_data.get(mock_api_name, None)),
@@ -342,6 +342,7 @@ class _TemplatableConfig(_Config, ABC):
     # The settings which could be set by section *template* or override the values
     base_file_path: str = ""
     config_path: str = field(default_factory=str)
+    config_file_tail: str = field(default_factory=str)
     config_path_format: str = field(default_factory=str)
 
     _default_base_file_path: str = "./"

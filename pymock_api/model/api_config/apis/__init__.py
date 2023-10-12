@@ -14,6 +14,8 @@ from .response import HTTPResponse, ResponseProperty
 class HTTP(_TemplatableConfig):
     """*The **http** section in **mocked_apis.<api>***"""
 
+    config_file_tail: str = "-http"
+
     request: Optional[HTTPRequest] = None
     response: Optional[HTTPResponse] = None
 
@@ -111,9 +113,7 @@ class HTTP(_TemplatableConfig):
             if _data:
                 config = data_model(_current_template=self._current_template)
                 config.base_file_path = self.base_file_path
-                config.config_path = self.config_path.replace(
-                    "-http", "-request" if issubclass(data_model, HTTPRequest) else "-response"
-                )
+                config.config_path = self.config_path.replace(self.config_file_tail, config.config_file_tail)
                 return config.deserialize(data=_data)
             else:
                 return None
@@ -130,6 +130,8 @@ class HTTP(_TemplatableConfig):
 @dataclass(eq=False)
 class MockAPI(_TemplatableConfig):
     """*The **<api>** section in **mocked_apis***"""
+
+    config_file_tail: str = "-api"
 
     url: str = field(default_factory=str)
     http: Optional[HTTP] = None
@@ -237,7 +239,7 @@ class MockAPI(_TemplatableConfig):
             if _data:
                 config = data_model(_current_template=self._current_template)
                 config.base_file_path = self.base_file_path
-                config.config_path = self.config_path.replace("-api", "-http")
+                config.config_path = self.config_path.replace(self.config_file_tail, config.config_file_tail)
                 return config.deserialize(data=_data)
             else:
                 return None
