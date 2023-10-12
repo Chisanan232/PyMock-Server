@@ -19,7 +19,6 @@ mocked_apis:
       response:
         config_path_format: '**-response'
     apply:
-      scan_strategy: by_config_list
       api:
         - get_foo
   base:

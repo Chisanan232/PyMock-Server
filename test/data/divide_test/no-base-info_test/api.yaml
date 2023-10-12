@@ -21,6 +21,5 @@ mocked_apis:
       response:
         config_path_format: '**-response'
     apply:
-      scan_strategy: file_name_first
       api:
         - get_foo
