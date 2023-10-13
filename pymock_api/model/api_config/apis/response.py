@@ -7,7 +7,7 @@ from ...._utils.file_opt import YAML, _BaseFileOperation
 from ...enums import ResponseStrategy
 from .._base import _Config
 from ..item import IteratorItem
-from ..template import _TemplatableConfig
+from ..template import TemplateResponse, _TemplatableConfig
 
 
 @dataclass(eq=False)
@@ -81,6 +81,8 @@ class HTTPResponse(_TemplatableConfig):
     * file: Return the data which be recorded in the file path as response.
     * object: Return the response which be composed as object by some properties.
     """
+
+    config_file_tail: str = "-response"
 
     # Strategy: string
     value: str = field(default_factory=str)
@@ -197,3 +199,7 @@ class HTTPResponse(_TemplatableConfig):
         else:
             raise NotImplementedError
         return self
+
+    @property
+    def _template_setting(self) -> TemplateResponse:
+        return self._current_template.values.response

@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 from ...._utils.file_opt import YAML, _BaseFileOperation
 from .._base import _Config
 from ..item import IteratorItem
-from ..template import _TemplatableConfig
+from ..template import TemplateRequest, _TemplatableConfig
 
 
 @dataclass(eq=False)
@@ -79,6 +79,8 @@ class APIParameter(_Config):
 class HTTPRequest(_TemplatableConfig):
     """*The **http.request** section in **mocked_apis.<api>***"""
 
+    config_file_tail: str = "-request"
+
     method: str = field(default_factory=str)
     parameters: List[APIParameter] = field(default_factory=list)
 
@@ -135,6 +137,10 @@ class HTTPRequest(_TemplatableConfig):
             raise TypeError("Argument *parameters* should be a list type value.")
         self.parameters = [APIParameter().deserialize(data=parameter) for parameter in parameters] if parameters else []
         return self
+
+    @property
+    def _template_setting(self) -> TemplateRequest:
+        return self._current_template.values.request
 
     def get_one_param_by_name(self, name: str) -> Optional[APIParameter]:
         for param in self.parameters:

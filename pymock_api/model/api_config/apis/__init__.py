@@ -5,7 +5,7 @@ from ...._utils import YAML
 from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Config
-from ..template import _TemplatableConfig
+from ..template import TemplateAPI, TemplateHTTP, _TemplatableConfig
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 
@@ -13,6 +13,8 @@ from .response import HTTPResponse, ResponseProperty
 @dataclass(eq=False)
 class HTTP(_TemplatableConfig):
     """*The **http** section in **mocked_apis.<api>***"""
+
+    config_file_tail: str = "-http"
 
     request: Optional[HTTPRequest] = None
     response: Optional[HTTPResponse] = None
@@ -107,29 +109,24 @@ class HTTP(_TemplatableConfig):
 
         """
 
-        def _deserialize_data_model(data_model: Type[_TemplatableConfig], _data: dict) -> Optional[_TemplatableConfig]:
-            if _data:
-                config = data_model(_current_template=self._current_template)
-                config.base_file_path = self.base_file_path
-                config.config_path = self.config_path.replace(
-                    "-http", "-request" if issubclass(data_model, HTTPRequest) else "-response"
-                )
-                return config.deserialize(data=_data)
-            else:
-                return None
-
         super().deserialize(data)
 
         req = data.get("request", None)
         resp = data.get("response", None)
-        self.request = _deserialize_data_model(HTTPRequest, req)  # type: ignore[assignment]
-        self.response = _deserialize_data_model(HTTPResponse, resp)  # type: ignore[assignment]
+        self.request = self._deserialize_as(HTTPRequest, with_data=req)  # type: ignore[assignment]
+        self.response = self._deserialize_as(HTTPResponse, with_data=resp)  # type: ignore[assignment]
         return self
+
+    @property
+    def _template_setting(self) -> TemplateHTTP:
+        return self._current_template.values.http
 
 
 @dataclass(eq=False)
 class MockAPI(_TemplatableConfig):
     """*The **<api>** section in **mocked_apis***"""
+
+    config_file_tail: str = "-api"
 
     url: str = field(default_factory=str)
     http: Optional[HTTP] = None
@@ -233,22 +230,17 @@ class MockAPI(_TemplatableConfig):
 
         """
 
-        def _deserialize_data_model(data_model: Type[_TemplatableConfig], _data: dict) -> Optional[_TemplatableConfig]:
-            if _data:
-                config = data_model(_current_template=self._current_template)
-                config.base_file_path = self.base_file_path
-                config.config_path = self.config_path.replace("-api", "-http")
-                return config.deserialize(data=_data)
-            else:
-                return None
-
         super().deserialize(data)
 
         self.url = data.get("url", None)
         http_info = data.get("http", None)
-        self.http = _deserialize_data_model(HTTP, http_info)  # type: ignore[assignment]
+        self.http = self._deserialize_as(HTTP, with_data=http_info)  # type: ignore[assignment]
         self.tag = data.get("tag", "")
         return self
+
+    @property
+    def _template_setting(self) -> TemplateAPI:
+        return self._current_template.values.api
 
     def set_request(self, method: str = "GET", parameters: Optional[List[Union[dict, APIParameter]]] = None) -> None:
         def _convert(param: Union[dict, APIParameter]) -> APIParameter:
