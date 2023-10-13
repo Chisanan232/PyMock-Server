@@ -380,6 +380,11 @@ class _TemplatableConfig(_Config, ABC):
         _update_template_prop("config_path")
         _update_template_prop("config_path_format")
 
+        # Update the tail part of file name to let it could find the dividing configuration
+        old_config_file_tail = self.config_file_tail
+        self.config_file_tail = (self.config_path_format or self._template_setting.config_path_format).replace("**", "")
+        self.config_path = self.config_path.replace(old_config_file_tail, self.config_file_tail)
+
         if self.apply_template_props:
             data = self._get_dividing_config(data)
         return self
@@ -393,3 +398,8 @@ class _TemplatableConfig(_Config, ABC):
             dividing_data = self._configuration.read(dividing_config_path)
             data.update(**dividing_data)
         return data
+
+    @property
+    @abstractmethod
+    def _template_setting(self) -> TemplateSetting:
+        pass

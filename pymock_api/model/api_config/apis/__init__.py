@@ -5,7 +5,7 @@ from ...._utils import YAML
 from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Config
-from ..template import _TemplatableConfig
+from ..template import TemplateAPI, TemplateHTTP, _TemplatableConfig
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 
@@ -125,6 +125,10 @@ class HTTP(_TemplatableConfig):
         self.request = _deserialize_data_model(HTTPRequest, req)  # type: ignore[assignment]
         self.response = _deserialize_data_model(HTTPResponse, resp)  # type: ignore[assignment]
         return self
+
+    @property
+    def _template_setting(self) -> TemplateHTTP:
+        return self._current_template.values.http
 
 
 @dataclass(eq=False)
@@ -251,6 +255,10 @@ class MockAPI(_TemplatableConfig):
         self.http = _deserialize_data_model(HTTP, http_info)  # type: ignore[assignment]
         self.tag = data.get("tag", "")
         return self
+
+    @property
+    def _template_setting(self) -> TemplateAPI:
+        return self._current_template.values.api
 
     def set_request(self, method: str = "GET", parameters: Optional[List[Union[dict, APIParameter]]] = None) -> None:
         def _convert(param: Union[dict, APIParameter]) -> APIParameter:
