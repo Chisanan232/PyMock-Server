@@ -4,6 +4,10 @@ description: ''
 mocked_apis:
   template:
     activate: true
+    load_config:
+      includes_apis: True
+      order:
+        - 'apply'
     values:
       base_file_path: './test/data/divide_test/has-base-info_divide_http_test/'
       api:
@@ -15,7 +19,6 @@ mocked_apis:
       response:
         config_path_format: '**-response'
     apply:
-      scan_strategy: by_config_list
       api:
         - get_foo
   base:

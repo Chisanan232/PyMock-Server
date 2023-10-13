@@ -126,14 +126,6 @@ class HTTP(_TemplatableConfig):
         self.response = _deserialize_data_model(HTTPResponse, resp)  # type: ignore[assignment]
         return self
 
-    # @property
-    # def _template_base_file_path(self) -> str:
-    #     return ""
-    #
-    # @property
-    # def _template_config_file_path(self) -> str:
-    #     return ""
-
 
 @dataclass(eq=False)
 class MockAPI(_TemplatableConfig):
@@ -314,11 +306,3 @@ class MockAPI(_TemplatableConfig):
             return YAML().serialize(_ensure_getting_serialized_data())
         else:
             raise ValueError(f"Not support the format feature as {f}.")
-
-    # @property
-    # def _template_base_file_path(self) -> str:
-    #     return self._current_template.values.api.base_file_path
-    #
-    # @property
-    # def _template_config_file_path(self) -> str:
-    #     return self._current_template.values.api.config_path_format

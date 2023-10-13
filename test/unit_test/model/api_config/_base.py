@@ -3,8 +3,8 @@ from abc import ABC, ABCMeta, abstractmethod
 from enum import Enum
 from test._values import (
     _Base_URL,
+    _Mock_Load_Config,
     _Mock_Template_Apply_Has_Tag_Setting,
-    _Mock_Template_Apply_Scan_Strategy,
     _Mock_Template_Config_Activate,
     _Test_API_Parameter,
     _Test_HTTP_Resp,
@@ -26,6 +26,7 @@ from pymock_api.model.api_config import (
 )
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
 from pymock_api.model.api_config.template import (
+    LoadConfig,
     TemplateAPI,
     TemplateApply,
     TemplateConfigLoadable,
@@ -33,7 +34,11 @@ from pymock_api.model.api_config.template import (
     TemplateResponse,
     TemplateValues,
 )
-from pymock_api.model.enums import ResponseStrategy, TemplateApplyScanStrategy
+from pymock_api.model.enums import (
+    ConfigLoadingOrder,
+    ResponseStrategy,
+    set_loading_function,
+)
 
 _assertion_msg = "Its property's value should be same as we set."
 MOCK_RETURN_VALUE: Mock = Mock()
@@ -65,14 +70,23 @@ class MockModel:
     @property
     def template_apply(self) -> TemplateApply:
         return TemplateApply(
-            scan_strategy=_Mock_Template_Apply_Scan_Strategy,
             api=_Mock_Template_Apply_Has_Tag_Setting["api"],
+        )
+
+    @property
+    def template_load_config(self) -> LoadConfig:
+        return LoadConfig(
+            includes_apis=_Mock_Load_Config["includes_apis"],
+            order=_Mock_Load_Config["order"],
         )
 
     @property
     def template_config(self) -> TemplateConfig:
         return TemplateConfig(
-            activate=_Mock_Template_Config_Activate, values=self.template_values, apply=self.template_apply
+            activate=_Mock_Template_Config_Activate,
+            load_config=self.template_load_config,
+            values=self.template_values,
+            apply=self.template_apply,
         )
 
     @property
@@ -175,75 +189,71 @@ class LoadConfigFunction(Enum):
     Here values are the function naming of object *TemplateConfigLoadable* which loads configuration
     """
 
-    FROM_DATA: str = "_load_mocked_apis_from_data"
-    BY_FILE: str = "_load_templatable_config"
-    BY_APPLY: str = "_load_templatable_config_by_apply"
+    FROM_DATA: str = "apis:_load_mocked_apis_from_data"
+    BY_FILE: str = "file:_load_templatable_config"
+    BY_APPLY: str = "apply:_load_templatable_config_by_apply"
 
 
 class TemplateConfigLoadableTestSuite(ConfigTestSpec, ABC):
     @pytest.mark.parametrize(
-        ("strategy", "expected_func_run_order"),
+        ("load_order", "expected_func_run_order"),
         [
             (
-                TemplateApplyScanStrategy.FILE_NAME_FIRST,
+                [ConfigLoadingOrder.APIs, ConfigLoadingOrder.FILE, ConfigLoadingOrder.APPLY],
                 [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_FILE, LoadConfigFunction.BY_APPLY],
             ),
             (
-                TemplateApplyScanStrategy.CONFIG_LIST_FIRST,
+                [ConfigLoadingOrder.APIs, ConfigLoadingOrder.APPLY, ConfigLoadingOrder.FILE],
                 [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_APPLY, LoadConfigFunction.BY_FILE],
             ),
-            (TemplateApplyScanStrategy.BY_FILE_NAME, [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_FILE]),
-            (TemplateApplyScanStrategy.BY_CONFIG_LIST, [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_APPLY]),
+            (
+                [ConfigLoadingOrder.APIs, ConfigLoadingOrder.FILE],
+                [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_FILE],
+            ),
+            (
+                [ConfigLoadingOrder.APIs, ConfigLoadingOrder.APPLY],
+                [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_APPLY],
+            ),
         ],
     )
     def test_loading_configuration_workflow(
-        self, strategy: TemplateApplyScanStrategy, expected_func_run_order: List[LoadConfigFunction], sut: _Config
+        self, load_order: List[ConfigLoadingOrder], expected_func_run_order: List[LoadConfigFunction], sut: _Config
     ):
         assert isinstance(sut, TemplateConfigLoadable)
-        expected_func_run_order = [func.value for func in expected_func_run_order]
+        expected_func_run_order = [func.value.split(":") for func in expected_func_run_order]
 
         # Parent mock object for mocking target functions
         mock_parent = Mock()
+        mock_load_config_data = {}
         # Magic mock the target function
         for func in expected_func_run_order:
-            setattr(sut, func, MagicMock())
+            setattr(sut, func[1], MagicMock())
+            mock_load_config_data[func[0]] = getattr(sut, func[1])
         # Annotate some functions as magic functions
         for func in expected_func_run_order:
-            setattr(mock_parent, func, getattr(sut, func))
+            setattr(mock_parent, func[1], getattr(sut, func[1]))
 
         # Generate criteria of the function running order
         criteria_order = []
         for func in expected_func_run_order:
-            if func == "_load_mocked_apis_from_data":
-                criteria = getattr(call, func)({})
+            if func[1] == "_load_mocked_apis_from_data":
+                criteria = getattr(call, func[1])({})
             else:
-                criteria = getattr(call, func)()
+                criteria = getattr(call, func[1])()
             criteria_order.append(criteria)
 
+        # Pre-process of setting loading function
+        set_loading_function(**mock_load_config_data)
         template_config = TemplateConfig(
             activate=True,
-            apply=TemplateApply(scan_strategy=strategy),
+            load_config=LoadConfig(includes_apis=True, order=load_order),
         )
         with patch(
             "pymock_api.model.api_config.MockAPIs._template_config",
             new_callable=PropertyMock,
             return_value=template_config,
         ):
+            # Run the target function
             sut._load_mocked_apis_config({})
+            # Verify the running result
             mock_parent.assert_has_calls(criteria_order)
-
-    def test_load_mocked_apis_with_invalid_scan_strategy(self, sut: _Config):
-        assert isinstance(sut, TemplateConfigLoadable)
-
-        invalid_template_config = TemplateConfig(
-            activate=True,
-            apply=TemplateApply(scan_strategy="invalid_scan_strategy"),
-        )
-        with pytest.raises(RuntimeError) as exc_info:
-            with patch(
-                "pymock_api.model.api_config.MockAPIs._template_config",
-                new_callable=PropertyMock,
-                return_value=invalid_template_config,
-            ):
-                sut._load_mocked_apis_config({})
-        assert re.search(r".{0,32}invalid.{0,32}strategy.{0,32}", str(exc_info.value), re.IGNORECASE)

@@ -8,9 +8,45 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
 from ..._utils.file_opt import YAML, _BaseFileOperation
-from ...model.enums import TemplateApplyScanStrategy
-from ..enums import TemplateApplyScanStrategy
+from ...model.enums import ConfigLoadingOrder, set_loading_function
 from ._base import SelfType, _Config
+
+
+@dataclass(eq=False)
+class LoadConfig(_Config):
+    includes_apis: bool = True
+    order: List[ConfigLoadingOrder] = field(default_factory=list)
+
+    _default_order: List[ConfigLoadingOrder] = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self._default_order = [ConfigLoadingOrder.APIs]
+        if self.order is not None:
+            self._convert_order()
+
+    def _convert_order(self) -> None:
+        is_str = list(map(lambda e: isinstance(e, str), self.order))
+        if True in is_str:
+            self.order = [ConfigLoadingOrder.to_enum(o) for o in self.order]
+
+    def _compare(self, other: "LoadConfig") -> bool:
+        return self.includes_apis == other.includes_apis and self.order == other.order
+
+    def serialize(self, data: Optional["LoadConfig"] = None) -> Optional[Dict[str, Any]]:
+        includes_apis: bool = self._get_prop(data, prop="includes_apis")
+        order: List[Union[str, ConfigLoadingOrder]] = self._get_prop(data, prop="order")
+        if not order:
+            order = [str(o.value) for o in self._default_order]
+        return {
+            "includes_apis": includes_apis,
+            "order": [o.value if isinstance(o, ConfigLoadingOrder) else o for o in order],
+        }
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["LoadConfig"]:
+        self.includes_apis = data.get("includes_apis", True)
+        self.order = [ConfigLoadingOrder.to_enum(o) for o in data.get("order", self._default_order)]
+        return self
 
 
 @dataclass(eq=False)
@@ -111,34 +147,19 @@ class TemplateValues(_Config):
 
 @dataclass(eq=False)
 class TemplateApply(_Config):
-    scan_strategy: Optional[TemplateApplyScanStrategy] = None
     api: List[Union[str, Dict[str, List[str]]]] = field(default_factory=list)
 
     def _compare(self, other: "TemplateApply") -> bool:
-        return self.scan_strategy is other.scan_strategy and self.api == other.api
+        return self.api == other.api
 
     def serialize(self, data: Optional["TemplateApply"] = None) -> Optional[Dict[str, Any]]:
-        scan_strategy: TemplateApplyScanStrategy = self.scan_strategy or TemplateApplyScanStrategy.to_enum(
-            self._get_prop(data, prop="scan_strategy")
-        )
-        if not scan_strategy:
-            raise ValueError("Necessary argument *scan_strategy* is missing.")
-        if not isinstance(scan_strategy, TemplateApplyScanStrategy):
-            raise TypeError(
-                "Argument *scan_strategy* data type is invalid. It only accepts *TemplateApplyScanStrategy* type value."
-            )
-
         api: str = self._get_prop(data, prop="api")
         return {
-            "scan_strategy": scan_strategy.value,
             "api": api,
         }
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateApply"]:
-        self.scan_strategy = TemplateApplyScanStrategy.to_enum(data.get("scan_strategy", None))
-        if not self.scan_strategy:
-            raise ValueError("Schema key *scan_strategy* cannot be empty.")
         self.api = data.get("api")  # type: ignore[assignment]
         return self
 
@@ -148,14 +169,21 @@ class TemplateConfig(_Config):
     """The data model which could be set details attribute by section *template*."""
 
     activate: bool = False
+    load_config: LoadConfig = LoadConfig()
     values: TemplateValues = TemplateValues()
-    apply: TemplateApply = TemplateApply(scan_strategy=TemplateApplyScanStrategy.FILE_NAME_FIRST)
+    apply: TemplateApply = TemplateApply()
 
     def _compare(self, other: "TemplateConfig") -> bool:
-        return self.activate == other.activate and self.values == other.values and self.apply == other.apply
+        return (
+            self.activate == other.activate
+            and self.load_config == other.load_config
+            and self.values == other.values
+            and self.apply == other.apply
+        )
 
     def serialize(self, data: Optional["TemplateConfig"] = None) -> Optional[Dict[str, Any]]:
         activate: bool = self.activate or self._get_prop(data, prop="activate")
+        load_config: LoadConfig = self.load_config or self._get_prop(data, prop="load_config")
         values: TemplateValues = self.values or self._get_prop(data, prop="values")
         apply: TemplateApply = self.apply or self._get_prop(data, prop="apply")
         if not (values and apply and activate is not None):
@@ -163,6 +191,7 @@ class TemplateConfig(_Config):
             return None
         return {
             "activate": activate,
+            "load_config": load_config.serialize(),
             "values": values.serialize(),
             "apply": apply.serialize(),
         }
@@ -170,6 +199,7 @@ class TemplateConfig(_Config):
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfig"]:
         self.activate = data.get("activate", False)
+        self.load_config = LoadConfig().deserialize(data.get("load_config", {}))
         self.values = TemplateValues().deserialize(data.get("values", {}))
         self.apply = TemplateApply().deserialize(data.get("apply", {}))
         return self
@@ -181,6 +211,13 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     _config_file_name: str = "api.yaml"
     _configuration: _BaseFileOperation = YAML()
 
+    def __init__(self):
+        set_loading_function(
+            apis=self._load_mocked_apis_from_data,
+            apply=self._load_templatable_config_by_apply,
+            file=self._load_templatable_config,
+        )
+
     @property
     def config_file_name(self) -> str:
         return self._config_file_name
@@ -190,39 +227,31 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         self._config_file_name = n
 
     def _load_mocked_apis_config(self, mocked_apis_data: dict) -> None:
-        # TODO: Has a attribute to control it should be loaded first or finally
-        self._load_mocked_apis_from_data(mocked_apis_data)
+        loading_order = self._template_config.load_config.order
+
+        if self._template_config.load_config.includes_apis:
+            if (ConfigLoadingOrder.APIs not in loading_order) or (
+                ConfigLoadingOrder.APIs in loading_order and not self._template_config.activate
+            ):
+                self._load_mocked_apis_from_data(mocked_apis_data)
+
         if self._template_config.activate:
-            scan_strategy = self._template_config.apply.scan_strategy
-            # TODO: Modify to builder pattern to control the process
-            if scan_strategy is TemplateApplyScanStrategy.FILE_NAME_FIRST:
-                self._load_templatable_config()
-                self._load_templatable_config_by_apply()
-            elif scan_strategy is TemplateApplyScanStrategy.CONFIG_LIST_FIRST:
-                self._load_templatable_config_by_apply()
-                self._load_templatable_config()
-            elif scan_strategy is TemplateApplyScanStrategy.BY_FILE_NAME:
-                self._load_templatable_config()
-            elif scan_strategy is TemplateApplyScanStrategy.BY_CONFIG_LIST:
-                self._load_templatable_config_by_apply()
-            else:
-                all_valid_strategy = ", ".join([f"'{strategy}'" for strategy in TemplateApplyScanStrategy])
-                raise RuntimeError(
-                    f"Invalid template scanning strategy. Please configure valid strategy: {all_valid_strategy}."
-                )
+            for load_config in loading_order:
+                args = (mocked_apis_data,)
+                args = load_config.get_loading_function_args(*args)  # type: ignore[assignment]
+                load_config.get_loading_function()(*args)
 
     def _load_templatable_config(self) -> None:
-        # TODO: Modify to use property *config_path* or *config_path_format*
         customize_config_file_format = "**"
         config_file_format = f"[!_**]{customize_config_file_format}"
         # all_paths = glob.glob(f"{self._base_path}**/[!_*]*.yaml", recursive=True)
         config_base_path = self._template_config.values.base_file_path
         all_paths = glob.glob(f"{config_base_path}{config_file_format}")
-        all_paths.remove(f"{config_base_path}{self.config_file_name}")
+        if os.path.exists(f"{config_base_path}{self.config_file_name}"):
+            all_paths.remove(f"{config_base_path}{self.config_file_name}")
         for path in all_paths:
             if os.path.isdir(path):
                 # Has tag as directory
-                # TODO: Modify to use property *config_path* or *config_path_format*
                 for path_with_tag in glob.glob(f"{path}/{self._config_file_format}.yaml"):
                     # In the tag directory, it's config
                     self._deserialize_and_set_template_config(path_with_tag)
@@ -340,6 +369,7 @@ class _TemplatableConfig(_Config, ABC):
             value = data.get(key, None)
             if value is not None:
                 self._has_apply_template_props_in_config = True
+                # Note: Override the value which be set by upper layer from template config
                 setattr(self, key, value)
 
         _update_template_prop("apply_template_props")
@@ -347,30 +377,13 @@ class _TemplatableConfig(_Config, ABC):
         _update_template_prop("config_path")
         _update_template_prop("config_path_format")
 
-        # FIXME: Extract the running process order as a single function
         if self.apply_template_props:
             data = self._get_dividing_config(data)
         return self
 
     def _get_dividing_config(self, data: dict) -> dict:
-        # base_path = self.base_file_path or self._template_base_file_path
-        # config_file_path = self.config_path or self._template_config_file_path
-        base_path = self.base_file_path
-        config_file_path = self.config_path
-        dividing_config_path = str(pathlib.Path(base_path, config_file_path))
+        dividing_config_path = str(pathlib.Path(self.base_file_path, self.config_path))
         if dividing_config_path and os.path.exists(dividing_config_path) and os.path.isfile(dividing_config_path):
-            # assert os.path.isfile(dividing_config_path) is True
             dividing_data = self._configuration.read(dividing_config_path)
             data.update(**dividing_data)
         return data
-
-    # FIXME: Wait for make sure the spec of configuration
-    # @property
-    # @abstractmethod
-    # def _template_base_file_path(self) -> str:
-    #     pass
-    #
-    # @property
-    # @abstractmethod
-    # def _template_config_file_path(self) -> str:
-    #     pass
