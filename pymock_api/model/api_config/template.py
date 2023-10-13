@@ -5,7 +5,7 @@ import pathlib
 import re
 from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 from ..._utils.file_opt import YAML, _BaseFileOperation
 from ...model.enums import ConfigLoadingOrder, set_loading_function
@@ -403,3 +403,14 @@ class _TemplatableConfig(_Config, ABC):
     @abstractmethod
     def _template_setting(self) -> TemplateSetting:
         pass
+
+    def _deserialize_as(
+        self, data_model: Type["_TemplatableConfig"], with_data: dict
+    ) -> Optional["_TemplatableConfig"]:
+        if with_data:
+            config = data_model(_current_template=self._current_template)
+            config.base_file_path = self.base_file_path
+            config.config_path = self.config_path.replace(self.config_file_tail, config.config_file_tail)
+            return config.deserialize(data=with_data)
+        else:
+            return None

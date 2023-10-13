@@ -109,21 +109,12 @@ class HTTP(_TemplatableConfig):
 
         """
 
-        def _deserialize_data_model(data_model: Type[_TemplatableConfig], _data: dict) -> Optional[_TemplatableConfig]:
-            if _data:
-                config = data_model(_current_template=self._current_template)
-                config.base_file_path = self.base_file_path
-                config.config_path = self.config_path.replace(self.config_file_tail, config.config_file_tail)
-                return config.deserialize(data=_data)
-            else:
-                return None
-
         super().deserialize(data)
 
         req = data.get("request", None)
         resp = data.get("response", None)
-        self.request = _deserialize_data_model(HTTPRequest, req)  # type: ignore[assignment]
-        self.response = _deserialize_data_model(HTTPResponse, resp)  # type: ignore[assignment]
+        self.request = self._deserialize_as(HTTPRequest, with_data=req)  # type: ignore[assignment]
+        self.response = self._deserialize_as(HTTPResponse, with_data=resp)  # type: ignore[assignment]
         return self
 
     @property
@@ -239,20 +230,11 @@ class MockAPI(_TemplatableConfig):
 
         """
 
-        def _deserialize_data_model(data_model: Type[_TemplatableConfig], _data: dict) -> Optional[_TemplatableConfig]:
-            if _data:
-                config = data_model(_current_template=self._current_template)
-                config.base_file_path = self.base_file_path
-                config.config_path = self.config_path.replace(self.config_file_tail, config.config_file_tail)
-                return config.deserialize(data=_data)
-            else:
-                return None
-
         super().deserialize(data)
 
         self.url = data.get("url", None)
         http_info = data.get("http", None)
-        self.http = _deserialize_data_model(HTTP, http_info)  # type: ignore[assignment]
+        self.http = self._deserialize_as(HTTP, with_data=http_info)  # type: ignore[assignment]
         self.tag = data.get("tag", "")
         return self
 
