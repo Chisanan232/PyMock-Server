@@ -1,52 +1,34 @@
 name: CI
 
 on:
+  # For the push event, it only sniffs branch 'develop/**' and let anything changes triggers CI for be safe of source
+  # code.
   push:
     branches:
       - "develop/**"
-      - "release"
-      - "release-**"
-      - "release/**"
-      - "master"
-    paths-ignore:
-#       For documentation
-      - ".github/ISSUE_TEMPLATE/**"
-      - ".github/workflows/documentation.yaml"
-      - "docs/**"
-      - "mkdocs.yml"
-      - "README.md"
-#       For Docker feature
-      - "scripts/ci/**-docker-**.sh"
-      - "scripts/docker/**"
-      - "Dockerfile"
-      - "README-DOCKER.md"
-#       Others
-      - ".gitcommitrules"
-      - ".gitignore"
-      - ".pre-commit-config.yaml"
-      - ".pylintrc"
-      - "LICENSE"
 
+  # For the pull request event, it sniffs branch 'develop/**', 'release' and 'master' and make sure anything would be
+  # fine without any issue before review and merge.
   pull_request:
     branches:
       - "develop/**"
       - "release"
-      - "release-**"
-      - "release/**"
       - "master"
     paths-ignore:
-#       For documentation
+#     For documentation
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/workflows/documentation.yaml"
       - "docs/**"
+      - "**/*.md"
       - "mkdocs.yml"
       - "README.md"
-#       For Docker feature
+#     For Docker feature
+      - ".github/workflows/docker.yaml"
       - "scripts/ci/**-docker-**.sh"
       - "scripts/docker/**"
       - "Dockerfile"
       - "README-DOCKER.md"
-#       Others
+#     Others
       - ".gitcommitrules"
       - ".gitignore"
       - ".pre-commit-config.yaml"
@@ -91,7 +73,7 @@ jobs:
 
   all-test_codecov:
 #    name: Organize and generate the testing report and upload it to Codecov
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event_name == 'pull_request' }}
     needs: [run_unit-test, run_integration-test]
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/organize_and_generate_test_cov_reports.yaml@v4
     with:
@@ -146,37 +128,10 @@ jobs:
   pre-building_test:
 #    name: Check about it could work finely by installing the Python package with setup.py file
     needs: [codecov_finish, sonarcloud_finish]
-    if: ${{ github.ref_name == 'release' || github.ref_name == 'master' && github.event_name == 'push' }}
+    if: ${{ github.ref_name == 'release' || github.ref_name == 'master' }}
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/pre-building_test.yaml@develop
     with:
       build-type: poetry
       python_package_name: pymock-api
       test_shell_in_python: from pymock_api.model import APIConfig
       test_shell: mock-api --help
-
-
-#  build_git-tag_and_create_github-release:
-##    name: Build git tag and GitHub release if it needs
-#    needs: pre-building_test
-#    if: ${{ github.ref_name == 'master' && github.event_name == 'push' }}
-#    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/build_git-tag_and_create_github-release.yaml@v4
-#    secrets:
-#      github_auth_token: ${{ secrets.GITHUB_TOKEN }}
-#    with:
-#      project_type: python-package
-#      project_name: pymock_api
-#      software_version_format: general-3
-#
-#
-#  push_python_pkg_to_pypi:
-##    name: Check about it could work finely by installing the Python package with setup.py file
-#    needs: build_git-tag_and_create_github-release
-#    if: ${{ github.ref_name == 'master' && github.event_name == 'push' }}
-#    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/push_pkg_to_pypi.yaml@v4
-#    with:
-#      release-type: ${{ needs.build_git-tag_and_create_github-release.outputs.python_release_version }}
-#      push-to-PyPI: official
-#    secrets:
-#      pypi_user: ${{ secrets.PYPI_USERNAME }}
-#      pypi_token: ${{ secrets.PYPI_PASSWORD }}
-

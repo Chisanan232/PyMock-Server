@@ -1,25 +1,26 @@
 mocked_apis:
-  google_home:
-    url: '/google'
-    http:
-      request:
-        method: 'GET'
-      response:
-        strategy: object
-        properties:
-          - name: responseCode
-            required: True
-            type: int
-            format:
-          - name: responseData
-            required: True
-            type: str
-            format:
-#            items:
-#              content: '{"content": "This is sample response as JSON format", "errorMsg": ""}'
-#          - name: responseData
-#            required: True
-#            type: dict
-#            items:
-#              content: "This is sample response as JSON format"
-#              errorMsg: ""
+  apis:
+    google_home:
+      url: '/google'
+      http:
+        request:
+          method: 'GET'
+        response:
+          strategy: object
+          properties:
+            - name: responseCode
+              required: True
+              type: int
+              format:
+            - name: responseData
+              required: True
+              type: str
+              format:
+#              items:
+#                content: '{"content": "This is sample response as JSON format", "errorMsg": ""}'
+#            - name: responseData
+#              required: True
+#              type: dict
+#              items:
+#                content: "This is sample response as JSON format"
+#                errorMsg: ""

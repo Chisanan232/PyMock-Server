@@ -1,5 +1,7 @@
+from collections import namedtuple
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import Union
+from typing import Callable, Dict, Optional, Tuple, Union
 
 
 class Format(Enum):
@@ -26,3 +28,39 @@ class ResponseStrategy(Enum):
             return ResponseStrategy(v.lower())
         else:
             return v
+
+
+ConfigLoadingFunction: Dict[str, Optional[Callable]] = {
+    "apis": None,
+    "apply": None,
+    "file": None,
+}
+
+
+def set_loading_function(**kwargs) -> None:
+    global ConfigLoadingFunction
+    if False in [v in ConfigLoadingFunction.keys() for v in kwargs.keys()]:
+        raise KeyError("The arguments only have *apis*, *file* and *apply* for setting loading function data.")
+    ConfigLoadingFunction.update(**kwargs)
+
+
+class ConfigLoadingOrder(Enum):
+    APIs: str = "apis"
+    APPLY: str = "apply"
+    FILE: str = "file"
+
+    @staticmethod
+    def to_enum(v: Union[str, "ConfigLoadingOrder"]) -> "ConfigLoadingOrder":
+        if isinstance(v, str):
+            return ConfigLoadingOrder(v.lower())
+        else:
+            return v
+
+    def get_loading_function(self) -> Callable:
+        return ConfigLoadingFunction[self.value]  # type: ignore[return-value]
+
+    def get_loading_function_args(self, *args) -> Optional[tuple]:
+        if self is ConfigLoadingOrder.APIs:
+            if args:
+                return args
+        return ()

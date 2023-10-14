@@ -1,7 +1,8 @@
 mocked_apis:
-  google_home:
-    url: '/google'
-    http:
-      request:
-        method: 'GET'
-      response:
+  apis:
+    google_home:
+      url: '/google'
+      http:
+        request:
+          method: 'GET'
+        response:

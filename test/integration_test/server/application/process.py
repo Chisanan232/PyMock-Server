@@ -12,7 +12,7 @@ from flask import Flask
 from flask import Request as LibFlaskRequest
 from flask import Response as LibFlaskResponse
 
-from pymock_api.model.api_config import MockAPI
+from pymock_api.model import MockAPI
 from pymock_api.server.application.process import (
     BaseHTTPProcess,
     HTTPRequestProcess,

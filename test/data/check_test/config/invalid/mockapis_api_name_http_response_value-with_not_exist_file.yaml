@@ -1,9 +1,10 @@
 mocked_apis:
-  google_home:
-    url: '/google'
-    http:
-      request:
-        method: 'GET'
-      response:
-        strategy: file
-        path: ./not_exist.file
+  apis:
+    google_home:
+      url: '/google'
+      http:
+        request:
+          method: 'GET'
+        response:
+          strategy: file
+          path: ./not_exist.file

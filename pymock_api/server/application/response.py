@@ -6,7 +6,7 @@ from typing import Any, List, Union
 
 from ..._utils import import_web_lib
 from ...exceptions import FileFormatNotSupport
-from ...model.api_config import HTTPResponse as MockAPIHTTPResponseConfig
+from ...model.api_config.apis import HTTPResponse as MockAPIHTTPResponseConfig
 from ...model.enums import ResponseStrategy
 
 

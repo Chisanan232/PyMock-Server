@@ -8,9 +8,10 @@ from typing import List, Tuple
 
 import pytest
 
-from pymock_api.model.api_config import APIConfig
-from pymock_api.model.api_config import APIParameter as PyMockAPIParameter
-from pymock_api.model.api_config import MockAPI, _Config
+from pymock_api import APIConfig
+from pymock_api.model import MockAPI
+from pymock_api.model.api_config import _Config
+from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import ResponseStrategy
 from pymock_api.model.swagger_config import (
     API,

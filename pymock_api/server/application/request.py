@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, List
 
 from ..._utils import import_web_lib
-from ...model.api_config import APIParameter
+from ...model.api_config.apis import APIParameter
 
 
 class BaseCurrentRequest(metaclass=ABCMeta):
