@@ -14,7 +14,7 @@ from ._base import SelfType, _Config
 
 @dataclass(eq=False)
 class LoadConfig(_Config):
-    includes_apis: bool = True
+    includes_apis: bool = field(default=True)
     order: List[ConfigLoadingOrder] = field(default_factory=list)
 
     _default_order: List[ConfigLoadingOrder] = field(init=False, repr=False)
@@ -103,11 +103,11 @@ class TemplateResponse(TemplateSetting):
 
 @dataclass(eq=False)
 class TemplateValues(_Config):
-    base_file_path: str = "./"
-    api: TemplateAPI = TemplateAPI()
-    http: TemplateHTTP = TemplateHTTP()
-    request: TemplateRequest = TemplateRequest()
-    response: TemplateResponse = TemplateResponse()
+    base_file_path: str = field(default="./")
+    api: TemplateAPI = field(default_factory=TemplateAPI)
+    http: TemplateHTTP = field(default_factory=TemplateHTTP)
+    request: TemplateRequest = field(default_factory=TemplateRequest)
+    response: TemplateResponse = field(default_factory=TemplateResponse)
 
     def _compare(self, other: "TemplateValues") -> bool:
         return (
@@ -168,10 +168,10 @@ class TemplateApply(_Config):
 class TemplateConfig(_Config):
     """The data model which could be set details attribute by section *template*."""
 
-    activate: bool = False
-    load_config: LoadConfig = LoadConfig()
-    values: TemplateValues = TemplateValues()
-    apply: TemplateApply = TemplateApply()
+    activate: bool = field(default=False)
+    load_config: LoadConfig = field(default_factory=LoadConfig)
+    values: TemplateValues = field(default_factory=TemplateValues)
+    apply: TemplateApply = field(default_factory=TemplateApply)
 
     def _compare(self, other: "TemplateConfig") -> bool:
         return (
@@ -337,22 +337,22 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
 
 @dataclass(eq=False)
 class _TemplatableConfig(_Config, ABC):
-    apply_template_props: bool = True
+    apply_template_props: bool = field(default=True)
 
     # The settings which could be set by section *template* or override the values
-    base_file_path: str = ""
+    base_file_path: str = field(default_factory=str)
     config_path: str = field(default_factory=str)
     config_file_tail: str = field(default_factory=str)
     config_path_format: str = field(default_factory=str)
 
-    _default_base_file_path: str = "./"
+    _default_base_file_path: str = field(default="./")
 
     # Attributes for inner usage
-    _current_template: TemplateConfig = TemplateConfig()
-    _has_apply_template_props_in_config: bool = False
+    _current_template: TemplateConfig = field(default_factory=TemplateConfig)
+    _has_apply_template_props_in_config: bool = field(default=False)
 
     # Component for inner usage
-    _configuration: _BaseFileOperation = YAML()
+    _configuration: _BaseFileOperation = field(default_factory=YAML)
 
     def _compare(self, other: SelfType) -> bool:
         return self.apply_template_props == other.apply_template_props
