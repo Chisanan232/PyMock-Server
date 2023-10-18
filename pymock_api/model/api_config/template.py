@@ -2,7 +2,6 @@ import fnmatch
 import glob
 import os
 import pathlib
-import re
 from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Type, Union

@@ -32,7 +32,6 @@ class BaseCommandOption(metaclass=ABCMeta):
             A string value which is this option usage.
 
         """
-        pass
 
     @abstractmethod
     def workers(self, w: int) -> str:
@@ -42,7 +41,6 @@ class BaseCommandOption(metaclass=ABCMeta):
             A string value which is this option usage.
 
         """
-        pass
 
     @abstractmethod
     def log_level(self, level: str) -> str:
@@ -52,7 +50,6 @@ class BaseCommandOption(metaclass=ABCMeta):
             A string value which is this option usage.
 
         """
-        pass
 
     def _is_valid_address(self, address: str) -> bool:
         if not re.search(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}", str(address)):
