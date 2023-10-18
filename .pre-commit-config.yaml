@@ -2,7 +2,7 @@ exclude: '.github/|docs/|requirements/'
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v4.5.0
   hooks:
     - id: check-yaml
     - id: debug-statements
@@ -15,7 +15,7 @@ repos:
       args: # arguments to configure black
         - --profile=black
 - repo: https://github.com/psf/black
-  rev: 23.1.0
+  rev: 23.9.1
   hooks:
     - id: black
       args: # arguments to configure black
