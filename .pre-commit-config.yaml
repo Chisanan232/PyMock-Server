@@ -15,6 +15,14 @@ repos:
     - id: isort
       args: # arguments to configure black
         - --profile=black
+- repo: https://github.com/PyCQA/autoflake
+  rev: v2.2.1
+  hooks:
+    - id: autoflake
+      args:
+        - --remove-all-unused-imports
+        - --ignore-init-module-imports
+        - --in-place
 - repo: https://github.com/psf/black
   rev: 23.3.0
   hooks:
