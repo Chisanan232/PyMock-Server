@@ -38,18 +38,16 @@ on:
 jobs:
   prep-testbed_unit-test:
 #    name: Prepare all unit test items
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/prepare_test_items.yaml@v4
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/prepare_test_items.yaml@develop
     with:
-      shell_path: scripts/ci/get-unit-test-paths.sh
-      shell_arg: unix
+      shell_arg: test/unit_test/
 
 
   prep-testbed_integration-test:
 #    name: Prepare all integration test items
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/prepare_test_items.yaml@v4
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/prepare_test_items.yaml@develop
     with:
-      shell_path: scripts/ci/get-integration-test-paths.sh
-      shell_arg: unix
+      shell_arg: test/integration_test/
 
 
   run_unit-test:
