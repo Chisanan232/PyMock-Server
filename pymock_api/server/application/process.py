@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Union, cast
 
 from ...model import MockAPI
 from ...model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
-from ...model.enums import ResponseStrategy
 from .request import BaseCurrentRequest
 from .response import BaseResponse
 from .response import HTTPResponse as MockHTTPResponse

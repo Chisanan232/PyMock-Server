@@ -52,7 +52,6 @@ class BaseSGIServer(metaclass=ABCMeta):
             A string value about the command line.
 
         """
-        pass
 
     @property
     def options(self) -> BaseCommandOption:
