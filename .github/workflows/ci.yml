@@ -105,23 +105,13 @@ jobs:
   sonarcloud_finish:
 #    name: SonarCloud Scan
     needs: all-test_codecov
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/sonarqube_scan.yaml@develop
+    secrets:
+      github_token: ${{ secrets.GITHUB_TOKEN }}
+      sonar_token: ${{ secrets.SONAR_TOKEN }}
+    with:
+      download_path: ${{ inputs.download_path }}
 
-      - name: Download code coverage result files which has be handled by different test type process
-        uses: actions/download-artifact@v3
-        with:
-          name: test_coverage_xml_report
-          path: ${{ inputs.download_path }}
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   pre-building_test:
 #    name: Check about it could work finely by installing the Python package with setup.py file
