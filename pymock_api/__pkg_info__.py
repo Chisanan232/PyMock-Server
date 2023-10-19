@@ -10,7 +10,7 @@
 
 __title__ = "PyMock-API"
 __description__ = "🕸🤖👺 A Python tool to mock API easily and humanly."
-__url__ = ""  # TODO: Documentation is coming soon
+__url__ = "https://chisanan232.github.io/PyMock-API/"
 __version__ = "0.1.0"
 __author__ = "Liu, Bryant"
 __author_email__ = "chi10211201@cycu.org.tw"
