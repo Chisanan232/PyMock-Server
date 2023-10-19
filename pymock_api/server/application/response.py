@@ -16,7 +16,6 @@ class BaseResponse(metaclass=ABCMeta):
         """
         [Data processing for both HTTP request] (May also could provide this feature for HTTP response part?)
         """
-        pass
 
 
 class FlaskResponse(BaseResponse):

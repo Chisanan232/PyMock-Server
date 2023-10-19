@@ -1,9 +1,6 @@
-import glob
-import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from ...._utils.file_opt import YAML, _BaseFileOperation
 from ...enums import ResponseStrategy
 from .._base import _Config
 from ..item import IteratorItem
