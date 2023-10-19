@@ -1,7 +1,7 @@
 import glob
 import os
 import pathlib
-from typing import Any, List
+from typing import List
 
 import pytest
 

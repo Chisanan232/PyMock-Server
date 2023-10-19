@@ -61,7 +61,6 @@ class BaseAppServer(metaclass=ABCMeta):
             An object which should be an instance of loading web application server.
 
         """
-        pass
 
     @abstractmethod
     def init_code_generator(self) -> BaseWebServerCodeGenerator:
@@ -98,7 +97,6 @@ class BaseAppServer(metaclass=ABCMeta):
         """
         Part of [Entry point for generating Python code]
         """
-        pass
 
     def _request_process(self, **kwargs) -> "flask.Response":  # type: ignore
         self._http_request.mock_api_details = self.mock_api_details
