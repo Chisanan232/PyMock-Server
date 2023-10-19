@@ -107,7 +107,6 @@ jobs:
     needs: all-test_codecov
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/sonarqube_scan.yaml@develop
     secrets:
-      github_token: ${{ secrets.GITHUB_TOKEN }}
       sonar_token: ${{ secrets.SONAR_TOKEN }}
     with:
       download_path: ${{ inputs.download_path }}
