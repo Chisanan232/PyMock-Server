@@ -30,6 +30,7 @@ env:
   RELEASE_TYPE: python-package
   PYTHON_PACKAGE_NAME: pymock_api
   SOFTWARE_VERSION_FORMAT: general-3
+  RUNNING_MODE: truly-run
 
 permissions:
   contents: write
@@ -70,6 +71,7 @@ jobs:
       - name: Release the Docker image to Docker hub
         run: |
           bash ./scripts/ci/release-docker-image.sh \
+               -d '${{ env.RUNNING_MODE }}' \
                -r '${{ env.RELEASE_TYPE }}' \
                -p '${{ env.PYTHON_PACKAGE_NAME }}' \
                -v '${{ env.SOFTWARE_VERSION_FORMAT }}' \
