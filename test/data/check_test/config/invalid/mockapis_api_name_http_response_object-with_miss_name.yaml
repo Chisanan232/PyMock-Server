@@ -1,0 +1,11 @@
+mocked_apis:
+  apis:
+    google_home:
+      url: '/google'
+      http:
+        request:
+          method: 'GET'
+        response:
+          strategy: object
+          properties:
+            - no_name: for_test_checking_invalid_attribute

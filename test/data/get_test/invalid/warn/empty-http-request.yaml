@@ -1,0 +1,9 @@
+mocked_apis:
+  apis:
+    foo_home:
+      url: '/foo-home'
+      http:
+        request:
+        response:
+          strategy: string
+          value: 'This is Foo home API.'

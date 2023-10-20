@@ -1,0 +1,79 @@
+# CI workflow for Docker feature
+#
+# Description:
+#     This CI workflow for releasing Docker image to Docker hub.
+#
+# Processes:
+#     1. Generate the tag by software version for Docker image
+#     2. Build the Docker image and name it with the tag
+#     3. Push the Docker image to Docker hub
+#
+# Trigger condition:
+#     This CI workflow only be triggered by changing the package info module (__pkg_info__.py) of *PyMock-API*.
+#
+
+name: docker
+
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - "pymock_api/__pkg_info__.py"
+#      Only activate below setting for developing, testing or troubleshooting
+#      - ".github/workflows/docker.yaml"
+
+env:
+  DOCKER_ACCOUNT: chisanan232
+  DOCKER_IMAGE_NAME: pymock-api
+#  DOCKER_IMAGE_NAME: test    # For testing
+  RELEASE_TYPE: python-package
+  PYTHON_PACKAGE_NAME: pymock_api
+  SOFTWARE_VERSION_FORMAT: general-3
+#  RUNNING_MODE: dry-run
+
+permissions:
+  contents: write
+
+jobs:
+  check_version_info:
+#    name: Check the package version info to make sure whether it should release Docker image or not.
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/build_git-tag_and_create_github-release.yaml@v4
+    secrets:
+      github_auth_token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      project_type: python-package
+      project_name: pymock_api
+      software_version_format: general-3
+      debug_mode: true
+
+
+  deploy_documentation:
+    needs: check_version_info
+    if: ${{ needs.check_version_info.outputs.python_release_version == 'Official-Release' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build Docker image with tag
+        run: |
+          bash ./scripts/ci/build-docker-image.sh \
+               -r '${{ env.RELEASE_TYPE }}' \
+               -p '${{ env.PYTHON_PACKAGE_NAME }}' \
+               -v '${{ env.SOFTWARE_VERSION_FORMAT }}' \
+               -i '${{ env.DOCKER_IMAGE_NAME }}'
+
+      - name: Loging Docker
+        run: |
+          docker login -u ${{ env.DOCKER_ACCOUNT }} -p ${{ secrets.DOCKER_ACCOUNT_PWD }}
+
+      - name: Release the Docker image to Docker hub
+        run: |
+          bash ./scripts/ci/release-docker-image.sh \
+               -d '${{ env.RUNNING_MODE }}' \
+               -r '${{ env.RELEASE_TYPE }}' \
+               -p '${{ env.PYTHON_PACKAGE_NAME }}' \
+               -v '${{ env.SOFTWARE_VERSION_FORMAT }}' \
+               -i '${{ env.DOCKER_IMAGE_NAME }}'
+

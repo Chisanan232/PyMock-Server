@@ -1,0 +1,10 @@
+mocked_apis:
+  apis:
+    google_home:
+      url: '/google'
+      http:
+        request:
+          method: 'GET'
+        response:
+          strategy: string
+          value:
