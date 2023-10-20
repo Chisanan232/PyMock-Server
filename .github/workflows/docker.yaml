@@ -16,21 +16,21 @@ name: docker
 
 on:
   push:
-#    branches:
-#      - "master"
+    branches:
+      - "master"
     paths:
-#      - "pymock_api/__pkg_info__.py"
+      - "pymock_api/__pkg_info__.py"
 #      Only activate below setting for developing, testing or troubleshooting
-      - ".github/workflows/docker.yaml"
+#      - ".github/workflows/docker.yaml"
 
 env:
   DOCKER_ACCOUNT: chisanan232
-#  DOCKER_IMAGE_NAME: pymock-api
-  DOCKER_IMAGE_NAME: test    # For testing
+  DOCKER_IMAGE_NAME: pymock-api
+#  DOCKER_IMAGE_NAME: test    # For testing
   RELEASE_TYPE: python-package
   PYTHON_PACKAGE_NAME: pymock_api
   SOFTWARE_VERSION_FORMAT: general-3
-  RUNNING_MODE: dry-run
+#  RUNNING_MODE: dry-run
 
 permissions:
   contents: write
@@ -43,7 +43,7 @@ jobs:
       github_auth_token: ${{ secrets.GITHUB_TOKEN }}
     with:
       project_type: python-package
-      project_name: pymock_api
+      project_name: ${{ env.PYTHON_PACKAGE_NAME }}
       software_version_format: general-3
       debug_mode: true
 
