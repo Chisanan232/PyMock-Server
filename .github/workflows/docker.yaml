@@ -25,8 +25,8 @@ on:
 
 env:
   DOCKER_ACCOUNT: chisanan232
-  DOCKER_IMAGE_NAME: pymock-api
-#  DOCKER_IMAGE_NAME: test    # For testing
+#  DOCKER_IMAGE_NAME: pymock-api
+  DOCKER_IMAGE_NAME: test    # For testing
   RELEASE_TYPE: python-package
   PYTHON_PACKAGE_NAME: pymock_api
   SOFTWARE_VERSION_FORMAT: general-3
@@ -50,7 +50,7 @@ jobs:
 
   deploy_documentation:
     needs: check_version_info
-    if: ${{ inputs.release-type == 'Official-Release' }}
+    if: ${{ needs.build_git-tag_and_create_github-release.outputs.python_release_version == 'Official-Release' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
