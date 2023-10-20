@@ -37,7 +37,7 @@ do
            Running_Mode=$OPTARG
            ;;
          "h")    # Help for display all usage of each arguments
-           echo "Shell script usage: bash ./scripts/docker/build.sh [OPTION] [VALUE]"
+           echo "Shell script usage: bash ./scripts/ci/build-docker-image.sh [OPTION] [VALUE]"
            echo " "
            echo "This is a shell script for building Docker image with software version which be get from package info module (__pkg_info__) from Python package."
            echo " "
@@ -69,7 +69,7 @@ done
 
 declare Docker_Image_Tag
 generate_image_tag() {
-    Docker_Image_Tag=$(bash ./scripts/docker/generate-docker-image-tag.sh -r "$Input_Arg_Release_Type" -p "$Input_Arg_Python_Pkg_Name" -v "$Input_Arg_Software_Version_Format")
+    Docker_Image_Tag=$(bash ./scripts/ci/generate-docker-image-tag.sh -r "$Input_Arg_Release_Type" -p "$Input_Arg_Python_Pkg_Name" -v "$Input_Arg_Software_Version_Format")
     echo "🐳 🖼️ 🏷️  Docker_Image_Tag: $Docker_Image_Tag"
 }
 
