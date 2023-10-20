@@ -5,6 +5,7 @@ on:
   # code.
   push:
     branches:
+      - "master"
       - "develop/**"
 
   # For the pull request event, it sniffs branch 'develop/**', 'release' and 'master' and make sure anything would be
@@ -12,7 +13,6 @@ on:
   pull_request:
     branches:
       - "develop/**"
-      - "release"
       - "master"
     paths-ignore:
 #     For documentation
