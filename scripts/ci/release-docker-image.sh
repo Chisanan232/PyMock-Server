@@ -3,10 +3,13 @@
 #####################################################################################################################
 #
 # Target:
-# Automate to build Docker image with the software version which be recorded in package info module (<pacakge>/__pkg_info__.py)
+# Automate to :
+#   1. get the software version of Python package and output
+#   2. build Docker image and tag it by the software version
+#   3. release the Docker image to Docker hub with tag
 #
 # Description:
-# Build the Docker image and tag it by current software version.
+# Build Docker image and tag it, and release it to Docker hub.
 #
 # Allowable options:
 #  -r [Release type]              Release type of project. Different release type it would get different version format. [options: python-package]
