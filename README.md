@@ -84,6 +84,7 @@ mocked_apis:
       request:
         method: 'GET'
       response:
+        strategy: string
         value: 'This is Google home API.'
 ```
 
