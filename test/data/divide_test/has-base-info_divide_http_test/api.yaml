@@ -1,0 +1,32 @@
+# Swagger API documentation config from Python FastAPI library
+name: ''
+description: ''
+mocked_apis:
+  template:
+    activate: true
+    load_config:
+      includes_apis: True
+      order:
+        - 'apis'
+        - 'apply'
+        - 'file'
+    values:
+      base_file_path: './test/data/divide_test/has-base-info_divide_http_test/'
+      api:
+        config_path_format: '**-api'
+      http:
+        config_path_format: '**-http'
+      request:
+        config_path_format: '**-request'
+      response:
+        config_path_format: '**-response'
+    apply:
+      api:
+        - get_foo
+  base:
+    url: '/api/v1/test'
+  apis:
+    get_foo:
+      apply_template_props: True
+      config_path:
+      config_path_format: '**-api'

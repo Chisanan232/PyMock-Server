@@ -7,7 +7,8 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
 from ..._utils import import_web_lib
-from ...model import MockAPI, MockAPIs
+from ...model.api_config import MockAPIs
+from ...model.api_config.apis import MockAPI
 from .code_generator import (
     BaseWebServerCodeGenerator,
     FastAPICodeGenerator,
@@ -60,7 +61,6 @@ class BaseAppServer(metaclass=ABCMeta):
             An object which should be an instance of loading web application server.
 
         """
-        pass
 
     @abstractmethod
     def init_code_generator(self) -> BaseWebServerCodeGenerator:
@@ -97,7 +97,6 @@ class BaseAppServer(metaclass=ABCMeta):
         """
         Part of [Entry point for generating Python code]
         """
-        pass
 
     def _request_process(self, **kwargs) -> "flask.Response":  # type: ignore
         self._http_request.mock_api_details = self.mock_api_details

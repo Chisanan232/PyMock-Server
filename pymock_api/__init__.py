@@ -3,4 +3,4 @@
 content ...
 """
 
-from .model import APIConfig
+from .model.api_config import APIConfig

@@ -910,24 +910,11 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
 
                 # Run one core logic of target function
                 print(f"[DEBUG in test] run one core logic of target function")
-                debug_swagger_api_config = deserialize_swagger_api_config(swagger_json_data)
-                print(f"[DEBUG in test] debug_swagger_api_config: {debug_swagger_api_config}")
-                debug_api_config = debug_swagger_api_config.to_api_config(mock_parser_arg.base_url)
-                print(f"[DEBUG in test] debug_api_config: {debug_api_config}")
-                print(f"[DEBUG in test] debug_api_config.apis.apis: {debug_api_config.apis.apis}")
-                print(f"[DEBUG in test] debug_api_config.apis.apis['get_foo']: {debug_api_config.apis.apis['get_foo']}")
-                print(
-                    f"[DEBUG in test] debug_api_config.apis.apis['get_foo'].http.request: {debug_api_config.apis.apis['get_foo'].http.request}"
+                confirm_expected_api_config = deserialize_swagger_api_config(swagger_json_data).to_api_config(
+                    mock_parser_arg.base_url
                 )
-                print(
-                    f"[DEBUG in test] debug_api_config.apis.apis['get_foo'].http.response: {debug_api_config.apis.apis['get_foo'].http.response}"
-                )
-                print(f"[DEBUG in test] debug_api_config.serialize(): {debug_api_config.serialize()}")
-                confirm_expected_config_data = (
-                    deserialize_swagger_api_config(swagger_json_data)
-                    .to_api_config(mock_parser_arg.base_url)
-                    .serialize()
-                )
+                confirm_expected_api_config.set_template_in_config = False
+                confirm_expected_config_data = confirm_expected_api_config.serialize()
                 print(f"[DEBUG in test] expected_config_data: {expected_config_data}")
                 print(f"[DEBUG in test] confirm_expected_config_data: {confirm_expected_config_data}")
                 assert expected_config_data["name"] == confirm_expected_config_data["name"]
@@ -935,60 +922,49 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
                 assert len(expected_config_data["mocked_apis"].keys()) == len(
                     confirm_expected_config_data["mocked_apis"].keys()
                 )
-                expected_config_data_keys = sorted(expected_config_data["mocked_apis"].keys())
-                confirm_expected_config_data_keys = sorted(confirm_expected_config_data["mocked_apis"].keys())
+                assert len(expected_config_data["mocked_apis"]["apis"].keys()) == len(
+                    confirm_expected_config_data["mocked_apis"]["apis"].keys()
+                )
+                expected_config_data_keys = sorted(expected_config_data["mocked_apis"]["apis"].keys())
+                confirm_expected_config_data_keys = sorted(confirm_expected_config_data["mocked_apis"]["apis"].keys())
                 for expected_key, confirm_expected_key in zip(
                     expected_config_data_keys, confirm_expected_config_data_keys
                 ):
                     assert expected_key == confirm_expected_key
+                    expected_api_config = expected_config_data["mocked_apis"]["apis"][expected_key]
+                    confirm_expected_api_config = confirm_expected_config_data["mocked_apis"]["apis"][
+                        confirm_expected_key
+                    ]
                     if expected_key != "base":
                         # Verify mock API URL
-                        assert (
-                            expected_config_data["mocked_apis"][expected_key]["url"]
-                            == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["url"]
-                        )
+                        assert expected_api_config["url"] == confirm_expected_api_config["url"]
                         # Verify mock API request properties - HTTP method
                         assert (
-                            expected_config_data["mocked_apis"][expected_key]["http"]["request"]["method"]
-                            == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["request"][
-                                "method"
-                            ]
+                            expected_api_config["http"]["request"]["method"]
+                            == confirm_expected_api_config["http"]["request"]["method"]
                         )
                         # Verify mock API request properties - request parameters
                         assert (
-                            expected_config_data["mocked_apis"][expected_key]["http"]["request"]["parameters"]
-                            == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["request"][
-                                "parameters"
-                            ]
+                            expected_api_config["http"]["request"]["parameters"]
+                            == confirm_expected_api_config["http"]["request"]["parameters"]
                         )
                         # Verify mock API response properties
                         assert (
-                            expected_config_data["mocked_apis"][expected_key]["http"]["response"]["strategy"]
-                            == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["response"][
-                                "strategy"
-                            ]
+                            expected_api_config["http"]["response"]["strategy"]
+                            == confirm_expected_api_config["http"]["response"]["strategy"]
                         )
-                        assert expected_config_data["mocked_apis"][expected_key]["http"]["response"].get(
+                        assert expected_api_config["http"]["response"].get(
                             "value", None
-                        ) == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["response"].get(
-                            "value", None
-                        )
-                        assert expected_config_data["mocked_apis"][expected_key]["http"]["response"].get(
-                            "path", None
-                        ) == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["response"].get(
-                            "path", None
-                        )
-                        assert expected_config_data["mocked_apis"][expected_key]["http"]["response"].get(
+                        ) == confirm_expected_api_config["http"]["response"].get("value", None)
+                        assert expected_api_config["http"]["response"].get("path", None) == confirm_expected_api_config[
+                            "http"
+                        ]["response"].get("path", None)
+                        assert expected_api_config["http"]["response"].get(
                             "properties", None
-                        ) == confirm_expected_config_data["mocked_apis"][confirm_expected_key]["http"]["response"].get(
-                            "properties", None
-                        )
+                        ) == confirm_expected_api_config["http"]["response"].get("properties", None)
                     else:
                         # Verify base info
-                        assert (
-                            expected_config_data["mocked_apis"][expected_key]
-                            == confirm_expected_config_data["mocked_apis"][confirm_expected_key]
-                        )
+                        assert expected_api_config == confirm_expected_api_config
 
                 FakeYAML.write.assert_called_once_with(path=_Test_Config, config=expected_config_data)
 

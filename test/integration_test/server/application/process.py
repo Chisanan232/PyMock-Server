@@ -9,15 +9,10 @@ import pytest
 from fastapi import FastAPI
 from fastapi import Response as LibFastAPIResponse
 from flask import Flask
-from flask import Request as LibFlaskRequest
 from flask import Response as LibFlaskResponse
 
-from pymock_api.model.api_config import MockAPI
-from pymock_api.server.application.process import (
-    BaseHTTPProcess,
-    HTTPRequestProcess,
-    HTTPResponseProcess,
-)
+from pymock_api.model import MockAPI
+from pymock_api.server.application.process import BaseHTTPProcess, HTTPRequestProcess
 from pymock_api.server.application.request import (
     BaseCurrentRequest,
     FastAPIRequest,
@@ -29,7 +24,7 @@ from pymock_api.server.application.response import (
     FlaskResponse,
 )
 
-from ...._values import _Google_Home_Value, _Post_Google_Home_Value, _TestConfig
+from ...._values import _Google_Home_Value, _Post_Google_Home_Value
 
 MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
 

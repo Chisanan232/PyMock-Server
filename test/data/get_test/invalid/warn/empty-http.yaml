@@ -1,4 +1,5 @@
 mocked_apis:
-  foo_home:
-    url: '/foo-home'
-    http:
+  apis:
+    foo_home:
+      url: '/foo-home'
+      http:

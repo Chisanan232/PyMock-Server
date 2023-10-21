@@ -1,9 +1,10 @@
 mocked_apis:
-  google_home:
-    url: '/google'
-    http:
-      request:
-        method: 'GET'
-      response:
-        strategy: string
-        value: '{"responseCode": 200, "responseData": {"content": "This is sample response as JSON format", "errorMsg": ""}}'
+  apis:
+    google_home:
+      url: '/google'
+      http:
+        request:
+          method: 'GET'
+        response:
+          strategy: string
+          value: '{"responseCode": 200, "responseData": {"content": "This is sample response as JSON format", "errorMsg": ""}}'

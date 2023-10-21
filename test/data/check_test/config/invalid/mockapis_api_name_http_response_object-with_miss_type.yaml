@@ -1,12 +1,13 @@
 mocked_apis:
-  google_home:
-    url: '/google'
-    http:
-      request:
-        method: 'GET'
-      response:
-        strategy: object
-        properties:
-          - name: name
-            required: True
-            no_type: for_test_checking_invalid_attribute
+  apis:
+    google_home:
+      url: '/google'
+      http:
+        request:
+          method: 'GET'
+        response:
+          strategy: object
+          properties:
+            - name: name
+              required: True
+              no_type: for_test_checking_invalid_attribute

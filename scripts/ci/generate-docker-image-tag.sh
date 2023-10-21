@@ -3,10 +3,10 @@
 #####################################################################################################################
 #
 # Target:
-# Automate to build Docker image with the software version which be recorded in package info module (<pacakge>/__pkg_info__.py)
+# Automate to get the software version of Python package.
 #
 # Description:
-# Build the Docker image and tag it by current software version.
+# Use the version regex to get the software version of Python package, and output it.
 #
 # Allowable options:
 #  -r [Release type]              Release type of project. Different release type it would get different version format. [options: python-package]
@@ -33,9 +33,9 @@ do
            Running_Mode=$OPTARG
            ;;
          "h")    # Help for display all usage of each arguments
-           echo "Shell script usage: bash ./scripts/docker/build.sh [OPTION] [VALUE]"
+           echo "Shell script usage: bash ./scripts/ci/generate-docker-image-tag.sh [OPTION] [VALUE]"
            echo " "
-           echo "This is a shell script for building Docker image with software version which be get from package info module (__pkg_info__) from Python package."
+           echo "This is a shell script for generating tag by software version which be recorded in package info module (__pkg_info__) from Python package for building Docker image."
            echo " "
            echo "options:"
            if [ "$OPTARG" == "r" ] || [ "$OPTARG" == "h" ] || [ "$OPTARG" == "all" ]; then

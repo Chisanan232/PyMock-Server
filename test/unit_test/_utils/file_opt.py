@@ -4,9 +4,9 @@ from unittest.mock import mock_open, patch
 import pytest
 
 try:
-    from yaml import CLoader as Loader
+    pass
 except ImportError:
-    from yaml import Loader
+    pass
 
 from pymock_api._utils.file_opt import JSON, YAML, _BaseFileOperation
 

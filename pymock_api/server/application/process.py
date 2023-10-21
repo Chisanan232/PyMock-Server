@@ -3,8 +3,8 @@ from abc import ABC, ABCMeta, abstractmethod
 from pydoc import locate
 from typing import Any, Dict, List, Union, cast
 
-from ...model.api_config import APIParameter, HTTPRequest, HTTPResponse, MockAPI
-from ...model.enums import ResponseStrategy
+from ...model import MockAPI
+from ...model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
 from .request import BaseCurrentRequest
 from .response import BaseResponse
 from .response import HTTPResponse as MockHTTPResponse

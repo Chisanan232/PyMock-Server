@@ -1,13 +1,10 @@
-import json
-import random
-import string
 from abc import ABCMeta, abstractmethod
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
-from pymock_api.model.api_config import APIConfig
-from pymock_api.model.api_config import APIParameter as PyMockAPIParameter
-from pymock_api.model.api_config import BaseConfig, MockAPI, MockAPIs, _Config
+from pymock_api.model import APIConfig, MockAPI, MockAPIs
+from pymock_api.model.api_config import BaseConfig, _Config
+from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import ResponseStrategy
 
 Self = Any
@@ -359,7 +356,7 @@ class API(Transferable):
                     k_value = "random integer value"
                 elif locate(v_type) == bool:
                     k_value = "random boolean value"
-                elif v_type is "file":
+                elif v_type == "file":
                     # TODO: Handle the file download feature
                     k_value = "random file output stream"
                 else:

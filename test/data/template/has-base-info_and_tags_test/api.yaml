@@ -1,0 +1,20 @@
+name: ''
+description: ''
+mocked_apis:
+  template:
+    base_file_path: './'
+    api_config_path_format: '{{ api.base_file_path }}{{ api.tag }}/{{ api.__name__ }}.yaml'
+    api_config_file: ./foo/get_foo.yaml
+  base:
+    url: '/api/v1/test'
+  apis:
+    get_foo:
+      tag: 'foo'
+    put_foo:
+      api_config_file: ./foo/put_foo.yaml
+      tag: 'foo'
+    get_foo-boo_export:
+      base_file_path: './'
+      api_config_path_format: '{api.base_file_path}{api.tag}/{api.__name__}.yaml'
+      config_file: ./foo-boo/get_foo-boo_export.yaml
+      tag: 'foo-boo'
