@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/PyMock-API?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white)](https://pypi.org/project/PyMock-API)
 [![Release](https://img.shields.io/github/release/Chisanan232/PyMock-API.svg?label=Release&logo=github)](https://github.com/Chisanan232/PyMock-API/releases)
 [![CI](https://github.com/Chisanan232/PyMock-API/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Chisanan232/PyMock-API/actions/workflows/ci-cd.yml)
-[![codecov](https://codecov.io/gh/Chisanan232/PyMock-API/branch/main/graph/badge.svg?token=r5HJxg9KhN)](https://codecov.io/gh/Chisanan232/PyMock-API)
+[![codecov](https://codecov.io/gh/Chisanan232/PyMock-API/graph/badge.svg?token=r5HJxg9KhN)](https://codecov.io/gh/Chisanan232/PyMock-API)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Chisanan232/PyMock-API/master.svg)](https://results.pre-commit.ci/latest/github/Chisanan232/PyMock-API/master)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyMock-API&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-API)
 [![documentation](https://github.com/Chisanan232/PyMock-API/actions/workflows/documentation.yaml/badge.svg)](https://chisanan232.github.io/PyMock-API/)
