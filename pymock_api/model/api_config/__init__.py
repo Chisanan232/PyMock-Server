@@ -205,6 +205,18 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         self._load_mocked_apis_config(mocked_apis_info)
         return self
 
+    def is_work(self) -> bool:
+        if self.apis:
+            for ak, av in self.apis.items():
+                # TODO: Check the key validity about it will be the function naming in Python code
+                if not ak:
+                    return False
+                if not av or not av.is_work():
+                    return False
+        return (self.template is not None and self.template.is_work()) and (
+            self.base is not None and self.base.is_work()
+        )
+
     def _set_mocked_apis(self, api_key: str = "", api_config: Optional[MockAPI] = None) -> None:  # type: ignore[override]
         if api_key and api_config:
             self.apis[api_key] = api_config
@@ -420,6 +432,9 @@ class APIConfig(_Config):
             mock_apis_data_model.config_file_name = self.config_file_name
             self.apis = mock_apis_data_model.deserialize(data=mocked_apis)
         return self
+
+    def is_work(self) -> bool:
+        return self.apis is not None and self.apis.is_work()
 
     def from_yaml(self, path: str) -> Optional["APIConfig"]:
         return self.deserialize(data=self._config_operation.read(path))

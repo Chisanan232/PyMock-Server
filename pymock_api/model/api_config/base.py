@@ -45,3 +45,7 @@ class BaseConfig(_Config):
         """
         self.url = data.get("url", None)
         return self
+
+    def is_work(self) -> bool:
+        # TODO: Check the path format
+        return True

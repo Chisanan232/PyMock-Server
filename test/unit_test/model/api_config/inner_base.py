@@ -36,6 +36,9 @@ def test_config_get_prop():
         def deserialize(self, data: Dict[str, Any]) -> Optional["_Config"]:
             pass
 
+        def is_work(self) -> bool:
+            pass
+
     class Dummy:
         pass
 

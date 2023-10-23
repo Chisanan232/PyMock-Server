@@ -72,6 +72,22 @@ class APIParameter(_Config):
         self.items = items if items else None
         return self
 
+    def is_work(self) -> bool:
+        if not self.value_type:
+            return False
+        if self.value_type in ["list", "tuple", "set", "dict"]:
+            if not self.name or self.required is None or (self.required is True and self.default is None):
+                return False
+        else:
+            if (
+                not self.name
+                or self.required is None
+                or not self.items
+                or (self.required is True and self.default is None)
+            ):
+                return False
+        return True
+
 
 @dataclass(eq=False)
 class HTTPRequest(_TemplatableConfig):
@@ -145,3 +161,12 @@ class HTTPRequest(_TemplatableConfig):
             if param.name == name:
                 return param
         return None
+
+    def is_work(self) -> bool:
+        if not self.method or self.method not in ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTION"]:
+            return False
+        if self.parameters:
+            is_work_params = list(filter(lambda p: p.is_work(), self.parameters))
+            if len(is_work_params) != len(self.parameters):
+                return False
+        return True

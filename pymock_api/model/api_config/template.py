@@ -47,6 +47,15 @@ class LoadConfig(_Config):
         self.order = [ConfigLoadingOrder.to_enum(o) for o in data.get("order", self._default_order)]
         return self
 
+    def is_work(self) -> bool:
+        if self.includes_apis is None:
+            return False
+        if self.order:
+            is_work_enum = list(filter(lambda o: o in ConfigLoadingOrder, self.order))
+            if len(is_work_enum) != len(self.order):
+                return False
+        return True
+
 
 @dataclass(eq=False)
 class TemplateSetting(_Config, ABC):
@@ -74,6 +83,10 @@ class TemplateSetting(_Config, ABC):
     @abstractmethod
     def _default_config_path_format(self) -> str:
         pass
+
+    def is_work(self) -> bool:
+        # TODO: Check the path format
+        return True
 
 
 class TemplateAPI(TemplateSetting):
@@ -143,6 +156,10 @@ class TemplateValues(_Config):
         self.response = TemplateResponse().deserialize(data.get("response", {}))
         return self
 
+    def is_work(self) -> bool:
+        # TODO: Check the path format
+        return self.api.is_work() and self.http.is_work() and self.request.is_work() and self.response.is_work()
+
 
 @dataclass(eq=False)
 class TemplateApply(_Config):
@@ -161,6 +178,15 @@ class TemplateApply(_Config):
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateApply"]:
         self.api = data.get("api")  # type: ignore[assignment]
         return self
+
+    def is_work(self) -> bool:
+        all_ele_is_str = list(map(lambda a: isinstance(a, str), self.api))
+        all_ele_is_dict = list(map(lambda a: isinstance(a, dict), self.api))
+        ele_is_str = set(all_ele_is_str)
+        ele_is_dict = set(all_ele_is_dict)
+        if len(ele_is_str) == 1 and len(ele_is_dict) == 1 and (True in ele_is_str or True in ele_is_dict):
+            return True
+        return False
 
 
 @dataclass(eq=False)
@@ -202,6 +228,14 @@ class TemplateConfig(_Config):
         self.values = TemplateValues().deserialize(data.get("values", {}))
         self.apply = TemplateApply().deserialize(data.get("apply", {}))
         return self
+
+    def is_work(self) -> bool:
+        return (
+            (self.activate is not None and isinstance(self.activate, bool))
+            and (self.load_config is not None and self.load_config.is_work())
+            and (self.values is not None and self.values.is_work())
+            and (self.apply is not None and self.apply.is_work())
+        )
 
 
 class TemplateConfigLoadable(metaclass=ABCMeta):

@@ -33,3 +33,8 @@ class IteratorItem(_Config):
         self.required = data.get("required", None)
         self.value_type = data.get("type", None)
         return self
+
+    def is_work(self) -> bool:
+        if not self.name or self.required is None or not self.value_type:
+            return False
+        return True

@@ -66,6 +66,22 @@ class ResponseProperty(_Config):
         self.items = items if items else None
         return self
 
+    def is_work(self) -> bool:
+        # Check the data type first
+        # 1. Check the data type (value_type)
+        # 2. Use the data type check others,
+        #   2-1.Not iterable object -> name, required
+        #   2-2.Iterable object -> name, required, items
+        if not self.value_type:
+            return False
+        if self.value_type in ["list", "tuple", "set", "dict"]:
+            if not self.name or self.required is None:
+                return False
+        else:
+            if not self.name or self.required is None or not self.items:
+                return False
+        return True
+
 
 @dataclass(eq=False)
 class HTTPResponse(_TemplatableConfig):
@@ -200,3 +216,22 @@ class HTTPResponse(_TemplatableConfig):
     @property
     def _template_setting(self) -> TemplateResponse:
         return self._current_template.values.response
+
+    def is_work(self) -> bool:
+        if not self.strategy:
+            return False
+        if ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.STRING:
+            if self.value is not None:
+                return False
+        elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.FILE:
+            if not self.path:
+                return False
+        elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.OBJECT:
+            if not self.properties:
+                return False
+            is_work_props = list(filter(lambda p: p.is_work(), self.properties))
+            if len(is_work_props) != len(self.properties):
+                return False
+        else:
+            raise NotImplementedError
+        return True

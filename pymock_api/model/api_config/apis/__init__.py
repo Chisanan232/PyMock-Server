@@ -121,6 +121,11 @@ class HTTP(_TemplatableConfig):
     def _template_setting(self) -> TemplateHTTP:
         return self._current_template.values.http
 
+    def is_work(self) -> bool:
+        return (self.request is not None and self.request.is_work()) and (
+            self.response is not None and self.response.is_work()
+        )
+
 
 @dataclass(eq=False)
 class MockAPI(_TemplatableConfig):
@@ -237,6 +242,10 @@ class MockAPI(_TemplatableConfig):
         self.http = self._deserialize_as(HTTP, with_data=http_info)  # type: ignore[assignment]
         self.tag = data.get("tag", "")
         return self
+
+    def is_work(self) -> bool:
+        # TODO: Check the URL format
+        return self.url not in ["", None] and (self.http is not None and self.http.is_work())
 
     @property
     def _template_setting(self) -> TemplateAPI:

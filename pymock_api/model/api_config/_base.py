@@ -51,3 +51,7 @@ class _Config(metaclass=ABCMeta):
         if not hasattr(data, prop) and not hasattr(self, prop):
             raise AttributeError(f"Cannot find attribute {prop} in objects {data} or {self}.")
         return (getattr(data, prop) if data else None) or getattr(self, prop)
+
+    @abstractmethod
+    def is_work(self) -> bool:
+        pass
