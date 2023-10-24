@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from dataclasses import field
 from typing import Any, Callable, Dict, Optional
 
 # The truly semantically is more near like following:
@@ -16,6 +17,8 @@ SelfType = Any
 
 
 class _Config(metaclass=ABCMeta):
+    _absolute_key: str = field(init=False, repr=False)
+
     def __eq__(self, other: SelfType) -> bool:
         if other is None:
             return False
@@ -28,6 +31,21 @@ class _Config(metaclass=ABCMeta):
 
     @abstractmethod
     def _compare(self, other: SelfType) -> bool:
+        pass
+
+    @property
+    def absolute_model_key(self) -> str:
+        return self._absolute_key
+
+    @absolute_model_key.setter
+    def absolute_model_key(self, key: str) -> None:
+        self._absolute_key = key
+        if self._absolute_key:
+            self._absolute_key += f".{self.key}"
+
+    @property
+    @abstractmethod
+    def key(self) -> str:
         pass
 
     @abstractmethod

@@ -26,6 +26,10 @@ class HTTP(_TemplatableConfig):
         templatable_config = super()._compare(other)
         return templatable_config and self.request == other.request and self.response == other.response
 
+    @property
+    def key(self) -> str:
+        return "http"
+
     @property  # type: ignore[no-redef]
     def request(self) -> Optional[HTTPRequest]:
         return self._request
@@ -144,6 +148,10 @@ class MockAPI(_TemplatableConfig):
     def _compare(self, other: "MockAPI") -> bool:
         templatable_config = super()._compare(other)
         return templatable_config and self.url == other.url and self.http == other.http
+
+    @property
+    def key(self) -> str:
+        return "<mock API>"
 
     @property  # type: ignore[no-redef]
     def url(self) -> Optional[str]:

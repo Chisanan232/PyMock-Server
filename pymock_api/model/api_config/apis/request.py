@@ -16,6 +16,8 @@ class APIParameter(_Config):
     value_format: Optional[str] = None
     items: Optional[List[IteratorItem]] = None
 
+    _absolute_key: str = field(init=False, repr=False)
+
     def _compare(self, other: "APIParameter") -> bool:
         # TODO: Let it could automatically scan what properties it has and compare all of their value.
         return (
@@ -40,6 +42,10 @@ class APIParameter(_Config):
             else i
             for i in self.items
         ]
+
+    @property
+    def key(self) -> str:
+        return "parameters.<parameter item>"
 
     def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:
         name: str = self._get_prop(data, prop="name")
@@ -104,6 +110,10 @@ class HTTPRequest(_TemplatableConfig):
         templatable_config = super()._compare(other)
         return templatable_config and self.method == other.method and self.parameters == other.parameters
 
+    @property
+    def key(self) -> str:
+        return "request"
+
     def serialize(self, data: Optional["HTTPRequest"] = None) -> Optional[Dict[str, Any]]:
         method: str = self._get_prop(data, prop="method")
         all_parameters = (data or self).parameters if (data and data.parameters) or self.parameters else None
@@ -143,13 +153,19 @@ class HTTPRequest(_TemplatableConfig):
             A **HTTPRequest** type object.
 
         """
+
+        def _deserialize_parameter(parameter: dict) -> APIParameter:
+            api_parameter = APIParameter()
+            api_parameter.absolute_model_key = self.key
+            return api_parameter.deserialize(data=parameter)
+
         super().deserialize(data)
 
         self.method = data.get("method", None)
         parameters: List[dict] = data.get("parameters", None)
         if parameters and not isinstance(parameters, list):
             raise TypeError("Argument *parameters* should be a list type value.")
-        self.parameters = [APIParameter().deserialize(data=parameter) for parameter in parameters] if parameters else []
+        self.parameters = [_deserialize_parameter(parameter) for parameter in parameters] if parameters else []
         return self
 
     @property

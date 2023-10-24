@@ -15,6 +15,8 @@ class ResponseProperty(_Config):
     value_format: Optional[str] = None
     items: Optional[List[IteratorItem]] = None
 
+    _absolute_key: str = field(init=False, repr=False)
+
     def _compare(self, other: "ResponseProperty") -> bool:
         return (
             self.name == other.name
@@ -37,6 +39,10 @@ class ResponseProperty(_Config):
             else i
             for i in self.items
         ]
+
+    @property
+    def key(self) -> str:
+        return "properties.<property item>"
 
     def serialize(self, data: Optional["ResponseProperty"] = None) -> Optional[Dict[str, Any]]:
         name: str = self._get_prop(data, prop="name")
@@ -136,6 +142,10 @@ class HTTPResponse(_TemplatableConfig):
             raise TypeError("The data type of key *properties* must be dict or ResponseProperty.")
         self.properties = [ResponseProperty().deserialize(i) if isinstance(i, dict) else i for i in self.properties]
 
+    @property
+    def key(self) -> str:
+        return "response"
+
     def serialize(self, data: Optional["HTTPResponse"] = None) -> Optional[Dict[str, Any]]:
         serialized_data = super().serialize(data)
         assert serialized_data is not None
@@ -197,6 +207,12 @@ class HTTPResponse(_TemplatableConfig):
             A **HTTPResponse** type object.
 
         """
+
+        def _deserialize_response_property(prop: dict) -> ResponseProperty:
+            response_property = ResponseProperty()
+            response_property.absolute_model_key = self.key
+            return response_property.deserialize(prop)
+
         super().deserialize(data)
 
         self.strategy = ResponseStrategy.to_enum(data.get("strategy", None))
@@ -207,7 +223,7 @@ class HTTPResponse(_TemplatableConfig):
         elif self.strategy is ResponseStrategy.FILE:
             self.path = data.get("path", None)
         elif self.strategy is ResponseStrategy.OBJECT:
-            properties = [ResponseProperty().deserialize(prop) for prop in data.get("properties", [])]
+            properties = [_deserialize_response_property(prop) for prop in data.get("properties", [])]
             self.properties = properties if properties else None  # type: ignore[assignment]
         else:
             raise NotImplementedError

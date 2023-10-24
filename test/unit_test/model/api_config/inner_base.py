@@ -30,6 +30,10 @@ def test_config_get_prop():
         def _compare(self, other: "_Config") -> bool:
             pass
 
+        @property
+        def key(self) -> str:
+            pass
+
         def serialize(self, data: Optional["_Config"] = None) -> Optional[Dict[str, Any]]:
             pass
 

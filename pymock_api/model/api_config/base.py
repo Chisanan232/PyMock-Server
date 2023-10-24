@@ -10,8 +10,14 @@ class BaseConfig(_Config):
 
     url: str = field(default_factory=str)
 
+    _absolute_key: str = field(init=False, repr=False)
+
     def _compare(self, other: "BaseConfig") -> bool:
         return self.url == other.url
+
+    @property
+    def key(self) -> str:
+        return "base"
 
     def serialize(self, data: Optional["BaseConfig"] = None) -> Optional[Dict[str, Any]]:
         url: str = self._get_prop(data, prop="url")

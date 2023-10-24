@@ -49,6 +49,10 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         return self.base == other.base and self.apis == other.apis
 
     @property
+    def key(self) -> str:
+        return "mocked_apis"
+
+    @property
     def template(self) -> TemplateConfig:
         return self._template
 
@@ -194,11 +198,15 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         template_info = data.get("template", {})
         if not template_info:
             self._need_template_in_config = False
-        self.template = TemplateConfig().deserialize(data=template_info)
+        template_config = TemplateConfig()
+        template_config.absolute_model_key = self.key
+        self.template = template_config.deserialize(data=template_info)
 
         # Processing section *base*
         base_info = data.get("base", None)
-        self.base = BaseConfig().deserialize(data=base_info)
+        base_config = BaseConfig()
+        base_config.absolute_model_key = self.key
+        self.base = base_config.deserialize(data=base_info)
 
         # Processing section *apis*
         mocked_apis_info = data.get("apis", {})
@@ -233,7 +241,9 @@ class MockAPIs(_Config, TemplateConfigLoadable):
 
     @property
     def _deserialize_as_template_config(self) -> MockAPI:
-        return MockAPI(_current_template=self.template)
+        mock_api = MockAPI(_current_template=self.template)
+        mock_api.absolute_model_key = self.key
+        return mock_api
 
     def _set_template_config(self, config: MockAPI, **kwargs) -> None:  # type: ignore[override]
         # Read YAML config
@@ -290,6 +300,10 @@ class APIConfig(_Config):
 
     def _compare(self, other: "APIConfig") -> bool:
         return self.name == other.name and self.description == other.description and self.apis == other.apis
+
+    @property
+    def key(self) -> str:
+        return ""
 
     @property
     def _config_operation(self) -> _BaseFileOperation:
@@ -430,6 +444,7 @@ class APIConfig(_Config):
             mock_apis_data_model = MockAPIs()
             mock_apis_data_model.set_template_in_config = self.set_template_in_config
             mock_apis_data_model.config_file_name = self.config_file_name
+            mock_apis_data_model.absolute_model_key = self.key
             self.apis = mock_apis_data_model.deserialize(data=mocked_apis)
         return self
 

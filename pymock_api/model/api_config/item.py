@@ -10,8 +10,14 @@ class IteratorItem(_Config):
     required: Optional[bool] = None
     value_type: Optional[str] = None  # A type value as string
 
+    _absolute_key: str = field(init=False, repr=False)
+
     def _compare(self, other: "IteratorItem") -> bool:
         return self.name == other.name and self.required == other.required and self.value_type == other.value_type
+
+    @property
+    def key(self) -> str:
+        return "<item>"
 
     def serialize(self, data: Optional["IteratorItem"] = None) -> Optional[Dict[str, Any]]:
         name: str = self._get_prop(data, prop="name")
