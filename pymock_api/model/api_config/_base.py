@@ -1,3 +1,4 @@
+import sys
 from abc import ABCMeta, abstractmethod
 from dataclasses import field
 from typing import Any, Callable, Dict, Optional
@@ -73,3 +74,60 @@ class _Config(metaclass=ABCMeta):
     @abstractmethod
     def is_work(self) -> bool:
         pass
+
+
+class _Checkable(metaclass=ABCMeta):
+    _stop_if_fail: Optional[bool] = field(init=False, repr=False, default=None)
+    _config_is_wrong: bool = field(init=False, repr=False, default=False)
+
+    def should_not_be_none(
+        self,
+        config_key: str,
+        config_value: Any,
+        valid_callback: Optional[Callable] = None,
+        err_msg: Optional[str] = None,
+    ) -> bool:
+        if config_value is None:
+            print(err_msg if err_msg else f"Configuration *{config_key}* content cannot be empty.")
+            self._config_is_wrong = True
+            if self._stop_if_fail:
+                self._exit_program(1)
+            return False
+        else:
+            if valid_callback:
+                return valid_callback(config_key, config_value)
+            return True
+
+    def should_be_valid(
+        self, config_key: str, config_value: Any, criteria: list, valid_callback: Optional[Callable] = None
+    ) -> None:
+        if not isinstance(criteria, list):
+            raise TypeError("The argument *criteria* only accept 'list' type value.")
+
+        if config_value not in criteria:
+            is_valid = False
+        else:
+            is_valid = True
+
+        if not is_valid:
+            print(f"Configuration *{config_key}* value is invalid.")
+            self._config_is_wrong = True
+            if self._stop_if_fail:
+                self._exit_program(1)
+        else:
+            if valid_callback:
+                valid_callback(config_key, config_value, criteria)
+
+    def run_finally(self) -> None:
+        if self._config_is_wrong:
+            print("Configuration is invalid.")
+            if self._stop_if_fail:
+                self._exit_program(1)
+        else:
+            print("Configuration is valid.")
+            self._exit_program(0)
+
+    def _exit_program(self, exit_code: int = 0, msg: str = "") -> None:
+        if msg:
+            print(msg)
+        sys.exit(exit_code)
