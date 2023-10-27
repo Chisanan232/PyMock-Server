@@ -84,10 +84,11 @@ class _Checkable(metaclass=ABCMeta):
         self,
         config_key: str,
         config_value: Any,
+        accept_empty: bool = True,
         valid_callback: Optional[Callable] = None,
         err_msg: Optional[str] = None,
     ) -> bool:
-        if config_value is None:
+        if config_value is None or (accept_empty and not config_value):
             print(err_msg if err_msg else f"Configuration *{config_key}* content cannot be empty.")
             self._config_is_wrong = True
             if self._stop_if_fail:
@@ -99,12 +100,17 @@ class _Checkable(metaclass=ABCMeta):
             return True
 
     def props_should_not_be_none(
-        self, under_check: dict, valid_callback: Optional[Callable] = None, err_msg: Optional[str] = None
+        self,
+        under_check: dict,
+        accept_empty: bool = True,
+        valid_callback: Optional[Callable] = None,
+        err_msg: Optional[str] = None,
     ) -> bool:
         for k, v in under_check.items():
             if not self.should_not_be_none(
                 config_key=k,
                 config_value=v,
+                accept_empty=accept_empty,
                 valid_callback=valid_callback,
                 err_msg=err_msg,
             ):
