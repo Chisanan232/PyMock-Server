@@ -98,6 +98,19 @@ class _Checkable(metaclass=ABCMeta):
                 return valid_callback(config_key, config_value)
             return True
 
+    def props_should_not_be_none(
+        self, under_check: dict, valid_callback: Optional[Callable] = None, err_msg: Optional[str] = None
+    ) -> bool:
+        for k, v in under_check.items():
+            if not self.should_not_be_none(
+                config_key=k,
+                config_value=v,
+                valid_callback=valid_callback,
+                err_msg=err_msg,
+            ):
+                return False
+        return True
+
     def should_be_valid(
         self, config_key: str, config_value: Any, criteria: list, valid_callback: Optional[Callable] = None
     ) -> None:
