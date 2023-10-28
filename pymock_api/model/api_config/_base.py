@@ -137,6 +137,22 @@ class _Checkable(metaclass=ABCMeta):
             if valid_callback:
                 valid_callback(config_key, config_value, criteria)
 
+    def condition_should_be_true(
+        self,
+        config_key: str,
+        condition: bool,
+        err_msg: Optional[str] = None,
+    ) -> bool:
+        if condition is False:
+            base_error_msg = f"Configuration *{config_key}* setting is invalid."
+            print(f"{base_error_msg} {err_msg}" if err_msg else base_error_msg)
+            self._config_is_wrong = True
+            if self._stop_if_fail:
+                self._exit_program(1)
+            return False
+        else:
+            return True
+
     def run_finally(self) -> None:
         if self._config_is_wrong:
             print("Configuration is invalid.")
