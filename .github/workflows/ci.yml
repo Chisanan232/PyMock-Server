@@ -7,6 +7,27 @@ on:
     branches:
       - "master"
       - "develop/**"
+    paths-ignore:
+#     For GitHub dependency bot
+      - ".github/dependabot.yaml"
+#     For documentation
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/documentation.yaml"
+      - "docs/**"
+      - "**/*.md"
+      - "mkdocs.yml"
+      - "README.md"
+#     For Docker feature
+      - ".github/workflows/docker.yaml"
+      - "scripts/ci/**-docker-**.sh"
+      - "scripts/docker/**"
+      - "Dockerfile"
+      - "README-DOCKER.md"
+#     Others
+      - ".gitcommitrules"
+      - ".gitignore"
+      - ".pre-commit-config.yaml"
+      - ".pylintrc"
 
   # For the pull request event, it sniffs branch 'develop/**', 'release' and 'master' and make sure anything would be
   # fine without any issue before review and merge.
