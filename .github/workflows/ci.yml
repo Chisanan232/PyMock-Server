@@ -92,17 +92,6 @@ jobs:
       codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
 
 
-#  coveralls_finish:
-##    name: Organize and generate the testing report and upload it to Coveralls
-#    needs: all_test_codecov
-#    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/upload_test_cov_report.yaml@v4
-#    secrets:
-#      coveralls_token: ${{ secrets.COVERALLS_TOKEN }}
-#    with:
-#      test_type: unit-test
-#      upload-to-coveralls: true
-
-
   sonarcloud_finish:
 #    name: SonarCloud Scan
     needs: all_test_codecov
