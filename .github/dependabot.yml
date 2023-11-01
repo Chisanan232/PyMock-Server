@@ -1,0 +1,28 @@
+version: 2
+updates:
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "Chisanan232"
+    labels:
+      - "🔍 enhancement"
+      - "🤖 github actions"
+      - "dependencies"
+    commit-message:
+      prefix: ⬆
+  # Python
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "Chisanan232"
+    labels:
+      - "🔍 enhancement"
+      - "🐍 python"
+      - "dependencies"
+    commit-message:
+      prefix: ⬆
