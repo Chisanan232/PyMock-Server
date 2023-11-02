@@ -38,7 +38,7 @@ permissions:
 jobs:
   check_version_info:
 #    name: Check the package version info to make sure whether it should release Docker image or not.
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/build_git-tag_and_create_github-release.yaml@v4
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/build_git-tag_and_create_github-release.yaml@v5
     secrets:
       github_auth_token: ${{ secrets.GITHUB_TOKEN }}
     with:
