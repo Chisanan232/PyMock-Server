@@ -4,14 +4,14 @@ from typing import Any, Dict, List, Optional, Type, Union
 from ...._utils import YAML
 from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
-from .._base import _Config
+from .._base import _Checkable, _Config
 from ..template import TemplateAPI, TemplateHTTP, _TemplatableConfig
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 
 
 @dataclass(eq=False)
-class HTTP(_TemplatableConfig):
+class HTTP(_TemplatableConfig, _Checkable):
     """*The **http** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-http"
@@ -126,13 +126,20 @@ class HTTP(_TemplatableConfig):
         return self._current_template.values.http
 
     def is_work(self) -> bool:
-        return (self.request is not None and self.request.is_work()) and (
-            self.response is not None and self.response.is_work()
-        )
+        if not self.props_should_not_be_none(
+            under_check={
+                f"{self.absolute_model_key}.request": self.request,
+                f"{self.absolute_model_key}.response": self.response,
+            }
+        ):
+            return False
+        assert self.request is not None
+        assert self.response is not None
+        return self.request.is_work() and self.response.is_work()
 
 
 @dataclass(eq=False)
-class MockAPI(_TemplatableConfig):
+class MockAPI(_TemplatableConfig, _Checkable):
     """*The **<api>** section in **mocked_apis***"""
 
     config_file_tail: str = "-api"
@@ -253,7 +260,21 @@ class MockAPI(_TemplatableConfig):
 
     def is_work(self) -> bool:
         # TODO: Check the URL format
-        return self.url not in ["", None] and (self.http is not None and self.http.is_work())
+        if not self.should_not_be_none(
+            config_key=f"{self.absolute_model_key}.http",
+            config_value=self.http,
+        ):
+            return False
+
+        if not self.should_not_be_none(
+            config_key=f"{self.absolute_model_key}.url",
+            config_value=self.url,
+            accept_empty=False,
+        ):
+            return False
+
+        assert self.http is not None
+        return self.http.is_work()
 
     @property
     def _template_setting(self) -> TemplateAPI:
