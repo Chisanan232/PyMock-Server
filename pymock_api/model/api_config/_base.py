@@ -127,15 +127,11 @@ class _Checkable(metaclass=ABCMeta):
 
     def should_be_valid(
         self, config_key: str, config_value: Any, criteria: list, valid_callback: Optional[Callable] = None
-    ) -> None:
+    ) -> bool:
         if not isinstance(criteria, list):
             raise TypeError("The argument *criteria* only accept 'list' type value.")
 
-        if config_value not in criteria:
-            is_valid = False
-        else:
-            is_valid = True
-
+        is_valid = config_value in criteria
         if not is_valid:
             print(f"Configuration *{config_key}* value is invalid.")
             self._config_is_wrong = True
@@ -144,6 +140,7 @@ class _Checkable(metaclass=ABCMeta):
         else:
             if valid_callback:
                 valid_callback(config_key, config_value, criteria)
+        return is_valid
 
     def condition_should_be_true(
         self,
