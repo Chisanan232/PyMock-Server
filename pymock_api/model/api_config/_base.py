@@ -148,7 +148,7 @@ class _Checkable(metaclass=ABCMeta):
         condition: bool,
         err_msg: Optional[str] = None,
     ) -> bool:
-        if condition is False:
+        if condition is True:
             base_error_msg = f"Configuration *{config_key}* setting is invalid."
             print(f"{base_error_msg} {err_msg}" if err_msg else base_error_msg)
             self._config_is_wrong = True
