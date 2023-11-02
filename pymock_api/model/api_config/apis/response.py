@@ -1,14 +1,17 @@
+import json
+import pathlib
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from ...enums import ResponseStrategy
-from .._base import _Config
+from .._base import _Checkable, _Config
 from ..item import IteratorItem
 from ..template import TemplateResponse, _TemplatableConfig
 
 
 @dataclass(eq=False)
-class ResponseProperty(_Config):
+class ResponseProperty(_Config, _Checkable):
     name: str = field(default_factory=str)
     required: Optional[bool] = None
     value_type: Optional[str] = None  # A type value as string
@@ -58,7 +61,6 @@ class ResponseProperty(_Config):
             "format": value_format,
         }
         if self.items:
-            print(f"[DEBUG in api_config.ResponseProperty.serialize] self.items: {self.items}")
             serialized_data["items"] = [item.serialize() for item in self.items]
         return serialized_data
 
@@ -78,19 +80,35 @@ class ResponseProperty(_Config):
         # 2. Use the data type check others,
         #   2-1.Not iterable object -> name, required
         #   2-2.Iterable object -> name, required, items
-        if not self.value_type:
+        if not self.props_should_not_be_none(
+            under_check={
+                f"{self.absolute_model_key}.name": self.name,
+                f"{self.absolute_model_key}.value_type": self.value_type,
+            },
+            accept_empty=False,
+        ):
             return False
-        if self.value_type in ["list", "tuple", "set", "dict"]:
-            if not self.name or self.required is None:
-                return False
-        else:
-            if not self.name or self.required is None or not self.items:
-                return False
+
+        if not self.should_not_be_none(
+            config_key=f"{self.absolute_model_key}.required",
+            config_value=self.required,
+            accept_empty=False,
+        ):
+            return False
+
+        if not self.condition_should_be_true(
+            config_key=f"{self.absolute_model_key}.items",
+            condition=(self.value_type not in ["list", "tuple", "set", "dict"] and len(self.items or []) != 0)
+            or (self.value_type in ["list", "tuple", "set", "dict"] and not (self.items or [])),
+            err_msg="It's meaningless if it has item setting but its data type is not collection. The items value setting sould not be None if the data type is one of collection types.",
+        ):
+            return False
+
         return True
 
 
 @dataclass(eq=False)
-class HTTPResponse(_TemplatableConfig):
+class HTTPResponse(_TemplatableConfig, _Checkable):
     """*The **http.response** section in **mocked_apis.<api>***"""
 
     strategy: Optional[ResponseStrategy] = None
@@ -234,16 +252,33 @@ class HTTPResponse(_TemplatableConfig):
         return self._current_template.values.response
 
     def is_work(self) -> bool:
-        if not self.strategy:
+        if not self.should_not_be_none(
+            config_key=f"{self.absolute_model_key}.strategy",
+            config_value=self.strategy,
+            accept_empty=False,
+        ):
             return False
+        assert self.strategy is not None
         if ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.STRING:
-            if self.value is not None:
-                return False
+            return self.should_not_be_none(
+                config_key=f"{self.absolute_model_key}.value",
+                config_value=self.value,
+                valid_callback=self._chk_response_value_validity,
+            )
         elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.FILE:
-            if not self.path:
-                return False
+            return self.should_not_be_none(
+                config_key=f"{self.absolute_model_key}.path",
+                config_value=self.path,
+                accept_empty=False,
+                valid_callback=self._chk_response_value_validity,
+            )
         elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.OBJECT:
-            if not self.properties:
+            if not self.should_not_be_none(
+                config_key=f"{self.absolute_model_key}.properties",
+                config_value=self.properties,
+                accept_empty=False,
+                valid_callback=self._chk_response_value_validity,
+            ):
                 return False
             is_work_props = list(filter(lambda p: p.is_work(), self.properties))
             if len(is_work_props) != len(self.properties):
@@ -251,3 +286,63 @@ class HTTPResponse(_TemplatableConfig):
         else:
             raise NotImplementedError
         return True
+
+    def _chk_response_value_validity(self, config_key: str, config_value: Any) -> bool:  # type: ignore[return]
+        response_strategy = config_key.split(".")[-1]
+        assert response_strategy in [
+            "value",
+            "path",
+            "properties",
+        ], f"It has unexpected schema usage '{config_key}' in configuration."
+        if response_strategy == "value":
+            assert isinstance(
+                config_value, str
+            ), "If HTTP response strategy is *string*, the data type of response value must be *str*."
+            if re.search(r"\{.{0,99999999}}", config_value):
+                try:
+                    json.loads(config_value)
+                except:
+                    print(
+                        "If HTTP response strategy is *string* and its value seems like JSON format, its format is not a valid JSON format."
+                    )
+                    self._config_is_wrong = True
+                    if self._stop_if_fail:
+                        self._exit_program(1)
+                    return False
+            return True
+        elif response_strategy == "path":
+            assert isinstance(
+                config_value, str
+            ), "If HTTP response strategy is *file*, the data type of response value must be *str*."
+            if not pathlib.Path(config_value).exists():
+                print("The file which is the response content doesn't exist.")
+                self._config_is_wrong = True
+                if self._stop_if_fail:
+                    self._exit_program(1)
+                return False
+            return True
+        elif response_strategy == "properties":
+            assert isinstance(
+                config_value, list
+            ), "If HTTP response strategy is *object*, the data type of response value must be *list*."
+            for v in config_value:
+                assert isinstance(v, ResponseProperty)
+                if not v.name:
+                    print("Attribute *name* is necessary of data model *ResponseProperty*.")
+                    self._config_is_wrong = True
+                    if self._stop_if_fail:
+                        self._exit_program(1)
+                    return False
+                if v.required is None:
+                    print("Attribute *required* is necessary of data model *ResponseProperty*.")
+                    self._config_is_wrong = True
+                    if self._stop_if_fail:
+                        self._exit_program(1)
+                    return False
+                if not v.value_type:
+                    print("Attribute *value_type* is necessary of data model *ResponseProperty*.")
+                    self._config_is_wrong = True
+                    if self._stop_if_fail:
+                        self._exit_program(1)
+                    return False
+            return True
