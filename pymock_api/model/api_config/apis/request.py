@@ -2,13 +2,13 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from ...._utils.file_opt import YAML, _BaseFileOperation
-from .._base import _Config
+from .._base import _Checkable, _Config
 from ..item import IteratorItem
 from ..template import TemplateRequest, _TemplatableConfig
 
 
 @dataclass(eq=False)
-class APIParameter(_Config):
+class APIParameter(_Config, _Checkable):
     name: str = field(default_factory=str)
     required: Optional[bool] = None
     default: Optional[Any] = None
@@ -79,24 +79,43 @@ class APIParameter(_Config):
         return self
 
     def is_work(self) -> bool:
-        if not self.value_type:
+        if not self.props_should_not_be_none(
+            under_check={
+                f"{self.absolute_model_key}.name": self.name,
+                f"{self.absolute_model_key}.value_type": self.value_type,
+            },
+            accept_empty=False,
+        ):
             return False
-        if self.value_type in ["list", "tuple", "set", "dict"]:
-            if not self.name or self.required is None or (self.required is True and self.default is None):
-                return False
-        else:
-            if (
-                not self.name
-                or self.required is None
-                or not self.items
-                or (self.required is True and self.default is None)
-            ):
+        if not self.should_not_be_none(
+            config_key=f"{self.absolute_model_key}.required",
+            config_value=self.required,
+            accept_empty=False,
+        ):
+            return False
+        if not self.condition_should_be_true(
+            config_key=f"{self.absolute_model_key}.default",
+            condition=(self.required is True and self.default is not None)
+            or (self.required is False and self.default is None),
+            err_msg="It's meaningless if it has default value but it is required. The default value setting should not be None if the required is 'False'.",
+        ):
+            return False
+        if not self.condition_should_be_true(
+            config_key=f"{self.absolute_model_key}.items",
+            condition=(self.value_type not in ["list", "tuple", "set", "dict"] and len(self.items or []) != 0)
+            or (self.value_type in ["list", "tuple", "set", "dict"] and not (self.items or [])),
+            err_msg="It's meaningless if it has item setting but its data type is not collection. The items value setting sould not be None if the data type is one of collection types.",
+        ):
+            return False
+        if self.items:
+            is_work_props = list(filter(lambda i: i.is_work(), self.items))
+            if len(is_work_props) != len(self.items):
                 return False
         return True
 
 
 @dataclass(eq=False)
-class HTTPRequest(_TemplatableConfig):
+class HTTPRequest(_TemplatableConfig, _Checkable):
     """*The **http.request** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-request"
@@ -179,7 +198,16 @@ class HTTPRequest(_TemplatableConfig):
         return None
 
     def is_work(self) -> bool:
-        if not self.method or self.method not in ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTION"]:
+        if not self.should_not_be_none(
+            config_key=f"{self.absolute_model_key}.method",
+            config_value=self.method,
+        ):
+            return False
+        if not self.should_be_valid(
+            config_key=f"{self.absolute_model_key}.method",
+            config_value=self.method,
+            criteria=["GET", "POST", "PUT", "DELETE", "HEAD", "OPTION"],
+        ):
             return False
         if self.parameters:
             is_work_params = list(filter(lambda p: p.is_work(), self.parameters))
