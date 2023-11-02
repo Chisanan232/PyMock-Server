@@ -3,11 +3,11 @@
 content ...
 """
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
-from ._base import _Config
+from ._base import _Checkable, _Config
 from .apis import (
     HTTP,
     APIParameter,
@@ -21,7 +21,7 @@ from .item import IteratorItem
 from .template import TemplateConfig, TemplateConfigLoadable, _TemplatableConfig
 
 
-class MockAPIs(_Config, TemplateConfigLoadable):
+class MockAPIs(_Config, _Checkable, TemplateConfigLoadable):
     """*The **mocked_apis** section*"""
 
     _template: TemplateConfig
@@ -214,16 +214,28 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         return self
 
     def is_work(self) -> bool:
+        under_check = {
+            f"{self.absolute_model_key}.<API name>": self.apis,
+            self.template.absolute_model_key: self.template,
+        }
+        if self.base is not None:
+            under_check[self.base.absolute_model_key] = self.base
+        if not self.props_should_not_be_none(under_check=under_check):
+            return False
+
         if self.apis:
             for ak, av in self.apis.items():
                 # TODO: Check the key validity about it will be the function naming in Python code
-                if not ak:
+                api_config_is_valid = self.props_should_not_be_none(
+                    under_check={
+                        f"{self.absolute_model_key}.<API name>": ak,
+                        f"{self.absolute_model_key}.{ak}": av,
+                    }
+                )
+                assert av is not None
+                if not api_config_is_valid or not av.is_work():
                     return False
-                if not av or not av.is_work():
-                    return False
-        return (self.template is not None and self.template.is_work()) and (
-            self.base is not None and self.base.is_work()
-        )
+        return self.template.is_work() and (self.base.is_work() if self.base else True)
 
     def _set_mocked_apis(self, api_key: str = "", api_config: Optional[MockAPI] = None) -> None:  # type: ignore[override]
         if api_key and api_config:
@@ -279,7 +291,7 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         return aggregated_apis
 
 
-class APIConfig(_Config):
+class APIConfig(_Config, _Checkable):
     """*The entire configuration*"""
 
     _name: str = ""
@@ -449,7 +461,16 @@ class APIConfig(_Config):
         return self
 
     def is_work(self) -> bool:
-        return self.apis is not None and self.apis.is_work()
+        if not self.should_not_be_none(
+            config_key=f"{self.absolute_model_key}.mocked_apis",
+            config_value=self.apis,
+        ):
+            self._exit_program(
+                msg="⚠️  Configuration is invalid.",
+                exit_code=1,
+            )
+        assert self.apis is not None
+        return self.apis.is_work()
 
     def from_yaml(self, path: str) -> Optional["APIConfig"]:
         return self.deserialize(data=self._config_operation.read(path))
