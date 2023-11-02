@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 
-from ._base import _Config
+from ._base import _Checkable, _Config
 
 
 @dataclass(eq=False)
-class IteratorItem(_Config):
+class IteratorItem(_Config, _Checkable):
     name: str = field(default_factory=str)
     required: Optional[bool] = None
     value_type: Optional[str] = None  # A type value as string
@@ -41,6 +41,19 @@ class IteratorItem(_Config):
         return self
 
     def is_work(self) -> bool:
-        if not self.name or self.required is None or not self.value_type:
+        if not self.props_should_not_be_none(
+            under_check={
+                f"{self.absolute_model_key}.required": self.required,
+            },
+            accept_empty=False,
+        ):
+            return False
+        if not self.props_should_not_be_none(
+            under_check={
+                f"{self.absolute_model_key}.name": self.name,
+                f"{self.absolute_model_key}.value_type": self.value_type,
+            },
+            accept_empty=False,
+        ):
             return False
         return True
