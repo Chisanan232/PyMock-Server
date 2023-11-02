@@ -8,11 +8,11 @@ from typing import Any, Dict, List, Optional, Type, Union
 
 from ..._utils.file_opt import YAML, _BaseFileOperation
 from ...model.enums import ConfigLoadingOrder, set_loading_function
-from ._base import SelfType, _Config
+from ._base import SelfType, _Checkable, _Config
 
 
 @dataclass(eq=False)
-class LoadConfig(_Config):
+class LoadConfig(_Config, _Checkable):
     includes_apis: bool = field(default=True)
     order: List[ConfigLoadingOrder] = field(default_factory=list)
 
@@ -53,17 +53,23 @@ class LoadConfig(_Config):
         return self
 
     def is_work(self) -> bool:
-        if self.includes_apis is None:
+        if not self.should_not_be_none(
+            config_key=f"{self.absolute_model_key}.includes_apis",
+            config_value=self.includes_apis,
+        ):
             return False
         if self.order:
-            is_work_enum = list(filter(lambda o: o in ConfigLoadingOrder, self.order))
-            if len(is_work_enum) != len(self.order):
+            if not self.should_be_valid(
+                config_key=f"{self.absolute_model_key}.order",
+                config_value=self.order,
+                criteria=[c for c in ConfigLoadingOrder],
+            ):
                 return False
         return True
 
 
 @dataclass(eq=False)
-class TemplateSetting(_Config, ABC):
+class TemplateSetting(_Config, _Checkable, ABC):
     config_path_format: str = field(default_factory=str)
 
     _absolute_key: str = field(init=False, repr=False)
@@ -137,7 +143,7 @@ class TemplateResponse(TemplateSetting):
 
 
 @dataclass(eq=False)
-class TemplateValues(_Config):
+class TemplateValues(_Config, _Checkable):
     base_file_path: str = field(default="./")
     api: TemplateAPI = field(default_factory=TemplateAPI)
     http: TemplateHTTP = field(default_factory=TemplateHTTP)
@@ -203,7 +209,7 @@ class TemplateValues(_Config):
 
 
 @dataclass(eq=False)
-class TemplateApply(_Config):
+class TemplateApply(_Config, _Checkable):
     api: List[Union[str, Dict[str, List[str]]]] = field(default_factory=list)
 
     _absolute_key: str = field(init=False, repr=False)
@@ -227,17 +233,20 @@ class TemplateApply(_Config):
         return self
 
     def is_work(self) -> bool:
-        all_ele_is_str = list(map(lambda a: isinstance(a, str), self.api))
-        all_ele_is_dict = list(map(lambda a: isinstance(a, dict), self.api))
-        ele_is_str = set(all_ele_is_str)
-        ele_is_dict = set(all_ele_is_dict)
-        if len(ele_is_str) == 1 and len(ele_is_dict) == 1 and (True in ele_is_str or True in ele_is_dict):
+        if self.api is None or len(self.api) == 0:
             return True
+        else:
+            all_ele_is_str = list(map(lambda a: isinstance(a, str), self.api))
+            all_ele_is_dict = list(map(lambda a: isinstance(a, dict), self.api))
+            ele_is_str = set(all_ele_is_str)
+            ele_is_dict = set(all_ele_is_dict)
+            if len(ele_is_str) == 1 and len(ele_is_dict) == 1 and (True in ele_is_str or True in ele_is_dict):
+                return True
         return False
 
 
 @dataclass(eq=False)
-class TemplateConfig(_Config):
+class TemplateConfig(_Config, _Checkable):
     """The data model which could be set details attribute by section *template*."""
 
     activate: bool = field(default=False)
@@ -292,11 +301,21 @@ class TemplateConfig(_Config):
         return self
 
     def is_work(self) -> bool:
+        if not self.props_should_not_be_none(
+            under_check={
+                f"{self.absolute_model_key}.activate": self.activate,
+                self.load_config.absolute_model_key: self.load_config,
+                self.values.absolute_model_key: self.values,
+                # self.apply.absolute_model_key: self.apply,
+            },
+            accept_empty=False,
+        ):
+            return False
         return (
-            (self.activate is not None and isinstance(self.activate, bool))
-            and (self.load_config is not None and self.load_config.is_work())
-            and (self.values is not None and self.values.is_work())
-            and (self.apply is not None and self.apply.is_work())
+            isinstance(self.activate, bool)
+            and self.load_config.is_work()
+            and self.values.is_work()
+            and self.apply.is_work()
         )
 
 
