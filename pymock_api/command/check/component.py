@@ -1,5 +1,3 @@
-import json
-import pathlib
 import re
 import sys
 from abc import ABCMeta, abstractmethod
@@ -13,7 +11,6 @@ from ...model import (
     deserialize_swagger_api_config,
     load_config,
 )
-from ...model.api_config import ResponseProperty
 from ...model.api_config.apis import APIParameter as MockedAPIParameter
 from ...model.enums import ResponseStrategy
 from ...model.swagger_config import API as SwaggerAPI
@@ -76,7 +73,6 @@ class _BaseChecking(metaclass=ABCMeta):
         self._config_is_wrong: bool = False
 
     def run(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
-        self._stop_if_fail = args.stop_if_fail
         api_config = self.check(args, api_config)
         self.run_finally(args)
         assert api_config
@@ -103,152 +99,12 @@ class ValidityChecking(_BaseChecking):
                 msg="⚠️  Configuration is invalid.",
                 exit_code=1,
             )
-        # # Check the section *mocked_apis* (first layer) of configuration
-        # NOTE: It's the normal behavior of code implementation. It must have something of property *MockAPIs.apis*
-        # if it has anything within key *mocked_apis*.
-        assert api_config is not None  # Here is strange
-        if not self._setting_should_not_be_none(
-            config_key="mocked_apis",
-            config_value=api_config.apis,
-        ):
-            self._exit_program(
-                msg="⚠️  Configuration is invalid.",
-                exit_code=1,
-            )
-        assert api_config.apis
-        self._setting_should_not_be_none(
-            config_key="mocked_apis.<API name>",
-            config_value=api_config.apis.apis,
-        )
-        # # Check each API content at first layer is *mocked_apis* of configuration
-        for one_api_name, one_api_config in api_config.apis.apis.items():
-            # # Check the section *mocked_apis.<API name>* (second layer) of configuration
-            if not self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}",
-                config_value=one_api_config,
-            ):
-                continue
-
-            # # Check the section *mocked_apis.<API name>.<property>* (third layer) of configuration (not
-            # # include the layer about API name, should be the first layer under API name)
-            assert one_api_config
-            self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}.url",
-                config_value=one_api_config.url,
-            )
-            if not self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}.http",
-                config_value=one_api_config.http,
-            ):
-                continue
-
-            # # Check the section *mocked_apis.<API name>.http.<property>* (forth layer) of configuration
-            assert one_api_config.http
-            if not self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}.http.request",
-                config_value=one_api_config.http.request,
-            ):
-                continue
-
-            assert one_api_config.http.request
-            if not self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}.http.request.method",
-                config_value=one_api_config.http.request.method,
-            ):
-                continue
-            assert one_api_config.http.request.method
-            self._setting_should_be_valid(
-                config_key=f"mocked_apis.{one_api_name}.http.request.method",
-                config_value=one_api_config.http.request.method.upper(),
-                criteria=["GET", "POST", "PUT", "DELETE", "HEAD", "OPTION"],
-            )
-
-            if not self._setting_should_not_be_none(
-                config_key=f"mocked_apis.{one_api_name}.http.response",
-                config_value=one_api_config.http.response,
-            ):
-                continue
-
-            assert one_api_config.http.response
-            http_response = one_api_config.http.response
-            assert http_response.strategy in ResponseStrategy
-            config_key = ""
-            under_check_value = None
-            if http_response.strategy is ResponseStrategy.STRING:
-                under_check_value = http_response.value
-                config_key = f"mocked_apis.{one_api_name}.http.response.value"
-            elif http_response.strategy is ResponseStrategy.FILE:
-                under_check_value = http_response.path
-                config_key = f"mocked_apis.{one_api_name}.http.response.path"
-            elif http_response.strategy is ResponseStrategy.OBJECT:
-                under_check_value = http_response.properties  # type: ignore[assignment]
-                config_key = f"mocked_apis.{one_api_name}.http.response.properties"
-            self._setting_should_not_be_none(
-                config_key=config_key,
-                config_value=under_check_value,
-                valid_callback=self._chk_response_value_validity,
-            )
+        assert api_config is not None
+        api_config.stop_if_fail = args.stop_if_fail
+        is_work = api_config.is_work()
+        if not is_work:
+            api_config._exit_program(1)
         return api_config
-
-    def _chk_response_value_validity(self, config_key: str, config_value: Any) -> bool:  # type: ignore[return]
-        response_strategy = config_key.split(".")[-1]
-        assert response_strategy in [
-            "value",
-            "path",
-            "properties",
-        ], f"It has unexpected schema usage '{config_key}' in configuration."
-        if response_strategy == "value":
-            assert isinstance(
-                config_value, str
-            ), "If HTTP response strategy is *string*, the data type of response value must be *str*."
-            if re.search(r"\{.{0,99999999}}", config_value):
-                try:
-                    json.loads(config_value)
-                except:
-                    print(
-                        "If HTTP response strategy is *string* and its value seems like JSON format, its format is not a valid JSON format."
-                    )
-                    self._config_is_wrong = True
-                    if self._stop_if_fail:
-                        sys.exit(1)
-                    return False
-            return True
-        elif response_strategy == "path":
-            assert isinstance(
-                config_value, str
-            ), "If HTTP response strategy is *file*, the data type of response value must be *str*."
-            if not pathlib.Path(config_value).exists():
-                print("The file which is the response content doesn't exist.")
-                self._config_is_wrong = True
-                if self._stop_if_fail:
-                    sys.exit(1)
-                return False
-            return True
-        elif response_strategy == "properties":
-            assert isinstance(
-                config_value, list
-            ), "If HTTP response strategy is *object*, the data type of response value must be *list*."
-            for v in config_value:
-                assert isinstance(v, ResponseProperty)
-                if not v.name:
-                    print("Attribute *name* is necessary of data model *ResponseProperty*.")
-                    self._config_is_wrong = True
-                    if self._stop_if_fail:
-                        sys.exit(1)
-                    return False
-                if v.required is None:
-                    print("Attribute *required* is necessary of data model *ResponseProperty*.")
-                    self._config_is_wrong = True
-                    if self._stop_if_fail:
-                        sys.exit(1)
-                    return False
-                if not v.value_type:
-                    print("Attribute *value_type* is necessary of data model *ResponseProperty*.")
-                    self._config_is_wrong = True
-                    if self._stop_if_fail:
-                        sys.exit(1)
-                    return False
-            return True
 
     def _setting_should_not_be_none(
         self,
@@ -267,26 +123,6 @@ class ValidityChecking(_BaseChecking):
             if valid_callback:
                 return valid_callback(config_key, config_value)
             return True
-
-    def _setting_should_be_valid(
-        self, config_key: str, config_value: Any, criteria: list, valid_callback: Optional[Callable] = None
-    ) -> None:
-        if not isinstance(criteria, list):
-            raise TypeError("The argument *criteria* only accept 'list' type value.")
-
-        if config_value not in criteria:
-            is_valid = False
-        else:
-            is_valid = True
-
-        if not is_valid:
-            print(f"Configuration *{config_key}* value is invalid.")
-            self._config_is_wrong = True
-            if self._stop_if_fail:
-                sys.exit(1)
-        else:
-            if valid_callback:
-                valid_callback(config_key, config_value, criteria)
 
     def _exit_program(self, msg: str, exit_code: int = 0) -> None:
         print(msg)
