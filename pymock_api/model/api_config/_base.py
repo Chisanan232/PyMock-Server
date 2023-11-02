@@ -80,6 +80,14 @@ class _Checkable(metaclass=ABCMeta):
     _stop_if_fail: Optional[bool] = field(init=False, repr=False, default=None)
     _config_is_wrong: bool = field(init=False, repr=False, default=False)
 
+    @property
+    def stop_if_fail(self) -> Optional[bool]:
+        return self._stop_if_fail
+
+    @stop_if_fail.setter
+    def stop_if_fail(self, s: bool) -> None:
+        self._stop_if_fail = s
+
     def should_not_be_none(
         self,
         config_key: str,
