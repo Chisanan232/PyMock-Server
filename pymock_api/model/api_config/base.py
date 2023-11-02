@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 
-from ._base import _Config
+from ._base import _Checkable, _Config
 
 
 @dataclass(eq=False)
-class BaseConfig(_Config):
+class BaseConfig(_Config, _Checkable):
     """*The **base** section in **mocked_apis***"""
 
     url: str = field(default_factory=str)
