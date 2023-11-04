@@ -290,9 +290,20 @@ def _set_test_data(is_valid: bool, data_model: str) -> None:
         _TEST_DATA.append((yaml_config_path, expected_is_work))
 
 
+def set_checking_test_data(data_modal_dir: str, reset: bool = True) -> None:
+    if reset:
+        reset_test_data()
+    init_checking_test_data(data_modal_dir)
+
+
 def init_checking_test_data(data_modal_dir: str) -> None:
     _set_test_data(is_valid=True, data_model=data_modal_dir)
     _set_test_data(is_valid=False, data_model=data_modal_dir)
+
+
+def reset_test_data() -> None:
+    global _TEST_DATA
+    _TEST_DATA.clear()
 
 
 class CheckableTestSuite(ConfigTestSpec, ABC):
