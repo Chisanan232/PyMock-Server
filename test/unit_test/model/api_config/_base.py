@@ -295,17 +295,8 @@ def init_checking_test_data(data_modal_dir: str) -> None:
     _set_test_data(is_valid=False, data_model=data_modal_dir)
 
 
-def reset_checking_test_data() -> None:
-    global _TEST_DATA
-    _TEST_DATA = []
-
-
 class CheckableTestSuite(ConfigTestSpec, ABC):
-    @property
-    @abstractmethod
-    def data_modal_dir(self) -> str:
-        # FIXME: Consider the usage of this property
-        pass
+    test_data_dir = NotImplementedError("Please override attribute *test_data_dir* about the test data directory.")
 
     @pytest.mark.parametrize(
         ("test_data_path", "criteria"),
