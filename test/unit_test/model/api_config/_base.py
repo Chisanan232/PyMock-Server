@@ -295,6 +295,11 @@ def init_checking_test_data(data_modal_dir: str) -> None:
     _set_test_data(is_valid=False, data_model=data_modal_dir)
 
 
+def reset_checking_test_data() -> None:
+    global _TEST_DATA
+    _TEST_DATA = []
+
+
 class CheckableTestSuite(ConfigTestSpec, ABC):
     @property
     @abstractmethod
