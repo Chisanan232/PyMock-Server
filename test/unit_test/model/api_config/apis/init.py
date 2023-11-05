@@ -12,11 +12,21 @@ from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResp
 from pymock_api.model.enums import Format, ResponseStrategy
 
 from ....._values import _Test_Response_Properties, _Test_Tag, _Test_URL, _TestConfig
-from .._base import MOCK_MODEL, MOCK_RETURN_VALUE, MockModel, _assertion_msg
+from .._base import (
+    MOCK_MODEL,
+    MOCK_RETURN_VALUE,
+    CheckableTestSuite,
+    MockModel,
+    _assertion_msg,
+    set_checking_test_data,
+)
 from ..template import TemplatableConfigTestSuite
 
 
-class TestMockAPI(TemplatableConfigTestSuite):
+class TestMockAPI(TemplatableConfigTestSuite, CheckableTestSuite):
+    test_data_dir = "api"
+    set_checking_test_data(test_data_dir)
+
     @pytest.fixture(scope="function")
     def sut(self) -> MockAPI:
         return MockAPI(url=_Test_URL, http=self._Mock_Model.http, tag=_Test_Tag)
@@ -238,7 +248,10 @@ class TestMockAPI(TemplatableConfigTestSuite):
         assert re.search(r".{0,32}invalid response strategy.{0,32}", str(exc_info.value), re.IGNORECASE)
 
 
-class TestHTTP(TemplatableConfigTestSuite):
+class TestHTTP(TemplatableConfigTestSuite, CheckableTestSuite):
+    test_data_dir = "http"
+    set_checking_test_data(test_data_dir)
+
     @pytest.fixture(scope="function")
     def sut(self) -> HTTP:
         return HTTP(request=self._Mock_Model.http_request, response=self._Mock_Model.http_response)

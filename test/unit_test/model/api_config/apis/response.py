@@ -9,7 +9,13 @@ from pymock_api.model.api_config.apis import HTTPResponse
 from pymock_api.model.enums import ResponseStrategy
 
 from ....._values import _Test_HTTP_Resp, _Test_Response_Property_List, _TestConfig
-from .._base import ConfigTestSpec, MockModel, _assertion_msg
+from .._base import (
+    CheckableTestSuite,
+    ConfigTestSpec,
+    MockModel,
+    _assertion_msg,
+    set_checking_test_data,
+)
 from ..template import TemplatableConfigTestSuite
 
 
@@ -62,7 +68,10 @@ class TestResponseProperty(ConfigTestSpec):
         )
 
 
-class TestHTTPResponse(TemplatableConfigTestSuite):
+class TestHTTPResponse(TemplatableConfigTestSuite, CheckableTestSuite):
+    test_data_dir = "response"
+    set_checking_test_data(test_data_dir)
+
     @pytest.fixture(scope="function")
     def sut(self) -> HTTPResponse:
         return HTTPResponse(strategy=ResponseStrategy.STRING, value=_Test_HTTP_Resp)

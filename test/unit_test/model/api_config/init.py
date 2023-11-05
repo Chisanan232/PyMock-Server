@@ -20,13 +20,17 @@ from ...._values import (
 from ._base import (
     MOCK_MODEL,
     MOCK_RETURN_VALUE,
-    ConfigTestSpec,
+    CheckableTestSuite,
     TemplateConfigLoadableTestSuite,
     _assertion_msg,
+    set_checking_test_data,
 )
 
 
-class TestAPIConfig(ConfigTestSpec):
+class TestAPIConfig(CheckableTestSuite):
+    test_data_dir = "api"
+    set_checking_test_data(test_data_dir)
+
     @pytest.fixture(scope="function")
     def sut(self) -> APIConfig:
         return APIConfig(name=_Config_Name, description=_Config_Description, apis=self._Mock_Model.mock_apis)
@@ -119,7 +123,10 @@ class TestAPIConfig(ConfigTestSpec):
         mock_write_yaml.assert_called_once_with(path=_Test_Config, config=sut.serialize())
 
 
-class TestMockAPIs(TemplateConfigLoadableTestSuite):
+class TestMockAPIs(TemplateConfigLoadableTestSuite, CheckableTestSuite):
+    test_data_dir = "mocked_apis"
+    set_checking_test_data(test_data_dir)
+
     @pytest.fixture(scope="function")
     def sut(self) -> MockAPIs:
         return MockAPIs(

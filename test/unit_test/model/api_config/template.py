@@ -28,7 +28,12 @@ from ...._values import (
     _Mock_Template_Setting,
     _Mock_Template_Values_Setting,
 )
-from ._base import MOCK_MODEL, ConfigTestSpec
+from ._base import (
+    MOCK_MODEL,
+    CheckableTestSuite,
+    ConfigTestSpec,
+    set_checking_test_data,
+)
 
 
 class TestLoadConfig(ConfigTestSpec):
@@ -243,7 +248,10 @@ class TestTemplateApply(ConfigTestSpec):
         assert obj.api == _Mock_Template_Apply_Has_Tag_Setting.get("api")
 
 
-class TestTemplateConfig(ConfigTestSpec):
+class TestTemplateConfig(CheckableTestSuite):
+    test_data_dir = "template"
+    set_checking_test_data(test_data_dir)
+
     @pytest.fixture(scope="function")
     def sut(self) -> TemplateConfig:
         return TemplateConfig(
