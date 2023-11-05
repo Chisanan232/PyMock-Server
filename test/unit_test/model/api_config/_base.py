@@ -274,7 +274,7 @@ def _set_test_data(is_valid: bool, data_model: str) -> None:
         config_type = "valid"
         expected_is_work = True
     else:
-        config_type = ("invalid",)
+        config_type = "invalid"
         expected_is_work = False
     yaml_dir = os.path.join(
         str(pathlib.Path(__file__).parent.parent.parent.parent),
