@@ -74,7 +74,7 @@ class APIParameter(_Config, _Checkable):
         self.default = data.get("default", None)
         self.value_type = data.get("type", None)
         self.value_format = data.get("format", None)
-        items = [IteratorItem().deserialize(item) for item in data.get("items", [])]
+        items = [IteratorItem().deserialize(item) for item in (data.get("items", []) or [])]
         self.items = items if items else None
         return self
 
