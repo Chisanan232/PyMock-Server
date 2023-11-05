@@ -280,7 +280,12 @@ class HTTPResponse(_TemplatableConfig, _Checkable):
                 valid_callback=self._chk_response_value_validity,
             ):
                 return False
-            is_work_props = list(filter(lambda p: p.is_work(), self.properties))
+
+            def _p_is_work(p: ResponseProperty) -> bool:
+                p.stop_if_fail = self.stop_if_fail
+                return p.is_work()
+
+            is_work_props = list(filter(lambda p: _p_is_work(p), self.properties))
             if len(is_work_props) != len(self.properties):
                 return False
         else:

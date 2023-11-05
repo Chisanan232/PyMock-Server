@@ -108,7 +108,12 @@ class APIParameter(_Config, _Checkable):
         ):
             return False
         if self.items:
-            is_work_props = list(filter(lambda i: i.is_work(), self.items))
+
+            def _i_is_work(i: IteratorItem) -> bool:
+                i.stop_if_fail = self.stop_if_fail
+                return i.is_work()
+
+            is_work_props = list(filter(lambda i: _i_is_work(i), self.items))
             if len(is_work_props) != len(self.items):
                 return False
         return True
@@ -210,7 +215,12 @@ class HTTPRequest(_TemplatableConfig, _Checkable):
         ):
             return False
         if self.parameters:
-            is_work_params = list(filter(lambda p: p.is_work(), self.parameters))
+
+            def _p_is_work(p: APIParameter) -> bool:
+                p.stop_if_fail = self.stop_if_fail
+                return p.is_work()
+
+            is_work_params = list(filter(lambda p: _p_is_work(p), self.parameters))
             if len(is_work_params) != len(self.parameters):
                 return False
         return True

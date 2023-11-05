@@ -134,7 +134,9 @@ class HTTP(_TemplatableConfig, _Checkable):
         ):
             return False
         assert self.request is not None
+        self.request.stop_if_fail = self.stop_if_fail
         assert self.response is not None
+        self.response.stop_if_fail = self.stop_if_fail
         return self.request.is_work() and self.response.is_work()
 
 
@@ -274,6 +276,7 @@ class MockAPI(_TemplatableConfig, _Checkable):
             return False
 
         assert self.http is not None
+        self.http.stop_if_fail = self.stop_if_fail
         return self.http.is_work()
 
     @property

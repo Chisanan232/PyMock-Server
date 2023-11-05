@@ -219,6 +219,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable):
             self.template.absolute_model_key: self.template,
         }
         if self.base is not None:
+            self.base.stop_if_fail = self.stop_if_fail
             under_check[self.base.absolute_model_key] = self.base
         if not self.props_should_not_be_none(under_check=under_check):
             return False
@@ -233,8 +234,10 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable):
                     }
                 )
                 assert av is not None
+                av.stop_if_fail = self.stop_if_fail
                 if not api_config_is_valid or not av.is_work():
                     return False
+        self.template.stop_if_fail = self.stop_if_fail
         return self.template.is_work() and (self.base.is_work() if self.base else True)
 
     def _set_mocked_apis(self, api_key: str = "", api_config: Optional[MockAPI] = None) -> None:  # type: ignore[override]
@@ -470,6 +473,7 @@ class APIConfig(_Config, _Checkable):
                 exit_code=1,
             )
         assert self.apis is not None
+        self.apis.stop_if_fail = self.stop_if_fail
         return self.apis.is_work()
 
     def from_yaml(self, path: str) -> Optional["APIConfig"]:
