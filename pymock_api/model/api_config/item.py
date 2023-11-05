@@ -50,7 +50,6 @@ class IteratorItem(_Config, _Checkable):
             return False
         if not self.props_should_not_be_none(
             under_check={
-                f"{self.absolute_model_key}.name": self.name,
                 f"{self.absolute_model_key}.value_type": self.value_type,
             },
             accept_empty=False,
