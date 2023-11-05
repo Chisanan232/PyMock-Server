@@ -1,4 +1,4 @@
-method: 'GET'
+method: 'PUT'
 parameters:
   - name: 'date'
     required: true

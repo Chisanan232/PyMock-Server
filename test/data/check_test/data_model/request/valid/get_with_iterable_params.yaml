@@ -1,4 +1,4 @@
-method: 'GET'
+method: 'POST'
 parameters:
   - name: 'date'
     required: true
@@ -6,8 +6,8 @@ parameters:
     type: str
     format:
   - name: 'fooType'
-    required: true
-    default:
+    required: false
+    default: FooType
     type: str
     format:
   - name: 'arg1'
