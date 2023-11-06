@@ -158,15 +158,6 @@ class _Checkable(metaclass=ABCMeta):
         else:
             return True
 
-    def run_finally(self) -> None:
-        if self._config_is_wrong:
-            print("Configuration is invalid.")
-            if self._stop_if_fail:
-                self._exit_program(1)
-        else:
-            print("Configuration is valid.")
-            self._exit_program(0)
-
     def _exit_program(self, exit_code: int = 0, msg: str = "") -> None:
         if msg:
             print(msg)
