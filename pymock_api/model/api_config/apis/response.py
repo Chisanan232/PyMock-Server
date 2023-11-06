@@ -274,14 +274,6 @@ class HTTPResponse(_TemplatableConfig, _Checkable):
                 valid_callback=self._chk_response_value_validity,
             ):
                 return False
-
-            def _p_is_work(p: ResponseProperty) -> bool:
-                p.stop_if_fail = self.stop_if_fail
-                return p.is_work()
-
-            is_work_props = list(filter(lambda p: _p_is_work(p), self.properties))
-            if len(is_work_props) != len(self.properties):
-                return False
         else:
             raise NotImplementedError
         return True
@@ -326,22 +318,5 @@ class HTTPResponse(_TemplatableConfig, _Checkable):
             ), "If HTTP response strategy is *object*, the data type of response value must be *list*."
             for v in config_value:
                 assert isinstance(v, ResponseProperty)
-                if not v.name:
-                    print("Attribute *name* is necessary of data model *ResponseProperty*.")
-                    self._config_is_wrong = True
-                    if self._stop_if_fail:
-                        self._exit_program(1)
-                    return False
-                if v.required is None:
-                    print("Attribute *required* is necessary of data model *ResponseProperty*.")
-                    self._config_is_wrong = True
-                    if self._stop_if_fail:
-                        self._exit_program(1)
-                    return False
-                if not v.value_type:
-                    print("Attribute *value_type* is necessary of data model *ResponseProperty*.")
-                    self._config_is_wrong = True
-                    if self._stop_if_fail:
-                        self._exit_program(1)
-                    return False
-            return True
+                v.stop_if_fail = self.stop_if_fail
+                return v.is_work()
