@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 
 import pytest
 
-from pymock_api.model.api_config import _Config
+from pymock_api.model.api_config import _Checkable, _Config
 
 
 @pytest.mark.parametrize(
@@ -49,3 +49,18 @@ def test_config_get_prop():
     with pytest.raises(AttributeError) as exc_info:
         FakeConfig()._get_prop(data=Dummy(), prop="not_exist_prop")
     assert re.search(r"Cannot find attribute", str(exc_info.value), re.IGNORECASE)
+
+
+class FakeCheckableConfig(_Checkable):
+    pass
+
+
+class TestCheckableConfig:
+    @pytest.fixture(scope="function")
+    def checkable_config(self) -> _Checkable:
+        return FakeCheckableConfig()
+
+    def test_fail_should_be_valid(self, checkable_config: _Checkable):
+        with pytest.raises(AssertionError) as exc_info:
+            checkable_config.should_be_valid(config_key="key", config_value="value", criteria="invalid type criteria")
+        assert re.search(r"only accept 'list' type", str(exc_info.value), re.IGNORECASE)

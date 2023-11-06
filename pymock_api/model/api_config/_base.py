@@ -128,8 +128,7 @@ class _Checkable(metaclass=ABCMeta):
     def should_be_valid(
         self, config_key: str, config_value: Any, criteria: list, valid_callback: Optional[Callable] = None
     ) -> bool:
-        if not isinstance(criteria, list):
-            raise TypeError("The argument *criteria* only accept 'list' type value.")
+        assert isinstance(criteria, list), "The argument *criteria* only accept 'list' type value."
 
         is_valid = config_value in criteria
         if not is_valid:
