@@ -34,14 +34,16 @@ class APIParameter(_Config, _Checkable):
             self._convert_items()
 
     def _convert_items(self):
+        def _deserialize_item(i: dict) -> IteratorItem:
+            item = IteratorItem(
+                name=i.get("name", ""), value_type=i.get("type", None), required=i.get("required", True)
+            )
+            item.absolute_model_key = self.key
+            return item
+
         if False in list(map(lambda i: isinstance(i, (dict, IteratorItem)), self.items)):
             raise TypeError("The data type of key *items* must be dict or IteratorItem.")
-        self.items = [
-            IteratorItem(name=i.get("name", ""), value_type=i.get("type", None), required=i.get("required", True))
-            if isinstance(i, dict)
-            else i
-            for i in self.items
-        ]
+        self.items = [_deserialize_item(i) if isinstance(i, dict) else i for i in self.items]
 
     @property
     def key(self) -> str:
