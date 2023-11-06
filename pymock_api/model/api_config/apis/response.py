@@ -241,7 +241,7 @@ class HTTPResponse(_TemplatableConfig, _Checkable):
         elif self.strategy is ResponseStrategy.FILE:
             self.path = data.get("path", None)
         elif self.strategy is ResponseStrategy.OBJECT:
-            properties = [_deserialize_response_property(prop) for prop in data.get("properties", [])]
+            properties = [_deserialize_response_property(prop) for prop in (data.get("properties", []) or [])]
             self.properties = properties if properties else None  # type: ignore[assignment]
         else:
             raise NotImplementedError
