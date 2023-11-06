@@ -1,5 +1,6 @@
 import re
 from typing import Any, Dict, Optional
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -64,3 +65,13 @@ class TestCheckableConfig:
         with pytest.raises(AssertionError) as exc_info:
             checkable_config.should_be_valid(config_key="key", config_value="value", criteria="invalid type criteria")
         assert re.search(r"only accept 'list' type", str(exc_info.value), re.IGNORECASE)
+
+    def test_should_be_valid_callback(self, checkable_config: _Checkable):
+        mock_callback_func = MagicMock()
+        checkable_config.should_be_valid(
+            config_key="key",
+            config_value="invalid value",
+            criteria=["invalid value"],
+            valid_callback=mock_callback_func,
+        )
+        mock_callback_func.assert_called_once_with("key", "invalid value", ["invalid value"])
