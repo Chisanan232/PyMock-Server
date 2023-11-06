@@ -252,12 +252,6 @@ class HTTPResponse(_TemplatableConfig, _Checkable):
         return self._current_template.values.response
 
     def is_work(self) -> bool:
-        if not self.should_not_be_none(
-            config_key=f"{self.absolute_model_key}.strategy",
-            config_value=self.strategy,
-            accept_empty=False,
-        ):
-            return False
         assert self.strategy is not None
         if ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.STRING:
             return self.should_not_be_none(
