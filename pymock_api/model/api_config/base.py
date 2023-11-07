@@ -1,3 +1,5 @@
+import copy
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 
@@ -53,5 +55,12 @@ class BaseConfig(_Config, _Checkable):
         return self
 
     def is_work(self) -> bool:
-        # TODO: Check the path format
+        if not self.url:
+            return True
+        valid_url = re.findall(r"\/[\w,\-,\_]{1,32}", self.url)
+        url_copy = copy.copy(self.url)
+        if not valid_url:
+            return False
+        if url_copy.replace("".join(valid_url), ""):
+            return False
         return True
