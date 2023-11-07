@@ -53,19 +53,20 @@ class LoadConfig(_Config, _Checkable):
         return self
 
     def is_work(self) -> bool:
-        if not self.should_not_be_none(
-            config_key=f"{self.absolute_model_key}.includes_apis",
-            config_value=self.includes_apis,
+        if not self.props_should_not_be_none(
+            under_check={
+                f"{self.absolute_model_key}.includes_apis": self.includes_apis,
+                f"{self.absolute_model_key}.order": self.order,
+            },
         ):
             return False
         if self.order:
             for o in self.order:
-                if not self.should_be_valid(
+                assert self.should_be_valid(
                     config_key=f"{self.absolute_model_key}.order",
                     config_value=o,
                     criteria=[c for c in ConfigLoadingOrder],
-                ):
-                    return False
+                )
         return True
 
 
