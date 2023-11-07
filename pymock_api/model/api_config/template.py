@@ -59,12 +59,13 @@ class LoadConfig(_Config, _Checkable):
         ):
             return False
         if self.order:
-            if not self.should_be_valid(
-                config_key=f"{self.absolute_model_key}.order",
-                config_value=self.order,
-                criteria=[c for c in ConfigLoadingOrder],
-            ):
-                return False
+            for o in self.order:
+                if not self.should_be_valid(
+                    config_key=f"{self.absolute_model_key}.order",
+                    config_value=o,
+                    criteria=[c for c in ConfigLoadingOrder],
+                ):
+                    return False
         return True
 
 
@@ -308,22 +309,20 @@ class TemplateConfig(_Config, _Checkable):
         if not self.props_should_not_be_none(
             under_check={
                 f"{self.absolute_model_key}.activate": self.activate,
-                self.load_config.absolute_model_key: self.load_config,
-                self.values.absolute_model_key: self.values,
-                # self.apply.absolute_model_key: self.apply,
+                f"{self.absolute_model_key}.load_config": self.load_config,
+                f"{self.absolute_model_key}.values": self.values,
             },
-            accept_empty=False,
         ):
             return False
         self.load_config.stop_if_fail = self.stop_if_fail
         self.values.stop_if_fail = self.stop_if_fail
-        if self.apply is not None:
+        if self.apply:
             self.apply.stop_if_fail = self.stop_if_fail
         return (
             isinstance(self.activate, bool)
             and self.load_config.is_work()
             and self.values.is_work()
-            and self.apply.is_work()
+            and (self.apply.is_work() if self.apply else True)
         )
 
 
