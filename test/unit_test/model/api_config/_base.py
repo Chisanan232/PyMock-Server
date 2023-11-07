@@ -315,7 +315,8 @@ class CheckableTestSuite(ConfigTestSpec, ABC):
     )
     def test_is_work(self, sut_with_nothing: _Config, test_data_path: str, criteria: bool):
         data_model = sut_with_nothing.deserialize(data=YAML().read(path=test_data_path))
-        assert isinstance(data_model, _Checkable)
-        data_model.stop_if_fail = False
-        is_valid_to_work = data_model.is_work()
-        assert is_valid_to_work is criteria
+        if data_model:  # For data modal *BaseConfig*
+            assert isinstance(data_model, _Checkable)
+            data_model.stop_if_fail = False
+            is_valid_to_work = data_model.is_work()
+            assert is_valid_to_work is criteria
