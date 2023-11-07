@@ -49,7 +49,7 @@ class LoadConfig(_Config, _Checkable):
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["LoadConfig"]:
         self.includes_apis = data.get("includes_apis", True)
-        self.order = [ConfigLoadingOrder.to_enum(o) for o in data.get("order", self._default_order)]
+        self.order = [ConfigLoadingOrder.to_enum(o) for o in (data.get("order", self._default_order) or [])]
         return self
 
     def is_work(self) -> bool:
