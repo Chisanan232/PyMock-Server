@@ -293,10 +293,15 @@ def _set_test_data(is_valid: bool, data_model: str, opt_globals_callback: Option
         global_var_operation((yaml_config_path, expected_is_work))
 
 
-def set_checking_test_data(data_modal_dir: str, reset: bool = True) -> None:
+def set_checking_test_data(
+    data_modal_dir: str,
+    reset: bool = True,
+    reset_callback: Optional[Callable] = None,
+    opt_globals_callback: Optional[Callable] = None,
+) -> None:
     if reset:
-        reset_test_data()
-    init_checking_test_data(data_modal_dir)
+        reset_callback() if reset_callback else reset_test_data()
+    init_checking_test_data(data_modal_dir, opt_globals_callback)
 
 
 def init_checking_test_data(data_modal_dir: str, opt_globals_callback: Optional[Callable] = None) -> None:
