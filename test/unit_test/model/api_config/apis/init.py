@@ -22,10 +22,35 @@ from .._base import (
 )
 from ..template import TemplatableConfigTestSuite
 
+_MockAPI_Test_Data: List[tuple] = []
+_HTTP_Test_Data: List[tuple] = []
+
+
+def reset_mock_api_test_data() -> None:
+    global _MockAPI_Test_Data
+    _MockAPI_Test_Data.clear()
+
+
+def add_mock_api_test_data(test_scenario: tuple) -> None:
+    global _MockAPI_Test_Data
+    _MockAPI_Test_Data.append(test_scenario)
+
+
+def reset_http_test_data() -> None:
+    global _HTTP_Test_Data
+    _HTTP_Test_Data.clear()
+
+
+def add_http_test_data(test_scenario: tuple) -> None:
+    global _HTTP_Test_Data
+    _HTTP_Test_Data.append(test_scenario)
+
 
 class TestMockAPI(TemplatableConfigTestSuite, CheckableTestSuite):
     test_data_dir = "api"
-    set_checking_test_data(test_data_dir)
+    set_checking_test_data(
+        test_data_dir, reset_callback=reset_mock_api_test_data, opt_globals_callback=add_mock_api_test_data
+    )
 
     @pytest.fixture(scope="function")
     def sut(self) -> MockAPI:
@@ -247,10 +272,17 @@ class TestMockAPI(TemplatableConfigTestSuite, CheckableTestSuite):
             sut_with_nothing.set_response(strategy="Invalid response strategy")
         assert re.search(r".{0,32}invalid response strategy.{0,32}", str(exc_info.value), re.IGNORECASE)
 
+    @pytest.mark.parametrize(
+        ("test_data_path", "criteria"),
+        _MockAPI_Test_Data,
+    )
+    def test_is_work(self, sut_with_nothing: MockAPI, test_data_path: str, criteria: bool):
+        super().test_is_work(sut_with_nothing, test_data_path, criteria)
+
 
 class TestHTTP(TemplatableConfigTestSuite, CheckableTestSuite):
     test_data_dir = "http"
-    set_checking_test_data(test_data_dir)
+    set_checking_test_data(test_data_dir, reset_callback=reset_http_test_data, opt_globals_callback=add_http_test_data)
 
     @pytest.fixture(scope="function")
     def sut(self) -> HTTP:
@@ -336,3 +368,10 @@ class TestHTTP(TemplatableConfigTestSuite, CheckableTestSuite):
         assert obj.request.method == _TestConfig.Request.get("method", None)
         assert obj.request.parameters == [self._Mock_Model.api_parameter]
         assert obj.response.value == _TestConfig.Response.get("value", None)
+
+    @pytest.mark.parametrize(
+        ("test_data_path", "criteria"),
+        _HTTP_Test_Data,
+    )
+    def test_is_work(self, sut_with_nothing: HTTP, test_data_path: str, criteria: bool):
+        super().test_is_work(sut_with_nothing, test_data_path, criteria)
