@@ -15,7 +15,7 @@ from test._values import (
     _Test_URL,
     _TestConfig,
 )
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List, Optional
 from unittest.mock import MagicMock, Mock, PropertyMock, call, patch
 
 import pytest
@@ -267,10 +267,12 @@ class TemplateConfigLoadableTestSuite(ConfigTestSpec, ABC):
 _TEST_DATA: List[tuple] = []
 
 
-def _set_test_data(is_valid: bool, data_model: str) -> None:
+def _set_test_data(is_valid: bool, data_model: str, opt_globals_callback: Optional[Callable] = None) -> None:
     def _operate_default_global_var(test_scenario: tuple) -> None:
         global _TEST_DATA
         _TEST_DATA.append(test_scenario)
+
+    global_var_operation = opt_globals_callback if opt_globals_callback else _operate_default_global_var
 
     if is_valid:
         config_type = "valid"
@@ -288,7 +290,7 @@ def _set_test_data(is_valid: bool, data_model: str) -> None:
         "*.yaml",
     )
     for yaml_config_path in glob.glob(yaml_dir):
-        _operate_default_global_var((yaml_config_path, expected_is_work))
+        global_var_operation((yaml_config_path, expected_is_work))
 
 
 def set_checking_test_data(data_modal_dir: str, reset: bool = True) -> None:
@@ -297,9 +299,9 @@ def set_checking_test_data(data_modal_dir: str, reset: bool = True) -> None:
     init_checking_test_data(data_modal_dir)
 
 
-def init_checking_test_data(data_modal_dir: str) -> None:
-    _set_test_data(is_valid=True, data_model=data_modal_dir)
-    _set_test_data(is_valid=False, data_model=data_modal_dir)
+def init_checking_test_data(data_modal_dir: str, opt_globals_callback: Optional[Callable] = None) -> None:
+    _set_test_data(is_valid=True, data_model=data_modal_dir, opt_globals_callback=opt_globals_callback)
+    _set_test_data(is_valid=False, data_model=data_modal_dir, opt_globals_callback=opt_globals_callback)
 
 
 def reset_test_data() -> None:
