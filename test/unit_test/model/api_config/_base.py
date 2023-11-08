@@ -268,6 +268,10 @@ _TEST_DATA: List[tuple] = []
 
 
 def _set_test_data(is_valid: bool, data_model: str) -> None:
+    def _operate_default_global_var(test_scenario: tuple) -> None:
+        global _TEST_DATA
+        _TEST_DATA.append(test_scenario)
+
     if is_valid:
         config_type = "valid"
         expected_is_work = True
@@ -283,9 +287,8 @@ def _set_test_data(is_valid: bool, data_model: str) -> None:
         f"{config_type}",
         "*.yaml",
     )
-    global _TEST_DATA
     for yaml_config_path in glob.glob(yaml_dir):
-        _TEST_DATA.append((yaml_config_path, expected_is_work))
+        _operate_default_global_var((yaml_config_path, expected_is_work))
 
 
 def set_checking_test_data(data_modal_dir: str, reset: bool = True) -> None:
