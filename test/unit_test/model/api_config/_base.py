@@ -268,8 +268,6 @@ _TEST_DATA: List[tuple] = []
 
 
 def _set_test_data(is_valid: bool, data_model: str) -> None:
-    global _TEST_DATA
-
     if is_valid:
         config_type = "valid"
         expected_is_work = True
