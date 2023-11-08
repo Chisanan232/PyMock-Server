@@ -1,3 +1,5 @@
+import copy
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Type, Union
 
@@ -261,7 +263,6 @@ class MockAPI(_TemplatableConfig, _Checkable):
         return self
 
     def is_work(self) -> bool:
-        # TODO: Check the URL format
         if not self.should_not_be_none(
             config_key=f"{self.absolute_model_key}.http",
             config_value=self.http,
@@ -273,6 +274,12 @@ class MockAPI(_TemplatableConfig, _Checkable):
             config_value=self.url,
             accept_empty=False,
         ):
+            return False
+        valid_url = re.findall(r"\/[\w,\-,\_]{1,32}", self.url)
+        url_copy = copy.copy(self.url)
+        if not valid_url:
+            return False
+        if url_copy.replace("".join(valid_url), ""):
             return False
 
         assert self.http is not None
