@@ -384,26 +384,27 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
                     self._deserialize_and_set_template_config(path)
 
     def _load_templatable_config_by_apply(self) -> None:
-        apply_apis = self._template_config.apply.api
-        all_ele_is_dict = list(map(lambda e: isinstance(e, dict), apply_apis))
-        config_path_format = self._config_file_format
-        config_base_path = self._template_config.values.base_file_path
-        if False in all_ele_is_dict:
-            # no tag API
-            for api in apply_apis:
-                assert isinstance(api, str)
-                api_config = config_path_format.replace("**", api)
-                config_path = str(pathlib.Path(config_base_path, f"{api_config}.yaml"))
-                self._deserialize_and_set_template_config(config_path)
-        else:
-            # API with tag
-            for tag_apis in apply_apis:
-                assert isinstance(tag_apis, dict)
-                for tag, apis in tag_apis.items():
-                    for api in apis:
-                        api_config = config_path_format.replace("**", api)
-                        config_path = str(pathlib.Path(config_base_path, tag, f"{api_config}.yaml"))
-                        self._deserialize_and_set_template_config(config_path)
+        if self._template_config.apply:
+            apply_apis = self._template_config.apply.api
+            all_ele_is_dict = list(map(lambda e: isinstance(e, dict), apply_apis))
+            config_path_format = self._config_file_format
+            config_base_path = self._template_config.values.base_file_path
+            if False in all_ele_is_dict:
+                # no tag API
+                for api in apply_apis:
+                    assert isinstance(api, str)
+                    api_config = config_path_format.replace("**", api)
+                    config_path = str(pathlib.Path(config_base_path, f"{api_config}.yaml"))
+                    self._deserialize_and_set_template_config(config_path)
+            else:
+                # API with tag
+                for tag_apis in apply_apis:
+                    assert isinstance(tag_apis, dict)
+                    for tag, apis in tag_apis.items():
+                        for api in apis:
+                            api_config = config_path_format.replace("**", api)
+                            config_path = str(pathlib.Path(config_base_path, tag, f"{api_config}.yaml"))
+                            self._deserialize_and_set_template_config(config_path)
 
     @property
     @abstractmethod
