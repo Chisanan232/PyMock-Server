@@ -1,5 +1,5 @@
 import re
-from typing import Any, Union
+from typing import Any, List, Union
 from unittest.mock import Mock, patch
 
 import pytest
@@ -26,10 +26,35 @@ from ._base import (
     set_checking_test_data,
 )
 
+_APIConfig_Test_Data: List[tuple] = []
+_MockAPIs_Test_Data: List[tuple] = []
+
+
+def reset_api_config_test_data() -> None:
+    global _APIConfig_Test_Data
+    _APIConfig_Test_Data.clear()
+
+
+def add_api_config_test_data(test_scenario: tuple) -> None:
+    global _APIConfig_Test_Data
+    _APIConfig_Test_Data.append(test_scenario)
+
+
+def reset_mock_apis_test_data() -> None:
+    global _MockAPIs_Test_Data
+    _MockAPIs_Test_Data.clear()
+
+
+def add_mock_apis_test_data(test_scenario: tuple) -> None:
+    global _MockAPIs_Test_Data
+    _MockAPIs_Test_Data.append(test_scenario)
+
 
 class TestAPIConfig(CheckableTestSuite):
-    test_data_dir = "api"
-    set_checking_test_data(test_data_dir)
+    test_data_dir = "entire_api"
+    set_checking_test_data(
+        test_data_dir, reset_callback=reset_api_config_test_data, opt_globals_callback=add_api_config_test_data
+    )
 
     @pytest.fixture(scope="function")
     def sut(self) -> APIConfig:
@@ -108,6 +133,13 @@ class TestAPIConfig(CheckableTestSuite):
             list(obj.apis.apis.keys())[0] in _TestConfig.API_Config.get("mocked_apis").get("apis").keys()
         ), _assertion_msg
 
+    @pytest.mark.parametrize(
+        ("test_data_path", "criteria"),
+        _APIConfig_Test_Data,
+    )
+    def test_is_work(self, sut_with_nothing: APIConfig, test_data_path: str, criteria: bool):
+        super().test_is_work(sut_with_nothing, test_data_path, criteria)
+
     @patch("pymock_api._utils.file_opt.YAML.read", return_value=_TestConfig.API_Config)
     def test_from_yaml_file(self, mock_read_yaml: Mock, sut: APIConfig):
         config = sut.from_yaml(path="test-api.yaml")
@@ -125,7 +157,9 @@ class TestAPIConfig(CheckableTestSuite):
 
 class TestMockAPIs(TemplateConfigLoadableTestSuite, CheckableTestSuite):
     test_data_dir = "mocked_apis"
-    set_checking_test_data(test_data_dir)
+    set_checking_test_data(
+        test_data_dir, reset_callback=reset_mock_apis_test_data, opt_globals_callback=add_mock_apis_test_data
+    )
 
     @pytest.fixture(scope="function")
     def sut(self) -> MockAPIs:
@@ -301,6 +335,13 @@ class TestMockAPIs(TemplateConfigLoadableTestSuite, CheckableTestSuite):
     def _test_is_work_process(self, sut_with_nothing: MockAPIs, test_data_path: str, criteria: bool):
         sut_with_nothing.config_file_name = "api.yaml"
         super()._test_is_work_process(sut_with_nothing, test_data_path, criteria)
+
+    @pytest.mark.parametrize(
+        ("test_data_path", "criteria"),
+        _MockAPIs_Test_Data,
+    )
+    def test_is_work(self, sut_with_nothing: MockAPIs, test_data_path: str, criteria: bool):
+        super().test_is_work(sut_with_nothing, test_data_path, criteria)
 
     def test_get_api_config_by_url(self, sut: MockAPIs):
         api_config = sut.get_api_config_by_url(url=_Test_URL)
