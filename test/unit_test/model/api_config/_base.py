@@ -322,6 +322,9 @@ class CheckableTestSuite(ConfigTestSpec, ABC):
         _TEST_DATA,
     )
     def test_is_work(self, sut_with_nothing: _Config, test_data_path: str, criteria: bool):
+        self._test_is_work_process(sut_with_nothing, test_data_path, criteria)
+
+    def _test_is_work_process(self, sut_with_nothing: _Config, test_data_path: str, criteria: bool) -> None:
         data_model = sut_with_nothing.deserialize(data=YAML().read(path=test_data_path))
         if data_model:  # For data modal *BaseConfig*
             assert isinstance(data_model, _Checkable)
