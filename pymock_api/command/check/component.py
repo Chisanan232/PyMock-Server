@@ -1,7 +1,7 @@
 import re
 import sys
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 from ... import APIConfig
 from ..._utils.api_client import URLLibHTTPClient
@@ -101,6 +101,7 @@ class ValidityChecking(_BaseChecking):
             )
         assert api_config is not None
         api_config.stop_if_fail = args.stop_if_fail
+        self._stop_if_fail = args.stop_if_fail
         is_work = api_config.is_work()
         if not is_work:
             api_config._exit_program(1)
@@ -110,7 +111,6 @@ class ValidityChecking(_BaseChecking):
         self,
         config_key: str,
         config_value: Any,
-        valid_callback: Optional[Callable] = None,
         err_msg: Optional[str] = None,
     ) -> bool:
         if config_value is None:
@@ -120,8 +120,6 @@ class ValidityChecking(_BaseChecking):
                 sys.exit(1)
             return False
         else:
-            if valid_callback:
-                return valid_callback(config_key, config_value)
             return True
 
     def _exit_program(self, msg: str, exit_code: int = 0) -> None:
