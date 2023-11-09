@@ -96,7 +96,7 @@ class _Checkable(metaclass=ABCMeta):
         valid_callback: Optional[Callable] = None,
         err_msg: Optional[str] = None,
     ) -> bool:
-        if config_value is None or (accept_empty and not config_value):
+        if (config_value is None) or (accept_empty and not config_value):
             print(err_msg if err_msg else f"Configuration *{config_key}* content cannot be empty.")
             self._config_is_wrong = True
             if self._stop_if_fail:
