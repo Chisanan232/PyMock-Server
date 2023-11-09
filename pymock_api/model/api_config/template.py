@@ -310,6 +310,12 @@ class TemplateConfig(_Config, _Checkable):
         if not self.props_should_not_be_none(
             under_check={
                 f"{self.absolute_model_key}.activate": self.activate,
+            },
+            accept_empty=False,
+        ):
+            return False
+        if not self.props_should_not_be_none(
+            under_check={
                 f"{self.absolute_model_key}.load_config": self.load_config,
                 f"{self.absolute_model_key}.values": self.values,
             },
