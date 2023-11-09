@@ -21,13 +21,15 @@ class LoadConfig(_Config, _Checkable):
 
     def __post_init__(self) -> None:
         self._default_order = [ConfigLoadingOrder.APIs]
-        if self.order is not None:
-            self._convert_order()
+        self._convert_order()
 
     def _convert_order(self) -> None:
-        is_str = list(map(lambda e: isinstance(e, str), self.order))
-        if True in is_str:
-            self.order = [ConfigLoadingOrder.to_enum(o) for o in self.order]
+        if self.order:
+            is_str = list(map(lambda e: isinstance(e, str), self.order))
+            if True in is_str:
+                self.order = [ConfigLoadingOrder.to_enum(o) for o in self.order]
+        else:
+            self.order = self._default_order
 
     def _compare(self, other: "LoadConfig") -> bool:
         return self.includes_apis == other.includes_apis and self.order == other.order
