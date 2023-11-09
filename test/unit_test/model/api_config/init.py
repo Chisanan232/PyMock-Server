@@ -298,6 +298,10 @@ class TestMockAPIs(TemplateConfigLoadableTestSuite, CheckableTestSuite):
         assert obj.base.url == _Base_URL
         assert obj.apis == self._Mock_Model.mock_api
 
+    def _test_is_work_process(self, sut_with_nothing: MockAPIs, test_data_path: str, criteria: bool):
+        sut_with_nothing.config_file_name = "api.yaml"
+        super()._test_is_work_process(sut_with_nothing, test_data_path, criteria)
+
     def test_get_api_config_by_url(self, sut: MockAPIs):
         api_config = sut.get_api_config_by_url(url=_Test_URL)
         assert api_config.url == _Test_URL
