@@ -90,6 +90,7 @@ class _BaseChecking(metaclass=ABCMeta):
 class ValidityChecking(_BaseChecking):
     def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
         # # Check whether it has anything in configuration or not
+        self._stop_if_fail = args.stop_if_fail
         if not self._setting_should_not_be_none(
             config_key="",
             config_value=api_config,
@@ -101,7 +102,6 @@ class ValidityChecking(_BaseChecking):
             )
         assert api_config is not None
         api_config.stop_if_fail = args.stop_if_fail
-        self._stop_if_fail = args.stop_if_fail
         self._config_is_wrong = api_config.is_work() is False
         return api_config
 
