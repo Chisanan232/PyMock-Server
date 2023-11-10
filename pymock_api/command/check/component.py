@@ -102,9 +102,7 @@ class ValidityChecking(_BaseChecking):
         assert api_config is not None
         api_config.stop_if_fail = args.stop_if_fail
         self._stop_if_fail = args.stop_if_fail
-        is_work = api_config.is_work()
-        if not is_work:
-            api_config._exit_program(1)
+        self._config_is_wrong = api_config.is_work() is False
         return api_config
 
     def _setting_should_not_be_none(
