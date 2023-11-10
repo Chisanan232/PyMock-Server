@@ -103,7 +103,15 @@ class ResponseProperty(_Config, _Checkable):
             err_msg="It's meaningless if it has item setting but its data type is not collection. The items value setting sould not be None if the data type is one of collection types.",
         ):
             return False
+        if self.items:
 
+            def _i_is_work(i: IteratorItem) -> bool:
+                i.stop_if_fail = self.stop_if_fail
+                return i.is_work()
+
+            is_work_props = list(filter(lambda i: _i_is_work(i), self.items))
+            if len(is_work_props) != len(self.items):
+                return False
         return True
 
 
