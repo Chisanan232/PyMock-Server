@@ -18,8 +18,6 @@ class ResponseProperty(_Config, _Checkable):
     value_format: Optional[str] = None
     items: Optional[List[IteratorItem]] = None
 
-    _absolute_key: str = field(init=False, repr=False)
-
     def _compare(self, other: "ResponseProperty") -> bool:
         return (
             self.name == other.name

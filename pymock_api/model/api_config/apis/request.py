@@ -16,8 +16,6 @@ class APIParameter(_Config, _Checkable):
     value_format: Optional[str] = None
     items: Optional[List[IteratorItem]] = None
 
-    _absolute_key: str = field(init=False, repr=False)
-
     def _compare(self, other: "APIParameter") -> bool:
         # TODO: Let it could automatically scan what properties it has and compare all of their value.
         return (
