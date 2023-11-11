@@ -57,7 +57,7 @@ mocked_apis:
           parameters:
             - name: 'arg1'
               required: false
-              default:
+              default: []
               type: list
               format:
               items:
@@ -65,12 +65,12 @@ mocked_apis:
                   type: str
             - name: 'arg2'
               required: false
-              default:
+              default: ''
               type: str
               format:
             - name: 'datetime'
               required: false
-              default:
+              default: ''
               type: str
               format:
         response:

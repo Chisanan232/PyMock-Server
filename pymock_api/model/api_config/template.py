@@ -8,34 +8,39 @@ from typing import Any, Dict, List, Optional, Type, Union
 
 from ..._utils.file_opt import YAML, _BaseFileOperation
 from ...model.enums import ConfigLoadingOrder, set_loading_function
-from ._base import SelfType, _Config
+from ._base import SelfType, _Checkable, _Config
 
 
 @dataclass(eq=False)
-class LoadConfig(_Config):
+class LoadConfig(_Config, _Checkable):
     includes_apis: bool = field(default=True)
     order: List[ConfigLoadingOrder] = field(default_factory=list)
 
     _default_order: List[ConfigLoadingOrder] = field(init=False, repr=False)
+    _absolute_key: str = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         self._default_order = [ConfigLoadingOrder.APIs]
-        if self.order is not None:
-            self._convert_order()
+        self._convert_order()
 
     def _convert_order(self) -> None:
-        is_str = list(map(lambda e: isinstance(e, str), self.order))
-        if True in is_str:
-            self.order = [ConfigLoadingOrder.to_enum(o) for o in self.order]
+        if self.order:
+            is_str = list(map(lambda e: isinstance(e, str), self.order))
+            if True in is_str:
+                self.order = [ConfigLoadingOrder.to_enum(o) for o in self.order]
+        else:
+            self.order = self._default_order
 
     def _compare(self, other: "LoadConfig") -> bool:
         return self.includes_apis == other.includes_apis and self.order == other.order
 
+    @property
+    def key(self) -> str:
+        return "load_config"
+
     def serialize(self, data: Optional["LoadConfig"] = None) -> Optional[Dict[str, Any]]:
         includes_apis: bool = self._get_prop(data, prop="includes_apis")
         order: List[Union[str, ConfigLoadingOrder]] = self._get_prop(data, prop="order")
-        if not order:
-            order = [str(o.value) for o in self._default_order]
         return {
             "includes_apis": includes_apis,
             "order": [o.value if isinstance(o, ConfigLoadingOrder) else o for o in order],
@@ -44,13 +49,32 @@ class LoadConfig(_Config):
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["LoadConfig"]:
         self.includes_apis = data.get("includes_apis", True)
-        self.order = [ConfigLoadingOrder.to_enum(o) for o in data.get("order", self._default_order)]
+        self.order = [ConfigLoadingOrder.to_enum(o) for o in (data.get("order", self._default_order) or [])]
         return self
+
+    def is_work(self) -> bool:
+        if not self.props_should_not_be_none(
+            under_check={
+                f"{self.absolute_model_key}.includes_apis": self.includes_apis,
+                f"{self.absolute_model_key}.order": self.order,
+            },
+        ):
+            return False
+        if self.order:
+            for o in self.order:
+                assert self.should_be_valid(
+                    config_key=f"{self.absolute_model_key}.order",
+                    config_value=o,
+                    criteria=[c for c in ConfigLoadingOrder],
+                )
+        return True
 
 
 @dataclass(eq=False)
-class TemplateSetting(_Config, ABC):
+class TemplateSetting(_Config, _Checkable, ABC):
     config_path_format: str = field(default_factory=str)
+
+    _absolute_key: str = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         if not self.config_path_format:
@@ -75,8 +99,16 @@ class TemplateSetting(_Config, ABC):
     def _default_config_path_format(self) -> str:
         pass
 
+    def is_work(self) -> bool:
+        # TODO: Check the path format
+        return True
+
 
 class TemplateAPI(TemplateSetting):
+    @property
+    def key(self) -> str:
+        return "api"
+
     @property
     def _default_config_path_format(self) -> str:
         return "**-api.yaml"
@@ -84,11 +116,19 @@ class TemplateAPI(TemplateSetting):
 
 class TemplateHTTP(TemplateSetting):
     @property
+    def key(self) -> str:
+        return "http"
+
+    @property
     def _default_config_path_format(self) -> str:
         return "**-http.yaml"
 
 
 class TemplateRequest(TemplateSetting):
+    @property
+    def key(self) -> str:
+        return "request"
+
     @property
     def _default_config_path_format(self) -> str:
         return "**-request.yaml"
@@ -96,17 +136,23 @@ class TemplateRequest(TemplateSetting):
 
 class TemplateResponse(TemplateSetting):
     @property
+    def key(self) -> str:
+        return "response"
+
+    @property
     def _default_config_path_format(self) -> str:
         return "**-response.yaml"
 
 
 @dataclass(eq=False)
-class TemplateValues(_Config):
+class TemplateValues(_Config, _Checkable):
     base_file_path: str = field(default="./")
     api: TemplateAPI = field(default_factory=TemplateAPI)
     http: TemplateHTTP = field(default_factory=TemplateHTTP)
     request: TemplateRequest = field(default_factory=TemplateRequest)
     response: TemplateResponse = field(default_factory=TemplateResponse)
+
+    _absolute_key: str = field(init=False, repr=False)
 
     def _compare(self, other: "TemplateValues") -> bool:
         return (
@@ -116,6 +162,10 @@ class TemplateValues(_Config):
             and self.request == other.request
             and self.response == other.response
         )
+
+    @property
+    def key(self) -> str:
+        return "values"
 
     def serialize(self, data: Optional["TemplateValues"] = None) -> Optional[Dict[str, Any]]:
         base_file_path: str = self._get_prop(data, prop="base_file_path")
@@ -137,19 +187,45 @@ class TemplateValues(_Config):
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateValues"]:
         self.base_file_path = data.get("base_file_path", "./")
-        self.api = TemplateAPI().deserialize(data.get("api", {}))
-        self.http = TemplateHTTP().deserialize(data.get("http", {}))
-        self.request = TemplateRequest().deserialize(data.get("request", {}))
-        self.response = TemplateResponse().deserialize(data.get("response", {}))
+
+        template_api = TemplateAPI()
+        template_api.absolute_model_key = self.key
+        self.api = template_api.deserialize(data.get("api", {}))
+
+        template_http = TemplateHTTP()
+        template_http.absolute_model_key = self.key
+        self.http = template_http.deserialize(data.get("http", {}))
+
+        template_request = TemplateRequest()
+        template_request.absolute_model_key = self.key
+        self.request = template_request.deserialize(data.get("request", {}))
+
+        template_response = TemplateResponse()
+        template_response.absolute_model_key = self.key
+        self.response = template_response.deserialize(data.get("response", {}))
         return self
+
+    def is_work(self) -> bool:
+        # TODO: Check the path format
+        self.api.stop_if_fail = self.stop_if_fail
+        self.http.stop_if_fail = self.stop_if_fail
+        self.request.stop_if_fail = self.stop_if_fail
+        self.response.stop_if_fail = self.stop_if_fail
+        return self.api.is_work() and self.http.is_work() and self.request.is_work() and self.response.is_work()
 
 
 @dataclass(eq=False)
-class TemplateApply(_Config):
+class TemplateApply(_Config, _Checkable):
     api: List[Union[str, Dict[str, List[str]]]] = field(default_factory=list)
+
+    _absolute_key: str = field(init=False, repr=False)
 
     def _compare(self, other: "TemplateApply") -> bool:
         return self.api == other.api
+
+    @property
+    def key(self) -> str:
+        return "apply"
 
     def serialize(self, data: Optional["TemplateApply"] = None) -> Optional[Dict[str, Any]]:
         api: str = self._get_prop(data, prop="api")
@@ -162,15 +238,29 @@ class TemplateApply(_Config):
         self.api = data.get("api")  # type: ignore[assignment]
         return self
 
+    def is_work(self) -> bool:
+        if self.api is None or len(self.api) == 0:
+            return True
+        else:
+            all_ele_is_str = list(map(lambda a: isinstance(a, str), self.api))
+            all_ele_is_dict = list(map(lambda a: isinstance(a, dict), self.api))
+            ele_is_str = set(all_ele_is_str)
+            ele_is_dict = set(all_ele_is_dict)
+            if len(ele_is_str) == 1 and len(ele_is_dict) == 1 and (True in ele_is_str or True in ele_is_dict):
+                return True
+        return False
+
 
 @dataclass(eq=False)
-class TemplateConfig(_Config):
+class TemplateConfig(_Config, _Checkable):
     """The data model which could be set details attribute by section *template*."""
 
     activate: bool = field(default=False)
     load_config: LoadConfig = field(default_factory=LoadConfig)
     values: TemplateValues = field(default_factory=TemplateValues)
     apply: TemplateApply = field(default_factory=TemplateApply)
+
+    _absolute_key: str = field(init=False, repr=False)
 
     def _compare(self, other: "TemplateConfig") -> bool:
         return (
@@ -179,6 +269,10 @@ class TemplateConfig(_Config):
             and self.values == other.values
             and self.apply == other.apply
         )
+
+    @property
+    def key(self) -> str:
+        return "template"
 
     def serialize(self, data: Optional["TemplateConfig"] = None) -> Optional[Dict[str, Any]]:
         activate: bool = self.activate or self._get_prop(data, prop="activate")
@@ -198,10 +292,45 @@ class TemplateConfig(_Config):
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfig"]:
         self.activate = data.get("activate", False)
-        self.load_config = LoadConfig().deserialize(data.get("load_config", {}))
-        self.values = TemplateValues().deserialize(data.get("values", {}))
-        self.apply = TemplateApply().deserialize(data.get("apply", {}))
+
+        load_config = LoadConfig()
+        load_config.absolute_model_key = self.key
+        self.load_config = load_config.deserialize(data.get("load_config", {}))
+
+        template_values = TemplateValues()
+        template_values.absolute_model_key = self.key
+        self.values = template_values.deserialize(data.get("values", {}))
+
+        template_apply = TemplateApply()
+        template_apply.absolute_model_key = self.key
+        self.apply = template_apply.deserialize(data.get("apply", {}))
         return self
+
+    def is_work(self) -> bool:
+        if not self.props_should_not_be_none(
+            under_check={
+                f"{self.absolute_model_key}.activate": self.activate,
+            },
+            accept_empty=False,
+        ):
+            return False
+        if not self.props_should_not_be_none(
+            under_check={
+                f"{self.absolute_model_key}.load_config": self.load_config,
+                f"{self.absolute_model_key}.values": self.values,
+            },
+        ):
+            return False
+        self.load_config.stop_if_fail = self.stop_if_fail
+        self.values.stop_if_fail = self.stop_if_fail
+        if self.apply:
+            self.apply.stop_if_fail = self.stop_if_fail
+        return (
+            isinstance(self.activate, bool)
+            and self.load_config.is_work()
+            and self.values.is_work()
+            and (self.apply.is_work() if self.apply else True)
+        )
 
 
 class TemplateConfigLoadable(metaclass=ABCMeta):
@@ -261,26 +390,27 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
                     self._deserialize_and_set_template_config(path)
 
     def _load_templatable_config_by_apply(self) -> None:
-        apply_apis = self._template_config.apply.api
-        all_ele_is_dict = list(map(lambda e: isinstance(e, dict), apply_apis))
-        config_path_format = self._config_file_format
-        config_base_path = self._template_config.values.base_file_path
-        if False in all_ele_is_dict:
-            # no tag API
-            for api in apply_apis:
-                assert isinstance(api, str)
-                api_config = config_path_format.replace("**", api)
-                config_path = str(pathlib.Path(config_base_path, f"{api_config}.yaml"))
-                self._deserialize_and_set_template_config(config_path)
-        else:
-            # API with tag
-            for tag_apis in apply_apis:
-                assert isinstance(tag_apis, dict)
-                for tag, apis in tag_apis.items():
-                    for api in apis:
-                        api_config = config_path_format.replace("**", api)
-                        config_path = str(pathlib.Path(config_base_path, tag, f"{api_config}.yaml"))
-                        self._deserialize_and_set_template_config(config_path)
+        if self._template_config.apply:
+            apply_apis = self._template_config.apply.api
+            all_ele_is_dict = list(map(lambda e: isinstance(e, dict), apply_apis))
+            config_path_format = self._config_file_format
+            config_base_path = self._template_config.values.base_file_path
+            if False in all_ele_is_dict:
+                # no tag API
+                for api in apply_apis:
+                    assert isinstance(api, str)
+                    api_config = config_path_format.replace("**", api)
+                    config_path = str(pathlib.Path(config_base_path, f"{api_config}.yaml"))
+                    self._deserialize_and_set_template_config(config_path)
+            else:
+                # API with tag
+                for tag_apis in apply_apis:
+                    assert isinstance(tag_apis, dict)
+                    for tag, apis in tag_apis.items():
+                        for api in apis:
+                            api_config = config_path_format.replace("**", api)
+                            config_path = str(pathlib.Path(config_base_path, tag, f"{api_config}.yaml"))
+                            self._deserialize_and_set_template_config(config_path)
 
     @property
     @abstractmethod
@@ -345,6 +475,7 @@ class _TemplatableConfig(_Config, ABC):
     config_path_format: str = field(default_factory=str)
 
     _default_base_file_path: str = field(default="./")
+    _absolute_key: str = field(init=False, repr=False)
 
     # Attributes for inner usage
     _current_template: TemplateConfig = field(default_factory=TemplateConfig)
@@ -410,6 +541,7 @@ class _TemplatableConfig(_Config, ABC):
             config = data_model(_current_template=self._current_template)
             config.base_file_path = self.base_file_path
             config.config_path = self.config_path.replace(self.config_file_tail, config.config_file_tail)
+            config.absolute_model_key = self.key
             return config.deserialize(data=with_data)
         else:
             return None

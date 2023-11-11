@@ -1,17 +1,19 @@
+import copy
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Type, Union
 
 from ...._utils import YAML
 from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
-from .._base import _Config
+from .._base import _Checkable, _Config
 from ..template import TemplateAPI, TemplateHTTP, _TemplatableConfig
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 
 
 @dataclass(eq=False)
-class HTTP(_TemplatableConfig):
+class HTTP(_TemplatableConfig, _Checkable):
     """*The **http** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-http"
@@ -25,6 +27,10 @@ class HTTP(_TemplatableConfig):
     def _compare(self, other: "HTTP") -> bool:
         templatable_config = super()._compare(other)
         return templatable_config and self.request == other.request and self.response == other.response
+
+    @property
+    def key(self) -> str:
+        return "http"
 
     @property  # type: ignore[no-redef]
     def request(self) -> Optional[HTTPRequest]:
@@ -121,9 +127,23 @@ class HTTP(_TemplatableConfig):
     def _template_setting(self) -> TemplateHTTP:
         return self._current_template.values.http
 
+    def is_work(self) -> bool:
+        if not self.props_should_not_be_none(
+            under_check={
+                f"{self.absolute_model_key}.request": self.request,
+                f"{self.absolute_model_key}.response": self.response,
+            }
+        ):
+            return False
+        assert self.request is not None
+        self.request.stop_if_fail = self.stop_if_fail
+        assert self.response is not None
+        self.response.stop_if_fail = self.stop_if_fail
+        return self.request.is_work() and self.response.is_work()
+
 
 @dataclass(eq=False)
-class MockAPI(_TemplatableConfig):
+class MockAPI(_TemplatableConfig, _Checkable):
     """*The **<api>** section in **mocked_apis***"""
 
     config_file_tail: str = "-api"
@@ -139,6 +159,10 @@ class MockAPI(_TemplatableConfig):
     def _compare(self, other: "MockAPI") -> bool:
         templatable_config = super()._compare(other)
         return templatable_config and self.url == other.url and self.http == other.http
+
+    @property
+    def key(self) -> str:
+        return "<mock API>"
 
     @property  # type: ignore[no-redef]
     def url(self) -> Optional[str]:
@@ -237,6 +261,30 @@ class MockAPI(_TemplatableConfig):
         self.http = self._deserialize_as(HTTP, with_data=http_info)  # type: ignore[assignment]
         self.tag = data.get("tag", "")
         return self
+
+    def is_work(self) -> bool:
+        if not self.should_not_be_none(
+            config_key=f"{self.absolute_model_key}.http",
+            config_value=self.http,
+        ):
+            return False
+
+        if not self.should_not_be_none(
+            config_key=f"{self.absolute_model_key}.url",
+            config_value=self.url,
+            accept_empty=False,
+        ):
+            return False
+        valid_url = re.findall(r"\/[\w,\-,\_]{1,32}", self.url)
+        url_copy = copy.copy(self.url)
+        if not valid_url:
+            return False
+        if url_copy.replace("".join(valid_url), ""):
+            return False
+
+        assert self.http is not None
+        self.http.stop_if_fail = self.stop_if_fail
+        return self.http.is_work()
 
     @property
     def _template_setting(self) -> TemplateAPI:

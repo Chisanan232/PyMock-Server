@@ -3,11 +3,11 @@
 content ...
 """
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
-from ._base import _Config
+from ._base import _Checkable, _Config
 from .apis import (
     HTTP,
     APIParameter,
@@ -21,7 +21,7 @@ from .item import IteratorItem
 from .template import TemplateConfig, TemplateConfigLoadable, _TemplatableConfig
 
 
-class MockAPIs(_Config, TemplateConfigLoadable):
+class MockAPIs(_Config, _Checkable, TemplateConfigLoadable):
     """*The **mocked_apis** section*"""
 
     _template: TemplateConfig
@@ -47,6 +47,10 @@ class MockAPIs(_Config, TemplateConfigLoadable):
 
     def _compare(self, other: "MockAPIs") -> bool:
         return self.base == other.base and self.apis == other.apis
+
+    @property
+    def key(self) -> str:
+        return "mocked_apis"
 
     @property
     def template(self) -> TemplateConfig:
@@ -194,16 +198,47 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         template_info = data.get("template", {})
         if not template_info:
             self._need_template_in_config = False
-        self.template = TemplateConfig().deserialize(data=template_info)
+        template_config = TemplateConfig()
+        template_config.absolute_model_key = self.key
+        self.template = template_config.deserialize(data=template_info)
 
         # Processing section *base*
         base_info = data.get("base", None)
-        self.base = BaseConfig().deserialize(data=base_info)
+        base_config = BaseConfig()
+        base_config.absolute_model_key = self.key
+        self.base = base_config.deserialize(data=base_info)
 
         # Processing section *apis*
         mocked_apis_info = data.get("apis", {})
         self._load_mocked_apis_config(mocked_apis_info)
         return self
+
+    def is_work(self) -> bool:
+        under_check = {
+            f"{self.absolute_model_key}.<API name>": self.apis,
+            self.template.absolute_model_key: self.template,
+        }
+        if self.base is not None:
+            self.base.stop_if_fail = self.stop_if_fail
+            under_check[self.base.absolute_model_key] = self.base
+        if not self.props_should_not_be_none(under_check=under_check):
+            return False
+
+        if self.apis:
+            for ak, av in self.apis.items():
+                # TODO: Check the key validity about it will be the function naming in Python code
+                api_config_is_valid = self.props_should_not_be_none(
+                    under_check={
+                        f"{self.absolute_model_key}.<API name>": ak,
+                        f"{self.absolute_model_key}.{ak}": av,
+                    }
+                )
+                assert av is not None
+                av.stop_if_fail = self.stop_if_fail
+                if not api_config_is_valid or not av.is_work():
+                    return False
+        self.template.stop_if_fail = self.stop_if_fail
+        return self.template.is_work() and (self.base.is_work() if self.base else True)
 
     def _set_mocked_apis(self, api_key: str = "", api_config: Optional[MockAPI] = None) -> None:  # type: ignore[override]
         if api_key and api_config:
@@ -221,7 +256,9 @@ class MockAPIs(_Config, TemplateConfigLoadable):
 
     @property
     def _deserialize_as_template_config(self) -> MockAPI:
-        return MockAPI(_current_template=self.template)
+        mock_api = MockAPI(_current_template=self.template)
+        mock_api.absolute_model_key = self.key
+        return mock_api
 
     def _set_template_config(self, config: MockAPI, **kwargs) -> None:  # type: ignore[override]
         # Read YAML config
@@ -257,7 +294,7 @@ class MockAPIs(_Config, TemplateConfigLoadable):
         return aggregated_apis
 
 
-class APIConfig(_Config):
+class APIConfig(_Config, _Checkable):
     """*The entire configuration*"""
 
     _name: str = ""
@@ -278,6 +315,10 @@ class APIConfig(_Config):
 
     def _compare(self, other: "APIConfig") -> bool:
         return self.name == other.name and self.description == other.description and self.apis == other.apis
+
+    @property
+    def key(self) -> str:
+        return ""
 
     @property
     def _config_operation(self) -> _BaseFileOperation:
@@ -418,8 +459,22 @@ class APIConfig(_Config):
             mock_apis_data_model = MockAPIs()
             mock_apis_data_model.set_template_in_config = self.set_template_in_config
             mock_apis_data_model.config_file_name = self.config_file_name
+            mock_apis_data_model.absolute_model_key = self.key
             self.apis = mock_apis_data_model.deserialize(data=mocked_apis)
         return self
+
+    def is_work(self) -> bool:
+        if not self.should_not_be_none(
+            config_key=f"{self.absolute_model_key}.mocked_apis",
+            config_value=self.apis,
+        ):
+            self._exit_program(
+                msg="⚠️  Configuration is invalid.",
+                exit_code=1,
+            )
+        assert self.apis is not None
+        self.apis.stop_if_fail = self.stop_if_fail
+        return self.apis.is_work()
 
     def from_yaml(self, path: str) -> Optional["APIConfig"]:
         return self.deserialize(data=self._config_operation.read(path))

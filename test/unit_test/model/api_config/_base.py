@@ -1,3 +1,6 @@
+import glob
+import os
+import pathlib
 import re
 from abc import ABC, ABCMeta, abstractmethod
 from enum import Enum
@@ -12,16 +15,18 @@ from test._values import (
     _Test_URL,
     _TestConfig,
 )
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List, Optional
 from unittest.mock import MagicMock, Mock, PropertyMock, call, patch
 
 import pytest
 
+from pymock_api._utils import YAML
 from pymock_api.model import HTTP, MockAPI, MockAPIs
 from pymock_api.model.api_config import (
     BaseConfig,
     ResponseProperty,
     TemplateConfig,
+    _Checkable,
     _Config,
 )
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
@@ -257,3 +262,72 @@ class TemplateConfigLoadableTestSuite(ConfigTestSpec, ABC):
             sut._load_mocked_apis_config({})
             # Verify the running result
             mock_parent.assert_has_calls(criteria_order)
+
+
+_TEST_DATA: List[tuple] = []
+
+
+def _set_test_data(is_valid: bool, data_model: str, opt_globals_callback: Optional[Callable] = None) -> None:
+    def _operate_default_global_var(test_scenario: tuple) -> None:
+        global _TEST_DATA
+        _TEST_DATA.append(test_scenario)
+
+    global_var_operation = opt_globals_callback if opt_globals_callback else _operate_default_global_var
+
+    if is_valid:
+        config_type = "valid"
+        expected_is_work = True
+    else:
+        config_type = "invalid"
+        expected_is_work = False
+    yaml_dir = os.path.join(
+        str(pathlib.Path(__file__).parent.parent.parent.parent),
+        "data",
+        "check_test",
+        "data_model",
+        f"{data_model}",
+        f"{config_type}",
+        "*.yaml",
+    )
+    for yaml_config_path in glob.glob(yaml_dir):
+        global_var_operation((yaml_config_path, expected_is_work))
+
+
+def set_checking_test_data(
+    data_modal_dir: str,
+    reset: bool = True,
+    reset_callback: Optional[Callable] = None,
+    opt_globals_callback: Optional[Callable] = None,
+) -> None:
+    if reset:
+        reset_callback() if reset_callback else reset_test_data()
+    init_checking_test_data(data_modal_dir, opt_globals_callback)
+
+
+def init_checking_test_data(data_modal_dir: str, opt_globals_callback: Optional[Callable] = None) -> None:
+    _set_test_data(is_valid=True, data_model=data_modal_dir, opt_globals_callback=opt_globals_callback)
+    _set_test_data(is_valid=False, data_model=data_modal_dir, opt_globals_callback=opt_globals_callback)
+
+
+def reset_test_data() -> None:
+    global _TEST_DATA
+    _TEST_DATA.clear()
+
+
+class CheckableTestSuite(ConfigTestSpec, ABC):
+    test_data_dir = NotImplementedError("Please override attribute *test_data_dir* about the test data directory.")
+
+    @pytest.mark.parametrize(
+        ("test_data_path", "criteria"),
+        _TEST_DATA,
+    )
+    def test_is_work(self, sut_with_nothing: _Config, test_data_path: str, criteria: bool):
+        self._test_is_work_process(sut_with_nothing, test_data_path, criteria)
+
+    def _test_is_work_process(self, sut_with_nothing: _Config, test_data_path: str, criteria: bool) -> None:
+        data_model = sut_with_nothing.deserialize(data=YAML().read(path=test_data_path))
+        if data_model is not None:  # For data modal *BaseConfig*
+            assert isinstance(data_model, _Config) and isinstance(data_model, _Checkable)
+            data_model.stop_if_fail = False
+            is_valid_to_work = data_model.is_work()
+            assert is_valid_to_work is criteria
