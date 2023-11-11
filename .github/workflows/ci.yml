@@ -33,8 +33,8 @@ on:
   # fine without any issue before review and merge.
   pull_request:
     branches:
-      - "develop/**"
       - "master"
+      - "develop/**"
     paths-ignore:
 #     For GitHub dependency bot
       - ".github/dependabot.yaml"
