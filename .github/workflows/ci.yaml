@@ -57,7 +57,7 @@ on:
       - ".pre-commit-config.yaml"
       - ".pylintrc"
       - "LICENSE"
-g
+
 jobs:
   build-and-test:
 #    name: Run all tests and organize all test reports
