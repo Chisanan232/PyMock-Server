@@ -66,6 +66,7 @@ jobs:
 
   codecov_finish:
 #    name: Organize and generate the testing report and upload it to Codecov
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
     needs: build-and-test
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_upload_test_cov_report.yaml@v5
     secrets:
@@ -79,7 +80,7 @@ jobs:
 
   sonarcloud_finish:
 #    name: SonarCloud Scan
-#    needs: all_test_codecov
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
     needs: build-and-test
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_sonarqube_scan.yaml@v5
     secrets:
