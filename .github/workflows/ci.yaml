@@ -1,8 +1,8 @@
 name: CI
 
 on:
-  # For the push event, it only sniffs branch 'develop/**' and let anything changes triggers CI for be safe of source
-  # code.
+  # No matter for push or pull request events, it would trigger CI for safely saving the source code.
+  # For the push event, it only runs building and testing.
   push:
     branches:
       - "master"
@@ -29,8 +29,8 @@ on:
       - ".pre-commit-config.yaml"
       - ".pylintrc"
 
-  # For the pull request event, it sniffs branch 'develop/**', 'release' and 'master' and make sure anything would be
-  # fine without any issue before review and merge.
+  # For the push event, in addition to build and test would be run, it would trigger other service to keep the reports
+  # or other checking, i.e., record the test report by CodeCov and check the code quality by SonarQube.
   pull_request:
     branches:
       - "master"
