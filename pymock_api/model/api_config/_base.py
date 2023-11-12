@@ -1,6 +1,6 @@
 import sys
 from abc import ABCMeta, abstractmethod
-from dataclasses import field
+from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Optional
 
 # The truly semantically is more near like following:
@@ -161,3 +161,11 @@ class _Checkable(metaclass=ABCMeta):
         if msg:
             print(msg)
         sys.exit(exit_code)
+
+
+@dataclass(eq=False)
+class _DivideStrategy:
+    divide_api: bool = field(default=False)
+    divide_http: bool = field(default=False)
+    divide_http_request: bool = field(default=False)
+    divide_http_response: bool = field(default=False)

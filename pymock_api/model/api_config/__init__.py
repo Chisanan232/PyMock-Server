@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
-from ._base import _Checkable, _Config
+from ._base import _Checkable, _Config, _DivideStrategy
 from .apis import (
     HTTP,
     APIParameter,
@@ -30,6 +30,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable):
 
     _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
+    _divide_strategy: _DivideStrategy = _DivideStrategy()
 
     def __init__(
         self,
@@ -113,6 +114,14 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable):
     def set_template_in_config(self, _set: bool) -> None:
         self._need_template_in_config = _set
 
+    @property
+    def divide_strategy(self) -> _DivideStrategy:
+        return self._divide_strategy
+
+    @divide_strategy.setter
+    def divide_strategy(self, d: _DivideStrategy) -> None:
+        self._divide_strategy = d
+
     def serialize(self, data: Optional["MockAPIs"] = None) -> Optional[Dict[str, Any]]:
         template = (data.template if data else None) or self.template
         base = (data.base if data else None) or self.base
@@ -131,6 +140,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable):
         # Process section *apis*
         all_mocked_apis = {}
         for api_name, api_config in apis.items():
+            # Divide the config
             all_mocked_apis[api_name] = MockAPI().serialize(data=api_config)
         api_info["apis"] = all_mocked_apis
 
@@ -304,6 +314,7 @@ class APIConfig(_Config, _Checkable):
     _config_file_name: str = "api.yaml"
     _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
+    _divide_strategy: _DivideStrategy = _DivideStrategy()
 
     def __init__(self, name: str = "", description: str = "", apis: Optional[MockAPIs] = None):
         self._name = name
@@ -368,6 +379,14 @@ class APIConfig(_Config, _Checkable):
         self._need_template_in_config = _set
 
     @property
+    def divide_strategy(self) -> _DivideStrategy:
+        return self._divide_strategy
+
+    @divide_strategy.setter
+    def divide_strategy(self, d: _DivideStrategy) -> None:
+        self._divide_strategy = d
+
+    @property
     def config_file_name(self) -> str:
         return self._config_file_name
 
@@ -382,6 +401,7 @@ class APIConfig(_Config, _Checkable):
         if not apis:
             return None
         apis.set_template_in_config = self.set_template_in_config
+        apis.divide_strategy = self.divide_strategy
         return {
             "name": name,
             "description": description,
@@ -460,6 +480,7 @@ class APIConfig(_Config, _Checkable):
             mock_apis_data_model.set_template_in_config = self.set_template_in_config
             mock_apis_data_model.config_file_name = self.config_file_name
             mock_apis_data_model.absolute_model_key = self.key
+            mock_apis_data_model.divide_strategy = self._divide_strategy
             self.apis = mock_apis_data_model.deserialize(data=mocked_apis)
         return self
 

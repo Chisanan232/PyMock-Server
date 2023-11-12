@@ -1,6 +1,7 @@
 from ..._utils import YAML
 from ..._utils.api_client import URLLibHTTPClient
 from ...model import SwaggerConfig, deserialize_swagger_api_config
+from ...model.api_config import _DivideStrategy
 from ...model.cmd_args import SubcmdPullArguments
 from ..component import BaseSubCmdComponent
 
@@ -20,6 +21,12 @@ class SubCmdPullComponent(BaseSubCmdComponent):
         # TODO: Add command line option to control this setting
         api_config.set_template_in_config = False
         # TODO: Add command line option to control how to divide the configuration
+        api_config.divide_strategy = _DivideStrategy(
+            divide_api=False,
+            divide_http=False,
+            divide_http_request=False,
+            divide_http_response=False,
+        )
         self._file.write(path=args.config_path, config=api_config.serialize())
         print(f"All configuration has been writen in file '{args.config_path}'.")
 
