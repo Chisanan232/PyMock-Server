@@ -1,8 +1,8 @@
-name: CI
+name: Bot CI
 
 on:
-  # For the pull request event, it sniffs branch 'develop/**', 'release' and 'master' and make sure anything would be
-  # fine without any issue before review and merge.
+  # It would only run at any events which be triggered by bot, i.e., GitHub dependency bot, for guarantee that the
+  # change doesn't affect anything of source code.
   pull_request:
     branches:
       - "dependabot/pip/**"
