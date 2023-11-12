@@ -1,8 +1,8 @@
 name: CI
 
 on:
-  # For the push event, it only sniffs branch 'develop/**' and let anything changes triggers CI for be safe of source
-  # code.
+  # No matter for push or pull request events, it would trigger CI for safely saving the source code.
+  # For the push event, it only runs building and testing.
   push:
     branches:
       - "master"
@@ -29,12 +29,12 @@ on:
       - ".pre-commit-config.yaml"
       - ".pylintrc"
 
-  # For the pull request event, it sniffs branch 'develop/**', 'release' and 'master' and make sure anything would be
-  # fine without any issue before review and merge.
+  # For the push event, in addition to build and test would be run, it would trigger other service to keep the reports
+  # or other checking, i.e., record the test report by CodeCov and check the code quality by SonarQube.
   pull_request:
     branches:
-      - "develop/**"
       - "master"
+      - "develop/**"
     paths-ignore:
 #     For GitHub dependency bot
       - ".github/dependabot.yaml"
@@ -59,50 +59,15 @@ on:
       - "LICENSE"
 
 jobs:
-  prep_unit-test:
-#    name: Prepare all unit test items
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_get_tests.yaml@v5
-    with:
-      shell_arg: test/unit_test/
-
-
-  prep_integration-test:
-#    name: Prepare all integration test items
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_get_tests.yaml@v5
-    with:
-      shell_arg: test/integration_test/
-
-
-  run_unit-test:
-#    name: Run all unit test items
-    needs: prep_unit-test
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_poetry_run_test.yaml@v5
-    with:
-      test_type: unit-test
-      all_test_items_paths: ${{needs.prep_unit-test.outputs.all_test_items}}
-
-
-  run_integration-test:
-#    name: Run all integration test items
-    needs: prep_integration-test
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_poetry_run_test.yaml@v5
-    with:
-      test_type: integration-test
-      all_test_items_paths: ${{needs.prep_integration-test.outputs.all_test_items}}
-
-
-  all_test_codecov:
-#    name: Organize and generate the testing report and upload it to Codecov
-    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
-    needs: [run_unit-test, run_integration-test]
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_organize_test_cov_reports.yaml@v5
-    with:
-      test_type: all-test
+  build-and-test:
+#    name: Run all tests and organize all test reports
+    uses: ./.github/workflows/rw_build_and_test.yaml
 
 
   codecov_finish:
 #    name: Organize and generate the testing report and upload it to Codecov
-    needs: all_test_codecov
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
+    needs: build-and-test
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_upload_test_cov_report.yaml@v5
     secrets:
       codecov_token: ${{ secrets.CODECOV_TOKEN }}
@@ -115,7 +80,8 @@ jobs:
 
   sonarcloud_finish:
 #    name: SonarCloud Scan
-    needs: all_test_codecov
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
+    needs: build-and-test
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_sonarqube_scan.yaml@v5
     secrets:
       sonar_token: ${{ secrets.SONAR_TOKEN }}
