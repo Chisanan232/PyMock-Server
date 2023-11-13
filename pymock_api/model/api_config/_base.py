@@ -168,7 +168,7 @@ class _Checkable(metaclass=ABCMeta):
         sys.exit(exit_code)
 
 
-@dataclass(eq=False)
+@dataclass
 class _DivideStrategy:
     divide_api: bool = field(default=False)
     divide_http: bool = field(default=False)
