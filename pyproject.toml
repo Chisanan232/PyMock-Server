@@ -72,7 +72,7 @@ mkdocs = "^1.4.3"
 mkdocs-material = "^9.1.17"
 mkdocs-autorefs = "^0.4.1"
 mkdocstrings = "^0.22.0"
-mkdocstrings-python = "^1.1.2"
+mkdocstrings-python = "^1.7.4"
 
 [tool.poetry.scripts]
 mock-api = "pymock_api.runner:run"
