@@ -3,11 +3,12 @@
 content ...
 """
 import os
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
-from ._base import _Checkable, _Config, _DivideStrategy
+from ._base import _Checkable, _Config
+from ._divide import _Dividable, _DivideStrategy
 from .apis import (
     HTTP,
     APIParameter,
@@ -21,7 +22,7 @@ from .item import IteratorItem
 from .template import TemplateConfig, TemplateConfigLoadable, _TemplatableConfig
 
 
-class MockAPIs(_Config, _Checkable, TemplateConfigLoadable):
+class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
     """*The **mocked_apis** section*"""
 
     _template: TemplateConfig
@@ -30,7 +31,6 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable):
 
     _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
-    _divide_strategy: _DivideStrategy = _DivideStrategy()
 
     def __init__(
         self,
@@ -42,6 +42,8 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable):
         self._template = TemplateConfig() if template is None else template
         self._base = base
         self._apis = apis
+
+        self.divide_strategy = _DivideStrategy()
 
     def __len__(self):
         return len(self.apis.keys())
@@ -115,12 +117,8 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable):
         self._need_template_in_config = _set
 
     @property
-    def divide_strategy(self) -> _DivideStrategy:
-        return self._divide_strategy
-
-    @divide_strategy.setter
-    def divide_strategy(self, d: _DivideStrategy) -> None:
-        self._divide_strategy = d
+    def should_divide(self) -> bool:
+        return self.divide_strategy.divide_api
 
     def serialize(self, data: Optional["MockAPIs"] = None) -> Optional[Dict[str, Any]]:
         template = (data.template if data else None) or self.template
@@ -140,11 +138,17 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable):
         # Process section *apis*
         all_mocked_apis = {}
         for api_name, api_config in apis.items():
-            # Divide the config
-            all_mocked_apis[api_name] = MockAPI().serialize(data=api_config)
+            # TODO: Add property for this setting *save_data*
+            save_data = False
+            serialized_data = self.dividing_serialize(data=api_config, save_data=save_data)  # type: ignore[arg-type]
+            if not save_data:
+                all_mocked_apis[api_name] = serialized_data
         api_info["apis"] = all_mocked_apis
 
         return api_info
+
+    def serialize_lower_layer(self, data: MockAPI) -> Optional[Dict[str, Any]]:  # type: ignore[override]
+        return MockAPI().serialize(data=data)
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["MockAPIs"]:
