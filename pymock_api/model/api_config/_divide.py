@@ -37,17 +37,6 @@ class _Dividable(metaclass=ABCMeta):
         self, data: Union[_Config, _BeDividedable, _TemplatableConfig], save_data: bool
     ) -> Optional[Union[str, dict]]:
         if self.should_divide:
-            # Note:
-            # if has tag:
-            #     if tag directory not exist:
-            #         create tag directory
-            #     config_file = f"{api name}_{config key}.yaml"
-            #     path = pathlib.Path(template base path, tag directory, config_file)
-            #     do something ...
-            # else:
-            #     config_file = f"{api name}_{config key}.yaml"
-            #     path = pathlib.Path(template base path, config_file)
-            #     do something ...
             assert (
                 isinstance(data, _Config) and isinstance(data, _BeDividedable) and isinstance(data, _TemplatableConfig)
             )
@@ -63,7 +52,6 @@ class _Dividable(metaclass=ABCMeta):
             else:
                 return str(path)
         else:
-            print(f"[DEBUG in _Dividable.dividing_serialize] data: {data}")
             return self.serialize_lower_layer(data=data)
 
     @abstractmethod
