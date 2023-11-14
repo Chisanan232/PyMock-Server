@@ -4,8 +4,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_api._utils import YAML
-from pymock_api._utils.file_opt import JSON
+from pymock_api._utils import JSON, YAML
+from pymock_api._utils.file_opt import _BaseFileOperation
 from pymock_api.model import HTTP, MockAPI
 from pymock_api.model.api_config import ResponseProperty
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
@@ -120,7 +120,7 @@ class TestMockAPI(TemplatableConfigTestSuite, CheckableTestSuite):
             (Format.YAML, YAML),
         ],
     )
-    def test_valid_format(self, formatter: str, format_object, sut: MockAPI):
+    def test_valid_format(self, formatter: str, format_object: _BaseFileOperation, sut: MockAPI):
         with patch.object(format_object, "serialize") as mock_formatter:
             format_str = sut.format(formatter)
             assert format_str
