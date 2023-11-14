@@ -85,7 +85,7 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         assert serialized_data is not None
 
         # Set HTTP request and HTTP response data modal
-        save_data = False
+        save_data = self.dry_run is False
         req.tag = self.tag
         req.api_name = self.api_name
         resp.tag = self.tag
@@ -236,7 +236,7 @@ class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         assert serialized_data is not None
 
         # Set HTTP data modal
-        save_data = False
+        save_data = self.dry_run is False
         http.tag = self.tag
         http.api_name = self.api_name
         http_serialized_data = self.dividing_serialize(data=http, save_data=save_data)

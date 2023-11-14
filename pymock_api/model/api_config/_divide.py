@@ -24,6 +24,8 @@ class _BeDividedable(metaclass=ABCMeta):
 
 
 class _Dividable(metaclass=ABCMeta):
+    dry_run: bool = field(init=False, repr=False, default=True)
+
     _divide_strategy: _DivideStrategy = _DivideStrategy()
 
     _configuration: _BaseFileOperation = YAML()
