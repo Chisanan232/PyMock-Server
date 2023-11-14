@@ -45,7 +45,7 @@ class _Dividable(metaclass=ABCMeta):
             config_base_path = data._current_template.values.base_file_path
             tag_dir = str(pathlib.Path(config_base_path, data.tag)) if data.tag else ""
             config_file = f"{data.api_name}_{data.key}.yaml"
-            path = pathlib.Path(tag_dir, config_base_path, config_file)
+            path = pathlib.Path(config_base_path, tag_dir, config_file)
             if save_data:
                 if tag_dir and not os.path.exists(tag_dir):
                     os.mkdir(tag_dir)
