@@ -10,7 +10,7 @@ from ._base import _Config
 from .template import _TemplatableConfig
 
 
-@dataclass
+@dataclass(eq=False)
 class _DivideStrategy:
     divide_api: bool = field(default=False)
     divide_http: bool = field(default=False)
@@ -19,12 +19,12 @@ class _DivideStrategy:
 
 
 class _BeDividedable(metaclass=ABCMeta):
-    tag: str = field(init=False, repr=False)
-    api_name: str = field(init=False, repr=False)
+    tag: str = field(init=False, repr=False, compare=False)
+    api_name: str = field(init=False, repr=False, compare=False)
 
 
 class _Dividable(metaclass=ABCMeta):
-    divide_strategy = field(init=False, repr=False, default_factory=_DivideStrategy)
+    _divide_strategy: _DivideStrategy = _DivideStrategy()
 
     _configuration: _BaseFileOperation = YAML()
 
@@ -53,16 +53,17 @@ class _Dividable(metaclass=ABCMeta):
             )
             config_base_path = data._current_template.values.base_file_path
             tag_dir = str(pathlib.Path(config_base_path, data.tag)) if data.tag else ""
-            if tag_dir and not os.path.exists(tag_dir):
-                os.mkdir(tag_dir)
             config_file = f"{data.api_name}_{data.key}.yaml"
             path = pathlib.Path(tag_dir, config_base_path, config_file)
             if save_data:
+                if tag_dir and not os.path.exists(tag_dir):
+                    os.mkdir(tag_dir)
                 self._configuration.write(path=str(path), config=self.serialize_lower_layer(data=data))
                 return
             else:
                 return str(path)
         else:
+            print(f"[DEBUG in _Dividable.dividing_serialize] data: {data}")
             return self.serialize_lower_layer(data=data)
 
     @abstractmethod
