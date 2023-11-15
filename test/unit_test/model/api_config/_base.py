@@ -3,18 +3,8 @@ import os
 import pathlib
 import re
 from abc import ABC, ABCMeta, abstractmethod
+from collections import namedtuple
 from enum import Enum
-from test._values import (
-    _Base_URL,
-    _Mock_Load_Config,
-    _Mock_Template_Apply_Has_Tag_Setting,
-    _Mock_Template_Config_Activate,
-    _Test_API_Parameter,
-    _Test_HTTP_Resp,
-    _Test_Tag,
-    _Test_URL,
-    _TestConfig,
-)
 from typing import Any, Callable, Dict, List, Optional
 from unittest.mock import MagicMock, Mock, PropertyMock, call, patch
 
@@ -26,8 +16,10 @@ from pymock_api.model.api_config import (
     BaseConfig,
     ResponseProperty,
     TemplateConfig,
+    _BeDividedable,
     _Checkable,
     _Config,
+    _Dividable,
 )
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
 from pymock_api.model.api_config.template import (
@@ -43,6 +35,18 @@ from pymock_api.model.enums import (
     ConfigLoadingOrder,
     ResponseStrategy,
     set_loading_function,
+)
+
+from ...._values import (
+    _Base_URL,
+    _Mock_Load_Config,
+    _Mock_Template_Apply_Has_Tag_Setting,
+    _Mock_Template_Config_Activate,
+    _Test_API_Parameter,
+    _Test_HTTP_Resp,
+    _Test_Tag,
+    _Test_URL,
+    _TestConfig,
 )
 
 _assertion_msg = "Its property's value should be same as we set."
@@ -331,3 +335,146 @@ class CheckableTestSuite(ConfigTestSpec, ABC):
             data_model.stop_if_fail = False
             is_valid_to_work = data_model.is_work()
             assert is_valid_to_work is criteria
+
+
+TestDividingData = namedtuple(
+    "TestDividingData",
+    (
+        "should_divide",
+        "dry_run",
+        "tag_directory_exist",
+        "should_check_dir_exist",
+        "should_run_mkdir",
+        "should_run_serialize",
+    ),
+)
+
+
+class DividableTestSuite(ConfigTestSpec, ABC):
+    @pytest.mark.parametrize(
+        "test_data",
+        [
+            TestDividingData(
+                should_divide=False,
+                dry_run=True,
+                tag_directory_exist=True,
+                should_check_dir_exist=False,
+                should_run_mkdir=False,
+                should_run_serialize=True,
+            ),
+            TestDividingData(
+                should_divide=False,
+                dry_run=False,
+                tag_directory_exist=True,
+                should_check_dir_exist=False,
+                should_run_mkdir=False,
+                should_run_serialize=True,
+            ),
+            TestDividingData(
+                should_divide=False,
+                dry_run=True,
+                tag_directory_exist=False,
+                should_check_dir_exist=False,
+                should_run_mkdir=False,
+                should_run_serialize=True,
+            ),
+            TestDividingData(
+                should_divide=False,
+                dry_run=False,
+                tag_directory_exist=False,
+                should_check_dir_exist=False,
+                should_run_mkdir=False,
+                should_run_serialize=True,
+            ),
+            TestDividingData(
+                should_divide=True,
+                dry_run=True,
+                tag_directory_exist=False,
+                should_check_dir_exist=False,
+                should_run_mkdir=False,
+                should_run_serialize=False,
+            ),
+            TestDividingData(
+                should_divide=True,
+                dry_run=True,
+                tag_directory_exist=True,
+                should_check_dir_exist=False,
+                should_run_mkdir=False,
+                should_run_serialize=False,
+            ),
+            TestDividingData(
+                should_divide=True,
+                dry_run=False,
+                tag_directory_exist=False,
+                should_check_dir_exist=True,
+                should_run_mkdir=True,
+                should_run_serialize=True,
+            ),
+            TestDividingData(
+                should_divide=True,
+                dry_run=False,
+                tag_directory_exist=True,
+                should_check_dir_exist=True,
+                should_run_mkdir=False,
+                should_run_serialize=True,
+            ),
+        ],
+    )
+    def test_dividing_serialize(self, test_data: TestDividingData, sut: _Config):
+        self._test_dividing_serialize_process(test_data=test_data, sut=sut)
+
+    def _test_dividing_serialize_process(self, test_data: TestDividingData, sut: _Config) -> None:
+        def _get_abs_module(_obj: object) -> str:
+            return f"{_obj.__module__}.{_obj.__class__.__name__}"
+
+        assert isinstance(sut, _Config) and isinstance(sut, _Dividable)
+        assert isinstance(self._lower_layer_data_modal_for_divide, _Config) and isinstance(
+            self._lower_layer_data_modal_for_divide, _BeDividedable
+        )
+
+        # Given
+        with patch(f"{_get_abs_module(sut)}.should_divide", new_callable=PropertyMock) as mock_should_divide:
+            mock_should_divide.return_value = test_data.should_divide
+            with patch(
+                f"{_get_abs_module(self._lower_layer_data_modal_for_divide)}.api_name", new_callable=PropertyMock
+            ) as mock_prop_api_name:
+                mock_prop_api_name.return_value = "test_config"
+                with patch(
+                    f"{_get_abs_module(self._lower_layer_data_modal_for_divide)}.tag", new_callable=PropertyMock
+                ) as mock_prop_tag:
+                    mock_prop_tag.return_value = "pytest-mocked-api"
+                    with patch("pymock_api.model.api_config._divide.YAML.write") as mock_yaml_write:
+                        with patch.object(sut, "serialize_lower_layer") as mock_serialize_lower_layer:
+                            with patch(
+                                "os.path.exists", return_value=test_data.tag_directory_exist
+                            ) as mock_check_file_exist:
+                                with patch("os.mkdir") as mock_mkdir:
+                                    # When: Run target function
+                                    sut.dividing_serialize(
+                                        data=self._lower_layer_data_modal_for_divide,
+                                        save_data=test_data.dry_run is False,
+                                    )
+
+                                    # Should: Verify
+                                    mock_should_divide.assert_called_once()
+                                    if test_data.should_check_dir_exist:
+                                        mock_check_file_exist.assert_called_once()
+                                    else:
+                                        mock_check_file_exist.assert_not_called()
+                                    if test_data.should_run_mkdir:
+                                        mock_mkdir.assert_called_once()
+                                    else:
+                                        mock_mkdir.assert_not_called()
+                                    if test_data.should_run_serialize:
+                                        mock_serialize_lower_layer.assert_called_once()
+                                    else:
+                                        mock_serialize_lower_layer.assert_not_called()
+                                    if test_data.should_check_dir_exist and test_data.should_run_serialize:
+                                        mock_yaml_write.assert_called_once()
+                                    else:
+                                        mock_yaml_write.assert_not_called()
+
+    @property
+    @abstractmethod
+    def _lower_layer_data_modal_for_divide(self) -> _Config:
+        pass
