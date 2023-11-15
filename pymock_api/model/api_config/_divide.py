@@ -56,8 +56,7 @@ class _Dividable(metaclass=ABCMeta):
         else:
             return self.serialize_lower_layer(data=data)
 
-    @abstractmethod
     def serialize_lower_layer(
         self, data: Union[_Config, _BeDividedable, _TemplatableConfig]
     ) -> Optional[Dict[str, Any]]:
-        pass
+        return data.serialize()  # type: ignore[union-attr]

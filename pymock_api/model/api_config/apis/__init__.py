@@ -100,9 +100,6 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
 
         return serialized_data
 
-    def serialize_lower_layer(self, data: Union[HTTPRequest, HTTPResponse]) -> Optional[Dict[str, Any]]:  # type: ignore[override]
-        return data.serialize()
-
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["HTTP"]:
         """Convert data to **HTTP** type object.
@@ -249,9 +246,6 @@ class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         serialized_data.update(updated_data)
 
         return serialized_data
-
-    def serialize_lower_layer(self, data: HTTP) -> Optional[Dict[str, Any]]:  # type: ignore[override]
-        return data.serialize()
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["MockAPI"]:
