@@ -234,6 +234,7 @@ class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
 
         # Set HTTP data modal
         save_data = self.dry_run is False
+        http.dry_run = self.dry_run
         http.tag = self.tag
         http.api_name = self.api_name
         http_serialized_data = self.dividing_serialize(data=http, save_data=save_data)
