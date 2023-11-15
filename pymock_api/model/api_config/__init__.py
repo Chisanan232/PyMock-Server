@@ -149,7 +149,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         return api_info
 
     def serialize_lower_layer(self, data: MockAPI) -> Optional[Dict[str, Any]]:  # type: ignore[override]
-        return MockAPI().serialize(data=data)
+        return data.serialize()
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["MockAPIs"]:
