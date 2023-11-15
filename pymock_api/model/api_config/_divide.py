@@ -19,8 +19,8 @@ class _DivideStrategy:
 
 
 class _BeDividedable(metaclass=ABCMeta):
-    tag: str = field(init=False, repr=False, compare=False)
-    api_name: str = field(init=False, repr=False, compare=False)
+    tag: str = field(init=False, repr=False)
+    api_name: str = field(init=False, repr=False)
 
 
 class _Dividable(metaclass=ABCMeta):
