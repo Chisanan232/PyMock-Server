@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Union
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
 from ._base import _Checkable, _Config
-from ._divide import _Dividable, _DivideStrategy
+from ._divide import _BeDividedable, _Dividable, _DivideStrategy
 from .apis import (
     HTTP,
     APIParameter,
