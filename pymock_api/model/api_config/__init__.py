@@ -317,6 +317,7 @@ class APIConfig(_Config, _Checkable):
     _config_file_name: str = "api.yaml"
     _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
+    _dry_run: bool = True
     _divide_strategy: _DivideStrategy = _DivideStrategy()
 
     def __init__(self, name: str = "", description: str = "", apis: Optional[MockAPIs] = None):
@@ -382,6 +383,14 @@ class APIConfig(_Config, _Checkable):
         self._need_template_in_config = _set
 
     @property
+    def dry_run(self) -> bool:
+        return self._dry_run
+
+    @dry_run.setter
+    def dry_run(self, d: bool) -> None:
+        self._dry_run = d
+
+    @property
     def divide_strategy(self) -> _DivideStrategy:
         return self._divide_strategy
 
@@ -404,6 +413,7 @@ class APIConfig(_Config, _Checkable):
         if not apis:
             return None
         apis.set_template_in_config = self.set_template_in_config
+        apis.dry_run = self.dry_run
         apis.divide_strategy = self.divide_strategy
         return {
             "name": name,
