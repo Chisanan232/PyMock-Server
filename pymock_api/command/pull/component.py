@@ -20,6 +20,8 @@ class SubCmdPullComponent(BaseSubCmdComponent):
         print("Write the API configuration to file ...")
         # TODO: Add command line option to control this setting
         api_config.set_template_in_config = False
+        # TODO: Add command line option to control this setting *dry_run*
+        api_config.dry_run = True
         # TODO: Add command line option to control how to divide the configuration
         api_config.divide_strategy = _DivideStrategy(
             divide_api=False,
