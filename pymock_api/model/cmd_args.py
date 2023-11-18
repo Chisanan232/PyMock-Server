@@ -71,9 +71,16 @@ class SubcmdSampleArguments(ParserArguments):
 
 @dataclass(frozen=True)
 class SubcmdPullArguments(ParserArguments):
+    request_with_https: bool
     source: str
-    base_url: str
     config_path: str
+    base_url: str
+    include_template_config: bool
+    dry_run: bool
+    divide_api: bool
+    divide_http: bool
+    divide_http_request: bool
+    divide_http_response: bool
 
 
 class DeserializeParsedArgs:
@@ -153,7 +160,14 @@ class DeserializeParsedArgs:
     def subcommand_pull(cls, args: Namespace) -> SubcmdPullArguments:
         return SubcmdPullArguments(
             subparser_name=args.subcommand,
+            request_with_https=args.request_with_https,
             source=args.source,
-            base_url=args.base_url,
             config_path=args.config_path,
+            base_url=args.base_url,
+            include_template_config=args.include_template_config,
+            dry_run=args.dry_run,
+            divide_api=args.divide_api,
+            divide_http=args.divide_http,
+            divide_http_request=args.divide_http_request,
+            divide_http_response=args.divide_http_response,
         )

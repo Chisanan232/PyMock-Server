@@ -13,21 +13,17 @@ class SubCmdPullComponent(BaseSubCmdComponent):
 
     def process(self, args: SubcmdPullArguments) -> None:  # type: ignore[override]
         print(f"Try to get Swagger API documentation content at 'http://{args.source}/'.")
-        # TODO: Have a command line option to control it should use http or https to request
-        http_proto = "http"
+        http_proto = "https" if args.request_with_https else "http"
         swagger_api_doc = self._get_swagger_config(swagger_url=f"{http_proto}://{args.source}/")
         api_config = swagger_api_doc.to_api_config(base_url=args.base_url)
         print("Write the API configuration to file ...")
-        # TODO: Add command line option to control this setting
-        api_config.set_template_in_config = False
-        # TODO: Add command line option to control this setting *dry_run*
-        api_config.dry_run = True
-        # TODO: Add command line option to control how to divide the configuration
+        api_config.set_template_in_config = args.include_template_config
+        api_config.dry_run = args.dry_run
         api_config.divide_strategy = _DivideStrategy(
-            divide_api=False,
-            divide_http=False,
-            divide_http_request=False,
-            divide_http_response=False,
+            divide_api=args.divide_api,
+            divide_http=args.divide_http,
+            divide_http_request=args.divide_http_request,
+            divide_http_response=args.divide_http_response,
         )
         self._file.write(path=args.config_path, config=api_config.serialize())
         print(f"All configuration has been writen in file '{args.config_path}'.")

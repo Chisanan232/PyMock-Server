@@ -51,6 +51,7 @@ from ..._values import (
     _Bind_Host_And_Port,
     _Cmd_Arg_API_Path,
     _Cmd_Arg_HTTP_Method,
+    _Default_Include_Template_Config,
     _Generate_Sample,
     _Log_Level,
     _Print_Sample,
@@ -60,9 +61,15 @@ from ..._values import (
     _Test_App_Type,
     _Test_Auto_Type,
     _Test_Config,
+    _Test_Divide_Api,
+    _Test_Divide_Http,
+    _Test_Divide_Http_Request,
+    _Test_Divide_Http_Response,
+    _Test_Dry_Run,
     _Test_FastAPI_App_Type,
     _Test_HTTP_Method,
     _Test_HTTP_Resp,
+    _Test_Request_With_Https,
     _Test_Response_Strategy,
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
@@ -885,9 +892,16 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         base_url = _Base_URL if ("has-base" in swagger_config and "has-base" in expected_config) else ""
         mock_parser_arg = SubcmdPullArguments(
             subparser_name=_Test_SubCommand_Pull,
+            request_with_https=_Test_Request_With_Https,
             source=_API_Doc_Source,
-            base_url=base_url,
             config_path=_Test_Config,
+            base_url=base_url,
+            include_template_config=_Default_Include_Template_Config,
+            dry_run=_Test_Dry_Run,
+            divide_api=_Test_Divide_Api,
+            divide_http=_Test_Divide_Http,
+            divide_http_request=_Test_Divide_Http_Request,
+            divide_http_response=_Test_Divide_Http_Response,
         )
 
         with open(swagger_config, "r") as file:
@@ -971,9 +985,16 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
         args_namespace.subcommand = SubCommand.Pull
+        args_namespace.request_with_https = _Test_Request_With_Https
         args_namespace.source = _API_Doc_Source
         args_namespace.base_url = _Base_URL
         args_namespace.config_path = _Test_Config
+        args_namespace.include_template_config = _Default_Include_Template_Config
+        args_namespace.dry_run = _Test_Dry_Run
+        args_namespace.divide_api = _Test_Divide_Api
+        args_namespace.divide_http = _Test_Divide_Http
+        args_namespace.divide_http_request = _Test_Divide_Http_Request
+        args_namespace.divide_http_response = _Test_Divide_Http_Response
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:
