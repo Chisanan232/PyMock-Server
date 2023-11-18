@@ -4,8 +4,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_api._utils import YAML
-from pymock_api._utils.file_opt import JSON
+from pymock_api._utils import JSON, YAML
+from pymock_api._utils.file_opt import _BaseFileOperation
 from pymock_api.model import HTTP, MockAPI
 from pymock_api.model.api_config import ResponseProperty
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
@@ -16,6 +16,7 @@ from .._base import (
     MOCK_MODEL,
     MOCK_RETURN_VALUE,
     CheckableTestSuite,
+    DividableTestSuite,
     MockModel,
     _assertion_msg,
     set_checking_test_data,
@@ -46,7 +47,7 @@ def add_http_test_data(test_scenario: tuple) -> None:
     _HTTP_Test_Data.append(test_scenario)
 
 
-class TestMockAPI(TemplatableConfigTestSuite, CheckableTestSuite):
+class TestMockAPI(TemplatableConfigTestSuite, CheckableTestSuite, DividableTestSuite):
     test_data_dir = "api"
     set_checking_test_data(
         test_data_dir, reset_callback=reset_mock_api_test_data, opt_globals_callback=add_mock_api_test_data
@@ -120,7 +121,7 @@ class TestMockAPI(TemplatableConfigTestSuite, CheckableTestSuite):
             (Format.YAML, YAML),
         ],
     )
-    def test_valid_format(self, formatter: str, format_object, sut: MockAPI):
+    def test_valid_format(self, formatter: str, format_object: _BaseFileOperation, sut: MockAPI):
         with patch.object(format_object, "serialize") as mock_formatter:
             format_str = sut.format(formatter)
             assert format_str
@@ -279,8 +280,12 @@ class TestMockAPI(TemplatableConfigTestSuite, CheckableTestSuite):
     def test_is_work(self, sut_with_nothing: MockAPI, test_data_path: str, criteria: bool):
         super().test_is_work(sut_with_nothing, test_data_path, criteria)
 
+    @property
+    def _lower_layer_data_modal_for_divide(self) -> HTTP:
+        return self._Mock_Model.http
 
-class TestHTTP(TemplatableConfigTestSuite, CheckableTestSuite):
+
+class TestHTTP(TemplatableConfigTestSuite, CheckableTestSuite, DividableTestSuite):
     test_data_dir = "http"
     set_checking_test_data(test_data_dir, reset_callback=reset_http_test_data, opt_globals_callback=add_http_test_data)
 
@@ -375,3 +380,7 @@ class TestHTTP(TemplatableConfigTestSuite, CheckableTestSuite):
     )
     def test_is_work(self, sut_with_nothing: HTTP, test_data_path: str, criteria: bool):
         super().test_is_work(sut_with_nothing, test_data_path, criteria)
+
+    @property
+    def _lower_layer_data_modal_for_divide(self) -> HTTPRequest:
+        return self._Mock_Model.http_request

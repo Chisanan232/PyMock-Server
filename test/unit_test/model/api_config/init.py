@@ -21,6 +21,7 @@ from ._base import (
     MOCK_MODEL,
     MOCK_RETURN_VALUE,
     CheckableTestSuite,
+    DividableTestSuite,
     TemplateConfigLoadableTestSuite,
     _assertion_msg,
     set_checking_test_data,
@@ -155,7 +156,7 @@ class TestAPIConfig(CheckableTestSuite):
         mock_write_yaml.assert_called_once_with(path=_Test_Config, config=sut.serialize())
 
 
-class TestMockAPIs(TemplateConfigLoadableTestSuite, CheckableTestSuite):
+class TestMockAPIs(TemplateConfigLoadableTestSuite, CheckableTestSuite, DividableTestSuite):
     test_data_dir = "mocked_apis"
     set_checking_test_data(
         test_data_dir, reset_callback=reset_mock_apis_test_data, opt_globals_callback=add_mock_apis_test_data
@@ -387,3 +388,7 @@ class TestMockAPIs(TemplateConfigLoadableTestSuite, CheckableTestSuite):
             foo_post_api.http.request.method,
         ]
         assert [a.http.request.method for a in aggregated_apis["/foo-boo"]] == [foo_boo_api.http.request.method]
+
+    @property
+    def _lower_layer_data_modal_for_divide(self) -> MockAPI:
+        return self._Mock_Model.mock_api["test_config"]

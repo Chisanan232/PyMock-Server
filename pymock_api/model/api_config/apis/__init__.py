@@ -7,13 +7,14 @@ from ...._utils import YAML
 from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Checkable, _Config
+from .._divide import _BeDividedable, _Dividable
 from ..template import TemplateAPI, TemplateHTTP, _TemplatableConfig
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 
 
 @dataclass(eq=False)
-class HTTP(_TemplatableConfig, _Checkable):
+class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
     """*The **http** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-http"
@@ -70,20 +71,33 @@ class HTTP(_TemplatableConfig, _Checkable):
         else:
             self._response = None
 
+    @property
+    def should_divide(self) -> bool:
+        return self._divide_strategy.divide_http_request or self._divide_strategy.divide_http_response
+
     def serialize(self, data: Optional["HTTP"] = None) -> Optional[Dict[str, Any]]:
-        req = (data or self).request.serialize() if (data and data.request) or self.request else None  # type: ignore
-        resp = (data or self).response.serialize() if (data and data.response) or self.response else None  # type: ignore
+        req = (data or self).request if (data and data.request) or self.request else None
+        resp = (data or self).response if (data and data.response) or self.response else None
         if not (req and resp):
             return None
 
         serialized_data = super().serialize(data)
         assert serialized_data is not None
-        serialized_data.update(
-            {
-                "request": req,
-                "response": resp,
-            }
-        )
+
+        # Set HTTP request and HTTP response data modal
+        save_data = self.dry_run is False
+        req.tag = self.tag
+        req.api_name = self.api_name
+        resp.tag = self.tag
+        resp.api_name = self.api_name
+        serialized_req_data = self.dividing_serialize(data=req, save_data=save_data)
+        serialized_resp_data = self.dividing_serialize(data=resp, save_data=save_data)
+        if not save_data:
+            if not self._divide_strategy.divide_http_request:
+                serialized_data.update({"request": serialized_req_data})
+            if not self._divide_strategy.divide_http_response:
+                serialized_data.update({"response": serialized_resp_data})
+
         return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
@@ -143,7 +157,7 @@ class HTTP(_TemplatableConfig, _Checkable):
 
 
 @dataclass(eq=False)
-class MockAPI(_TemplatableConfig, _Checkable):
+class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
     """*The **<api>** section in **mocked_apis***"""
 
     config_file_tail: str = "-api"
@@ -205,6 +219,10 @@ class MockAPI(_TemplatableConfig, _Checkable):
         else:
             raise TypeError(f"Setter *MockAPI.tag* only accepts str type value. But it got '{tag}'.")
 
+    @property
+    def should_divide(self) -> bool:
+        return self._divide_strategy.divide_http
+
     def serialize(self, data: Optional["MockAPI"] = None) -> Optional[Dict[str, Any]]:
         url = (data.url if data else None) or self.url
         http = (data.http if data else None) or self.http
@@ -213,13 +231,21 @@ class MockAPI(_TemplatableConfig, _Checkable):
         tag = (data.tag if data else None) or self.tag
         serialized_data = super().serialize(data)
         assert serialized_data is not None
-        serialized_data.update(
-            {
-                "url": url,
-                "http": http.serialize(data=http),
-                "tag": tag,
-            }
-        )
+
+        # Set HTTP data modal
+        save_data = self.dry_run is False
+        http.dry_run = self.dry_run
+        http.tag = self.tag
+        http.api_name = self.api_name
+        http_serialized_data = self.dividing_serialize(data=http, save_data=save_data)
+        updated_data = {
+            "url": url,
+            "tag": tag,
+        }
+        if not save_data:
+            updated_data["http"] = http_serialized_data  # type: ignore[assignment]
+        serialized_data.update(updated_data)
+
         return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
