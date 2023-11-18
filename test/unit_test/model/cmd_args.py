@@ -21,6 +21,7 @@ from ..._values import (
     _Bind_Host_And_Port,
     _Cmd_Arg_API_Path,
     _Cmd_Arg_HTTP_Method,
+    _Default_Include_Template_Config,
     _Generate_Sample,
     _Log_Level,
     _Print_Sample,
@@ -201,8 +202,9 @@ class TestDeserialize:
         namespace_args = {
             "subcommand": _Test_SubCommand_Pull,
             "source": _API_Doc_Source,
-            "base_url": _Base_URL,
             "config_path": _Test_Config,
+            "base_url": _Base_URL,
+            "include_template_config": _Default_Include_Template_Config,
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_pull(namespace)
@@ -210,3 +212,4 @@ class TestDeserialize:
         assert arguments.subparser_name == _Test_SubCommand_Pull
         assert arguments.source == _API_Doc_Source
         assert arguments.config_path == _Test_Config
+        assert arguments.include_template_config == _Default_Include_Template_Config

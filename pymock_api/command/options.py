@@ -565,3 +565,12 @@ class PullBaseURL(BaseSubCmdPullOption):
     cli_option: str = "--base-url"
     name: str = "base_url"
     help_description: str = "The base URL which must be the part of path all the APIs begin with."
+
+
+class PullIncludeTemplateConfig(BaseSubCmdPullOption):
+    cli_option: str = "--include-template-config"
+    name: str = "include_template_config"
+    help_description: str = "If it's true, it would also configure *template* section setting in result configuration."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False

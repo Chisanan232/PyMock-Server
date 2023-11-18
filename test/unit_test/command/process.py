@@ -51,6 +51,7 @@ from ..._values import (
     _Bind_Host_And_Port,
     _Cmd_Arg_API_Path,
     _Cmd_Arg_HTTP_Method,
+    _Default_Include_Template_Config,
     _Generate_Sample,
     _Log_Level,
     _Print_Sample,
@@ -886,8 +887,9 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         mock_parser_arg = SubcmdPullArguments(
             subparser_name=_Test_SubCommand_Pull,
             source=_API_Doc_Source,
-            base_url=base_url,
             config_path=_Test_Config,
+            base_url=base_url,
+            include_template_config=_Default_Include_Template_Config,
         )
 
         with open(swagger_config, "r") as file:
@@ -974,6 +976,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         args_namespace.source = _API_Doc_Source
         args_namespace.base_url = _Base_URL
         args_namespace.config_path = _Test_Config
+        args_namespace.include_template_config = _Default_Include_Template_Config
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:
