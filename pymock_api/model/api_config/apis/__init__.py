@@ -90,8 +90,8 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         req.api_name = self.api_name
         resp.tag = self.tag
         resp.api_name = self.api_name
-        serialized_req_data = self.dividing_serialize(data=req, save_data=save_data)
-        serialized_resp_data = self.dividing_serialize(data=resp, save_data=save_data)
+        serialized_req_data = self.dividing_serialize(data=req)
+        serialized_resp_data = self.dividing_serialize(data=resp)
         if not self.should_divide or (self.should_divide and not save_data):
             if not self._divide_strategy.divide_http_request:
                 serialized_data.update({"request": serialized_req_data})
@@ -237,7 +237,7 @@ class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         http.dry_run = self.dry_run
         http.tag = self.tag
         http.api_name = self.api_name
-        http_serialized_data = self.dividing_serialize(data=http, save_data=save_data)
+        http_serialized_data = self.dividing_serialize(data=http)
         updated_data = {
             "url": url,
             "tag": tag,

@@ -35,8 +35,12 @@ class _Dividable(metaclass=ABCMeta):
     def should_divide(self) -> bool:
         pass
 
+    @property
+    def save_data(self) -> bool:
+        return self.dry_run is False
+
     def dividing_serialize(
-        self, data: Union[_Config, _BeDividedable, _TemplatableConfig], save_data: bool
+        self, data: Union[_Config, _BeDividedable, _TemplatableConfig]
     ) -> Optional[Union[str, dict]]:
         if self.should_divide:
             assert (
@@ -46,7 +50,7 @@ class _Dividable(metaclass=ABCMeta):
             tag_dir = str(pathlib.Path(config_base_path, data.tag)) if data.tag else ""
             config_file = f"{data.api_name}_{data.key}.yaml"
             path = pathlib.Path(config_base_path, tag_dir, config_file)
-            if save_data:
+            if self.save_data:
                 if tag_dir and not os.path.exists(tag_dir):
                     os.mkdir(tag_dir)
                 self._configuration.write(path=str(path), config=self.serialize_lower_layer(data=data))

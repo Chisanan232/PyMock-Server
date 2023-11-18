@@ -450,9 +450,9 @@ class DividableTestSuite(ConfigTestSpec, ABC):
                             ) as mock_check_file_exist:
                                 with patch("os.mkdir") as mock_mkdir:
                                     # When: Run target function
+                                    sut.dry_run = test_data.dry_run
                                     sut.dividing_serialize(
                                         data=self._lower_layer_data_modal_for_divide,
-                                        save_data=test_data.dry_run is False,
                                     )
 
                                     # Should: Verify

@@ -142,7 +142,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
             save_data = self.dry_run is False
             api_config.dry_run = self.dry_run
             api_config.api_name = api_name
-            serialized_data = self.dividing_serialize(data=api_config, save_data=save_data)
+            serialized_data = self.dividing_serialize(data=api_config)
             if not self.should_divide or (self.should_divide and not save_data):
                 all_mocked_apis[api_name] = serialized_data
         api_info["apis"] = all_mocked_apis
