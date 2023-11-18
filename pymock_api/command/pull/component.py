@@ -20,12 +20,9 @@ class SubCmdPullComponent(BaseSubCmdComponent):
         api_config = swagger_api_doc.to_api_config(base_url=args.base_url)
         serialized_api_config = self._serialize_api_config_with_cmd_args(cmd_args=args, api_config=api_config)
         if args.dry_run:
-            print("The result serialized API configuration:\n")
-            print(serialized_api_config)
+            self._dry_run_final_process(serialized_api_config)
         else:
-            print("Write the API configuration to file ...")
-            self._file.write(path=args.config_path, config=serialized_api_config)
-            print(f"All configuration has been writen in file '{args.config_path}'.")
+            self._final_process(args, serialized_api_config)
 
     def _get_swagger_config(self, swagger_url: str) -> SwaggerConfig:
         swagger_api_doc: dict = self._api_client.request(method="GET", url=swagger_url)
@@ -43,3 +40,12 @@ class SubCmdPullComponent(BaseSubCmdComponent):
             divide_http_response=cmd_args.divide_http_response,
         )
         return api_config.serialize()
+
+    def _final_process(self, cmd_args: SubcmdPullArguments, serialized_api_config: Optional[Dict[str, Any]]) -> None:
+        print("Write the API configuration to file ...")
+        self._file.write(path=cmd_args.config_path, config=serialized_api_config)
+        print(f"All configuration has been writen in file '{cmd_args.config_path}'.")
+
+    def _dry_run_final_process(self, serialized_api_config: Optional[Dict[str, Any]]) -> None:
+        print("The result serialized API configuration:\n")
+        print(serialized_api_config)
