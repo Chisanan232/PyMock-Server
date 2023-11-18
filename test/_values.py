@@ -425,3 +425,7 @@ _Test_SubCommand_Pull: str = "pull"
 _API_Doc_Source: str = "127.0.0.1:8080"
 _Default_Include_Template_Config: bool = False
 _Test_Dry_Run: bool = True
+_Test_Divide_Api: bool = False
+_Test_Divide_Http: bool = False
+_Test_Divide_Http_Request: bool = False
+_Test_Divide_Http_Response: bool = False

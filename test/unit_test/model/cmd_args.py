@@ -31,6 +31,10 @@ from ..._values import (
     _Swagger_API_Document_URL,
     _Test_App_Type,
     _Test_Config,
+    _Test_Divide_Api,
+    _Test_Divide_Http,
+    _Test_Divide_Http_Request,
+    _Test_Divide_Http_Response,
     _Test_Dry_Run,
     _Test_HTTP_Method,
     _Test_HTTP_Resp,
@@ -207,6 +211,10 @@ class TestDeserialize:
             "base_url": _Base_URL,
             "include_template_config": _Default_Include_Template_Config,
             "dry_run": _Test_Dry_Run,
+            "divide_api": _Test_Divide_Api,
+            "divide_http": _Test_Divide_Http,
+            "divide_http_request": _Test_Divide_Http_Request,
+            "divide_http_response": _Test_Divide_Http_Response,
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_pull(namespace)
@@ -216,3 +224,7 @@ class TestDeserialize:
         assert arguments.config_path == _Test_Config
         assert arguments.include_template_config == _Default_Include_Template_Config
         assert arguments.dry_run == _Test_Dry_Run
+        assert arguments.divide_api == _Test_Divide_Api
+        assert arguments.divide_http == _Test_Divide_Http
+        assert arguments.divide_http_request == _Test_Divide_Http_Request
+        assert arguments.divide_http_response == _Test_Divide_Http_Response

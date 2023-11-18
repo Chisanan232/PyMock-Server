@@ -583,3 +583,49 @@ class PullDryRun(BaseSubCmdPullOption):
     action: str = "store_true"
     option_value_type: Optional[type] = None
     default_value: bool = False
+
+
+class PullDivideApi(BaseSubCmdPullOption):
+    cli_option: str = "--divide-api"
+    name: str = "divide_api"
+    help_description: str = (
+        "If it's true, it would divide the setting values of mocked API section " "(mocked_apis.apis.<mock API>)."
+    )
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
+class PullDivideHttp(BaseSubCmdPullOption):
+    cli_option: str = "--divide-http"
+    name: str = "divide_http"
+    help_description: str = (
+        "If it's true, it would divide the setting values of HTTP part section " "(mocked_apis.apis.<mock API>.http)."
+    )
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
+class PullDivideHttpRequest(BaseSubCmdPullOption):
+    cli_option: str = "--divide-http-request"
+    name: str = "divide_http_request"
+    help_description: str = (
+        "If it's true, it would divide the setting values of HTTP request part section "
+        "(mocked_apis.apis.<mock API>.http.request)."
+    )
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
+class PullDivideHttpResponse(BaseSubCmdPullOption):
+    cli_option: str = "--divide-http-response"
+    name: str = "divide_http_response"
+    help_description: str = (
+        "If it's true, it would divide the setting values of HTTP response part section "
+        "(mocked_apis.apis.<mock API>.http.response)."
+    )
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False

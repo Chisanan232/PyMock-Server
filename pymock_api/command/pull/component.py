@@ -20,12 +20,11 @@ class SubCmdPullComponent(BaseSubCmdComponent):
         print("Write the API configuration to file ...")
         api_config.set_template_in_config = args.include_template_config
         api_config.dry_run = args.dry_run
-        # TODO: Add command line option to control how to divide the configuration
         api_config.divide_strategy = _DivideStrategy(
-            divide_api=False,
-            divide_http=False,
-            divide_http_request=False,
-            divide_http_response=False,
+            divide_api=args.divide_api,
+            divide_http=args.divide_http,
+            divide_http_request=args.divide_http_request,
+            divide_http_response=args.divide_http_response,
         )
         self._file.write(path=args.config_path, config=api_config.serialize())
         print(f"All configuration has been writen in file '{args.config_path}'.")
