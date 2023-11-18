@@ -92,7 +92,7 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         resp.api_name = self.api_name
         serialized_req_data = self.dividing_serialize(data=req, save_data=save_data)
         serialized_resp_data = self.dividing_serialize(data=resp, save_data=save_data)
-        if not save_data:
+        if not self.should_divide or (self.should_divide and not save_data):
             if not self._divide_strategy.divide_http_request:
                 serialized_data.update({"request": serialized_req_data})
             if not self._divide_strategy.divide_http_response:
@@ -242,7 +242,7 @@ class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
             "url": url,
             "tag": tag,
         }
-        if not save_data:
+        if not self.should_divide or (self.should_divide and not save_data):
             updated_data["http"] = http_serialized_data  # type: ignore[assignment]
         serialized_data.update(updated_data)
 
