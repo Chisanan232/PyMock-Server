@@ -86,39 +86,28 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
 
         # Set HTTP request and HTTP response data modal
         self._process_dividing_serialize(
+            init_data=serialized_data,
             data_modal=req,
             key="request",
-            init_data=serialized_data,
+            api_name=self.api_name,
+            tag=self.tag,
             should_set_dividable_value_callback=lambda: self.should_set_bedividedable_value
             and not self._divide_strategy.divide_http_request,
         )
         self._process_dividing_serialize(
+            init_data=serialized_data,
             data_modal=resp,
             key="response",
-            init_data=serialized_data,
+            api_name=self.api_name,
+            tag=self.tag,
             should_set_dividable_value_callback=lambda: self.should_set_bedividedable_value
             and not self._divide_strategy.divide_http_response,
         )
 
         return serialized_data
 
-    def _process_dividing_serialize(
-        self,
-        data_modal,
-        init_data: Dict[str, Any],
-        key: str = "",
-        should_set_dividable_value_callback: Optional[Callable] = None,
-    ) -> None:
-        data_modal.tag = self.tag
-        data_modal.api_name = self.api_name
-        serialized_data = self.dividing_serialize(data=data_modal)
-        if not should_set_dividable_value_callback:
-            should_set_dividable_value_callback = lambda: self.should_set_bedividedable_value
-        if should_set_dividable_value_callback():
-            self._set_serialized_data(init_data, serialized_data, key)
-
     def _set_serialized_data(
-        self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str
+        self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str = ""
     ) -> None:
         assert key, "Key in configuration cannot be empty."
         init_data.update({key: serialized_data})
@@ -260,26 +249,15 @@ class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
             "url": url,
             "tag": tag,
         }
-        self._process_dividing_serialize(http, updated_data)
+        self._process_dividing_serialize(
+            init_data=updated_data,
+            data_modal=http,
+            api_name=self.api_name,
+            tag=self.tag,
+        )
         serialized_data.update(updated_data)
 
         return serialized_data
-
-    def _process_dividing_serialize(
-        self,
-        data_modal,
-        init_data: Dict[str, Any],
-        should_set_dividable_value_callback: Optional[Callable] = None,
-        key: str = "",
-    ) -> None:
-        data_modal.dry_run = self.dry_run  # NOTE: It only has here
-        data_modal.tag = self.tag
-        data_modal.api_name = self.api_name
-        serialized_data = self.dividing_serialize(data=data_modal)
-        if not should_set_dividable_value_callback:
-            should_set_dividable_value_callback = lambda: self.should_set_bedividedable_value
-        if should_set_dividable_value_callback():
-            self._set_serialized_data(init_data, serialized_data, key)
 
     def _set_serialized_data(
         self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str = ""

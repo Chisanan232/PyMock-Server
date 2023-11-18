@@ -2,7 +2,7 @@ import os
 import pathlib
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
@@ -42,6 +42,36 @@ class _Dividable(metaclass=ABCMeta):
     @property
     def should_set_bedividedable_value(self) -> bool:
         return not self.should_divide or (self.should_divide and not self.save_data)
+
+    def _process_dividing_serialize(
+        self,
+        data_modal: Union[_Config, _BeDividedable],
+        init_data: Dict[str, Any],
+        api_name: str,
+        tag: str = "",
+        key: str = "",
+        should_set_dividable_value_callback: Optional[Callable] = None,
+    ) -> None:
+        assert isinstance(data_modal, _Config) and isinstance(data_modal, _BeDividedable)
+        # Pre-process
+        if isinstance(data_modal, _Dividable):
+            data_modal.dry_run = self.dry_run
+        data_modal.api_name = api_name
+        if tag:
+            data_modal.tag = tag
+        # Run dividing serialization
+        serialized_data = self.dividing_serialize(data=data_modal)
+        # Set the dividing serialization if it needs
+        if not should_set_dividable_value_callback:
+            should_set_dividable_value_callback = lambda: self.should_set_bedividedable_value
+        if should_set_dividable_value_callback():
+            self._set_serialized_data(init_data, serialized_data, key)
+
+    @abstractmethod
+    def _set_serialized_data(
+        self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str = ""
+    ) -> None:
+        pass
 
     def dividing_serialize(
         self, data: Union[_Config, _BeDividedable, _TemplatableConfig]

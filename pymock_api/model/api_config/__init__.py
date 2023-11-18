@@ -140,36 +140,17 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         for api_name, api_config in apis.items():
             assert api_config
             self._process_dividing_serialize(
+                init_data=all_mocked_apis,
                 data_modal=api_config,
                 api_name=api_name,
-                init_data=all_mocked_apis,
                 key=api_name,
             )
         api_info["apis"] = all_mocked_apis
 
         return api_info
 
-    def _process_dividing_serialize(
-        self,
-        data_modal,
-        init_data: Dict[str, Any],
-        api_name: str,
-        tag: str = "",
-        key: str = "",
-        should_set_dividable_value_callback: Optional[Callable] = None,
-    ) -> None:
-        data_modal.dry_run = self.dry_run  # NOTE: It only has here
-        data_modal.api_name = api_name
-        if tag:
-            data_modal.tag = tag
-        serialized_data = self.dividing_serialize(data=data_modal)
-        if not should_set_dividable_value_callback:
-            should_set_dividable_value_callback = lambda: self.should_set_bedividedable_value
-        if should_set_dividable_value_callback():
-            self._set_serialized_data(init_data, serialized_data, key)
-
     def _set_serialized_data(
-        self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str
+        self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str = ""
     ) -> None:
         init_data[key] = serialized_data
 
