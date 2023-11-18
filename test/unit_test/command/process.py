@@ -61,6 +61,7 @@ from ..._values import (
     _Test_App_Type,
     _Test_Auto_Type,
     _Test_Config,
+    _Test_Dry_Run,
     _Test_FastAPI_App_Type,
     _Test_HTTP_Method,
     _Test_HTTP_Resp,
@@ -890,6 +891,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
             config_path=_Test_Config,
             base_url=base_url,
             include_template_config=_Default_Include_Template_Config,
+            dry_run=_Test_Dry_Run,
         )
 
         with open(swagger_config, "r") as file:
@@ -977,6 +979,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         args_namespace.base_url = _Base_URL
         args_namespace.config_path = _Test_Config
         args_namespace.include_template_config = _Default_Include_Template_Config
+        args_namespace.dry_run = _Test_Dry_Run
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:

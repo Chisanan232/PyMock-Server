@@ -75,6 +75,7 @@ class SubcmdPullArguments(ParserArguments):
     config_path: str
     base_url: str
     include_template_config: bool
+    dry_run: bool
 
 
 class DeserializeParsedArgs:
@@ -158,4 +159,5 @@ class DeserializeParsedArgs:
             config_path=args.config_path,
             base_url=args.base_url,
             include_template_config=args.include_template_config,
+            dry_run=args.dry_run,
         )

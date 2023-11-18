@@ -574,3 +574,12 @@ class PullIncludeTemplateConfig(BaseSubCmdPullOption):
     action: str = "store_true"
     option_value_type: Optional[type] = None
     default_value: bool = False
+
+
+class PullDryRun(BaseSubCmdPullOption):
+    cli_option: str = "--dry-run"
+    name: str = "dry_run"
+    help_description: str = "If it's true, it would run pulling process without saving result configuration."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False

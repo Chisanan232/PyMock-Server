@@ -19,8 +19,7 @@ class SubCmdPullComponent(BaseSubCmdComponent):
         api_config = swagger_api_doc.to_api_config(base_url=args.base_url)
         print("Write the API configuration to file ...")
         api_config.set_template_in_config = args.include_template_config
-        # TODO: Add command line option to control this setting *dry_run*
-        api_config.dry_run = True
+        api_config.dry_run = args.dry_run
         # TODO: Add command line option to control how to divide the configuration
         api_config.divide_strategy = _DivideStrategy(
             divide_api=False,

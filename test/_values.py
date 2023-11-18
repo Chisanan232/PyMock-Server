@@ -424,3 +424,4 @@ _Sample_Data_Type: str = "all"
 _Test_SubCommand_Pull: str = "pull"
 _API_Doc_Source: str = "127.0.0.1:8080"
 _Default_Include_Template_Config: bool = False
+_Test_Dry_Run: bool = True
