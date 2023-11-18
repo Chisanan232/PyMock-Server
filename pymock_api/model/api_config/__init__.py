@@ -128,7 +128,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
             return None
 
         # Process section *base*
-        api_info = {  # type: ignore[var-annotated]
+        api_info = {
             "base": BaseConfig().serialize(data=base),
             "apis": {},
         }
