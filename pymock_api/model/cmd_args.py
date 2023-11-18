@@ -71,6 +71,7 @@ class SubcmdSampleArguments(ParserArguments):
 
 @dataclass(frozen=True)
 class SubcmdPullArguments(ParserArguments):
+    request_with_https: bool
     source: str
     config_path: str
     base_url: str
@@ -159,6 +160,7 @@ class DeserializeParsedArgs:
     def subcommand_pull(cls, args: Namespace) -> SubcmdPullArguments:
         return SubcmdPullArguments(
             subparser_name=args.subcommand,
+            request_with_https=args.request_with_https,
             source=args.source,
             config_path=args.config_path,
             base_url=args.base_url,

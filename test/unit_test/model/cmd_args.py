@@ -38,6 +38,7 @@ from ..._values import (
     _Test_Dry_Run,
     _Test_HTTP_Method,
     _Test_HTTP_Resp,
+    _Test_Request_With_Https,
     _Test_Response_Strategy,
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
@@ -206,6 +207,7 @@ class TestDeserialize:
     def test_parser_subcommand_pull_arguments(self, deserialize: Type[DeserializeParsedArgs]):
         namespace_args = {
             "subcommand": _Test_SubCommand_Pull,
+            "request_with_https": _Test_Request_With_Https,
             "source": _API_Doc_Source,
             "config_path": _Test_Config,
             "base_url": _Base_URL,
@@ -220,6 +222,7 @@ class TestDeserialize:
         arguments = deserialize.subcommand_pull(namespace)
         assert isinstance(arguments, SubcmdPullArguments)
         assert arguments.subparser_name == _Test_SubCommand_Pull
+        assert arguments.request_with_https == _Test_Request_With_Https
         assert arguments.source == _API_Doc_Source
         assert arguments.config_path == _Test_Config
         assert arguments.include_template_config == _Default_Include_Template_Config

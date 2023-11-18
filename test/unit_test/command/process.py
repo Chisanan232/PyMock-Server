@@ -69,6 +69,7 @@ from ..._values import (
     _Test_FastAPI_App_Type,
     _Test_HTTP_Method,
     _Test_HTTP_Resp,
+    _Test_Request_With_Https,
     _Test_Response_Strategy,
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
@@ -891,6 +892,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         base_url = _Base_URL if ("has-base" in swagger_config and "has-base" in expected_config) else ""
         mock_parser_arg = SubcmdPullArguments(
             subparser_name=_Test_SubCommand_Pull,
+            request_with_https=_Test_Request_With_Https,
             source=_API_Doc_Source,
             config_path=_Test_Config,
             base_url=base_url,
@@ -983,6 +985,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
         args_namespace.subcommand = SubCommand.Pull
+        args_namespace.request_with_https = _Test_Request_With_Https
         args_namespace.source = _API_Doc_Source
         args_namespace.base_url = _Base_URL
         args_namespace.config_path = _Test_Config

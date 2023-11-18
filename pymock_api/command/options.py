@@ -552,6 +552,17 @@ class Source(BaseSubCmdPullOption):
     help_description: str = "The source where keeps API details as documentation."
 
 
+class PullRequestWithHttps(BaseSubCmdPullOption):
+    cli_option: str = "--request-with-https"
+    name: str = "request_with_https"
+    help_description: str = (
+        "If it's true, it would send the HTTP request over TLS to get the Swagger API documentation configuration."
+    )
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
 class PullToConfigPath(BaseSubCmdPullOption):
     cli_option: str = "-c, --config-path"
     name: str = "config_path"
