@@ -136,17 +136,22 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
             api_info["template"] = template.serialize()
 
         # Process section *apis*
-        all_mocked_apis = {}
+        all_mocked_apis = {}  # type: ignore[var-annotated]
         for api_name, api_config in apis.items():
             assert api_config
             api_config.dry_run = self.dry_run
             api_config.api_name = api_name
             serialized_data = self.dividing_serialize(data=api_config)
             if self.should_set_bedividedable_value:
-                all_mocked_apis[api_name] = serialized_data
+                self._set_serialized_data(all_mocked_apis, api_name, serialized_data)
         api_info["apis"] = all_mocked_apis
 
         return api_info
+
+    def _set_serialized_data(
+        self, all_mocked_apis: dict, api_name: str, serialized_data: Optional[Union[str, dict]]
+    ) -> None:
+        all_mocked_apis[api_name] = serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["MockAPIs"]:

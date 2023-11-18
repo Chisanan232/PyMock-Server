@@ -87,17 +87,23 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         # Set HTTP request and HTTP response data modal
         req.tag = self.tag
         req.api_name = self.api_name
+        serialized_req_data = self.dividing_serialize(data=req)
+        if self.should_set_bedividedable_value and not self._divide_strategy.divide_http_request:
+            self._set_serialized_data(serialized_data, serialized_req_data, "request")
+
         resp.tag = self.tag
         resp.api_name = self.api_name
-        serialized_req_data = self.dividing_serialize(data=req)
         serialized_resp_data = self.dividing_serialize(data=resp)
-        if self.should_set_bedividedable_value:
-            if not self._divide_strategy.divide_http_request:
-                serialized_data.update({"request": serialized_req_data})
-            if not self._divide_strategy.divide_http_response:
-                serialized_data.update({"response": serialized_resp_data})
+        if self.should_set_bedividedable_value and not self._divide_strategy.divide_http_response:
+            self._set_serialized_data(serialized_data, serialized_resp_data, "response")
 
         return serialized_data
+
+    def _set_serialized_data(
+        self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str
+    ) -> None:
+        assert key, "Key in configuration cannot be empty."
+        init_data.update({key: serialized_data})
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["HTTP"]:
@@ -241,10 +247,13 @@ class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
             "tag": tag,
         }
         if self.should_set_bedividedable_value:
-            updated_data["http"] = http_serialized_data  # type: ignore[assignment]
+            self._set_serialized_data(http_serialized_data, updated_data)
         serialized_data.update(updated_data)
 
         return serialized_data
+
+    def _set_serialized_data(self, http_serialized_data: Optional[Union[str, dict]], updated_data: dict) -> None:
+        updated_data["http"] = http_serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["MockAPI"]:
