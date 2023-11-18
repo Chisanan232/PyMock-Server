@@ -552,12 +552,6 @@ class Source(BaseSubCmdPullOption):
     help_description: str = "The source where keeps API details as documentation."
 
 
-class PullBaseURL(BaseSubCmdPullOption):
-    cli_option: str = "--base-url"
-    name: str = "base_url"
-    help_description: str = "The base URL which must be the part of path all the APIs begin with."
-
-
 class PullToConfigPath(BaseSubCmdPullOption):
     cli_option: str = "-c, --config-path"
     name: str = "config_path"
@@ -565,3 +559,9 @@ class PullToConfigPath(BaseSubCmdPullOption):
         "The file path where program will write the deserialization result configuration of API documentation, e.g., "
         "Swagger API documentation to it."
     )
+
+
+class PullBaseURL(BaseSubCmdPullOption):
+    cli_option: str = "--base-url"
+    name: str = "base_url"
+    help_description: str = "The base URL which must be the part of path all the APIs begin with."

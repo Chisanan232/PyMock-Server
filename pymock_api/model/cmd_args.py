@@ -72,8 +72,8 @@ class SubcmdSampleArguments(ParserArguments):
 @dataclass(frozen=True)
 class SubcmdPullArguments(ParserArguments):
     source: str
-    base_url: str
     config_path: str
+    base_url: str
 
 
 class DeserializeParsedArgs:
@@ -154,6 +154,6 @@ class DeserializeParsedArgs:
         return SubcmdPullArguments(
             subparser_name=args.subcommand,
             source=args.source,
-            base_url=args.base_url,
             config_path=args.config_path,
+            base_url=args.base_url,
         )
