@@ -39,6 +39,10 @@ class _Dividable(metaclass=ABCMeta):
     def save_data(self) -> bool:
         return self.dry_run is False
 
+    @property
+    def should_set_bedividedable_value(self) -> bool:
+        return not self.should_divide or (self.should_divide and not self.save_data)
+
     def dividing_serialize(
         self, data: Union[_Config, _BeDividedable, _TemplatableConfig]
     ) -> Optional[Union[str, dict]]:
