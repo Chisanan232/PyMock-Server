@@ -851,8 +851,9 @@ def _get_all_yaml_for_subcmd_pull() -> None:
 
     global PULL_YAML_PATHS_WITH_CONFIG
     for yaml_config_path, json_path in zip(sorted(glob.glob(config_yaml_path)), sorted(glob.glob(swagger_json_path))):
-        one_test_scenario = (json_path, yaml_config_path)
-        PULL_YAML_PATHS_WITH_CONFIG.append(one_test_scenario)
+        for dry_run_scenario in (True, False):
+            one_test_scenario = (json_path, dry_run_scenario, yaml_config_path)
+            PULL_YAML_PATHS_WITH_CONFIG.append(one_test_scenario)
 
 
 _get_all_yaml_for_subcmd_pull()
@@ -864,30 +865,36 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         return SubCmdPull()
 
     @pytest.mark.parametrize(
-        ("swagger_config", "expected_config"),
+        ("swagger_config", "dry_run", "expected_config"),
         PULL_YAML_PATHS_WITH_CONFIG,
     )
-    def test_with_command_processor(self, swagger_config: str, expected_config: str, object_under_test: Callable):
+    def test_with_command_processor(
+        self, swagger_config: str, dry_run: bool, expected_config: str, object_under_test: Callable
+    ):
         kwargs = {
             "swagger_config": swagger_config,
+            "dry_run": dry_run,
             "expected_config": expected_config,
             "cmd_ps": object_under_test,
         }
         self._test_process(**kwargs)
 
     @pytest.mark.parametrize(
-        ("swagger_config", "expected_config"),
+        ("swagger_config", "dry_run", "expected_config"),
         PULL_YAML_PATHS_WITH_CONFIG,
     )
-    def test_with_run_entry_point(self, swagger_config: str, expected_config: str, entry_point_under_test: Callable):
+    def test_with_run_entry_point(
+        self, swagger_config: str, dry_run: bool, expected_config: str, entry_point_under_test: Callable
+    ):
         kwargs = {
             "swagger_config": swagger_config,
+            "dry_run": dry_run,
             "expected_config": expected_config,
             "cmd_ps": entry_point_under_test,
         }
         self._test_process(**kwargs)
 
-    def _test_process(self, swagger_config: str, expected_config: str, cmd_ps: Callable):
+    def _test_process(self, swagger_config: str, dry_run: bool, expected_config: str, cmd_ps: Callable):
         FakeYAML.write = MagicMock()
         base_url = _Base_URL if ("has-base" in swagger_config and "has-base" in expected_config) else ""
         mock_parser_arg = SubcmdPullArguments(
@@ -897,7 +904,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
             config_path=_Test_Config,
             base_url=base_url,
             include_template_config=_Default_Include_Template_Config,
-            dry_run=_Test_Dry_Run,
+            dry_run=dry_run,
             divide_api=_Test_Divide_Api,
             divide_http=_Test_Divide_Http,
             divide_http_request=_Test_Divide_Http_Request,
@@ -923,14 +930,11 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
                 mock_swagger_request.assert_called_once_with(method="GET", url=f"http://{_API_Doc_Source}/")
 
                 # Run one core logic of target function
-                print(f"[DEBUG in test] run one core logic of target function")
                 confirm_expected_api_config = deserialize_swagger_api_config(swagger_json_data).to_api_config(
                     mock_parser_arg.base_url
                 )
                 confirm_expected_api_config.set_template_in_config = False
                 confirm_expected_config_data = confirm_expected_api_config.serialize()
-                print(f"[DEBUG in test] expected_config_data: {expected_config_data}")
-                print(f"[DEBUG in test] confirm_expected_config_data: {confirm_expected_config_data}")
                 assert expected_config_data["name"] == confirm_expected_config_data["name"]
                 assert expected_config_data["description"] == confirm_expected_config_data["description"]
                 assert len(expected_config_data["mocked_apis"].keys()) == len(
@@ -980,7 +984,10 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
                         # Verify base info
                         assert expected_api_config == confirm_expected_api_config
 
-                FakeYAML.write.assert_called_once_with(path=_Test_Config, config=expected_config_data)
+                if mock_parser_arg.dry_run:
+                    FakeYAML.write.assert_not_called()
+                else:
+                    FakeYAML.write.assert_called_once_with(path=_Test_Config, config=expected_config_data)
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()

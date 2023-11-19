@@ -1,7 +1,7 @@
 import copy
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from ...._utils import YAML
 from ...._utils.file_opt import JSON
@@ -85,20 +85,32 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         assert serialized_data is not None
 
         # Set HTTP request and HTTP response data modal
-        save_data = self.dry_run is False
-        req.tag = self.tag
-        req.api_name = self.api_name
-        resp.tag = self.tag
-        resp.api_name = self.api_name
-        serialized_req_data = self.dividing_serialize(data=req, save_data=save_data)
-        serialized_resp_data = self.dividing_serialize(data=resp, save_data=save_data)
-        if not save_data:
-            if not self._divide_strategy.divide_http_request:
-                serialized_data.update({"request": serialized_req_data})
-            if not self._divide_strategy.divide_http_response:
-                serialized_data.update({"response": serialized_resp_data})
+        self._process_dividing_serialize(
+            init_data=serialized_data,
+            data_modal=req,
+            key="request",
+            api_name=self.api_name,
+            tag=self.tag,
+            should_set_dividable_value_callback=lambda: self.should_set_bedividedable_value
+            and not self._divide_strategy.divide_http_request,
+        )
+        self._process_dividing_serialize(
+            init_data=serialized_data,
+            data_modal=resp,
+            key="response",
+            api_name=self.api_name,
+            tag=self.tag,
+            should_set_dividable_value_callback=lambda: self.should_set_bedividedable_value
+            and not self._divide_strategy.divide_http_response,
+        )
 
         return serialized_data
+
+    def _set_serialized_data(
+        self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str = ""
+    ) -> None:
+        assert key, "Key in configuration cannot be empty."
+        init_data.update({key: serialized_data})
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["HTTP"]:
@@ -233,20 +245,24 @@ class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         assert serialized_data is not None
 
         # Set HTTP data modal
-        save_data = self.dry_run is False
-        http.dry_run = self.dry_run
-        http.tag = self.tag
-        http.api_name = self.api_name
-        http_serialized_data = self.dividing_serialize(data=http, save_data=save_data)
         updated_data = {
             "url": url,
             "tag": tag,
         }
-        if not save_data:
-            updated_data["http"] = http_serialized_data  # type: ignore[assignment]
+        self._process_dividing_serialize(
+            init_data=updated_data,
+            data_modal=http,
+            api_name=self.api_name,
+            tag=self.tag,
+        )
         serialized_data.update(updated_data)
 
         return serialized_data
+
+    def _set_serialized_data(
+        self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str = ""
+    ) -> None:
+        init_data["http"] = serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["MockAPI"]:

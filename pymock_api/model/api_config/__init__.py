@@ -3,7 +3,7 @@
 content ...
 """
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
@@ -136,18 +136,23 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
             api_info["template"] = template.serialize()
 
         # Process section *apis*
-        all_mocked_apis = {}
+        all_mocked_apis = {}  # type: ignore[var-annotated]
         for api_name, api_config in apis.items():
             assert api_config
-            save_data = self.dry_run is False
-            api_config.dry_run = self.dry_run
-            api_config.api_name = api_name
-            serialized_data = self.dividing_serialize(data=api_config, save_data=save_data)
-            if not save_data:
-                all_mocked_apis[api_name] = serialized_data
+            self._process_dividing_serialize(
+                init_data=all_mocked_apis,
+                data_modal=api_config,
+                api_name=api_name,
+                key=api_name,
+            )
         api_info["apis"] = all_mocked_apis
 
         return api_info
+
+    def _set_serialized_data(
+        self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str = ""
+    ) -> None:
+        init_data[key] = serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["MockAPIs"]:
