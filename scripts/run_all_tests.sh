@@ -22,6 +22,12 @@ echo "⚙️ It would run the '$testing_type' of the Python package PyMock-API."
 
 echo "🔍 Get the testing items ... ⏳"
 
+# GitHub repro about the template of Python project CI/CD
+# Refer: https://github.com/Chisanan232/GitHub-Action_Reusable_Workflows-Python
+GitHub_Org=Chisanan232
+GitHub_Repro=GitHub-Action_Reusable_Workflows-Python
+GitHub_Repro_Branch=master
+
 Scripts_Dir=./scripts/ci
 Test_Running_Script=get-all-tests.sh
 
@@ -31,7 +37,7 @@ test_running_script=$(ls "$Scripts_Dir" | grep -E "$Test_Running_Script" || true
 if [ "$test_running_script" == "" ]; then
     echo "⚠️ It should have shell script file '$Test_Running_Script' in '$Scripts_Dir/' directory of your project in HitHub."
     echo "Start to download the shell script file from repository 'GitHub-Action_Reusable_Workflows-Python' ..."
-    curl https://raw.githubusercontent.com/Chisanan232/GitHub-Action_Reusable_Workflows-Python/master/$Scripts_Dir/$Test_Running_Script --output $Scripts_Dir/$Test_Running_Script
+    curl https://raw.githubusercontent.com/$GitHub_Org/$GitHub_Repro/$GitHub_Repro_Branch/$Scripts_Dir/$Test_Running_Script --output $Scripts_Dir/$Test_Running_Script
     # wait for 3 second for downloading shell script
     sleep 3
 
@@ -41,6 +47,8 @@ if [ "$test_running_script" == "" ]; then
     if [ "$shell_script_file" == "" ]; then
         echo "❌️ It still cannot find the shell script file '$Test_Running_Script' in '$Scripts_Dir/' directory of your project in HitHub."
         exit 1
+    else
+        echo "✅ It already has shell script '$Test_Running_Script' in '$Scripts_Dir/' directory for running test."
     fi
 else
     echo "✅ It already has shell script '$Test_Running_Script' in '$Scripts_Dir/' directory for running test."
