@@ -60,11 +60,15 @@ then
 elif echo "$testing_type" | grep -q "integration-test";
 then
     test_path=$(bash "$Scripts_Dir/$Test_Running_Script" ./test/integration_test/ windows | sed "s/\"//g" | sed 's/^//')
+elif echo "$testing_type" | grep -q "system-test";
+then
+    test_path=$(bash "$Scripts_Dir/$Test_Running_Script" ./test/system_test/ windows | sed "s/\"//g" | sed 's/^//')
 elif echo "$testing_type" | grep -q "all-test";
 then
     unit_test_path=$(bash "$Scripts_Dir/$Test_Running_Script" ./test/unit_test/ windows | sed "s/\"//g" | sed 's/^//')
     integration_test_path=$(bash "$Scripts_Dir/$Test_Running_Script" ./test/integration_test/ windows | sed "s/\"//g" | sed 's/^//')
-    test_path="$unit_test_path $integration_test_path"
+    system_test_path=$(bash "$Scripts_Dir/$Test_Running_Script" ./test/system_test/ windows | sed "s/\"//g" | sed 's/^//')
+    test_path="$unit_test_path $integration_test_path $system_test_path"
 else
     test_path='error'
 fi
