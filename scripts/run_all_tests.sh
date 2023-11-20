@@ -18,25 +18,49 @@
 
 set -exm
 testing_type=$1
-echo "⚙️ It would run the " +  testing_type + " of the Python package PyMock-API."
+echo "⚙️ It would run the '$testing_type' of the Python package PyMock-API."
 
 echo "🔍 Get the testing items ... ⏳"
 
+Scripts_Dir=./scripts/ci
+Test_Running_Script=get-all-tests.sh
+
+echo "🔍 Check whether it has necessary shell script '$Test_Running_Script' in '$Scripts_Dir/' directory or not."
+# shellcheck disable=SC2010
+test_running_script=$(ls "$Scripts_Dir" | grep -E "$Test_Running_Script" || true )
+if [ "$test_running_script" == "" ]; then
+    echo "⚠️ It should have shell script file '$Test_Running_Script' in '$Scripts_Dir/' directory of your project in HitHub."
+    echo "Start to download the shell script file from repository 'GitHub-Action_Reusable_Workflows-Python' ..."
+    curl https://raw.githubusercontent.com/Chisanan232/GitHub-Action_Reusable_Workflows-Python/master/$Scripts_Dir/$Test_Running_Script --output $Scripts_Dir/$Test_Running_Script
+    # wait for 3 second for downloading shell script
+    sleep 3
+
+    # check again
+    # shellcheck disable=SC2010
+    shell_script_file=$(ls "$Scripts_Dir" | grep -E "$Test_Running_Script" || true)
+    if [ "$shell_script_file" == "" ]; then
+        echo "❌️ It still cannot find the shell script file '$Test_Running_Script' in '$Scripts_Dir/' directory of your project in HitHub."
+        exit 1
+    fi
+else
+    echo "✅ It already has shell script '$Test_Running_Script' in '$Scripts_Dir/' directory for running test."
+fi
+
 if echo "$testing_type" | grep -q "unit-test";
 then
-    test_path=$(bash ./scripts/ci/get-unit-test-paths.sh windows | sed "s/\"//g" | sed 's/^//')
+    test_path=$(bash "$Scripts_Dir/$Test_Running_Script" ./test/unit_test/ windows | sed "s/\"//g" | sed 's/^//')
     unit_test_path=''
     integration_test_path=''
 elif echo "$testing_type" | grep -q "integration-test";
 then
-    test_path=$(bash ./scripts/ci/get-integration-test-paths.sh windows | sed "s/\"//g" | sed 's/^//')
+    test_path=$(bash "$Scripts_Dir/$Test_Running_Script" ./test/integration_test/ windows | sed "s/\"//g" | sed 's/^//')
     unit_test_path=''
     integration_test_path=''
 elif echo "$testing_type" | grep -q "all-test";
 then
     test_path=''
-    unit_test_path=$(bash ./scripts/ci/get-unit-test-paths.sh windows | sed "s/\"//g" | sed 's/^//')
-    integration_test_path=$(bash ./scripts/ci/get-integration-test-paths.sh windows | sed "s/\"//g" | sed 's/^//')
+    unit_test_path=$(bash "$Scripts_Dir/$Test_Running_Script" ./test/unit_test/ windows | sed "s/\"//g" | sed 's/^//')
+    integration_test_path=$(bash "$Scripts_Dir/$Test_Running_Script" ./test/integration_test/ windows | sed "s/\"//g" | sed 's/^//')
 else
     test_path='error'
 fi
