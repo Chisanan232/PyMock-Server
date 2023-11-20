@@ -13,6 +13,7 @@ from pymock_api._utils.file_opt import YAML
 from pymock_api.model._sample import Mocked_APIs, Sample_Config_Value
 
 from .._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
+from .._spec import run_test
 from .._utils import Capturing
 from .._values import (
     _Base_URL,
@@ -21,7 +22,6 @@ from .._values import (
     _Test_Home,
     _YouTube_Home_Value,
 )
-from ._spec import run_test
 
 
 class CommandTestSpec(metaclass=ABCMeta):

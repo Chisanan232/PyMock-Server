@@ -16,8 +16,8 @@ from ..._file_utils import (
     json_factory,
     yaml_factory,
 )
+from ..._spec import run_test
 from ..._values import _Test_Config_Value
-from .._spec import run_test
 
 
 class _BaseTestSuite(metaclass=ABCMeta):

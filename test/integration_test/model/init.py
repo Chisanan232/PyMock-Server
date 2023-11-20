@@ -9,7 +9,7 @@ from pymock_api import APIConfig
 from pymock_api.model import load_config
 
 from ..._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
-from .._spec import run_test
+from ..._spec import run_test
 
 # [(under_test_path, expected_path)]
 DIVIDING_YAML_PATHS: List[tuple] = []

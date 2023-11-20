@@ -3,14 +3,13 @@ import json
 from functools import wraps
 from typing import Any, Callable, Type
 
-from .._file_utils import _BaseConfigFactory, file
-
 try:
     from yaml import CDumper as Dumper
 except ImportError:
     from yaml import Dumper  # type: ignore
 
-from .._values import _YouTube_API_Content
+from ._file_utils import _BaseConfigFactory, file
+from ._values import _YouTube_API_Content
 
 
 class run_test:
