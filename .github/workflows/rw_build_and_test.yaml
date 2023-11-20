@@ -18,6 +18,13 @@ jobs:
       shell_arg: test/integration_test/
 
 
+  prep_system-test:
+#    name: Prepare all system test items
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_get_tests.yaml@v5
+    with:
+      shell_arg: test/system_test/
+
+
   run_unit-test:
 #    name: Run all unit test items
     needs: prep_unit-test
@@ -36,10 +43,19 @@ jobs:
       all_test_items_paths: ${{needs.prep_integration-test.outputs.all_test_items}}
 
 
+  run_system-test:
+#    name: Run all system test items
+    needs: prep_system-test
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_poetry_run_test.yaml@v5
+    with:
+      test_type: system-test
+      all_test_items_paths: ${{needs.prep_system-test.outputs.all_test_items}}
+
+
   all_test_codecov:
 #    name: Organize and generate the testing report and upload it to Codecov
     if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
-    needs: [run_unit-test, run_integration-test]
+    needs: [run_unit-test, run_integration-test, run_system-test]
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_organize_test_cov_reports.yaml@v5
     with:
       test_type: all-test
