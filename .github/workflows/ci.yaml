@@ -74,7 +74,7 @@ jobs:
     with:
       test_type: all-test
       upload-to-codecov: true
-      codecov_flags: unit,integration  # Required if 'upload-to-codecov' is true
+      codecov_flags: unit,integration,system  # Required if 'upload-to-codecov' is true
       codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
 
 
