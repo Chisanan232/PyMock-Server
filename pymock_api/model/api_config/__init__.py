@@ -149,6 +149,10 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
 
         return api_info
 
+    @property
+    def _current_template_at_serialization(self) -> TemplateConfig:
+        return self.template
+
     def _set_serialized_data(
         self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str = ""
     ) -> None:

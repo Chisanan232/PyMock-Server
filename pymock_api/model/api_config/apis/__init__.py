@@ -8,7 +8,7 @@ from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Checkable, _Config
 from .._divide import _BeDividedable, _Dividable
-from ..template import TemplateAPI, TemplateHTTP, _TemplatableConfig
+from ..template import TemplateAPI, TemplateConfig, TemplateHTTP, _TemplatableConfig
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 
@@ -105,6 +105,10 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         )
 
         return serialized_data
+
+    @property
+    def _current_template_at_serialization(self) -> TemplateConfig:
+        return self._current_template
 
     def _set_serialized_data(
         self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str = ""
@@ -258,6 +262,10 @@ class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         serialized_data.update(updated_data)
 
         return serialized_data
+
+    @property
+    def _current_template_at_serialization(self) -> TemplateConfig:
+        return self._current_template
 
     def _set_serialized_data(
         self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str = ""

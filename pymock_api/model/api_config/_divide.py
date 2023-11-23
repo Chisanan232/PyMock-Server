@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict, Optional, Union
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
 from ._base import _Config
-from .template import _TemplatableConfig
+from .template import TemplateConfig, _TemplatableConfig
 
 
 @dataclass(eq=False)
@@ -45,20 +45,26 @@ class _Dividable(metaclass=ABCMeta):
 
     def _process_dividing_serialize(
         self,
-        data_modal: Union[_Config, _BeDividedable],
+        data_modal: Union[_Config, _BeDividedable, _TemplatableConfig],
         init_data: Dict[str, Any],
         api_name: str,
         tag: str = "",
         key: str = "",
         should_set_dividable_value_callback: Optional[Callable] = None,
     ) -> None:
-        assert isinstance(data_modal, _Config) and isinstance(data_modal, _BeDividedable)
+        assert (
+            isinstance(data_modal, _Config)
+            and isinstance(data_modal, _BeDividedable)
+            and isinstance(data_modal, _TemplatableConfig)
+        )
         # Pre-process
         if isinstance(data_modal, _Dividable):
             data_modal.dry_run = self.dry_run
         data_modal.api_name = api_name
         if tag:
             data_modal.tag = tag
+        # Set current template config again in serialization
+        data_modal._current_template = self._current_template_at_serialization
         # Run dividing serialization
         serialized_data = self.dividing_serialize(data=data_modal)
         # Set the dividing serialization if it needs
@@ -66,6 +72,11 @@ class _Dividable(metaclass=ABCMeta):
             should_set_dividable_value_callback = lambda: self.should_set_bedividedable_value
         if should_set_dividable_value_callback():
             self._set_serialized_data(init_data, serialized_data, key)
+
+    @property
+    @abstractmethod
+    def _current_template_at_serialization(self) -> TemplateConfig:
+        pass
 
     @abstractmethod
     def _set_serialized_data(
