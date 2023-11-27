@@ -98,7 +98,7 @@ class _Dividable(metaclass=ABCMeta):
             if self.save_data:
                 if tag_dir and not os.path.exists(tag_dir):
                     os.mkdir(tag_dir)
-                self._configuration.write(path=str(path), config=self.serialize_lower_layer(data=data))
+                self._configuration.write(path=str(path), config=self.serialize_lower_layer(data=data), mode="w+")
                 return
             else:
                 return str(path)

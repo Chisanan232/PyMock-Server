@@ -43,7 +43,7 @@ class SubCmdPullComponent(BaseSubCmdComponent):
 
     def _final_process(self, cmd_args: SubcmdPullArguments, serialized_api_config: Optional[Dict[str, Any]]) -> None:
         print("Write the API configuration to file ...")
-        self._file.write(path=cmd_args.config_path, config=serialized_api_config)
+        self._file.write(path=cmd_args.config_path, config=serialized_api_config, mode="w+")
         print(f"All configuration has been writen in file '{cmd_args.config_path}'.")
 
     def _dry_run_final_process(self, serialized_api_config: Optional[Dict[str, Any]]) -> None:
