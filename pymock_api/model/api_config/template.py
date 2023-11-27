@@ -381,7 +381,7 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         for path in all_paths:
             if os.path.isdir(path):
                 # Has tag as directory
-                for path_with_tag in glob.glob(f"{path}/{self._config_file_format}.yaml"):
+                for path_with_tag in glob.glob(str(pathlib.Path(path, self._config_file_format))):
                     # In the tag directory, it's config
                     self._deserialize_and_set_template_config(path_with_tag)
             else:
