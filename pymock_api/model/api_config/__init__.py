@@ -147,7 +147,11 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
             )
         api_info["apis"] = all_mocked_apis
 
-        return api_info
+        not_empty_api_config = {}
+        for k, v in api_info.items():
+            if v:
+                not_empty_api_config[k] = v
+        return not_empty_api_config
 
     @property
     def _current_template_at_serialization(self) -> TemplateConfig:
