@@ -291,11 +291,8 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         mock_api_config_name = os.path.basename(kwargs["path"]).replace(".yaml", "")
         format_rule_string = self._config_file_format.replace("**", "")
         mock_api_config_key = mock_api_config_name.replace(format_rule_string, "")
-        print(f"[DEBUG in MockAPIs._set_template_config] mock_api_config_key: {mock_api_config_key}")
-        print(f"[DEBUG in MockAPIs._set_template_config] self.apis: {self.apis}")
         # Set the data model in config
         self.apis[mock_api_config_key] = config
-        print(f"[DEBUG in MockAPIs._set_template_config] new self.apis: {self.apis}")
 
     def get_api_config_by_url(self, url: str, base: Optional[BaseConfig] = None) -> Optional[MockAPI]:
         url = url.replace(base.url, "") if base else url
