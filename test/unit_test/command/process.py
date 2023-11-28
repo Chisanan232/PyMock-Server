@@ -989,7 +989,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
                 if mock_parser_arg.dry_run:
                     FakeYAML.write.assert_not_called()
                 else:
-                    FakeYAML.write.assert_called_once_with(path=_Test_Config, config=expected_config_data)
+                    FakeYAML.write.assert_called_once_with(path=_Test_Config, config=expected_config_data, mode="w+")
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
