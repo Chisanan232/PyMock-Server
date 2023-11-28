@@ -46,7 +46,7 @@ class YAML(_BaseFileOperation):
             file_stream.writelines(yaml_content)
 
     def serialize(self, config: dict) -> str:
-        return dump(config, Dumper=Dumper)
+        return dump(config, Dumper=Dumper, sort_keys=False)
 
 
 class JSON(_BaseFileOperation):
