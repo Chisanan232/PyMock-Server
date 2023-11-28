@@ -21,6 +21,7 @@ from ..._values import (
     _Bind_Host_And_Port,
     _Cmd_Arg_API_Path,
     _Cmd_Arg_HTTP_Method,
+    _Default_Base_File_Path,
     _Default_Include_Template_Config,
     _Generate_Sample,
     _Log_Level,
@@ -211,6 +212,7 @@ class TestDeserialize:
             "source": _API_Doc_Source,
             "config_path": _Test_Config,
             "base_url": _Base_URL,
+            "base_file_path": _Default_Base_File_Path,
             "include_template_config": _Default_Include_Template_Config,
             "dry_run": _Test_Dry_Run,
             "divide_api": _Test_Divide_Api,
@@ -225,6 +227,8 @@ class TestDeserialize:
         assert arguments.request_with_https == _Test_Request_With_Https
         assert arguments.source == _API_Doc_Source
         assert arguments.config_path == _Test_Config
+        assert arguments.base_url == _Base_URL
+        assert arguments.base_file_path == _Default_Base_File_Path
         assert arguments.include_template_config == _Default_Include_Template_Config
         assert arguments.dry_run == _Test_Dry_Run
         assert arguments.divide_api == _Test_Divide_Api
