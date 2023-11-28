@@ -5,6 +5,7 @@ from ..._utils.api_client import URLLibHTTPClient
 from ...model import SwaggerConfig, deserialize_swagger_api_config
 from ...model.api_config import APIConfig, _DivideStrategy
 from ...model.cmd_args import SubcmdPullArguments
+from ...model.enums import ConfigLoadingOrder
 from ..component import BaseSubCmdComponent
 
 
@@ -31,7 +32,16 @@ class SubCmdPullComponent(BaseSubCmdComponent):
     def _serialize_api_config_with_cmd_args(
         self, cmd_args: SubcmdPullArguments, api_config: APIConfig
     ) -> Optional[Dict[str, Any]]:
+        # section *template*
         api_config.set_template_in_config = cmd_args.include_template_config
+        assert api_config.apis
+        api_config.apis.template.activate = True
+        order = api_config.apis.template.load_config.order
+        order.append(ConfigLoadingOrder.FILE)
+        api_config.apis.template.load_config.order = order
+        api_config.apis.template.values.base_file_path = cmd_args.base_file_path
+
+        # feature about dividing configuration
         api_config.dry_run = cmd_args.dry_run
         api_config.divide_strategy = _DivideStrategy(
             divide_api=cmd_args.divide_api,
@@ -39,6 +49,7 @@ class SubCmdPullComponent(BaseSubCmdComponent):
             divide_http_request=cmd_args.divide_http_request,
             divide_http_response=cmd_args.divide_http_response,
         )
+
         return api_config.serialize()
 
     def _final_process(self, cmd_args: SubcmdPullArguments, serialized_api_config: Optional[Dict[str, Any]]) -> None:
