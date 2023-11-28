@@ -107,7 +107,7 @@ class TestSubCmdPullComponent:
             template_config = TemplateConfig()
             # Set the base file path to let the test could run and save the result configuration under the target
             # directory
-            template_config.values.base_file_path = str(test_scenario_dir)
+            template_config.values.base_file_path = str(ut_dir)
             mock_mock_apis_template.return_value = template_config
 
             # Set the Swagger API reference data for testing
