@@ -65,6 +65,10 @@ class _Dividable(metaclass=ABCMeta):
             data_modal.tag = tag
         # Set current template config again in serialization
         data_modal._current_template = self._current_template_at_serialization
+        # Set current dividing strategy again in serialization
+        data_modal._divide_strategy = (
+            self.divide_strategy if hasattr(self, "divide_strategy") else self._divide_strategy
+        )
         # Run dividing serialization
         serialized_data = self.dividing_serialize(data=data_modal)
         # Set the dividing serialization if it needs
