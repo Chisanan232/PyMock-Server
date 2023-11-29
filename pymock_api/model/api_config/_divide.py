@@ -61,8 +61,7 @@ class _Dividable(metaclass=ABCMeta):
         if isinstance(data_modal, _Dividable):
             data_modal.dry_run = self.dry_run
         data_modal.api_name = api_name
-        if tag:
-            data_modal.tag = tag
+        data_modal.tag = tag if tag else ""
         # Set current template config again in serialization
         data_modal._current_template = self._current_template_at_serialization
         # Set current dividing strategy again in serialization
