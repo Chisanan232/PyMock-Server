@@ -143,6 +143,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
                 init_data=all_mocked_apis,
                 data_modal=api_config,
                 api_name=api_name,
+                tag=api_config.tag,
                 key=api_name,
             )
         api_info["apis"] = all_mocked_apis
