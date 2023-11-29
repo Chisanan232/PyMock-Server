@@ -25,6 +25,10 @@ SubCmdPullTestArgs = namedtuple(
     (
         "base_url",
         "include_template_config",
+        "divide_api",
+        "divide_http",
+        "divide_http_request",
+        "divide_http_response",
     ),
 )
 
@@ -42,6 +46,7 @@ def _get_all_yaml_for_dividing() -> None:
 
     different_scenarios_data_folder = os.listdir(_get_path())
     for f in different_scenarios_data_folder:
+        test_cmd_opt_arg = _divide_chk(f)
         swagger_api = _get_path(scenario_folder=f, yaml_file_naming="swagger_api.json")
         expected_yaml_dir = _get_path(scenario_folder=f, yaml_file_naming="expect_config/api.yaml")
         global DIVIDING_YAML_PATHS
@@ -56,9 +61,35 @@ def _get_all_yaml_for_dividing() -> None:
                 include_template_config = True
             else:
                 include_template_config = False
-            cmd_arg = SubCmdPullTestArgs(base_url=base_url, include_template_config=include_template_config)
+            test_cmd_opt_arg.update(
+                {
+                    "base_url": base_url,
+                    "include_template_config": include_template_config,
+                }
+            )
+            cmd_arg = SubCmdPullTestArgs(**test_cmd_opt_arg)
             one_test_scenario = (swagger_api_resp_path, cmd_arg, expected_yaml_config_path)
             DIVIDING_YAML_PATHS.append(one_test_scenario)
+
+
+def _divide_chk(test_scenario_dir: str) -> dict:
+    cmd_divide_arg = {
+        "divide_api": False,
+        "divide_http": False,
+        "divide_http_request": False,
+        "divide_http_response": False,
+    }
+
+    def _set_val(key: str) -> None:
+        if key in test_scenario_dir:
+            cmd_divide_arg[f"divide_{key}"] = True
+
+    _set_val("api")
+    _set_val("http")
+    _set_val("http_request")
+    _set_val("http_response")
+
+    return cmd_divide_arg
 
 
 _get_all_yaml_for_dividing()
@@ -78,6 +109,7 @@ class TestSubCmdPullComponent:
         sub_cmd: SubCmdPullComponent,
     ):
         # Given command line argument
+        print(f"[DEBUG in test] cmd_arg: {cmd_arg}")
         test_scenario_dir = pathlib.Path(swagger_api_resp_path).parent
         ut_dir = pathlib.Path(test_scenario_dir, "under_test")
         if not ut_dir.exists():
@@ -92,10 +124,10 @@ class TestSubCmdPullComponent:
             include_template_config=cmd_arg.include_template_config,
             base_file_path=str(ut_dir),
             dry_run=False,
-            divide_api=True,
-            divide_http=False,
-            divide_http_request=False,
-            divide_http_response=False,
+            divide_api=cmd_arg.divide_api,
+            divide_http=cmd_arg.divide_http,
+            divide_http_request=cmd_arg.divide_http_request,
+            divide_http_response=cmd_arg.divide_http_response,
         )
 
         with open(swagger_api_resp_path, "r") as file:
