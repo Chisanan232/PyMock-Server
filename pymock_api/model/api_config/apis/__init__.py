@@ -91,28 +91,39 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         assert serialized_data is not None
 
         # Set HTTP request and HTTP response data modal
-        self._current_section = "request"
-        self._process_dividing_serialize(
+        self._process_dividing_serialize_http_props(
             init_data=serialized_data,
             data_modal=req,
             key="request",
-            api_name=self.api_name,
-            tag=self.tag,
             should_set_dividable_value_callback=lambda: self.should_set_bedividedable_value
             and not self._divide_strategy.divide_http_request,
         )
-        self._current_section = "response"
-        self._process_dividing_serialize(
+        self._process_dividing_serialize_http_props(
             init_data=serialized_data,
             data_modal=resp,
             key="response",
-            api_name=self.api_name,
-            tag=self.tag,
             should_set_dividable_value_callback=lambda: self.should_set_bedividedable_value
             and not self._divide_strategy.divide_http_response,
         )
 
         return serialized_data
+
+    def _process_dividing_serialize_http_props(
+        self,
+        data_modal: Union[_Config, _BeDividedable, _TemplatableConfig],
+        init_data: Dict[str, Any],
+        key: str = "",
+        should_set_dividable_value_callback: Optional[Callable] = None,
+    ) -> None:
+        self._current_section = key
+        self._process_dividing_serialize(
+            init_data=init_data,
+            data_modal=data_modal,
+            key=key,
+            api_name=self.api_name,
+            tag=self.tag,
+            should_set_dividable_value_callback=should_set_dividable_value_callback,
+        )
 
     @property
     def _current_template_at_serialization(self) -> TemplateConfig:
