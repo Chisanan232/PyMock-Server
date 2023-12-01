@@ -80,14 +80,15 @@ def _divide_chk(test_scenario_dir: str) -> dict:
         "divide_http_response": False,
     }
 
-    def _set_val(key: str) -> None:
+    def _set_val(key: str, cmd_key: str = "") -> None:
         if key in test_scenario_dir:
-            cmd_divide_arg[f"divide_{key}"] = True
+            cmd_divide_key = cmd_key if cmd_key else key
+            cmd_divide_arg[f"divide_{cmd_divide_key}"] = True
 
     _set_val("api")
     _set_val("http")
-    _set_val("http_request")
-    _set_val("http_response")
+    _set_val("request", "http_request")
+    _set_val("response", "http_response")
 
     return cmd_divide_arg
 
