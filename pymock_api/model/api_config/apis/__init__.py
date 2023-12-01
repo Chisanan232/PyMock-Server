@@ -25,6 +25,8 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
     _request: Optional[HTTPRequest] = field(init=False, repr=False)
     _response: Optional[HTTPResponse] = field(init=False, repr=False)
 
+    _current_section: str = field(init=False, repr=False)
+
     def _compare(self, other: "HTTP") -> bool:
         templatable_config = super()._compare(other)
         return templatable_config and self.request == other.request and self.response == other.response
@@ -73,7 +75,11 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
 
     @property
     def should_divide(self) -> bool:
-        return self._divide_strategy.divide_http_request or self._divide_strategy.divide_http_response
+        if self._current_section.lower() == "request":
+            return self._divide_strategy.divide_http_request
+        if self._current_section.lower() == "response":
+            return self._divide_strategy.divide_http_response
+        raise ValueError("Inner property *HTTP._current_section* value must to be *request* or *response*.")
 
     def serialize(self, data: Optional["HTTP"] = None) -> Optional[Dict[str, Any]]:
         req = (data or self).request if (data and data.request) or self.request else None
@@ -85,6 +91,7 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         assert serialized_data is not None
 
         # Set HTTP request and HTTP response data modal
+        self._current_section = "request"
         self._process_dividing_serialize(
             init_data=serialized_data,
             data_modal=req,
@@ -94,6 +101,7 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
             should_set_dividable_value_callback=lambda: self.should_set_bedividedable_value
             and not self._divide_strategy.divide_http_request,
         )
+        self._current_section = "response"
         self._process_dividing_serialize(
             init_data=serialized_data,
             data_modal=resp,
