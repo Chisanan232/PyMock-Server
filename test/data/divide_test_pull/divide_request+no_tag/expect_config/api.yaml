@@ -11,7 +11,7 @@ mocked_apis:
         - 'apply'
         - 'file'
     values:
-      base_file_path: './test/data/divide_test_pull/divide_http+no_tag/'
+      base_file_path: './test/data/divide_test_pull/divide_request+no_tag/expect_config'
       api:
         config_path_format: '**-api'
       http:
