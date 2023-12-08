@@ -225,9 +225,8 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         template_info = data.get("template", {})
         if not template_info:
             self._need_template_in_config = False
-        template_config = TemplateConfig()
-        template_config.absolute_model_key = self.key
-        self.template = template_config.deserialize(data=template_info)
+        self.template.absolute_model_key = self.key
+        self.template.deserialize(data=template_info)
 
         # Processing section *base*
         base_info = data.get("base", None)
