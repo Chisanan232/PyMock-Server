@@ -160,8 +160,12 @@ class TestSubCmdPullComponent:
                 ut_config_data_modal = load_config(ut_config_path)
                 assert ut_config_data_modal
                 assert expected_config_data_modal
+
+                # Basic configuration
                 assert ut_config_data_modal.name == expected_config_data_modal.name
                 assert ut_config_data_modal.description == expected_config_data_modal.description
+
+                # mock APIs configuration
                 assert ut_config_data_modal.apis
                 assert expected_config_data_modal.apis
                 assert ut_config_data_modal.apis == expected_config_data_modal.apis
