@@ -158,14 +158,14 @@ class TestSubCmdPullComponent:
                 # Verify
                 mock_swagger_request.assert_called_once()
                 ut_config_data_modal = load_config(ut_config_path)
-                assert ut_config_data_modal
-                assert expected_config_data_modal
+                assert ut_config_data_modal is not None
+                assert expected_config_data_modal is not None
 
                 # Basic configuration
                 assert ut_config_data_modal.name == expected_config_data_modal.name
                 assert ut_config_data_modal.description == expected_config_data_modal.description
 
                 # mock APIs configuration
-                assert ut_config_data_modal.apis
-                assert expected_config_data_modal.apis
+                assert ut_config_data_modal.apis is not None
+                assert expected_config_data_modal.apis is not None
                 assert ut_config_data_modal.apis == expected_config_data_modal.apis
