@@ -43,7 +43,8 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         self._base = base
         self._apis = apis
 
-        self.divide_strategy = _DivideStrategy()
+        self.divide_strategy: _DivideStrategy = _DivideStrategy()
+        self.is_pull: bool = False
 
     def __len__(self):
         return len(self.apis.keys())
@@ -345,6 +346,8 @@ class APIConfig(_Config, _Checkable):
         self._description = description
         self._apis = apis
 
+        self.is_pull: bool = False
+
     def __len__(self):
         return len(self._apis) if self._apis else 0
 
@@ -515,6 +518,7 @@ class APIConfig(_Config, _Checkable):
         mock_apis_data_model.config_file_name = self.config_file_name
         mock_apis_data_model.absolute_model_key = self.key
         mock_apis_data_model.divide_strategy = self._divide_strategy
+        mock_apis_data_model.is_pull = self.is_pull
         self.apis = mock_apis_data_model.deserialize(data=mocked_apis)
 
         return self

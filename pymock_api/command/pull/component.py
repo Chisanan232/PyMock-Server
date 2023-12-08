@@ -32,9 +32,12 @@ class SubCmdPullComponent(BaseSubCmdComponent):
     def _serialize_api_config_with_cmd_args(
         self, cmd_args: SubcmdPullArguments, api_config: APIConfig
     ) -> Optional[Dict[str, Any]]:
+        api_config.is_pull = True
+
         # section *template*
         api_config.set_template_in_config = cmd_args.include_template_config
         assert api_config.apis
+        assert api_config.apis.template
         api_config.apis.template.activate = True
         order = api_config.apis.template.load_config.order
         order.append(ConfigLoadingOrder.FILE)
