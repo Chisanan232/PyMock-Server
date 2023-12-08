@@ -25,7 +25,7 @@ from .template import TemplateConfig, TemplateConfigLoadable, _TemplatableConfig
 class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
     """*The **mocked_apis** section*"""
 
-    _template: TemplateConfig
+    _template: Optional[TemplateConfig]
     _base: Optional[BaseConfig]
     _apis: Dict[str, Optional[MockAPI]]
 
@@ -39,7 +39,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         apis: Dict[str, Optional[MockAPI]] = {},
     ):
         super().__init__()
-        self._template = TemplateConfig() if template is None else template
+        self._template = template
         self._base = base
         self._apis = apis
 
@@ -56,7 +56,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         return "mocked_apis"
 
     @property
-    def template(self) -> TemplateConfig:
+    def template(self) -> Optional[TemplateConfig]:
         return self._template
 
     @template.setter
@@ -124,11 +124,11 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         template = (data.template if data else None) or self.template
         base = (data.base if data else None) or self.base
         apis = (data.apis if data else None) or self.apis
-        if not (base and apis):
+        if not (template and base and apis):
             return None
 
         # Process section *base*
-        api_info = {
+        api_info: dict = {
             "base": BaseConfig().serialize(data=base),
             "apis": {},
         }
@@ -156,6 +156,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
 
     @property
     def _current_template_at_serialization(self) -> TemplateConfig:
+        assert self.template
         return self.template
 
     def _set_serialized_data(
@@ -225,8 +226,10 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         template_info = data.get("template", {})
         if not template_info:
             self._need_template_in_config = False
-        self.template.absolute_model_key = self.key
-        self.template.deserialize(data=template_info)
+        template_config = TemplateConfig()
+        template_config.absolute_model_key = self.key
+        template_config.deserialize(data=template_info)
+        self.template = template_config
 
         # Processing section *base*
         base_info = data.get("base", None)
@@ -240,6 +243,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         return self
 
     def is_work(self) -> bool:
+        assert self.template
         under_check = {
             f"{self.absolute_model_key}.<API name>": self.apis,
             self.template.absolute_model_key: self.template,
@@ -274,14 +278,17 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
 
     @property
     def _template_config(self) -> TemplateConfig:
+        assert self.template
         return self.template
 
     @property
     def _config_file_format(self) -> str:
+        assert self.template
         return self.template.values.api.config_path_format
 
     @property
     def _deserialize_as_template_config(self) -> MockAPI:
+        assert self.template
         mock_api = MockAPI(_current_template=self.template)
         mock_api.absolute_model_key = self.key
         return mock_api
