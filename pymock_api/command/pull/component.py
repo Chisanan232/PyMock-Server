@@ -5,7 +5,6 @@ from ..._utils.api_client import URLLibHTTPClient
 from ...model import SwaggerConfig, deserialize_swagger_api_config
 from ...model.api_config import APIConfig, _DivideStrategy
 from ...model.cmd_args import SubcmdPullArguments
-from ...model.enums import ConfigLoadingOrder
 from ..component import BaseSubCmdComponent
 
 
@@ -36,13 +35,7 @@ class SubCmdPullComponent(BaseSubCmdComponent):
 
         # section *template*
         api_config.set_template_in_config = cmd_args.include_template_config
-        assert api_config.apis
-        assert api_config.apis.template
-        api_config.apis.template.activate = True
-        order = api_config.apis.template.load_config.order
-        order.append(ConfigLoadingOrder.FILE)
-        api_config.apis.template.load_config.order = order
-        api_config.apis.template.values.base_file_path = cmd_args.base_file_path
+        api_config.base_file_path = cmd_args.base_file_path
 
         # feature about dividing configuration
         api_config.dry_run = cmd_args.dry_run

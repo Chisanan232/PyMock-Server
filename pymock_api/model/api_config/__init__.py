@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
+from ..enums import ConfigLoadingOrder
 from ._base import _Checkable, _Config
 from ._divide import _BeDividedable, _Dividable, _DivideStrategy
 from .apis import (
@@ -45,6 +46,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
 
         self.divide_strategy: _DivideStrategy = _DivideStrategy()
         self.is_pull: bool = False
+        self._base_file_path: str = ""
 
     def __len__(self):
         return len(self.apis.keys())
@@ -55,6 +57,14 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
     @property
     def key(self) -> str:
         return "mocked_apis"
+
+    @property
+    def base_file_path(self) -> str:
+        return self._base_file_path
+
+    @base_file_path.setter
+    def base_file_path(self, p: str) -> None:
+        self._base_file_path = p
 
     @property
     def template(self) -> Optional[TemplateConfig]:
@@ -229,6 +239,12 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
             self._need_template_in_config = False
         template_config = TemplateConfig()
         template_config.absolute_model_key = self.key
+        if self.is_pull:
+            template_config.activate = True
+            order = template_config.load_config.order
+            order.append(ConfigLoadingOrder.FILE)
+            template_config.load_config.order = order
+            template_config.values.base_file_path = self.base_file_path
         template_config.deserialize(data=template_info)
         self.template = template_config
 
@@ -347,6 +363,7 @@ class APIConfig(_Config, _Checkable):
         self._apis = apis
 
         self.is_pull: bool = False
+        self._base_file_path: str = ""
 
     def __len__(self):
         return len(self._apis) if self._apis else 0
@@ -428,6 +445,14 @@ class APIConfig(_Config, _Checkable):
     @config_file_name.setter
     def config_file_name(self, n: str) -> None:
         self._config_file_name = n
+
+    @property
+    def base_file_path(self) -> str:
+        return self._base_file_path
+
+    @base_file_path.setter
+    def base_file_path(self, p: str) -> None:
+        self._base_file_path = p
 
     def serialize(self, data: Optional["APIConfig"] = None) -> Optional[Dict[str, Any]]:
         name = (data.name if data else None) or self.name
@@ -519,6 +544,7 @@ class APIConfig(_Config, _Checkable):
         mock_apis_data_model.absolute_model_key = self.key
         mock_apis_data_model.divide_strategy = self._divide_strategy
         mock_apis_data_model.is_pull = self.is_pull
+        mock_apis_data_model.base_file_path = self.base_file_path
         self.apis = mock_apis_data_model.deserialize(data=mocked_apis)
 
         return self
