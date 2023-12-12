@@ -167,6 +167,20 @@ class TemplateValues(_Config, _Checkable):
     def key(self) -> str:
         return "values"
 
+    @property
+    def all_values(self) -> List[str]:
+        return list(
+            map(
+                lambda v: v.config_path_format,
+                [
+                    self.api,
+                    self.http,
+                    self.request,
+                    self.response,
+                ],
+            )
+        )
+
     def serialize(self, data: Optional["TemplateValues"] = None) -> Optional[Dict[str, Any]]:
         base_file_path: str = self._get_prop(data, prop="base_file_path")
         api = self.api or self._get_prop(data, prop="api")
@@ -381,12 +395,15 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         for path in all_paths:
             if os.path.isdir(path):
                 # Has tag as directory
-                for path_with_tag in glob.glob(str(pathlib.Path(path, self._config_file_format))):
+                for path_with_tag in glob.glob(str(pathlib.Path(path, f"{self._config_file_format}.yaml"))):
                     # In the tag directory, it's config
                     self._deserialize_and_set_template_config(path_with_tag)
             else:
                 assert os.path.isfile(path) is True
-                if fnmatch.fnmatch(path, self._config_file_format):
+                fn_match = list(
+                    map(lambda v: fnmatch.fnmatch(path, f"{v}.yaml"), self._template_config.values.all_values)
+                )
+                if True in fn_match:
                     # Doesn't have tag, it's config
                     self._deserialize_and_set_template_config(path)
 
