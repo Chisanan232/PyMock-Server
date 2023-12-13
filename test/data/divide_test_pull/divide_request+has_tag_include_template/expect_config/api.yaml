@@ -12,13 +12,13 @@ mocked_apis:
     values:
       base_file_path: './test/data/divide_test_pull/divide_request+has_tag_include_template/expect_config'    # Default value should be current path './'
       api:
-        config_path_format: '**-api'    # ex. ./foo/get_foo.yaml
+        config_path_format: '**-api.yaml'    # ex. ./foo/get_foo.yaml
       http:
-        config_path_format: '**-http'
+        config_path_format: '**-http.yaml'
       request:
-        config_path_format: '**-request'
+        config_path_format: '**-request.yaml'
       response:
-        config_path_format: '**-response'
+        config_path_format: '**-response.yaml'
     apply:    # Which mocked APIs should apply template values
       api:    # Which mocked APIs should apply template values to its entire settings includes URL, request and response
         - foo:    # If it has tag, it could set the tag name as key and set the target APIs as list type value of the key

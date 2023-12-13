@@ -13,13 +13,13 @@ mocked_apis:
     values:
       base_file_path: './test/data/divide_test_load/has-base-info_divide_http_test/'
       api:
-        config_path_format: '**-api'
+        config_path_format: '**-api.yaml'    # ex. ./foo/get_foo.yaml
       http:
-        config_path_format: '**-http'
+        config_path_format: '**-http.yaml'
       request:
-        config_path_format: '**-request'
+        config_path_format: '**-request.yaml'
       response:
-        config_path_format: '**-response'
+        config_path_format: '**-response.yaml'
     apply:
       api:
         - get_foo
