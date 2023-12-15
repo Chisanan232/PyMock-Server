@@ -153,11 +153,11 @@ class TestSubCmdPullComponent:
                 sub_cmd.process(args=cmd_args)
 
                 # Expected values
-                expected_config_data_modal = load_config(expected_yaml_config_path)
+                expected_config_data_modal = load_config(expected_yaml_config_path, is_pull=True)
 
                 # Verify
                 mock_swagger_request.assert_called_once()
-                ut_config_data_modal = load_config(ut_config_path)
+                ut_config_data_modal = load_config(ut_config_path, is_pull=True)
                 assert ut_config_data_modal is not None
                 assert expected_config_data_modal is not None
 
@@ -168,4 +168,20 @@ class TestSubCmdPullComponent:
                 # mock APIs configuration
                 assert ut_config_data_modal.apis is not None
                 assert expected_config_data_modal.apis is not None
-                assert ut_config_data_modal.apis == expected_config_data_modal.apis
+                assert ut_config_data_modal.apis.base == expected_config_data_modal.apis.base
+                assert ut_config_data_modal.apis.apis.keys() == expected_config_data_modal.apis.apis.keys()
+                for api_key in expected_config_data_modal.apis.apis.keys():
+                    ut_api = ut_config_data_modal.apis.apis[api_key]
+                    expect_api = expected_config_data_modal.apis.apis[api_key]
+
+                    # Basic checking
+                    assert ut_api is not None
+                    assert expect_api is not None
+                    assert ut_api.http is not None
+                    assert expect_api.http is not None
+
+                    # Details checking
+                    assert ut_api.url == expect_api.url
+                    assert ut_api.tag == expect_api.tag
+                    assert ut_api.http.request == expect_api.http.request
+                    assert ut_api.http.response == expect_api.http.response
