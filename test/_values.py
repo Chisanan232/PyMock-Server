@@ -37,7 +37,7 @@ _Mock_API_HTTP: dict = {
 
 def generate_mock_template(tail_naming: str = "") -> dict:
     return {
-        "config_path_format": "**.yaml" if not tail_naming else ("**" + f"-{tail_naming}" + ".yaml"),
+        "config_path_format": "**.yaml" if not tail_naming else f"**-{tail_naming}.yaml",
     }
 
 
