@@ -20,7 +20,7 @@ class LoadConfig(_Config, _Checkable):
     _absolute_key: str = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
-        self._default_order = [ConfigLoadingOrder.APIs]
+        self._default_order = [o for o in ConfigLoadingOrder]
         self._convert_order()
 
     def _convert_order(self) -> None:
@@ -392,17 +392,23 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         api_config_path = str(pathlib.Path(config_base_path, self.config_file_name))
         if os.path.exists(api_config_path):
             all_paths.remove(api_config_path)
+        print(f"[DEBUG in _load_templatable_config] all_paths: {all_paths}")
         for path in all_paths:
+            print(f"[DEBUG in _load_templatable_config] path: {path}")
+            print(f"[DEBUG in _load_templatable_config] self._config_file_format: {self._config_file_format}")
+            print(
+                f"[DEBUG in _load_templatable_config] self._template_config.values.all_values: {self._template_config.values.all_values}"
+            )
             if os.path.isdir(path):
                 # Has tag as directory
-                for path_with_tag in glob.glob(str(pathlib.Path(path, f"{self._config_file_format}.yaml"))):
+                for path_with_tag in glob.glob(str(pathlib.Path(path, self._config_file_format))):
+                    print(f"[DEBUG in _load_templatable_config] path_with_tag: {path_with_tag}")
                     # In the tag directory, it's config
                     self._deserialize_and_set_template_config(path_with_tag)
             else:
                 assert os.path.isfile(path) is True
-                fn_match = list(
-                    map(lambda v: fnmatch.fnmatch(path, f"{v}.yaml"), self._template_config.values.all_values)
-                )
+                fn_match = list(map(lambda v: fnmatch.fnmatch(path, v), self._template_config.values.all_values))
+                print(f"[DEBUG in _load_templatable_config] fn_match: {fn_match}")
                 if True in fn_match:
                     # Doesn't have tag, it's config
                     self._deserialize_and_set_template_config(path)
@@ -418,7 +424,7 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
                 for api in apply_apis:
                     assert isinstance(api, str)
                     api_config = config_path_format.replace("**", api)
-                    config_path = str(pathlib.Path(config_base_path, f"{api_config}.yaml"))
+                    config_path = str(pathlib.Path(config_base_path, api_config))
                     self._deserialize_and_set_template_config(config_path)
             else:
                 # API with tag
@@ -427,7 +433,7 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
                     for tag, apis in tag_apis.items():
                         for api in apis:
                             api_config = config_path_format.replace("**", api)
-                            config_path = str(pathlib.Path(config_base_path, tag, f"{api_config}.yaml"))
+                            config_path = str(pathlib.Path(config_base_path, tag, api_config))
                             self._deserialize_and_set_template_config(config_path)
 
     @property
