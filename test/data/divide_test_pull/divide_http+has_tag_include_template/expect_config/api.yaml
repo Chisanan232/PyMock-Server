@@ -34,6 +34,6 @@ mocked_apis:
     put_foo:
       url: /foo
       tag: foo
-    get_foo_boo_export:
+    get_foo-boo_export:
       url: /foo-boo/export
       tag: foo-boo

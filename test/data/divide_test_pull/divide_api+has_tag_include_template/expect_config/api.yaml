@@ -22,6 +22,7 @@ mocked_apis:
       api:    # Which mocked APIs should apply template values to its entire settings includes URL, request and response
         - foo:    # If it has tag, it could set the tag name as key and set the target APIs as list type value of the key
           - get_foo
+          - put_foo
         - foo-boo:
           - get_foo-boo_export
   base:

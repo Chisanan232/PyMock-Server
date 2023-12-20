@@ -79,7 +79,7 @@ mocked_apis:
               required: False
               type: list
               format:
-    get_foo_boo_export:
+    get_foo-boo_export:
       url: /foo-boo/export
       tag: foo-boo
       http:

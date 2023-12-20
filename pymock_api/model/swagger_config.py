@@ -399,6 +399,4 @@ class SwaggerConfig(Transferable):
         return base_url
 
     def _generate_api_key(self, base_url: str, swagger_api: API) -> str:
-        return "_".join(
-            [swagger_api.http_method, swagger_api.path.replace(base_url, "")[1:].replace("/", "_").replace("-", "_")]
-        )
+        return "_".join([swagger_api.http_method, swagger_api.path.replace(base_url, "")[1:].replace("/", "_")])
