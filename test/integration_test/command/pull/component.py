@@ -170,7 +170,7 @@ class TestSubCmdPullComponent:
                 assert expected_config_data_modal.apis is not None
                 assert ut_config_data_modal.apis.base == expected_config_data_modal.apis.base
                 assert ut_config_data_modal.apis.apis.keys() == expected_config_data_modal.apis.apis.keys()
-                for api_key in expected_config_data_modal.apis.apis.keys():
+                for api_key in ut_config_data_modal.apis.apis.keys():
                     ut_api = ut_config_data_modal.apis.apis[api_key]
                     expect_api = expected_config_data_modal.apis.apis[api_key]
 
@@ -179,9 +179,17 @@ class TestSubCmdPullComponent:
                     assert expect_api is not None
                     assert ut_api.http is not None
                     assert expect_api.http is not None
+                    assert ut_api.http.request is not None
+                    assert ut_api.http.response is not None
+                    assert expect_api.http.request is not None
+                    assert expect_api.http.response is not None
 
                     # Details checking
                     assert ut_api.url == expect_api.url
                     assert ut_api.tag == expect_api.tag
-                    assert ut_api.http.request == expect_api.http.request
-                    assert ut_api.http.response == expect_api.http.response
+                    assert ut_api.http.request.method == expect_api.http.request.method
+                    assert ut_api.http.request.parameters == expect_api.http.request.parameters
+                    assert ut_api.http.response.strategy == expect_api.http.response.strategy
+                    assert ut_api.http.response.value == expect_api.http.response.value
+                    assert ut_api.http.response.path == expect_api.http.response.path
+                    assert ut_api.http.response.properties == expect_api.http.response.properties
