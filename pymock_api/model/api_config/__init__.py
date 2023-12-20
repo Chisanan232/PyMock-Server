@@ -72,7 +72,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
 
     @template.setter
     def template(self, template: Union[dict, TemplateConfig]) -> None:
-        if template:
+        if template is not None:
             if isinstance(template, dict):
                 self._template = TemplateConfig().deserialize(data=template)
             elif isinstance(template, TemplateConfig):
@@ -86,7 +86,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
 
     @base.setter
     def base(self, base: Union[dict, BaseConfig]) -> None:
-        if base:
+        if base is not None:
             if isinstance(base, dict):
                 self._base = BaseConfig().deserialize(data=base)
             elif isinstance(base, BaseConfig):
@@ -102,7 +102,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
 
     @apis.setter
     def apis(self, apis: Dict[str, Union[dict, MockAPI]]) -> None:
-        if apis:
+        if apis is not None:
             if not isinstance(apis, dict):
                 raise TypeError("Setter *MockAPIs.apis* only accepts dict or MockAPI type object.")
 
@@ -312,7 +312,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         # Read YAML config
         mock_api_config_name = os.path.basename(kwargs["path"])
         format_rule_string = self._config_file_format.replace("**", "")
-        mock_api_config_key = mock_api_config_name.replace(format_rule_string, "").replace("-", "_")
+        mock_api_config_key = mock_api_config_name.replace(format_rule_string, "")
         # Set the data model in config
         self.apis[mock_api_config_key] = config
 
@@ -402,7 +402,7 @@ class APIConfig(_Config, _Checkable):
 
     @apis.setter
     def apis(self, apis: Union[dict, MockAPIs]) -> None:
-        if apis:
+        if apis is not None:
             if isinstance(apis, dict):
                 self._apis = MockAPIs().deserialize(data=apis)
             elif isinstance(apis, MockAPIs):

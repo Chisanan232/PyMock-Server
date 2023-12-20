@@ -8,7 +8,13 @@ from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Checkable, _Config
 from .._divide import _BeDividedable, _Dividable
-from ..template import TemplateAPI, TemplateConfig, TemplateHTTP, _TemplatableConfig
+from ..template import (
+    TemplateAPI,
+    TemplateConfig,
+    TemplateConfigLoadable,
+    TemplateHTTP,
+    _TemplatableConfig,
+)
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 
@@ -41,7 +47,7 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
 
     @request.setter
     def request(self, req: Union[dict, HTTPRequest]) -> None:
-        if req:
+        if req is not None:
             if isinstance(req, dict):
                 self._request = HTTPRequest().deserialize(data=req)
             elif isinstance(req, HTTPRequest):
@@ -60,7 +66,7 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
 
     @response.setter
     def response(self, resp: Union[dict, HTTPResponse]) -> None:
-        if resp:
+        if resp is not None:
             if isinstance(resp, dict):
                 self._response = HTTPResponse().deserialize(data=resp)
             elif isinstance(resp, HTTPResponse):
@@ -227,7 +233,7 @@ class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
 
     @http.setter
     def http(self, http: Union[dict, HTTP]) -> None:
-        if http:
+        if http is not None:
             if isinstance(http, dict):
                 self._http = HTTP().deserialize(data=http)
             elif isinstance(http, HTTP):
