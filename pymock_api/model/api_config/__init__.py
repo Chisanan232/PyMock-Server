@@ -107,7 +107,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
                 raise TypeError("Setter *MockAPIs.apis* only accepts dict or MockAPI type object.")
 
             ele_types = set(list(map(lambda v: isinstance(v, MockAPI), apis.values())))
-            if len(ele_types) != 1:
+            if len(ele_types) > 1:
                 raise ValueError("It has multiple types of the data content. Please unify these objects data type.")
 
             if False in ele_types:
