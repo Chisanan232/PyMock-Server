@@ -20,7 +20,7 @@ from .response import HTTPResponse, ResponseProperty
 
 
 @dataclass(eq=False)
-class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
+class HTTP(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDividedable, _Dividable):
     """*The **http** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-http"
@@ -174,8 +174,16 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
 
         req = data.get("request", None)
         resp = data.get("response", None)
-        self.request = self._deserialize_as(HTTPRequest, with_data=req)  # type: ignore[assignment]
-        self.response = self._deserialize_as(HTTPResponse, with_data=resp)  # type: ignore[assignment]
+        if req:
+            self.request = self._deserialize_as(HTTPRequest, with_data=req)  # type: ignore[assignment]
+        else:
+            self._current_section = "request"
+            self._load_templatable_config()
+        if resp:
+            self.response = self._deserialize_as(HTTPResponse, with_data=resp)  # type: ignore[assignment]
+        else:
+            self._current_section = "response"
+            self._load_templatable_config()
         return self
 
     @property
@@ -196,9 +204,44 @@ class HTTP(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         self.response.stop_if_fail = self.stop_if_fail
         return self.request.is_work() and self.response.is_work()
 
+    @property
+    def _template_config(self) -> TemplateConfig:
+        return self._current_template
+
+    @property
+    def _config_file_format(self) -> str:
+        if self._current_section.lower() == "request":
+            return self._current_template.values.request.config_path_format
+        if self._current_section.lower() == "response":
+            return self._current_template.values.response.config_path_format
+        raise ValueError(
+            "Inner property *HTTPRequest._current_section*, *HTTPResponse._current_section* value must to be *request*"
+            " or *response*."
+        )
+
+    @property
+    def _deserialize_as_template_config(self) -> Union[HTTPRequest, HTTPResponse]:
+        if self._current_section.lower() == "request":
+            http_prop = HTTPRequest(_current_template=self._current_template)
+        if self._current_section.lower() == "response":
+            http_prop = HTTPResponse(_current_template=self._current_template)  # type: ignore[assignment]
+        http_prop.absolute_model_key = self.key
+        return http_prop
+
+    def _set_template_config(self, config: _Config, **kwargs) -> None:
+        # Set the data model in config
+        if self._current_section.lower() == "request":
+            self.request = config  # type: ignore[assignment]
+        if self._current_section.lower() == "response":
+            self.response = config  # type: ignore[assignment]
+
+    def _set_mocked_apis(self, api_key: str = "", api_config: Optional[_Config] = None) -> None:
+        # FIXME: Should not be an abstract method force every data modal to implement it
+        pass
+
 
 @dataclass(eq=False)
-class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
+class MockAPI(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDividedable, _Dividable):
     """*The **<api>** section in **mocked_apis***"""
 
     config_file_tail: str = "-api"
@@ -332,8 +375,13 @@ class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
         super().deserialize(data)
 
         self.url = data.get("url", None)
-        http_info = data.get("http", None)
-        self.http = self._deserialize_as(HTTP, with_data=http_info)  # type: ignore[assignment]
+        http_info = data.get("http", {})
+        if http_info:
+            self.http = self._deserialize_as(HTTP, with_data=http_info)  # type: ignore[assignment]
+        else:
+            self._load_templatable_config()
+        assert self.http
+        self.http._current_template = self._current_template
         self.tag = data.get("tag", "")
         return self
 
@@ -421,3 +469,25 @@ class MockAPI(_TemplatableConfig, _Checkable, _BeDividedable, _Dividable):
             return YAML().serialize(_ensure_getting_serialized_data())
         else:
             raise ValueError(f"Not support the format feature as {f}.")
+
+    @property
+    def _template_config(self) -> TemplateConfig:
+        return self._current_template
+
+    @property
+    def _config_file_format(self) -> str:
+        return self._current_template.values.http.config_path_format
+
+    @property
+    def _deserialize_as_template_config(self) -> HTTP:
+        http = HTTP(_current_template=self._current_template)
+        http.absolute_model_key = self.key
+        return http
+
+    def _set_template_config(self, config: _Config, **kwargs) -> None:
+        # Set the data model in config
+        self.http = config  # type: ignore[assignment]
+
+    def _set_mocked_apis(self, api_key: str = "", api_config: Optional[_Config] = None) -> None:
+        # FIXME: Should not be an abstract method force every data modal to implement it
+        pass
