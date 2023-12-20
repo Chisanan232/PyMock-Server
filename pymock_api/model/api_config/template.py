@@ -407,9 +407,7 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
                     self._deserialize_and_set_template_config(path_with_tag)
             else:
                 assert os.path.isfile(path) is True
-                fn_match = list(map(lambda v: fnmatch.fnmatch(path, v), self._template_config.values.all_values))
-                print(f"[DEBUG in _load_templatable_config] fn_match: {fn_match}")
-                if True in fn_match:
+                if fnmatch.fnmatch(path, self._config_file_format):
                     # Doesn't have tag, it's config
                     self._deserialize_and_set_template_config(path)
 
