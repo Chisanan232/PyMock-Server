@@ -1,4 +1,5 @@
 url: '/foo'
+tag: foo
 http:
   request:
     method: 'PUT'

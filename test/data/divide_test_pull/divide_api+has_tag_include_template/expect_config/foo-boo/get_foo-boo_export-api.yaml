@@ -1,4 +1,5 @@
 url: '/foo-boo/export'
+tag: foo-boo
 http:
   request:
     method: 'GET'
