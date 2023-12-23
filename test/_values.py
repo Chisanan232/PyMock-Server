@@ -109,7 +109,7 @@ _Test_Iterable_Parameter_With_Single_Value: dict = {
 _Test_Iterable_Parameter_With_MultiValue: dict = {
     "name": "iterable_param",
     "required": True,
-    "default": None,
+    "default": [],
     "type": "list",
     "format": None,
     "items": _Test_Iterable_Parameter_Items,
