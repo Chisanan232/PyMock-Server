@@ -6,7 +6,7 @@ http:
     parameters:
       - name: 'balances'
         required: true
-        default:
+        default: []
         type: list
         format:
         items:
