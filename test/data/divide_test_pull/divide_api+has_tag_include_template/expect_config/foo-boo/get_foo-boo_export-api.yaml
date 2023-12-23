@@ -14,12 +14,12 @@ http:
             type: str
       - name: 'arg2'
         required: false
-        default: ''
+        default:
         type: str
         format:
       - name: 'datetime'
         required: false
-        default: ''
+        default:
         type: str
         format:
   response:
