@@ -71,7 +71,7 @@ _Mock_Template_Config_Activate: bool = False
 
 _Mock_Load_Config: dict = {
     "includes_apis": True,
-    "order": ["apis", "apply", "file"],
+    "order": ["apis", "file"],
 }
 
 _Mock_Template_Setting: dict = {
