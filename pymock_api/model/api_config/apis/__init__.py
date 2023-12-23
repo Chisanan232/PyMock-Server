@@ -380,8 +380,8 @@ class MockAPI(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDivided
             self.http = self._deserialize_as(HTTP, with_data=http_info)  # type: ignore[assignment]
         else:
             self._load_templatable_config()
-        assert self.http
-        self.http._current_template = self._current_template
+        if self.http is not None:
+            self.http._current_template = self._current_template
         self.tag = data.get("tag", "")
         return self
 
