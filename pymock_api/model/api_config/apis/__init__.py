@@ -57,8 +57,6 @@ class HTTP(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDividedabl
                 self._request = None
             else:
                 raise TypeError("Setter *HTTP.request* only accepts dict or HTTPRequest type object.")
-        else:
-            self._request = None
 
     @property  # type: ignore[no-redef]
     def response(self) -> Optional[HTTPResponse]:
@@ -76,8 +74,6 @@ class HTTP(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDividedabl
                 self._response = None
             else:
                 raise TypeError("Setter *HTTP.response* only accepts dict or HTTPResponse type object.")
-        else:
-            self._response = None
 
     @property
     def should_divide(self) -> bool:
