@@ -116,8 +116,6 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
                     self._apis[api_name] = MockAPI().deserialize(data=(api_config or {}))
             else:
                 self._apis = apis  # type: ignore
-        else:
-            self._apis = {}
 
     @property
     def set_template_in_config(self) -> bool:
@@ -406,8 +404,6 @@ class APIConfig(_Config, _Checkable):
                 self._apis = apis
             else:
                 raise TypeError("Setter *APIConfig.apis* only accepts dict or MockAPIs type object.")
-        else:
-            self._apis = None
 
     @property
     def set_template_in_config(self) -> bool:
