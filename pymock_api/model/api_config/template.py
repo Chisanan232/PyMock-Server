@@ -392,17 +392,10 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         api_config_path = str(pathlib.Path(config_base_path, self.config_file_name))
         if os.path.exists(api_config_path):
             all_paths.remove(api_config_path)
-        print(f"[DEBUG in _load_templatable_config] all_paths: {all_paths}")
         for path in all_paths:
-            print(f"[DEBUG in _load_templatable_config] path: {path}")
-            print(f"[DEBUG in _load_templatable_config] self._config_file_format: {self._config_file_format}")
-            print(
-                f"[DEBUG in _load_templatable_config] self._template_config.values.all_values: {self._template_config.values.all_values}"
-            )
             if os.path.isdir(path):
                 # Has tag as directory
                 for path_with_tag in glob.glob(str(pathlib.Path(path, self._config_file_format))):
-                    print(f"[DEBUG in _load_templatable_config] path_with_tag: {path_with_tag}")
                     # In the tag directory, it's config
                     self._deserialize_and_set_template_config(path_with_tag)
             else:
