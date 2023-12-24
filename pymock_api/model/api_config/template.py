@@ -167,20 +167,6 @@ class TemplateValues(_Config, _Checkable):
     def key(self) -> str:
         return "values"
 
-    @property
-    def all_values(self) -> List[str]:
-        return list(
-            map(
-                lambda v: v.config_path_format,
-                [
-                    self.api,
-                    self.http,
-                    self.request,
-                    self.response,
-                ],
-            )
-        )
-
     def serialize(self, data: Optional["TemplateValues"] = None) -> Optional[Dict[str, Any]]:
         base_file_path: str = self._get_prop(data, prop="base_file_path")
         api = self.api or self._get_prop(data, prop="api")
