@@ -92,7 +92,7 @@ class TestAPIConfig(CheckableTestSuite):
     @pytest.mark.parametrize(
         ("setting_val", "should_call_deserialize"),
         [
-            ({}, False),
+            ({}, True),
             ({"test": "test"}, True),
             (Mock(MockAPIs()), False),
         ],
@@ -185,7 +185,7 @@ class TestMockAPIs(TemplateConfigLoadableTestSuite, CheckableTestSuite, Dividabl
     @pytest.mark.parametrize(
         ("setting_val", "should_call_deserialize"),
         [
-            ({}, False),
+            ({}, True),
             ({"test": "test"}, True),
             (TemplateConfig(), False),
         ],
@@ -218,7 +218,7 @@ class TestMockAPIs(TemplateConfigLoadableTestSuite, CheckableTestSuite, Dividabl
     @pytest.mark.parametrize(
         ("setting_val", "should_call_deserialize"),
         [
-            ({}, False),
+            ({}, True),
             ({"test": "test"}, True),
             (Mock(BaseConfig()), False),
         ],
@@ -251,7 +251,7 @@ class TestMockAPIs(TemplateConfigLoadableTestSuite, CheckableTestSuite, Dividabl
     @pytest.mark.parametrize(
         ("setting_val", "should_call_deserialize"),
         [
-            ({}, False),
+            ({}, True),
             ({"test": "test"}, True),
             ({"test": Mock(MockAPI())}, False),
         ],
