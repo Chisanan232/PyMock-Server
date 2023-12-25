@@ -20,10 +20,10 @@ from .apis import (
 )
 from .base import BaseConfig
 from .item import IteratorItem
-from .template import TemplateConfig, TemplateConfigLoadable, _TemplatableConfig
+from .template import TemplateConfig, TemplateConfigLoader, _TemplatableConfig
 
 
-class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
+class MockAPIs(_Config, _Checkable, TemplateConfigLoader, _Dividable):
     """*The **mocked_apis** section*"""
 
     _template: TemplateConfig

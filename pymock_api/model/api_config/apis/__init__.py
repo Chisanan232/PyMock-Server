@@ -11,7 +11,7 @@ from .._divide import _BeDividedable, _Dividable
 from ..template import (
     TemplateAPI,
     TemplateConfig,
-    TemplateConfigLoadable,
+    TemplateConfigLoader,
     TemplateHTTP,
     _TemplatableConfig,
 )
@@ -20,7 +20,7 @@ from .response import HTTPResponse, ResponseProperty
 
 
 @dataclass(eq=False)
-class HTTP(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDividedable, _Dividable):
+class HTTP(_TemplatableConfig, TemplateConfigLoader, _Checkable, _BeDividedable, _Dividable):
     """*The **http** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-http"
@@ -237,7 +237,7 @@ class HTTP(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDividedabl
 
 
 @dataclass(eq=False)
-class MockAPI(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDividedable, _Dividable):
+class MockAPI(_TemplatableConfig, TemplateConfigLoader, _Checkable, _BeDividedable, _Dividable):
     """*The **<api>** section in **mocked_apis***"""
 
     config_file_tail: str = "-api"

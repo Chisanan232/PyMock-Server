@@ -486,6 +486,10 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         pass
 
 
+class TemplateConfigLoader(TemplateConfigLoadable, ABC):
+    """The layer for extending all the configuration loaders"""
+
+
 @dataclass(eq=False)
 class _TemplatableConfig(_Config, ABC):
     apply_template_props: bool = field(default=True)
