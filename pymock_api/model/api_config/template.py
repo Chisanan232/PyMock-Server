@@ -339,7 +339,11 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     _config_file_name: str = "api.yaml"
     _configuration: _BaseFileOperation = YAML()
 
+    _valid_loader_keys: List[str] = ["apis", "apply", "file"]
+    _loaders: Dict[str, "TemplateConfigLoadable"] = {}
+
     def __init__(self):
+        # self._register_loader()    // FIXME: This code would be activated after refactoring done.
         set_loading_function(
             apis=self._load_mocked_apis_from_data,
             apply=self._load_templatable_config_by_apply,
@@ -353,6 +357,19 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     @config_file_name.setter
     def config_file_name(self, n: str) -> None:
         self._config_file_name = n
+
+    def _register_loader(self) -> None:
+        if self._register_load_by_key not in self._valid_loader_keys:
+            raise KeyError(
+                f"Loader key *{self._register_load_by_key}* is not valid. Please use"
+                f"*{', '.join(self._valid_loader_keys)}* to set the key of loader."
+            )
+        self._loaders[self._register_load_by_key] = self
+
+    @property
+    # @abstractmethod    // FIXME: Would be activated after refactoring.
+    def _register_load_by_key(self) -> str:
+        return ""
 
     def _load_mocked_apis_config(self, mocked_apis_data: dict) -> None:
         loading_order = self._template_config.load_config.order
