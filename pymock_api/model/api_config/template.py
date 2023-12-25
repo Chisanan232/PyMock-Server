@@ -343,7 +343,9 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     _loaders: Dict[str, "TemplateConfigLoadable"] = {}
 
     def __init__(self):
-        # self._register_loader()    // FIXME: This code would be activated after refactoring done.
+        self._register_loader()  # FIXME: This code would be activated after refactoring done.
+
+        self._load_mocked_apis_from_data = self._loaders["apis"].load_config
         set_loading_function(
             apis=self._load_mocked_apis_from_data,
             apply=self._load_templatable_config_by_apply,
@@ -369,10 +371,10 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     @property
     # @abstractmethod    // FIXME: Would be activated after refactoring.
     def _register_load_by_key(self) -> str:
-        return ""
+        return "apis"  # FIXME: Would be modify as *pass* after refactoring has done.
 
     # @abstractmethod    // FIXME: Would be activated after refactoring.
-    def load_config(self, **kwargs) -> None:
+    def load_config(self, *args, **kwargs) -> None:
         pass
 
     def _load_mocked_apis_config(self, mocked_apis_data: dict) -> None:
@@ -470,7 +472,13 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     def _set_template_config(self, config: _Config, **kwargs) -> None:
         pass
 
-    def _load_mocked_apis_from_data(self, mocked_apis_data: dict) -> None:
+
+class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
+    @property
+    def _register_load_by_key(self) -> str:
+        return "apis"
+
+    def load_config(self, mocked_apis_data: dict) -> None:
         self._set_mocked_apis()
         if mocked_apis_data:
             for mock_api_name in mocked_apis_data.keys():
@@ -486,7 +494,7 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
         pass
 
 
-class TemplateConfigLoader(TemplateConfigLoadable, ABC):
+class TemplateConfigLoader(TemplateConfigLoaderWithAPIConfig, ABC):
     """The layer for extending all the configuration loaders"""
 
 
