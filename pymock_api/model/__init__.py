@@ -2,7 +2,7 @@
 
 content ...
 """
-
+import pathlib
 from argparse import Namespace
 from typing import Optional
 
@@ -109,8 +109,8 @@ def deserialize_swagger_api_config(data: dict) -> SwaggerConfig:
 
 def load_config(path: str, is_pull: bool = False) -> Optional[APIConfig]:
     api_config = APIConfig()
-    only_config_file_name = path.split("/")[-1]
-    api_config.config_file_name = only_config_file_name
+    api_config_path = pathlib.Path(path)
+    api_config.config_file_name = api_config_path.name
     api_config.is_pull = is_pull
     return api_config.from_yaml(path=path, is_pull=is_pull)
 
