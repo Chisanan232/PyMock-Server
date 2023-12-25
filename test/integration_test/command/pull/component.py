@@ -134,12 +134,12 @@ class TestSubCmdPullComponent:
         with open(swagger_api_resp_path, "r") as file:
             swagger_api_resp = json.loads(file.read())
 
+        # Note: Set the base file path to let the test could run and save the result configuration under the target
+        # directory
         with patch(
             "pymock_api.model.api_config.MockAPIs.template", new_callable=PropertyMock
         ) as mock_mock_apis_template:
             template_config = TemplateConfig()
-            # Set the base file path to let the test could run and save the result configuration under the target
-            # directory
             template_config.values.base_file_path = str(ut_dir)
             mock_mock_apis_template.return_value = template_config
 
