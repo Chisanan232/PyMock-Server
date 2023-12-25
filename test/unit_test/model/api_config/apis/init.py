@@ -384,3 +384,19 @@ class TestHTTP(TemplatableConfigTestSuite, CheckableTestSuite, DividableTestSuit
     @property
     def _lower_layer_data_modal_for_divide(self) -> HTTPRequest:
         return self._Mock_Model.http_request
+
+    def test_prop_should_divide_with_invalid_value(self, sut_with_nothing: HTTP):
+        # Given invalid value
+        sut_with_nothing._current_section = "invalid value"
+        # Run target function
+        with pytest.raises(ValueError) as exc_info:
+            sut_with_nothing.should_divide
+        assert re.search(r"must to be \*request\* or \*response\*", str(exc_info.value), re.IGNORECASE)
+
+    def test_prop__config_file_format_with_invalid_value(self, sut_with_nothing: HTTP):
+        # Given invalid value
+        sut_with_nothing._current_section = "invalid value"
+        # Run target function
+        with pytest.raises(ValueError) as exc_info:
+            sut_with_nothing._config_file_format
+        assert re.search(r"must to be \*request\* or \*response\*", str(exc_info.value), re.IGNORECASE)

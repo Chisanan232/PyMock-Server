@@ -51,6 +51,7 @@ from ..._values import (
     _Bind_Host_And_Port,
     _Cmd_Arg_API_Path,
     _Cmd_Arg_HTTP_Method,
+    _Default_Base_File_Path,
     _Default_Include_Template_Config,
     _Generate_Sample,
     _Log_Level,
@@ -903,6 +904,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
             source=_API_Doc_Source,
             config_path=_Test_Config,
             base_url=base_url,
+            base_file_path=_Default_Base_File_Path,
             include_template_config=_Default_Include_Template_Config,
             dry_run=dry_run,
             divide_api=_Test_Divide_Api,
@@ -987,7 +989,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
                 if mock_parser_arg.dry_run:
                     FakeYAML.write.assert_not_called()
                 else:
-                    FakeYAML.write.assert_called_once_with(path=_Test_Config, config=expected_config_data)
+                    FakeYAML.write.assert_called_once_with(path=_Test_Config, config=expected_config_data, mode="w+")
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
@@ -995,6 +997,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         args_namespace.request_with_https = _Test_Request_With_Https
         args_namespace.source = _API_Doc_Source
         args_namespace.base_url = _Base_URL
+        args_namespace.base_file_path = _Default_Base_File_Path
         args_namespace.config_path = _Test_Config
         args_namespace.include_template_config = _Default_Include_Template_Config
         args_namespace.dry_run = _Test_Dry_Run

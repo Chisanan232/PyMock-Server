@@ -76,6 +76,7 @@ class SubcmdPullArguments(ParserArguments):
     config_path: str
     base_url: str
     include_template_config: bool
+    base_file_path: str
     dry_run: bool
     divide_api: bool
     divide_http: bool
@@ -165,6 +166,7 @@ class DeserializeParsedArgs:
             config_path=args.config_path,
             base_url=args.base_url,
             include_template_config=args.include_template_config,
+            base_file_path=args.base_file_path,
             dry_run=args.dry_run,
             divide_api=args.divide_api,
             divide_http=args.divide_http,

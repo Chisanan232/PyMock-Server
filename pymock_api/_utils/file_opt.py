@@ -22,7 +22,7 @@ class _BaseFileOperation(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def write(self, path: str, config: Union[str, dict]) -> None:
+    def write(self, path: str, config: Union[str, dict], mode: str = "a+") -> None:
         pass
 
     @abstractmethod
@@ -40,13 +40,13 @@ class YAML(_BaseFileOperation):
             data: dict = load(stream=file_stream, Loader=Loader)
         return data
 
-    def write(self, path: str, config: Union[str, dict]) -> None:
+    def write(self, path: str, config: Union[str, dict], mode: str = "a+") -> None:
         yaml_content = self.serialize(config) if isinstance(config, dict) else config
-        with open(path, "a+", encoding="utf-8") as file_stream:
+        with open(path, mode, encoding="utf-8") as file_stream:
             file_stream.writelines(yaml_content)
 
     def serialize(self, config: dict) -> str:
-        return dump(config, Dumper=Dumper)
+        return dump(config, Dumper=Dumper, sort_keys=False)
 
 
 class JSON(_BaseFileOperation):
@@ -59,9 +59,9 @@ class JSON(_BaseFileOperation):
             data: dict = json.loads(file_stream.read())
         return data
 
-    def write(self, path: str, config: Union[str, dict]) -> None:
+    def write(self, path: str, config: Union[str, dict], mode: str = "a+") -> None:
         json_content = self.serialize(config) if isinstance(config, dict) else config
-        with open(path, "a+", encoding="utf-8") as file_stream:
+        with open(path, mode, encoding="utf-8") as file_stream:
             file_stream.writelines(json_content)
 
     def serialize(self, config: dict) -> str:

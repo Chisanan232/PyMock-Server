@@ -1,3 +1,0 @@
-url: '/foo'
-http:
-  apply_template_props: True

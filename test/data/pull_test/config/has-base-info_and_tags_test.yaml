@@ -57,7 +57,7 @@ mocked_apis:
           parameters:
             - name: 'balances'
               required: true
-              default:
+              default: []
               type: list
               format:
               items:
@@ -83,7 +83,7 @@ mocked_apis:
               type: list
               format:
       tag: 'foo'
-    get_foo_boo_export:
+    get_foo-boo_export:
       url: '/foo-boo/export'
       http:
         request:
@@ -91,7 +91,7 @@ mocked_apis:
           parameters:
             - name: 'arg1'
               required: false
-              default:
+              default: []
               type: list
               format:
               items:

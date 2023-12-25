@@ -37,7 +37,7 @@ _Mock_API_HTTP: dict = {
 
 def generate_mock_template(tail_naming: str = "") -> dict:
     return {
-        "config_path_format": "**.yaml" if not tail_naming else ("**" + f"-{tail_naming}" + ".yaml"),
+        "config_path_format": "**.yaml" if not tail_naming else f"**-{tail_naming}.yaml",
     }
 
 
@@ -71,7 +71,7 @@ _Mock_Template_Config_Activate: bool = False
 
 _Mock_Load_Config: dict = {
     "includes_apis": True,
-    "order": ["apis", "apply", "file"],
+    "order": ["apis", "file"],
 }
 
 _Mock_Template_Setting: dict = {
@@ -109,7 +109,7 @@ _Test_Iterable_Parameter_With_Single_Value: dict = {
 _Test_Iterable_Parameter_With_MultiValue: dict = {
     "name": "iterable_param",
     "required": True,
-    "default": None,
+    "default": [],
     "type": "list",
     "format": None,
     "items": _Test_Iterable_Parameter_Items,
@@ -424,6 +424,7 @@ _Sample_Data_Type: str = "all"
 _Test_SubCommand_Pull: str = "pull"
 _Test_Request_With_Https: bool = False
 _API_Doc_Source: str = "127.0.0.1:8080"
+_Default_Base_File_Path: str = "./"
 _Default_Include_Template_Config: bool = False
 _Test_Dry_Run: bool = True
 _Test_Divide_Api: bool = False

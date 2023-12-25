@@ -578,6 +578,16 @@ class PullBaseURL(BaseSubCmdPullOption):
     help_description: str = "The base URL which must be the part of path all the APIs begin with."
 
 
+class PullBaseFilePath(BaseSubCmdPullOption):
+    cli_option: str = "--base-file-path"
+    name: str = "base_file_path"
+    help_description: str = (
+        "The path which is the basic value of all configuration file paths. In the other "
+        "words, it would automatically add the base path in front of all the other file "
+        "paths in configuration."
+    )
+
+
 class PullIncludeTemplateConfig(BaseSubCmdPullOption):
     cli_option: str = "--include-template-config"
     name: str = "include_template_config"

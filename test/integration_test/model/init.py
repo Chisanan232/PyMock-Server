@@ -20,7 +20,7 @@ def _get_all_yaml_for_dividing() -> None:
         _path = (
             str(pathlib.Path(__file__).parent.parent.parent),
             "data",
-            "divide_test",
+            "divide_test_load",
             scenario_folder,
             yaml_file_naming,
         )

@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from pydoc import locate
+from typing import Any, Dict, List, Optional, Union
 
 from ...._utils.file_opt import YAML, _BaseFileOperation
 from .._base import _Checkable, _Config
@@ -23,7 +24,9 @@ class APIParameter(BaseProperty):
     def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:  # type: ignore[override]
         serialized_data = super().serialize(data)
         if serialized_data is not None:
-            default: str = self._get_prop(data, prop="default")
+            default: Union[str, list] = self._get_prop(data, prop="default")
+            if locate(self.value_type) is list:  # type: ignore[arg-type]
+                default = []
             serialized_data["default"] = default
         return serialized_data
 

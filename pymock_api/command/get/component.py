@@ -18,9 +18,10 @@ class SubCmdGetComponent(BaseSubCmdComponent):
             print("❌  Empty content in configuration file.")
             sys.exit(1)
         apis_info = current_api_config.apis
-        if apis_info is None:
+        if apis_info.apis is None or (apis_info.apis is not None and len(apis_info.apis.keys())) == 0:  # type: ignore[union-attr]
             print("❌  Cannot find any API setting to mock.")
             sys.exit(1)
+        assert apis_info
         specific_api_info = apis_info.get_api_config_by_url(url=args.api_path, base=apis_info.base)
         APIInfoDisplayChain().show(args, specific_api_info)
 

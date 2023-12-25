@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict, Optional, Union
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
 from ._base import _Config
-from .template import _TemplatableConfig
+from .template import TemplateConfig, _TemplatableConfig
 
 
 @dataclass(eq=False)
@@ -45,20 +45,29 @@ class _Dividable(metaclass=ABCMeta):
 
     def _process_dividing_serialize(
         self,
-        data_modal: Union[_Config, _BeDividedable],
+        data_modal: Union[_Config, _BeDividedable, _TemplatableConfig],
         init_data: Dict[str, Any],
         api_name: str,
         tag: str = "",
         key: str = "",
         should_set_dividable_value_callback: Optional[Callable] = None,
     ) -> None:
-        assert isinstance(data_modal, _Config) and isinstance(data_modal, _BeDividedable)
+        assert (
+            isinstance(data_modal, _Config)
+            and isinstance(data_modal, _BeDividedable)
+            and isinstance(data_modal, _TemplatableConfig)
+        )
         # Pre-process
         if isinstance(data_modal, _Dividable):
             data_modal.dry_run = self.dry_run
         data_modal.api_name = api_name
-        if tag:
-            data_modal.tag = tag
+        data_modal.tag = tag if tag else ""
+        # Set current template config again in serialization
+        data_modal._current_template = self._current_template_at_serialization
+        # Set current dividing strategy again in serialization
+        data_modal._divide_strategy = (
+            self.divide_strategy if hasattr(self, "divide_strategy") else self._divide_strategy
+        )
         # Run dividing serialization
         serialized_data = self.dividing_serialize(data=data_modal)
         # Set the dividing serialization if it needs
@@ -66,6 +75,11 @@ class _Dividable(metaclass=ABCMeta):
             should_set_dividable_value_callback = lambda: self.should_set_bedividedable_value
         if should_set_dividable_value_callback():
             self._set_serialized_data(init_data, serialized_data, key)
+
+    @property
+    @abstractmethod
+    def _current_template_at_serialization(self) -> TemplateConfig:
+        pass
 
     @abstractmethod
     def _set_serialized_data(
@@ -82,12 +96,12 @@ class _Dividable(metaclass=ABCMeta):
             )
             config_base_path = data._current_template.values.base_file_path
             tag_dir = str(pathlib.Path(config_base_path, data.tag)) if data.tag else ""
-            config_file = f"{data.api_name}_{data.key}.yaml"
-            path = pathlib.Path(config_base_path, tag_dir, config_file)
+            config_file = f"{data.api_name}-{data.key.replace('<mock API>', 'api')}.yaml"
+            path = pathlib.Path(config_base_path, data.tag, config_file)
             if self.save_data:
                 if tag_dir and not os.path.exists(tag_dir):
                     os.mkdir(tag_dir)
-                self._configuration.write(path=str(path), config=self.serialize_lower_layer(data=data))
+                self._configuration.write(path=str(path), config=self.serialize_lower_layer(data=data), mode="w+")
                 return
             else:
                 return str(path)

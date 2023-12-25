@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
+from ..enums import ConfigLoadingOrder
 from ._base import _Checkable, _Config
 from ._divide import _BeDividedable, _Dividable, _DivideStrategy
 from .apis import (
@@ -39,11 +40,13 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         apis: Dict[str, Optional[MockAPI]] = {},
     ):
         super().__init__()
-        self._template = TemplateConfig() if template is None else template
+        self._template = template if template is not None else TemplateConfig()
         self._base = base
         self._apis = apis
 
-        self.divide_strategy = _DivideStrategy()
+        self.divide_strategy: _DivideStrategy = _DivideStrategy()
+        self.is_pull: bool = False
+        self._base_file_path: str = ""
 
     def __len__(self):
         return len(self.apis.keys())
@@ -56,12 +59,20 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         return "mocked_apis"
 
     @property
+    def base_file_path(self) -> str:
+        return self._base_file_path
+
+    @base_file_path.setter
+    def base_file_path(self, p: str) -> None:
+        self._base_file_path = p
+
+    @property
     def template(self) -> TemplateConfig:
         return self._template
 
     @template.setter
     def template(self, template: Union[dict, TemplateConfig]) -> None:
-        if template:
+        if template is not None:
             if isinstance(template, dict):
                 self._template = TemplateConfig().deserialize(data=template)
             elif isinstance(template, TemplateConfig):
@@ -75,7 +86,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
 
     @base.setter
     def base(self, base: Union[dict, BaseConfig]) -> None:
-        if base:
+        if base is not None:
             if isinstance(base, dict):
                 self._base = BaseConfig().deserialize(data=base)
             elif isinstance(base, BaseConfig):
@@ -91,12 +102,12 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
 
     @apis.setter
     def apis(self, apis: Dict[str, Union[dict, MockAPI]]) -> None:
-        if apis:
+        if apis is not None:
             if not isinstance(apis, dict):
                 raise TypeError("Setter *MockAPIs.apis* only accepts dict or MockAPI type object.")
 
             ele_types = set(list(map(lambda v: isinstance(v, MockAPI), apis.values())))
-            if len(ele_types) != 1:
+            if len(ele_types) > 1:
                 raise ValueError("It has multiple types of the data content. Please unify these objects data type.")
 
             if False in ele_types:
@@ -105,8 +116,6 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
                     self._apis[api_name] = MockAPI().deserialize(data=(api_config or {}))
             else:
                 self._apis = apis  # type: ignore
-        else:
-            self._apis = {}
 
     @property
     def set_template_in_config(self) -> bool:
@@ -124,15 +133,19 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         template = (data.template if data else None) or self.template
         base = (data.base if data else None) or self.base
         apis = (data.apis if data else None) or self.apis
-        if not (base and apis):
+        if not (template and base and apis):
             return None
 
         # Process section *base*
-        api_info = {
+        api_info: dict = {
             "base": BaseConfig().serialize(data=base),
             "apis": {},
         }
         if self._need_template_in_config:
+            if self.is_pull:
+                template.activate = True
+                if self.base_file_path:
+                    template.values.base_file_path = self.base_file_path
             api_info["template"] = template.serialize()
 
         # Process section *apis*
@@ -143,11 +156,20 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
                 init_data=all_mocked_apis,
                 data_modal=api_config,
                 api_name=api_name,
+                tag=api_config.tag,
                 key=api_name,
             )
         api_info["apis"] = all_mocked_apis
 
-        return api_info
+        not_empty_api_config = {}
+        for k, v in api_info.items():
+            if v:
+                not_empty_api_config[k] = v
+        return not_empty_api_config
+
+    @property
+    def _current_template_at_serialization(self) -> TemplateConfig:
+        return self.template
 
     def _set_serialized_data(
         self, init_data: Dict[str, Any], serialized_data: Optional[Union[str, dict]], key: str = ""
@@ -216,9 +238,12 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         template_info = data.get("template", {})
         if not template_info:
             self._need_template_in_config = False
-        template_config = TemplateConfig()
-        template_config.absolute_model_key = self.key
-        self.template = template_config.deserialize(data=template_info)
+        self.template.absolute_model_key = self.key
+        if self.is_pull:
+            self.template.activate = True
+            if self.base_file_path:
+                self.template.values.base_file_path = self.base_file_path
+        self.template.deserialize(data=template_info)
 
         # Processing section *base*
         base_info = data.get("base", None)
@@ -280,7 +305,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
 
     def _set_template_config(self, config: MockAPI, **kwargs) -> None:  # type: ignore[override]
         # Read YAML config
-        mock_api_config_name = os.path.basename(kwargs["path"]).replace(".yaml", "")
+        mock_api_config_name = os.path.basename(kwargs["path"])
         format_rule_string = self._config_file_format.replace("**", "")
         mock_api_config_key = mock_api_config_name.replace(format_rule_string, "")
         # Set the data model in config
@@ -330,6 +355,9 @@ class APIConfig(_Config, _Checkable):
         self._description = description
         self._apis = apis
 
+        self.is_pull: bool = False
+        self._base_file_path: str = ""
+
     def __len__(self):
         return len(self._apis) if self._apis else 0
 
@@ -369,15 +397,13 @@ class APIConfig(_Config, _Checkable):
 
     @apis.setter
     def apis(self, apis: Union[dict, MockAPIs]) -> None:
-        if apis:
+        if apis is not None:
             if isinstance(apis, dict):
                 self._apis = MockAPIs().deserialize(data=apis)
             elif isinstance(apis, MockAPIs):
                 self._apis = apis
             else:
                 raise TypeError("Setter *APIConfig.apis* only accepts dict or MockAPIs type object.")
-        else:
-            self._apis = None
 
     @property
     def set_template_in_config(self) -> bool:
@@ -411,12 +437,21 @@ class APIConfig(_Config, _Checkable):
     def config_file_name(self, n: str) -> None:
         self._config_file_name = n
 
+    @property
+    def base_file_path(self) -> str:
+        return self._base_file_path
+
+    @base_file_path.setter
+    def base_file_path(self, p: str) -> None:
+        self._base_file_path = p
+
     def serialize(self, data: Optional["APIConfig"] = None) -> Optional[Dict[str, Any]]:
         name = (data.name if data else None) or self.name
         description = (data.description if data else None) or self.description
         apis = (data.apis if data else None) or self.apis
         if not apis:
             return None
+        apis.is_pull = self.is_pull
         apis.set_template_in_config = self.set_template_in_config
         apis.dry_run = self.dry_run
         apis.divide_strategy = self.divide_strategy
@@ -492,14 +527,18 @@ class APIConfig(_Config, _Checkable):
         """
         self.name = data.get("name", None)
         self.description = data.get("description", None)
+
         mocked_apis = data.get("mocked_apis", None)
-        if mocked_apis:
-            mock_apis_data_model = MockAPIs()
-            mock_apis_data_model.set_template_in_config = self.set_template_in_config
-            mock_apis_data_model.config_file_name = self.config_file_name
-            mock_apis_data_model.absolute_model_key = self.key
-            mock_apis_data_model.divide_strategy = self._divide_strategy
-            self.apis = mock_apis_data_model.deserialize(data=mocked_apis)
+        mocked_apis = {"template": {}} if not mocked_apis else mocked_apis
+        mock_apis_data_model = MockAPIs()
+        mock_apis_data_model.set_template_in_config = self.set_template_in_config
+        mock_apis_data_model.config_file_name = self.config_file_name
+        mock_apis_data_model.absolute_model_key = self.key
+        mock_apis_data_model.divide_strategy = self._divide_strategy
+        mock_apis_data_model.is_pull = self.is_pull
+        mock_apis_data_model.base_file_path = self.base_file_path
+        self.apis = mock_apis_data_model.deserialize(data=mocked_apis)
+
         return self
 
     def is_work(self) -> bool:
@@ -515,7 +554,8 @@ class APIConfig(_Config, _Checkable):
         self.apis.stop_if_fail = self.stop_if_fail
         return self.apis.is_work()
 
-    def from_yaml(self, path: str) -> Optional["APIConfig"]:
+    def from_yaml(self, path: str, is_pull: bool = False) -> Optional["APIConfig"]:
+        self.is_pull = is_pull
         return self.deserialize(data=self._config_operation.read(path))
 
     def to_yaml(self, path: str) -> None:
