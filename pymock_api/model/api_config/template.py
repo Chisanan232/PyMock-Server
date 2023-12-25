@@ -371,6 +371,10 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     def _register_load_by_key(self) -> str:
         return ""
 
+    # @abstractmethod    // FIXME: Would be activated after refactoring.
+    def load_config(self, **kwargs) -> None:
+        pass
+
     def _load_mocked_apis_config(self, mocked_apis_data: dict) -> None:
         loading_order = self._template_config.load_config.order
 
