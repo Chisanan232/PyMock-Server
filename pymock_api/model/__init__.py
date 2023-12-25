@@ -107,10 +107,11 @@ def deserialize_swagger_api_config(data: dict) -> SwaggerConfig:
     return SwaggerConfig().deserialize(data=data)
 
 
-def load_config(path: str, is_pull: bool = False) -> Optional[APIConfig]:
+def load_config(path: str, is_pull: bool = False, base_file_path: str = "") -> Optional[APIConfig]:
     api_config = APIConfig()
     api_config_path = pathlib.Path(path)
     api_config.config_file_name = api_config_path.name
+    api_config.base_file_path = base_file_path if base_file_path else str(api_config_path.parent)
     api_config.is_pull = is_pull
     return api_config.from_yaml(path=path, is_pull=is_pull)
 
