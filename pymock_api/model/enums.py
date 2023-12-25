@@ -28,10 +28,16 @@ class ResponseStrategy(Enum):
             return v
 
 
+class ConfigLoadingOrderKey(Enum):
+    APIs: str = "apis"
+    APPLY: str = "apply"
+    FILE: str = "file"
+
+
 ConfigLoadingFunction: Dict[str, Optional[Callable]] = {
-    "apis": None,
-    "apply": None,
-    "file": None,
+    ConfigLoadingOrderKey.APIs.value: None,
+    ConfigLoadingOrderKey.APPLY.value: None,
+    ConfigLoadingOrderKey.FILE.value: None,
 }
 
 
@@ -43,9 +49,9 @@ def set_loading_function(**kwargs) -> None:
 
 
 class ConfigLoadingOrder(Enum):
-    APIs: str = "apis"
-    APPLY: str = "apply"
-    FILE: str = "file"
+    APIs: str = ConfigLoadingOrderKey.APIs.value
+    APPLY: str = ConfigLoadingOrderKey.APPLY.value
+    FILE: str = ConfigLoadingOrderKey.FILE.value
 
     @staticmethod
     def to_enum(v: Union[str, "ConfigLoadingOrder"]) -> "ConfigLoadingOrder":

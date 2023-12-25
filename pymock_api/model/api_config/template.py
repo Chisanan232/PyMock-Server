@@ -7,7 +7,11 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Type, Union
 
 from ..._utils.file_opt import YAML, _BaseFileOperation
-from ...model.enums import ConfigLoadingOrder, set_loading_function
+from ...model.enums import (
+    ConfigLoadingOrder,
+    ConfigLoadingOrderKey,
+    set_loading_function,
+)
 from ._base import SelfType, _Checkable, _Config
 
 
@@ -339,13 +343,13 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     _config_file_name: str = "api.yaml"
     _configuration: _BaseFileOperation = YAML()
 
-    _valid_loader_keys: List[str] = ["apis", "apply", "file"]
+    _valid_loader_keys: List[str] = [k.value for k in ConfigLoadingOrderKey]
     _loaders: Dict[str, "TemplateConfigLoadable"] = {}
 
     def __init__(self):
         self._register_loader()  # FIXME: This code would be activated after refactoring done.
 
-        self._load_mocked_apis_from_data = self._loaders["apis"].load_config
+        self._load_mocked_apis_from_data = self._loaders[ConfigLoadingOrderKey.APIs.value].load_config
         set_loading_function(
             apis=self._load_mocked_apis_from_data,
             apply=self._load_templatable_config_by_apply,
@@ -476,7 +480,7 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
 class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
     @property
     def _register_load_by_key(self) -> str:
-        return "apis"
+        return ConfigLoadingOrderKey.APIs.value
 
     def load_config(self, mocked_apis_data: dict) -> None:
         self._set_mocked_apis()
