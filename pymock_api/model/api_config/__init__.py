@@ -20,10 +20,15 @@ from .apis import (
 )
 from .base import BaseConfig
 from .item import IteratorItem
-from .template import TemplateConfig, TemplateConfigLoader, _TemplatableConfig
+from .template import (
+    TemplateConfig,
+    TemplateConfigLoader,
+    TemplateConfigOpts,
+    _TemplatableConfig,
+)
 
 
-class MockAPIs(_Config, _Checkable, TemplateConfigLoader, _Dividable):
+class MockAPIs(_Config, _Checkable, TemplateConfigOpts, TemplateConfigLoader, _Dividable):
     """*The **mocked_apis** section*"""
 
     _template: TemplateConfig
@@ -47,6 +52,8 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoader, _Dividable):
         self.divide_strategy: _DivideStrategy = _DivideStrategy()
         self.is_pull: bool = False
         self._base_file_path: str = ""
+
+        self._template_config_opts = self.register_callbacks()
 
     def __len__(self):
         return len(self.apis.keys())

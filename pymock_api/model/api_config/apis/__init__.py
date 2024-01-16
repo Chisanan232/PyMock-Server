@@ -12,6 +12,7 @@ from ..template import (
     TemplateAPI,
     TemplateConfig,
     TemplateConfigLoader,
+    TemplateConfigOpts,
     TemplateHTTP,
     _TemplatableConfig,
 )
@@ -20,7 +21,7 @@ from .response import HTTPResponse, ResponseProperty
 
 
 @dataclass(eq=False)
-class HTTP(_TemplatableConfig, TemplateConfigLoader, _Checkable, _BeDividedable, _Dividable):
+class HTTP(_TemplatableConfig, TemplateConfigOpts, TemplateConfigLoader, _Checkable, _BeDividedable, _Dividable):
     """*The **http** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-http"
@@ -32,6 +33,9 @@ class HTTP(_TemplatableConfig, TemplateConfigLoader, _Checkable, _BeDividedable,
     _response: Optional[HTTPResponse] = field(init=False, repr=False)
 
     _current_section: str = field(init=False, repr=False)
+
+    def __post_init__(self):
+        self._template_config_opts = self.register_callbacks()
 
     def _compare(self, other: "HTTP") -> bool:
         templatable_config = super()._compare(other)
@@ -237,7 +241,7 @@ class HTTP(_TemplatableConfig, TemplateConfigLoader, _Checkable, _BeDividedable,
 
 
 @dataclass(eq=False)
-class MockAPI(_TemplatableConfig, TemplateConfigLoader, _Checkable, _BeDividedable, _Dividable):
+class MockAPI(_TemplatableConfig, TemplateConfigOpts, TemplateConfigLoader, _Checkable, _BeDividedable, _Dividable):
     """*The **<api>** section in **mocked_apis***"""
 
     config_file_tail: str = "-api"
@@ -249,6 +253,9 @@ class MockAPI(_TemplatableConfig, TemplateConfigLoader, _Checkable, _BeDividedab
     _url: str = field(init=False, repr=False)
     _http: Optional[HTTP] = field(init=False, repr=False)
     _tag: str = field(init=False, repr=False)
+
+    def __post_init__(self):
+        self._template_config_opts = self.register_callbacks()
 
     def _compare(self, other: "MockAPI") -> bool:
         templatable_config = super()._compare(other)
