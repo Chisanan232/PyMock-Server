@@ -383,11 +383,12 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     _template_config_opts: TemplateConfigOpts = field(default_factory=TemplateConfigOpts)
 
     def __init__(self):
-        self._register_loader()  # FIXME: This code would be activated after refactoring done.
+        # self._register_loader()  # FIXME: This code would be activated after refactoring done.
 
-        self._load_mocked_apis_from_data = self._loaders[ConfigLoadingOrderKey.APIs.value].load_config
+        # self._load_mocked_apis_from_data = self._loaders[ConfigLoadingOrderKey.APIs.value].load_config
+        self._load_mocked_apis_from_data = None  # Let subclass *TemplateConfigLoaderWithAPIConfig* to set the callback.
         set_loading_function(
-            apis=self._load_mocked_apis_from_data,
+            # apis=self._load_mocked_apis_from_data,
             apply=self._load_templatable_config_by_apply,
             file=self._load_templatable_config,
         )
@@ -400,18 +401,18 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
     def config_file_name(self, n: str) -> None:
         self._config_file_name = n
 
-    def _register_loader(self) -> None:
-        if self._register_load_by_key not in self._valid_loader_keys:
+    def _register_loader(self, key: str) -> None:
+        if key not in self._valid_loader_keys:
             raise KeyError(
-                f"Loader key *{self._register_load_by_key}* is not valid. Please use"
+                f"Loader key *{key}* is not valid. Please use"
                 f"*{', '.join(self._valid_loader_keys)}* to set the key of loader."
             )
-        self._loaders[self._register_load_by_key] = self
+        self._loaders[key] = self
 
-    @property
-    # @abstractmethod    // FIXME: Would be activated after refactoring.
-    def _register_load_by_key(self) -> str:
-        return "apis"  # FIXME: Would be modify as *pass* after refactoring has done.
+    # @property
+    # # @abstractmethod    // FIXME: Would be activated after refactoring.
+    # def _register_load_by_key(self) -> str:
+    #     return "apis"  # FIXME: Would be modify as *pass* after refactoring has done.
 
     # @abstractmethod    // FIXME: Would be activated after refactoring.
     def load_config(self, *args, **kwargs) -> None:
@@ -514,9 +515,18 @@ class TemplateConfigLoadable(metaclass=ABCMeta):
 
 
 class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
-    @property
-    def _register_load_by_key(self) -> str:
-        return ConfigLoadingOrderKey.APIs.value
+    def __init__(self):
+        super().__init__()
+        self._register_loader(key=ConfigLoadingOrderKey.APIs.value)
+
+        self._load_mocked_apis_from_data = self.load_config
+        set_loading_function(
+            apis=self._load_mocked_apis_from_data,
+        )
+
+    # @property
+    # def _register_load_by_key(self) -> str:
+    #     return ConfigLoadingOrderKey.APIs.value
 
     def load_config(self, mocked_apis_data: dict) -> None:
         self._template_config_opts._set_mocked_apis()
