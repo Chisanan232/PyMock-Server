@@ -371,7 +371,7 @@ class TemplateConfigOpts(metaclass=ABCMeta):
         pass
 
 
-class TemplateConfigLoadable(metaclass=ABCMeta):
+class TemplateConfigLoadable:
     """The data model which could load template configuration."""
 
     _config_file_name: str = "api.yaml"
@@ -544,7 +544,7 @@ class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
     #     pass
 
 
-class TemplateConfigLoader(TemplateConfigLoaderWithAPIConfig, ABC):
+class TemplateConfigLoader(TemplateConfigLoaderWithAPIConfig):
     """The layer for extending all the configuration loaders"""
 
 
