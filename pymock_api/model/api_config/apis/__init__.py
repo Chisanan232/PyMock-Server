@@ -11,6 +11,7 @@ from .._divide import _BeDividedable, _Dividable
 from ..template import (
     TemplateAPI,
     TemplateConfig,
+    TemplateConfigLoadable,
     TemplateConfigLoader,
     TemplateConfigOpts,
     TemplateHTTP,
@@ -21,7 +22,7 @@ from .response import HTTPResponse, ResponseProperty
 
 
 @dataclass(eq=False)
-class HTTP(_TemplatableConfig, TemplateConfigOpts, TemplateConfigLoader, _Checkable, _BeDividedable, _Dividable):
+class HTTP(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _Dividable):
     """*The **http** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-http"
@@ -33,9 +34,10 @@ class HTTP(_TemplatableConfig, TemplateConfigOpts, TemplateConfigLoader, _Checka
     _response: Optional[HTTPResponse] = field(init=False, repr=False)
 
     _current_section: str = field(init=False, repr=False)
+    _template_config_loader: TemplateConfigLoadable = TemplateConfigLoader()
 
     def __post_init__(self):
-        self._template_config_opts = self.register_callbacks()
+        self._template_config_loader._template_config_opts = self.register_callbacks()
 
     def _compare(self, other: "HTTP") -> bool:
         templatable_config = super()._compare(other)
@@ -178,12 +180,12 @@ class HTTP(_TemplatableConfig, TemplateConfigOpts, TemplateConfigLoader, _Checka
             self.request = self._deserialize_as(HTTPRequest, with_data=req)  # type: ignore[assignment]
         else:
             self._current_section = "request"
-            self._load_templatable_config()
+            self._template_config_loader._load_templatable_config()
         if resp:
             self.response = self._deserialize_as(HTTPResponse, with_data=resp)  # type: ignore[assignment]
         else:
             self._current_section = "response"
-            self._load_templatable_config()
+            self._template_config_loader._load_templatable_config()
         return self
 
     @property
@@ -210,6 +212,12 @@ class HTTP(_TemplatableConfig, TemplateConfigOpts, TemplateConfigLoader, _Checka
 
     @property
     def _config_file_format(self) -> str:
+        print(
+            f"[DEBUG in HTTP._config_file_format] self._current_template.values.request.config_path_format: {self._current_template.values.request.config_path_format}"
+        )
+        print(
+            f"[DEBUG in HTTP._config_file_format] self._current_template.values.response.config_path_format: {self._current_template.values.response.config_path_format}"
+        )
         if self._current_section.lower() == "request":
             return self._current_template.values.request.config_path_format
         if self._current_section.lower() == "response":
@@ -241,7 +249,7 @@ class HTTP(_TemplatableConfig, TemplateConfigOpts, TemplateConfigLoader, _Checka
 
 
 @dataclass(eq=False)
-class MockAPI(_TemplatableConfig, TemplateConfigOpts, TemplateConfigLoader, _Checkable, _BeDividedable, _Dividable):
+class MockAPI(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _Dividable):
     """*The **<api>** section in **mocked_apis***"""
 
     config_file_tail: str = "-api"
@@ -254,8 +262,10 @@ class MockAPI(_TemplatableConfig, TemplateConfigOpts, TemplateConfigLoader, _Che
     _http: Optional[HTTP] = field(init=False, repr=False)
     _tag: str = field(init=False, repr=False)
 
+    _template_config_loader: TemplateConfigLoadable = TemplateConfigLoader()
+
     def __post_init__(self):
-        self._template_config_opts = self.register_callbacks()
+        self._template_config_loader._template_config_opts = self.register_callbacks()
 
     def _compare(self, other: "MockAPI") -> bool:
         templatable_config = super()._compare(other)
@@ -379,10 +389,11 @@ class MockAPI(_TemplatableConfig, TemplateConfigOpts, TemplateConfigLoader, _Che
 
         self.url = data.get("url", None)
         http_info = data.get("http", {})
+        print(f"[DEBUG in MockAPI.deserialize] http_info: {http_info}")
         if http_info:
             self.http = self._deserialize_as(HTTP, with_data=http_info)  # type: ignore[assignment]
         else:
-            self._load_templatable_config()
+            self._template_config_loader._load_templatable_config()
         if self.http is not None:
             self.http._current_template = self._current_template
         self.tag = data.get("tag", "")
@@ -479,6 +490,9 @@ class MockAPI(_TemplatableConfig, TemplateConfigOpts, TemplateConfigLoader, _Che
 
     @property
     def _config_file_format(self) -> str:
+        print(
+            f"[DEBUG in MockAPI._config_file_format] self._current_template.values.http.config_path_format: {self._current_template.values.http.config_path_format}"
+        )
         return self._current_template.values.http.config_path_format
 
     @property

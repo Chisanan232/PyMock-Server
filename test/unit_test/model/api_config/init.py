@@ -22,7 +22,6 @@ from ._base import (
     MOCK_RETURN_VALUE,
     CheckableTestSuite,
     DividableTestSuite,
-    TemplateConfigLoadableTestSuite,
     _assertion_msg,
     set_checking_test_data,
 )
@@ -156,7 +155,7 @@ class TestAPIConfig(CheckableTestSuite):
         mock_write_yaml.assert_called_once_with(path=_Test_Config, config=sut.serialize())
 
 
-class TestMockAPIs(TemplateConfigLoadableTestSuite, CheckableTestSuite, DividableTestSuite):
+class TestMockAPIs(CheckableTestSuite, DividableTestSuite):
     test_data_dir = "mocked_apis"
     set_checking_test_data(
         test_data_dir, reset_callback=reset_mock_apis_test_data, opt_globals_callback=add_mock_apis_test_data

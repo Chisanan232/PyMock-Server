@@ -22,13 +22,14 @@ from .base import BaseConfig
 from .item import IteratorItem
 from .template import (
     TemplateConfig,
+    TemplateConfigLoadable,
     TemplateConfigLoader,
     TemplateConfigOpts,
     _TemplatableConfig,
 )
 
 
-class MockAPIs(_Config, _Checkable, TemplateConfigOpts, TemplateConfigLoader, _Dividable):
+class MockAPIs(_Config, _Checkable, TemplateConfigOpts, _Dividable):
     """*The **mocked_apis** section*"""
 
     _template: TemplateConfig
@@ -37,6 +38,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigOpts, TemplateConfigLoader, _D
 
     _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
+    _template_config_loader: TemplateConfigLoadable = TemplateConfigLoader()
 
     def __init__(
         self,
@@ -53,7 +55,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigOpts, TemplateConfigLoader, _D
         self.is_pull: bool = False
         self._base_file_path: str = ""
 
-        self._template_config_opts = self.register_callbacks()
+        self._template_config_loader._template_config_opts = self.register_callbacks()
 
     def __len__(self):
         return len(self.apis.keys())
@@ -260,7 +262,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigOpts, TemplateConfigLoader, _D
 
         # Processing section *apis*
         mocked_apis_info = data.get("apis", {})
-        self._load_mocked_apis_config(mocked_apis_info)
+        self._template_config_loader._load_mocked_apis_config(mocked_apis_info)
         return self
 
     def is_work(self) -> bool:
@@ -302,6 +304,9 @@ class MockAPIs(_Config, _Checkable, TemplateConfigOpts, TemplateConfigLoader, _D
 
     @property
     def _config_file_format(self) -> str:
+        print(
+            f"[DEBUG in MockAPIs._config_file_format] self.template.values.api.config_path_format: {self.template.values.api.config_path_format}"
+        )
         return self.template.values.api.config_path_format
 
     @property
@@ -539,7 +544,7 @@ class APIConfig(_Config, _Checkable):
         mocked_apis = {"template": {}} if not mocked_apis else mocked_apis
         mock_apis_data_model = MockAPIs()
         mock_apis_data_model.set_template_in_config = self.set_template_in_config
-        mock_apis_data_model.config_file_name = self.config_file_name
+        # mock_apis_data_model.config_file_name = self.config_file_name
         mock_apis_data_model.absolute_model_key = self.key
         mock_apis_data_model.divide_strategy = self._divide_strategy
         mock_apis_data_model.is_pull = self.is_pull
