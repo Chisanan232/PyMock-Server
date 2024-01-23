@@ -38,7 +38,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigOpts, _Dividable):
 
     _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
-    _template_config_loader: TemplateConfigLoadable = TemplateConfigLoader()
+    _template_config_loader: TemplateConfigLoadable
 
     def __init__(
         self,
@@ -55,6 +55,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigOpts, _Dividable):
         self.is_pull: bool = False
         self._base_file_path: str = ""
 
+        self._template_config_loader = TemplateConfigLoader()
         self._template_config_loader._template_config_opts = self.register_callbacks()
 
     def __len__(self):
