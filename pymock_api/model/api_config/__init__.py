@@ -545,7 +545,7 @@ class APIConfig(_Config, _Checkable):
         mocked_apis = {"template": {}} if not mocked_apis else mocked_apis
         mock_apis_data_model = MockAPIs()
         mock_apis_data_model.set_template_in_config = self.set_template_in_config
-        # mock_apis_data_model.config_file_name = self.config_file_name
+        mock_apis_data_model.config_file_name = self.config_file_name
         mock_apis_data_model.absolute_model_key = self.key
         mock_apis_data_model.divide_strategy = self._divide_strategy
         mock_apis_data_model.is_pull = self.is_pull

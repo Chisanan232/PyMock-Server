@@ -338,6 +338,8 @@ class TemplateConfig(_Config, _Checkable):
 
 
 class TemplateConfigOpts(metaclass=ABCMeta):
+    _config_file_name: str = "api.yaml"
+
     def register_callbacks(self) -> "TemplateConfigOpts":
         return self
         # return {
@@ -346,6 +348,14 @@ class TemplateConfigOpts(metaclass=ABCMeta):
         #     "_deserialize_as_template_config": self._deserialize_as_template_config,
         #     "_set_template_config": self._set_template_config,
         # }
+
+    @property
+    def config_file_name(self) -> str:
+        return self._config_file_name
+
+    @config_file_name.setter
+    def config_file_name(self, n: str) -> None:
+        self._config_file_name = n
 
     @property
     @abstractmethod
@@ -374,7 +384,6 @@ class TemplateConfigOpts(metaclass=ABCMeta):
 class TemplateConfigLoadable:
     """The data model which could load template configuration."""
 
-    _config_file_name: str = "api.yaml"
     _configuration: _BaseFileOperation = YAML()
 
     _valid_loader_keys: List[str] = [k.value for k in ConfigLoadingOrderKey]
@@ -392,14 +401,6 @@ class TemplateConfigLoadable:
             apply=self._load_templatable_config_by_apply,
             file=self._load_templatable_config,
         )
-
-    @property
-    def config_file_name(self) -> str:
-        return self._config_file_name
-
-    @config_file_name.setter
-    def config_file_name(self, n: str) -> None:
-        self._config_file_name = n
 
     def _register_loader(self, key: str) -> None:
         if key not in self._valid_loader_keys:
@@ -439,7 +440,7 @@ class TemplateConfigLoadable:
         # all_paths = glob.glob(f"{self._base_path}**/[!_*]*.yaml", recursive=True)
         config_base_path = self._template_config_opts._template_config.values.base_file_path
         all_paths = glob.glob(str(pathlib.Path(config_base_path, config_file_format)))
-        api_config_path = str(pathlib.Path(config_base_path, self.config_file_name))
+        api_config_path = str(pathlib.Path(config_base_path, self._template_config_opts.config_file_name))
         if os.path.exists(api_config_path):
             all_paths.remove(api_config_path)
         for path in all_paths:
