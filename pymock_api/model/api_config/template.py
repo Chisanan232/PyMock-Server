@@ -387,7 +387,7 @@ class TemplateConfigLoadable:
     _configuration: _BaseFileOperation = YAML()
 
     _valid_loader_keys: List[str] = [k.value for k in ConfigLoadingOrderKey]
-    _loaders: Dict[str, "TemplateConfigLoadable"] = {}
+    # _loaders: Dict[str, "TemplateConfigLoadable"] = {}
 
     _template_config_opts: TemplateConfigOpts = field(default_factory=TemplateConfigOpts)
 
@@ -402,13 +402,13 @@ class TemplateConfigLoadable:
             file=self._load_templatable_config,
         )
 
-    def _register_loader(self, key: str) -> None:
-        if key not in self._valid_loader_keys:
-            raise KeyError(
-                f"Loader key *{key}* is not valid. Please use"
-                f"*{', '.join(self._valid_loader_keys)}* to set the key of loader."
-            )
-        self._loaders[key] = self
+    # def _register_loader(self, key: str) -> None:
+    #     if key not in self._valid_loader_keys:
+    #         raise KeyError(
+    #             f"Loader key *{key}* is not valid. Please use"
+    #             f"*{', '.join(self._valid_loader_keys)}* to set the key of loader."
+    #         )
+    #     self._loaders[key] = self
 
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         self._template_config_opts = template_config_ops
@@ -521,7 +521,7 @@ class TemplateConfigLoadable:
 class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
     def __init__(self):
         super().__init__()
-        self._register_loader(key=ConfigLoadingOrderKey.APIs.value)
+        # self._register_loader(key=ConfigLoadingOrderKey.APIs.value)
 
         self._load_mocked_apis_from_data = self.load_config
         set_loading_function(
