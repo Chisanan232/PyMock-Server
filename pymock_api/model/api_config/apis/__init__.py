@@ -37,7 +37,7 @@ class HTTP(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _
     _template_config_loader: TemplateConfigLoadable = TemplateConfigLoader()
 
     def __post_init__(self):
-        self._template_config_loader._template_config_opts = self.register_callbacks()
+        self._template_config_loader.register(self.register_callbacks())
 
     def _compare(self, other: "HTTP") -> bool:
         templatable_config = super()._compare(other)
@@ -265,7 +265,7 @@ class MockAPI(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable
     _template_config_loader: TemplateConfigLoadable = TemplateConfigLoader()
 
     def __post_init__(self):
-        self._template_config_loader._template_config_opts = self.register_callbacks()
+        self._template_config_loader.register(self.register_callbacks())
 
     def _compare(self, other: "MockAPI") -> bool:
         templatable_config = super()._compare(other)

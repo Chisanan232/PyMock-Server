@@ -56,7 +56,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigOpts, _Dividable):
         self._base_file_path: str = ""
 
         self._template_config_loader = TemplateConfigLoader()
-        self._template_config_loader._template_config_opts = self.register_callbacks()
+        self._template_config_loader.register(self.register_callbacks())
 
     def __len__(self):
         return len(self.apis.keys())

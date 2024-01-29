@@ -410,6 +410,9 @@ class TemplateConfigLoadable:
             )
         self._loaders[key] = self
 
+    def register(self, template_config_ops: TemplateConfigOpts) -> None:
+        self._template_config_opts = template_config_ops
+
     # @property
     # # @abstractmethod    // FIXME: Would be activated after refactoring.
     # def _register_load_by_key(self) -> str:
