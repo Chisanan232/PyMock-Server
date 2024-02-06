@@ -305,9 +305,6 @@ class MockAPIs(_Config, _Checkable, TemplateConfigOpts, _Dividable):
 
     @property
     def _config_file_format(self) -> str:
-        print(
-            f"[DEBUG in MockAPIs._config_file_format] self.template.values.api.config_path_format: {self.template.values.api.config_path_format}"
-        )
         return self.template.values.api.config_path_format
 
     @property

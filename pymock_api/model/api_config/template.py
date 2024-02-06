@@ -389,18 +389,19 @@ class TemplateConfigLoadable:
     _valid_loader_keys: List[str] = [k.value for k in ConfigLoadingOrderKey]
     # _loaders: Dict[str, "TemplateConfigLoadable"] = {}
 
-    _template_config_opts: TemplateConfigOpts = field(default_factory=TemplateConfigOpts)
+    _template_config_opts: TemplateConfigOpts
 
     def __init__(self):
         # self._register_loader()  # FIXME: This code would be activated after refactoring done.
 
         # self._load_mocked_apis_from_data = self._loaders[ConfigLoadingOrderKey.APIs.value].load_config
         self._load_mocked_apis_from_data = None  # Let subclass *TemplateConfigLoaderWithAPIConfig* to set the callback.
-        set_loading_function(
-            # apis=self._load_mocked_apis_from_data,
-            apply=self._load_templatable_config_by_apply,
-            file=self._load_templatable_config,
-        )
+        # set_loading_function(
+        #     data_model_key=self._template_config_opts._config_file_format,
+        #     # apis=self._load_mocked_apis_from_data,
+        #     apply=self._load_templatable_config_by_apply,
+        #     file=self._load_templatable_config,
+        # )
 
     # def _register_loader(self, key: str) -> None:
     #     if key not in self._valid_loader_keys:
@@ -412,6 +413,13 @@ class TemplateConfigLoadable:
 
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         self._template_config_opts = template_config_ops
+
+        set_loading_function(
+            data_model_key=self._template_config_opts._config_file_format,
+            # apis=self._load_mocked_apis_from_data,
+            apply=self._load_templatable_config_by_apply,
+            file=self._load_templatable_config,
+        )
 
     # @property
     # # @abstractmethod    // FIXME: Would be activated after refactoring.
@@ -435,7 +443,7 @@ class TemplateConfigLoadable:
             for load_config in loading_order:
                 args = (mocked_apis_data,)
                 args = load_config.get_loading_function_args(*args)  # type: ignore[assignment]
-                load_config.get_loading_function()(*args)
+                load_config.get_loading_function(data_modal_key=self._template_config_opts._config_file_format)(*args)
 
     def _load_templatable_config(self) -> None:
         customize_config_file_format = "**"
@@ -524,7 +532,15 @@ class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
         # self._register_loader(key=ConfigLoadingOrderKey.APIs.value)
 
         self._load_mocked_apis_from_data = self.load_config
+        # set_loading_function(
+        #     data_model_key=self._template_config_opts._config_file_format,
+        #     apis=self._load_mocked_apis_from_data,
+        # )
+
+    def register(self, template_config_ops: TemplateConfigOpts) -> None:
+        super().register(template_config_ops)
         set_loading_function(
+            data_model_key=self._template_config_opts._config_file_format,
             apis=self._load_mocked_apis_from_data,
         )
 
@@ -548,8 +564,30 @@ class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
     #     pass
 
 
-class TemplateConfigLoader(TemplateConfigLoaderWithAPIConfig):
+class TemplateConfigLoader(TemplateConfigLoadable):
     """The layer for extending all the configuration loaders"""
+
+    # _loaders: Dict[str, "TemplateConfigLoadable"] = {
+    #     ConfigLoadingOrderKey.APIs.value: TemplateConfigLoaderWithAPIConfig(),
+    # }
+    _loaders: Dict[str, "TemplateConfigLoadable"] = {}
+
+    def __init__(self):
+        super().__init__()
+        self._loaders: Dict[str, "TemplateConfigLoadable"] = {
+            ConfigLoadingOrderKey.APIs.value: TemplateConfigLoaderWithAPIConfig(),
+        }
+
+    def register(self, template_config_ops: TemplateConfigOpts) -> None:
+        super().register(template_config_ops)
+        for k, v in self._loaders.items():
+            v.register(template_config_ops)
+            if k == ConfigLoadingOrderKey.APIs.value:
+                self._load_mocked_apis_from_data = self._loaders[k].load_config
+                set_loading_function(
+                    data_model_key=self._template_config_opts._config_file_format,
+                    apis=self._load_mocked_apis_from_data,
+                )
 
 
 @dataclass(eq=False)

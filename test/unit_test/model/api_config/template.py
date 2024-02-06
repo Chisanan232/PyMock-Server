@@ -311,6 +311,7 @@ class LoadConfigFunction(Enum):
 
 class MockTemplateConfigOpts(TemplateConfigOpts):
     _template_config_val = None
+    __config_file_format_val = None
 
     @property
     def _template_config(self) -> TemplateConfig:
@@ -322,7 +323,11 @@ class MockTemplateConfigOpts(TemplateConfigOpts):
 
     @property
     def _config_file_format(self) -> str:
-        pass
+        return self.__config_file_format_val
+
+    @_config_file_format.setter
+    def _config_file_format(self, k: str) -> None:
+        self.__config_file_format_val = k
 
     @property
     def _deserialize_as_template_config(self) -> "_TemplatableConfig":
@@ -395,13 +400,14 @@ class TestTemplateConfigLoadable:
             criteria_order.append(criteria)
 
         # Pre-process of setting loading function
-        set_loading_function(**mock_load_config_data)
+        set_loading_function(data_model_key="data_modal", **mock_load_config_data)
         template_config = TemplateConfig(
             activate=True,
             load_config=LoadConfig(includes_apis=True, order=load_order),
         )
         mock_template_config_opts_instance = MockTemplateConfigOpts()
         mock_template_config_opts_instance._template_config = template_config
+        mock_template_config_opts_instance._config_file_format = "data_modal"
 
         loadable_data_modal._template_config_opts = mock_template_config_opts_instance
 
