@@ -1,13 +1,12 @@
-request:
-  method: 'GET'
-  parameters:
-    - name: 'date'
-      required: true
-      default:
-      type: str
-      format:
-    - name: 'fooType'
-      required: true
-      default:
-      type: str
-      format:
+method: 'GET'
+parameters:
+  - name: 'date'
+    required: true
+    default:
+    type: str
+    format:
+  - name: 'fooType'
+    required: true
+    default:
+    type: str
+    format:

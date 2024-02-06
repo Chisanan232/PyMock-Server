@@ -3,7 +3,7 @@ request:
   parameters:
     - name: 'arg1'
       required: false
-      default: []
+      default:
       type: list
       format:
       items:
