@@ -434,21 +434,6 @@ class TemplateConfigLoadable:
     def load_config(self, *args, **kwargs) -> None:
         pass
 
-    def _load_mocked_apis_config(self, mocked_apis_data: dict) -> None:
-        loading_order = self._template_config_opts._template_config.load_config.order
-
-        if self._template_config_opts._template_config.load_config.includes_apis:
-            if (ConfigLoadingOrder.APIs not in loading_order) or (
-                ConfigLoadingOrder.APIs in loading_order and not self._template_config_opts._template_config.activate
-            ):
-                self._load_mocked_apis_from_data(mocked_apis_data)
-
-        if self._template_config_opts._template_config.activate:
-            for load_config in loading_order:
-                args = (mocked_apis_data,)
-                args = load_config.get_loading_function_args(*args)  # type: ignore[assignment]
-                load_config.get_loading_function(data_modal_key=self._template_config_opts._config_file_format)(*args)
-
     # @property
     # @abstractmethod
     # def _template_config(self) -> TemplateConfig:
@@ -621,6 +606,21 @@ class TemplateConfigLoader(TemplateConfigLoadable):
             elif k == ConfigLoadingOrderKey.APPLY.value:
                 self._load_templatable_config_by_apply = self._loaders[k].load_config
             self._loaders[k].register(template_config_ops)
+
+    def load_config(self, mocked_apis_data: dict) -> None:
+        loading_order = self._template_config_opts._template_config.load_config.order
+
+        if self._template_config_opts._template_config.load_config.includes_apis:
+            if (ConfigLoadingOrder.APIs not in loading_order) or (
+                ConfigLoadingOrder.APIs in loading_order and not self._template_config_opts._template_config.activate
+            ):
+                self._load_mocked_apis_from_data(mocked_apis_data)
+
+        if self._template_config_opts._template_config.activate:
+            for load_config in loading_order:
+                args = (mocked_apis_data,)
+                args = load_config.get_loading_function_args(*args)  # type: ignore[assignment]
+                load_config.get_loading_function(data_modal_key=self._template_config_opts._config_file_format)(*args)
 
 
 @dataclass(eq=False)

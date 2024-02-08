@@ -412,7 +412,7 @@ class TestTemplateConfigLoadable:
         loadable_data_modal._template_config_opts = mock_template_config_opts_instance
 
         # Run the target function
-        loadable_data_modal._load_mocked_apis_config({})
+        loadable_data_modal.load_config({})
 
         # Verify the running result
         mock_parent.assert_has_calls(criteria_order)

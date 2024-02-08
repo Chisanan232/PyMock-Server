@@ -263,7 +263,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigOpts, _Dividable):
 
         # Processing section *apis*
         mocked_apis_info = data.get("apis", {})
-        self._template_config_loader._load_mocked_apis_config(mocked_apis_info)
+        self._template_config_loader.load_config(mocked_apis_info)
         return self
 
     def is_work(self) -> bool:
