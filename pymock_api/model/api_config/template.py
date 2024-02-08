@@ -418,12 +418,12 @@ class TemplateConfigLoadable:
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         self._template_config_opts = template_config_ops
 
-        set_loading_function(
-            data_model_key=self._template_config_opts._config_file_format,
-            # apis=self._load_mocked_apis_from_data,
-            apply=self._load_templatable_config_by_apply,
-            # file=self._load_templatable_config,
-        )
+        # set_loading_function(
+        #     data_model_key=self._template_config_opts._config_file_format,
+        #     # apis=self._load_mocked_apis_from_data,
+        #     apply=self._load_templatable_config_by_apply,
+        #     # file=self._load_templatable_config,
+        # )
 
     # @property
     # # @abstractmethod    // FIXME: Would be activated after refactoring.
