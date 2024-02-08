@@ -616,16 +616,11 @@ class TemplateConfigLoader(TemplateConfigLoadable):
             v.register(template_config_ops)
             if k == ConfigLoadingOrderKey.APIs.value:
                 self._load_mocked_apis_from_data = self._loaders[k].load_config
-                set_loading_function(
-                    data_model_key=self._template_config_opts._config_file_format,
-                    apis=self._load_mocked_apis_from_data,
-                )
             elif k == ConfigLoadingOrderKey.FILE.value:
                 self._load_templatable_config = self._loaders[k].load_config
-                self._loaders[k].register(template_config_ops)
             elif k == ConfigLoadingOrderKey.APPLY.value:
                 self._load_templatable_config_by_apply = self._loaders[k].load_config
-                self._loaders[k].register(template_config_ops)
+            self._loaders[k].register(template_config_ops)
 
 
 @dataclass(eq=False)
