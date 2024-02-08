@@ -12,7 +12,7 @@ from ..template import (
     TemplateAPI,
     TemplateConfig,
     TemplateConfigLoadable,
-    TemplateConfigLoader,
+    TemplateConfigLoaderByScanFile,
     TemplateConfigOpts,
     TemplateHTTP,
     _TemplatableConfig,
@@ -38,7 +38,7 @@ class HTTP(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _
 
     def __post_init__(self):
         if self._template_config_loader is None:
-            self._template_config_loader = TemplateConfigLoader()
+            self._template_config_loader = TemplateConfigLoaderByScanFile()
             self._template_config_loader.register(self.register_callbacks())
 
     def _compare(self, other: "HTTP") -> bool:
@@ -183,13 +183,13 @@ class HTTP(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _
         else:
             self._current_section = "request"
             assert self._template_config_loader
-            self._template_config_loader._load_templatable_config()
+            self._template_config_loader.load_config()
         if resp:
             self.response = self._deserialize_as(HTTPResponse, with_data=resp)  # type: ignore[assignment]
         else:
             self._current_section = "response"
             assert self._template_config_loader
-            self._template_config_loader._load_templatable_config()
+            self._template_config_loader.load_config()
         return self
 
     @property
@@ -269,7 +269,7 @@ class MockAPI(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable
 
     def __post_init__(self):
         if self._template_config_loader is None:
-            self._template_config_loader = TemplateConfigLoader()
+            self._template_config_loader = TemplateConfigLoaderByScanFile()
             self._template_config_loader.register(self.register_callbacks())
 
     def _compare(self, other: "MockAPI") -> bool:
@@ -398,7 +398,7 @@ class MockAPI(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable
             self.http = self._deserialize_as(HTTP, with_data=http_info)  # type: ignore[assignment]
         else:
             assert self._template_config_loader
-            self._template_config_loader._load_templatable_config()
+            self._template_config_loader.load_config()
         if self.http is not None:
             self.http._current_template = self._current_template
         self.tag = data.get("tag", "")
