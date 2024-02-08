@@ -402,6 +402,7 @@ class TemplateConfigLoadable:
         #     apply=self._load_templatable_config_by_apply,
         #     file=self._load_templatable_config,
         # )
+        self._load_templatable_config = None  # Let subclass *TemplateConfigLoaderByScanFile* to set the callback.
 
     # def _register_loader(self, key: str) -> None:
     #     if key not in self._valid_loader_keys:
@@ -418,7 +419,7 @@ class TemplateConfigLoadable:
             data_model_key=self._template_config_opts._config_file_format,
             # apis=self._load_mocked_apis_from_data,
             apply=self._load_templatable_config_by_apply,
-            file=self._load_templatable_config,
+            # file=self._load_templatable_config,
         )
 
     # @property
@@ -444,27 +445,6 @@ class TemplateConfigLoadable:
                 args = (mocked_apis_data,)
                 args = load_config.get_loading_function_args(*args)  # type: ignore[assignment]
                 load_config.get_loading_function(data_modal_key=self._template_config_opts._config_file_format)(*args)
-
-    def _load_templatable_config(self) -> None:
-        customize_config_file_format = "**"
-        config_file_format = f"[!_**]{customize_config_file_format}"
-        # all_paths = glob.glob(f"{self._base_path}**/[!_*]*.yaml", recursive=True)
-        config_base_path = self._template_config_opts._template_config.values.base_file_path
-        all_paths = glob.glob(str(pathlib.Path(config_base_path, config_file_format)))
-        api_config_path = str(pathlib.Path(config_base_path, self._template_config_opts.config_file_name))
-        if os.path.exists(api_config_path):
-            all_paths.remove(api_config_path)
-        for path in all_paths:
-            if os.path.isdir(path):
-                # Has tag as directory
-                for path_with_tag in glob.glob(str(pathlib.Path(path, self._template_config_opts._config_file_format))):
-                    # In the tag directory, it's config
-                    self._deserialize_and_set_template_config(path_with_tag)
-            else:
-                assert os.path.isfile(path) is True
-                if fnmatch.fnmatch(path, self._template_config_opts._config_file_format):
-                    # Doesn't have tag, it's config
-                    self._deserialize_and_set_template_config(path)
 
     def _load_templatable_config_by_apply(self) -> None:
         if self._template_config_opts._template_config.apply:
@@ -564,6 +544,40 @@ class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
     #     pass
 
 
+class TemplateConfigLoaderByScanFile(TemplateConfigLoadable):
+    def __init__(self):
+        super().__init__()
+        self._load_templatable_config = self.load_config
+
+    def register(self, template_config_ops: TemplateConfigOpts) -> None:
+        super().register(template_config_ops)
+        set_loading_function(
+            data_model_key=self._template_config_opts._config_file_format,
+            file=self._load_templatable_config,
+        )
+
+    def load_config(self) -> None:
+        customize_config_file_format = "**"
+        config_file_format = f"[!_**]{customize_config_file_format}"
+        # all_paths = glob.glob(f"{self._base_path}**/[!_*]*.yaml", recursive=True)
+        config_base_path = self._template_config_opts._template_config.values.base_file_path
+        all_paths = glob.glob(str(pathlib.Path(config_base_path, config_file_format)))
+        api_config_path = str(pathlib.Path(config_base_path, self._template_config_opts.config_file_name))
+        if os.path.exists(api_config_path):
+            all_paths.remove(api_config_path)
+        for path in all_paths:
+            if os.path.isdir(path):
+                # Has tag as directory
+                for path_with_tag in glob.glob(str(pathlib.Path(path, self._template_config_opts._config_file_format))):
+                    # In the tag directory, it's config
+                    self._deserialize_and_set_template_config(path_with_tag)
+            else:
+                assert os.path.isfile(path) is True
+                if fnmatch.fnmatch(path, self._template_config_opts._config_file_format):
+                    # Doesn't have tag, it's config
+                    self._deserialize_and_set_template_config(path)
+
+
 class TemplateConfigLoader(TemplateConfigLoadable):
     """The layer for extending all the configuration loaders"""
 
@@ -576,6 +590,7 @@ class TemplateConfigLoader(TemplateConfigLoadable):
         super().__init__()
         self._loaders: Dict[str, "TemplateConfigLoadable"] = {
             ConfigLoadingOrderKey.APIs.value: TemplateConfigLoaderWithAPIConfig(),
+            ConfigLoadingOrderKey.FILE.value: TemplateConfigLoaderByScanFile(),
         }
 
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
@@ -588,6 +603,9 @@ class TemplateConfigLoader(TemplateConfigLoadable):
                     data_model_key=self._template_config_opts._config_file_format,
                     apis=self._load_mocked_apis_from_data,
                 )
+            elif k == ConfigLoadingOrderKey.FILE.value:
+                self._load_templatable_config = self._loaders[k].load_config
+                self._loaders[k].register(template_config_ops)
 
 
 @dataclass(eq=False)
