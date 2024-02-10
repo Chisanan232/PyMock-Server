@@ -342,12 +342,6 @@ class TemplateConfigOpts(metaclass=ABCMeta):
 
     def register_callbacks(self) -> "TemplateConfigOpts":
         return self
-        # return {
-        #     "_template_config": self._template_config,
-        #     "_config_file_format": self._config_file_format,
-        #     "_deserialize_as_template_config": self._deserialize_as_template_config,
-        #     "_set_template_config": self._set_template_config,
-        # }
 
     @property
     def config_file_name(self) -> str:
@@ -391,59 +385,12 @@ class TemplateConfigLoadable:
 
     _template_config_opts: TemplateConfigOpts
 
-    def __init__(self):
-        pass
-        # self._register_loader()  # FIXME: This code would be activated after refactoring done.
-
-        # self._load_mocked_apis_from_data = self._loaders[ConfigLoadingOrderKey.APIs.value].load_config
-        # self._load_mocked_apis_from_data = None  # Let subclass *TemplateConfigLoaderWithAPIConfig* to set the callback.
-        # set_loading_function(
-        #     data_model_key=self._template_config_opts._config_file_format,
-        #     # apis=self._load_mocked_apis_from_data,
-        #     apply=self._load_templatable_config_by_apply,
-        #     file=self._load_templatable_config,
-        # )
-        # self._load_templatable_config = None  # Let subclass *TemplateConfigLoaderByScanFile* to set the callback.
-        # self._load_templatable_config_by_apply = (
-        #     None  # Let subclass *TemplateConfigLoaderByScanFile* to set the callback.
-        # )
-
-    # def _register_loader(self, key: str) -> None:
-    #     if key not in self._valid_loader_keys:
-    #         raise KeyError(
-    #             f"Loader key *{key}* is not valid. Please use"
-    #             f"*{', '.join(self._valid_loader_keys)}* to set the key of loader."
-    #         )
-    #     self._loaders[key] = self
-
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         self._template_config_opts = template_config_ops
-
-        # set_loading_function(
-        #     data_model_key=self._template_config_opts._config_file_format,
-        #     # apis=self._load_mocked_apis_from_data,
-        #     apply=self._load_templatable_config_by_apply,
-        #     # file=self._load_templatable_config,
-        # )
-
-    # @property
-    # # @abstractmethod    // FIXME: Would be activated after refactoring.
-    # def _register_load_by_key(self) -> str:
-    #     return "apis"  # FIXME: Would be modify as *pass* after refactoring has done.
 
     # @abstractmethod    // FIXME: Would be activated after refactoring.
     def load_config(self, *args, **kwargs) -> None:
         pass
-
-    # @property
-    # @abstractmethod
-    # def _template_config(self) -> TemplateConfig:
-    #     pass
-
-    # @property
-    # @abstractmethod
-    # def _config_file_format(self) -> str:
-    #     pass
 
     def _deserialize_and_set_template_config(self, path: str) -> None:
         config = self._deserialize_template_config(path)
@@ -462,37 +409,14 @@ class TemplateConfigLoadable:
         config.config_path = pathlib.Path(path).name
         return config.deserialize(yaml_config)
 
-    # @property
-    # @abstractmethod
-    # def _deserialize_as_template_config(self) -> "_TemplatableConfig":
-    #     pass
-    #
-    # @abstractmethod
-    # def _set_template_config(self, config: _Config, **kwargs) -> None:
-    #     pass
-
 
 class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
-    def __init__(self):
-        super().__init__()
-        # self._register_loader(key=ConfigLoadingOrderKey.APIs.value)
-
-        # self._load_mocked_apis_from_data = self.load_config
-        # set_loading_function(
-        #     data_model_key=self._template_config_opts._config_file_format,
-        #     apis=self._load_mocked_apis_from_data,
-        # )
-
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         super().register(template_config_ops)
         set_loading_function(
             data_model_key=self._template_config_opts._config_file_format,
             apis=self.load_config,
         )
-
-    # @property
-    # def _register_load_by_key(self) -> str:
-    #     return ConfigLoadingOrderKey.APIs.value
 
     def load_config(self, mocked_apis_data: dict) -> None:
         self._template_config_opts._set_mocked_apis()
@@ -505,16 +429,8 @@ class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
                     api_config=api_config.deserialize(data=mocked_apis_data.get(mock_api_name, None)),
                 )
 
-    # @abstractmethod
-    # def _set_mocked_apis(self, api_key: str = "", api_config: Optional[_Config] = None) -> None:
-    #     pass
-
 
 class TemplateConfigLoaderByScanFile(TemplateConfigLoadable):
-    def __init__(self):
-        super().__init__()
-        # self._load_templatable_config = self.load_config
-
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         super().register(template_config_ops)
         set_loading_function(
@@ -545,10 +461,6 @@ class TemplateConfigLoaderByScanFile(TemplateConfigLoadable):
 
 
 class TemplateConfigLoaderByApply(TemplateConfigLoadable):
-    def __init__(self):
-        super().__init__()
-        # self._load_templatable_config_by_apply = self.load_config
-
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         super().register(template_config_ops)
         set_loading_function(
@@ -583,9 +495,6 @@ class TemplateConfigLoaderByApply(TemplateConfigLoadable):
 class TemplateConfigLoader(TemplateConfigLoadable):
     """The layer for extending all the configuration loaders"""
 
-    # _loaders: Dict[str, "TemplateConfigLoadable"] = {
-    #     ConfigLoadingOrderKey.APIs.value: TemplateConfigLoaderWithAPIConfig(),
-    # }
     _loaders: Dict[str, "TemplateConfigLoadable"] = {}
 
     def __init__(self):
@@ -600,12 +509,6 @@ class TemplateConfigLoader(TemplateConfigLoadable):
         super().register(template_config_ops)
         for k, v in self._loaders.items():
             v.register(template_config_ops)
-            # if k == ConfigLoadingOrderKey.APIs.value:
-            #     self._load_mocked_apis_from_data = self._loaders[k].load_config
-            # elif k == ConfigLoadingOrderKey.FILE.value:
-            #     self._load_templatable_config = self._loaders[k].load_config
-            # elif k == ConfigLoadingOrderKey.APPLY.value:
-            #     self._load_templatable_config_by_apply = self._loaders[k].load_config
             self._loaders[k].register(template_config_ops)
 
     def load_config_by(self, key: ConfigLoadingOrderKey, *args) -> None:
