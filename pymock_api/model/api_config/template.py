@@ -370,9 +370,8 @@ class TemplateConfigOpts(metaclass=ABCMeta):
     def _set_template_config(self, config: _Config, **kwargs) -> None:
         pass
 
-    @abstractmethod
     def _set_mocked_apis(self, api_key: str = "", api_config: Optional[_Config] = None) -> None:
-        pass
+        raise NotImplementedError
 
 
 class TemplateConfigLoadable:

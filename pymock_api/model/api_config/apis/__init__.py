@@ -246,10 +246,6 @@ class HTTP(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _
         if self._current_section.lower() == "response":
             self.response = config  # type: ignore[assignment]
 
-    def _set_mocked_apis(self, api_key: str = "", api_config: Optional[_Config] = None) -> None:
-        # FIXME: Should not be an abstract method force every data modal to implement it
-        pass
-
 
 @dataclass(eq=False)
 class MockAPI(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _Dividable):
@@ -507,7 +503,3 @@ class MockAPI(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable
         # Set the data model in config
         # if self.http is None:
         self.http = config  # type: ignore[assignment]
-
-    def _set_mocked_apis(self, api_key: str = "", api_config: Optional[_Config] = None) -> None:
-        # FIXME: Should not be an abstract method force every data modal to implement it
-        pass
