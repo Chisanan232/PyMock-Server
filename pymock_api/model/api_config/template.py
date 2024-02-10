@@ -504,12 +504,8 @@ class TemplateConfigLoader(TemplateConfigLoadable):
 
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         super().register(template_config_ops)
-        for k, v in self._loaders.items():
-            v.register(template_config_ops)
-            self._loaders[k].register(template_config_ops)
-
-    def load_config_by(self, key: ConfigLoadingOrderKey, *args) -> None:
-        self._loaders[key.value].load_config(*args)
+        for loader in self._loaders.values():
+            loader.register(template_config_ops)
 
     def load_config(self, mocked_apis_data: dict) -> None:
         loading_order = self._template_config_opts._template_config.load_config.order
