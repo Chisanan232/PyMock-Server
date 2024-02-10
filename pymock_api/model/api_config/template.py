@@ -515,7 +515,6 @@ class TemplateConfigLoader(TemplateConfigLoadable):
                 ConfigLoadingOrder.APIs in loading_order and not self._template_config_opts._template_config.activate
             ):
                 self._loaders[ConfigLoadingOrderKey.APIs.value].load_config(mocked_apis_data)
-                # self._load_mocked_apis_from_data(mocked_apis_data)
 
         if self._template_config_opts._template_config.activate:
             for load_config in loading_order:
