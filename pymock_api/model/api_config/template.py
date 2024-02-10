@@ -380,15 +380,12 @@ class TemplateConfigLoadable:
 
     _configuration: _BaseFileOperation = YAML()
 
-    _valid_loader_keys: List[str] = [k.value for k in ConfigLoadingOrderKey]
-    # _loaders: Dict[str, "TemplateConfigLoadable"] = {}
-
     _template_config_opts: TemplateConfigOpts
 
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         self._template_config_opts = template_config_ops
 
-    # @abstractmethod    // FIXME: Would be activated after refactoring.
+    @abstractmethod
     def load_config(self, *args, **kwargs) -> None:
         pass
 
