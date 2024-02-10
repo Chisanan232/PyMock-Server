@@ -392,20 +392,21 @@ class TemplateConfigLoadable:
     _template_config_opts: TemplateConfigOpts
 
     def __init__(self):
+        pass
         # self._register_loader()  # FIXME: This code would be activated after refactoring done.
 
         # self._load_mocked_apis_from_data = self._loaders[ConfigLoadingOrderKey.APIs.value].load_config
-        self._load_mocked_apis_from_data = None  # Let subclass *TemplateConfigLoaderWithAPIConfig* to set the callback.
+        # self._load_mocked_apis_from_data = None  # Let subclass *TemplateConfigLoaderWithAPIConfig* to set the callback.
         # set_loading_function(
         #     data_model_key=self._template_config_opts._config_file_format,
         #     # apis=self._load_mocked_apis_from_data,
         #     apply=self._load_templatable_config_by_apply,
         #     file=self._load_templatable_config,
         # )
-        self._load_templatable_config = None  # Let subclass *TemplateConfigLoaderByScanFile* to set the callback.
-        self._load_templatable_config_by_apply = (
-            None  # Let subclass *TemplateConfigLoaderByScanFile* to set the callback.
-        )
+        # self._load_templatable_config = None  # Let subclass *TemplateConfigLoaderByScanFile* to set the callback.
+        # self._load_templatable_config_by_apply = (
+        #     None  # Let subclass *TemplateConfigLoaderByScanFile* to set the callback.
+        # )
 
     # def _register_loader(self, key: str) -> None:
     #     if key not in self._valid_loader_keys:
@@ -476,7 +477,7 @@ class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
         super().__init__()
         # self._register_loader(key=ConfigLoadingOrderKey.APIs.value)
 
-        self._load_mocked_apis_from_data = self.load_config
+        # self._load_mocked_apis_from_data = self.load_config
         # set_loading_function(
         #     data_model_key=self._template_config_opts._config_file_format,
         #     apis=self._load_mocked_apis_from_data,
@@ -486,7 +487,7 @@ class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
         super().register(template_config_ops)
         set_loading_function(
             data_model_key=self._template_config_opts._config_file_format,
-            apis=self._load_mocked_apis_from_data,
+            apis=self.load_config,
         )
 
     # @property
@@ -512,13 +513,13 @@ class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
 class TemplateConfigLoaderByScanFile(TemplateConfigLoadable):
     def __init__(self):
         super().__init__()
-        self._load_templatable_config = self.load_config
+        # self._load_templatable_config = self.load_config
 
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         super().register(template_config_ops)
         set_loading_function(
             data_model_key=self._template_config_opts._config_file_format,
-            file=self._load_templatable_config,
+            file=self.load_config,
         )
 
     def load_config(self) -> None:
@@ -546,13 +547,13 @@ class TemplateConfigLoaderByScanFile(TemplateConfigLoadable):
 class TemplateConfigLoaderByApply(TemplateConfigLoadable):
     def __init__(self):
         super().__init__()
-        self._load_templatable_config_by_apply = self.load_config
+        # self._load_templatable_config_by_apply = self.load_config
 
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         super().register(template_config_ops)
         set_loading_function(
             data_model_key=self._template_config_opts._config_file_format,
-            apply=self._load_templatable_config_by_apply,
+            apply=self.load_config,
         )
 
     def load_config(self) -> None:
@@ -599,12 +600,12 @@ class TemplateConfigLoader(TemplateConfigLoadable):
         super().register(template_config_ops)
         for k, v in self._loaders.items():
             v.register(template_config_ops)
-            if k == ConfigLoadingOrderKey.APIs.value:
-                self._load_mocked_apis_from_data = self._loaders[k].load_config
-            elif k == ConfigLoadingOrderKey.FILE.value:
-                self._load_templatable_config = self._loaders[k].load_config
-            elif k == ConfigLoadingOrderKey.APPLY.value:
-                self._load_templatable_config_by_apply = self._loaders[k].load_config
+            # if k == ConfigLoadingOrderKey.APIs.value:
+            #     self._load_mocked_apis_from_data = self._loaders[k].load_config
+            # elif k == ConfigLoadingOrderKey.FILE.value:
+            #     self._load_templatable_config = self._loaders[k].load_config
+            # elif k == ConfigLoadingOrderKey.APPLY.value:
+            #     self._load_templatable_config_by_apply = self._loaders[k].load_config
             self._loaders[k].register(template_config_ops)
 
     def load_config_by(self, key: ConfigLoadingOrderKey, *args) -> None:

@@ -12,6 +12,9 @@ from pymock_api.model.api_config.template import (
     TemplateApply,
     TemplateConfigLoadable,
     TemplateConfigLoader,
+    TemplateConfigLoaderByApply,
+    TemplateConfigLoaderByScanFile,
+    TemplateConfigLoaderWithAPIConfig,
     TemplateConfigOpts,
     TemplateHTTP,
     TemplateRequest,
@@ -19,7 +22,11 @@ from pymock_api.model.api_config.template import (
     TemplateSetting,
     TemplateValues,
 )
-from pymock_api.model.enums import ConfigLoadingOrder, set_loading_function
+from pymock_api.model.enums import (
+    ConfigLoadingOrder,
+    ConfigLoadingOrderKey,
+    set_loading_function,
+)
 
 from ...._values import (
     _Mock_Base_File_Path,
@@ -299,14 +306,26 @@ class TestTemplateConfig(CheckableTestSuite):
         assert obj.apply.serialize() == _Mock_Template_Setting.get("apply")
 
 
+class DummyTemplateConfigLoaderWithAPIConfig(TemplateConfigLoaderWithAPIConfig):
+    pass
+
+
+class DummyTemplateConfigLoaderByScanFile(TemplateConfigLoaderByScanFile):
+    pass
+
+
+class DummyTemplateConfigLoaderByApply(TemplateConfigLoaderByApply):
+    pass
+
+
 class LoadConfigFunction(Enum):
     """
     Here values are the function naming of object *TemplateConfigLoadable* which loads configuration
     """
 
-    FROM_DATA: str = "apis:_load_mocked_apis_from_data"
-    BY_FILE: str = "file:_load_templatable_config"
-    BY_APPLY: str = "apply:_load_templatable_config_by_apply"
+    FROM_DATA: tuple = ("apis", DummyTemplateConfigLoaderWithAPIConfig)
+    BY_FILE: tuple = ("file", DummyTemplateConfigLoaderByScanFile)
+    BY_APPLY: tuple = ("apply", DummyTemplateConfigLoaderByApply)
 
 
 class MockTemplateConfigOpts(TemplateConfigOpts):
@@ -341,7 +360,14 @@ class MockTemplateConfigOpts(TemplateConfigOpts):
 
 
 class DummyTemplateLoadableDataModal(TemplateConfigLoader):
-    pass
+    def __init__(self):
+        super().__init__()
+        # Mock the loaders
+        self._loaders = {
+            ConfigLoadingOrderKey.APIs.value: DummyTemplateConfigLoaderWithAPIConfig(),
+            ConfigLoadingOrderKey.FILE.value: DummyTemplateConfigLoaderByScanFile(),
+            ConfigLoadingOrderKey.APPLY.value: DummyTemplateConfigLoaderByApply(),
+        }
 
 
 class TestTemplateConfigLoadable:
@@ -350,7 +376,7 @@ class TestTemplateConfigLoadable:
         return DummyTemplateLoadableDataModal()
 
     @pytest.mark.parametrize(
-        ("load_order", "expected_func_run_order"),
+        ("load_order", "expected_obj_run_order"),
         [
             (
                 [ConfigLoadingOrder.APIs, ConfigLoadingOrder.FILE, ConfigLoadingOrder.APPLY],
@@ -374,29 +400,29 @@ class TestTemplateConfigLoadable:
         self,
         loadable_data_modal: TemplateConfigLoadable,
         load_order: List[ConfigLoadingOrder],
-        expected_func_run_order: List[LoadConfigFunction],
+        expected_obj_run_order: List[LoadConfigFunction],
     ):
         # assert isinstance(sut, TemplateConfigLoadable)
-        expected_func_run_order = [func.value.split(":") for func in expected_func_run_order]
+        expected_obj_run_order = [func.value for func in expected_obj_run_order]
 
         # Parent mock object for mocking target functions
         mock_parent = Mock()
         mock_load_config_data = {}
         # Magic mock the target function
-        for func in expected_func_run_order:
-            setattr(loadable_data_modal, func[1], MagicMock())
-            mock_load_config_data[func[0]] = getattr(loadable_data_modal, func[1])
+        for obj in expected_obj_run_order:
+            setattr(obj[1], "load_config", MagicMock())
+            mock_load_config_data[obj[0]] = getattr(obj[1], "load_config")
         # Annotate some functions as magic functions
-        for func in expected_func_run_order:
-            setattr(mock_parent, func[1], getattr(loadable_data_modal, func[1]))
+        for obj in expected_obj_run_order:
+            setattr(mock_parent, f"{obj[0]}_load_config", getattr(obj[1], "load_config"))
 
         # Generate criteria of the function running order
         criteria_order = []
-        for func in expected_func_run_order:
-            if func[1] == "_load_mocked_apis_from_data":
-                criteria = getattr(call, func[1])({})
+        for obj in expected_obj_run_order:
+            if obj[0] == "apis":
+                criteria = getattr(call, f"{obj[0]}_load_config")({})
             else:
-                criteria = getattr(call, func[1])()
+                criteria = getattr(call, f"{obj[0]}_load_config")()
             criteria_order.append(criteria)
 
         # Pre-process of setting loading function
