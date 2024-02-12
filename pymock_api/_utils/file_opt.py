@@ -2,6 +2,7 @@
 
 Read the configuration and parse its content to a specific data object so that it could be convenience to use it.
 """
+
 import json
 import os
 from abc import ABCMeta, abstractmethod
