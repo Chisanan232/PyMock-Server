@@ -501,5 +501,4 @@ class MockAPI(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable
 
     def _set_template_config(self, config: _Config, **kwargs) -> None:
         # Set the data model in config
-        # if self.http is None:
         self.http = config  # type: ignore[assignment]
