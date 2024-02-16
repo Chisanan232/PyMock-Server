@@ -8,7 +8,7 @@ from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Checkable, _Config
 from ..template import TemplateAPI, TemplateConfig, TemplateHTTP
-from ..template._base import _TemplatableConfig
+from ..template._base import _BaseTemplatableConfig
 from ..template._divide import (
     BeDividedableAsTemplatableConfig,
     TemplatableConfigDividable,
@@ -24,7 +24,7 @@ from .response import HTTPResponse, ResponseProperty
 
 @dataclass(eq=False)
 class HTTP(
-    _TemplatableConfig,
+    _BaseTemplatableConfig,
     TemplatableConfigLoadable,
     _Checkable,
     BeDividedableAsTemplatableConfig,
@@ -128,7 +128,7 @@ class HTTP(
 
     def _process_dividing_serialize_http_props(
         self,
-        data_modal: Union[_Config, BeDividedableAsTemplatableConfig, _TemplatableConfig],
+        data_modal: Union[_Config, BeDividedableAsTemplatableConfig, _BaseTemplatableConfig],
         init_data: Dict[str, Any],
         key: str = "",
         should_set_dividable_value_callback: Optional[Callable] = None,
@@ -257,7 +257,7 @@ class HTTP(
 
 @dataclass(eq=False)
 class MockAPI(
-    _TemplatableConfig,
+    _BaseTemplatableConfig,
     TemplatableConfigLoadable,
     _Checkable,
     BeDividedableAsTemplatableConfig,

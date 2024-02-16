@@ -11,7 +11,7 @@ from . import TemplateConfig, TemplateSetting
 
 
 @dataclass(eq=False)
-class _TemplatableConfig(_Config, ABC):
+class _BaseTemplatableConfig(_Config, ABC):
     apply_template_props: bool = field(default=True)
 
     # The settings which could be set by section *template* or override the values
@@ -81,8 +81,8 @@ class _TemplatableConfig(_Config, ABC):
         pass
 
     def _deserialize_as(
-        self, data_model: Type["_TemplatableConfig"], with_data: dict
-    ) -> Optional["_TemplatableConfig"]:
+        self, data_model: Type["_BaseTemplatableConfig"], with_data: dict
+    ) -> Optional["_BaseTemplatableConfig"]:
         if with_data:
             config = data_model(_current_template=self._current_template)
             config.base_file_path = self.base_file_path

@@ -8,7 +8,7 @@ from ...._utils import YAML
 from ...._utils.file_opt import _BaseFileOperation
 from .._base import _Config
 from . import TemplateConfig
-from ._base import _TemplatableConfig
+from ._base import _BaseTemplatableConfig
 
 
 @dataclass(eq=False)
@@ -46,7 +46,7 @@ class TemplatableConfigDividable(metaclass=ABCMeta):
 
     def _process_dividing_serialize(
         self,
-        data_modal: Union[_Config, BeDividedableAsTemplatableConfig, _TemplatableConfig],
+        data_modal: Union[_Config, BeDividedableAsTemplatableConfig, _BaseTemplatableConfig],
         init_data: Dict[str, Any],
         api_name: str,
         tag: str = "",
@@ -56,7 +56,7 @@ class TemplatableConfigDividable(metaclass=ABCMeta):
         assert (
             isinstance(data_modal, _Config)
             and isinstance(data_modal, BeDividedableAsTemplatableConfig)
-            and isinstance(data_modal, _TemplatableConfig)
+            and isinstance(data_modal, _BaseTemplatableConfig)
         )
         # Pre-process
         if isinstance(data_modal, TemplatableConfigDividable):
@@ -89,13 +89,13 @@ class TemplatableConfigDividable(metaclass=ABCMeta):
         pass
 
     def dividing_serialize(
-        self, data: Union[_Config, BeDividedableAsTemplatableConfig, _TemplatableConfig]
+        self, data: Union[_Config, BeDividedableAsTemplatableConfig, _BaseTemplatableConfig]
     ) -> Optional[Union[str, dict]]:
         if self.should_divide:
             assert (
                 isinstance(data, _Config)
                 and isinstance(data, BeDividedableAsTemplatableConfig)
-                and isinstance(data, _TemplatableConfig)
+                and isinstance(data, _BaseTemplatableConfig)
             )
             config_base_path = data._current_template.values.base_file_path
             tag_dir = str(pathlib.Path(config_base_path, data.tag)) if data.tag else ""
@@ -112,6 +112,6 @@ class TemplatableConfigDividable(metaclass=ABCMeta):
             return self.serialize_lower_layer(data=data)
 
     def serialize_lower_layer(
-        self, data: Union[_Config, BeDividedableAsTemplatableConfig, _TemplatableConfig]
+        self, data: Union[_Config, BeDividedableAsTemplatableConfig, _BaseTemplatableConfig]
     ) -> Optional[Dict[str, Any]]:
         return data.serialize()  # type: ignore[union-attr]

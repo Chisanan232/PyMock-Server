@@ -7,9 +7,9 @@ import pytest
 from pymock_api.model.api_config import (
     TemplateConfig,
     TemplateConfigLoader,
+    _BaseTemplatableConfig,
     _BaseTemplateConfigLoader,
     _Config,
-    _TemplatableConfig,
 )
 from pymock_api.model.api_config.template import (
     LoadConfig,
@@ -282,7 +282,7 @@ class MockTemplateConfigOpts(TemplateConfigOpts):
         self.__config_file_format_val = k
 
     @property
-    def _deserialize_as_template_config(self) -> "_TemplatableConfig":
+    def _deserialize_as_template_config(self) -> "_BaseTemplatableConfig":
         pass
 
     def _set_template_config(self, config: _Config, **kwargs) -> None:

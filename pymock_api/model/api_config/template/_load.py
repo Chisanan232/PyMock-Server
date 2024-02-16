@@ -10,7 +10,7 @@ from ...._utils.file_opt import _BaseFileOperation
 from ...enums import ConfigLoadingOrder, ConfigLoadingOrderKey, set_loading_function
 from .._base import _Config
 from . import TemplateConfig
-from ._base import _TemplatableConfig
+from ._base import _BaseTemplatableConfig
 
 
 class TemplateConfigOpts(metaclass=ABCMeta):
@@ -39,7 +39,7 @@ class TemplateConfigOpts(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def _deserialize_as_template_config(self) -> "_TemplatableConfig":
+    def _deserialize_as_template_config(self) -> "_BaseTemplatableConfig":
         pass
 
     @abstractmethod
