@@ -6,13 +6,9 @@ from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Type, Union
 
-from ..._utils.file_opt import YAML, _BaseFileOperation
-from ...model.enums import (
-    ConfigLoadingOrder,
-    ConfigLoadingOrderKey,
-    set_loading_function,
-)
-from ._base import SelfType, _Checkable, _Config
+from ...._utils.file_opt import YAML, _BaseFileOperation
+from ...enums import ConfigLoadingOrder, ConfigLoadingOrderKey, set_loading_function
+from .._base import SelfType, _Checkable, _Config
 
 
 @dataclass(eq=False)
