@@ -20,10 +20,16 @@ from .apis import (
 )
 from .base import BaseConfig
 from .item import IteratorItem
-from .template import TemplateConfig, TemplateConfigLoadable, _TemplatableConfig
+from .template import (
+    TemplateConfig,
+    TemplateConfigLoadable,
+    TemplateConfigLoader,
+    TemplateConfigOpts,
+    _TemplatableConfig,
+)
 
 
-class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
+class MockAPIs(_Config, _Checkable, TemplateConfigOpts, _Dividable):
     """*The **mocked_apis** section*"""
 
     _template: TemplateConfig
@@ -32,6 +38,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
 
     _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
+    _template_config_loader: TemplateConfigLoadable
 
     def __init__(
         self,
@@ -47,6 +54,9 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
         self.divide_strategy: _DivideStrategy = _DivideStrategy()
         self.is_pull: bool = False
         self._base_file_path: str = ""
+
+        self._template_config_loader = TemplateConfigLoader()
+        self._template_config_loader.register(self.register_callbacks())
 
     def __len__(self):
         return len(self.apis.keys())
@@ -253,7 +263,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigLoadable, _Dividable):
 
         # Processing section *apis*
         mocked_apis_info = data.get("apis", {})
-        self._load_mocked_apis_config(mocked_apis_info)
+        self._template_config_loader.load_config(mocked_apis_info)
         return self
 
     def is_work(self) -> bool:

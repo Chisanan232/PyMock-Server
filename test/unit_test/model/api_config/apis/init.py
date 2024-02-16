@@ -400,3 +400,11 @@ class TestHTTP(TemplatableConfigTestSuite, CheckableTestSuite, DividableTestSuit
         with pytest.raises(ValueError) as exc_info:
             sut_with_nothing._config_file_format
         assert re.search(r"must to be \*request\* or \*response\*", str(exc_info.value), re.IGNORECASE)
+
+    def test_prop__deserialize_as_template_config_with_invalid_value(self, sut_with_nothing: HTTP):
+        # Given invalid value
+        sut_with_nothing._current_section = "invalid value"
+        # Run target function
+        with pytest.raises(ValueError) as exc_info:
+            sut_with_nothing._deserialize_as_template_config
+        assert re.search(r"must to be \*request\* or \*response\*", str(exc_info.value), re.IGNORECASE)

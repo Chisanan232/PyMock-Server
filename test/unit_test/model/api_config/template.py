@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Type
+from enum import Enum
+from typing import List, Optional, Type
+from unittest.mock import MagicMock, Mock, call
 
 import pytest
 
@@ -8,11 +10,22 @@ from pymock_api.model.api_config.template import (
     LoadConfig,
     TemplateAPI,
     TemplateApply,
+    TemplateConfigLoadable,
+    TemplateConfigLoader,
+    TemplateConfigLoaderByApply,
+    TemplateConfigLoaderByScanFile,
+    TemplateConfigLoaderWithAPIConfig,
+    TemplateConfigOpts,
     TemplateHTTP,
     TemplateRequest,
     TemplateResponse,
     TemplateSetting,
     TemplateValues,
+)
+from pymock_api.model.enums import (
+    ConfigLoadingOrder,
+    ConfigLoadingOrderKey,
+    set_loading_function,
 )
 
 from ...._values import (
@@ -291,3 +304,141 @@ class TestTemplateConfig(CheckableTestSuite):
         assert obj.activate == _Mock_Template_Setting.get("activate")
         assert obj.values.serialize() == _Mock_Template_Setting.get("values")
         assert obj.apply.serialize() == _Mock_Template_Setting.get("apply")
+
+
+class DummyTemplateConfigLoaderWithAPIConfig(TemplateConfigLoaderWithAPIConfig):
+    pass
+
+
+class DummyTemplateConfigLoaderByScanFile(TemplateConfigLoaderByScanFile):
+    pass
+
+
+class DummyTemplateConfigLoaderByApply(TemplateConfigLoaderByApply):
+    pass
+
+
+class LoadConfigFunction(Enum):
+    """
+    Here values are the function naming of object *TemplateConfigLoadable* which loads configuration
+    """
+
+    FROM_DATA: tuple = ("apis", DummyTemplateConfigLoaderWithAPIConfig)
+    BY_FILE: tuple = ("file", DummyTemplateConfigLoaderByScanFile)
+    BY_APPLY: tuple = ("apply", DummyTemplateConfigLoaderByApply)
+
+
+class MockTemplateConfigOpts(TemplateConfigOpts):
+    _template_config_val = None
+    __config_file_format_val = None
+
+    @property
+    def _template_config(self) -> TemplateConfig:
+        return self._template_config_val
+
+    @_template_config.setter
+    def _template_config(self, t: TemplateConfig) -> None:
+        self._template_config_val = t
+
+    @property
+    def _config_file_format(self) -> str:
+        return self.__config_file_format_val
+
+    @_config_file_format.setter
+    def _config_file_format(self, k: str) -> None:
+        self.__config_file_format_val = k
+
+    @property
+    def _deserialize_as_template_config(self) -> "_TemplatableConfig":
+        pass
+
+    def _set_template_config(self, config: _Config, **kwargs) -> None:
+        pass
+
+    def _set_mocked_apis(self, api_key: str = "", api_config: Optional[_Config] = None) -> None:
+        pass
+
+
+class DummyTemplateLoadableDataModal(TemplateConfigLoader):
+    def __init__(self):
+        super().__init__()
+        # Mock the loaders
+        self._loaders = {
+            ConfigLoadingOrderKey.APIs.value: DummyTemplateConfigLoaderWithAPIConfig(),
+            ConfigLoadingOrderKey.FILE.value: DummyTemplateConfigLoaderByScanFile(),
+            ConfigLoadingOrderKey.APPLY.value: DummyTemplateConfigLoaderByApply(),
+        }
+
+
+class TestTemplateConfigLoadable:
+    @pytest.fixture(scope="class")
+    def loadable_data_modal(self) -> TemplateConfigLoadable:
+        return DummyTemplateLoadableDataModal()
+
+    @pytest.mark.parametrize(
+        ("load_order", "expected_obj_run_order"),
+        [
+            (
+                [ConfigLoadingOrder.APIs, ConfigLoadingOrder.FILE, ConfigLoadingOrder.APPLY],
+                [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_FILE, LoadConfigFunction.BY_APPLY],
+            ),
+            (
+                [ConfigLoadingOrder.APIs, ConfigLoadingOrder.APPLY, ConfigLoadingOrder.FILE],
+                [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_APPLY, LoadConfigFunction.BY_FILE],
+            ),
+            (
+                [ConfigLoadingOrder.APIs, ConfigLoadingOrder.FILE],
+                [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_FILE],
+            ),
+            (
+                [ConfigLoadingOrder.APIs, ConfigLoadingOrder.APPLY],
+                [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_APPLY],
+            ),
+        ],
+    )
+    def test_loading_configuration_workflow(
+        self,
+        loadable_data_modal: TemplateConfigLoadable,
+        load_order: List[ConfigLoadingOrder],
+        expected_obj_run_order: List[LoadConfigFunction],
+    ):
+        # assert isinstance(sut, TemplateConfigLoadable)
+        expected_obj_run_order = [func.value for func in expected_obj_run_order]
+
+        # Parent mock object for mocking target functions
+        mock_parent = Mock()
+        mock_load_config_data = {}
+        # Magic mock the target function
+        for obj in expected_obj_run_order:
+            setattr(obj[1], "load_config", MagicMock())
+            mock_load_config_data[obj[0]] = getattr(obj[1], "load_config")
+        # Annotate some functions as magic functions
+        for obj in expected_obj_run_order:
+            setattr(mock_parent, f"{obj[0]}_load_config", getattr(obj[1], "load_config"))
+
+        # Generate criteria of the function running order
+        criteria_order = []
+        for obj in expected_obj_run_order:
+            if obj[0] == "apis":
+                criteria = getattr(call, f"{obj[0]}_load_config")({})
+            else:
+                criteria = getattr(call, f"{obj[0]}_load_config")()
+            criteria_order.append(criteria)
+
+        # Pre-process of setting loading function
+        set_loading_function(data_model_key="data_modal", **mock_load_config_data)
+        template_config = TemplateConfig(
+            activate=True,
+            load_config=LoadConfig(includes_apis=True, order=load_order),
+        )
+        mock_template_config_opts_instance = MockTemplateConfigOpts()
+        mock_template_config_opts_instance._template_config = template_config
+        mock_template_config_opts_instance._config_file_format = "data_modal"
+
+        loadable_data_modal._template_config_opts = mock_template_config_opts_instance
+
+        # Run the target function
+        loadable_data_modal.load_config({})
+
+        # Verify the running result
+        mock_parent.assert_has_calls(criteria_order)

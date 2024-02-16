@@ -12,6 +12,8 @@ from ..template import (
     TemplateAPI,
     TemplateConfig,
     TemplateConfigLoadable,
+    TemplateConfigLoaderByScanFile,
+    TemplateConfigOpts,
     TemplateHTTP,
     _TemplatableConfig,
 )
@@ -20,7 +22,7 @@ from .response import HTTPResponse, ResponseProperty
 
 
 @dataclass(eq=False)
-class HTTP(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDividedable, _Dividable):
+class HTTP(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _Dividable):
     """*The **http** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-http"
@@ -31,7 +33,13 @@ class HTTP(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDividedabl
     _request: Optional[HTTPRequest] = field(init=False, repr=False)
     _response: Optional[HTTPResponse] = field(init=False, repr=False)
 
-    _current_section: str = field(init=False, repr=False)
+    _current_section: str = "request"
+    _template_config_loader: Optional[TemplateConfigLoadable] = None
+
+    def __post_init__(self):
+        if self._template_config_loader is None:
+            self._template_config_loader = TemplateConfigLoaderByScanFile()
+            self._template_config_loader.register(self.register_callbacks())
 
     def _compare(self, other: "HTTP") -> bool:
         templatable_config = super()._compare(other)
@@ -174,12 +182,14 @@ class HTTP(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDividedabl
             self.request = self._deserialize_as(HTTPRequest, with_data=req)  # type: ignore[assignment]
         else:
             self._current_section = "request"
-            self._load_templatable_config()
+            assert self._template_config_loader
+            self._template_config_loader.load_config()
         if resp:
             self.response = self._deserialize_as(HTTPResponse, with_data=resp)  # type: ignore[assignment]
         else:
             self._current_section = "response"
-            self._load_templatable_config()
+            assert self._template_config_loader
+            self._template_config_loader.load_config()
         return self
 
     @property
@@ -219,8 +229,13 @@ class HTTP(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDividedabl
     def _deserialize_as_template_config(self) -> Union[HTTPRequest, HTTPResponse]:
         if self._current_section.lower() == "request":
             http_prop = HTTPRequest(_current_template=self._current_template)
-        if self._current_section.lower() == "response":
+        elif self._current_section.lower() == "response":
             http_prop = HTTPResponse(_current_template=self._current_template)  # type: ignore[assignment]
+        else:
+            raise ValueError(
+                "Inner property *HTTPRequest._current_section*, *HTTPResponse._current_section* value must to be "
+                "*request* or *response*."
+            )
         http_prop.absolute_model_key = self.key
         return http_prop
 
@@ -231,13 +246,9 @@ class HTTP(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDividedabl
         if self._current_section.lower() == "response":
             self.response = config  # type: ignore[assignment]
 
-    def _set_mocked_apis(self, api_key: str = "", api_config: Optional[_Config] = None) -> None:
-        # FIXME: Should not be an abstract method force every data modal to implement it
-        pass
-
 
 @dataclass(eq=False)
-class MockAPI(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDividedable, _Dividable):
+class MockAPI(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _Dividable):
     """*The **<api>** section in **mocked_apis***"""
 
     config_file_tail: str = "-api"
@@ -249,6 +260,13 @@ class MockAPI(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDivided
     _url: str = field(init=False, repr=False)
     _http: Optional[HTTP] = field(init=False, repr=False)
     _tag: str = field(init=False, repr=False)
+
+    _template_config_loader: Optional[TemplateConfigLoadable] = None
+
+    def __post_init__(self):
+        if self._template_config_loader is None:
+            self._template_config_loader = TemplateConfigLoaderByScanFile()
+            self._template_config_loader.register(self.register_callbacks())
 
     def _compare(self, other: "MockAPI") -> bool:
         templatable_config = super()._compare(other)
@@ -375,7 +393,8 @@ class MockAPI(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDivided
         if http_info:
             self.http = self._deserialize_as(HTTP, with_data=http_info)  # type: ignore[assignment]
         else:
-            self._load_templatable_config()
+            assert self._template_config_loader
+            self._template_config_loader.load_config()
         if self.http is not None:
             self.http._current_template = self._current_template
         self.tag = data.get("tag", "")
@@ -483,7 +502,3 @@ class MockAPI(_TemplatableConfig, TemplateConfigLoadable, _Checkable, _BeDivided
     def _set_template_config(self, config: _Config, **kwargs) -> None:
         # Set the data model in config
         self.http = config  # type: ignore[assignment]
-
-    def _set_mocked_apis(self, api_key: str = "", api_config: Optional[_Config] = None) -> None:
-        # FIXME: Should not be an abstract method force every data modal to implement it
-        pass
