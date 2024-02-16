@@ -23,7 +23,7 @@ class _BeDividedable(metaclass=ABCMeta):
     api_name: str = field(init=False, repr=False)
 
 
-class _Dividable(metaclass=ABCMeta):
+class TemplatableConfigDividable(metaclass=ABCMeta):
     dry_run: bool = field(init=False, repr=False, default=True)
 
     _divide_strategy: _DivideStrategy = _DivideStrategy()
@@ -58,7 +58,7 @@ class _Dividable(metaclass=ABCMeta):
             and isinstance(data_modal, _TemplatableConfig)
         )
         # Pre-process
-        if isinstance(data_modal, _Dividable):
+        if isinstance(data_modal, TemplatableConfigDividable):
             data_modal.dry_run = self.dry_run
         data_modal.api_name = api_name
         data_modal.tag = tag if tag else ""

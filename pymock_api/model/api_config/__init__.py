@@ -9,7 +9,7 @@ from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
 from ..enums import ConfigLoadingOrder
 from ._base import _Checkable, _Config
-from ._divide import _BeDividedable, _Dividable, _DivideStrategy
+from ._divide import TemplatableConfigDividable, _BeDividedable, _DivideStrategy
 from .apis import (
     HTTP,
     APIParameter,
@@ -29,7 +29,7 @@ from .template import (
 )
 
 
-class MockAPIs(_Config, _Checkable, TemplatableConfigLoadable, _Dividable):
+class MockAPIs(_Config, _Checkable, TemplatableConfigLoadable, TemplatableConfigDividable):
     """*The **mocked_apis** section*"""
 
     _template: TemplateConfig

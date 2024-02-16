@@ -7,7 +7,7 @@ from ...._utils import YAML
 from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Checkable, _Config
-from .._divide import _BeDividedable, _Dividable
+from .._divide import TemplatableConfigDividable, _BeDividedable
 from ..template import (
     TemplatableConfigLoadable,
     TemplateAPI,
@@ -22,7 +22,7 @@ from .response import HTTPResponse, ResponseProperty
 
 
 @dataclass(eq=False)
-class HTTP(_TemplatableConfig, TemplatableConfigLoadable, _Checkable, _BeDividedable, _Dividable):
+class HTTP(_TemplatableConfig, TemplatableConfigLoadable, _Checkable, _BeDividedable, TemplatableConfigDividable):
     """*The **http** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-http"
@@ -249,7 +249,7 @@ class HTTP(_TemplatableConfig, TemplatableConfigLoadable, _Checkable, _BeDivided
 
 
 @dataclass(eq=False)
-class MockAPI(_TemplatableConfig, TemplatableConfigLoadable, _Checkable, _BeDividedable, _Dividable):
+class MockAPI(_TemplatableConfig, TemplatableConfigLoadable, _Checkable, _BeDividedable, TemplatableConfigDividable):
     """*The **<api>** section in **mocked_apis***"""
 
     config_file_tail: str = "-api"
