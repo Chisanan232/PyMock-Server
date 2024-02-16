@@ -20,11 +20,7 @@ from .apis import (
 from .base import BaseConfig
 from .item import IteratorItem
 from .template import TemplateConfig, _TemplatableConfig
-from .template._divide import (
-    TemplatableConfigDividable,
-    _BeDividedable,
-    _DivideStrategy,
-)
+from .template._divide import BeDividedable, DivideStrategy, TemplatableConfigDividable
 from .template._load import (
     TemplatableConfigLoadable,
     TemplateConfigLoader,
@@ -53,7 +49,7 @@ class MockAPIs(_Config, _Checkable, TemplatableConfigLoadable, TemplatableConfig
         self._base = base
         self._apis = apis
 
-        self.divide_strategy: _DivideStrategy = _DivideStrategy()
+        self.divide_strategy: DivideStrategy = DivideStrategy()
         self.is_pull: bool = False
         self._base_file_path: str = ""
 
@@ -361,7 +357,7 @@ class APIConfig(_Config, _Checkable):
     _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
     _dry_run: bool = True
-    _divide_strategy: _DivideStrategy = _DivideStrategy()
+    _divide_strategy: DivideStrategy = DivideStrategy()
 
     def __init__(self, name: str = "", description: str = "", apis: Optional[MockAPIs] = None):
         self._name = name
@@ -435,11 +431,11 @@ class APIConfig(_Config, _Checkable):
         self._dry_run = d
 
     @property
-    def divide_strategy(self) -> _DivideStrategy:
+    def divide_strategy(self) -> DivideStrategy:
         return self._divide_strategy
 
     @divide_strategy.setter
-    def divide_strategy(self, d: _DivideStrategy) -> None:
+    def divide_strategy(self, d: DivideStrategy) -> None:
         self._divide_strategy = d
 
     @property

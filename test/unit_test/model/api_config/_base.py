@@ -13,10 +13,10 @@ from pymock_api._utils import YAML
 from pymock_api.model import HTTP, MockAPI, MockAPIs
 from pymock_api.model.api_config import (
     BaseConfig,
+    BeDividedable,
     ResponseProperty,
     TemplatableConfigDividable,
     TemplateConfig,
-    _BeDividedable,
     _Checkable,
     _Config,
 )
@@ -348,7 +348,7 @@ class DividableTestSuite(ConfigTestSpec, ABC):
 
         assert isinstance(sut, _Config) and isinstance(sut, TemplatableConfigDividable)
         assert isinstance(self._lower_layer_data_modal_for_divide, _Config) and isinstance(
-            self._lower_layer_data_modal_for_divide, _BeDividedable
+            self._lower_layer_data_modal_for_divide, BeDividedable
         )
 
         # Given

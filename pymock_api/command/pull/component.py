@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 from ..._utils import YAML
 from ..._utils.api_client import URLLibHTTPClient
 from ...model import SwaggerConfig, deserialize_swagger_api_config
-from ...model.api_config import APIConfig, _DivideStrategy
+from ...model.api_config import APIConfig, DivideStrategy
 from ...model.cmd_args import SubcmdPullArguments
 from ..component import BaseSubCmdComponent
 
@@ -39,7 +39,7 @@ class SubCmdPullComponent(BaseSubCmdComponent):
 
         # feature about dividing configuration
         api_config.dry_run = cmd_args.dry_run
-        api_config.divide_strategy = _DivideStrategy(
+        api_config.divide_strategy = DivideStrategy(
             divide_api=cmd_args.divide_api,
             divide_http=cmd_args.divide_http,
             divide_http_request=cmd_args.divide_http_request,

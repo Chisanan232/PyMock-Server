@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 from ...._utils.file_opt import YAML, _BaseFileOperation
 from .._base import _Checkable, _Config
 from ..template import TemplateRequest, _TemplatableConfig
-from ..template._divide import _BeDividedable
+from ..template._divide import BeDividedable
 from ._property import BaseProperty
 
 
@@ -48,7 +48,7 @@ class APIParameter(BaseProperty):
 
 
 @dataclass(eq=False)
-class HTTPRequest(_TemplatableConfig, _Checkable, _BeDividedable):
+class HTTPRequest(_TemplatableConfig, _Checkable, BeDividedable):
     """*The **http.request** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-request"
