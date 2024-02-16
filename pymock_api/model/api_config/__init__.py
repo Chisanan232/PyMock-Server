@@ -9,7 +9,6 @@ from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
 from ..enums import ConfigLoadingOrder
 from ._base import _Checkable, _Config
-from ._divide import TemplatableConfigDividable, _BeDividedable, _DivideStrategy
 from .apis import (
     HTTP,
     APIParameter,
@@ -26,6 +25,11 @@ from .template import (
     TemplateConfigLoader,
     _BaseTemplateConfigLoader,
     _TemplatableConfig,
+)
+from .template._divide import (
+    TemplatableConfigDividable,
+    _BeDividedable,
+    _DivideStrategy,
 )
 
 

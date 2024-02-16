@@ -6,8 +6,8 @@ from typing import Any, Dict, List, Optional
 
 from ...enums import ResponseStrategy
 from .._base import _Checkable, _Config
-from .._divide import _BeDividedable
 from ..template import TemplateResponse, _TemplatableConfig
+from ..template._divide import _BeDividedable
 from ._property import BaseProperty
 
 
