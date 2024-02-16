@@ -19,17 +19,16 @@ from .apis import (
 )
 from .base import BaseConfig
 from .item import IteratorItem
-from .template import (
-    TemplatableConfigLoadable,
-    TemplateConfig,
-    TemplateConfigLoader,
-    _BaseTemplateConfigLoader,
-    _TemplatableConfig,
-)
+from .template import TemplateConfig, _TemplatableConfig
 from .template._divide import (
     TemplatableConfigDividable,
     _BeDividedable,
     _DivideStrategy,
+)
+from .template._load import (
+    TemplatableConfigLoadable,
+    TemplateConfigLoader,
+    _BaseTemplateConfigLoader,
 )
 
 

@@ -7,16 +7,13 @@ from ...._utils import YAML
 from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Checkable, _Config
-from ..template import (
-    TemplatableConfigLoadable,
-    TemplateAPI,
-    TemplateConfig,
-    TemplateConfigLoaderByScanFile,
-    TemplateHTTP,
-    _BaseTemplateConfigLoader,
-    _TemplatableConfig,
-)
+from ..template import TemplateAPI, TemplateConfig, TemplateHTTP, _TemplatableConfig
 from ..template._divide import TemplatableConfigDividable, _BeDividedable
+from ..template._load import (
+    TemplatableConfigLoadable,
+    TemplateConfigLoaderByScanFile,
+    _BaseTemplateConfigLoader,
+)
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 
