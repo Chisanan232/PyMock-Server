@@ -22,9 +22,9 @@ from .base import BaseConfig
 from .item import IteratorItem
 from .template import (
     TemplateConfig,
-    TemplateConfigLoadable,
     TemplateConfigLoader,
     TemplateConfigOpts,
+    _BaseTemplateConfigLoader,
     _TemplatableConfig,
 )
 
@@ -38,7 +38,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigOpts, _Dividable):
 
     _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
-    _template_config_loader: TemplateConfigLoadable
+    _template_config_loader: _BaseTemplateConfigLoader
 
     def __init__(
         self,

@@ -374,7 +374,7 @@ class TemplateConfigOpts(metaclass=ABCMeta):
         raise NotImplementedError
 
 
-class TemplateConfigLoadable:
+class _BaseTemplateConfigLoader:
     """The data model which could load template configuration."""
 
     _configuration: _BaseFileOperation = YAML()
@@ -406,7 +406,7 @@ class TemplateConfigLoadable:
         return config.deserialize(yaml_config)
 
 
-class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
+class TemplateConfigLoaderWithAPIConfig(_BaseTemplateConfigLoader):
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         super().register(template_config_ops)
         set_loading_function(
@@ -426,7 +426,7 @@ class TemplateConfigLoaderWithAPIConfig(TemplateConfigLoadable):
                 )
 
 
-class TemplateConfigLoaderByScanFile(TemplateConfigLoadable):
+class TemplateConfigLoaderByScanFile(_BaseTemplateConfigLoader):
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         super().register(template_config_ops)
         set_loading_function(
@@ -456,7 +456,7 @@ class TemplateConfigLoaderByScanFile(TemplateConfigLoadable):
                     self._deserialize_and_set_template_config(path)
 
 
-class TemplateConfigLoaderByApply(TemplateConfigLoadable):
+class TemplateConfigLoaderByApply(_BaseTemplateConfigLoader):
     def register(self, template_config_ops: TemplateConfigOpts) -> None:
         super().register(template_config_ops)
         set_loading_function(
@@ -488,14 +488,14 @@ class TemplateConfigLoaderByApply(TemplateConfigLoadable):
                             self._deserialize_and_set_template_config(config_path)
 
 
-class TemplateConfigLoader(TemplateConfigLoadable):
+class TemplateConfigLoader(_BaseTemplateConfigLoader):
     """The layer for extending all the configuration loaders"""
 
-    _loaders: Dict[str, "TemplateConfigLoadable"] = {}
+    _loaders: Dict[str, "_BaseTemplateConfigLoader"] = {}
 
     def __init__(self):
         super().__init__()
-        self._loaders: Dict[str, "TemplateConfigLoadable"] = {
+        self._loaders: Dict[str, "_BaseTemplateConfigLoader"] = {
             ConfigLoadingOrderKey.APIs.value: TemplateConfigLoaderWithAPIConfig(),
             ConfigLoadingOrderKey.FILE.value: TemplateConfigLoaderByScanFile(),
             ConfigLoadingOrderKey.APPLY.value: TemplateConfigLoaderByApply(),

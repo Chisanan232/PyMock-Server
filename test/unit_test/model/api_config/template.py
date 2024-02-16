@@ -10,7 +10,6 @@ from pymock_api.model.api_config.template import (
     LoadConfig,
     TemplateAPI,
     TemplateApply,
-    TemplateConfigLoadable,
     TemplateConfigLoader,
     TemplateConfigLoaderByApply,
     TemplateConfigLoaderByScanFile,
@@ -21,6 +20,7 @@ from pymock_api.model.api_config.template import (
     TemplateResponse,
     TemplateSetting,
     TemplateValues,
+    _BaseTemplateConfigLoader,
 )
 from pymock_api.model.enums import (
     ConfigLoadingOrder,
@@ -372,7 +372,7 @@ class DummyTemplateLoadableDataModal(TemplateConfigLoader):
 
 class TestTemplateConfigLoadable:
     @pytest.fixture(scope="class")
-    def loadable_data_modal(self) -> TemplateConfigLoadable:
+    def loadable_data_modal(self) -> _BaseTemplateConfigLoader:
         return DummyTemplateLoadableDataModal()
 
     @pytest.mark.parametrize(
@@ -398,7 +398,7 @@ class TestTemplateConfigLoadable:
     )
     def test_loading_configuration_workflow(
         self,
-        loadable_data_modal: TemplateConfigLoadable,
+        loadable_data_modal: _BaseTemplateConfigLoader,
         load_order: List[ConfigLoadingOrder],
         expected_obj_run_order: List[LoadConfigFunction],
     ):

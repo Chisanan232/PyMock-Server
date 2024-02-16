@@ -11,10 +11,10 @@ from .._divide import _BeDividedable, _Dividable
 from ..template import (
     TemplateAPI,
     TemplateConfig,
-    TemplateConfigLoadable,
     TemplateConfigLoaderByScanFile,
     TemplateConfigOpts,
     TemplateHTTP,
+    _BaseTemplateConfigLoader,
     _TemplatableConfig,
 )
 from .request import APIParameter, HTTPRequest
@@ -34,7 +34,7 @@ class HTTP(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _
     _response: Optional[HTTPResponse] = field(init=False, repr=False)
 
     _current_section: str = "request"
-    _template_config_loader: Optional[TemplateConfigLoadable] = None
+    _template_config_loader: Optional[_BaseTemplateConfigLoader] = None
 
     def __post_init__(self):
         if self._template_config_loader is None:
@@ -261,7 +261,7 @@ class MockAPI(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable
     _http: Optional[HTTP] = field(init=False, repr=False)
     _tag: str = field(init=False, repr=False)
 
-    _template_config_loader: Optional[TemplateConfigLoadable] = None
+    _template_config_loader: Optional[_BaseTemplateConfigLoader] = None
 
     def __post_init__(self):
         if self._template_config_loader is None:
