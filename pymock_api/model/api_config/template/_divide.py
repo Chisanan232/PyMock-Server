@@ -7,7 +7,8 @@ from typing import Any, Callable, Dict, Optional, Union
 from ...._utils import YAML
 from ...._utils.file_opt import _BaseFileOperation
 from .._base import _Config
-from ..template import TemplateConfig, _TemplatableConfig
+from . import TemplateConfig
+from ._base import _TemplatableConfig
 
 
 @dataclass(eq=False)

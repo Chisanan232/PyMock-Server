@@ -21,7 +21,7 @@ from .._base import (
     _assertion_msg,
     set_checking_test_data,
 )
-from ..template import TemplatableConfigTestSuite
+from ..template._base import TemplatableConfigTestSuite
 
 _MockAPI_Test_Data: List[tuple] = []
 _HTTP_Test_Data: List[tuple] = []

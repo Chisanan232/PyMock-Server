@@ -7,7 +7,8 @@ from ...._utils import YAML
 from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Checkable, _Config
-from ..template import TemplateAPI, TemplateConfig, TemplateHTTP, _TemplatableConfig
+from ..template import TemplateAPI, TemplateConfig, TemplateHTTP
+from ..template._base import _TemplatableConfig
 from ..template._divide import (
     BeDividedableAsTemplatableConfig,
     TemplatableConfigDividable,

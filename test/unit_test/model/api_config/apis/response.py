@@ -16,7 +16,7 @@ from .._base import (
     _assertion_msg,
     set_checking_test_data,
 )
-from ..template import TemplatableConfigTestSuite
+from ..template._base import TemplatableConfigTestSuite
 
 
 class TestResponseProperty(ConfigTestSpec):

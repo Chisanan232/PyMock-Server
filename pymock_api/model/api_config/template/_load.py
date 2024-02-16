@@ -8,8 +8,9 @@ from typing import Dict, Optional
 from ...._utils import YAML
 from ...._utils.file_opt import _BaseFileOperation
 from ...enums import ConfigLoadingOrder, ConfigLoadingOrderKey, set_loading_function
-from .. import _Config
-from . import TemplateConfig, _TemplatableConfig
+from .._base import _Config
+from . import TemplateConfig
+from ._base import _TemplatableConfig
 
 
 class TemplateConfigOpts(metaclass=ABCMeta):
