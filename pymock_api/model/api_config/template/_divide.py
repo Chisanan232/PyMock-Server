@@ -18,7 +18,7 @@ class DivideStrategy:
     divide_http_response: bool = field(default=False)
 
 
-class BeDividedable(metaclass=ABCMeta):
+class BeDividedableAsTemplatableConfig(metaclass=ABCMeta):
     tag: str = field(init=False, repr=False)
     api_name: str = field(init=False, repr=False)
 
@@ -45,7 +45,7 @@ class TemplatableConfigDividable(metaclass=ABCMeta):
 
     def _process_dividing_serialize(
         self,
-        data_modal: Union[_Config, BeDividedable, _TemplatableConfig],
+        data_modal: Union[_Config, BeDividedableAsTemplatableConfig, _TemplatableConfig],
         init_data: Dict[str, Any],
         api_name: str,
         tag: str = "",
@@ -54,7 +54,7 @@ class TemplatableConfigDividable(metaclass=ABCMeta):
     ) -> None:
         assert (
             isinstance(data_modal, _Config)
-            and isinstance(data_modal, BeDividedable)
+            and isinstance(data_modal, BeDividedableAsTemplatableConfig)
             and isinstance(data_modal, _TemplatableConfig)
         )
         # Pre-process
@@ -87,10 +87,14 @@ class TemplatableConfigDividable(metaclass=ABCMeta):
     ) -> None:
         pass
 
-    def dividing_serialize(self, data: Union[_Config, BeDividedable, _TemplatableConfig]) -> Optional[Union[str, dict]]:
+    def dividing_serialize(
+        self, data: Union[_Config, BeDividedableAsTemplatableConfig, _TemplatableConfig]
+    ) -> Optional[Union[str, dict]]:
         if self.should_divide:
             assert (
-                isinstance(data, _Config) and isinstance(data, BeDividedable) and isinstance(data, _TemplatableConfig)
+                isinstance(data, _Config)
+                and isinstance(data, BeDividedableAsTemplatableConfig)
+                and isinstance(data, _TemplatableConfig)
             )
             config_base_path = data._current_template.values.base_file_path
             tag_dir = str(pathlib.Path(config_base_path, data.tag)) if data.tag else ""
@@ -107,6 +111,6 @@ class TemplatableConfigDividable(metaclass=ABCMeta):
             return self.serialize_lower_layer(data=data)
 
     def serialize_lower_layer(
-        self, data: Union[_Config, BeDividedable, _TemplatableConfig]
+        self, data: Union[_Config, BeDividedableAsTemplatableConfig, _TemplatableConfig]
     ) -> Optional[Dict[str, Any]]:
         return data.serialize()  # type: ignore[union-attr]

@@ -8,7 +8,10 @@ from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Checkable, _Config
 from ..template import TemplateAPI, TemplateConfig, TemplateHTTP, _TemplatableConfig
-from ..template._divide import BeDividedable, TemplatableConfigDividable
+from ..template._divide import (
+    BeDividedableAsTemplatableConfig,
+    TemplatableConfigDividable,
+)
 from ..template._load import (
     TemplatableConfigLoadable,
     TemplateConfigLoaderByScanFile,
@@ -19,7 +22,13 @@ from .response import HTTPResponse, ResponseProperty
 
 
 @dataclass(eq=False)
-class HTTP(_TemplatableConfig, TemplatableConfigLoadable, _Checkable, BeDividedable, TemplatableConfigDividable):
+class HTTP(
+    _TemplatableConfig,
+    TemplatableConfigLoadable,
+    _Checkable,
+    BeDividedableAsTemplatableConfig,
+    TemplatableConfigDividable,
+):
     """*The **http** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-http"
@@ -118,7 +127,7 @@ class HTTP(_TemplatableConfig, TemplatableConfigLoadable, _Checkable, BeDivideda
 
     def _process_dividing_serialize_http_props(
         self,
-        data_modal: Union[_Config, BeDividedable, _TemplatableConfig],
+        data_modal: Union[_Config, BeDividedableAsTemplatableConfig, _TemplatableConfig],
         init_data: Dict[str, Any],
         key: str = "",
         should_set_dividable_value_callback: Optional[Callable] = None,
@@ -246,7 +255,13 @@ class HTTP(_TemplatableConfig, TemplatableConfigLoadable, _Checkable, BeDivideda
 
 
 @dataclass(eq=False)
-class MockAPI(_TemplatableConfig, TemplatableConfigLoadable, _Checkable, BeDividedable, TemplatableConfigDividable):
+class MockAPI(
+    _TemplatableConfig,
+    TemplatableConfigLoadable,
+    _Checkable,
+    BeDividedableAsTemplatableConfig,
+    TemplatableConfigDividable,
+):
     """*The **<api>** section in **mocked_apis***"""
 
     config_file_tail: str = "-api"

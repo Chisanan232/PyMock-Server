@@ -20,7 +20,11 @@ from .apis import (
 from .base import BaseConfig
 from .item import IteratorItem
 from .template import TemplateConfig, _TemplatableConfig
-from .template._divide import BeDividedable, DivideStrategy, TemplatableConfigDividable
+from .template._divide import (
+    BeDividedableAsTemplatableConfig,
+    DivideStrategy,
+    TemplatableConfigDividable,
+)
 from .template._load import (
     TemplatableConfigLoadable,
     TemplateConfigLoader,
