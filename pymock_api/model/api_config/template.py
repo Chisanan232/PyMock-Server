@@ -522,6 +522,17 @@ class TemplateConfigLoader(_BaseTemplateConfigLoader):
                 load_config.get_loading_function(data_modal_key=self._template_config_opts._config_file_format)(*args)
 
 
+class TemplatableConfigLoadable(TemplateConfigOpts):
+    _template_config_loader: Optional[_BaseTemplateConfigLoader] = None
+
+    def initial_loadable_data_modal(self) -> None:
+        self._template_config_loader = self.init_template_config_loader()
+        self._template_config_loader.register(self.register_callbacks())
+
+    def init_template_config_loader(self) -> _BaseTemplateConfigLoader:
+        return TemplateConfigLoader()
+
+
 @dataclass(eq=False)
 class _TemplatableConfig(_Config, ABC):
     apply_template_props: bool = field(default=True)
