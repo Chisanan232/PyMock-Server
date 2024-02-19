@@ -3,11 +3,10 @@
 content ...
 """
 import os
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
-from ..enums import ConfigLoadingOrder
 from ._base import _Checkable, _Config
 from .apis import (
     HTTP,
@@ -21,6 +20,7 @@ from .base import BaseConfig
 from .item import IteratorItem
 from .template import TemplateConfig
 from .template._base import _BaseTemplatableConfig
+from .template._base_wrapper import _OperatingTemplatableConfig
 from .template._divide import (
     BeDividedableAsTemplatableConfig,
     DivideStrategy,
@@ -33,7 +33,7 @@ from .template._load import (
 )
 
 
-class MockAPIs(_Config, _Checkable, TemplatableConfigLoadable, TemplatableConfigDividable):
+class MockAPIs(_OperatingTemplatableConfig, _Checkable):
     """*The **mocked_apis** section*"""
 
     _template: TemplateConfig

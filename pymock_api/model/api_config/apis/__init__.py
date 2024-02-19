@@ -9,27 +9,15 @@ from ...enums import Format, ResponseStrategy
 from .._base import _Checkable, _Config
 from ..template import TemplateAPI, TemplateConfig, TemplateHTTP
 from ..template._base import _BaseTemplatableConfig
-from ..template._divide import (
-    BeDividedableAsTemplatableConfig,
-    TemplatableConfigDividable,
-)
-from ..template._load import (
-    TemplatableConfigLoadable,
-    TemplateConfigLoaderByScanFile,
-    _BaseTemplateConfigLoader,
-)
+from ..template._base_wrapper import _GeneralTemplatableConfig
+from ..template._divide import BeDividedableAsTemplatableConfig
+from ..template._load import TemplateConfigLoaderByScanFile, _BaseTemplateConfigLoader
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 
 
 @dataclass(eq=False)
-class HTTP(
-    _BaseTemplatableConfig,
-    TemplatableConfigLoadable,
-    _Checkable,
-    BeDividedableAsTemplatableConfig,
-    TemplatableConfigDividable,
-):
+class HTTP(_GeneralTemplatableConfig, _Checkable):
     """*The **http** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-http"
@@ -256,13 +244,7 @@ class HTTP(
 
 
 @dataclass(eq=False)
-class MockAPI(
-    _BaseTemplatableConfig,
-    TemplatableConfigLoadable,
-    _Checkable,
-    BeDividedableAsTemplatableConfig,
-    TemplatableConfigDividable,
-):
+class MockAPI(_GeneralTemplatableConfig, _Checkable):
     """*The **<api>** section in **mocked_apis***"""
 
     config_file_tail: str = "-api"
