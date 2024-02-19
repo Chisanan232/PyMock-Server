@@ -2,6 +2,7 @@
 
 content ...
 """
+
 import pathlib
 from argparse import Namespace
 from typing import Optional
