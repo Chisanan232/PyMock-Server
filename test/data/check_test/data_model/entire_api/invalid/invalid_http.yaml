@@ -1,0 +1,23 @@
+name: ''
+description: ''
+mocked_apis:
+  base:
+    url: '/api/v1/test'
+  apis:
+    get_foo:
+      url: '/foo'
+      http:
+        request:
+          method: 'GET'
+          parameters:
+            - name: 'date'
+              required: true
+              default:
+              type: str
+              format:
+            - name: 'fooType'
+              required: true
+              default:
+              type: str
+              format:
+      tag: 'foo'
