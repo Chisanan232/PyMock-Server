@@ -7,22 +7,17 @@ from ...._utils import YAML
 from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Checkable, _Config
-from .._divide import _BeDividedable, _Dividable
-from ..template import (
-    TemplateAPI,
-    TemplateConfig,
-    TemplateConfigLoadable,
-    TemplateConfigLoaderByScanFile,
-    TemplateConfigOpts,
-    TemplateHTTP,
-    _TemplatableConfig,
-)
+from ..template import TemplateAPI, TemplateConfig, TemplateHTTP
+from ..template._base import _BaseTemplatableConfig
+from ..template._base_wrapper import _GeneralTemplatableConfig
+from ..template._divide import BeDividedableAsTemplatableConfig
+from ..template._load import TemplateConfigLoaderByScanFile, _BaseTemplateConfigLoader
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 
 
 @dataclass(eq=False)
-class HTTP(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _Dividable):
+class HTTP(_GeneralTemplatableConfig, _Checkable):
     """*The **http** section in **mocked_apis.<api>***"""
 
     config_file_tail: str = "-http"
@@ -34,12 +29,13 @@ class HTTP(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _
     _response: Optional[HTTPResponse] = field(init=False, repr=False)
 
     _current_section: str = "request"
-    _template_config_loader: Optional[TemplateConfigLoadable] = None
 
     def __post_init__(self):
         if self._template_config_loader is None:
-            self._template_config_loader = TemplateConfigLoaderByScanFile()
-            self._template_config_loader.register(self.register_callbacks())
+            self.initial_loadable_data_modal()
+
+    def init_template_config_loader(self) -> _BaseTemplateConfigLoader:
+        return TemplateConfigLoaderByScanFile()
 
     def _compare(self, other: "HTTP") -> bool:
         templatable_config = super()._compare(other)
@@ -120,7 +116,7 @@ class HTTP(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _
 
     def _process_dividing_serialize_http_props(
         self,
-        data_modal: Union[_Config, _BeDividedable, _TemplatableConfig],
+        data_modal: Union[_Config, BeDividedableAsTemplatableConfig, _BaseTemplatableConfig],
         init_data: Dict[str, Any],
         key: str = "",
         should_set_dividable_value_callback: Optional[Callable] = None,
@@ -248,7 +244,7 @@ class HTTP(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _
 
 
 @dataclass(eq=False)
-class MockAPI(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable, _Dividable):
+class MockAPI(_GeneralTemplatableConfig, _Checkable):
     """*The **<api>** section in **mocked_apis***"""
 
     config_file_tail: str = "-api"
@@ -261,12 +257,12 @@ class MockAPI(_TemplatableConfig, TemplateConfigOpts, _Checkable, _BeDividedable
     _http: Optional[HTTP] = field(init=False, repr=False)
     _tag: str = field(init=False, repr=False)
 
-    _template_config_loader: Optional[TemplateConfigLoadable] = None
-
     def __post_init__(self):
         if self._template_config_loader is None:
-            self._template_config_loader = TemplateConfigLoaderByScanFile()
-            self._template_config_loader.register(self.register_callbacks())
+            self.initial_loadable_data_modal()
+
+    def init_template_config_loader(self) -> _BaseTemplateConfigLoader:
+        return TemplateConfigLoaderByScanFile()
 
     def _compare(self, other: "MockAPI") -> bool:
         templatable_config = super()._compare(other)

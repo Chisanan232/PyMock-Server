@@ -13,12 +13,12 @@ from pymock_api._utils import YAML
 from pymock_api.model import HTTP, MockAPI, MockAPIs
 from pymock_api.model.api_config import (
     BaseConfig,
+    BeDividedableAsTemplatableConfig,
     ResponseProperty,
+    TemplatableConfigDividable,
     TemplateConfig,
-    _BeDividedable,
     _Checkable,
     _Config,
-    _Dividable,
 )
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
 from pymock_api.model.api_config.template import (
@@ -346,9 +346,9 @@ class DividableTestSuite(ConfigTestSpec, ABC):
         def _get_abs_module(_obj: object) -> str:
             return f"{_obj.__module__}.{_obj.__class__.__name__}"
 
-        assert isinstance(sut, _Config) and isinstance(sut, _Dividable)
+        assert isinstance(sut, _Config) and isinstance(sut, TemplatableConfigDividable)
         assert isinstance(self._lower_layer_data_modal_for_divide, _Config) and isinstance(
-            self._lower_layer_data_modal_for_divide, _BeDividedable
+            self._lower_layer_data_modal_for_divide, BeDividedableAsTemplatableConfig
         )
 
         # Given
@@ -362,7 +362,7 @@ class DividableTestSuite(ConfigTestSpec, ABC):
                     f"{_get_abs_module(self._lower_layer_data_modal_for_divide)}.tag", new_callable=PropertyMock
                 ) as mock_prop_tag:
                     mock_prop_tag.return_value = "pytest-mocked-api"
-                    with patch("pymock_api.model.api_config._divide.YAML.write") as mock_yaml_write:
+                    with patch("pymock_api.model.api_config.template._divide.YAML.write") as mock_yaml_write:
                         with patch.object(sut, "serialize_lower_layer") as mock_serialize_lower_layer:
                             with patch(
                                 "os.path.exists", return_value=test_data.tag_directory_exist

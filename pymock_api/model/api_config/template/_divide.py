@@ -4,29 +4,30 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Optional, Union
 
-from ..._utils import YAML
-from ..._utils.file_opt import _BaseFileOperation
-from ._base import _Config
-from .template import TemplateConfig, _TemplatableConfig
+from ...._utils import YAML
+from ...._utils.file_opt import _BaseFileOperation
+from .._base import _Config
+from . import TemplateConfig
+from ._base import _BaseTemplatableConfig
 
 
 @dataclass(eq=False)
-class _DivideStrategy:
+class DivideStrategy:
     divide_api: bool = field(default=False)
     divide_http: bool = field(default=False)
     divide_http_request: bool = field(default=False)
     divide_http_response: bool = field(default=False)
 
 
-class _BeDividedable(metaclass=ABCMeta):
+class BeDividedableAsTemplatableConfig(metaclass=ABCMeta):
     tag: str = field(init=False, repr=False)
     api_name: str = field(init=False, repr=False)
 
 
-class _Dividable(metaclass=ABCMeta):
+class TemplatableConfigDividable(metaclass=ABCMeta):
     dry_run: bool = field(init=False, repr=False, default=True)
 
-    _divide_strategy: _DivideStrategy = _DivideStrategy()
+    _divide_strategy: DivideStrategy = DivideStrategy()
 
     _configuration: _BaseFileOperation = YAML()
 
@@ -45,7 +46,7 @@ class _Dividable(metaclass=ABCMeta):
 
     def _process_dividing_serialize(
         self,
-        data_modal: Union[_Config, _BeDividedable, _TemplatableConfig],
+        data_modal: Union[_Config, BeDividedableAsTemplatableConfig, _BaseTemplatableConfig],
         init_data: Dict[str, Any],
         api_name: str,
         tag: str = "",
@@ -54,11 +55,11 @@ class _Dividable(metaclass=ABCMeta):
     ) -> None:
         assert (
             isinstance(data_modal, _Config)
-            and isinstance(data_modal, _BeDividedable)
-            and isinstance(data_modal, _TemplatableConfig)
+            and isinstance(data_modal, BeDividedableAsTemplatableConfig)
+            and isinstance(data_modal, _BaseTemplatableConfig)
         )
         # Pre-process
-        if isinstance(data_modal, _Dividable):
+        if isinstance(data_modal, TemplatableConfigDividable):
             data_modal.dry_run = self.dry_run
         data_modal.api_name = api_name
         data_modal.tag = tag if tag else ""
@@ -88,11 +89,13 @@ class _Dividable(metaclass=ABCMeta):
         pass
 
     def dividing_serialize(
-        self, data: Union[_Config, _BeDividedable, _TemplatableConfig]
+        self, data: Union[_Config, BeDividedableAsTemplatableConfig, _BaseTemplatableConfig]
     ) -> Optional[Union[str, dict]]:
         if self.should_divide:
             assert (
-                isinstance(data, _Config) and isinstance(data, _BeDividedable) and isinstance(data, _TemplatableConfig)
+                isinstance(data, _Config)
+                and isinstance(data, BeDividedableAsTemplatableConfig)
+                and isinstance(data, _BaseTemplatableConfig)
             )
             config_base_path = data._current_template.values.base_file_path
             tag_dir = str(pathlib.Path(config_base_path, data.tag)) if data.tag else ""
@@ -109,6 +112,6 @@ class _Dividable(metaclass=ABCMeta):
             return self.serialize_lower_layer(data=data)
 
     def serialize_lower_layer(
-        self, data: Union[_Config, _BeDividedable, _TemplatableConfig]
+        self, data: Union[_Config, BeDividedableAsTemplatableConfig, _BaseTemplatableConfig]
     ) -> Optional[Dict[str, Any]]:
         return data.serialize()  # type: ignore[union-attr]

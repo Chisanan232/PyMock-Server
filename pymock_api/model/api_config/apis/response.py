@@ -6,8 +6,8 @@ from typing import Any, Dict, List, Optional
 
 from ...enums import ResponseStrategy
 from .._base import _Checkable, _Config
-from .._divide import _BeDividedable
-from ..template import TemplateResponse, _TemplatableConfig
+from ..template import TemplateResponse
+from ..template._base_wrapper import _DividableOnlyTemplatableConfig
 from ._property import BaseProperty
 
 
@@ -19,7 +19,7 @@ class ResponseProperty(BaseProperty):
 
 
 @dataclass(eq=False)
-class HTTPResponse(_TemplatableConfig, _Checkable, _BeDividedable):
+class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
     """*The **http.response** section in **mocked_apis.<api>***"""
 
     strategy: Optional[ResponseStrategy] = None

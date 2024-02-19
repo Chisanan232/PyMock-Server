@@ -3,13 +3,11 @@
 content ...
 """
 import os
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from ..._utils import YAML
 from ..._utils.file_opt import _BaseFileOperation
-from ..enums import ConfigLoadingOrder
 from ._base import _Checkable, _Config
-from ._divide import _BeDividedable, _Dividable, _DivideStrategy
 from .apis import (
     HTTP,
     APIParameter,
@@ -20,16 +18,22 @@ from .apis import (
 )
 from .base import BaseConfig
 from .item import IteratorItem
-from .template import (
-    TemplateConfig,
-    TemplateConfigLoadable,
+from .template import TemplateConfig
+from .template._base import _BaseTemplatableConfig
+from .template._base_wrapper import _OperatingTemplatableConfig
+from .template._divide import (
+    BeDividedableAsTemplatableConfig,
+    DivideStrategy,
+    TemplatableConfigDividable,
+)
+from .template._load import (
+    TemplatableConfigLoadable,
     TemplateConfigLoader,
-    TemplateConfigOpts,
-    _TemplatableConfig,
+    _BaseTemplateConfigLoader,
 )
 
 
-class MockAPIs(_Config, _Checkable, TemplateConfigOpts, _Dividable):
+class MockAPIs(_OperatingTemplatableConfig, _Checkable):
     """*The **mocked_apis** section*"""
 
     _template: TemplateConfig
@@ -38,7 +42,6 @@ class MockAPIs(_Config, _Checkable, TemplateConfigOpts, _Dividable):
 
     _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
-    _template_config_loader: TemplateConfigLoadable
 
     def __init__(
         self,
@@ -51,12 +54,12 @@ class MockAPIs(_Config, _Checkable, TemplateConfigOpts, _Dividable):
         self._base = base
         self._apis = apis
 
-        self.divide_strategy: _DivideStrategy = _DivideStrategy()
+        self.divide_strategy: DivideStrategy = DivideStrategy()
         self.is_pull: bool = False
         self._base_file_path: str = ""
 
-        self._template_config_loader = TemplateConfigLoader()
-        self._template_config_loader.register(self.register_callbacks())
+        if self._template_config_loader is None:
+            self.initial_loadable_data_modal()
 
     def __len__(self):
         return len(self.apis.keys())
@@ -263,6 +266,7 @@ class MockAPIs(_Config, _Checkable, TemplateConfigOpts, _Dividable):
 
         # Processing section *apis*
         mocked_apis_info = data.get("apis", {})
+        assert self._template_config_loader
         self._template_config_loader.load_config(mocked_apis_info)
         return self
 
@@ -358,7 +362,7 @@ class APIConfig(_Config, _Checkable):
     _configuration: _BaseFileOperation = YAML()
     _need_template_in_config: bool = True
     _dry_run: bool = True
-    _divide_strategy: _DivideStrategy = _DivideStrategy()
+    _divide_strategy: DivideStrategy = DivideStrategy()
 
     def __init__(self, name: str = "", description: str = "", apis: Optional[MockAPIs] = None):
         self._name = name
@@ -432,11 +436,11 @@ class APIConfig(_Config, _Checkable):
         self._dry_run = d
 
     @property
-    def divide_strategy(self) -> _DivideStrategy:
+    def divide_strategy(self) -> DivideStrategy:
         return self._divide_strategy
 
     @divide_strategy.setter
-    def divide_strategy(self, d: _DivideStrategy) -> None:
+    def divide_strategy(self, d: DivideStrategy) -> None:
         self._divide_strategy = d
 
     @property
