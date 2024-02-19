@@ -113,7 +113,6 @@ class TemplateConfigLoaderByScanFile(_BaseTemplateConfigLoader):
     def load_config(self) -> None:
         customize_config_file_format = "**"
         config_file_format = f"[!_**]{customize_config_file_format}"
-        # all_paths = glob.glob(f"{self._base_path}**/[!_*]*.yaml", recursive=True)
         config_base_path = self._template_config_opts._template_config.values.base_file_path
         all_paths = glob.glob(str(pathlib.Path(config_base_path, config_file_format)))
         api_config_path = str(pathlib.Path(config_base_path, self._template_config_opts.config_file_name))
