@@ -12,25 +12,22 @@ The setting section for the template feature.
 
 ### ``activate``
 
-content ...
+Whether activating the template feature or not. It accepts a boolean type value.
 
 
 ### ``load_config``
 
-content ...
-
-[load](/configure-references/mocked-apis/template/load)
+It's a setting section for some detail adjustments about loading configuration. Please refer to 
+[here](/configure-references/mocked-apis/template/load) to get more details.
 
 
 ### ``values``
 
-content ...
-
-[values](/configure-references/mocked-apis/template/values)
+It's a setting section for some detail setting for scanning file to load configuration. Please refer to 
+[here](/configure-references/mocked-apis/template/values) to get more details.
 
 
 ### ``apply``
 
-content ...
-
-[apply](/configure-references/mocked-apis/template/apply)
+It's a setting section for some detail setting for applying some specific mocked APIs into entire configuration. Please
+refer to [here](/configure-references/mocked-apis/template/apply) to get more details.
