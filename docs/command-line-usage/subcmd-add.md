@@ -95,16 +95,16 @@ It receives a string value and default value is empty string. This option could 
     ```
 
 
-## ``--response`` <String value\>
+## ``--response-strategy`` <String value\>
 
-Set the HTTP response value of mocking API.
+About setting the response part, it needs to set 2 values: strategy and properties. This option sets the strategy part.
 
-It receives a string value and default value is ``OK.``.
+For the details of each strategy, please refer to the section [HTTP response in Configuration references](/configure-references/mocked-apis/apis/http/response/#strategy).
 
 === "Set by command line"
     
     ```console
-    --response 'This is PyTest demo.'
+    --response-strategy 'string'
     ```
 
 === "Set by YAML syntax"
@@ -123,5 +123,89 @@ It receives a string value and default value is ``OK.``.
               type: int
               default: 0
         response:
+          strategy: string
           value: 'This is PyTest demo.'
     ```
+
+
+## ``--response-value`` <String value\>
+
+About setting the response part, it needs to set 2 values: strategy and properties. This option sets the properties part
+which is the HTTP response value of mocking API.
+
+It receives a string value and default value is ``OK.``.
+
+* Set the value as string directly
+
+If the response strategy is ``string`` or ``file``, it should use this option with that. It would set the option value
+as the setting value directly.
+
+=== "Set by command line"
+    
+    ```console
+    --response-value 'This is foo.'
+    ```
+
+=== "Set by YAML syntax"
+    
+    ```yaml hl_lines="15"
+    mocked_apis:
+      foo_home:
+        request:
+          method: 'POST'
+          parameters:
+            - name: 'arg1'
+              required: true
+              type: str
+            - name: 'arg2'
+              required: false
+              type: int
+              default: 0
+        response:
+          strategy: string
+          value: 'This is foo.'
+    ```
+
+* Set the value with some special properties
+
+If the response strategy is ``object``, it should use this option with that. It should use JSON format string value to
+set its settings.
+
+=== "Set by command line"
+    
+    ```console
+    --response-value '{"name": "responseCode", "required": True, "type": "str"}' --response-value '{"name": "responseData", "required": False, "type": "str"}'
+    ```
+
+=== "Set by YAML syntax"
+    
+    ```yaml hl_lines="15-24"
+    mocked_apis:
+      foo_home:
+        request:
+          method: 'POST'
+          parameters:
+            - name: 'arg1'
+              required: true
+              type: str
+            - name: 'arg2'
+              required: false
+              type: int
+              default: 0
+        response:
+          strategy: object
+          properties:
+            - name: responseCode
+              required: True
+              type: str
+              format:
+            - name: responseData
+              required: True
+              type: str
+              format:
+    ```
+
+!!! hint "Use command line or operate configuration directly?"
+
+    In general usage scenarios, it's okay to use any one of these 2 ways. However, if the 
+    response properties are complex, it's better to set the value in configuration directly.

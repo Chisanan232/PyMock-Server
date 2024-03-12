@@ -13,6 +13,14 @@ of configuring mocked API. Following are the common features it provides current
 * [Basic information](#mocked_apisbase)
 
 
+### ``template``
+
+The template settings information of entire configuration for all mocked APIs. It would apply this section settings for
+scanning or finding the configuration files about the setting details of every mocked APIs.
+
+[Here](/configure-references/mocked-apis/template) is the configuration details.
+
+
 ### ``base``
 
 The basic information of all APIs. It would apply this section settings for all APIs.
