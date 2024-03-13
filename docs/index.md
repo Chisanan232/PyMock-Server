@@ -15,7 +15,7 @@
     <img src="https://github.com/Chisanan232/PyMock-API/actions/workflows/ci-cd.yml/badge.svg" alt="CI/CD status">
   </a>
   <a href="https://codecov.io/gh/Chisanan232/PyMock-API">
-    <img src="https://codecov.io/gh/Chisanan232/PyMock-API/branch/main/graph/badge.svg?token=r5HJxg9KhN" alt="Test coverage">
+    <img src="https://codecov.io/gh/Chisanan232/PyMock-API/graph/badge.svg?token=r5HJxg9KhN" alt="Test coverage">
   </a>
   <a href="https://results.pre-commit.ci/latest/github/Chisanan232/PyMock-API/master">
     <img src="https://results.pre-commit.ci/badge/github/Chisanan232/PyMock-API/master.svg" alt="Pre-Commit building state">
