@@ -337,7 +337,7 @@ _Foo_Object_Value: dict = {
     },
     "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
 }
-_Foo_With_Variable_Value: dict = {
+_Foo_With_Variable_In_Api: dict = {
     "url": "/foo/<id>",
     "http": {
         "request": {
@@ -363,7 +363,7 @@ _Mocked_APIs: dict = {
         "test_home": _Test_Home,
         "youtube_home": _YouTube_Home_Value,
         "foo_object": _Foo_Object_Value,
-        "foo_var_id": _Foo_With_Variable_Value,
+        "foo_var_id": _Foo_With_Variable_In_Api,
     },
 }
 

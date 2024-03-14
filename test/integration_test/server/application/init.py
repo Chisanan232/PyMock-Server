@@ -20,7 +20,7 @@ from ...._values import (
     _Base_URL,
     _Delete_Google_Home_Value,
     _Foo_Object_Value,
-    _Foo_With_Variable_Value,
+    _Foo_With_Variable_In_Api,
     _Google_Home_Value,
     _Post_Google_Home_Value,
     _Put_Google_Home_Value,
@@ -100,7 +100,7 @@ class MockHTTPServerTestSpec:
             _test_api_attr(api=_Test_Home, payload={"param1": "any_format"}),
             _test_api_attr(api=_YouTube_Home_Value, payload={"param1": "any_format"}),
             _test_api_attr(api=_Foo_Object_Value, payload={"param1": "any_format"}),
-            _test_api_attr(api=_Foo_With_Variable_Value, payload={"param1": "any_format"}),
+            _test_api_attr(api=_Foo_With_Variable_In_Api, payload={"param1": "any_format"}),
         ],
     )
     def test_mock_apis(
