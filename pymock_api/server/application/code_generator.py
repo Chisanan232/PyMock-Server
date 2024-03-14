@@ -23,16 +23,10 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
         define_function_for_api = self._define_api_function_pycode(api_name, api_config)
         return initial_global_server + define_function_for_api
 
+    @abstractmethod
     def _define_api_function_pycode(self, api_name: str, api_config: List[MockAPI]) -> str:
         """
         [Generating code]
-        """
-        api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
-        # TODO (Flask): Add the logic about variable in URL here
-        return f"""def {api_function_name}() -> Union[str, dict]:
-            {self._run_request_process_pycode()}
-            {self._handle_request_process_result_pycode()}
-            {self._generate_response_pycode()}
         """
 
     def _run_request_process_pycode(self, **kwargs) -> str:
@@ -104,6 +98,16 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
 
 
 class FlaskCodeGenerator(BaseWebServerCodeGenerator):
+
+    def _define_api_function_pycode(self, api_name: str, api_config: List[MockAPI]) -> str:
+        api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
+        # TODO (Flask): Add the logic about variable in URL here
+        return f"""def {api_function_name}() -> Union[str, dict]:
+            {self._run_request_process_pycode()}
+            {self._handle_request_process_result_pycode()}
+            {self._generate_response_pycode()}
+        """
+
     def add_api(self, api_name: str, api_config: Union[MockAPI, List[MockAPI]], base_url: Optional[str] = None) -> str:
         super().add_api(api_name=api_name, api_config=api_config, base_url=base_url)
         # TODO: Should align the data structure and remove this checking
