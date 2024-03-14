@@ -38,14 +38,20 @@ class TestFlaskRequest(BaseCurrentRequestTestSpec):
             super().test_api_parameters_with_missing_argument(request_util)
             mock_request_instance.assert_called_once()
 
-    def test_find_api_detail_by_api_path(self, request_util: FlaskRequest):
+    @pytest.mark.parametrize(
+        ("api_path", "expected_key"),
+        [
+            ("/foo", "/foo"),
+        ],
+    )
+    def test_find_api_detail_by_api_path(self, request_util: FlaskRequest, api_path: str, expected_key: str):
         mock_api_details = {
             "/foo": {"value": "this is foo."},
             "/foo/<id>": {"value": "this is foo with ID *<id>*."},
             "/foo/<id>/process/<work_id>": {"value": "this is foo with ID *<id>* by worker *<work_id>*."},
         }
-        detail = request_util.find_api_detail_by_api_path(mock_api_details, api_path="/foo")
-        assert detail == mock_api_details["/foo"]
+        detail = request_util.find_api_detail_by_api_path(mock_api_details, api_path=api_path)
+        assert detail == mock_api_details[expected_key]
 
 
 class TestFastAPIRequest(BaseCurrentRequestTestSpec):
