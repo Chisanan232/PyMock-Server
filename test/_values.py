@@ -363,7 +363,7 @@ _Mocked_APIs: dict = {
         "test_home": _Test_Home,
         "youtube_home": _YouTube_Home_Value,
         "foo_object": _Foo_Object_Value,
-        "foo_{id}": _Foo_With_Variable_Value,
+        "foo_var_id": _Foo_With_Variable_Value,
     },
 }
 

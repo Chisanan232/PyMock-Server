@@ -49,6 +49,9 @@ class BaseHTTPProcess(BaseMockAPIProcess, ABC):
     def _get_current_request_http_method(self, request: Any) -> str:
         return self._request.http_method(request=request)
 
+    def _find_detail_by_api_path(self, api_path: str) -> dict:
+        return self._request.find_api_detail_by_api_path(self.mock_api_details, api_path)
+
 
 class HTTPRequestProcess(BaseHTTPProcess):
     def __init__(self, request: BaseCurrentRequest, response: BaseResponse):
@@ -59,7 +62,9 @@ class HTTPRequestProcess(BaseHTTPProcess):
         request = self._get_current_request(**kwargs)
         req_params = self._get_current_api_parameters(**kwargs)
 
-        api_params_info: List[APIParameter] = self.mock_api_details[self._get_current_api_path(request)][self._get_current_request_http_method(request)].http.request.parameters  # type: ignore[union-attr]
+        api_params_info: List[APIParameter] = self._find_detail_by_api_path(self._get_current_api_path(request))[
+            self._get_current_request_http_method(request)
+        ].http.request.parameters
         for param_info in api_params_info:
             # Check the required parameter
             one_req_param_value = req_params.get(param_info.name, None)
@@ -120,7 +125,7 @@ class HTTPRequestProcess(BaseHTTPProcess):
 class HTTPResponseProcess(BaseHTTPProcess):
     def process(self, **kwargs) -> Union[str, dict]:
         request = self._get_current_request(**kwargs)
-        api_params_info: MockAPI = self.mock_api_details[self._get_current_api_path(request)][
+        api_params_info: MockAPI = self._find_detail_by_api_path(self._get_current_api_path(request))[
             self._get_current_request_http_method(request)
         ]
         response = cast(HTTPResponse, self._ensure_http(api_params_info, "response"))

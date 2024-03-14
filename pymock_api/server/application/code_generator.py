@@ -1,3 +1,4 @@
+import re
 from abc import ABCMeta, abstractmethod
 from typing import Dict, List, Optional, Union, cast
 
@@ -99,14 +100,25 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
 
 class FlaskCodeGenerator(BaseWebServerCodeGenerator):
 
+    _variables_in_url: Dict[str, str] = {}
+
     def _define_api_function_pycode(self, api_name: str, api_config: List[MockAPI]) -> str:
-        api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
-        # TODO (Flask): Add the logic about variable in URL here
-        return f"""def {api_function_name}() -> Union[str, dict]:
+        self._variables_in_url.clear()
+        self._variables_in_url = self._prase_variable_api(api_name)
+
+        return f"""def {self._api_controller_name(api_name)}({self._api_function_signature()}) -> Union[str, dict]:
             {self._run_request_process_pycode()}
             {self._handle_request_process_result_pycode()}
             {self._generate_response_pycode()}
         """
+
+    def _prase_variable_api(self, api_function_name) -> Dict[str, str]:
+        has_variable_in_url = re.findall(r"<\w{1,32}>", api_function_name)
+        var_mapping_table = {}
+        for one_var_in_url in has_variable_in_url:
+            new_one_var_in_url = str(one_var_in_url).replace("<", "var_").replace(">", "")
+            var_mapping_table[one_var_in_url] = new_one_var_in_url
+        return var_mapping_table
 
     def add_api(self, api_name: str, api_config: Union[MockAPI, List[MockAPI]], base_url: Optional[str] = None) -> str:
         super().add_api(api_name=api_name, api_config=api_config, base_url=base_url)
@@ -129,7 +141,17 @@ class FlaskCodeGenerator(BaseWebServerCodeGenerator):
         return getattr(api_config.http, http_attr)
 
     def _api_controller_name(self, api_name: str) -> str:
-        return "_".join(api_name.split("/")[1:]).replace("-", "_")
+        api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
+        for var_in_url, new_name in self._variables_in_url.items():
+            api_function_name = api_function_name.replace(var_in_url, new_name)
+        return api_function_name
+
+    def _api_function_signature(self) -> str:
+        func_sig = ""
+        all_variable_params = list(map(lambda var: str(var).replace("var_", ""), self._variables_in_url.values()))
+        if all_variable_params:
+            func_sig = ", ".join(all_variable_params)
+        return func_sig
 
 
 class FastAPICodeGenerator(BaseWebServerCodeGenerator):
