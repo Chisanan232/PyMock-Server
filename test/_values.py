@@ -337,6 +337,19 @@ _Foo_Object_Value: dict = {
     },
     "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
 }
+_Foo_With_Variable_Value: dict = {
+    "url": "/foo/<id>",
+    "http": {
+        "request": {
+            "method": "GET",
+        },
+        "response": {
+            "strategy": "string",
+            "value": '{ "responseCode": "200", "errorMessage": "OK", "content": "You get the info of ID *<id>*." }',
+        },
+    },
+    "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
+}
 
 
 _Mocked_APIs: dict = {
@@ -350,6 +363,7 @@ _Mocked_APIs: dict = {
         "test_home": _Test_Home,
         "youtube_home": _YouTube_Home_Value,
         "foo_object": _Foo_Object_Value,
+        "foo_{id}": _Foo_With_Variable_Value,
     },
 }
 

@@ -20,6 +20,7 @@ from ...._values import (
     _Base_URL,
     _Delete_Google_Home_Value,
     _Foo_Object_Value,
+    _Foo_With_Variable_Value,
     _Google_Home_Value,
     _Post_Google_Home_Value,
     _Put_Google_Home_Value,
@@ -99,6 +100,7 @@ class MockHTTPServerTestSpec:
             _test_api_attr(api=_Test_Home, payload={"param1": "any_format"}),
             _test_api_attr(api=_YouTube_Home_Value, payload={"param1": "any_format"}),
             _test_api_attr(api=_Foo_Object_Value, payload={"param1": "any_format"}),
+            _test_api_attr(api=_Foo_With_Variable_Value, payload={"param1": "any_format"}),
         ],
     )
     def test_mock_apis(
@@ -111,9 +113,11 @@ class MockHTTPServerTestSpec:
     ):
         assert api_config.apis and api_config.apis.apis and api_config.apis.base
         no_base_url = url.replace(api_config.apis.base.url, "")
+        print(f"[DEBUG in test] api_config: {api_config.apis.apis}")
         one_api_configs = api_config.apis.get_all_api_config_by_url(no_base_url, base=api_config.apis.base)
 
         if http_method.upper() == "GET":
+            print(f"[DEBUG in test] one_api_configs: {one_api_configs}")
             request_params = self._client_get_req_func_params(one_api_configs[http_method.upper()], payload)
         else:
             if payload:
