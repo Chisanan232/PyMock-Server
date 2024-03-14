@@ -28,6 +28,7 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
         [Generating code]
         """
         api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
+        # TODO (Flask): Add the logic about variable in URL here
         return f"""def {api_function_name}() -> Union[str, dict]:
             {self._run_request_process_pycode()}
             {self._handle_request_process_result_pycode()}
@@ -149,6 +150,7 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
         if api_config.http.request.method.upper() != "GET":  # type: ignore[union-attr]
             api_func_signature = ""
             # Process the function signature if API has parameter settings
+            # TODO (FastAPI): Add the logic about variable in URL here
             if api_config.http.request.parameters:  # type: ignore[union-attr]
                 parameter_class = self._api_name_as_camel_case(api_name)
                 api_func_signature = f"model: {parameter_class}, " if self._api_has_params else ""
