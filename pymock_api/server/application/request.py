@@ -68,15 +68,27 @@ class FlaskRequest(BaseCurrentRequest):
         return api_params
 
     def find_api_detail_by_api_path(self, mock_api_details: Dict[str, dict], api_path: str) -> dict:
+
+        def _find_mapping_api(api: str):
+            simple_api_path_parts = re.sub(r"<\w{1,32}>", "<>", api).split("<>")
+            search_regular = r""
+            for api_part in simple_api_path_parts:
+                search_regular += re.escape(api_part) + r"\w{1,256}"
+            return re.search(search_regular, api_path)
+
         try:
             return mock_api_details[api_path]
         except KeyError:
             api_has_variable = list(filter(lambda p: re.search(r"<\w{1,32}>", p) is not None, mock_api_details.keys()))
-            if len(api_has_variable) == 1:
-                return mock_api_details[api_has_variable[0]]
-            else:
-                # FIXME: How to filter the correct config by API path?
-                raise NotImplementedError
+            mapping_variable_api = list(filter(lambda api: _find_mapping_api(api) is not None, api_has_variable))
+            if len(mapping_variable_api) > 1:
+                mapping_variable_api = list(
+                    filter(
+                        lambda api: len(api) == max(map(lambda a: len(a), mapping_variable_api)), mapping_variable_api
+                    )
+                )
+            assert len(mapping_variable_api) == 1
+            return mock_api_details[mapping_variable_api[0]]
 
     def api_path(self, request: "flask.Request") -> str:  # type: ignore[name-defined]
         return request.path

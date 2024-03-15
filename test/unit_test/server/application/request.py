@@ -42,6 +42,8 @@ class TestFlaskRequest(BaseCurrentRequestTestSpec):
         ("api_path", "expected_key"),
         [
             ("/foo", "/foo"),
+            ("/foo/123", "/foo/<id>"),
+            ("/foo/123/process/666", "/foo/<id>/process/<work_id>"),
         ],
     )
     def test_find_api_detail_by_api_path(self, request_util: FlaskRequest, api_path: str, expected_key: str):
