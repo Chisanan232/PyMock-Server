@@ -86,7 +86,7 @@ jobs:
     secrets:
       codecov_token: ${{ secrets.CODECOV_TOKEN }}
     with:
-      test_type: all-test
+      test_type: integration-test
       upload-to-codecov: true
       codecov_flags: integration-test  # Required if 'upload-to-codecov' is true
       codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
@@ -100,7 +100,7 @@ jobs:
     secrets:
       codecov_token: ${{ secrets.CODECOV_TOKEN }}
     with:
-      test_type: all-test
+      test_type: system-test
       upload-to-codecov: true
       codecov_flags: system-test  # Required if 'upload-to-codecov' is true
       codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
