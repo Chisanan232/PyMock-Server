@@ -64,6 +64,48 @@ jobs:
     uses: ./.github/workflows/rw_build_and_test.yaml
 
 
+  unit-test_codecov_finish:
+#    name: Organize and generate the testing report and upload it to Codecov
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
+    needs: build-and-test
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_upload_test_cov_report.yaml@v5
+    secrets:
+      codecov_token: ${{ secrets.CODECOV_TOKEN }}
+    with:
+      test_type: unit-test
+      upload-to-codecov: true
+      codecov_flags: unit-test  # Required if 'upload-to-codecov' is true
+      codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
+
+
+  integration-test_codecov_finish:
+#    name: Organize and generate the testing report and upload it to Codecov
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
+    needs: build-and-test
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_upload_test_cov_report.yaml@v5
+    secrets:
+      codecov_token: ${{ secrets.CODECOV_TOKEN }}
+    with:
+      test_type: all-test
+      upload-to-codecov: true
+      codecov_flags: integration-test  # Required if 'upload-to-codecov' is true
+      codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
+
+
+  system-test_codecov_finish:
+#    name: Organize and generate the testing report and upload it to Codecov
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
+    needs: build-and-test
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_upload_test_cov_report.yaml@v5
+    secrets:
+      codecov_token: ${{ secrets.CODECOV_TOKEN }}
+    with:
+      test_type: all-test
+      upload-to-codecov: true
+      codecov_flags: system-test  # Required if 'upload-to-codecov' is true
+      codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
+
+
   all-test_codecov_finish:
 #    name: Organize and generate the testing report and upload it to Codecov
     if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
@@ -74,7 +116,7 @@ jobs:
     with:
       test_type: all-test
       upload-to-codecov: true
-      codecov_flags: unit,integration,system  # Required if 'upload-to-codecov' is true
+      codecov_flags: all-test  # Required if 'upload-to-codecov' is true
       codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
 
 
