@@ -17,7 +17,7 @@ class BaseCurrentRequest(metaclass=ABCMeta):
         pass
 
     def find_api_detail_by_api_path(self, mock_api_details: Dict[str, dict], api_path: str) -> dict:
-        return {}
+        return mock_api_details[api_path]
 
     @abstractmethod
     def api_path(self, request: Any) -> str:
