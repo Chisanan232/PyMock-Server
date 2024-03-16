@@ -377,7 +377,7 @@ _Mocked_APIs: dict = {
         "delete_google_home": _Delete_Google_Home_Value,
         "test_home": _Test_Home,
         "youtube_home": _YouTube_Home_Value,
-        "foo_object": _Foo_Object_Value,
+        "foo-object": _Foo_Object_Value,
         "foo_var_id": _Foo_With_Variable_In_Api,
         "foo_var_id_process_var_work_id": _Foo_With_Multiple_Variables_In_Api,
     },
