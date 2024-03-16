@@ -337,6 +337,32 @@ _Foo_Object_Value: dict = {
     },
     "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
 }
+_Foo_With_Variable_In_Api: dict = {
+    "url": "/foo/<id>",
+    "http": {
+        "request": {
+            "method": "GET",
+        },
+        "response": {
+            "strategy": "string",
+            "value": '{ "responseCode": "200", "errorMessage": "OK", "content": "You get the info of ID *<id>*." }',
+        },
+    },
+    "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
+}
+_Foo_With_Multiple_Variables_In_Api: dict = {
+    "url": "/foo/<id>/process/<work_id>",
+    "http": {
+        "request": {
+            "method": "GET",
+        },
+        "response": {
+            "strategy": "string",
+            "value": '{ "responseCode": "200", "errorMessage": "OK", "content": "You get the info of ID *<id>* by worker *<work_id>*." }',
+        },
+    },
+    "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
+}
 
 
 _Mocked_APIs: dict = {
@@ -350,6 +376,8 @@ _Mocked_APIs: dict = {
         "test_home": _Test_Home,
         "youtube_home": _YouTube_Home_Value,
         "foo_object": _Foo_Object_Value,
+        "foo_var_id": _Foo_With_Variable_In_Api,
+        "foo_var_id_process_var_work_id": _Foo_With_Multiple_Variables_In_Api,
     },
 }
 
