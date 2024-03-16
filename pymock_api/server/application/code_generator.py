@@ -181,7 +181,7 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
                 parameter_class = self._api_name_as_camel_case(api_name)
                 api_func_signature = f"model: {parameter_class}, " if self._api_has_params else ""
             # Combine all the string value as a valid Python code
-            return f"""def {api_name}({api_func_signature}request: FastAPIRequest):
+            return f"""def {self._api_controller_name(api_name)}({api_func_signature}request: FastAPIRequest):
                 {self._run_request_process_pycode()}
                 {self._handle_request_process_result_pycode()}
                 {self._generate_response_pycode()}
@@ -219,7 +219,7 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
         model = {parameter_class}()
                 """
             # Combine all the string value as a valid Python code
-            return f"""def {api_name}(request: FastAPIRequest{function_args}):
+            return f"""def {self._api_controller_name(api_name)}(request: FastAPIRequest{function_args}):
                 {instantiate_model}
                 {assign_value_to_model}
                 {self._run_request_process_pycode()}
@@ -228,9 +228,14 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
             """
 
     def _api_name_as_camel_case(self, api_name: str) -> str:
-        # api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
-        # camel_case_api_name = "".join(map(lambda n: f"{n[0].upper()}{n[1:]}", api_function_name.split("_")))
-        camel_case_api_name = "".join(map(lambda n: f"{n[0].upper()}{n[1:]}", api_name.split("_")))
+        new_api_name: List[str] = []
+        for i in map(lambda e: e.split("-") if "-" in e else e, api_name.split("_")):
+            if type(i) is list:
+                new_api_name.extend(i)
+            else:
+                new_api_name.append(i)  # type: ignore[arg-type]
+
+        camel_case_api_name = "".join(map(lambda n: f"{n[0].upper()}{n[1:]}", new_api_name))
         return f"{camel_case_api_name}Parameter"
 
     def _annotate_api_parameters_model_pycode(self, api_name: str, api_config: MockAPI) -> str:
@@ -293,4 +298,4 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
             """
 
     def _api_controller_name(self, api_name: str) -> str:
-        return api_name
+        return api_name.replace("-", "_")
