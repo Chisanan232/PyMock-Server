@@ -36,7 +36,8 @@ ResponseType = Any  # FlaskResponse, FastAPIResponse
 
 
 def _test_api_attr(api: dict, payload: dict) -> tuple:
-    return f"{_Base_URL}{api['url']}", f"{api['http']['request']['method']}", payload
+    real_url = api["under_test_url"] if "under_test_url" in api.keys() else api["url"]
+    return api["url"], f"{_Base_URL}{real_url}", f"{api['http']['request']['method']}", payload
 
 
 class MockHTTPServerTestSpec:
@@ -76,7 +77,7 @@ class MockHTTPServerTestSpec:
         pass
 
     @pytest.mark.parametrize(
-        ("url", "http_method", "payload"),
+        ("url", "real_url", "http_method", "payload"),
         [
             _test_api_attr(
                 api=_Google_Home_Value,
@@ -108,14 +109,14 @@ class MockHTTPServerTestSpec:
     def test_mock_apis(
         self,
         url: str,
+        real_url: str,
         http_method: str,
         payload: dict,
         client: Union["flask.testing.FlaskClient", FastAPITestClient],
         api_config: APIConfig,
     ):
         assert api_config.apis and api_config.apis.apis and api_config.apis.base
-        no_base_url = url.replace(api_config.apis.base.url, "")
-        one_api_configs = api_config.apis.get_all_api_config_by_url(no_base_url, base=api_config.apis.base)
+        one_api_configs = api_config.apis.get_all_api_config_by_url(url, base=api_config.apis.base)
 
         if http_method.upper() == "GET":
             request_params = self._client_get_req_func_params(one_api_configs[http_method.upper()], payload)
@@ -129,7 +130,7 @@ class MockHTTPServerTestSpec:
                 request_params = {
                     "headers": {"Content-Type": "application/json"},
                 }
-        response = getattr(client, http_method.lower())(url, **request_params)
+        response = getattr(client, http_method.lower())(real_url, **request_params)
         under_test_http_resp = self._deserialize_response(response)
 
         # Get the expected result data

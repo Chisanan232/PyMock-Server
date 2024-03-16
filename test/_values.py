@@ -339,6 +339,7 @@ _Foo_Object_Value: dict = {
 }
 _Foo_With_Variable_In_Api: dict = {
     "url": "/foo/<id>",
+    "under_test_url": "/foo/123",
     "http": {
         "request": {
             "method": "GET",
@@ -352,6 +353,7 @@ _Foo_With_Variable_In_Api: dict = {
 }
 _Foo_With_Multiple_Variables_In_Api: dict = {
     "url": "/foo/<id>/process/<work_id>",
+    "under_test_url": "/foo/123/process/666",
     "http": {
         "request": {
             "method": "GET",
