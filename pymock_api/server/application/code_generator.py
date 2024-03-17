@@ -30,7 +30,7 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
         [Generating code]
         """
 
-    def _prase_variable_api(self, api_function_name: str) -> Dict[str, str]:
+    def _parse_variable_in_api(self, api_function_name: str) -> Dict[str, str]:
         has_variable_in_url = re.findall(r"<\w{1,32}>", api_function_name)
         var_mapping_table = {}
         for one_var_in_url in has_variable_in_url:
@@ -112,7 +112,7 @@ class FlaskCodeGenerator(BaseWebServerCodeGenerator):
 
     def _define_api_function_pycode(self, api_name: str, api_config: List[MockAPI]) -> str:
         self._variables_in_url.clear()
-        self._variables_in_url = self._prase_variable_api(api_name)
+        self._variables_in_url = self._parse_variable_in_api(api_name)
 
         return f"""def {self._api_controller_name(api_name)}({self._api_function_signature()}) -> Union[str, dict]:
             {self._run_request_process_pycode()}
@@ -160,7 +160,7 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
 
     def annotate_function(self, api_name: str, api_config: MockAPI) -> str:  # type: ignore[override]
         self._variables_in_url.clear()
-        self._variables_in_url = self._prase_variable_api(api_config.url)
+        self._variables_in_url = self._parse_variable_in_api(api_config.url)
 
         import_fastapi = "from fastapi import Query, Request as FastAPIRequest\n"
         import_typing = "from typing import List, Union\n"
@@ -177,7 +177,7 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
             + define_function_for_api
         )
 
-    def _prase_variable_api(self, api_function_name: str) -> Dict[str, str]:
+    def _parse_variable_in_api(self, api_function_name: str) -> Dict[str, str]:
         has_variable_in_url = re.findall(r"<\w{1,32}>", api_function_name)
         var_mapping_table = {}
         for one_var_in_url in has_variable_in_url:
