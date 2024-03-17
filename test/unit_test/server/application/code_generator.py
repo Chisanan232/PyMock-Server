@@ -23,12 +23,18 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
 
     def test_generate_pycode_about_annotating_function(self, sut: BaseWebServerCodeGenerator):
         for_test_api_name = "/Function/name"
-        api = Mock(MockAPI(url=Mock(), http=Mock(HTTP())))
+        api = MockAPI(url="/foo/api/url", http=Mock(HTTP()))
         api.http.request.parameters = [APIParameter().deserialize(p) for p in _Test_API_Parameters]
 
-        annotate_function_pycode = sut.annotate_function(api_name=for_test_api_name, api_config=api)
+        annotate_function_pycode = sut.annotate_function(
+            api_name=for_test_api_name, api_config=self._mock_api_config_data(api)
+        )
 
         assert sut._api_controller_name(for_test_api_name) in annotate_function_pycode
+
+    @abstractmethod
+    def _mock_api_config_data(self, api: MockAPI) -> Union[MockAPI, List[MockAPI]]:
+        pass
 
     @pytest.mark.parametrize("base_url", [None, "Has base URL"])
     def test_generate_pycode_about_adding_api(self, sut: BaseWebServerCodeGenerator, base_url: Optional[str]):
@@ -73,6 +79,9 @@ class TestFlaskCodeGenerator(WebServerCodeGeneratorTestSpec):
     def sut(self) -> BaseWebServerCodeGenerator:
         return FlaskCodeGenerator()
 
+    def _mock_api_config_data(self, api: MockAPI) -> List[MockAPI]:
+        return [api]
+
     def _get_api_config_param(self, api_config: MockAPI) -> List[MockAPI]:
         return [api_config]
 
@@ -94,6 +103,9 @@ class TestFastAPICodeGenerator(WebServerCodeGeneratorTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> BaseWebServerCodeGenerator:
         return FastAPICodeGenerator()
+
+    def _mock_api_config_data(self, api: MockAPI) -> MockAPI:
+        return api
 
     def _get_api_config_param(self, api_config: MockAPI) -> MockAPI:
         return api_config
