@@ -31,7 +31,6 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
         """
 
     def _prase_variable_api(self, api_function_name: str) -> Dict[str, str]:
-        print(f"[DEBUG] api_function_name: {api_function_name}")
         has_variable_in_url = re.findall(r"<\w{1,32}>", api_function_name)
         var_mapping_table = {}
         for one_var_in_url in has_variable_in_url:
@@ -120,15 +119,6 @@ class FlaskCodeGenerator(BaseWebServerCodeGenerator):
             {self._handle_request_process_result_pycode()}
             {self._generate_response_pycode()}
         """
-
-    def _prase_variable_api(self, api_function_name: str) -> Dict[str, str]:
-        print(f"[DEBUG] api_function_name: {api_function_name}")
-        has_variable_in_url = re.findall(r"<\w{1,32}>", api_function_name)
-        var_mapping_table = {}
-        for one_var_in_url in has_variable_in_url:
-            new_one_var_in_url = str(one_var_in_url).replace("<", "var_").replace(">", "")
-            var_mapping_table[one_var_in_url] = new_one_var_in_url
-        return var_mapping_table
 
     def add_api(self, api_name: str, api_config: Union[MockAPI, List[MockAPI]], base_url: Optional[str] = None) -> str:
         super().add_api(api_name=api_name, api_config=api_config, base_url=base_url)
