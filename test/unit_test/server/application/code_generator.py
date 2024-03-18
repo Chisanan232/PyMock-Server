@@ -117,6 +117,17 @@ class TestFastAPICodeGenerator(WebServerCodeGeneratorTestSpec):
     def _get_http_method_in_generating_code(self, method: str) -> str:
         return method.lower()
 
+    @pytest.mark.parametrize(
+        ("api_name", "expect_api_name"),
+        [
+            ("get_foo", "GetFooParameter"),
+            ("get_foo-boo_export", "GetFooBooExportParameter"),
+        ],
+    )
+    def test__api_name_as_camel_case(self, sut: FastAPICodeGenerator, api_name: str, expect_api_name: str):
+        api_name_with_camel_case = sut._api_name_as_camel_case(api_name=api_name)
+        assert api_name_with_camel_case == expect_api_name
+
     def test__add_api_with_invalid_value(self, sut: BaseWebServerCodeGenerator):
         ut_url = "This is URL path"
         ut_api_config = ["Invalid API configuration"]
