@@ -16,7 +16,7 @@ repos:
       args: # arguments to configure black
         - --profile=black
 - repo: https://github.com/PyCQA/autoflake
-  rev: v2.3.0
+  rev: v2.3.1
   hooks:
     - id: autoflake
       args:
@@ -24,7 +24,7 @@ repos:
         - --ignore-init-module-imports
         - --in-place
 - repo: https://github.com/psf/black
-  rev: 24.2.0
+  rev: 24.3.0
   hooks:
     - id: black
       args: # arguments to configure black
