@@ -1,4 +1,4 @@
-name: CI
+name: Run test and organize test coverage reports
 
 on:
   workflow_call:

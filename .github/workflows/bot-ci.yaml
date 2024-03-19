@@ -4,12 +4,13 @@ on:
   # It would only run at any events which be triggered by bot, i.e., GitHub dependency bot, for guarantee that the
   # change doesn't affect anything of source code.
   pull_request:
+    types:
+      - labeled
     branches:
-      - "dependabot/pip/**"
-      - "dependabot/github_actions/actions/**"
-      - "dependabot/github_actions/Chisanan232/**"
+      - "master"
 
 jobs:
   build-and-test:
 #    name: Run all tests and organize all test reports
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'dependencies') }}
     uses: ./.github/workflows/rw_build_and_test.yaml
