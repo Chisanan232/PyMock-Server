@@ -1,0 +1,6 @@
+strategy: object
+properties:
+  - name: description
+    required:
+    type: str
+    format:

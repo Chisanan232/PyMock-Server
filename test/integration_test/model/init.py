@@ -8,7 +8,8 @@ import pytest
 from pymock_api import APIConfig
 from pymock_api.model import load_config
 
-from .._spec import MockAPI_Config_Yaml_Path, run_test, yaml_factory
+from ..._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
+from ..._spec import run_test
 
 # [(under_test_path, expected_path)]
 DIVIDING_YAML_PATHS: List[tuple] = []
@@ -19,7 +20,7 @@ def _get_all_yaml_for_dividing() -> None:
         _path = (
             str(pathlib.Path(__file__).parent.parent.parent),
             "data",
-            "divide_test",
+            "divide_test_load",
             scenario_folder,
             yaml_file_naming,
         )

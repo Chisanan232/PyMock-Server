@@ -1,0 +1,7 @@
+method: 'PUT'
+parameters:
+  - name: 'date'
+    required:
+    default:
+    type: str
+    format:

@@ -1,0 +1,35 @@
+url: '/foo'
+http:
+  request:
+    apply_template_props: True
+    base_file_path: './test/data/divide_test_load/has-base-info_and_tags_no_mocked_apis_with_divide_http_test/foo/'
+    config_path:
+    config_path_format: '**-request'
+  response:
+    strategy: object
+    properties:
+      - name: errorMessage
+        required: True
+        type: str
+        format:
+      - name: responseCode
+        required: True
+        type: str
+        format:
+      - name: responseData
+        required: False
+        type: list
+        format:
+        items:
+          - name: id
+            required: True
+            type: int
+          - name: name
+            required: True
+            type: str
+          - name: value1
+            required: True
+            type: str
+          - name: value2
+            required: True
+            type: str

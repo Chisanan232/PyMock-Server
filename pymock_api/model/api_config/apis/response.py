@@ -1,74 +1,25 @@
+import json
+import pathlib
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from ...enums import ResponseStrategy
-from .._base import _Config
-from ..item import IteratorItem
-from ..template import TemplateResponse, _TemplatableConfig
+from .._base import _Checkable, _Config
+from ..template import TemplateResponse
+from ..template._base_wrapper import _DividableOnlyTemplatableConfig
+from ._property import BaseProperty
 
 
 @dataclass(eq=False)
-class ResponseProperty(_Config):
-    name: str = field(default_factory=str)
-    required: Optional[bool] = None
-    value_type: Optional[str] = None  # A type value as string
-    value_format: Optional[str] = None
-    items: Optional[List[IteratorItem]] = None
-
-    def _compare(self, other: "ResponseProperty") -> bool:
-        return (
-            self.name == other.name
-            and self.required == other.required
-            and self.value_type == other.value_type
-            and self.value_format == other.value_format
-            and self.items == other.items
-        )
-
-    def __post_init__(self) -> None:
-        if self.items is not None:
-            self._convert_items()
-
-    def _convert_items(self):
-        if False in list(map(lambda i: isinstance(i, (dict, IteratorItem)), self.items)):
-            raise TypeError("The data type of key *items* must be dict or IteratorItem.")
-        self.items = [
-            IteratorItem(name=i.get("name", ""), value_type=i.get("type", None), required=i.get("required", True))
-            if isinstance(i, dict)
-            else i
-            for i in self.items
-        ]
-
-    def serialize(self, data: Optional["ResponseProperty"] = None) -> Optional[Dict[str, Any]]:
-        name: str = self._get_prop(data, prop="name")
-        required: bool = self._get_prop(data, prop="required")
-        value_type: type = self._get_prop(data, prop="value_type")
-        value_format: str = self._get_prop(data, prop="value_format")
-        if not (name and value_type) or (required is None):
-            return None
-        serialized_data = {
-            "name": name,
-            "required": required,
-            "type": value_type,
-            "format": value_format,
-        }
-        if self.items:
-            print(f"[DEBUG in api_config.ResponseProperty.serialize] self.items: {self.items}")
-            serialized_data["items"] = [item.serialize() for item in self.items]
-        return serialized_data
-
-    @_Config._ensure_process_with_not_empty_value
-    def deserialize(self, data: Dict[str, Any]) -> Optional["ResponseProperty"]:
-        self.name = data.get("name", None)
-        self.required = data.get("required", None)
-        self.value_type = data.get("type", None)
-        self.value_format = data.get("format", None)
-        items = [IteratorItem().deserialize(item) for item in (data.get("items", []) or [])]
-        self.items = items if items else None
-        return self
+class ResponseProperty(BaseProperty):
+    @property
+    def key(self) -> str:
+        return "properties.<property item>"
 
 
 @dataclass(eq=False)
-class HTTPResponse(_TemplatableConfig):
+class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
     """*The **http.response** section in **mocked_apis.<api>***"""
 
     strategy: Optional[ResponseStrategy] = None
@@ -119,6 +70,10 @@ class HTTPResponse(_TemplatableConfig):
         if False in list(map(lambda i: isinstance(i, (dict, ResponseProperty)), self.properties)):
             raise TypeError("The data type of key *properties* must be dict or ResponseProperty.")
         self.properties = [ResponseProperty().deserialize(i) if isinstance(i, dict) else i for i in self.properties]
+
+    @property
+    def key(self) -> str:
+        return "response"
 
     def serialize(self, data: Optional["HTTPResponse"] = None) -> Optional[Dict[str, Any]]:
         serialized_data = super().serialize(data)
@@ -181,6 +136,12 @@ class HTTPResponse(_TemplatableConfig):
             A **HTTPResponse** type object.
 
         """
+
+        def _deserialize_response_property(prop: dict) -> ResponseProperty:
+            response_property = ResponseProperty()
+            response_property.absolute_model_key = self.key
+            return response_property.deserialize(prop)
+
         super().deserialize(data)
 
         self.strategy = ResponseStrategy.to_enum(data.get("strategy", None))
@@ -191,7 +152,7 @@ class HTTPResponse(_TemplatableConfig):
         elif self.strategy is ResponseStrategy.FILE:
             self.path = data.get("path", None)
         elif self.strategy is ResponseStrategy.OBJECT:
-            properties = [ResponseProperty().deserialize(prop) for prop in data.get("properties", [])]
+            properties = [_deserialize_response_property(prop) for prop in (data.get("properties", []) or [])]
             self.properties = properties if properties else None  # type: ignore[assignment]
         else:
             raise NotImplementedError
@@ -200,3 +161,73 @@ class HTTPResponse(_TemplatableConfig):
     @property
     def _template_setting(self) -> TemplateResponse:
         return self._current_template.values.response
+
+    def is_work(self) -> bool:
+        assert self.strategy is not None
+        if ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.STRING:
+            return self.should_not_be_none(
+                config_key=f"{self.absolute_model_key}.value",
+                config_value=self.value,
+                valid_callback=self._chk_response_value_validity,
+            )
+        elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.FILE:
+            return self.should_not_be_none(
+                config_key=f"{self.absolute_model_key}.path",
+                config_value=self.path,
+                accept_empty=False,
+                valid_callback=self._chk_response_value_validity,
+            )
+        elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.OBJECT:
+            if not self.should_not_be_none(
+                config_key=f"{self.absolute_model_key}.properties",
+                config_value=self.properties,
+                accept_empty=False,
+                valid_callback=self._chk_response_value_validity,
+            ):
+                return False
+        else:
+            raise NotImplementedError
+        return True
+
+    def _chk_response_value_validity(self, config_key: str, config_value: Any) -> bool:  # type: ignore[return]
+        response_strategy = config_key.split(".")[-1]
+        assert response_strategy in [
+            "value",
+            "path",
+            "properties",
+        ], f"It has unexpected schema usage '{config_key}' in configuration."
+        if response_strategy == "value":
+            assert isinstance(
+                config_value, str
+            ), "If HTTP response strategy is *string*, the data type of response value must be *str*."
+            if re.search(r"\{.{0,99999999}}", config_value):
+                try:
+                    json.loads(config_value)
+                except:
+                    print(
+                        "If HTTP response strategy is *string* and its value seems like JSON format, its format is not a valid JSON format."
+                    )
+                    self._config_is_wrong = True
+                    if self._stop_if_fail:
+                        self._exit_program(1)
+                    return False
+            return True
+        elif response_strategy == "path":
+            assert isinstance(
+                config_value, str
+            ), "If HTTP response strategy is *file*, the data type of response value must be *str*."
+            if not pathlib.Path(config_value).exists():
+                print("The file which is the response content doesn't exist.")
+                self._config_is_wrong = True
+                if self._stop_if_fail:
+                    self._exit_program(1)
+                return False
+            return True
+        elif response_strategy == "properties":
+            assert isinstance(
+                config_value, list
+            ), "If HTTP response strategy is *object*, the data type of response value must be *list*."
+            for v in config_value:
+                assert isinstance(v, ResponseProperty)
+                v.stop_if_fail = self.stop_if_fail
+                return v.is_work()

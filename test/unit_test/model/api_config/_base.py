@@ -1,7 +1,37 @@
+import glob
+import os
+import pathlib
 import re
 from abc import ABC, ABCMeta, abstractmethod
-from enum import Enum
-from test._values import (
+from collections import namedtuple
+from typing import Any, Callable, Dict, List, Optional
+from unittest.mock import Mock, PropertyMock, patch
+
+import pytest
+
+from pymock_api._utils import YAML
+from pymock_api.model import HTTP, MockAPI, MockAPIs
+from pymock_api.model.api_config import (
+    BaseConfig,
+    BeDividedableAsTemplatableConfig,
+    ResponseProperty,
+    TemplatableConfigDividable,
+    TemplateConfig,
+    _Checkable,
+    _Config,
+)
+from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
+from pymock_api.model.api_config.template import (
+    LoadConfig,
+    TemplateAPI,
+    TemplateApply,
+    TemplateRequest,
+    TemplateResponse,
+    TemplateValues,
+)
+from pymock_api.model.enums import ResponseStrategy
+
+from ...._values import (
     _Base_URL,
     _Mock_Load_Config,
     _Mock_Template_Apply_Has_Tag_Setting,
@@ -11,33 +41,6 @@ from test._values import (
     _Test_Tag,
     _Test_URL,
     _TestConfig,
-)
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock, PropertyMock, call, patch
-
-import pytest
-
-from pymock_api.model import HTTP, MockAPI, MockAPIs
-from pymock_api.model.api_config import (
-    BaseConfig,
-    ResponseProperty,
-    TemplateConfig,
-    _Config,
-)
-from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
-from pymock_api.model.api_config.template import (
-    LoadConfig,
-    TemplateAPI,
-    TemplateApply,
-    TemplateConfigLoadable,
-    TemplateRequest,
-    TemplateResponse,
-    TemplateValues,
-)
-from pymock_api.model.enums import (
-    ConfigLoadingOrder,
-    ResponseStrategy,
-    set_loading_function,
 )
 
 _assertion_msg = "Its property's value should be same as we set."
@@ -184,76 +187,213 @@ class ConfigTestSpec(metaclass=ABCMeta):
         assert sut_with_nothing.deserialize(data={}) == {}
 
 
-class LoadConfigFunction(Enum):
-    """
-    Here values are the function naming of object *TemplateConfigLoadable* which loads configuration
-    """
-
-    FROM_DATA: str = "apis:_load_mocked_apis_from_data"
-    BY_FILE: str = "file:_load_templatable_config"
-    BY_APPLY: str = "apply:_load_templatable_config_by_apply"
+_TEST_DATA: List[tuple] = []
 
 
-class TemplateConfigLoadableTestSuite(ConfigTestSpec, ABC):
+def _set_test_data(is_valid: bool, data_model: str, opt_globals_callback: Optional[Callable] = None) -> None:
+    def _operate_default_global_var(test_scenario: tuple) -> None:
+        global _TEST_DATA
+        _TEST_DATA.append(test_scenario)
+
+    global_var_operation = opt_globals_callback if opt_globals_callback else _operate_default_global_var
+
+    if is_valid:
+        config_type = "valid"
+        expected_is_work = True
+    else:
+        config_type = "invalid"
+        expected_is_work = False
+    yaml_dir = os.path.join(
+        str(pathlib.Path(__file__).parent.parent.parent.parent),
+        "data",
+        "check_test",
+        "data_model",
+        f"{data_model}",
+        f"{config_type}",
+        "*.yaml",
+    )
+    for yaml_config_path in glob.glob(yaml_dir):
+        global_var_operation((yaml_config_path, expected_is_work))
+
+
+def set_checking_test_data(
+    data_modal_dir: str,
+    reset: bool = True,
+    reset_callback: Optional[Callable] = None,
+    opt_globals_callback: Optional[Callable] = None,
+) -> None:
+    if reset:
+        reset_callback() if reset_callback else reset_test_data()
+    init_checking_test_data(data_modal_dir, opt_globals_callback)
+
+
+def init_checking_test_data(data_modal_dir: str, opt_globals_callback: Optional[Callable] = None) -> None:
+    _set_test_data(is_valid=True, data_model=data_modal_dir, opt_globals_callback=opt_globals_callback)
+    _set_test_data(is_valid=False, data_model=data_modal_dir, opt_globals_callback=opt_globals_callback)
+
+
+def reset_test_data() -> None:
+    global _TEST_DATA
+    _TEST_DATA.clear()
+
+
+class CheckableTestSuite(ConfigTestSpec, ABC):
+    test_data_dir = NotImplementedError("Please override attribute *test_data_dir* about the test data directory.")
+
     @pytest.mark.parametrize(
-        ("load_order", "expected_func_run_order"),
+        ("test_data_path", "criteria"),
+        _TEST_DATA,
+    )
+    def test_is_work(self, sut_with_nothing: _Config, test_data_path: str, criteria: bool):
+        self._test_is_work_process(sut_with_nothing, test_data_path, criteria)
+
+    def _test_is_work_process(self, sut_with_nothing: _Config, test_data_path: str, criteria: bool) -> None:
+        data_model = sut_with_nothing.deserialize(data=YAML().read(path=test_data_path))
+        if data_model is not None:  # For data modal *BaseConfig*
+            assert isinstance(data_model, _Config) and isinstance(data_model, _Checkable)
+            data_model.stop_if_fail = False
+            is_valid_to_work = data_model.is_work()
+            assert is_valid_to_work is criteria
+
+
+TestDividingData = namedtuple(
+    "TestDividingData",
+    (
+        "should_divide",
+        "dry_run",
+        "tag_directory_exist",
+        "should_check_dir_exist",
+        "should_run_mkdir",
+        "should_run_serialize",
+    ),
+)
+
+
+class DividableTestSuite(ConfigTestSpec, ABC):
+    @pytest.mark.parametrize(
+        "test_data",
         [
-            (
-                [ConfigLoadingOrder.APIs, ConfigLoadingOrder.FILE, ConfigLoadingOrder.APPLY],
-                [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_FILE, LoadConfigFunction.BY_APPLY],
+            TestDividingData(
+                should_divide=False,
+                dry_run=True,
+                tag_directory_exist=True,
+                should_check_dir_exist=False,
+                should_run_mkdir=False,
+                should_run_serialize=True,
             ),
-            (
-                [ConfigLoadingOrder.APIs, ConfigLoadingOrder.APPLY, ConfigLoadingOrder.FILE],
-                [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_APPLY, LoadConfigFunction.BY_FILE],
+            TestDividingData(
+                should_divide=False,
+                dry_run=False,
+                tag_directory_exist=True,
+                should_check_dir_exist=False,
+                should_run_mkdir=False,
+                should_run_serialize=True,
             ),
-            (
-                [ConfigLoadingOrder.APIs, ConfigLoadingOrder.FILE],
-                [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_FILE],
+            TestDividingData(
+                should_divide=False,
+                dry_run=True,
+                tag_directory_exist=False,
+                should_check_dir_exist=False,
+                should_run_mkdir=False,
+                should_run_serialize=True,
             ),
-            (
-                [ConfigLoadingOrder.APIs, ConfigLoadingOrder.APPLY],
-                [LoadConfigFunction.FROM_DATA, LoadConfigFunction.BY_APPLY],
+            TestDividingData(
+                should_divide=False,
+                dry_run=False,
+                tag_directory_exist=False,
+                should_check_dir_exist=False,
+                should_run_mkdir=False,
+                should_run_serialize=True,
+            ),
+            TestDividingData(
+                should_divide=True,
+                dry_run=True,
+                tag_directory_exist=False,
+                should_check_dir_exist=False,
+                should_run_mkdir=False,
+                should_run_serialize=False,
+            ),
+            TestDividingData(
+                should_divide=True,
+                dry_run=True,
+                tag_directory_exist=True,
+                should_check_dir_exist=False,
+                should_run_mkdir=False,
+                should_run_serialize=False,
+            ),
+            TestDividingData(
+                should_divide=True,
+                dry_run=False,
+                tag_directory_exist=False,
+                should_check_dir_exist=True,
+                should_run_mkdir=True,
+                should_run_serialize=True,
+            ),
+            TestDividingData(
+                should_divide=True,
+                dry_run=False,
+                tag_directory_exist=True,
+                should_check_dir_exist=True,
+                should_run_mkdir=False,
+                should_run_serialize=True,
             ),
         ],
     )
-    def test_loading_configuration_workflow(
-        self, load_order: List[ConfigLoadingOrder], expected_func_run_order: List[LoadConfigFunction], sut: _Config
-    ):
-        assert isinstance(sut, TemplateConfigLoadable)
-        expected_func_run_order = [func.value.split(":") for func in expected_func_run_order]
+    def test_dividing_serialize(self, test_data: TestDividingData, sut: _Config):
+        self._test_dividing_serialize_process(test_data=test_data, sut=sut)
 
-        # Parent mock object for mocking target functions
-        mock_parent = Mock()
-        mock_load_config_data = {}
-        # Magic mock the target function
-        for func in expected_func_run_order:
-            setattr(sut, func[1], MagicMock())
-            mock_load_config_data[func[0]] = getattr(sut, func[1])
-        # Annotate some functions as magic functions
-        for func in expected_func_run_order:
-            setattr(mock_parent, func[1], getattr(sut, func[1]))
+    def _test_dividing_serialize_process(self, test_data: TestDividingData, sut: _Config) -> None:
+        def _get_abs_module(_obj: object) -> str:
+            return f"{_obj.__module__}.{_obj.__class__.__name__}"
 
-        # Generate criteria of the function running order
-        criteria_order = []
-        for func in expected_func_run_order:
-            if func[1] == "_load_mocked_apis_from_data":
-                criteria = getattr(call, func[1])({})
-            else:
-                criteria = getattr(call, func[1])()
-            criteria_order.append(criteria)
-
-        # Pre-process of setting loading function
-        set_loading_function(**mock_load_config_data)
-        template_config = TemplateConfig(
-            activate=True,
-            load_config=LoadConfig(includes_apis=True, order=load_order),
+        assert isinstance(sut, _Config) and isinstance(sut, TemplatableConfigDividable)
+        assert isinstance(self._lower_layer_data_modal_for_divide, _Config) and isinstance(
+            self._lower_layer_data_modal_for_divide, BeDividedableAsTemplatableConfig
         )
-        with patch(
-            "pymock_api.model.api_config.MockAPIs._template_config",
-            new_callable=PropertyMock,
-            return_value=template_config,
-        ):
-            # Run the target function
-            sut._load_mocked_apis_config({})
-            # Verify the running result
-            mock_parent.assert_has_calls(criteria_order)
+
+        # Given
+        with patch(f"{_get_abs_module(sut)}.should_divide", new_callable=PropertyMock) as mock_should_divide:
+            mock_should_divide.return_value = test_data.should_divide
+            with patch(
+                f"{_get_abs_module(self._lower_layer_data_modal_for_divide)}.api_name", new_callable=PropertyMock
+            ) as mock_prop_api_name:
+                mock_prop_api_name.return_value = "test_config"
+                with patch(
+                    f"{_get_abs_module(self._lower_layer_data_modal_for_divide)}.tag", new_callable=PropertyMock
+                ) as mock_prop_tag:
+                    mock_prop_tag.return_value = "pytest-mocked-api"
+                    with patch("pymock_api.model.api_config.template._divide.YAML.write") as mock_yaml_write:
+                        with patch.object(sut, "serialize_lower_layer") as mock_serialize_lower_layer:
+                            with patch(
+                                "os.path.exists", return_value=test_data.tag_directory_exist
+                            ) as mock_check_file_exist:
+                                with patch("os.mkdir") as mock_mkdir:
+                                    # When: Run target function
+                                    sut.dry_run = test_data.dry_run
+                                    sut.dividing_serialize(
+                                        data=self._lower_layer_data_modal_for_divide,
+                                    )
+
+                                    # Should: Verify
+                                    mock_should_divide.assert_called_once()
+                                    if test_data.should_check_dir_exist:
+                                        mock_check_file_exist.assert_called_once()
+                                    else:
+                                        mock_check_file_exist.assert_not_called()
+                                    if test_data.should_run_mkdir:
+                                        mock_mkdir.assert_called_once()
+                                    else:
+                                        mock_mkdir.assert_not_called()
+                                    if test_data.should_run_serialize:
+                                        mock_serialize_lower_layer.assert_called_once()
+                                    else:
+                                        mock_serialize_lower_layer.assert_not_called()
+                                    if test_data.should_check_dir_exist and test_data.should_run_serialize:
+                                        mock_yaml_write.assert_called_once()
+                                    else:
+                                        mock_yaml_write.assert_not_called()
+
+    @property
+    @abstractmethod
+    def _lower_layer_data_modal_for_divide(self) -> _Config:
+        pass
