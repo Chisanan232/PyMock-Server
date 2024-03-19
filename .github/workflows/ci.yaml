@@ -61,6 +61,7 @@ on:
 jobs:
   build-and-test:
 #    name: Run all tests and organize all test reports
+    if: !contains(github.event.pull_request.labels.*.name, 'dependencies')
     uses: ./.github/workflows/rw_build_and_test.yaml
 
 
