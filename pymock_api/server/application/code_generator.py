@@ -1,3 +1,4 @@
+import re
 from abc import ABCMeta, abstractmethod
 from typing import Dict, List, Optional, Union, cast
 
@@ -23,16 +24,19 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
         define_function_for_api = self._define_api_function_pycode(api_name, api_config)
         return initial_global_server + define_function_for_api
 
+    @abstractmethod
     def _define_api_function_pycode(self, api_name: str, api_config: List[MockAPI]) -> str:
         """
         [Generating code]
         """
-        api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
-        return f"""def {api_function_name}() -> Union[str, dict]:
-            {self._run_request_process_pycode()}
-            {self._handle_request_process_result_pycode()}
-            {self._generate_response_pycode()}
-        """
+
+    def _parse_variable_in_api(self, api_function_name: str) -> Dict[str, str]:
+        has_variable_in_url = re.findall(r"<\w{1,32}>", api_function_name)
+        var_mapping_table = {}
+        for one_var_in_url in has_variable_in_url:
+            new_one_var_in_url = str(one_var_in_url).replace("<", "var_").replace(">", "")
+            var_mapping_table[one_var_in_url] = new_one_var_in_url
+        return var_mapping_table
 
     def _run_request_process_pycode(self, **kwargs) -> str:
         """
@@ -103,6 +107,19 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
 
 
 class FlaskCodeGenerator(BaseWebServerCodeGenerator):
+
+    _variables_in_url: Dict[str, str] = {}
+
+    def _define_api_function_pycode(self, api_name: str, api_config: List[MockAPI]) -> str:
+        self._variables_in_url.clear()
+        self._variables_in_url = self._parse_variable_in_api(api_name)
+
+        return f"""def {self._api_controller_name(api_name)}({self._api_function_signature()}) -> Union[str, dict]:
+            {self._run_request_process_pycode()}
+            {self._handle_request_process_result_pycode()}
+            {self._generate_response_pycode()}
+        """
+
     def add_api(self, api_name: str, api_config: Union[MockAPI, List[MockAPI]], base_url: Optional[str] = None) -> str:
         super().add_api(api_name=api_name, api_config=api_config, base_url=base_url)
         # TODO: Should align the data structure and remove this checking
@@ -124,11 +141,27 @@ class FlaskCodeGenerator(BaseWebServerCodeGenerator):
         return getattr(api_config.http, http_attr)
 
     def _api_controller_name(self, api_name: str) -> str:
-        return "_".join(api_name.split("/")[1:]).replace("-", "_")
+        api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
+        for var_in_url, new_name in self._variables_in_url.items():
+            api_function_name = api_function_name.replace(var_in_url, new_name)
+        return api_function_name
+
+    def _api_function_signature(self) -> str:
+        func_sig = ""
+        all_variable_params = list(map(lambda var: str(var).replace("var_", ""), self._variables_in_url.values()))
+        if all_variable_params:
+            func_sig = ", ".join(all_variable_params)
+        return func_sig
 
 
 class FastAPICodeGenerator(BaseWebServerCodeGenerator):
+
+    _variables_in_url: Dict[str, str] = {}
+
     def annotate_function(self, api_name: str, api_config: MockAPI) -> str:  # type: ignore[override]
+        self._variables_in_url.clear()
+        self._variables_in_url = self._parse_variable_in_api(api_config.url)
+
         import_fastapi = "from fastapi import Query, Request as FastAPIRequest\n"
         import_typing = "from typing import List, Union\n"
         import_typing_ext = "from typing_extensions import Annotated\n"
@@ -144,16 +177,32 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
             + define_function_for_api
         )
 
+    def _parse_variable_in_api(self, api_function_name: str) -> Dict[str, str]:
+        has_variable_in_url = re.findall(r"<\w{1,32}>", api_function_name)
+        var_mapping_table = {}
+        for one_var_in_url in has_variable_in_url:
+            new_one_var_in_url = str(one_var_in_url).replace("<", "var_").replace(">", "")
+            var_mapping_table[one_var_in_url] = new_one_var_in_url
+        return var_mapping_table
+
     def _define_api_function_pycode(self, api_name: str, api_config: MockAPI) -> str:  # type: ignore[override]
         # The code implementation is different if the HTTP method is *GET* or not
         if api_config.http.request.method.upper() != "GET":  # type: ignore[union-attr]
             api_func_signature = ""
             # Process the function signature if API has parameter settings
+            # TODO (FastAPI): Add the logic about variable in URL here
             if api_config.http.request.parameters:  # type: ignore[union-attr]
                 parameter_class = self._api_name_as_camel_case(api_name)
                 api_func_signature = f"model: {parameter_class}, " if self._api_has_params else ""
             # Combine all the string value as a valid Python code
-            return f"""def {api_name}({api_func_signature}request: FastAPIRequest):
+            api_variable_function_signature = self._api_function_signature()
+            function_signature = ", ".join(
+                filter(
+                    lambda fs: fs not in [None, ""],
+                    [api_variable_function_signature, f"{api_func_signature}request: FastAPIRequest"],
+                )
+            )
+            return f"""def {self._api_controller_name(api_name)}({function_signature}):
                 {self._run_request_process_pycode()}
                 {self._handle_request_process_result_pycode()}
                 {self._generate_response_pycode()}
@@ -191,7 +240,14 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
         model = {parameter_class}()
                 """
             # Combine all the string value as a valid Python code
-            return f"""def {api_name}(request: FastAPIRequest{function_args}):
+            api_variable_function_signature = self._api_function_signature()
+            function_signature = ", ".join(
+                filter(
+                    lambda fs: fs not in [None, ""],
+                    [api_variable_function_signature, f"request: FastAPIRequest{function_args}"],
+                )
+            )
+            return f"""def {self._api_controller_name(api_name)}({function_signature}):
                 {instantiate_model}
                 {assign_value_to_model}
                 {self._run_request_process_pycode()}
@@ -200,9 +256,14 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
             """
 
     def _api_name_as_camel_case(self, api_name: str) -> str:
-        # api_function_name = "_".join(api_name.split("/")[1:]).replace("-", "_")
-        # camel_case_api_name = "".join(map(lambda n: f"{n[0].upper()}{n[1:]}", api_function_name.split("_")))
-        camel_case_api_name = "".join(map(lambda n: f"{n[0].upper()}{n[1:]}", api_name.split("_")))
+        new_api_name: List[str] = []
+        for i in map(lambda e: e.split("-") if "-" in e else e, api_name.split("_")):
+            if type(i) is list:
+                new_api_name.extend(i)
+            else:
+                new_api_name.append(i)  # type: ignore[arg-type]
+
+        camel_case_api_name = "".join(map(lambda n: f"{n[0].upper()}{n[1:]}", new_api_name))
         return f"{camel_case_api_name}Parameter"
 
     def _annotate_api_parameters_model_pycode(self, api_name: str, api_config: MockAPI) -> str:
@@ -237,6 +298,13 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
             self._api_has_params = False
             return define_parameters_model
 
+    def _api_function_signature(self) -> str:
+        func_sig = ""
+        all_variable_params = list(map(lambda var: str(var).replace("var_", ""), self._variables_in_url.values()))
+        if all_variable_params:
+            func_sig = ", ".join(all_variable_params)
+        return func_sig
+
     def _run_request_process_pycode(self, **kwargs) -> str:
         return (
             """
@@ -264,5 +332,13 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
                 path="{url_path}")({self._api_controller_name(api_name)})
             """
 
+    def url_path(self, url: Optional[str], base_url: Optional[str] = None) -> str:
+        """
+        [Data processing]
+        """
+        url = super().url_path(url, base_url)
+        new_url = url.replace("<", "{").replace(">", "}")
+        return new_url
+
     def _api_controller_name(self, api_name: str) -> str:
-        return api_name
+        return api_name.replace("-", "_")

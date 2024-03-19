@@ -74,7 +74,6 @@ class _YamlSchema:
             (data["schema"]["$ref"] if _has_ref == "schema" else data["$ref"]).replace("#/", "").split("/")[1:]
         )
         # Operate the component definition object
-        print(f"[DEBUG in swagger_config.API._get_schema_ref] schema_path: {schema_path}")
         return _get_schema(get_component_definition(), schema_path, 0)
 
 
@@ -110,21 +109,17 @@ class APIParameter(Transferable):
         self.items: Optional[list] = None
 
     def deserialize(self, data: Dict) -> "APIParameter":
-        print(f"[DEBUG in swagger_config.APIParameter.deserialize] data: {data}")
         handled_data = self.parse_schema(data)
-        print(f"[DEBUG in swagger_config.APIParameter.deserialize] handled_data: {handled_data}")
         self.name = handled_data["name"]
         self.required = handled_data["required"]
         self.value_type = convert_js_type(handled_data["type"])
         self.default = handled_data.get("default", None)
         items = handled_data.get("items", None)
-        print(f"[DEBUG in swagger_config.APIParameter.deserialize] items: {items}")
         if items is not None:
             self.items = items if isinstance(items, list) else [items]
         return self
 
     def to_api_config(self) -> PyMockAPIParameter:  # type: ignore[override]
-        print(f"[DEBUG in swagger_config.APIParameter.to_api_config] self.items: {self.items}")
         return PyMockAPIParameter(
             name=self.name,
             required=self.required,
@@ -172,7 +167,6 @@ class API(Transferable):
 
     def _process_api_params(self, params_data: List[dict]) -> List["APIParameter"]:
         has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", params_data))
-        print(f"[DEBUG in swagger_config.API._process_api_params] params_data: {params_data}")
         if has_ref_in_schema_param:
             # TODO: Ensure the value maps this condition is really only one
             assert len(params_data) == 1
@@ -183,7 +177,6 @@ class API(Transferable):
                 if param.get("items", None) is not None:
                     param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
             handled_parameters = params_data
-        print(f"[DEBUG in swagger_config.API._process_api_params] handled_parameters: {handled_parameters}")
         return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
 
     def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
@@ -192,11 +185,9 @@ class API(Transferable):
         parameters: List[dict] = []
         for param_name, param_props in request_body_params["properties"].items():
             items = param_props.get("items", None)
-            print(f"[DEBUG in swagger_config.API._process_has_ref_parameters] before items: {items}")
             items_props = []
             if items and _YamlSchema.has_ref(items):
                 items = _YamlSchema.get_schema_ref(items)
-                print(f"[DEBUG in swagger_config.API._process_has_ref_parameters] after items: {items}")
                 # Sample data:
                 # {
                 #     'type': 'object',
@@ -217,7 +208,6 @@ class API(Transferable):
                         }
                     )
 
-            print(f"[DEBUG in swagger_config.API._process_has_ref_parameters] items: {items}")
             parameters.append(
                 {
                     "name": param_name,
@@ -243,12 +233,9 @@ class API(Transferable):
             }
         if _YamlSchema.has_schema(status_200_response):
             response_schema = _YamlSchema.get_schema_ref(status_200_response)
-            print(f"[DEBUG in src] response_schema: {response_schema}")
             response_schema_properties = response_schema.get("properties", None)
             if response_schema_properties:
-                print(f"[DEBUG in src] response_schema_properties: {response_schema_properties}")
                 for k, v in response_schema_properties.items():
-                    print(f"[DEBUG in src] v: {v}")
                     if strategy is ResponseStrategy.OBJECT:
                         response_data_prop = self._process_response_value(property_value=v, strategy=strategy)
                         assert isinstance(response_data_prop, dict)
@@ -273,7 +260,6 @@ class API(Transferable):
         if _YamlSchema.has_ref(property_value):
             # FIXME: Handle the reference
             v_ref = _YamlSchema.get_schema_ref(property_value)
-            print(f"[DEBUG in src] v_ref: {v_ref}")
             if strategy is ResponseStrategy.OBJECT:
                 return {
                     "name": "",
@@ -329,11 +315,8 @@ class API(Transferable):
                     single_response = _YamlSchema.get_schema_ref(property_value["items"])
                     item = {}
                     single_response_properties = single_response.get("properties", None)
-                    print(f"[DEBUG in src] single_response_properties: {single_response_properties}")
                     if single_response_properties:
                         for item_k, item_v in single_response["properties"].items():
-                            print(f"[DEBUG in src] item_v: {item_v}")
-                            print(f"[DEBUG in src] _YamlSchema.has_ref(item_v): {_YamlSchema.has_ref(item_v)}")
                             item_type = convert_js_type(item_v["type"])
                             if locate(item_type) is str:
                                 # lowercase_letters = string.ascii_lowercase
@@ -416,6 +399,4 @@ class SwaggerConfig(Transferable):
         return base_url
 
     def _generate_api_key(self, base_url: str, swagger_api: API) -> str:
-        return "_".join(
-            [swagger_api.http_method, swagger_api.path.replace(base_url, "")[1:].replace("/", "_").replace("-", "_")]
-        )
+        return "_".join([swagger_api.http_method, swagger_api.path.replace(base_url, "")[1:].replace("/", "_")])

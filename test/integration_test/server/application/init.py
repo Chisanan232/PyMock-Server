@@ -15,10 +15,14 @@ from pymock_api.model.api_config.apis import APIParameter
 from pymock_api.server.application import BaseAppServer, FastAPIServer, FlaskServer
 from pymock_api.server.application.response import HTTPResponse as _HTTPResponse
 
+from ...._file_utils import MockAPI_Config_Yaml_Path, file, yaml_factory
 from ...._values import (
     _Base_URL,
     _Delete_Google_Home_Value,
+    _Foo_Object_Data_Value,
     _Foo_Object_Value,
+    _Foo_With_Multiple_Variables_In_Api,
+    _Foo_With_Variable_In_Api,
     _Google_Home_Value,
     _Post_Google_Home_Value,
     _Put_Google_Home_Value,
@@ -27,14 +31,14 @@ from ...._values import (
     _YouTube_API_Content,
     _YouTube_Home_Value,
 )
-from ..._spec import MockAPI_Config_Yaml_Path, file, yaml_factory
 
 WebLibraryType = Any  # flask.Flask, fastapi.FastAPI
 ResponseType = Any  # FlaskResponse, FastAPIResponse
 
 
 def _test_api_attr(api: dict, payload: dict) -> tuple:
-    return f"{_Base_URL}{api['url']}", f"{api['http']['request']['method']}", payload
+    real_url = api["under_test_url"] if "under_test_url" in api.keys() else api["url"]
+    return api["url"], f"{_Base_URL}{real_url}", f"{api['http']['request']['method']}", payload
 
 
 class MockHTTPServerTestSpec:
@@ -74,7 +78,7 @@ class MockHTTPServerTestSpec:
         pass
 
     @pytest.mark.parametrize(
-        ("url", "http_method", "payload"),
+        ("url", "real_url", "http_method", "payload"),
         [
             _test_api_attr(
                 api=_Google_Home_Value,
@@ -99,19 +103,22 @@ class MockHTTPServerTestSpec:
             _test_api_attr(api=_Test_Home, payload={"param1": "any_format"}),
             _test_api_attr(api=_YouTube_Home_Value, payload={"param1": "any_format"}),
             _test_api_attr(api=_Foo_Object_Value, payload={"param1": "any_format"}),
+            _test_api_attr(api=_Foo_Object_Data_Value, payload={"param1": "any_format"}),
+            _test_api_attr(api=_Foo_With_Variable_In_Api, payload={"param1": "any_format"}),
+            _test_api_attr(api=_Foo_With_Multiple_Variables_In_Api, payload={"param1": "any_format"}),
         ],
     )
     def test_mock_apis(
         self,
         url: str,
+        real_url: str,
         http_method: str,
         payload: dict,
         client: Union["flask.testing.FlaskClient", FastAPITestClient],
         api_config: APIConfig,
     ):
         assert api_config.apis and api_config.apis.apis and api_config.apis.base
-        no_base_url = url.replace(api_config.apis.base.url, "")
-        one_api_configs = api_config.apis.get_all_api_config_by_url(no_base_url, base=api_config.apis.base)
+        one_api_configs = api_config.apis.get_all_api_config_by_url(url, base=api_config.apis.base)
 
         if http_method.upper() == "GET":
             request_params = self._client_get_req_func_params(one_api_configs[http_method.upper()], payload)
@@ -125,7 +132,7 @@ class MockHTTPServerTestSpec:
                 request_params = {
                     "headers": {"Content-Type": "application/json"},
                 }
-        response = getattr(client, http_method.lower())(url, **request_params)
+        response = getattr(client, http_method.lower())(real_url, **request_params)
         under_test_http_resp = self._deserialize_response(response)
 
         # Get the expected result data

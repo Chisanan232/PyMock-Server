@@ -1,0 +1,144 @@
+name: CI
+
+on:
+  # No matter for push or pull request events, it would trigger CI for safely saving the source code.
+  # For the push event, it only runs building and testing.
+  push:
+    branches:
+      - "master"
+      - "develop/**"
+    paths-ignore:
+#     For GitHub dependency bot
+      - ".github/dependabot.yaml"
+#     For documentation
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/documentation.yaml"
+      - "docs/**"
+      - "**/*.md"
+      - "mkdocs.yml"
+      - "README.md"
+#     For Docker feature
+      - ".github/workflows/docker.yaml"
+      - "scripts/ci/**-docker-**.sh"
+      - "scripts/docker/**"
+      - "Dockerfile"
+      - "README-DOCKER.md"
+#     Others
+      - ".gitcommitrules"
+      - ".gitignore"
+      - ".pre-commit-config.yaml"
+      - ".pylintrc"
+
+  # For the push event, in addition to build and test would be run, it would trigger other service to keep the reports
+  # or other checking, i.e., record the test report by CodeCov and check the code quality by SonarQube.
+  pull_request:
+    branches:
+      - "master"
+      - "develop/**"
+    paths-ignore:
+#     For GitHub dependency bot
+      - ".github/dependabot.yaml"
+#     For documentation
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/documentation.yaml"
+      - "docs/**"
+      - "**/*.md"
+      - "mkdocs.yml"
+      - "README.md"
+#     For Docker feature
+      - ".github/workflows/docker.yaml"
+      - "scripts/ci/**-docker-**.sh"
+      - "scripts/docker/**"
+      - "Dockerfile"
+      - "README-DOCKER.md"
+#     Others
+      - ".gitcommitrules"
+      - ".gitignore"
+      - ".pre-commit-config.yaml"
+      - ".pylintrc"
+      - "LICENSE"
+
+jobs:
+  build-and-test:
+#    name: Run all tests and organize all test reports
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'dependencies') }}
+    uses: ./.github/workflows/rw_build_and_test.yaml
+
+
+  unit-test_codecov_finish:
+#    name: Organize and generate the testing report and upload it to Codecov
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
+    needs: build-and-test
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_upload_test_cov_report.yaml@v5
+    secrets:
+      codecov_token: ${{ secrets.CODECOV_TOKEN }}
+    with:
+      test_type: unit-test
+      upload-to-codecov: true
+      codecov_flags: unit-test  # Required if 'upload-to-codecov' is true
+      codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
+
+
+  integration-test_codecov_finish:
+#    name: Organize and generate the testing report and upload it to Codecov
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
+    needs: build-and-test
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_upload_test_cov_report.yaml@v5
+    secrets:
+      codecov_token: ${{ secrets.CODECOV_TOKEN }}
+    with:
+      test_type: integration-test
+      upload-to-codecov: true
+      codecov_flags: integration-test  # Required if 'upload-to-codecov' is true
+      codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
+
+
+  system-test_codecov_finish:
+#    name: Organize and generate the testing report and upload it to Codecov
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
+    needs: build-and-test
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_upload_test_cov_report.yaml@develop
+    secrets:
+      codecov_token: ${{ secrets.CODECOV_TOKEN }}
+    with:
+      test_type: system-test
+      upload-to-codecov: true
+      codecov_flags: system-test  # Required if 'upload-to-codecov' is true
+      codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
+
+
+  all-test_codecov_finish:
+#    name: Organize and generate the testing report and upload it to Codecov
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
+    needs: build-and-test
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_upload_test_cov_report.yaml@v5
+    secrets:
+      codecov_token: ${{ secrets.CODECOV_TOKEN }}
+    with:
+      test_type: all-test
+      upload-to-codecov: true
+      codecov_flags: all-test  # Required if 'upload-to-codecov' is true
+      codecov_name: pymock-api  # Required if 'upload-to-codecov' is true
+
+
+  sonarcloud_finish:
+#    name: SonarCloud Scan
+    if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
+    needs: build-and-test
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_sonarqube_scan.yaml@v5
+    secrets:
+      sonar_token: ${{ secrets.SONAR_TOKEN }}
+    with:
+      download_path: ${{ inputs.download_path }}
+
+
+  pre-building_test:
+#    name: Check about it could work finely by installing the Python package with setup.py file
+    needs: [unit-test_codecov_finish, integration-test_codecov_finish, system-test_codecov_finish, all-test_codecov_finish, sonarcloud_finish]
+    if: ${{ github.ref_name == 'release' || github.ref_name == 'master' }}
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_pre-building_test.yaml@v5
+    with:
+      build-type: poetry
+      python_package_name: pymock-api
+      test_shell_in_python: from pymock_api.model import APIConfig
+      test_shell: mock-api --help

@@ -1,0 +1,16 @@
+name: Bot CI
+
+on:
+  # It would only run at any events which be triggered by bot, i.e., GitHub dependency bot, for guarantee that the
+  # change doesn't affect anything of source code.
+  pull_request:
+    types:
+      - labeled
+    branches:
+      - "master"
+
+jobs:
+  build-and-test:
+#    name: Run all tests and organize all test reports
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'dependencies') }}
+    uses: ./.github/workflows/rw_build_and_test.yaml

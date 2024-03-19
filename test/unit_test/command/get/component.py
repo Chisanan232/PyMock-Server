@@ -81,6 +81,27 @@ class TestSubCmdGetComponent:
 
             assert str(exc_info.value) == "1"
 
+    def test_component_when_getting_empty_config(self, component: SubCmdGetComponent):
+        with patch("pymock_api.command.get.component.load_config") as mock_load_config:
+            no_mocked_apis_config: dict = {
+                "name": "",
+                "description": "",
+                "mocked_apis": {},
+            }
+            mock_load_config.return_value = APIConfig().deserialize(data=no_mocked_apis_config)
+            with pytest.raises(SystemExit) as exc_info:
+                subcmd_get_args = SubcmdGetArguments(
+                    subparser_name="get",
+                    config_path="config path",
+                    show_detail=True,
+                    show_as_format=Format.YAML,
+                    api_path=_Test_URL,
+                    http_method=_Test_HTTP_Method,
+                )
+                component.process(subcmd_get_args)
+
+            assert str(exc_info.value) == "1"
+
 
 class TestAPIInfoDisplayChain:
     @pytest.fixture(scope="function")

@@ -1,0 +1,28 @@
+url: '/foo-boo/export'
+http:
+  request:
+    method: 'GET'
+    parameters:
+      - name: 'arg1'
+        required: false
+        default:
+        type: list
+        format:
+        items:
+          - required: true
+            type: str
+      - name: 'arg2'
+        required: false
+        default:
+        type: str
+        format:
+      - name: 'datetime'
+        required: false
+        default:
+        type: str
+        format:
+  response:
+    apply_template_props: True
+    base_file_path: './test/data/divide_test_load/has-base-info_and_tags_has_mocked_apis_with_divide_http_test/foo-boo'
+    config_path:
+    config_path_format: '**-response'
