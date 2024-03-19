@@ -337,8 +337,22 @@ _Foo_Object_Value: dict = {
     },
     "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
 }
+_Foo_Object_Data_Value: dict = {
+    "url": "/foo-object/data",
+    "http": {
+        "request": {
+            "method": "GET",
+        },
+        "response": {
+            "strategy": "object",
+            "properties": _HTTP_Response_Properties_With_Object_Strategy,
+        },
+    },
+    "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
+}
 _Foo_With_Variable_In_Api: dict = {
     "url": "/foo/<id>",
+    "under_test_url": "/foo/123",
     "http": {
         "request": {
             "method": "GET",
@@ -352,6 +366,7 @@ _Foo_With_Variable_In_Api: dict = {
 }
 _Foo_With_Multiple_Variables_In_Api: dict = {
     "url": "/foo/<id>/process/<work_id>",
+    "under_test_url": "/foo/123/process/666",
     "http": {
         "request": {
             "method": "GET",
@@ -375,7 +390,8 @@ _Mocked_APIs: dict = {
         "delete_google_home": _Delete_Google_Home_Value,
         "test_home": _Test_Home,
         "youtube_home": _YouTube_Home_Value,
-        "foo_object": _Foo_Object_Value,
+        "foo-object": _Foo_Object_Value,
+        "foo-object_data": _Foo_Object_Data_Value,
         "foo_var_id": _Foo_With_Variable_In_Api,
         "foo_var_id_process_var_work_id": _Foo_With_Multiple_Variables_In_Api,
     },
