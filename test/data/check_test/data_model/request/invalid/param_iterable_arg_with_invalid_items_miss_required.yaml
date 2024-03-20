@@ -1,0 +1,10 @@
+method: 'PUT'
+parameters:
+  - name: 'arg1'
+    required: false
+    default: []
+    type: list
+    format:
+    items:
+      - required:
+        type: str

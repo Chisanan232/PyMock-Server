@@ -95,6 +95,7 @@ In short, **_PyMock-API_** to let your job about mocking API to be easier and mo
           request:
             method: 'GET'
           response:
+            strategy: string
             value: 'This is Foo home API.'
     ```
 
@@ -132,7 +133,7 @@ Let's start to explain the running principle at web server part because it is th
 
 Here's a sample setting as YAML format:
 
-```yaml hl_lines="2 3 6 8"
+```yaml hl_lines="2 3 6 8-9"
 mocked_apis:
   foo_home:    # Code line 8: function naming
     url: '/foo'    # Code line 7: given parameters
@@ -140,6 +141,7 @@ mocked_apis:
       request:
         method: 'GET'    # Code line 7: given parameters
       response:
+        strategy: string    # Code line 9: given return data type is string
         value: 'This is Foo home API.'    # Code line 9: given return value
 ```
 

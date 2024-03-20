@@ -1,17 +1,25 @@
+import copy
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 
-from ._base import _Config
+from ._base import _Checkable, _Config
 
 
 @dataclass(eq=False)
-class BaseConfig(_Config):
+class BaseConfig(_Config, _Checkable):
     """*The **base** section in **mocked_apis***"""
 
     url: str = field(default_factory=str)
 
+    _absolute_key: str = field(init=False, repr=False)
+
     def _compare(self, other: "BaseConfig") -> bool:
         return self.url == other.url
+
+    @property
+    def key(self) -> str:
+        return "base"
 
     def serialize(self, data: Optional["BaseConfig"] = None) -> Optional[Dict[str, Any]]:
         url: str = self._get_prop(data, prop="url")
@@ -45,3 +53,14 @@ class BaseConfig(_Config):
         """
         self.url = data.get("url", None)
         return self
+
+    def is_work(self) -> bool:
+        if not self.url:
+            return True
+        valid_url = re.findall(r"\/[\w,\-,\_]{1,32}", self.url)
+        url_copy = copy.copy(self.url)
+        if not valid_url:
+            return False
+        if url_copy.replace("".join(valid_url), ""):
+            return False
+        return True

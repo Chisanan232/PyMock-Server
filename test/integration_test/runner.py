@@ -1,6 +1,4 @@
-import io
 import re
-import sys
 from abc import ABCMeta, abstractmethod
 
 import pytest
@@ -9,18 +7,7 @@ from pymock_api.command.options import SubCommand
 from pymock_api.runner import CommandRunner
 
 from .._sut import get_runner
-
-
-class Capturing(list):
-    def __enter__(self):
-        self._stdout = sys.stdout
-        sys.stdout = self._stringio = io.StringIO()
-        return self
-
-    def __exit__(self, *args):
-        self.extend(self._stringio.getvalue().splitlines())
-        del self._stringio  # free up some memory
-        sys.stdout = self._stdout
+from .._utils import Capturing
 
 
 class CommandFunctionTestSpec(metaclass=ABCMeta):

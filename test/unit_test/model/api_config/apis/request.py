@@ -13,11 +13,19 @@ from ....._values import (
     _Test_Iterable_Parameter_With_MultiValue,
     _TestConfig,
 )
-from .._base import ConfigTestSpec, _assertion_msg
-from ..template import TemplatableConfigTestSuite
+from .._base import (
+    CheckableTestSuite,
+    ConfigTestSpec,
+    _assertion_msg,
+    set_checking_test_data,
+)
+from ..template._base import TemplatableConfigTestSuite
 
 
-class TestHTTPReqeust(TemplatableConfigTestSuite):
+class TestHTTPReqeust(TemplatableConfigTestSuite, CheckableTestSuite):
+    test_data_dir = "request"
+    set_checking_test_data(test_data_dir)
+
     @pytest.fixture(scope="function")
     def sut(self) -> HTTPRequest:
         return HTTPRequest(method=_TestConfig.Request.get("method", None), parameters=[self._Mock_Model.api_parameter])

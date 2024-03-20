@@ -4,19 +4,55 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_api._utils import YAML
-from pymock_api._utils.file_opt import JSON
+from pymock_api._utils import JSON, YAML
+from pymock_api._utils.file_opt import _BaseFileOperation
 from pymock_api.model import HTTP, MockAPI
 from pymock_api.model.api_config import ResponseProperty
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
 from pymock_api.model.enums import Format, ResponseStrategy
 
 from ....._values import _Test_Response_Properties, _Test_Tag, _Test_URL, _TestConfig
-from .._base import MOCK_MODEL, MOCK_RETURN_VALUE, MockModel, _assertion_msg
-from ..template import TemplatableConfigTestSuite
+from .._base import (
+    MOCK_MODEL,
+    MOCK_RETURN_VALUE,
+    CheckableTestSuite,
+    DividableTestSuite,
+    MockModel,
+    _assertion_msg,
+    set_checking_test_data,
+)
+from ..template._base import TemplatableConfigTestSuite
+
+_MockAPI_Test_Data: List[tuple] = []
+_HTTP_Test_Data: List[tuple] = []
 
 
-class TestMockAPI(TemplatableConfigTestSuite):
+def reset_mock_api_test_data() -> None:
+    global _MockAPI_Test_Data
+    _MockAPI_Test_Data.clear()
+
+
+def add_mock_api_test_data(test_scenario: tuple) -> None:
+    global _MockAPI_Test_Data
+    _MockAPI_Test_Data.append(test_scenario)
+
+
+def reset_http_test_data() -> None:
+    global _HTTP_Test_Data
+    _HTTP_Test_Data.clear()
+
+
+def add_http_test_data(test_scenario: tuple) -> None:
+    global _HTTP_Test_Data
+    _HTTP_Test_Data.append(test_scenario)
+
+
+class TestMockAPI(TemplatableConfigTestSuite, CheckableTestSuite, DividableTestSuite):
+    test_data_dir = "api"
+    set_checking_test_data(
+        test_data_dir, reset_callback=reset_mock_api_test_data, opt_globals_callback=add_mock_api_test_data
+    )
+
     @pytest.fixture(scope="function")
     def sut(self) -> MockAPI:
         return MockAPI(url=_Test_URL, http=self._Mock_Model.http, tag=_Test_Tag)
@@ -85,7 +121,7 @@ class TestMockAPI(TemplatableConfigTestSuite):
             (Format.YAML, YAML),
         ],
     )
-    def test_valid_format(self, formatter: str, format_object, sut: MockAPI):
+    def test_valid_format(self, formatter: str, format_object: _BaseFileOperation, sut: MockAPI):
         with patch.object(format_object, "serialize") as mock_formatter:
             format_str = sut.format(formatter)
             assert format_str
@@ -237,8 +273,22 @@ class TestMockAPI(TemplatableConfigTestSuite):
             sut_with_nothing.set_response(strategy="Invalid response strategy")
         assert re.search(r".{0,32}invalid response strategy.{0,32}", str(exc_info.value), re.IGNORECASE)
 
+    @pytest.mark.parametrize(
+        ("test_data_path", "criteria"),
+        _MockAPI_Test_Data,
+    )
+    def test_is_work(self, sut_with_nothing: MockAPI, test_data_path: str, criteria: bool):
+        super().test_is_work(sut_with_nothing, test_data_path, criteria)
 
-class TestHTTP(TemplatableConfigTestSuite):
+    @property
+    def _lower_layer_data_modal_for_divide(self) -> HTTP:
+        return self._Mock_Model.http
+
+
+class TestHTTP(TemplatableConfigTestSuite, CheckableTestSuite, DividableTestSuite):
+    test_data_dir = "http"
+    set_checking_test_data(test_data_dir, reset_callback=reset_http_test_data, opt_globals_callback=add_http_test_data)
+
     @pytest.fixture(scope="function")
     def sut(self) -> HTTP:
         return HTTP(request=self._Mock_Model.http_request, response=self._Mock_Model.http_response)
@@ -323,3 +373,38 @@ class TestHTTP(TemplatableConfigTestSuite):
         assert obj.request.method == _TestConfig.Request.get("method", None)
         assert obj.request.parameters == [self._Mock_Model.api_parameter]
         assert obj.response.value == _TestConfig.Response.get("value", None)
+
+    @pytest.mark.parametrize(
+        ("test_data_path", "criteria"),
+        _HTTP_Test_Data,
+    )
+    def test_is_work(self, sut_with_nothing: HTTP, test_data_path: str, criteria: bool):
+        super().test_is_work(sut_with_nothing, test_data_path, criteria)
+
+    @property
+    def _lower_layer_data_modal_for_divide(self) -> HTTPRequest:
+        return self._Mock_Model.http_request
+
+    def test_prop_should_divide_with_invalid_value(self, sut_with_nothing: HTTP):
+        # Given invalid value
+        sut_with_nothing._current_section = "invalid value"
+        # Run target function
+        with pytest.raises(ValueError) as exc_info:
+            sut_with_nothing.should_divide
+        assert re.search(r"must to be \*request\* or \*response\*", str(exc_info.value), re.IGNORECASE)
+
+    def test_prop__config_file_format_with_invalid_value(self, sut_with_nothing: HTTP):
+        # Given invalid value
+        sut_with_nothing._current_section = "invalid value"
+        # Run target function
+        with pytest.raises(ValueError) as exc_info:
+            sut_with_nothing._config_file_format
+        assert re.search(r"must to be \*request\* or \*response\*", str(exc_info.value), re.IGNORECASE)
+
+    def test_prop__deserialize_as_template_config_with_invalid_value(self, sut_with_nothing: HTTP):
+        # Given invalid value
+        sut_with_nothing._current_section = "invalid value"
+        # Run target function
+        with pytest.raises(ValueError) as exc_info:
+            sut_with_nothing._deserialize_as_template_config
+        assert re.search(r"must to be \*request\* or \*response\*", str(exc_info.value), re.IGNORECASE)

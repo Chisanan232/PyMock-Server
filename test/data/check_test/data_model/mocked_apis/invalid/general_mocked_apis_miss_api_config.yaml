@@ -1,0 +1,4 @@
+base:
+  url: '/api/v1/test'
+apis:
+  special_put_foo:

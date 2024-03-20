@@ -21,6 +21,8 @@ from ..._values import (
     _Bind_Host_And_Port,
     _Cmd_Arg_API_Path,
     _Cmd_Arg_HTTP_Method,
+    _Default_Base_File_Path,
+    _Default_Include_Template_Config,
     _Generate_Sample,
     _Log_Level,
     _Print_Sample,
@@ -30,8 +32,14 @@ from ..._values import (
     _Swagger_API_Document_URL,
     _Test_App_Type,
     _Test_Config,
+    _Test_Divide_Api,
+    _Test_Divide_Http,
+    _Test_Divide_Http_Request,
+    _Test_Divide_Http_Response,
+    _Test_Dry_Run,
     _Test_HTTP_Method,
     _Test_HTTP_Resp,
+    _Test_Request_With_Https,
     _Test_Response_Strategy,
     _Test_SubCommand_Add,
     _Test_SubCommand_Check,
@@ -200,13 +208,30 @@ class TestDeserialize:
     def test_parser_subcommand_pull_arguments(self, deserialize: Type[DeserializeParsedArgs]):
         namespace_args = {
             "subcommand": _Test_SubCommand_Pull,
+            "request_with_https": _Test_Request_With_Https,
             "source": _API_Doc_Source,
-            "base_url": _Base_URL,
             "config_path": _Test_Config,
+            "base_url": _Base_URL,
+            "base_file_path": _Default_Base_File_Path,
+            "include_template_config": _Default_Include_Template_Config,
+            "dry_run": _Test_Dry_Run,
+            "divide_api": _Test_Divide_Api,
+            "divide_http": _Test_Divide_Http,
+            "divide_http_request": _Test_Divide_Http_Request,
+            "divide_http_response": _Test_Divide_Http_Response,
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_pull(namespace)
         assert isinstance(arguments, SubcmdPullArguments)
         assert arguments.subparser_name == _Test_SubCommand_Pull
+        assert arguments.request_with_https == _Test_Request_With_Https
         assert arguments.source == _API_Doc_Source
         assert arguments.config_path == _Test_Config
+        assert arguments.base_url == _Base_URL
+        assert arguments.base_file_path == _Default_Base_File_Path
+        assert arguments.include_template_config == _Default_Include_Template_Config
+        assert arguments.dry_run == _Test_Dry_Run
+        assert arguments.divide_api == _Test_Divide_Api
+        assert arguments.divide_http == _Test_Divide_Http
+        assert arguments.divide_http_request == _Test_Divide_Http_Request
+        assert arguments.divide_http_response == _Test_Divide_Http_Response
