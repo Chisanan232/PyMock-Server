@@ -37,7 +37,7 @@ _Mock_API_HTTP: dict = {
 
 def generate_mock_template(tail_naming: str = "") -> dict:
     return {
-        "config_path_format": "**.yaml" if not tail_naming else ("**" + f"-{tail_naming}" + ".yaml"),
+        "config_path_format": "**.yaml" if not tail_naming else f"**-{tail_naming}.yaml",
     }
 
 
@@ -71,7 +71,7 @@ _Mock_Template_Config_Activate: bool = False
 
 _Mock_Load_Config: dict = {
     "includes_apis": True,
-    "order": ["apis", "apply", "file"],
+    "order": ["apis", "file"],
 }
 
 _Mock_Template_Setting: dict = {
@@ -109,7 +109,7 @@ _Test_Iterable_Parameter_With_Single_Value: dict = {
 _Test_Iterable_Parameter_With_MultiValue: dict = {
     "name": "iterable_param",
     "required": True,
-    "default": None,
+    "default": [],
     "type": "list",
     "format": None,
     "items": _Test_Iterable_Parameter_Items,
@@ -337,6 +337,47 @@ _Foo_Object_Value: dict = {
     },
     "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
 }
+_Foo_Object_Data_Value: dict = {
+    "url": "/foo-object/data",
+    "http": {
+        "request": {
+            "method": "GET",
+        },
+        "response": {
+            "strategy": "object",
+            "properties": _HTTP_Response_Properties_With_Object_Strategy,
+        },
+    },
+    "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
+}
+_Foo_With_Variable_In_Api: dict = {
+    "url": "/foo/<id>",
+    "under_test_url": "/foo/123",
+    "http": {
+        "request": {
+            "method": "GET",
+        },
+        "response": {
+            "strategy": "string",
+            "value": '{ "responseCode": "200", "errorMessage": "OK", "content": "You get the info of ID *<id>*." }',
+        },
+    },
+    "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
+}
+_Foo_With_Multiple_Variables_In_Api: dict = {
+    "url": "/foo/<id>/process/<work_id>",
+    "under_test_url": "/foo/123/process/666",
+    "http": {
+        "request": {
+            "method": "GET",
+        },
+        "response": {
+            "strategy": "string",
+            "value": '{ "responseCode": "200", "errorMessage": "OK", "content": "You get the info of ID *<id>* by worker *<work_id>*." }',
+        },
+    },
+    "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
+}
 
 
 _Mocked_APIs: dict = {
@@ -349,7 +390,10 @@ _Mocked_APIs: dict = {
         "delete_google_home": _Delete_Google_Home_Value,
         "test_home": _Test_Home,
         "youtube_home": _YouTube_Home_Value,
-        "foo_object": _Foo_Object_Value,
+        "foo-object": _Foo_Object_Value,
+        "foo-object_data": _Foo_Object_Data_Value,
+        "foo_var_id": _Foo_With_Variable_In_Api,
+        "foo_var_id_process_var_work_id": _Foo_With_Multiple_Variables_In_Api,
     },
 }
 
@@ -422,4 +466,12 @@ _Sample_Data_Type: str = "all"
 
 # Test subcommand *pull* options
 _Test_SubCommand_Pull: str = "pull"
+_Test_Request_With_Https: bool = False
 _API_Doc_Source: str = "127.0.0.1:8080"
+_Default_Base_File_Path: str = "./"
+_Default_Include_Template_Config: bool = False
+_Test_Dry_Run: bool = True
+_Test_Divide_Api: bool = False
+_Test_Divide_Http: bool = False
+_Test_Divide_Http_Request: bool = False
+_Test_Divide_Http_Response: bool = False

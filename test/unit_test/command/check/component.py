@@ -2,7 +2,6 @@ import glob
 import json
 import os
 import pathlib
-import re
 from typing import List, Union
 from unittest.mock import MagicMock, patch
 
@@ -210,20 +209,6 @@ class TestValidityChecking:
     @pytest.fixture(scope="class")
     def checking(self) -> ValidityChecking:
         return ValidityChecking()
-
-    def test__setting_should_be_valid(self, checking: ValidityChecking):
-        test_callback = MagicMock()
-        checking._setting_should_be_valid(
-            config_key="key", config_value="value", criteria=["value"], valid_callback=test_callback
-        )
-        test_callback.assert_called_once_with("key", "value", ["value"])
-
-    def test__setting_should_be_valid_with_invalid_type_criteria(self, checking: ValidityChecking):
-        with pytest.raises(TypeError) as exc_info:
-            checking._setting_should_be_valid(
-                config_key="any key", config_value="any value", criteria="invalid type value"
-            )
-        assert re.search(r"only accept 'list'", str(exc_info.value), re.IGNORECASE)
 
 
 class TestSwaggerDiffChecking:

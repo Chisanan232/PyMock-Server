@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "PyMock-API"
-version = "0.1.0"
+version = "0.1.0-alpha1"
 description = "🕸🤖👺 A Python tool to mock API easily and humanly without any coding."
 authors = ["Liu, Bryant <chi10211201@cycu.org.tw>"]
 license = "MIT"
@@ -38,7 +38,7 @@ python = "^3.8"
 PyYAML = "^6.0"
 # Extra dependency of web framework *Flask* with WSGI server *Gunicorn*
 Flask = {version = "^2.2.3", extras = ["flask", "all"]}
-gunicorn = {version = "^20.1.0", extras = ["flask", "all"]}
+gunicorn = {version = "^21.2.0", extras = ["flask", "all"]}
 # Extra dependency of web framework *FastAPI* with ASGI server *Uvicorn*
 fastapi = {version = "^0.95.0", extras = ["fastapi", "all"]}
 uvicorn = {version = "^0.21.1", extras = ["fastapi", "all"]}
@@ -46,19 +46,19 @@ uvicorn = {version = "^0.21.1", extras = ["fastapi", "all"]}
 [tool.poetry.group.dev.dependencies]
 # Dependency for test
 pytest = "^7.0.0"
-pytest-cov = "^3.0.0"
+pytest-cov = "^4.1.0"
 pytest-html = "^4.1.1"
 pytest-rerunfailures = "^10.2"
 coverage = "^6.2"
 coveralls = "^3.3.1"
 # Dependency for CI
-pre-commit = "^3.0.4"
+pre-commit = "^3.5.0"
 pylint = "^2.16.2"
 # TODO: Import mypy to check static type of Python project code
 #mypy = "^1.2.0"
 # Dependency of web framework Flask
 Flask = "^2.2.3"
-gunicorn = "^20.1.0"
+gunicorn = "^21.2.0"
 # Dependency of web framework FastAPI
 fastapi = {extras = ["all"], version = "^0.95.0"}
 uvicorn = {extras = ["standard"], version = "^0.21.1"}

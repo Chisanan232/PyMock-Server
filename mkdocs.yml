@@ -121,6 +121,11 @@ nav:
     - Basic info: configure-references/config-basic-info.md
     - Mocked API:
       - configure-references/mocked-apis/index.md
+      - Template:
+        - configure-references/mocked-apis/template/index.md
+        - Loading setting: configure-references/mocked-apis/template/load.md
+        - Values setting: configure-references/mocked-apis/template/values.md
+        - Apply setting: configure-references/mocked-apis/template/apply.md
       - Base:
         - configure-references/mocked-apis/base/index.md
       - API:

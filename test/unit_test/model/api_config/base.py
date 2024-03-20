@@ -3,10 +3,13 @@ import pytest
 from pymock_api.model.api_config import BaseConfig
 
 from ...._values import _Base_URL, _TestConfig
-from ._base import ConfigTestSpec, _assertion_msg
+from ._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
 
 
-class TestBaseConfig(ConfigTestSpec):
+class TestBaseConfig(CheckableTestSuite):
+    test_data_dir = "base"
+    set_checking_test_data(test_data_dir)
+
     @pytest.fixture(scope="function")
     def sut(self) -> BaseConfig:
         return BaseConfig(url=_Base_URL)

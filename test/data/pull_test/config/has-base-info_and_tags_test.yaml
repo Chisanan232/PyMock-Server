@@ -49,6 +49,26 @@ mocked_apis:
                   required: True
                   type: str
       tag: 'foo'
+#    get_foo_var_id:
+#      url: '/foo/<id>'
+#      http:
+#        request:
+#          method: 'GET'
+#          parameters:
+#        response:
+#          strategy: string
+#          value: "This is variable fee API with index <id>"
+#      tag: 'foo'
+#    foo_var_id_process_var_work_id:
+#      url: '/foo/<id>/process/<work_id>'
+#      http:
+#        request:
+#          method: 'GET'
+#          parameters:
+#        response:
+#          strategy: string
+#          value: "This is variable fee API with index <id> by worker <work_id>"
+#      tag: 'foo'
     put_foo:
       url: '/foo'
       http:
@@ -57,7 +77,7 @@ mocked_apis:
           parameters:
             - name: 'balances'
               required: true
-              default:
+              default: []
               type: list
               format:
               items:
@@ -83,7 +103,7 @@ mocked_apis:
               type: list
               format:
       tag: 'foo'
-    get_foo_boo_export:
+    get_foo-boo_export:
       url: '/foo-boo/export'
       http:
         request:
@@ -91,7 +111,7 @@ mocked_apis:
           parameters:
             - name: 'arg1'
               required: false
-              default:
+              default: []
               type: list
               format:
               items:

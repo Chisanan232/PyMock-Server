@@ -1,0 +1,3 @@
+base:
+  url: '/api/v1/test'
+apis:

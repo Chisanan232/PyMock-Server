@@ -1,0 +1,51 @@
+name: ''
+description: ''
+mocked_apis:
+  base:
+    url: '/api/v1/test'
+  apis:
+    get_foo:
+      url: '*(&&*$^#*&#:13143'
+      http:
+        request:
+          method: 'GET'
+          parameters:
+            - name: 'date'
+              required: true
+              default:
+              type: str
+              format:
+            - name: 'fooType'
+              required: true
+              default:
+              type: str
+              format:
+        response:
+          strategy: object
+          properties:
+            - name: errorMessage
+              required: True
+              type: str
+              format:
+            - name: responseCode
+              required: True
+              type: str
+              format:
+            - name: responseData
+              required: False
+              type: list
+              format:
+              items:
+                - name: id
+                  required: True
+                  type: int
+                - name: name
+                  required: True
+                  type: str
+                - name: value1
+                  required: True
+                  type: str
+                - name: value2
+                  required: True
+                  type: str
+      tag: 'foo'

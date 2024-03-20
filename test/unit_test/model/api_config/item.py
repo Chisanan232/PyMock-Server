@@ -5,10 +5,13 @@ import pytest
 from pymock_api.model.api_config import IteratorItem
 
 from ...._values import _Test_Iterable_Parameter_Item_Name
-from ._base import ConfigTestSpec, _assertion_msg
+from ._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
 
 
-class TestIteratorItem(ConfigTestSpec):
+class TestIteratorItem(CheckableTestSuite):
+    test_data_dir = "item"
+    set_checking_test_data(test_data_dir)
+
     @pytest.fixture(scope="function")
     def sut(self) -> IteratorItem:
         return IteratorItem(
