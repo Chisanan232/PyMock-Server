@@ -45,7 +45,7 @@ uvicorn = {version = "^0.21.1", extras = ["fastapi", "all"]}
 
 [tool.poetry.group.dev.dependencies]
 # Dependency for test
-pytest = "^7.0.0"
+pytest = "^8.1.1"
 pytest-cov = "^4.1.0"
 pytest-html = "^4.1.1"
 pytest-rerunfailures = "^14.0"
