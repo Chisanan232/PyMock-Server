@@ -42,5 +42,5 @@ jobs:
           exit "$MERGE_PR"
 
       - name: Merge PR if it doesn't be merged
-        if: ${{ $MERGE_PR == $SUCCESSFUL_EXIT_CODE }}
+        if: ${{ env.MERGE_PR == env.SUCCESSFUL_EXIT_CODE }}
         run: gh pr merge $PR_NUMBER
