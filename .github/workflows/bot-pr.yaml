@@ -11,7 +11,7 @@ on:
 
 env:
   PR_NUMBER: ${{ github.event.number }}
-  PR_WAITING_TIME: 7200    # 60 seconds * 60 minutes * 2 hours
+  PR_WAITING_TIME: 3600    # 60 seconds * 60 minutes * 1 hours
   SUCCESSFUL_EXIT_CODE: 0
   MERGE_PR: 1
 
@@ -22,7 +22,7 @@ jobs:
     if: ${{ ( github.event.review.state == 'approved' ) && ( contains(github.event.pull_request.labels.*.name, 'dependencies') ) }}
     name: Auto-merge PR if it waits for long time
     steps:
-      - name: Sleep for 2 hours
+      - name: Sleep for 1 hours
         run: sleep $PR_WAITING_TIME
 
       - name: Check whether the PR has been merged or not
