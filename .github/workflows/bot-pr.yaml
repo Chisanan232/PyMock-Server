@@ -26,6 +26,8 @@ jobs:
         run: sleep $PR_WAITING_TIME
 
       - name: Check whether the PR has been merged or not
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           set +e
           gh pr list -l dependencies --search "$PR_NUMBER" | grep "$PR_NUMBER"
@@ -34,6 +36,8 @@ jobs:
           exit "$MERGE_PR"
 
       - name: Check CI status of the PR is successful without any error
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           set +e
           gh pr checks $PR_NUMBER --watch
@@ -43,4 +47,6 @@ jobs:
 
       - name: Merge PR if it doesn't be merged
         if: ${{ env.MERGE_PR == env.SUCCESSFUL_EXIT_CODE }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: gh pr merge $PR_NUMBER
