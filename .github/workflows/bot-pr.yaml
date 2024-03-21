@@ -5,7 +5,7 @@ on:
   # change doesn't affect anything of source code.
   push:
     branches:
-      - "master"
+      - "develop/ci-cd"
 
   pull_request_review:
     types:
