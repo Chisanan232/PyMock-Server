@@ -37,7 +37,7 @@ documentation = "https://chisanan232.github.io/PyMock-API/"
 python = "^3.8"
 PyYAML = "^6.0"
 # Extra dependency of web framework *Flask* with WSGI server *Gunicorn*
-Flask = {version = "^2.2.3", extras = ["flask", "all"]}
+Flask = {version = "^3.0.2", extras = ["flask", "all"]}
 gunicorn = {version = "^21.2.0", extras = ["flask", "all"]}
 # Extra dependency of web framework *FastAPI* with ASGI server *Uvicorn*
 fastapi = {version = "^0.95.0", extras = ["fastapi", "all"]}
@@ -57,7 +57,7 @@ pylint = "^3.1.0"
 # TODO: Import mypy to check static type of Python project code
 #mypy = "^1.2.0"
 # Dependency of web framework Flask
-Flask = "^2.2.3"
+Flask = "^3.0.2"
 gunicorn = "^21.2.0"
 # Dependency of web framework FastAPI
 fastapi = {extras = ["all"], version = "^0.95.0"}
