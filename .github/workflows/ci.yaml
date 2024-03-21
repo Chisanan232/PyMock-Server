@@ -10,6 +10,8 @@ on:
     paths-ignore:
 #     For GitHub dependency bot
       - ".github/dependabot.yaml"
+      - ".github/workflows/bot-pr.yaml"
+      - ".github/workflows/bot-ci.yaml"
 #     For documentation
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/workflows/documentation.yaml"
@@ -38,6 +40,8 @@ on:
     paths-ignore:
 #     For GitHub dependency bot
       - ".github/dependabot.yaml"
+      - ".github/workflows/bot-pr.yaml"
+      - ".github/workflows/bot-ci.yaml"
 #     For documentation
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/workflows/documentation.yaml"

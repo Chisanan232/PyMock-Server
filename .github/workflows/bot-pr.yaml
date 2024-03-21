@@ -1,0 +1,46 @@
+name: Bot PR
+
+on:
+  # It would only run at any events which be triggered by bot, i.e., GitHub dependency bot, for guarantee that the
+  # change doesn't affect anything of source code.
+  pull_request_review:
+    types:
+      - submitted
+    branches:
+      - "master"
+
+env:
+  PR_NUMBER: ${{ github.event.number }}
+  PR_WAITING_TIME: 7200    # 60 seconds * 60 minutes * 2 hours
+  SUCCESSFUL_EXIT_CODE: 0
+  MERGE_PR: 1
+
+jobs:
+  auto-merge-pr:
+#    name: Run all tests and organize all test reports
+    runs-on: ubuntu-latest
+    if: ${{ ( github.event.review.state == 'approved' ) && ( contains(github.event.pull_request.labels.*.name, 'dependencies') ) }}
+    name: Auto-merge PR if it waits for long time
+    steps:
+      - name: Sleep for 2 hours
+        run: sleep $PR_WAITING_TIME
+
+      - name: Check whether the PR has been merged or not
+        run: |
+          set +e
+          gh pr list -l dependencies --search "$PR_NUMBER" | grep "$PR_NUMBER"
+          exit_code="$?"
+          echo "MERGE_PR=$exit_code" >> $GITHUB_OUTPUT
+          exit "$MERGE_PR"
+
+      - name: Check CI status of the PR is successful without any error
+        run: |
+          set +e
+          gh pr checks $PR_NUMBER --watch
+          exit_code="$?"
+          echo "MERGE_PR=$exit_code" >> $GITHUB_OUTPUT
+          exit "$MERGE_PR"
+
+      - name: Merge PR if it doesn't be merged
+        if: ${{ $MERGE_PR == $SUCCESSFUL_EXIT_CODE }}
+        run: gh pr merge $PR_NUMBER
