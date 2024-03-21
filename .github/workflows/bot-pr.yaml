@@ -27,6 +27,9 @@ jobs:
 #    if: ${{ ( github.event.review.state == 'approved' ) && ( contains(github.event.pull_request.labels.*.name, 'dependencies') ) }}
     name: Auto-merge PR if it waits for long time
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Sleep for 30 minutes
 #        run: sleep $PR_WAITING_TIME
         run: sleep 10    # Just for testing
