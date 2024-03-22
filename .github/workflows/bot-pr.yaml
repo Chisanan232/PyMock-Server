@@ -48,7 +48,7 @@ jobs:
         shell: bash
 
       - name: Check CI status of the PR is successful without any error
-        if: ${{ env.PR_EXIST == "0" }}
+        if: ${{ env.PR_EXIST == '0' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
