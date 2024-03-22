@@ -17,6 +17,7 @@ env:
 #  PR_NUMBER: ${{ github.event.number }}
   PR_NUMBER: 189    # Just for testing
   PR_WAITING_TIME: 1800    # 60 seconds * 30 minutes
+  PR_EXIST: 0
 
 jobs:
   auto-merge-pr:
@@ -38,8 +39,16 @@ jobs:
         run: |
           set +e
           gh pr list -l dependencies --search "$PR_NUMBER" | grep "$PR_NUMBER"
+          pr_exist="$?"
+          if [ "$pr_exist" == "1" ];
+          then
+              echo "PR has been merged. Stop this CI workflow."
+              echo "PR_EXIST=$pr_exist" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
 
       - name: Check CI status of the PR is successful without any error
+        if: ${{ env.PR_EXIST == "0" }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
