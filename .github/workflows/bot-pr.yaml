@@ -14,25 +14,25 @@ on:
       - "master"
 
 env:
-#  PR_NUMBER: ${{ github.event.number }}
-  PR_NUMBER: 189    # Just for testing
+  PR_NUMBER: ${{ github.event.number }}
+#  PR_NUMBER: 189    # Just for testing
   PR_WAITING_TIME: 1800    # 60 seconds * 30 minutes
   PR_EXIST: 0
 
 jobs:
   auto-merge-pr:
-    permissions: write-all
 #    name: Run all tests and organize all test reports
+    permissions: write-all
     runs-on: ubuntu-latest
-#    if: ${{ ( github.event.review.state == 'approved' ) && ( contains(github.event.pull_request.labels.*.name, 'dependencies') ) }}
+    if: ${{ ( github.event.review.state == 'approved' ) && ( contains(github.event.pull_request.labels.*.name, 'dependencies') ) }}
     name: Auto-merge PR if it waits for long time
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Sleep for 30 minutes
-#        run: sleep $PR_WAITING_TIME
-        run: sleep 10    # Just for testing
+        run: sleep $PR_WAITING_TIME
+#        run: sleep 10    # Just for testing
 
       - name: Check whether the PR has been merged or not
         env:
