@@ -21,6 +21,7 @@ env:
 
 jobs:
   auto-merge-pr:
+    permissions: write-all
 #    name: Run all tests and organize all test reports
     runs-on: ubuntu-latest
 #    if: ${{ ( github.event.review.state == 'approved' ) && ( contains(github.event.pull_request.labels.*.name, 'dependencies') ) }}
