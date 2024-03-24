@@ -58,4 +58,4 @@ jobs:
       - name: Merge PR if it doesn't be merged
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr merge $PR_NUMBER --merge --admin
+        run: gh pr merge $PR_NUMBER --merge
