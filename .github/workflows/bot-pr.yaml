@@ -11,42 +11,48 @@ on:
 
 env:
   PR_NUMBER: ${{ github.event.number }}
+#  PR_NUMBER: 189    # Just for testing
   PR_WAITING_TIME: 1800    # 60 seconds * 30 minutes
-  SUCCESSFUL_EXIT_CODE: 0
-  MERGE_PR: 1
+  PR_EXIST: 0
 
 jobs:
   auto-merge-pr:
 #    name: Run all tests and organize all test reports
+    permissions: write-all
     runs-on: ubuntu-latest
     if: ${{ ( github.event.review.state == 'approved' ) && ( contains(github.event.pull_request.labels.*.name, 'dependencies') ) }}
     name: Auto-merge PR if it waits for long time
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Sleep for 30 minutes
         run: sleep $PR_WAITING_TIME
+#        run: sleep 10    # Just for testing
 
       - name: Check whether the PR has been merged or not
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set +e
           gh pr list -l dependencies --search "$PR_NUMBER" | grep "$PR_NUMBER"
-          exit_code="$?"
-          echo "MERGE_PR=$exit_code" >> $GITHUB_OUTPUT
-          exit "$MERGE_PR"
+          pr_exist="$?"
+          if [ "$pr_exist" == "1" ];
+          then
+              echo "PR has been merged. Stop this CI workflow."
+              echo "PR_EXIST=$pr_exist" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
 
       - name: Check CI status of the PR is successful without any error
+        if: ${{ env.PR_EXIST == '0' }}
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set +e
           gh pr checks $PR_NUMBER --watch
-          exit_code="$?"
-          echo "MERGE_PR=$exit_code" >> $GITHUB_OUTPUT
-          exit "$MERGE_PR"
 
       - name: Merge PR if it doesn't be merged
-        if: ${{ env.MERGE_PR == env.SUCCESSFUL_EXIT_CODE }}
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: gh pr merge $PR_NUMBER
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr merge $PR_NUMBER --merge
