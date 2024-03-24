@@ -3,10 +3,6 @@ name: Bot PR
 on:
   # It would only run at any events which be triggered by bot, i.e., GitHub dependency bot, for guarantee that the
   # change doesn't affect anything of source code.
-  push:
-    branches:
-      - "develop/ci-cd"
-
   pull_request_review:
     types:
       - submitted
