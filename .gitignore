@@ -22,6 +22,9 @@ build/
 dist/
 *.egg-info/
 
+## Script
+scripts/ci/get-all-tests.sh
+
 ## Some usage of this project
 study/
 under_test/
