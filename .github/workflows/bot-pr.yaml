@@ -33,18 +33,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set +e
-          pr_number_list="$(gh pr list -l dependencies --search 'review:approved' --limit 1 | grep 'dependabot')"
-          pr_exist="$?"
-          if [ "$pr_exist" == "1" ];
-          then
-              echo "PR has been merged. Stop this CI workflow."
-              echo "PR_EXIST=$pr_exist" >> $GITHUB_OUTPUT
-          else
-              pr_number="$("$pr_number_list" | cut -d ' ' -f 1 | tr -d -c 0-9)"
-              echo "PR_NUMBER=$pr_number" >> $GITHUB_OUTPUT
-          fi
-        shell: bash
+          bash ./scripts/ci/chk_pr_list.sh
 
       - name: Merge PR if it doesn't be merged
         if: ${{ env.PR_EXIST == '0' && env.PR_NUMBER != '0' }}
