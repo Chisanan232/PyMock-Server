@@ -7,7 +7,7 @@ pr_info="$(gh pr list -l dependencies --search 'review:approved' --limit 1 | gre
 pr_exist="$?"
 if [ "$pr_exist" == "1" ];
 then
-#    echo "[DEBUG] PR has been merged. Stop this CI workflow."
+    echo "PR has been merged. Stop this CI workflow."
     # Save the value to environment variable in GitHub Action
 #    echo "PR_EXIST=$pr_exist" >> $GITHUB_OUTPUT
     exit 1
