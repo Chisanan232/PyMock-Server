@@ -70,7 +70,7 @@ optional = true
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.4.3"
 mkdocs-material = "^9.1.17"
-mkdocs-autorefs = "^0.4.1"
+mkdocs-autorefs = "^1.0.1"
 mkdocstrings = "^0.24.1"
 mkdocstrings-python = "^1.9.0"
 
