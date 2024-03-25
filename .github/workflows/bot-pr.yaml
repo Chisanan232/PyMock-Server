@@ -33,7 +33,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -exm
-          echo "PR_NUMBER=$(bash ./scripts/ci/chk_pr_list.sh)" >> $GITHUB_OUTPUT
+          echo "PR_NUMBER=$(bash ./scripts/ci/chk_pr_list.sh)" >> $GITHUB_ENV
           echo "PR_NUMBER: $PR_NUMBER"
         shell: bash
 
