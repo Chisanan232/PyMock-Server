@@ -32,7 +32,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -exm
           echo "PR_NUMBER=$(bash ./scripts/ci/chk_pr_list.sh)" >> $GITHUB_OUTPUT
+          echo "PR_NUMBER: $PR_NUMBER"
+        shell: bash
 
       - name: Merge PR if it doesn't be merged
         if: ${{ env.PR_NUMBER != '0' }}
