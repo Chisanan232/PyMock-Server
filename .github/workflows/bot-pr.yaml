@@ -11,7 +11,7 @@ on:
 
 env:
   PR_NUMBER: 0
-  PR_WAITING_TIME: 1800    # 60 seconds * 30 minutes
+  PR_WAITING_TIME: 1200    # 60 seconds * 20 minutes
 
 jobs:
   auto-merge-pr:
@@ -24,8 +24,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-#      - name: Sleep for 30 minutes
-#        run: sleep $PR_WAITING_TIME
+      - name: Sleep for 20 minutes
+        run: sleep $PR_WAITING_TIME
 #        run: sleep 10    # Just for testing
 
       - name: Check whether the approved PR has been merged or not
