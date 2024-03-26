@@ -146,3 +146,6 @@ nav:
         - Testing: development/contributing/testing.md
       - Reporting a bug: development/contributing/reporting-a-bug.md
       - Requesting a feature or change: development/contributing/requesting-a-feature.md
+  - Release notes:
+    - release_note/index.md
+    - Version 0.X.X: release_note/version_0xx.md
