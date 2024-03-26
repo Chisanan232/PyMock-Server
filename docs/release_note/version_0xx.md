@@ -1,5 +1,8 @@
+# Version 0.X.X
+
+## 0.1.0
+
 ### 🎉🎊🍾 New feature
-<hr>
 
 1. Provide command line interface ``mock-api`` for mocking HTTP server.
 
