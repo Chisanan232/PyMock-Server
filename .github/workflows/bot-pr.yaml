@@ -10,10 +10,8 @@ on:
       - "master"
 
 env:
-  PR_NUMBER: ${{ github.event.number }}
-#  PR_NUMBER: 189    # Just for testing
-  PR_WAITING_TIME: 1800    # 60 seconds * 30 minutes
-  PR_EXIST: 0
+  PR_NUMBER: 0
+  PR_WAITING_TIME: 1200    # 60 seconds * 20 minutes
 
 jobs:
   auto-merge-pr:
@@ -26,34 +24,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Sleep for 30 minutes
+      - name: Sleep for 20 minutes
         run: sleep $PR_WAITING_TIME
 #        run: sleep 10    # Just for testing
 
-      - name: Check whether the PR has been merged or not
+      - name: Check whether the approved PR has been merged or not
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set +e
-          gh pr list -l dependencies --search "$PR_NUMBER" | grep "$PR_NUMBER"
-          pr_exist="$?"
-          if [ "$pr_exist" == "1" ];
-          then
-              echo "PR has been merged. Stop this CI workflow."
-              echo "PR_EXIST=$pr_exist" >> $GITHUB_OUTPUT
-          fi
+          set -exm
+          echo "PR_NUMBER=$(bash ./scripts/ci/chk_pr_list.sh)" >> $GITHUB_ENV
+          echo "PR_NUMBER: $PR_NUMBER"
         shell: bash
 
-      - name: Check CI status of the PR is successful without any error
-        if: ${{ env.PR_EXIST == '0' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set +e
-          gh run list --branch $GITHUB_HEAD_REF --commit $GITHUB_SHA --workflow 'Bot CI' --status 'success' | grep 'CI'
-#          gh pr checks $PR_NUMBER --watch
-
       - name: Merge PR if it doesn't be merged
+        if: ${{ env.PR_NUMBER != '' && env.PR_NUMBER != '0' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh pr merge $PR_NUMBER --merge
