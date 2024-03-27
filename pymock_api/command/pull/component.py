@@ -14,9 +14,10 @@ class SubCmdPullComponent(BaseSubCmdComponent):
         self._file = YAML()
 
     def process(self, args: SubcmdPullArguments) -> None:  # type: ignore[override]
-        print(f"Try to get Swagger API documentation content at 'http://{args.source}/'.")
         http_proto = "https" if args.request_with_https else "http"
-        swagger_api_doc = self._get_swagger_config(swagger_url=f"{http_proto}://{args.source}/")
+        swagger_api_doc_url = f"{http_proto}://{args.source}"
+        print(f"Try to get Swagger API documentation content at '{swagger_api_doc_url}'.")
+        swagger_api_doc = self._get_swagger_config(swagger_url=swagger_api_doc_url)
         api_config = swagger_api_doc.to_api_config(base_url=args.base_url)
         serialized_api_config = self._serialize_api_config_with_cmd_args(cmd_args=args, api_config=api_config)
         if args.dry_run:
