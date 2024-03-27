@@ -929,7 +929,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
                 cmd_ps(mock_parser_arg)
 
                 mock_instantiate_writer.assert_called_once()
-                mock_swagger_request.assert_called_once_with(method="GET", url=f"http://{_API_Doc_Source}/")
+                mock_swagger_request.assert_called_once_with(method="GET", url=f"http://{_API_Doc_Source}")
 
                 # Run one core logic of target function
                 confirm_expected_api_config = deserialize_swagger_api_config(swagger_json_data).to_api_config(
