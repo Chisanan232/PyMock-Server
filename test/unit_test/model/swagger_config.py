@@ -10,7 +10,7 @@ import pytest
 
 from pymock_api import APIConfig
 from pymock_api.model import MockAPI
-from pymock_api.model._parse import OpenAPIParser
+from pymock_api.model._parse import OpenAPIParser, OpenAPIPathParser
 from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import ResponseStrategy
@@ -305,7 +305,9 @@ class TestAPI(_SwaggerDataModelTestSuite):
         set_component_definition(OpenAPIParser(data=entire_config))
 
         # Run target function under test
-        response_data = data_model._process_response(data=api_detail, strategy=strategy)
+        response_data = data_model._process_response(
+            openapi_path_parser=OpenAPIPathParser(data=api_detail), strategy=strategy
+        )
         print(f"[DEBUG in test] response_data: {response_data}")
 
         # Verify

@@ -74,7 +74,7 @@ class OpenAPIPathParser:
     def get_request_parameters(self) -> List[dict]:
         return self._data["parameters"]
 
-    def get_response(self, status_code: str) -> List[dict]:
+    def get_response(self, status_code: str) -> dict:
         return self._data["responses"][status_code]
 
     def exist_in_response(self, status_code: str) -> bool:

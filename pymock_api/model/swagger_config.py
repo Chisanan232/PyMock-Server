@@ -3,7 +3,7 @@ from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
 from . import APIConfig, MockAPI, MockAPIs
-from ._parse import OpenAPIParser
+from ._parse import OpenAPIParser, OpenAPIPathParser
 from .api_config import BaseConfig, _Config
 from .api_config.apis import APIParameter as PyMockAPIParameter
 from .enums import ResponseStrategy
@@ -161,9 +161,10 @@ class API(Transferable):
         # FIXME: Does it have better way to set the HTTP response strategy?
         if not self.process_response_strategy:
             raise ValueError("Please set the strategy how it should process HTTP response.")
-        self.parameters = self._process_api_params(data["parameters"])
-        self.response = self._process_response(data, self.process_response_strategy)
-        self.tags = data.get("tags", [])
+        openapi_path_parser = OpenAPIPathParser(data=data)
+        self.parameters = self._process_api_params(openapi_path_parser.get_request_parameters())
+        self.response = self._process_response(openapi_path_parser, self.process_response_strategy)
+        self.tags = openapi_path_parser.get_all_tags()
         return self
 
     def _process_api_params(self, params_data: List[dict]) -> List["APIParameter"]:
@@ -220,8 +221,9 @@ class API(Transferable):
             )
         return parameters
 
-    def _process_response(self, data: dict, strategy: ResponseStrategy) -> dict:
-        status_200_response = data.get("responses", {}).get("200", {})
+    def _process_response(self, openapi_path_parser: OpenAPIPathParser, strategy: ResponseStrategy) -> dict:
+        assert openapi_path_parser.exist_in_response(status_code="200") is True
+        status_200_response = openapi_path_parser.get_response(status_code="200")
         if strategy is ResponseStrategy.OBJECT:
             response_data = {
                 "strategy": strategy,
@@ -234,7 +236,7 @@ class API(Transferable):
             }
         if _YamlSchema.has_schema(status_200_response):
             response_schema = _YamlSchema.get_schema_ref(status_200_response)
-            response_schema_properties = response_schema.get("properties", None)
+            response_schema_properties: Optional[dict] = response_schema.get("properties", None)
             if response_schema_properties:
                 for k, v in response_schema_properties.items():
                     if strategy is ResponseStrategy.OBJECT:
