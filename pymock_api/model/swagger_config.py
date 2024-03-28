@@ -3,7 +3,12 @@ from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
 from . import APIConfig, MockAPI, MockAPIs
-from ._parse import OpenAPIParser, OpenAPIPathParser, OpenAPITagParser
+from ._parse import (
+    OpenAPIParser,
+    OpenAPIPathParser,
+    OpenAPIRequestParametersParser,
+    OpenAPITagParser,
+)
 from .api_config import BaseConfig, _Config
 from .api_config.apis import APIParameter as PyMockAPIParameter
 from .enums import ResponseStrategy
@@ -140,11 +145,12 @@ class APIParameter(Transferable):
         if _YamlSchema.has_ref(data):
             raise NotImplementedError
         else:
+            parser = OpenAPIRequestParametersParser(data)
             return {
-                "name": data["name"],
-                "required": data["required"],
-                "type": data["schema"]["type"],
-                "default": data["schema"].get("default", None),
+                "name": parser.get_name(),
+                "required": parser.get_required(),
+                "type": parser.get_type(),
+                "default": parser.get_default(),
             }
 
 

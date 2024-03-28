@@ -54,10 +54,10 @@ class OpenAPIRequestParametersParser:
         return self._data["required"]
 
     def get_type(self) -> str:
-        return convert_js_type(self._data["type"])
+        return self._data["schema"]["type"]
 
     def get_default(self) -> Optional[str]:
-        return self._data.get("default", None)
+        return self._data["schema"].get("default", None)
 
     def get_items(self):
         items = self._data.get("items", None)
