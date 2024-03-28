@@ -7,6 +7,7 @@ from ._parse import (
     OpenAPIParser,
     OpenAPIPathParser,
     OpenAPIRequestParametersParser,
+    OpenAPIResponseParser,
     OpenAPITagParser,
 )
 from .api_config import BaseConfig, _Config
@@ -261,7 +262,9 @@ class API(Transferable):
                         ), "The response data type must be *dict* if its HTTP response strategy is not object."
                         response_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
         else:
-            response_schema = status_200_response.get("content", {}).get("application/json", {}).get("schema", {})
+            parser = OpenAPIResponseParser(status_200_response)
+            assert parser.exist_in_content(value_format="application/json") is True
+            response_schema = parser.get_content(value_format="application/json")
             if response_schema:
                 raise NotImplementedError("Not support set HTTP response by this way in current version.")
         return response_data
