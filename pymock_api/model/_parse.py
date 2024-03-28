@@ -90,7 +90,7 @@ class OpenAPIParser:
         if file:
             file_path = pathlib.Path(file)
             if not file_path.exists():
-                raise FileNotFoundError
+                raise FileNotFoundError(f"Cannot find the OpenAPI format configuration at file path *{file_path}*.")
             with open(str(file_path), "r", encoding="utf-8") as io_stream:
                 self._data = json.load(io_stream)
 
