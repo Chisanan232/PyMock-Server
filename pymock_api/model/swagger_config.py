@@ -3,7 +3,7 @@ from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
 from . import APIConfig, MockAPI, MockAPIs
-from ._parse import OpenAPIParser, OpenAPIPathParser
+from ._parse import OpenAPIParser, OpenAPIPathParser, OpenAPITagParser
 from .api_config import BaseConfig, _Config
 from .api_config.apis import APIParameter as PyMockAPIParameter
 from .enums import ResponseStrategy
@@ -96,8 +96,9 @@ class Tag(BaseSwaggerDataModel):
         self.description: str = ""
 
     def deserialize(self, data: Dict) -> "Tag":
-        self.name = data["name"]
-        self.description = data["description"]
+        parser = OpenAPITagParser(data)
+        self.name = parser.get_name()
+        self.description = parser.get_description()
         return self
 
 
