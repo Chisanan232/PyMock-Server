@@ -11,6 +11,7 @@ import pytest
 from pymock_api.command.options import SubCommand
 from pymock_api.command.pull.component import SubCmdPullComponent
 from pymock_api.model import SubcmdPullArguments, load_config
+from pymock_api.model._parse import OpenAPIParser
 from pymock_api.model.api_config import TemplateConfig
 from pymock_api.model.swagger_config import set_component_definition
 
@@ -144,7 +145,7 @@ class TestSubCmdPullComponent:
             mock_mock_apis_template.return_value = template_config
 
             # Set the Swagger API reference data for testing
-            set_component_definition(swagger_api_resp)
+            set_component_definition(OpenAPIParser(data=swagger_api_resp))
             # Mock the HTTP request result as the Swagger API documentation data
             with patch(
                 "pymock_api.command.pull.component.URLLibHTTPClient.request", return_value=swagger_api_resp

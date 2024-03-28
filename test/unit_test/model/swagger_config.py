@@ -10,6 +10,7 @@ import pytest
 
 from pymock_api import APIConfig
 from pymock_api.model import MockAPI
+from pymock_api.model._parse import OpenAPIParser
 from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import ResponseStrategy
@@ -77,7 +78,7 @@ def _get_all_swagger_api_doc() -> None:
 
                     # For testing API response properties
                     status_200_response = api_detail.get("responses", {}).get("200", {})
-                    set_component_definition(data=swagger_api_docs, key="definitions")
+                    set_component_definition(OpenAPIParser(data=swagger_api_docs))
                     if _YamlSchema.has_schema(status_200_response):
                         response_schema = _YamlSchema.get_schema_ref(status_200_response)
                         response_schema_properties = response_schema.get("properties", None)
@@ -187,7 +188,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
 
     @pytest.mark.parametrize(("swagger_api_doc_data", "entire_swagger_config"), SWAGGER_ONE_API_JSON)
     def test_deserialize(self, swagger_api_doc_data: dict, entire_swagger_config: dict, data_model: Transferable):
-        set_component_definition(data=entire_swagger_config, key="definitions")
+        set_component_definition(OpenAPIParser(data=entire_swagger_config))
         super().test_deserialize(swagger_api_doc_data, data_model)
 
     def test_invalid_deserialize(self, data_model: API):
@@ -260,7 +261,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
     )
     def test__process_api_params(self, swagger_api_doc_data: List[dict], entire_swagger_config: dict, data_model: API):
         # Pre-process
-        set_component_definition(data=entire_swagger_config, key="definitions")
+        set_component_definition(OpenAPIParser(data=entire_swagger_config))
 
         # Run target function
         parameters = data_model._process_api_params(swagger_api_doc_data)
@@ -276,7 +277,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
         self, swagger_api_doc_data: dict, entire_swagger_config: dict, data_model: API
     ):
         # Pre-process
-        set_component_definition(data=entire_swagger_config, key="definitions")
+        set_component_definition(OpenAPIParser(data=entire_swagger_config))
 
         # Run target function
         parameters = data_model._process_has_ref_parameters(swagger_api_doc_data)
@@ -301,7 +302,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
         self, strategy: ResponseStrategy, api_detail: dict, entire_config: dict, data_model: API
     ):
         # Pre-process
-        set_component_definition(data=entire_config, key="definitions")
+        set_component_definition(OpenAPIParser(data=entire_config))
 
         # Run target function under test
         response_data = data_model._process_response(data=api_detail, strategy=strategy)
@@ -346,7 +347,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
         self, strategy: ResponseStrategy, api_response_detail: dict, entire_config: dict, data_model: API
     ):
         # Pre-process
-        set_component_definition(data=entire_config, key="definitions")
+        set_component_definition(OpenAPIParser(data=entire_config))
 
         # Run target function under test
         response_prop_data = data_model._process_response_value(property_value=api_response_detail, strategy=strategy)
@@ -379,7 +380,7 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
 
     @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_DOC_JSON)
     def test_deserialize(self, swagger_api_doc_data: dict, data_model: Transferable):
-        set_component_definition(data=swagger_api_doc_data, key="definitions")
+        set_component_definition(OpenAPIParser(data=swagger_api_doc_data))
         super().test_deserialize(swagger_api_doc_data, data_model)
 
     def _initial(self, data: SwaggerConfig) -> None:

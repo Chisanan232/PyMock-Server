@@ -2,10 +2,11 @@ from abc import ABCMeta, abstractmethod
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
-from pymock_api.model import APIConfig, MockAPI, MockAPIs
-from pymock_api.model.api_config import BaseConfig, _Config
-from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
-from pymock_api.model.enums import ResponseStrategy
+from . import APIConfig, MockAPI, MockAPIs
+from ._parse import OpenAPIParser
+from .api_config import BaseConfig, _Config
+from .api_config.apis import APIParameter as PyMockAPIParameter
+from .enums import ResponseStrategy
 
 Self = Any
 
@@ -40,9 +41,9 @@ def get_component_definition() -> Dict:
     return ComponentDefinition
 
 
-def set_component_definition(data: dict, key: str = "definitions") -> None:
+def set_component_definition(openapi_parser: OpenAPIParser) -> None:
     global ComponentDefinition
-    ComponentDefinition = data.get(key, {})
+    ComponentDefinition = openapi_parser.get_objects()
 
 
 class _YamlSchema:
@@ -366,7 +367,8 @@ class SwaggerConfig(Transferable):
         self.tags: List[Tag] = []
 
     def deserialize(self, data: Dict) -> "SwaggerConfig":
-        apis: dict = data["paths"]
+        openapi_parser = OpenAPIParser(data=data)
+        apis = openapi_parser.get_paths()
         for api_path, api_props in apis.items():
             for one_api_http_method, one_api_details in api_props.items():
                 api = API().deserialize(data=one_api_details)
@@ -374,10 +376,10 @@ class SwaggerConfig(Transferable):
                 api.http_method = one_api_http_method
                 self.paths.append(api)
 
-        tags: List[dict] = data.get("tags", [])
+        tags: List[dict] = openapi_parser.get_tags()
         self.tags = list(map(lambda t: Tag().deserialize(t), tags))
 
-        set_component_definition(data)
+        set_component_definition(openapi_parser)
 
         return self
 
