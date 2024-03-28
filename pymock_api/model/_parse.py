@@ -3,21 +3,6 @@ import pathlib
 from typing import Dict, List, Optional
 
 
-def convert_js_type(t: str) -> str:
-    if t == "string":
-        return "str"
-    elif t in ["integer", "number"]:
-        return "int"
-    elif t == "boolean":
-        return "bool"
-    elif t == "array":
-        return "list"
-    elif t == "file":
-        return "file"
-    else:
-        raise TypeError(f"Currently, it cannot parse JS type '{t}'.")
-
-
 class OpenAPIObjectParser:
 
     def __init__(self, data: dict):
