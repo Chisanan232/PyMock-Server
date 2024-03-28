@@ -18,7 +18,7 @@ def convert_js_type(t: str) -> str:
         raise TypeError(f"Currently, it cannot parse JS type '{t}'.")
 
 
-class OpenAPIObject:
+class OpenAPIObjectParser:
 
     def __init__(self, data: dict):
         self._data = data
@@ -30,7 +30,7 @@ class OpenAPIObject:
         return self._data["properties"]
 
 
-class OpenAPIResponse:
+class OpenAPIResponseParser:
 
     def __init__(self, data: dict):
         self._data = data
@@ -84,7 +84,7 @@ class OpenAPIPathParser:
         return self._data.get("tags", [])
 
 
-class OpenAPITag:
+class OpenAPITagParser:
 
     def __init__(self, data: dict):
         self._data = data
