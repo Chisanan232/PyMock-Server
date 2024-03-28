@@ -1,6 +1,6 @@
 import json
 import pathlib
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 class OpenAPIObjectParser:
@@ -8,11 +8,17 @@ class OpenAPIObjectParser:
     def __init__(self, data: dict):
         self._data = data
 
-    def get_required(self) -> List[str]:
-        return self._data["required"]
+    def get_required(self, default: Any = None) -> List[str]:
+        if default is not None:
+            return self._data.get("required", default)
+        else:
+            return self._data["required"]
 
-    def get_properties(self) -> Dict[str, dict]:
-        return self._data["properties"]
+    def get_properties(self, default: Any = None) -> Dict[str, dict]:
+        if default is not None:
+            return self._data.get("properties", default)
+        else:
+            return self._data["properties"]
 
 
 class OpenAPIResponseParser:
@@ -45,10 +51,7 @@ class OpenAPIRequestParametersParser:
         return self._data["schema"].get("default", None)
 
     def get_items(self):
-        items = self._data.get("items", None)
-        if items is not None:
-            return items if isinstance(items, list) else [items]
-        return None
+        return self._data.get("items", None)
 
 
 class OpenAPIPathParser:

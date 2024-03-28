@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from . import APIConfig, MockAPI, MockAPIs
 from ._parse import (
+    OpenAPIObjectParser,
     OpenAPIParser,
     OpenAPIPathParser,
     OpenAPIRequestParametersParser,
@@ -184,7 +185,9 @@ class API(Transferable):
         else:
             # TODO: Parsing the data type of key *items* should be valid type of Python realm
             for param in params_data:
-                if param.get("items", None) is not None:
+                parser = OpenAPIRequestParametersParser(param)
+                items = parser.get_items()
+                if items is not None:
                     param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
             handled_parameters = params_data
         return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
@@ -193,8 +196,9 @@ class API(Transferable):
         request_body_params = _YamlSchema.get_schema_ref(data)
         # TODO: Should use the reference to get the details of parameters.
         parameters: List[dict] = []
-        for param_name, param_props in request_body_params["properties"].items():
-            items = param_props.get("items", None)
+        parser = OpenAPIObjectParser(request_body_params)
+        for param_name, param_props in parser.get_properties().items():
+            items: Optional[dict] = param_props.get("items", None)
             items_props = []
             if items and _YamlSchema.has_ref(items):
                 items = _YamlSchema.get_schema_ref(items)
@@ -208,11 +212,12 @@ class API(Transferable):
                 #     },
                 #     'title': 'UpdateOneFooDto'
                 # }
-                for item_name, item_prop in items.get("properties", {}).items():
+                items_parser = OpenAPIObjectParser(items)
+                for item_name, item_prop in items_parser.get_properties(default={}).items():
                     items_props.append(
                         {
                             "name": item_name,
-                            "required": item_name in items["required"],
+                            "required": item_name in items_parser.get_required(),
                             "type": convert_js_type(item_prop["type"]),
                             "default": item_prop.get("default", None),
                         }
@@ -221,7 +226,7 @@ class API(Transferable):
             parameters.append(
                 {
                     "name": param_name,
-                    "required": param_name in request_body_params["required"],
+                    "required": param_name in parser.get_required(),
                     "type": param_props["type"],
                     "default": param_props.get("default", None),
                     "items": items_props if items is not None else items,
@@ -244,14 +249,15 @@ class API(Transferable):
             }
         if _YamlSchema.has_schema(status_200_response):
             response_schema = _YamlSchema.get_schema_ref(status_200_response)
-            response_schema_properties: Optional[dict] = response_schema.get("properties", None)
+            parser = OpenAPIObjectParser(response_schema)
+            response_schema_properties: Optional[dict] = parser.get_properties(default=None)
             if response_schema_properties:
                 for k, v in response_schema_properties.items():
                     if strategy is ResponseStrategy.OBJECT:
                         response_data_prop = self._process_response_value(property_value=v, strategy=strategy)
                         assert isinstance(response_data_prop, dict)
                         response_data_prop["name"] = k
-                        response_data_prop["required"] = k in response_schema.get("required", [k])
+                        response_data_prop["required"] = k in parser.get_required(default=[k])
                         assert isinstance(
                             response_data["data"], list
                         ), "The response data type must be *list* if its HTTP response strategy is object."
@@ -262,9 +268,9 @@ class API(Transferable):
                         ), "The response data type must be *dict* if its HTTP response strategy is not object."
                         response_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
         else:
-            parser = OpenAPIResponseParser(status_200_response)
-            assert parser.exist_in_content(value_format="application/json") is True
-            response_schema = parser.get_content(value_format="application/json")
+            resp_parser = OpenAPIResponseParser(status_200_response)
+            assert resp_parser.exist_in_content(value_format="application/json") is True
+            response_schema = resp_parser.get_content(value_format="application/json")
             if response_schema:
                 raise NotImplementedError("Not support set HTTP response by this way in current version.")
         return response_data
@@ -302,9 +308,10 @@ class API(Transferable):
                     }
 
                     single_response = _YamlSchema.get_schema_ref(property_value["items"])
-                    single_response_properties = single_response.get("properties", None)
+                    parser = OpenAPIObjectParser(single_response)
+                    single_response_properties = parser.get_properties(default={})
                     if single_response_properties:
-                        for item_k, item_v in single_response["properties"].items():
+                        for item_k, item_v in parser.get_properties().items():
                             item_type = convert_js_type(item_v["type"])
                             # TODO: Set the *required* property correctly
                             item = {"name": item_k, "required": True, "type": item_type}
@@ -326,10 +333,11 @@ class API(Transferable):
             else:
                 if locate(v_type) == list:
                     single_response = _YamlSchema.get_schema_ref(property_value["items"])
+                    parser = OpenAPIObjectParser(single_response)
                     item = {}
-                    single_response_properties = single_response.get("properties", None)
+                    single_response_properties = parser.get_properties(default={})
                     if single_response_properties:
-                        for item_k, item_v in single_response["properties"].items():
+                        for item_k, item_v in parser.get_properties().items():
                             item_type = convert_js_type(item_v["type"])
                             if locate(item_type) is str:
                                 # lowercase_letters = string.ascii_lowercase
