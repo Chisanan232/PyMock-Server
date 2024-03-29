@@ -2,10 +2,18 @@ from abc import ABCMeta, abstractmethod
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
-from pymock_api.model import APIConfig, MockAPI, MockAPIs
-from pymock_api.model.api_config import BaseConfig, _Config
-from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
-from pymock_api.model.enums import ResponseStrategy
+from . import APIConfig, MockAPI, MockAPIs
+from ._parse import (
+    OpenAPIObjectParser,
+    OpenAPIParser,
+    OpenAPIPathParser,
+    OpenAPIRequestParametersParser,
+    OpenAPIResponseParser,
+    OpenAPITagParser,
+)
+from .api_config import BaseConfig, _Config
+from .api_config.apis import APIParameter as PyMockAPIParameter
+from .enums import ResponseStrategy
 
 Self = Any
 
@@ -40,9 +48,9 @@ def get_component_definition() -> Dict:
     return ComponentDefinition
 
 
-def set_component_definition(data: dict, key: str = "definitions") -> None:
+def set_component_definition(openapi_parser: OpenAPIParser) -> None:
     global ComponentDefinition
-    ComponentDefinition = data.get(key, {})
+    ComponentDefinition = openapi_parser.get_objects()
 
 
 class _YamlSchema:
@@ -95,8 +103,9 @@ class Tag(BaseSwaggerDataModel):
         self.description: str = ""
 
     def deserialize(self, data: Dict) -> "Tag":
-        self.name = data["name"]
-        self.description = data["description"]
+        parser = OpenAPITagParser(data)
+        self.name = parser.get_name()
+        self.description = parser.get_description()
         return self
 
 
@@ -138,11 +147,12 @@ class APIParameter(Transferable):
         if _YamlSchema.has_ref(data):
             raise NotImplementedError
         else:
+            parser = OpenAPIRequestParametersParser(data)
             return {
-                "name": data["name"],
-                "required": data["required"],
-                "type": data["schema"]["type"],
-                "default": data["schema"].get("default", None),
+                "name": parser.get_name(),
+                "required": parser.get_required(),
+                "type": parser.get_type(),
+                "default": parser.get_default(),
             }
 
 
@@ -160,9 +170,10 @@ class API(Transferable):
         # FIXME: Does it have better way to set the HTTP response strategy?
         if not self.process_response_strategy:
             raise ValueError("Please set the strategy how it should process HTTP response.")
-        self.parameters = self._process_api_params(data["parameters"])
-        self.response = self._process_response(data, self.process_response_strategy)
-        self.tags = data.get("tags", [])
+        openapi_path_parser = OpenAPIPathParser(data=data)
+        self.parameters = self._process_api_params(openapi_path_parser.get_request_parameters())
+        self.response = self._process_response(openapi_path_parser, self.process_response_strategy)
+        self.tags = openapi_path_parser.get_all_tags()
         return self
 
     def _process_api_params(self, params_data: List[dict]) -> List["APIParameter"]:
@@ -174,7 +185,9 @@ class API(Transferable):
         else:
             # TODO: Parsing the data type of key *items* should be valid type of Python realm
             for param in params_data:
-                if param.get("items", None) is not None:
+                parser = OpenAPIRequestParametersParser(param)
+                items = parser.get_items()
+                if items is not None:
                     param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
             handled_parameters = params_data
         return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
@@ -183,8 +196,9 @@ class API(Transferable):
         request_body_params = _YamlSchema.get_schema_ref(data)
         # TODO: Should use the reference to get the details of parameters.
         parameters: List[dict] = []
-        for param_name, param_props in request_body_params["properties"].items():
-            items = param_props.get("items", None)
+        parser = OpenAPIObjectParser(request_body_params)
+        for param_name, param_props in parser.get_properties().items():
+            items: Optional[dict] = param_props.get("items", None)
             items_props = []
             if items and _YamlSchema.has_ref(items):
                 items = _YamlSchema.get_schema_ref(items)
@@ -198,11 +212,12 @@ class API(Transferable):
                 #     },
                 #     'title': 'UpdateOneFooDto'
                 # }
-                for item_name, item_prop in items.get("properties", {}).items():
+                items_parser = OpenAPIObjectParser(items)
+                for item_name, item_prop in items_parser.get_properties(default={}).items():
                     items_props.append(
                         {
                             "name": item_name,
-                            "required": item_name in items["required"],
+                            "required": item_name in items_parser.get_required(),
                             "type": convert_js_type(item_prop["type"]),
                             "default": item_prop.get("default", None),
                         }
@@ -211,7 +226,7 @@ class API(Transferable):
             parameters.append(
                 {
                     "name": param_name,
-                    "required": param_name in request_body_params["required"],
+                    "required": param_name in parser.get_required(),
                     "type": param_props["type"],
                     "default": param_props.get("default", None),
                     "items": items_props if items is not None else items,
@@ -219,8 +234,9 @@ class API(Transferable):
             )
         return parameters
 
-    def _process_response(self, data: dict, strategy: ResponseStrategy) -> dict:
-        status_200_response = data.get("responses", {}).get("200", {})
+    def _process_response(self, openapi_path_parser: OpenAPIPathParser, strategy: ResponseStrategy) -> dict:
+        assert openapi_path_parser.exist_in_response(status_code="200") is True
+        status_200_response = openapi_path_parser.get_response(status_code="200")
         if strategy is ResponseStrategy.OBJECT:
             response_data = {
                 "strategy": strategy,
@@ -233,14 +249,15 @@ class API(Transferable):
             }
         if _YamlSchema.has_schema(status_200_response):
             response_schema = _YamlSchema.get_schema_ref(status_200_response)
-            response_schema_properties = response_schema.get("properties", None)
+            parser = OpenAPIObjectParser(response_schema)
+            response_schema_properties: Optional[dict] = parser.get_properties(default=None)
             if response_schema_properties:
                 for k, v in response_schema_properties.items():
                     if strategy is ResponseStrategy.OBJECT:
                         response_data_prop = self._process_response_value(property_value=v, strategy=strategy)
                         assert isinstance(response_data_prop, dict)
                         response_data_prop["name"] = k
-                        response_data_prop["required"] = k in response_schema.get("required", [k])
+                        response_data_prop["required"] = k in parser.get_required(default=[k])
                         assert isinstance(
                             response_data["data"], list
                         ), "The response data type must be *list* if its HTTP response strategy is object."
@@ -251,7 +268,9 @@ class API(Transferable):
                         ), "The response data type must be *dict* if its HTTP response strategy is not object."
                         response_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
         else:
-            response_schema = status_200_response.get("content", {}).get("application/json", {}).get("schema", {})
+            resp_parser = OpenAPIResponseParser(status_200_response)
+            assert resp_parser.exist_in_content(value_format="application/json") is True
+            response_schema = resp_parser.get_content(value_format="application/json")
             if response_schema:
                 raise NotImplementedError("Not support set HTTP response by this way in current version.")
         return response_data
@@ -289,9 +308,10 @@ class API(Transferable):
                     }
 
                     single_response = _YamlSchema.get_schema_ref(property_value["items"])
-                    single_response_properties = single_response.get("properties", None)
+                    parser = OpenAPIObjectParser(single_response)
+                    single_response_properties = parser.get_properties(default={})
                     if single_response_properties:
-                        for item_k, item_v in single_response["properties"].items():
+                        for item_k, item_v in parser.get_properties().items():
                             item_type = convert_js_type(item_v["type"])
                             # TODO: Set the *required* property correctly
                             item = {"name": item_k, "required": True, "type": item_type}
@@ -313,10 +333,11 @@ class API(Transferable):
             else:
                 if locate(v_type) == list:
                     single_response = _YamlSchema.get_schema_ref(property_value["items"])
+                    parser = OpenAPIObjectParser(single_response)
                     item = {}
-                    single_response_properties = single_response.get("properties", None)
+                    single_response_properties = parser.get_properties(default={})
                     if single_response_properties:
-                        for item_k, item_v in single_response["properties"].items():
+                        for item_k, item_v in parser.get_properties().items():
                             item_type = convert_js_type(item_v["type"])
                             if locate(item_type) is str:
                                 # lowercase_letters = string.ascii_lowercase
@@ -366,7 +387,8 @@ class SwaggerConfig(Transferable):
         self.tags: List[Tag] = []
 
     def deserialize(self, data: Dict) -> "SwaggerConfig":
-        apis: dict = data["paths"]
+        openapi_parser = OpenAPIParser(data=data)
+        apis = openapi_parser.get_paths()
         for api_path, api_props in apis.items():
             for one_api_http_method, one_api_details in api_props.items():
                 api = API().deserialize(data=one_api_details)
@@ -374,10 +396,10 @@ class SwaggerConfig(Transferable):
                 api.http_method = one_api_http_method
                 self.paths.append(api)
 
-        tags: List[dict] = data.get("tags", [])
+        tags: List[dict] = openapi_parser.get_tags()
         self.tags = list(map(lambda t: Tag().deserialize(t), tags))
 
-        set_component_definition(data)
+        set_component_definition(openapi_parser)
 
         return self
 
