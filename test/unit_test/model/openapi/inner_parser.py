@@ -4,7 +4,7 @@ import re
 
 import pytest
 
-from pymock_api.model._parse import OpenAPIParser
+from pymock_api.model.openapi._parse import OpenAPIParser
 
 
 class TestOpenAPIParser:

@@ -10,11 +10,11 @@ import pytest
 
 from pymock_api import APIConfig
 from pymock_api.model import MockAPI
-from pymock_api.model._parse import OpenAPIParser, OpenAPIPathParser
 from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import ResponseStrategy
-from pymock_api.model.swagger_config import (
+from pymock_api.model.openapi._parse import OpenAPIParser, OpenAPIPathParser
+from pymock_api.model.openapi.swagger_config import (
     API,
     APIParameter,
     SwaggerConfig,
@@ -55,7 +55,7 @@ SWAGGER_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[ResponseStrategy, dict, dict]
 
 def _get_all_swagger_api_doc() -> None:
     json_dir = os.path.join(
-        str(pathlib.Path(__file__).parent.parent.parent),
+        str(pathlib.Path(__file__).parent.parent.parent.parent),
         "data",
         "deserialize_swagger_config_test",
         "entire_config",
