@@ -21,7 +21,7 @@ from .cmd_args import (
     SubcmdRunArguments,
     SubcmdSampleArguments,
 )
-from .openapi.swagger_config import SwaggerConfig
+from .openapi.config import SwaggerConfig
 
 
 class deserialize_args:

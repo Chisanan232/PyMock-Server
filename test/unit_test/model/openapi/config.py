@@ -14,7 +14,7 @@ from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import ResponseStrategy
 from pymock_api.model.openapi._parse import OpenAPIParser, OpenAPIPathParser
-from pymock_api.model.openapi.swagger_config import (
+from pymock_api.model.openapi.config import (
     API,
     APIParameter,
     SwaggerConfig,

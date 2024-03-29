@@ -13,7 +13,7 @@ from pymock_api.command.pull.component import SubCmdPullComponent
 from pymock_api.model import SubcmdPullArguments, load_config
 from pymock_api.model.api_config import TemplateConfig
 from pymock_api.model.openapi._parse import OpenAPIParser
-from pymock_api.model.openapi.swagger_config import set_component_definition
+from pymock_api.model.openapi.config import set_component_definition
 
 from ...._values import _API_Doc_Source, _Test_Request_With_Https
 
