@@ -95,6 +95,6 @@ def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
 
 
 def test_deserialize_swagger_api_config():
-    with patch("pymock_api.model.SwaggerConfig.deserialize") as mock_deserialize_swagger_config_function:
+    with patch("pymock_api.model.OpenAPIDocumentConfig.deserialize") as mock_deserialize_swagger_config_function:
         deserialize_swagger_api_config(data={"some key": "some value"})
         mock_deserialize_swagger_config_function.assert_called_once_with(data={"some key": "some value"})

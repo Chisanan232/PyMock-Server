@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional
 
 from ..._utils import YAML
 from ..._utils.api_client import URLLibHTTPClient
-from ...model import SwaggerConfig, deserialize_swagger_api_config
+from ...model import OpenAPIDocumentConfig, deserialize_swagger_api_config
 from ...model.api_config import APIConfig, DivideStrategy
 from ...model.cmd_args import SubcmdPullArguments
 from ..component import BaseSubCmdComponent
@@ -25,7 +25,7 @@ class SubCmdPullComponent(BaseSubCmdComponent):
         else:
             self._final_process(args, serialized_api_config)
 
-    def _get_swagger_config(self, swagger_url: str) -> SwaggerConfig:
+    def _get_swagger_config(self, swagger_url: str) -> OpenAPIDocumentConfig:
         swagger_api_doc: dict = self._api_client.request(method="GET", url=swagger_url)
         return deserialize_swagger_api_config(data=swagger_api_doc)
 
