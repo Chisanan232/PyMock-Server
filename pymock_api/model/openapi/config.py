@@ -6,8 +6,8 @@ from .. import APIConfig, MockAPI, MockAPIs
 from ..api_config import BaseConfig, _Config
 from ..api_config.apis import APIParameter as PyMockAPIParameter
 from ..enums import ResponseStrategy
-from ._parse import OpenAPIParser, OpenAPIPathParser
-from ._parser_factory import OpenAPIParserFactory
+from ._parse import BaseOpenAPIParser, BaseOpenAPIPathParser
+from ._parser_factory import BaseOpenAPIParserFactory, OpenAPIParserFactory
 
 Self = Any
 
@@ -42,7 +42,7 @@ def get_component_definition() -> Dict:
     return ComponentDefinition
 
 
-def set_component_definition(openapi_parser: OpenAPIParser) -> None:
+def set_component_definition(openapi_parser: BaseOpenAPIParser) -> None:
     global ComponentDefinition
     ComponentDefinition = openapi_parser.get_objects()
 
@@ -82,7 +82,7 @@ class _YamlSchema:
 class BaseSwaggerDataModel(metaclass=ABCMeta):
 
     def __init__(self):
-        self._config_parser_factory: OpenAPIParserFactory = OpenAPIParserFactory()
+        self._config_parser_factory: BaseOpenAPIParserFactory = OpenAPIParserFactory()
 
     @abstractmethod
     def deserialize(self, data: Dict) -> Self:
@@ -235,7 +235,7 @@ class API(Transferable):
             )
         return parameters
 
-    def _process_response(self, openapi_path_parser: OpenAPIPathParser, strategy: ResponseStrategy) -> dict:
+    def _process_response(self, openapi_path_parser: BaseOpenAPIPathParser, strategy: ResponseStrategy) -> dict:
         assert openapi_path_parser.exist_in_response(status_code="200") is True
         status_200_response = openapi_path_parser.get_response(status_code="200")
         if strategy is ResponseStrategy.OBJECT:
