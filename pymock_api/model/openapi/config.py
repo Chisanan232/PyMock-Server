@@ -79,7 +79,7 @@ class _YamlSchema:
         return _get_schema(get_component_definition(), schema_path, 0)
 
 
-class BaseSwaggerDataModel(metaclass=ABCMeta):
+class BaseOpenAPIDataModel(metaclass=ABCMeta):
 
     def __init__(self):
         self._config_parser_factory: BaseOpenAPIParserFactory = OpenAPIParserFactory()
@@ -89,13 +89,13 @@ class BaseSwaggerDataModel(metaclass=ABCMeta):
         pass
 
 
-class Transferable(BaseSwaggerDataModel):
+class Transferable(BaseOpenAPIDataModel):
     @abstractmethod
     def to_api_config(self, **kwargs) -> _Config:
         pass
 
 
-class Tag(BaseSwaggerDataModel):
+class Tag(BaseOpenAPIDataModel):
     def __init__(self):
         super().__init__()
         self.name: str = ""
