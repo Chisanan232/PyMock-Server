@@ -6,14 +6,7 @@ from .. import APIConfig, MockAPI, MockAPIs
 from ..api_config import BaseConfig, _Config
 from ..api_config.apis import APIParameter as PyMockAPIParameter
 from ..enums import ResponseStrategy
-from ._parse import (
-    OpenAPIObjectParser,
-    OpenAPIParser,
-    OpenAPIPathParser,
-    OpenAPIRequestParametersParser,
-    OpenAPIResponseParser,
-    OpenAPITagParser,
-)
+from ._parse import OpenAPIParser, OpenAPIParserFactory, OpenAPIPathParser
 
 Self = Any
 
@@ -86,6 +79,10 @@ class _YamlSchema:
 
 
 class BaseSwaggerDataModel(metaclass=ABCMeta):
+
+    def __init__(self):
+        self._config_parser_factory: OpenAPIParserFactory = OpenAPIParserFactory()
+
     @abstractmethod
     def deserialize(self, data: Dict) -> Self:
         pass
@@ -99,11 +96,12 @@ class Transferable(BaseSwaggerDataModel):
 
 class Tag(BaseSwaggerDataModel):
     def __init__(self):
+        super().__init__()
         self.name: str = ""
         self.description: str = ""
 
     def deserialize(self, data: Dict) -> "Tag":
-        parser = OpenAPITagParser(data)
+        parser = self._config_parser_factory.tag(data)
         self.name = parser.get_name()
         self.description = parser.get_description()
         return self
@@ -111,6 +109,7 @@ class Tag(BaseSwaggerDataModel):
 
 class APIParameter(Transferable):
     def __init__(self):
+        super().__init__()
         self.name: str = ""
         self.required: bool = False
         self.value_type: str = ""
@@ -147,7 +146,7 @@ class APIParameter(Transferable):
         if _YamlSchema.has_ref(data):
             raise NotImplementedError
         else:
-            parser = OpenAPIRequestParametersParser(data)
+            parser = self._config_parser_factory.request_parameters(data)
             return {
                 "name": parser.get_name(),
                 "required": parser.get_required(),
@@ -158,6 +157,7 @@ class APIParameter(Transferable):
 
 class API(Transferable):
     def __init__(self):
+        super().__init__()
         self.path: str = ""
         self.http_method: str = ""
         self.parameters: List[APIParameter] = []
@@ -170,7 +170,7 @@ class API(Transferable):
         # FIXME: Does it have better way to set the HTTP response strategy?
         if not self.process_response_strategy:
             raise ValueError("Please set the strategy how it should process HTTP response.")
-        openapi_path_parser = OpenAPIPathParser(data=data)
+        openapi_path_parser = self._config_parser_factory.path(data=data)
         self.parameters = self._process_api_params(openapi_path_parser.get_request_parameters())
         self.response = self._process_response(openapi_path_parser, self.process_response_strategy)
         self.tags = openapi_path_parser.get_all_tags()
@@ -185,7 +185,7 @@ class API(Transferable):
         else:
             # TODO: Parsing the data type of key *items* should be valid type of Python realm
             for param in params_data:
-                parser = OpenAPIRequestParametersParser(param)
+                parser = self._config_parser_factory.request_parameters(param)
                 items = parser.get_items()
                 if items is not None:
                     param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
@@ -196,7 +196,7 @@ class API(Transferable):
         request_body_params = _YamlSchema.get_schema_ref(data)
         # TODO: Should use the reference to get the details of parameters.
         parameters: List[dict] = []
-        parser = OpenAPIObjectParser(request_body_params)
+        parser = self._config_parser_factory.object(request_body_params)
         for param_name, param_props in parser.get_properties().items():
             items: Optional[dict] = param_props.get("items", None)
             items_props = []
@@ -212,7 +212,7 @@ class API(Transferable):
                 #     },
                 #     'title': 'UpdateOneFooDto'
                 # }
-                items_parser = OpenAPIObjectParser(items)
+                items_parser = self._config_parser_factory.object(items)
                 for item_name, item_prop in items_parser.get_properties(default={}).items():
                     items_props.append(
                         {
@@ -249,7 +249,7 @@ class API(Transferable):
             }
         if _YamlSchema.has_schema(status_200_response):
             response_schema = _YamlSchema.get_schema_ref(status_200_response)
-            parser = OpenAPIObjectParser(response_schema)
+            parser = self._config_parser_factory.object(response_schema)
             response_schema_properties: Optional[dict] = parser.get_properties(default=None)
             if response_schema_properties:
                 for k, v in response_schema_properties.items():
@@ -268,7 +268,7 @@ class API(Transferable):
                         ), "The response data type must be *dict* if its HTTP response strategy is not object."
                         response_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
         else:
-            resp_parser = OpenAPIResponseParser(status_200_response)
+            resp_parser = self._config_parser_factory.response(status_200_response)
             assert resp_parser.exist_in_content(value_format="application/json") is True
             response_schema = resp_parser.get_content(value_format="application/json")
             if response_schema:
@@ -308,7 +308,7 @@ class API(Transferable):
                     }
 
                     single_response = _YamlSchema.get_schema_ref(property_value["items"])
-                    parser = OpenAPIObjectParser(single_response)
+                    parser = self._config_parser_factory.object(single_response)
                     single_response_properties = parser.get_properties(default={})
                     if single_response_properties:
                         for item_k, item_v in parser.get_properties().items():
@@ -333,7 +333,7 @@ class API(Transferable):
             else:
                 if locate(v_type) == list:
                     single_response = _YamlSchema.get_schema_ref(property_value["items"])
-                    parser = OpenAPIObjectParser(single_response)
+                    parser = self._config_parser_factory.object(single_response)
                     item = {}
                     single_response_properties = parser.get_properties(default={})
                     if single_response_properties:
@@ -383,11 +383,12 @@ class API(Transferable):
 
 class SwaggerConfig(Transferable):
     def __init__(self):
+        super().__init__()
         self.paths: List[API] = []
         self.tags: List[Tag] = []
 
     def deserialize(self, data: Dict) -> "SwaggerConfig":
-        openapi_parser = OpenAPIParser(data=data)
+        openapi_parser = self._config_parser_factory.entire_api(data=data)
         apis = openapi_parser.get_paths()
         for api_path, api_props in apis.items():
             for one_api_http_method, one_api_details in api_props.items():
