@@ -17,7 +17,7 @@ from pymock_api.model.openapi._parse import OpenAPIParser, OpenAPIPathParser
 from pymock_api.model.openapi.config import (
     API,
     APIParameter,
-    SwaggerConfig,
+    OpenAPIDocumentConfig,
     Transferable,
     _YamlSchema,
     convert_js_type,
@@ -377,18 +377,18 @@ class TestAPI(_SwaggerDataModelTestSuite):
 
 class TestSwaggerConfig(_SwaggerDataModelTestSuite):
     @pytest.fixture(scope="function")
-    def data_model(self) -> SwaggerConfig:
-        return SwaggerConfig()
+    def data_model(self) -> OpenAPIDocumentConfig:
+        return OpenAPIDocumentConfig()
 
     @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_DOC_JSON)
     def test_deserialize(self, swagger_api_doc_data: dict, data_model: Transferable):
         set_component_definition(OpenAPIParser(data=swagger_api_doc_data))
         super().test_deserialize(swagger_api_doc_data, data_model)
 
-    def _initial(self, data: SwaggerConfig) -> None:
+    def _initial(self, data: OpenAPIDocumentConfig) -> None:
         data.paths = []
 
-    def _verify_result(self, data: SwaggerConfig, og_data: dict) -> None:
+    def _verify_result(self, data: OpenAPIDocumentConfig, og_data: dict) -> None:
         # TODO: Remove this deprecated test criteria if it ensure
         # def _get_api_param(name: str) -> Optional[dict]:
         #     swagger_api_params = og_data["paths"][api.path][api.http_method]["parameters"]
@@ -412,7 +412,7 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
             #     assert api_param.value_type == convert_js_type(one_swagger_api_param["schema"]["type"])
             #     assert api_param.default == one_swagger_api_param["schema"]["default"]
 
-    def _given_props(self, data_model: SwaggerConfig) -> None:
+    def _given_props(self, data_model: OpenAPIDocumentConfig) -> None:
         params = APIParameter()
         params.name = "arg1"
         params.required = False
@@ -427,7 +427,7 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
 
         data_model.paths = [api]
 
-    def _verify_api_config_model(self, under_test: APIConfig, data_from: SwaggerConfig) -> None:
+    def _verify_api_config_model(self, under_test: APIConfig, data_from: OpenAPIDocumentConfig) -> None:
         assert len(under_test.apis.apis.keys()) == len(data_from.paths)
         for api_path, api_details in under_test.apis.apis.items():
             expect_apis = list(
@@ -461,7 +461,7 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
             ("api/v1/test", "api/v1/test/foo-home"),
         ],
     )
-    def test__align_url_format(self, base_url: str, api_path: str, data_model: SwaggerConfig):
+    def test__align_url_format(self, base_url: str, api_path: str, data_model: OpenAPIDocumentConfig):
         api = API()
         api.path = api_path
         base_url = data_model._align_url_format(base_url, api)

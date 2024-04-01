@@ -382,13 +382,13 @@ class API(Transferable):
         return mock_api
 
 
-class SwaggerConfig(Transferable):
+class OpenAPIDocumentConfig(Transferable):
     def __init__(self):
         super().__init__()
         self.paths: List[API] = []
         self.tags: List[Tag] = []
 
-    def deserialize(self, data: Dict) -> "SwaggerConfig":
+    def deserialize(self, data: Dict) -> "OpenAPIDocumentConfig":
         openapi_parser = self._config_parser_factory.entire_config(data=data)
         apis = openapi_parser.get_paths()
         for api_path, api_props in apis.items():
@@ -408,19 +408,19 @@ class SwaggerConfig(Transferable):
     def to_api_config(self, base_url: str = "") -> APIConfig:  # type: ignore[override]
         api_config = APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=base_url), apis={}))
         assert api_config.apis is not None and api_config.apis.apis == {}
-        for swagger_api in self.paths:
-            base_url = self._align_url_format(base_url, swagger_api)
-            api_config.apis.apis[self._generate_api_key(base_url, swagger_api)] = swagger_api.to_api_config(
+        for openapi_doc_api in self.paths:
+            base_url = self._align_url_format(base_url, openapi_doc_api)
+            api_config.apis.apis[self._generate_api_key(base_url, openapi_doc_api)] = openapi_doc_api.to_api_config(
                 base_url=base_url
             )
         return api_config
 
-    def _align_url_format(self, base_url: str, swagger_api: API) -> str:
-        if swagger_api.path[0] != "/":
-            swagger_api.path = f"/{swagger_api.path}"
+    def _align_url_format(self, base_url: str, openapi_doc_api: API) -> str:
+        if openapi_doc_api.path[0] != "/":
+            openapi_doc_api.path = f"/{openapi_doc_api.path}"
         if base_url and base_url[0] != "/":
             base_url = f"/{base_url}"
         return base_url
 
-    def _generate_api_key(self, base_url: str, swagger_api: API) -> str:
-        return "_".join([swagger_api.http_method, swagger_api.path.replace(base_url, "")[1:].replace("/", "_")])
+    def _generate_api_key(self, base_url: str, openapi_doc_api: API) -> str:
+        return "_".join([openapi_doc_api.http_method, openapi_doc_api.path.replace(base_url, "")[1:].replace("/", "_")])
