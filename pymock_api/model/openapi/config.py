@@ -2,7 +2,10 @@ from abc import ABCMeta, abstractmethod
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
-from . import APIConfig, MockAPI, MockAPIs
+from .. import APIConfig, MockAPI, MockAPIs
+from ..api_config import BaseConfig, _Config
+from ..api_config.apis import APIParameter as PyMockAPIParameter
+from ..enums import ResponseStrategy
 from ._parse import (
     OpenAPIObjectParser,
     OpenAPIParser,
@@ -11,9 +14,6 @@ from ._parse import (
     OpenAPIResponseParser,
     OpenAPITagParser,
 )
-from .api_config import BaseConfig, _Config
-from .api_config.apis import APIParameter as PyMockAPIParameter
-from .enums import ResponseStrategy
 
 Self = Any
 
