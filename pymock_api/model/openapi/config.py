@@ -388,7 +388,7 @@ class SwaggerConfig(Transferable):
         self.tags: List[Tag] = []
 
     def deserialize(self, data: Dict) -> "SwaggerConfig":
-        openapi_parser = self._config_parser_factory.entire_api(data=data)
+        openapi_parser = self._config_parser_factory.entire_config(data=data)
         apis = openapi_parser.get_paths()
         for api_path, api_props in apis.items():
             for one_api_http_method, one_api_details in api_props.items():

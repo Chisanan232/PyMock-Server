@@ -111,7 +111,7 @@ class OpenAPIParser:
 
 class OpenAPIParserFactory:
 
-    def entire_api(self, file: str = "", data: Dict = {}) -> OpenAPIParser:
+    def entire_config(self, file: str = "", data: Dict = {}) -> OpenAPIParser:
         return OpenAPIParser(file=file, data=data)
 
     def tag(self, data: Dict) -> OpenAPITagParser:
