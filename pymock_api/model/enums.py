@@ -93,9 +93,9 @@ class OpenAPIVersion(Enum):
         if isinstance(v, str):
             if re.search(r"OpenAPI V[2-3]", v):
                 return OpenAPIVersion(v)
-            if re.search(r"2\.[0-9](\.[0-9])?.{0,8}", v):
+            if re.search(r"2\.\d(\.\d)?.{0,8}", v):
                 return OpenAPIVersion.V2
-            if re.search(r"3\.[0-9](\.[0-9])?.{0,8}", v):
+            if re.search(r"3\.\d(\.\d)?.{0,8}", v):
                 return OpenAPIVersion.V3
             raise NotImplementedError(f"PyMock-API doesn't support parsing OpenAPI configuration with version '{v}'.")
         else:
