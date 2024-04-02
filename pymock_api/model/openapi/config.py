@@ -421,9 +421,10 @@ class OpenAPIDocumentConfig(Transferable):
         apis = openapi_parser.get_paths()
         for api_path, api_props in apis.items():
             for one_api_http_method, one_api_details in api_props.items():
-                api = API().deserialize(data=one_api_details)
+                api = API()
                 api.path = api_path
                 api.http_method = one_api_http_method
+                api.deserialize(data=one_api_details)
                 self.paths.append(api)
 
         tags: List[dict] = openapi_parser.get_tags()
