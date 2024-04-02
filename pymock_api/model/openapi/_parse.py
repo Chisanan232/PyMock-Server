@@ -198,3 +198,16 @@ class OpenAPIParser(BaseOpenAPIParser):
 
     def get_objects(self) -> Dict[str, dict]:
         return self._data.get("definitions", {})
+
+
+class OpenAPIV3Parser(BaseOpenAPIParser):
+
+    def get_paths(self) -> Dict[str, Dict]:
+        return self._data["paths"]
+
+    def get_tags(self) -> List[dict]:
+        # Not support this property in OpenAPI v3
+        return []
+
+    def get_objects(self) -> Dict[str, dict]:
+        return self._data.get("components", {}).get("schemas", {})

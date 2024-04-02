@@ -15,6 +15,7 @@ from ._parse import (
     OpenAPIRequestParametersParser,
     OpenAPIResponseParser,
     OpenAPITagParser,
+    OpenAPIV3Parser,
 )
 
 
@@ -68,8 +69,8 @@ class OpenAPIV2ParserFactory(BaseOpenAPIParserFactory):
 
 class OpenAPIV3ParserFactory(BaseOpenAPIParserFactory):
 
-    def entire_config(self, file: str = "", data: Dict = {}) -> OpenAPIParser:
-        return OpenAPIParser(file=file, data=data)
+    def entire_config(self, file: str = "", data: Dict = {}) -> OpenAPIV3Parser:
+        return OpenAPIV3Parser(file=file, data=data)
 
     def tag(self, data: Dict) -> OpenAPITagParser:
         return OpenAPITagParser(data=data)
