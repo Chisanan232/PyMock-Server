@@ -83,8 +83,8 @@
                 }
             }
         },
-        "/api/v1/test/foo-boo/export/{id}": {
-            "get": {
+        "/api/v1/test/foo-boo/process/{id}": {
+            "post": {
                 "tags": [
                     "foo-boo"
                 ],
@@ -108,7 +108,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/ExportFooBooDataRequestDto"
+                                "$ref": "#/components/schemas/PostFooBooProcessRequestDto"
                             }
                         }
                     },
@@ -357,7 +357,7 @@
                 },
                 "title": "FooResponse"
             },
-            "ExportFooBooDataRequestDto": {
+            "PostFooBooProcessRequestDto": {
                 "required": [],
                 "type": "object",
                 "properties": {
