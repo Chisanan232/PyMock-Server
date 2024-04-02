@@ -10,11 +10,11 @@ from ._parse import (
     BaseOpenAPIResponseParser,
     BaseOpenAPITagParser,
     OpenAPIObjectParser,
-    OpenAPIParser,
     OpenAPIPathParser,
     OpenAPIRequestParametersParser,
     OpenAPIResponseParser,
     OpenAPITagParser,
+    OpenAPIV2Parser,
     OpenAPIV3Parser,
 )
 
@@ -48,8 +48,8 @@ class BaseOpenAPIParserFactory(metaclass=ABCMeta):
 
 class OpenAPIV2ParserFactory(BaseOpenAPIParserFactory):
 
-    def entire_config(self, file: str = "", data: Dict = {}) -> OpenAPIParser:
-        return OpenAPIParser(file=file, data=data)
+    def entire_config(self, file: str = "", data: Dict = {}) -> OpenAPIV2Parser:
+        return OpenAPIV2Parser(file=file, data=data)
 
     def tag(self, data: Dict) -> OpenAPITagParser:
         return OpenAPITagParser(data=data)

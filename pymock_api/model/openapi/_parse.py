@@ -188,7 +188,7 @@ class BaseOpenAPIParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIParser(BaseOpenAPIParser):
+class OpenAPIV2Parser(BaseOpenAPIParser):
 
     def get_paths(self) -> Dict[str, Dict]:
         return self._data["paths"]

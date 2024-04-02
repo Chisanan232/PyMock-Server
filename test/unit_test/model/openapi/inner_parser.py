@@ -4,7 +4,7 @@ import re
 
 import pytest
 
-from pymock_api.model.openapi._parse import OpenAPIParser
+from pymock_api.model.openapi._parse import OpenAPIV2Parser
 
 
 class TestOpenAPIParser:
@@ -17,7 +17,7 @@ class TestOpenAPIParser:
                 io_stream.write(json.dumps({"paths": "test API"}))
 
             # Run target function
-            parser = OpenAPIParser(file=file_path)
+            parser = OpenAPIV2Parser(file=file_path)
 
             # Verify
             assert parser.get_paths() == "test API"
@@ -27,7 +27,7 @@ class TestOpenAPIParser:
     def test_initial_parser_with_invalid_file(self):
         # Run target function
         with pytest.raises(FileNotFoundError) as exc_info:
-            OpenAPIParser(file="./not_exist.json")
+            OpenAPIV2Parser(file="./not_exist.json")
 
         # Verify
         assert re.search(r".{0,32}not find.{0,32}OpenAPI format configuration", str(exc_info.value), re.IGNORECASE)
