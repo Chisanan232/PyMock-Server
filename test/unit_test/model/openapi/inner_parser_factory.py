@@ -8,6 +8,7 @@ from pymock_api.model.enums import OpenAPIVersion
 from pymock_api.model.openapi._parser_factory import (
     BaseOpenAPIParserFactory,
     OpenAPIParserFactory,
+    OpenAPIV3ParserFactory,
     get_parser_factory,
 )
 
@@ -17,12 +18,12 @@ from pymock_api.model.openapi._parser_factory import (
     [
         # Enum type
         (OpenAPIVersion.V2, OpenAPIParserFactory),
-        (OpenAPIVersion.V3, OpenAPIParserFactory),
+        (OpenAPIVersion.V3, OpenAPIV3ParserFactory),
         # str type
         ("2.0.0", OpenAPIParserFactory),
         ("2.4.8", OpenAPIParserFactory),
-        ("3.0.0", OpenAPIParserFactory),
-        ("3.1.0", OpenAPIParserFactory),
+        ("3.0.0", OpenAPIV3ParserFactory),
+        ("3.1.0", OpenAPIV3ParserFactory),
     ],
 )
 def test_get_parser_factory(openapi_version: OpenAPIVersion, expected_factory: Type[BaseOpenAPIParserFactory]):
