@@ -7,7 +7,7 @@ import pytest
 from pymock_api.model.enums import OpenAPIVersion
 from pymock_api.model.openapi._parser_factory import (
     BaseOpenAPIParserFactory,
-    OpenAPIParserFactory,
+    OpenAPIV2ParserFactory,
     OpenAPIV3ParserFactory,
     get_parser_factory,
 )
@@ -17,11 +17,11 @@ from pymock_api.model.openapi._parser_factory import (
     ("openapi_version", "expected_factory"),
     [
         # Enum type
-        (OpenAPIVersion.V2, OpenAPIParserFactory),
+        (OpenAPIVersion.V2, OpenAPIV2ParserFactory),
         (OpenAPIVersion.V3, OpenAPIV3ParserFactory),
         # str type
-        ("2.0.0", OpenAPIParserFactory),
-        ("2.4.8", OpenAPIParserFactory),
+        ("2.0.0", OpenAPIV2ParserFactory),
+        ("2.4.8", OpenAPIV2ParserFactory),
         ("3.0.0", OpenAPIV3ParserFactory),
         ("3.1.0", OpenAPIV3ParserFactory),
     ],
@@ -34,8 +34,8 @@ def test_get_parser_factory(openapi_version: OpenAPIVersion, expected_factory: T
 @pytest.mark.parametrize(
     ("openapi_version", "expected_factory"),
     [
-        ("4.0.0", OpenAPIParserFactory),
-        ("invalid version", OpenAPIParserFactory),
+        ("4.0.0", OpenAPIV2ParserFactory),
+        ("invalid version", OpenAPIV2ParserFactory),
     ],
 )
 def test_get_parser_factory_with_invalid_version(

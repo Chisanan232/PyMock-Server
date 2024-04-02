@@ -16,7 +16,7 @@ from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
 from pymock_api.model.openapi._parse import OpenAPIParser, OpenAPIPathParser
 from pymock_api.model.openapi._parser_factory import (
     BaseOpenAPIParserFactory,
-    OpenAPIParserFactory,
+    OpenAPIV2ParserFactory,
     OpenAPIV3ParserFactory,
 )
 from pymock_api.model.openapi.config import (
@@ -180,11 +180,11 @@ class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
         ("openapi_version", "expected_parser_factory"),
         [
             # Enum type
-            (OpenAPIVersion.V2, OpenAPIParserFactory),
+            (OpenAPIVersion.V2, OpenAPIV2ParserFactory),
             (OpenAPIVersion.V3, OpenAPIV3ParserFactory),
             # str type
-            ("2.0", OpenAPIParserFactory),
-            ("2.0.6", OpenAPIParserFactory),
+            ("2.0", OpenAPIV2ParserFactory),
+            ("2.0.6", OpenAPIV2ParserFactory),
             ("3.0.1", OpenAPIV3ParserFactory),
         ],
     )
@@ -532,8 +532,8 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
     @pytest.mark.parametrize(
         ("data", "expected_openapi_version", "expected_parser_factory"),
         [
-            ({"swagger": "2.0"}, OpenAPIVersion.V2, OpenAPIParserFactory),
-            ({"swagger": "2.6.0"}, OpenAPIVersion.V2, OpenAPIParserFactory),
+            ({"swagger": "2.0"}, OpenAPIVersion.V2, OpenAPIV2ParserFactory),
+            ({"swagger": "2.6.0"}, OpenAPIVersion.V2, OpenAPIV2ParserFactory),
             ({"swagger": "3.0"}, OpenAPIVersion.V3, OpenAPIV3ParserFactory),
             ({"swagger": "3.1.0"}, OpenAPIVersion.V3, OpenAPIV3ParserFactory),
         ],

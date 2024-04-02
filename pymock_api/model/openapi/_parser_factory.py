@@ -45,7 +45,7 @@ class BaseOpenAPIParserFactory(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIParserFactory(BaseOpenAPIParserFactory):
+class OpenAPIV2ParserFactory(BaseOpenAPIParserFactory):
 
     def entire_config(self, file: str = "", data: Dict = {}) -> OpenAPIParser:
         return OpenAPIParser(file=file, data=data)
@@ -92,7 +92,7 @@ def get_parser_factory(version: Union[str, OpenAPIVersion]) -> BaseOpenAPIParser
         version = OpenAPIVersion.to_enum(version)
 
     if version is OpenAPIVersion.V2:
-        return OpenAPIParserFactory()
+        return OpenAPIV2ParserFactory()
     if version is OpenAPIVersion.V3:
         return OpenAPIV3ParserFactory()
 
