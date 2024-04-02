@@ -95,10 +95,6 @@ def set_parser_factory(f: BaseOpenAPIParserFactory) -> None:
 
 class BaseOpenAPIDataModel(metaclass=ABCMeta):
 
-    def __init__(self):
-        if self.parser_factory is None:
-            self._load_parser_factory()
-
     @property
     def parser_factory(self) -> BaseOpenAPIParserFactory:
         global OpenAPI_Parser_Factory
