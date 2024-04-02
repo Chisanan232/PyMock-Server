@@ -198,12 +198,13 @@ class API(Transferable):
         if not self.process_response_strategy:
             raise ValueError("Please set the strategy how it should process HTTP response.")
         openapi_path_parser = self.parser_factory.path(data=data)
-        self.parameters = self._process_api_params(openapi_path_parser.get_request_parameters())
+        self.parameters = self._process_api_params(openapi_path_parser)
         self.response = self._process_response(openapi_path_parser, self.process_response_strategy)
         self.tags = openapi_path_parser.get_all_tags()
         return self
 
-    def _process_api_params(self, params_data: List[dict]) -> List["APIParameter"]:
+    def _process_api_params(self, openapi_path_parser: BaseOpenAPIPathParser) -> List["APIParameter"]:
+        params_data: List[dict] = openapi_path_parser.get_request_parameters()
         has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", params_data))
         if has_ref_in_schema_param:
             # TODO: Ensure the value maps this condition is really only one

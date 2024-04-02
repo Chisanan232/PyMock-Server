@@ -325,7 +325,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         set_component_definition(OpenAPIV2Parser(data=entire_openapi_config))
 
         # Run target function
-        parameters = data_model._process_api_params(openapi_doc_data)
+        parameters = data_model._process_api_params(OpenAPIPathParser({"parameters": openapi_doc_data}))
 
         # Verify
         assert parameters and isinstance(parameters, list)
