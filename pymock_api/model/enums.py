@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 from typing import Callable, Dict, Optional, Union
 
@@ -81,3 +82,21 @@ class ConfigLoadingOrder(Enum):
             if args:
                 return args
         return ()
+
+
+class OpenAPIVersion(Enum):
+    V2: str = "OpenAPI V2"
+    V3: str = "OpenAPI V3"
+
+    @staticmethod
+    def to_enum(v: Union[str, "OpenAPIVersion"]) -> "OpenAPIVersion":
+        if isinstance(v, str):
+            if re.search(r"OpenAPI V[2-3]", v):
+                return OpenAPIVersion(v)
+            if re.search(r"2\.[0-9]\.[0-9].{0,8}", v):
+                return OpenAPIVersion.V2
+            if re.search(r"3\.[0-9]\.[0-9].{0,8}", v):
+                return OpenAPIVersion.V3
+            raise NotImplementedError(f"PyMock-API doesn't support parsing OpenAPI configuration with version '{v}'.")
+        else:
+            return v
