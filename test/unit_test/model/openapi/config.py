@@ -155,7 +155,7 @@ class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
         from pymock_api.model.openapi.config import OpenAPI_Document_Version
 
         assert OpenAPI_Document_Version is openapi_version
-        assert isinstance(data_model._config_parser_factory, expected_parser_factory)
+        assert isinstance(data_model.parser_factory, expected_parser_factory)
 
     @pytest.mark.parametrize(
         ("openapi_version", "expected_parser_factory"),
@@ -177,7 +177,7 @@ class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
     ):
         set_openapi_version(openapi_version)
         data_model.reload_parser_factory()
-        assert isinstance(data_model._config_parser_factory, expected_parser_factory)
+        assert isinstance(data_model.parser_factory, expected_parser_factory)
 
 
 class TestAPIParameters(_OpenAPIDocumentDataModelTestSuite):
@@ -530,4 +530,4 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
         from pymock_api.model.openapi.config import OpenAPI_Document_Version
 
         assert OpenAPI_Document_Version is expected_openapi_version
-        assert isinstance(data_model._config_parser_factory, expected_parser_factory)
+        assert isinstance(data_model.parser_factory, expected_parser_factory)
