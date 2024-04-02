@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
-from typing import Dict
+from typing import Dict, Union
 
+from ..enums import OpenAPIVersion
 from ._parse import (
     BaseOpenAPIObjectParser,
     BaseOpenAPIParser,
@@ -63,3 +64,17 @@ class OpenAPIParserFactory(BaseOpenAPIParserFactory):
 
     def object(self, data: Dict) -> OpenAPIObjectParser:
         return OpenAPIObjectParser(data=data)
+
+
+def get_parser_factory(version: Union[str, OpenAPIVersion]) -> BaseOpenAPIParserFactory:
+    if isinstance(version, str):
+        version = OpenAPIVersion.to_enum(version)
+
+    if version is OpenAPIVersion.V2:
+        return OpenAPIParserFactory()
+    if version is OpenAPIVersion.V3:
+        # FIXME: Change the factory which generates the parser for OpenAPI version 3.
+        return OpenAPIParserFactory()
+
+    invalid_version = version if isinstance(version, str) else version.name
+    raise NotImplementedError(f"PyMock-API doesn't support OpenAPI version {invalid_version}.")
