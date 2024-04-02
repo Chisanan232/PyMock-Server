@@ -5,9 +5,9 @@ from typing import Any, Dict, List, Optional, Union
 from .. import APIConfig, MockAPI, MockAPIs
 from ..api_config import BaseConfig, _Config
 from ..api_config.apis import APIParameter as PyMockAPIParameter
-from ..enums import ResponseStrategy
+from ..enums import OpenAPIVersion, ResponseStrategy
 from ._parse import BaseOpenAPIParser, BaseOpenAPIPathParser
-from ._parser_factory import BaseOpenAPIParserFactory, OpenAPIParserFactory
+from ._parser_factory import BaseOpenAPIParserFactory, get_parser_factory
 
 Self = Any
 
@@ -79,10 +79,25 @@ class _YamlSchema:
         return _get_schema(get_component_definition(), schema_path, 0)
 
 
+OpenAPI_Document_Version: OpenAPIVersion = OpenAPIVersion.V3
+
+
+def set_openapi_version(v: Union[str, OpenAPIVersion]) -> None:
+    global OpenAPI_Document_Version
+    OpenAPI_Document_Version = OpenAPIVersion.to_enum(v)
+
+
 class BaseOpenAPIDataModel(metaclass=ABCMeta):
 
     def __init__(self):
-        self._config_parser_factory: BaseOpenAPIParserFactory = OpenAPIParserFactory()
+        self._config_parser_factory: BaseOpenAPIParserFactory = self.load_parser_factory()
+
+    def load_parser_factory(self) -> BaseOpenAPIParserFactory:
+        global OpenAPI_Document_Version
+        return get_parser_factory(version=OpenAPI_Document_Version)
+
+    def reload_parser_factory(self) -> None:
+        self._config_parser_factory = self.load_parser_factory()
 
     @abstractmethod
     def deserialize(self, data: Dict) -> Self:
@@ -389,6 +404,7 @@ class OpenAPIDocumentConfig(Transferable):
         self.tags: List[Tag] = []
 
     def deserialize(self, data: Dict) -> "OpenAPIDocumentConfig":
+        self._chk_version_and_load_parser(data)
         openapi_parser = self._config_parser_factory.entire_config(data=data)
         apis = openapi_parser.get_paths()
         for api_path, api_props in apis.items():
@@ -404,6 +420,15 @@ class OpenAPIDocumentConfig(Transferable):
         set_component_definition(openapi_parser)
 
         return self
+
+    def _chk_version_and_load_parser(self, data: dict) -> None:
+        swagger_version: Optional[str] = data.get("swagger", None)  # OpenAPI version 2
+        openapi_version: Optional[str] = data.get("openapi", None)  # OpenAPI version 3
+        doc_config_version = swagger_version or openapi_version
+        assert doc_config_version is not None, "PyMock-API cannot get the OpenAPI document version."
+        assert isinstance(doc_config_version, str)
+        set_openapi_version(doc_config_version)
+        self.reload_parser_factory()
 
     def to_api_config(self, base_url: str = "") -> APIConfig:  # type: ignore[override]
         api_config = APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=base_url), apis={}))
