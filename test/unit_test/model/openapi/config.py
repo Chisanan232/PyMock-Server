@@ -4,7 +4,7 @@ import os
 import pathlib
 import re
 from abc import ABCMeta, abstractmethod
-from typing import List, Tuple
+from typing import List, Tuple, Type
 
 import pytest
 
@@ -12,8 +12,12 @@ from pymock_api import APIConfig
 from pymock_api.model import MockAPI
 from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
 from pymock_api.model.openapi._parse import OpenAPIParser, OpenAPIPathParser
+from pymock_api.model.openapi._parser_factory import (
+    BaseOpenAPIParserFactory,
+    OpenAPIParserFactory,
+)
 from pymock_api.model.openapi.config import (
     API,
     APIParameter,
@@ -22,6 +26,7 @@ from pymock_api.model.openapi.config import (
     _YamlSchema,
     convert_js_type,
     set_component_definition,
+    set_openapi_version,
 )
 
 
@@ -44,75 +49,75 @@ def test_fail_convert_js_type():
     assert "cannot parse JS type" in str(exc_info.value)
 
 
-SWAGGER_API_DOC_JSON: List[tuple] = []
-SWAGGER_ONE_API_JSON: List[tuple] = []
-SWAGGER_API_PARAMETERS_JSON: List[tuple] = []
-SWAGGER_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
-SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
-SWAGGER_API_RESPONSES_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
-SWAGGER_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
+OPENAPI_API_DOC_JSON: List[tuple] = []
+OPENAPI_ONE_API_JSON: List[tuple] = []
+OPENAPI_API_PARAMETERS_JSON: List[tuple] = []
+OPENAPI_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
+OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
+OPENAPI_API_RESPONSES_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
+OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
 
 
-def _get_all_swagger_api_doc() -> None:
+def _get_all_openapi_api_doc() -> None:
     json_dir = os.path.join(
         str(pathlib.Path(__file__).parent.parent.parent.parent),
         "data",
-        "deserialize_swagger_config_test",
+        "deserialize_openapi_config_test",
         "entire_config",
         "*.json",
     )
-    global SWAGGER_API_DOC_JSON
+    global OPENAPI_API_DOC_JSON
     for json_config_path in glob.glob(json_dir):
         with open(json_config_path, "r", encoding="utf-8") as file_stream:
-            swagger_api_docs = json.loads(file_stream.read())
-            SWAGGER_API_DOC_JSON.append(swagger_api_docs)
-            apis: dict = swagger_api_docs["paths"]
+            openapi_api_docs = json.loads(file_stream.read())
+            OPENAPI_API_DOC_JSON.append(openapi_api_docs)
+            apis: dict = openapi_api_docs["paths"]
             for api_path, api_props in apis.items():
                 for api_detail in api_props.values():
                     # For testing API details
-                    SWAGGER_ONE_API_JSON.append((api_detail, swagger_api_docs))
+                    OPENAPI_ONE_API_JSON.append((api_detail, openapi_api_docs))
 
                     # For testing API response
                     for strategy in ResponseStrategy:
-                        SWAGGER_API_RESPONSES_FOR_API.append((strategy, api_detail, swagger_api_docs))
+                        OPENAPI_API_RESPONSES_FOR_API.append((strategy, api_detail, openapi_api_docs))
 
                     # For testing API response properties
                     status_200_response = api_detail.get("responses", {}).get("200", {})
-                    set_component_definition(OpenAPIParser(data=swagger_api_docs))
+                    set_component_definition(OpenAPIParser(data=openapi_api_docs))
                     if _YamlSchema.has_schema(status_200_response):
                         response_schema = _YamlSchema.get_schema_ref(status_200_response)
                         response_schema_properties = response_schema.get("properties", None)
                         if response_schema_properties:
                             for k, v in response_schema_properties.items():
                                 for strategy in ResponseStrategy:
-                                    SWAGGER_API_RESPONSES_PROPERTY_FOR_API.append((strategy, v, swagger_api_docs))
+                                    OPENAPI_API_RESPONSES_PROPERTY_FOR_API.append((strategy, v, openapi_api_docs))
 
                     # For testing API request parameters
-                    SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API.append((api_detail["parameters"], swagger_api_docs))
+                    OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API.append((api_detail["parameters"], openapi_api_docs))
 
                     # For testing API request parameters
                     for param in api_detail["parameters"]:
                         if param.get("schema", {}).get("$ref", None) is None:
-                            SWAGGER_API_PARAMETERS_JSON.append(param)
+                            OPENAPI_API_PARAMETERS_JSON.append(param)
                         else:
-                            SWAGGER_API_PARAMETERS_JSON_FOR_API.append((param, swagger_api_docs))
+                            OPENAPI_API_PARAMETERS_JSON_FOR_API.append((param, openapi_api_docs))
 
 
-_get_all_swagger_api_doc()
+_get_all_openapi_api_doc()
 
 
-class _SwaggerDataModelTestSuite(metaclass=ABCMeta):
+class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
     @pytest.fixture(scope="function")
     @abstractmethod
     def data_model(self) -> Transferable:
         pass
 
-    @pytest.mark.parametrize("swagger_api_doc_data", [])
-    def test_deserialize(self, swagger_api_doc_data: dict, data_model: Transferable):
+    @pytest.mark.parametrize("openapi_doc_data", [])
+    def test_deserialize(self, openapi_doc_data: dict, data_model: Transferable):
         self._initial(data=data_model)
-        deserialized_data = data_model.deserialize(data=swagger_api_doc_data)
+        deserialized_data = data_model.deserialize(data=openapi_doc_data)
         assert deserialized_data
-        self._verify_result(data=deserialized_data, og_data=swagger_api_doc_data)
+        self._verify_result(data=deserialized_data, og_data=openapi_doc_data)
 
     def test_to_api_config(self, data_model: Transferable):
         self._given_props(data_model)
@@ -135,15 +140,54 @@ class _SwaggerDataModelTestSuite(metaclass=ABCMeta):
     def _verify_api_config_model(self, under_test: _Config, data_from: Transferable) -> None:
         pass
 
+    @pytest.mark.parametrize(
+        ("openapi_version", "expected_parser_factory"),
+        [
+            (OpenAPIVersion.V3, OpenAPIParserFactory),
+        ],
+    )
+    def test_load_parser_factory_at_instantiate(
+        self,
+        data_model: Transferable,
+        openapi_version: OpenAPIVersion,
+        expected_parser_factory: Type[BaseOpenAPIParserFactory],
+    ):
+        from pymock_api.model.openapi.config import OpenAPI_Document_Version
 
-class TestAPIParameters(_SwaggerDataModelTestSuite):
+        assert OpenAPI_Document_Version is openapi_version
+        assert isinstance(data_model.parser_factory, expected_parser_factory)
+
+    @pytest.mark.parametrize(
+        ("openapi_version", "expected_parser_factory"),
+        [
+            # Enum type
+            (OpenAPIVersion.V2, OpenAPIParserFactory),
+            (OpenAPIVersion.V3, OpenAPIParserFactory),
+            # str type
+            ("2.0", OpenAPIParserFactory),
+            ("2.0.6", OpenAPIParserFactory),
+            ("3.0.1", OpenAPIParserFactory),
+        ],
+    )
+    def test_reload_parser_factory(
+        self,
+        data_model: Transferable,
+        openapi_version: OpenAPIVersion,
+        expected_parser_factory: Type[BaseOpenAPIParserFactory],
+    ):
+        set_openapi_version(openapi_version)
+        data_model.reload_parser_factory()
+        assert isinstance(data_model.parser_factory, expected_parser_factory)
+
+
+class TestAPIParameters(_OpenAPIDocumentDataModelTestSuite):
     @pytest.fixture(scope="function")
     def data_model(self) -> APIParameter:
         return APIParameter()
 
-    @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_PARAMETERS_JSON)
-    def test_deserialize(self, swagger_api_doc_data: dict, data_model: Transferable):
-        super().test_deserialize(swagger_api_doc_data, data_model)
+    @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_PARAMETERS_JSON)
+    def test_deserialize(self, openapi_doc_data: dict, data_model: Transferable):
+        super().test_deserialize(openapi_doc_data, data_model)
 
     def _initial(self, data: APIParameter) -> None:
         data.name = ""
@@ -181,15 +225,15 @@ class TestAPIParameters(_SwaggerDataModelTestSuite):
         assert re.search(r".{0,64}doesn't have key 'schema'.{0,64}", str(exc_info.value), re.IGNORECASE)
 
 
-class TestAPI(_SwaggerDataModelTestSuite):
+class TestAPI(_OpenAPIDocumentDataModelTestSuite):
     @pytest.fixture(scope="function")
     def data_model(self) -> API:
         return API()
 
-    @pytest.mark.parametrize(("swagger_api_doc_data", "entire_swagger_config"), SWAGGER_ONE_API_JSON)
-    def test_deserialize(self, swagger_api_doc_data: dict, entire_swagger_config: dict, data_model: Transferable):
-        set_component_definition(OpenAPIParser(data=entire_swagger_config))
-        super().test_deserialize(swagger_api_doc_data, data_model)
+    @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_ONE_API_JSON)
+    def test_deserialize(self, openapi_doc_data: dict, entire_openapi_config: dict, data_model: Transferable):
+        set_component_definition(OpenAPIParser(data=entire_openapi_config))
+        super().test_deserialize(openapi_doc_data, data_model)
 
     def test_invalid_deserialize(self, data_model: API):
         data_model.process_response_strategy = None
@@ -256,48 +300,46 @@ class TestAPI(_SwaggerDataModelTestSuite):
             assert p.value_format is None
         assert under_test.tag == data_from.tags[0]
 
-    @pytest.mark.parametrize(
-        ("swagger_api_doc_data", "entire_swagger_config"), SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API
-    )
-    def test__process_api_params(self, swagger_api_doc_data: List[dict], entire_swagger_config: dict, data_model: API):
+    @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API)
+    def test__process_api_params(self, openapi_doc_data: List[dict], entire_openapi_config: dict, data_model: API):
         # Pre-process
-        set_component_definition(OpenAPIParser(data=entire_swagger_config))
+        set_component_definition(OpenAPIParser(data=entire_openapi_config))
 
         # Run target function
-        parameters = data_model._process_api_params(swagger_api_doc_data)
+        parameters = data_model._process_api_params(openapi_doc_data)
 
         # Verify
         assert parameters and isinstance(parameters, list)
-        assert len(parameters) == len(swagger_api_doc_data)
+        assert len(parameters) == len(openapi_doc_data)
         type_checksum = list(map(lambda p: isinstance(p, APIParameter), parameters))
         assert False not in type_checksum
 
-    @pytest.mark.parametrize(("swagger_api_doc_data", "entire_swagger_config"), SWAGGER_API_PARAMETERS_JSON_FOR_API)
+    @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_API_PARAMETERS_JSON_FOR_API)
     def test__process_has_ref_parameters_with_valid_value(
-        self, swagger_api_doc_data: dict, entire_swagger_config: dict, data_model: API
+        self, openapi_doc_data: dict, entire_openapi_config: dict, data_model: API
     ):
         # Pre-process
-        set_component_definition(OpenAPIParser(data=entire_swagger_config))
+        set_component_definition(OpenAPIParser(data=entire_openapi_config))
 
         # Run target function
-        parameters = data_model._process_has_ref_parameters(swagger_api_doc_data)
+        parameters = data_model._process_has_ref_parameters(openapi_doc_data)
 
         # Verify
         assert parameters and isinstance(parameters, list)
-        assert len(parameters) == len(entire_swagger_config["definitions"]["UpdateFooRequest"]["properties"].keys())
+        assert len(parameters) == len(entire_openapi_config["definitions"]["UpdateFooRequest"]["properties"].keys())
         type_checksum = list(map(lambda p: isinstance(p, dict), parameters))
         assert False not in type_checksum
 
-    @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_PARAMETERS_JSON)
-    def test__process_has_ref_parameters_with_invalid_value(self, swagger_api_doc_data: dict, data_model: API):
+    @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_PARAMETERS_JSON)
+    def test__process_has_ref_parameters_with_invalid_value(self, openapi_doc_data: dict, data_model: API):
         with pytest.raises(ValueError) as exc_info:
             # Run target function
-            data_model._process_has_ref_parameters(swagger_api_doc_data)
+            data_model._process_has_ref_parameters(openapi_doc_data)
 
         # Verify
         assert re.search(r".{1,64}no ref.{1,64}", str(exc_info.value), re.IGNORECASE)
 
-    @pytest.mark.parametrize(("strategy", "api_detail", "entire_config"), SWAGGER_API_RESPONSES_FOR_API)
+    @pytest.mark.parametrize(("strategy", "api_detail", "entire_config"), OPENAPI_API_RESPONSES_FOR_API)
     def test__process_http_response(
         self, strategy: ResponseStrategy, api_detail: dict, entire_config: dict, data_model: API
     ):
@@ -343,7 +385,7 @@ class TestAPI(_SwaggerDataModelTestSuite):
                             assert item_value in ["random string value", "random integer value", "random boolean value"]
 
     @pytest.mark.parametrize(
-        ("strategy", "api_response_detail", "entire_config"), SWAGGER_API_RESPONSES_PROPERTY_FOR_API
+        ("strategy", "api_response_detail", "entire_config"), OPENAPI_API_RESPONSES_PROPERTY_FOR_API
     )
     def test__process_response_value(
         self, strategy: ResponseStrategy, api_response_detail: dict, entire_config: dict, data_model: API
@@ -375,15 +417,15 @@ class TestAPI(_SwaggerDataModelTestSuite):
                         assert item_value in ["random string value", "random integer value", "random boolean value"]
 
 
-class TestSwaggerConfig(_SwaggerDataModelTestSuite):
+class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
     @pytest.fixture(scope="function")
     def data_model(self) -> OpenAPIDocumentConfig:
         return OpenAPIDocumentConfig()
 
-    @pytest.mark.parametrize("swagger_api_doc_data", SWAGGER_API_DOC_JSON)
-    def test_deserialize(self, swagger_api_doc_data: dict, data_model: Transferable):
-        set_component_definition(OpenAPIParser(data=swagger_api_doc_data))
-        super().test_deserialize(swagger_api_doc_data, data_model)
+    @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_DOC_JSON)
+    def test_deserialize(self, openapi_doc_data: dict, data_model: Transferable):
+        set_component_definition(OpenAPIParser(data=openapi_doc_data))
+        super().test_deserialize(openapi_doc_data, data_model)
 
     def _initial(self, data: OpenAPIDocumentConfig) -> None:
         data.paths = []
@@ -467,3 +509,25 @@ class TestSwaggerConfig(_SwaggerDataModelTestSuite):
         base_url = data_model._align_url_format(base_url, api)
         assert re.search(r"/.{1,32}/.{1,32}/.{1,32}", base_url)
         assert re.search(r"/.{1,32}/.{1,32}/.{1,32}/.{1,32}", api.path)
+
+    @pytest.mark.parametrize(
+        ("data", "expected_openapi_version", "expected_parser_factory"),
+        [
+            ({"swagger": "2.0"}, OpenAPIVersion.V2, OpenAPIParserFactory),
+            ({"swagger": "2.6.0"}, OpenAPIVersion.V2, OpenAPIParserFactory),
+            ({"swagger": "3.0"}, OpenAPIVersion.V3, OpenAPIParserFactory),
+            ({"swagger": "3.1.0"}, OpenAPIVersion.V3, OpenAPIParserFactory),
+        ],
+    )
+    def test__chk_version_and_load_parser(
+        self,
+        data_model: OpenAPIDocumentConfig,
+        data: dict,
+        expected_openapi_version: OpenAPIVersion,
+        expected_parser_factory: Type[BaseOpenAPIParserFactory],
+    ):
+        data_model._chk_version_and_load_parser(data)
+        from pymock_api.model.openapi.config import OpenAPI_Document_Version
+
+        assert OpenAPI_Document_Version is expected_openapi_version
+        assert isinstance(data_model.parser_factory, expected_parser_factory)
