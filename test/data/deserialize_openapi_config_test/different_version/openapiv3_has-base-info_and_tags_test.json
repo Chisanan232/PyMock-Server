@@ -1,0 +1,392 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "description": "Some description about this API documentation",
+        "version": "A1",
+        "title": "PyTest testing API",
+        "license": {}
+    },
+    "servers": [
+        {
+            "url": "http://10.10.10.10:123456",
+            "description": "Generated server url"
+        }
+    ],
+    "paths": {
+        "/api/v1/test/foo": {
+            "get": {
+                "tags": [
+                    "foo"
+                ],
+                "summary": "This is Foo API",
+                "description": "  400 - Bad request error\n 401 - Unauthorized error\n 404 - Not found voucher\n 500 - Unexpected error\n",
+                "operationId": "",
+                "parameters": [
+                    {
+                        "name": "pageable",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/SwaggerPageable"
+                        }
+                    },
+                    {
+                        "name": "param",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/FooSearchParameters"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/definitions/ResponseDTO«List«FooResponse»»"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "foo"
+                ],
+                "summary": "update Foo",
+                "description": "  400 - Bad request error\n 401 - Unauthorized error\n 404 - Not found voucher\n 500 - Unexpected error\n",
+                "operationId": "",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/definitions/UpdateFooRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content":{
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/ResponseDTO«Unit»"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/test/foo-boo/export/{id}": {
+            "get": {
+                "tags": [
+                    "foo-boo"
+                ],
+                "summary": "export something as file",
+                "operationId": "",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExportFooBooDataRequestDto"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/Resource"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "TestResponse": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "value"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                },
+                "title": "Test"
+            },
+            "Resource": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string"
+                    },
+                    "file": {
+                        "type": "file"
+                    },
+                    "filename": {
+                        "type": "string"
+                    },
+                    "inputStream": {
+                        "$ref": "#/definitions/InputStream"
+                    },
+                    "open": {
+                        "type": "boolean"
+                    },
+                    "readable": {
+                        "type": "boolean"
+                    },
+                    "uri": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "url"
+                    },
+                    "count": {
+                        "type": "integer"
+                    }
+                },
+                "title": "Resource"
+            },
+            "InputStream": {
+                "type": "object",
+                "title": "InputStream"
+            },
+            "ResponseDTO«List«FooResponse»»": {
+                "type": "object",
+                "required": [
+                    "errorMessage",
+                    "responseCode"
+                ],
+                "properties": {
+                    "errorMessage": {
+                        "type": "string"
+                    },
+                    "responseCode": {
+                        "type": "string"
+                    },
+                    "responseData": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/FooResponse"
+                        }
+                    }
+                },
+                "title": "ResponseDTO«List«FooResponse»»"
+            },
+            "ResponseDTO«Unit»": {
+                "type": "object",
+                "required": [
+                    "errorMessage",
+                    "responseCode"
+                ],
+                "properties": {
+                    "errorMessage": {
+                        "type": "string"
+                    },
+                    "responseCode": {
+                        "type": "string"
+                    },
+                    "responseData": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/Unit"
+                        }
+                    }
+                },
+                "title": "ResponseDTO«List«FooResponse»»"
+            },
+            "Sort": {
+                "type": "object",
+                "properties": {
+                    "empty": {
+                        "type": "boolean"
+                    },
+                    "sorted": {
+                        "type": "boolean"
+                    },
+                    "unsorted": {
+                        "type": "boolean"
+                    }
+                },
+                "title": "Sort"
+            },
+            "SwaggerPageable": {
+                "type": "object",
+                "properties": {
+                    "page": {
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 0,
+                        "description": "Results page you want to retrieve (0..N)"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 20,
+                        "description": "Number of records per page"
+                    },
+                    "sort": {
+                        "type": "string",
+                        "description": "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+                    }
+                },
+                "title": "SwaggerPageable"
+            },
+            "UpdateFooRequest": {
+                "type": "object",
+                "required": [
+                    "balances"
+                ],
+                "properties": {
+                    "balances": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/UpdateOneFooDto"
+                        }
+                    }
+                },
+                "title": "UpdateFooRequest"
+            },
+            "UpdateOneFooDto": {
+                "type": "object",
+                "required": [
+                    "values",
+                    "id"
+                ],
+                "properties": {
+                    "values": {
+                        "type": "number",
+                        "example": 23434,
+                        "description": "value"
+                    },
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1,
+                        "description": "ID"
+                    }
+                },
+                "title": "UpdateOneFooDto"
+            },
+            "Unit": {
+                "type": "object",
+                "title": "Unit"
+            },
+            "FooSearchParameters": {
+                "required": [
+                    "date",
+                    "fooType"
+                ],
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "description": "Start date, format: ISO_OFFSET_DATE_TIME. Any special characters must be URL encoded, especially for `+`, `-`",
+                        "format": "date-time",
+                        "example": "2022-03-06T00:00:00.000+09:00"
+                    },
+                    "fooType": {
+                        "type": "string",
+                        "description": "Foo Type. Default value is selecting all.",
+                        "example": "ENUM1",
+                        "enum": [
+                            "ENUM1",
+                            "ENUM2"
+                        ]
+                    },
+                    "uid": {
+                        "type": "string",
+                        "description": "UID. Default value is *null*."
+                    }
+                }
+            },
+            "FooResponse": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "value1": {
+                        "type": "string"
+                    },
+                    "value2": {
+                        "type": "string"
+                    }
+                },
+                "title": "FooResponse"
+            },
+            "ExportFooBooDataRequestDto": {
+                "required": [],
+                "type": "object",
+                "properties": {
+                    "arg1": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "description": "test comment",
+                            "enum": [
+                                "ENUM1",
+                                "ENUM2"
+                            ]
+                        }
+                    },
+                    "arg2": {
+                        "type": "string",
+                        "example": "ENUM1",
+                        "enum": [
+                            "ENUM1",
+                            "ENUM2"
+                        ]
+                    },
+                    "datetime": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2022-09-01T00:00:00+09:00"
+                    }
+                }
+            }
+        }
+    }
+}

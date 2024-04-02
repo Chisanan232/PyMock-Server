@@ -57,6 +57,8 @@ OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
 OPENAPI_API_RESPONSES_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
 OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
 
+OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON: List[tuple] = []
+
 
 def _get_all_openapi_api_doc() -> None:
     json_dir = os.path.join(
@@ -103,7 +105,23 @@ def _get_all_openapi_api_doc() -> None:
                             OPENAPI_API_PARAMETERS_JSON_FOR_API.append((param, openapi_api_docs))
 
 
+def _get_different_version_openapi_api_doc() -> None:
+    json_dir = os.path.join(
+        str(pathlib.Path(__file__).parent.parent.parent.parent),
+        "data",
+        "deserialize_openapi_config_test",
+        "different_version",
+        "*.json",
+    )
+    global OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON
+    for json_config_path in glob.glob(json_dir):
+        with open(json_config_path, "r", encoding="utf-8") as file_stream:
+            openapi_api_docs = json.loads(file_stream.read())
+            OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON.append(openapi_api_docs)
+
+
 _get_all_openapi_api_doc()
+_get_different_version_openapi_api_doc()
 
 
 class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
@@ -531,3 +549,14 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
 
         assert OpenAPI_Document_Version is expected_openapi_version
         assert isinstance(data_model.parser_factory, expected_parser_factory)
+
+    @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON)
+    def test_deserialize_with_openapi_v3(self, openapi_doc_data: dict, data_model: OpenAPIDocumentConfig):
+        set_component_definition(OpenAPIParser(data=openapi_doc_data))
+
+        self._initial(data=data_model)
+        deserialized_data = data_model.deserialize(data=openapi_doc_data)
+        assert deserialized_data
+        self._verify_result(data=deserialized_data, og_data=openapi_doc_data)
+
+        # super().test_deserialize(openapi_doc_data, data_model)
