@@ -45,7 +45,7 @@
                         "content": {
                             "*/*": {
                                 "schema": {
-                                    "$ref": "#/definitions/ResponseDTO«List«FooResponse»»"
+                                    "$ref": "#/components/schemas/ResponseDTO«List«FooResponse»»"
                                 }
                             }
                         }
@@ -63,7 +63,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/definitions/UpdateFooRequest"
+                                "$ref": "#/components/schemas/UpdateFooRequest"
                             }
                         }
                     },
@@ -75,7 +75,7 @@
                         "content":{
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/definitions/ResponseDTO«Unit»"
+                                    "$ref": "#/components/schemas/ResponseDTO«Unit»"
                                 }
                             }
                         }
@@ -120,7 +120,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/definitions/Resource"
+                                    "$ref": "#/components/schemas/Resource"
                                 }
                             }
                         }
@@ -160,7 +160,7 @@
                         "type": "string"
                     },
                     "inputStream": {
-                        "$ref": "#/definitions/InputStream"
+                        "$ref": "#/components/schemas/InputStream"
                     },
                     "open": {
                         "type": "boolean"
@@ -202,7 +202,7 @@
                     "responseData": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/definitions/FooResponse"
+                            "$ref": "#/components/schemas/FooResponse"
                         }
                     }
                 },
@@ -224,7 +224,7 @@
                     "responseData": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/definitions/Unit"
+                            "$ref": "#/components/schemas/Unit"
                         }
                     }
                 },
@@ -276,7 +276,7 @@
                     "balances": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/definitions/UpdateOneFooDto"
+                            "$ref": "#/components/schemas/UpdateOneFooDto"
                         }
                     }
                 },
