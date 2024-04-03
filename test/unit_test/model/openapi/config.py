@@ -255,8 +255,10 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
 
     @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_ONE_API_JSON)
     def test_deserialize(self, openapi_doc_data: dict, entire_openapi_config: dict, data_model: Transferable):
+        set_openapi_version(OpenAPIVersion.V2)
         set_component_definition(OpenAPIV2Parser(data=entire_openapi_config))
         super().test_deserialize(openapi_doc_data, data_model)
+        set_openapi_version(OpenAPIVersion.V3)
 
     def test_invalid_deserialize(self, data_model: API):
         data_model.process_response_strategy = None
@@ -326,6 +328,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
     @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API)
     def test__process_api_params(self, openapi_doc_data: List[dict], entire_openapi_config: dict, data_model: API):
         # Pre-process
+        set_openapi_version(OpenAPIVersion.V2)
         set_component_definition(OpenAPIV2Parser(data=entire_openapi_config))
 
         # Run target function
@@ -336,6 +339,9 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         assert len(parameters) == len(openapi_doc_data)
         type_checksum = list(map(lambda p: isinstance(p, APIParameter), parameters))
         assert False not in type_checksum
+
+        # Finally
+        set_openapi_version(OpenAPIVersion.V3)
 
     @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_API_PARAMETERS_JSON_FOR_API)
     def test__process_has_ref_parameters_with_valid_value(
@@ -370,19 +376,34 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         set_component_definition(OpenAPIV2Parser(data=entire_config))
 
         # Run target function under test
+        print(f"[DEBUG in test] api_detail: {api_detail}")
         response_data = data_model._process_response(
             openapi_path_parser=OpenAPIV2PathParser(data=api_detail), strategy=strategy
         )
         print(f"[DEBUG in test] response_data: {response_data}")
 
         # Verify
+        resp_200 = api_detail["responses"]["200"]
+        if _YamlSchema.has_schema(resp_200):
+            should_check_name = True
+        else:
+            response_content = resp_200["content"]
+            resp_val_format = list(filter(lambda f: f in response_content.keys(), ["application/json", "*/*"]))
+            response_detail = response_content[resp_val_format[0]]["schema"]
+            if not response_detail:
+                should_check_name = False
+            else:
+                should_check_name = True
+        print(f"[DEBUG in test] should_check_name: {should_check_name}")
+
         assert response_data and isinstance(response_data, dict)
         data_details = response_data["data"]
         if strategy is ResponseStrategy.OBJECT:
             assert data_details is not None and isinstance(data_details, list)
             for d in data_details:
-                assert d["name"]
-                assert d["type"]
+                if should_check_name:
+                    assert d["name"]
+                    assert d["type"]
                 assert d["required"] is not None
                 assert d["format"] is None  # FIXME: Should activate this verify after support this feature
                 if d["type"] == "list":
@@ -395,17 +416,27 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
             assert data_details is not None and isinstance(data_details, dict)
             for v in data_details.values():
                 if isinstance(v, str):
-                    assert v in [
-                        "random string value",
-                        "random integer value",
-                        "random boolean value",
-                        "random file output stream",
-                        "FIXME: Handle the reference",
-                    ]
+                    if should_check_name:
+                        assert v in [
+                            "random string value",
+                            "random integer value",
+                            "random boolean value",
+                            "random file output stream",
+                            "FIXME: Handle the reference",
+                        ]
+                    else:
+                        assert v == "empty value"
                 else:
                     for item in v:
                         for item_value in item.values():
-                            assert item_value in ["random string value", "random integer value", "random boolean value"]
+                            if should_check_name:
+                                assert item_value in [
+                                    "random string value",
+                                    "random integer value",
+                                    "random boolean value",
+                                ]
+                            else:
+                                assert item_value == "empty value"
 
     @pytest.mark.parametrize(
         ("strategy", "api_response_detail", "entire_config"), OPENAPI_API_RESPONSES_PROPERTY_FOR_API
@@ -562,6 +593,28 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
         self._initial(data=data_model)
         deserialized_data = data_model.deserialize(data=openapi_doc_data)
         assert deserialized_data
-        self._verify_result(data=deserialized_data, og_data=openapi_doc_data)
+        self._verify_result_with_openapi_v3(data=deserialized_data, og_data=openapi_doc_data)
 
-        # super().test_deserialize(openapi_doc_data, data_model)
+    def _verify_result_with_openapi_v3(self, data: OpenAPIDocumentConfig, og_data: dict) -> None:
+        path_with_method_number = [len(v.keys()) for v in og_data["paths"].values()]
+        assert len(data.paths) == sum(path_with_method_number)
+        for api in data.paths:
+            assert api.path in og_data["paths"].keys()
+            assert api.http_method in og_data["paths"][api.path].keys()
+
+            api_http_details = og_data["paths"][api.path][api.http_method]
+            if api.http_method.upper() == "GET":
+                expected_parameters = 0
+                for param in api_http_details["parameters"]:
+                    if _YamlSchema.has_ref(param):
+                        expected_parameters += len(_YamlSchema.get_schema_ref(param)["properties"].keys())
+                    else:
+                        expected_parameters += 1
+                assert len(api.parameters) == expected_parameters
+            else:
+                request_body = api_http_details["requestBody"]
+                data_format = list(filter(lambda b: b in request_body["content"].keys(), ["application/json", "*/*"]))
+                assert len(data_format) == 1
+                assert len(api.parameters) == len(
+                    _YamlSchema.get_schema_ref(request_body["content"][data_format[0]])["properties"].keys()
+                )
