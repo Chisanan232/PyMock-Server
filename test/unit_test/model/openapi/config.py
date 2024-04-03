@@ -14,8 +14,8 @@ from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
 from pymock_api.model.openapi._parse import (
-    OpenAPIPathParser,
     OpenAPIV2Parser,
+    OpenAPIV2PathParser,
     OpenAPIV3Parser,
 )
 from pymock_api.model.openapi._parser_factory import (
@@ -329,7 +329,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         set_component_definition(OpenAPIV2Parser(data=entire_openapi_config))
 
         # Run target function
-        parameters = data_model._process_api_params(OpenAPIPathParser({"parameters": openapi_doc_data}))
+        parameters = data_model._process_api_params(OpenAPIV2PathParser({"parameters": openapi_doc_data}))
 
         # Verify
         assert parameters and isinstance(parameters, list)
@@ -371,7 +371,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
 
         # Run target function under test
         response_data = data_model._process_response(
-            openapi_path_parser=OpenAPIPathParser(data=api_detail), strategy=strategy
+            openapi_path_parser=OpenAPIV2PathParser(data=api_detail), strategy=strategy
         )
         print(f"[DEBUG in test] response_data: {response_data}")
 

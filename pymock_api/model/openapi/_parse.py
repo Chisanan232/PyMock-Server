@@ -126,7 +126,7 @@ class BaseOpenAPIPathParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIPathParser(BaseOpenAPIPathParser):
+class OpenAPIV2PathParser(BaseOpenAPIPathParser):
 
     def get_request_parameters(self) -> List[dict]:
         return self._data["parameters"]
