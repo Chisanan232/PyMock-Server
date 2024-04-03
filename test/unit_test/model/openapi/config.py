@@ -13,7 +13,11 @@ from pymock_api.model import MockAPI
 from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
-from pymock_api.model.openapi._parse import OpenAPIPathParser, OpenAPIV2Parser
+from pymock_api.model.openapi._parse import (
+    OpenAPIPathParser,
+    OpenAPIV2Parser,
+    OpenAPIV3Parser,
+)
 from pymock_api.model.openapi._parser_factory import (
     BaseOpenAPIParserFactory,
     OpenAPIV2ParserFactory,
@@ -553,7 +557,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
 
     @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON)
     def test_deserialize_with_openapi_v3(self, openapi_doc_data: dict, data_model: OpenAPIDocumentConfig):
-        set_component_definition(OpenAPIV2Parser(data=openapi_doc_data))
+        set_component_definition(OpenAPIV3Parser(data=openapi_doc_data))
 
         self._initial(data=data_model)
         deserialized_data = data_model.deserialize(data=openapi_doc_data)

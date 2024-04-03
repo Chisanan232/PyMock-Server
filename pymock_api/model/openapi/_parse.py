@@ -235,4 +235,4 @@ class OpenAPIV3Parser(BaseOpenAPIParser):
         return []
 
     def get_objects(self) -> Dict[str, dict]:
-        return self._data.get("components", {}).get("schemas", {})
+        return self._data.get("components", {})
