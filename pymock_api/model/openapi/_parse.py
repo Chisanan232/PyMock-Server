@@ -24,7 +24,7 @@ class OpenAPIObjectParser(BaseOpenAPIObjectParser):
         if default is not None:
             return self._data.get("required", default)
         else:
-            return self._data["required"]
+            return self._data.get("required", [])
 
     def get_properties(self, default: Any = None) -> Dict[str, dict]:
         if default is not None:
