@@ -69,12 +69,14 @@ class _YamlSchema:
             else:
                 return _get_schema(component_def_data[paths[i]], paths, i + 1)
 
+        print(f"[DEBUG in get_schema_ref] data: {data}")
         _has_ref = _YamlSchema.has_ref(data)
         if not _has_ref:
             raise ValueError("This parameter has no ref in schema.")
         schema_path = (
             (data["schema"]["$ref"] if _has_ref == "schema" else data["$ref"]).replace("#/", "").split("/")[1:]
         )
+        print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")
         # Operate the component definition object
         return _get_schema(get_component_definition(), schema_path, 0)
 
@@ -204,12 +206,28 @@ class API(Transferable):
         return self
 
     def _process_api_params(self, openapi_path_parser: BaseOpenAPIPathParser) -> List["APIParameter"]:
-        params_data: List[dict] = openapi_path_parser.get_request_parameters()
+        global OpenAPI_Document_Version
+        if OpenAPI_Document_Version is OpenAPIVersion.V2:
+            params_data: List[dict] = openapi_path_parser.get_request_parameters()
+        else:
+            if self.http_method.upper() == "GET":
+                params_data = openapi_path_parser.get_request_parameters()
+            else:
+                print(f"[DEBUG in src] self.http_method: {self.http_method}")
+                print(f"[DEBUG in src] openapi_path_parser._data: {openapi_path_parser._data}")
+                # TODO: Handle the parameters part for non-GET HTTP method
+                params_in_path_data: List[dict] = openapi_path_parser.get_request_parameters()
+                params_data = openapi_path_parser.get_request_body()
         has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", params_data))
+        print(f"[DEBUG in src] params_data: {params_data}")
         if has_ref_in_schema_param:
             # TODO: Ensure the value maps this condition is really only one
-            assert len(params_data) == 1
-            handled_parameters = self._process_has_ref_parameters(params_data[0])
+            handled_parameters = []
+            for param in params_data:
+                one_handled_parameters = self._process_has_ref_parameters(param)
+                handled_parameters.extend(one_handled_parameters)
+            # assert len(params_data) == 1
+            # handled_parameters = self._process_has_ref_parameters(params_data[0])
         else:
             # TODO: Parsing the data type of key *items* should be valid type of Python realm
             for param in params_data:

@@ -16,6 +16,7 @@ from ._parse import (
     OpenAPITagParser,
     OpenAPIV2Parser,
     OpenAPIV3Parser,
+    OpenAPIV3PathParser,
 )
 
 
@@ -75,8 +76,8 @@ class OpenAPIV3ParserFactory(BaseOpenAPIParserFactory):
     def tag(self, data: Dict) -> OpenAPITagParser:
         return OpenAPITagParser(data=data)
 
-    def path(self, data: Dict) -> OpenAPIPathParser:
-        return OpenAPIPathParser(data=data)
+    def path(self, data: Dict) -> OpenAPIV3PathParser:
+        return OpenAPIV3PathParser(data=data)
 
     def request_parameters(self, data: Dict) -> OpenAPIRequestParametersParser:
         return OpenAPIRequestParametersParser(data=data)
