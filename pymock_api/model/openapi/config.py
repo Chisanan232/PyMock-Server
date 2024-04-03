@@ -209,34 +209,75 @@ class API(Transferable):
         global OpenAPI_Document_Version
         if OpenAPI_Document_Version is OpenAPIVersion.V2:
             params_data: List[dict] = openapi_path_parser.get_request_parameters()
+            print(f"[DEBUG] params_data: {params_data}")
+            has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", params_data))
+            print(f"[DEBUG in src] has_ref_in_schema_param: {has_ref_in_schema_param}")
+            if has_ref_in_schema_param:
+                # TODO: Ensure the value maps this condition is really only one
+                handled_parameters = []
+                for param in params_data:
+                    one_handled_parameters = self._process_has_ref_parameters(param)
+                    handled_parameters.extend(one_handled_parameters)
+                # assert len(params_data) == 1
+                # handled_parameters = self._process_has_ref_parameters(params_data[0])
+            else:
+                # TODO: Parsing the data type of key *items* should be valid type of Python realm
+                for param in params_data:
+                    parser = self.parser_factory.request_parameters(param)
+                    items = parser.get_items()
+                    if items is not None:
+                        param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
+                handled_parameters = params_data
+            return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
         else:
             if self.http_method.upper() == "GET":
                 params_data = openapi_path_parser.get_request_parameters()
+                print(f"[DEBUG] params_data: {params_data}")
+                has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", params_data))
+                print(f"[DEBUG in src] has_ref_in_schema_param: {has_ref_in_schema_param}")
+                if has_ref_in_schema_param:
+                    # TODO: Ensure the value maps this condition is really only one
+                    handled_parameters = []
+                    for param in params_data:
+                        one_handled_parameters = self._process_has_ref_parameters(param)
+                        handled_parameters.extend(one_handled_parameters)
+                    # assert len(params_data) == 1
+                    # handled_parameters = self._process_has_ref_parameters(params_data[0])
+                else:
+                    # TODO: Parsing the data type of key *items* should be valid type of Python realm
+                    for param in params_data:
+                        parser = self.parser_factory.request_parameters(param)
+                        items = parser.get_items()
+                        if items is not None:
+                            param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
+                    handled_parameters = params_data
+                return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
             else:
                 print(f"[DEBUG in src] self.http_method: {self.http_method}")
                 print(f"[DEBUG in src] openapi_path_parser._data: {openapi_path_parser._data}")
                 # TODO: Handle the parameters part for non-GET HTTP method
                 params_in_path_data: List[dict] = openapi_path_parser.get_request_parameters()
-                params_data = openapi_path_parser.get_request_body()
-        has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", params_data))
-        print(f"[DEBUG in src] params_data: {params_data}")
-        if has_ref_in_schema_param:
-            # TODO: Ensure the value maps this condition is really only one
-            handled_parameters = []
-            for param in params_data:
-                one_handled_parameters = self._process_has_ref_parameters(param)
-                handled_parameters.extend(one_handled_parameters)
-            # assert len(params_data) == 1
-            # handled_parameters = self._process_has_ref_parameters(params_data[0])
-        else:
-            # TODO: Parsing the data type of key *items* should be valid type of Python realm
-            for param in params_data:
-                parser = self.parser_factory.request_parameters(param)
-                items = parser.get_items()
-                if items is not None:
-                    param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
-            handled_parameters = params_data
-        return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
+                params_data: dict = openapi_path_parser.get_request_body()  # type: ignore[no-redef]
+                print(f"[DEBUG] params_data: {params_data}")
+                has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", [params_data]))  # type: ignore[arg-type]
+                print(f"[DEBUG in src] has_ref_in_schema_param: {has_ref_in_schema_param}")
+                if has_ref_in_schema_param:
+                    # TODO: Ensure the value maps this condition is really only one
+                    handled_parameters = []
+                    # for param in params_data:
+                    one_handled_parameters = self._process_has_ref_parameters(params_data)  # type: ignore[arg-type]
+                    handled_parameters.extend(one_handled_parameters)
+                    # assert len(params_data) == 1
+                    # handled_parameters = self._process_has_ref_parameters(params_data[0])
+                else:
+                    # TODO: Parsing the data type of key *items* should be valid type of Python realm
+                    for param in params_data:
+                        parser = self.parser_factory.request_parameters(param)
+                        items = parser.get_items()
+                        if items is not None:
+                            param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
+                    handled_parameters = params_data
+                return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
 
     def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
         request_body_params = _YamlSchema.get_schema_ref(data)
@@ -293,9 +334,10 @@ class API(Transferable):
                 "strategy": strategy,
                 "data": {},
             }
+        print(f"[DEBUG] status_200_response: {status_200_response}")
         if _YamlSchema.has_schema(status_200_response):
-            response_schema = _YamlSchema.get_schema_ref(status_200_response)
-            parser = self.parser_factory.object(response_schema)
+            response_schema_ref = _YamlSchema.get_schema_ref(status_200_response)
+            parser = self.parser_factory.object(response_schema_ref)
             response_schema_properties: Optional[dict] = parser.get_properties(default=None)
             if response_schema_properties:
                 for k, v in response_schema_properties.items():
@@ -315,13 +357,67 @@ class API(Transferable):
                         response_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
         else:
             resp_parser = self.parser_factory.response(status_200_response)
-            assert resp_parser.exist_in_content(value_format="application/json") is True
-            response_schema = resp_parser.get_content(value_format="application/json")
-            if response_schema:
-                raise NotImplementedError("Not support set HTTP response by this way in current version.")
+            resp_value_format = list(
+                filter(lambda vf: resp_parser.exist_in_content(value_format=vf), ["application/json", "*/*"])
+            )
+            response_schema = resp_parser.get_content(value_format=resp_value_format[0])
+            if _YamlSchema.has_ref(response_schema):
+                response_schema_ref = _YamlSchema.get_schema_ref(response_schema)
+                parser = self.parser_factory.object(response_schema_ref)
+                response_schema_properties: Optional[dict] = parser.get_properties(default=None)  # type: ignore[no-redef]
+                if response_schema_properties:
+                    for k, v in response_schema_properties.items():
+                        if strategy is ResponseStrategy.OBJECT:
+                            response_data_prop = self._process_response_value(property_value=v, strategy=strategy)
+                            assert isinstance(response_data_prop, dict)
+                            response_data_prop["name"] = k
+                            response_data_prop["required"] = k in parser.get_required(default=[k])
+                            assert isinstance(
+                                response_data["data"], list
+                            ), "The response data type must be *list* if its HTTP response strategy is object."
+                            response_data["data"].append(response_data_prop)
+                        else:
+                            assert isinstance(
+                                response_data["data"], dict
+                            ), "The response data type must be *dict* if its HTTP response strategy is not object."
+                            response_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
+            else:
+                print(f"[DEBUG] response_schema: {response_schema}")
+                # Data may '{}' or '{ "type": "integer", "title": "Id" }'
+                if strategy is ResponseStrategy.OBJECT:
+                    response_data_prop = self._process_response_value(property_value=response_schema, strategy=strategy)
+                    assert isinstance(response_data_prop, dict)
+                    # response_data_prop["name"] = ""
+                    # response_data_prop["required"] = True
+                    assert isinstance(
+                        response_data["data"], list
+                    ), "The response data type must be *list* if its HTTP response strategy is object."
+                    response_data["data"].append(response_data_prop)
+                else:
+                    assert isinstance(
+                        response_data["data"], dict
+                    ), "The response data type must be *dict* if its HTTP response strategy is not object."
+                    response_data["data"][0] = self._process_response_value(
+                        property_value=response_schema, strategy=strategy
+                    )
+                print(f"[DEBUG] response_data: {response_data}")
         return response_data
 
     def _process_response_value(self, property_value: dict, strategy: ResponseStrategy) -> Union[str, dict]:
+        if not property_value:
+            if strategy is ResponseStrategy.OBJECT:
+                return {
+                    "name": "",
+                    # TODO: Set the *required* property correctly
+                    "required": False,
+                    # TODO: Set the *type* property correctly
+                    "type": None,
+                    # TODO: Set the *format* property correctly
+                    "format": None,
+                    "items": [],
+                }
+            else:
+                return "empty value"
         if _YamlSchema.has_ref(property_value):
             # FIXME: Handle the reference
             v_ref = _YamlSchema.get_schema_ref(property_value)
@@ -421,7 +517,12 @@ class API(Transferable):
         )
         resp_strategy = self.response["strategy"]
         if resp_strategy is ResponseStrategy.OBJECT:
-            mock_api.set_response(strategy=resp_strategy, iterable_value=self.response["data"])
+            if list(filter(lambda p: p["name"] == "", self.response["data"])):
+                values = []
+            else:
+                values = self.response["data"]
+            print(f"[DEBUG in to_api_config] values: {values}")
+            mock_api.set_response(strategy=resp_strategy, iterable_value=values)
         else:
             mock_api.set_response(strategy=resp_strategy, value=self.response["data"])
         return mock_api
