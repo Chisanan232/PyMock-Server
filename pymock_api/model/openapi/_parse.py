@@ -109,9 +109,8 @@ class BaseOpenAPIPathParser(metaclass=ABCMeta):
     def get_request_parameters(self) -> List[dict]:
         pass
 
-    @abstractmethod
     def get_request_body(self, value_format: str = "application/json") -> dict:
-        pass
+        raise NotImplemented
 
     @abstractmethod
     def get_response(self, status_code: str) -> dict:
@@ -129,9 +128,6 @@ class BaseOpenAPIPathParser(metaclass=ABCMeta):
 class OpenAPIV2PathParser(BaseOpenAPIPathParser):
 
     def get_request_parameters(self) -> List[dict]:
-        return self._data["parameters"]
-
-    def get_request_body(self, value_format: str = "application/json") -> dict:
         return self._data["parameters"]
 
     def get_response(self, status_code: str) -> dict:
