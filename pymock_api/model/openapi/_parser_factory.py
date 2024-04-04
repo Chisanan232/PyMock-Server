@@ -30,7 +30,7 @@ class BaseOpenAPIParserFactory(metaclass=ABCMeta):
         pass
 
     def tag(self, data: Dict) -> BaseOpenAPITagParser:
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def path(self, data: Dict) -> BaseOpenAPIPathParser:

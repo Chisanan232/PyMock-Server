@@ -110,7 +110,7 @@ class BaseOpenAPIPathParser(metaclass=ABCMeta):
         pass
 
     def get_request_body(self, value_format: str = "application/json") -> dict:
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def get_response(self, status_code: str) -> dict:
