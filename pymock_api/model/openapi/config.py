@@ -229,8 +229,6 @@ class API(Transferable):
                 for param in params_data:
                     one_handled_parameters = self._process_has_ref_parameters(param)
                     handled_parameters.extend(one_handled_parameters)
-                # assert len(params_data) == 1
-                # handled_parameters = self._process_has_ref_parameters(params_data[0])
             else:
                 # TODO: Parsing the data type of key *items* should be valid type of Python realm
                 handled_parameters = _initial_non_ref_parameters_value(params_data)
@@ -254,11 +252,8 @@ class API(Transferable):
                 if has_ref_in_schema_param:
                     # TODO: Ensure the value maps this condition is really only one
                     handled_parameters = []
-                    # for param in params_data:
                     one_handled_parameters = self._process_has_ref_parameters(params_data)
                     handled_parameters.extend(one_handled_parameters)
-                    # assert len(params_data) == 1
-                    # handled_parameters = self._process_has_ref_parameters(params_data[0])
                 else:
                     # TODO: Parsing the data type of key *items* should be valid type of Python realm
                     handled_parameters = _initial_non_ref_parameters_value(params_in_path_data)
@@ -334,8 +329,6 @@ class API(Transferable):
             if strategy is ResponseStrategy.OBJECT:
                 response_data_prop = self._process_response_value(property_value=_data, strategy=strategy)
                 assert isinstance(response_data_prop, dict)
-                # response_data_prop["name"] = ""
-                # response_data_prop["required"] = True
                 assert isinstance(
                     resp_data["data"], list
                 ), "The response data type must be *list* if its HTTP response strategy is object."
