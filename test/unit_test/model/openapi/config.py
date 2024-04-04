@@ -614,16 +614,27 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             api_http_details = og_data["paths"][api.path][api.http_method]
             if api.http_method.upper() == "GET":
                 expected_parameters = 0
-                for param in api_http_details["parameters"]:
+                for param in api_http_details.get("parameters", []):
                     if _YamlSchema.has_ref(param):
                         expected_parameters += len(_YamlSchema.get_schema_ref(param)["properties"].keys())
                     else:
                         expected_parameters += 1
                 assert len(api.parameters) == expected_parameters
             else:
-                request_body = api_http_details["requestBody"]
-                data_format = list(filter(lambda b: b in request_body["content"].keys(), ["application/json", "*/*"]))
-                assert len(data_format) == 1
-                assert len(api.parameters) == len(
-                    _YamlSchema.get_schema_ref(request_body["content"][data_format[0]])["properties"].keys()
-                )
+                request_body = api_http_details.get("requestBody", {})
+                if request_body:
+                    data_format = list(
+                        filter(lambda b: b in request_body["content"].keys(), ["application/json", "*/*"])
+                    )
+                    assert len(data_format) == 1
+                    assert len(api.parameters) == len(
+                        _YamlSchema.get_schema_ref(request_body["content"][data_format[0]])["properties"].keys()
+                    )
+                else:
+                    expected_parameters = 0
+                    for param in api_http_details["parameters"]:
+                        if _YamlSchema.has_ref(param):
+                            expected_parameters += len(_YamlSchema.get_schema_ref(param)["properties"].keys())
+                        else:
+                            expected_parameters += 1
+                    assert len(api.parameters) == expected_parameters
