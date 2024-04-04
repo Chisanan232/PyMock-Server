@@ -26,9 +26,8 @@ class BaseOpenAPIParserFactory(metaclass=ABCMeta):
     def entire_config(self, file: str = "", data: Dict = {}) -> BaseOpenAPIParser:
         pass
 
-    @abstractmethod
     def tag(self, data: Dict) -> BaseOpenAPITagParser:
-        pass
+        raise NotImplemented
 
     @abstractmethod
     def path(self, data: Dict) -> BaseOpenAPIPathParser:
@@ -72,9 +71,6 @@ class OpenAPIV3ParserFactory(BaseOpenAPIParserFactory):
 
     def entire_config(self, file: str = "", data: Dict = {}) -> OpenAPIV3Parser:
         return OpenAPIV3Parser(file=file, data=data)
-
-    def tag(self, data: Dict) -> OpenAPITagParser:
-        return OpenAPITagParser(data=data)
 
     def path(self, data: Dict) -> OpenAPIV3PathParser:
         return OpenAPIV3PathParser(data=data)
