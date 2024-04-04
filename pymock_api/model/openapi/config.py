@@ -243,7 +243,6 @@ class API(Transferable):
             else:
                 print(f"[DEBUG in src] self.http_method: {self.http_method}")
                 print(f"[DEBUG in src] openapi_path_parser._data: {openapi_path_parser._data}")
-                # TODO: Handle the parameters part for non-GET HTTP method
                 params_in_path_data: List[dict] = openapi_path_parser.get_request_parameters()
                 params_data: dict = openapi_path_parser.get_request_body()
                 print(f"[DEBUG] params_data: {params_data}")
