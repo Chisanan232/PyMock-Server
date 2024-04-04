@@ -99,7 +99,10 @@ class BaseOpenAPIDataModel(metaclass=ABCMeta):
 
     @property
     def parser_factory(self) -> BaseOpenAPIParserFactory:
-        global OpenAPI_Parser_Factory
+        global OpenAPI_Document_Version, OpenAPI_Parser_Factory
+        assert (
+            OpenAPI_Parser_Factory.chk_version(OpenAPI_Document_Version) is True
+        ), "The parser factory is not mapping with the OpenAPI documentation version."
         return OpenAPI_Parser_Factory
 
     def load_parser_factory_with_openapi_version(self) -> BaseOpenAPIParserFactory:

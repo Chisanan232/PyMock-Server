@@ -21,6 +21,9 @@ from ._parse import (
 
 
 class BaseOpenAPIParserFactory(metaclass=ABCMeta):
+    @abstractmethod
+    def chk_version(self, version: OpenAPIVersion) -> bool:
+        pass
 
     @abstractmethod
     def entire_config(self, file: str = "", data: Dict = {}) -> BaseOpenAPIParser:
@@ -47,6 +50,8 @@ class BaseOpenAPIParserFactory(metaclass=ABCMeta):
 
 
 class OpenAPIV2ParserFactory(BaseOpenAPIParserFactory):
+    def chk_version(self, version: OpenAPIVersion) -> bool:
+        return version is OpenAPIVersion.V2
 
     def entire_config(self, file: str = "", data: Dict = {}) -> OpenAPIV2Parser:
         return OpenAPIV2Parser(file=file, data=data)
@@ -68,6 +73,8 @@ class OpenAPIV2ParserFactory(BaseOpenAPIParserFactory):
 
 
 class OpenAPIV3ParserFactory(BaseOpenAPIParserFactory):
+    def chk_version(self, version: OpenAPIVersion) -> bool:
+        return version is OpenAPIVersion.V3
 
     def entire_config(self, file: str = "", data: Dict = {}) -> OpenAPIV3Parser:
         return OpenAPIV3Parser(file=file, data=data)
