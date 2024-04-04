@@ -215,8 +215,7 @@ class API(Transferable):
                     param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
             return _params
 
-        global OpenAPI_Document_Version
-        if OpenAPI_Document_Version is OpenAPIVersion.V2:
+        def _initial_request_parameters_model() -> List["APIParameter"]:
             params_data: List[dict] = openapi_path_parser.get_request_parameters()
             print(f"[DEBUG] params_data: {params_data}")
             has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", params_data))
@@ -233,38 +232,27 @@ class API(Transferable):
                 # TODO: Parsing the data type of key *items* should be valid type of Python realm
                 handled_parameters = _initial_non_ref_parameters_value(params_data)
             return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
+
+        global OpenAPI_Document_Version
+        if OpenAPI_Document_Version is OpenAPIVersion.V2:
+            return _initial_request_parameters_model()
         else:
             if self.http_method.upper() == "GET":
-                params_data = openapi_path_parser.get_request_parameters()
-                print(f"[DEBUG] params_data: {params_data}")
-                has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", params_data))
-                print(f"[DEBUG in src] has_ref_in_schema_param: {has_ref_in_schema_param}")
-                if has_ref_in_schema_param:
-                    # TODO: Ensure the value maps this condition is really only one
-                    handled_parameters = []
-                    for param in params_data:
-                        one_handled_parameters = self._process_has_ref_parameters(param)
-                        handled_parameters.extend(one_handled_parameters)
-                    # assert len(params_data) == 1
-                    # handled_parameters = self._process_has_ref_parameters(params_data[0])
-                else:
-                    # TODO: Parsing the data type of key *items* should be valid type of Python realm
-                    handled_parameters = _initial_non_ref_parameters_value(params_data)
-                return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
+                return _initial_request_parameters_model()
             else:
                 print(f"[DEBUG in src] self.http_method: {self.http_method}")
                 print(f"[DEBUG in src] openapi_path_parser._data: {openapi_path_parser._data}")
                 # TODO: Handle the parameters part for non-GET HTTP method
                 params_in_path_data: List[dict] = openapi_path_parser.get_request_parameters()
-                params_data: dict = openapi_path_parser.get_request_body()  # type: ignore[no-redef]
+                params_data: dict = openapi_path_parser.get_request_body()
                 print(f"[DEBUG] params_data: {params_data}")
-                has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", [params_data]))  # type: ignore[arg-type]
+                has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", [params_data]))
                 print(f"[DEBUG in src] has_ref_in_schema_param: {has_ref_in_schema_param}")
                 if has_ref_in_schema_param:
                     # TODO: Ensure the value maps this condition is really only one
                     handled_parameters = []
                     # for param in params_data:
-                    one_handled_parameters = self._process_has_ref_parameters(params_data)  # type: ignore[arg-type]
+                    one_handled_parameters = self._process_has_ref_parameters(params_data)
                     handled_parameters.extend(one_handled_parameters)
                     # assert len(params_data) == 1
                     # handled_parameters = self._process_has_ref_parameters(params_data[0])
