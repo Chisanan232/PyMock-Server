@@ -346,6 +346,23 @@ class API(Transferable):
                             resp_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
             return resp_data
 
+        def _initial_response_model_with_no_ref_value(resp_data: Dict[str, Any], _data: dict) -> Dict[str, Any]:
+            if strategy is ResponseStrategy.OBJECT:
+                response_data_prop = self._process_response_value(property_value=_data, strategy=strategy)
+                assert isinstance(response_data_prop, dict)
+                # response_data_prop["name"] = ""
+                # response_data_prop["required"] = True
+                assert isinstance(
+                    resp_data["data"], list
+                ), "The response data type must be *list* if its HTTP response strategy is object."
+                resp_data["data"].append(response_data_prop)
+            else:
+                assert isinstance(
+                    resp_data["data"], dict
+                ), "The response data type must be *dict* if its HTTP response strategy is not object."
+                resp_data["data"][0] = self._process_response_value(property_value=_data, strategy=strategy)
+            return resp_data
+
         assert openapi_path_parser.exist_in_response(status_code="200") is True
         status_200_response = openapi_path_parser.get_response(status_code="200")
         if strategy is ResponseStrategy.OBJECT:
@@ -372,22 +389,7 @@ class API(Transferable):
             else:
                 print(f"[DEBUG] response_schema: {response_schema}")
                 # Data may '{}' or '{ "type": "integer", "title": "Id" }'
-                if strategy is ResponseStrategy.OBJECT:
-                    response_data_prop = self._process_response_value(property_value=response_schema, strategy=strategy)
-                    assert isinstance(response_data_prop, dict)
-                    # response_data_prop["name"] = ""
-                    # response_data_prop["required"] = True
-                    assert isinstance(
-                        response_data["data"], list
-                    ), "The response data type must be *list* if its HTTP response strategy is object."
-                    response_data["data"].append(response_data_prop)
-                else:
-                    assert isinstance(
-                        response_data["data"], dict
-                    ), "The response data type must be *dict* if its HTTP response strategy is not object."
-                    response_data["data"][0] = self._process_response_value(
-                        property_value=response_schema, strategy=strategy
-                    )
+                response_data = _initial_response_model_with_no_ref_value(response_data, response_schema)
                 print(f"[DEBUG] response_data: {response_data}")
         return response_data
 
