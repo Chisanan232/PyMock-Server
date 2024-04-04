@@ -146,7 +146,9 @@ class OpenAPIV3PathParser(BaseOpenAPIPathParser):
         return self._data.get("parameters", [])
 
     def get_request_body(self, value_format: str = "application/json") -> dict:
-        return self._data["requestBody"]["content"][value_format]
+        if "requestBody" in self._data.keys():
+            return self._data["requestBody"]["content"][value_format]
+        return {}
 
     def get_response(self, status_code: str) -> dict:
         return self._data["responses"][status_code]
