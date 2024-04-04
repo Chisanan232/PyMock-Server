@@ -206,6 +206,15 @@ class API(Transferable):
         return self
 
     def _process_api_params(self, openapi_path_parser: BaseOpenAPIPathParser) -> List["APIParameter"]:
+
+        def _initial_non_ref_parameters_value(_params: List[dict]) -> List[dict]:
+            for param in _params:
+                parser = self.parser_factory.request_parameters(param)
+                items = parser.get_items()
+                if items is not None:
+                    param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
+            return _params
+
         global OpenAPI_Document_Version
         if OpenAPI_Document_Version is OpenAPIVersion.V2:
             params_data: List[dict] = openapi_path_parser.get_request_parameters()
@@ -222,12 +231,7 @@ class API(Transferable):
                 # handled_parameters = self._process_has_ref_parameters(params_data[0])
             else:
                 # TODO: Parsing the data type of key *items* should be valid type of Python realm
-                for param in params_data:
-                    parser = self.parser_factory.request_parameters(param)
-                    items = parser.get_items()
-                    if items is not None:
-                        param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
-                handled_parameters = params_data
+                handled_parameters = _initial_non_ref_parameters_value(params_data)
             return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
         else:
             if self.http_method.upper() == "GET":
@@ -245,12 +249,7 @@ class API(Transferable):
                     # handled_parameters = self._process_has_ref_parameters(params_data[0])
                 else:
                     # TODO: Parsing the data type of key *items* should be valid type of Python realm
-                    for param in params_data:
-                        parser = self.parser_factory.request_parameters(param)
-                        items = parser.get_items()
-                        if items is not None:
-                            param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
-                    handled_parameters = params_data
+                    handled_parameters = _initial_non_ref_parameters_value(params_data)
                 return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
             else:
                 print(f"[DEBUG in src] self.http_method: {self.http_method}")
@@ -271,12 +270,7 @@ class API(Transferable):
                     # handled_parameters = self._process_has_ref_parameters(params_data[0])
                 else:
                     # TODO: Parsing the data type of key *items* should be valid type of Python realm
-                    for param in params_data:
-                        parser = self.parser_factory.request_parameters(param)
-                        items = parser.get_items()
-                        if items is not None:
-                            param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
-                    handled_parameters = params_data
+                    handled_parameters = _initial_non_ref_parameters_value(params_in_path_data)
                 return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
 
     def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
