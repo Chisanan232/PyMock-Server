@@ -5,7 +5,11 @@ from typing import Dict, List, Type
 
 import pytest
 
-from pymock_api.model.openapi._parse import BaseOpenAPIParser, OpenAPIV2Parser, OpenAPIV3Parser
+from pymock_api.model.openapi._parse import (
+    BaseOpenAPIParser,
+    OpenAPIV2Parser,
+    OpenAPIV3Parser,
+)
 
 
 class DummyOpenAPIParser(BaseOpenAPIParser):
