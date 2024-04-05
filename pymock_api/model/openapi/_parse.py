@@ -24,7 +24,7 @@ class OpenAPIObjectParser(BaseOpenAPIObjectParser):
         if default is not None:
             return self._data.get("required", default)
         else:
-            return self._data["required"]
+            return self._data.get("required", [])
 
     def get_properties(self, default: Any = None) -> Dict[str, dict]:
         if default is not None:
@@ -109,6 +109,9 @@ class BaseOpenAPIPathParser(metaclass=ABCMeta):
     def get_request_parameters(self) -> List[dict]:
         pass
 
+    def get_request_body(self, value_format: str = "application/json") -> dict:
+        raise NotImplementedError
+
     @abstractmethod
     def get_response(self, status_code: str) -> dict:
         pass
@@ -122,10 +125,30 @@ class BaseOpenAPIPathParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIPathParser(BaseOpenAPIPathParser):
+class OpenAPIV2PathParser(BaseOpenAPIPathParser):
 
     def get_request_parameters(self) -> List[dict]:
         return self._data["parameters"]
+
+    def get_response(self, status_code: str) -> dict:
+        return self._data["responses"][status_code]
+
+    def exist_in_response(self, status_code: str) -> bool:
+        return status_code in self._data["responses"].keys()
+
+    def get_all_tags(self) -> List[str]:
+        return self._data.get("tags", [])
+
+
+class OpenAPIV3PathParser(BaseOpenAPIPathParser):
+
+    def get_request_parameters(self) -> List[dict]:
+        return self._data.get("parameters", [])
+
+    def get_request_body(self, value_format: str = "application/json") -> dict:
+        if "requestBody" in self._data.keys():
+            return self._data["requestBody"]["content"][value_format]
+        return {}
 
     def get_response(self, status_code: str) -> dict:
         return self._data["responses"][status_code]
@@ -188,7 +211,7 @@ class BaseOpenAPIParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIParser(BaseOpenAPIParser):
+class OpenAPIV2Parser(BaseOpenAPIParser):
 
     def get_paths(self) -> Dict[str, Dict]:
         return self._data["paths"]
@@ -198,3 +221,16 @@ class OpenAPIParser(BaseOpenAPIParser):
 
     def get_objects(self) -> Dict[str, dict]:
         return self._data.get("definitions", {})
+
+
+class OpenAPIV3Parser(BaseOpenAPIParser):
+
+    def get_paths(self) -> Dict[str, Dict]:
+        return self._data["paths"]
+
+    def get_tags(self) -> List[dict]:
+        # Not support this property in OpenAPI v3
+        return []
+
+    def get_objects(self) -> Dict[str, dict]:
+        return self._data.get("components", {})

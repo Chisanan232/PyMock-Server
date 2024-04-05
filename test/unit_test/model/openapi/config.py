@@ -13,10 +13,15 @@ from pymock_api.model import MockAPI
 from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
-from pymock_api.model.openapi._parse import OpenAPIParser, OpenAPIPathParser
+from pymock_api.model.openapi._parse import (
+    OpenAPIV2Parser,
+    OpenAPIV2PathParser,
+    OpenAPIV3Parser,
+)
 from pymock_api.model.openapi._parser_factory import (
     BaseOpenAPIParserFactory,
-    OpenAPIParserFactory,
+    OpenAPIV2ParserFactory,
+    OpenAPIV3ParserFactory,
 )
 from pymock_api.model.openapi.config import (
     API,
@@ -57,6 +62,8 @@ OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
 OPENAPI_API_RESPONSES_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
 OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
 
+OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON: List[tuple] = []
+
 
 def _get_all_openapi_api_doc() -> None:
     json_dir = os.path.join(
@@ -83,7 +90,7 @@ def _get_all_openapi_api_doc() -> None:
 
                     # For testing API response properties
                     status_200_response = api_detail.get("responses", {}).get("200", {})
-                    set_component_definition(OpenAPIParser(data=openapi_api_docs))
+                    set_component_definition(OpenAPIV2Parser(data=openapi_api_docs))
                     if _YamlSchema.has_schema(status_200_response):
                         response_schema = _YamlSchema.get_schema_ref(status_200_response)
                         response_schema_properties = response_schema.get("properties", None)
@@ -103,7 +110,23 @@ def _get_all_openapi_api_doc() -> None:
                             OPENAPI_API_PARAMETERS_JSON_FOR_API.append((param, openapi_api_docs))
 
 
+def _get_different_version_openapi_api_doc() -> None:
+    json_dir = os.path.join(
+        str(pathlib.Path(__file__).parent.parent.parent.parent),
+        "data",
+        "deserialize_openapi_config_test",
+        "different_version",
+        "*.json",
+    )
+    global OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON
+    for json_config_path in glob.glob(json_dir):
+        with open(json_config_path, "r", encoding="utf-8") as file_stream:
+            openapi_api_docs = json.loads(file_stream.read())
+            OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON.append(openapi_api_docs)
+
+
 _get_all_openapi_api_doc()
+_get_different_version_openapi_api_doc()
 
 
 class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
@@ -143,7 +166,7 @@ class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
     @pytest.mark.parametrize(
         ("openapi_version", "expected_parser_factory"),
         [
-            (OpenAPIVersion.V3, OpenAPIParserFactory),
+            (OpenAPIVersion.V3, OpenAPIV3ParserFactory),
         ],
     )
     def test_load_parser_factory_at_instantiate(
@@ -161,12 +184,12 @@ class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
         ("openapi_version", "expected_parser_factory"),
         [
             # Enum type
-            (OpenAPIVersion.V2, OpenAPIParserFactory),
-            (OpenAPIVersion.V3, OpenAPIParserFactory),
+            (OpenAPIVersion.V2, OpenAPIV2ParserFactory),
+            (OpenAPIVersion.V3, OpenAPIV3ParserFactory),
             # str type
-            ("2.0", OpenAPIParserFactory),
-            ("2.0.6", OpenAPIParserFactory),
-            ("3.0.1", OpenAPIParserFactory),
+            ("2.0", OpenAPIV2ParserFactory),
+            ("2.0.6", OpenAPIV2ParserFactory),
+            ("3.0.1", OpenAPIV3ParserFactory),
         ],
     )
     def test_reload_parser_factory(
@@ -232,8 +255,17 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
 
     @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_ONE_API_JSON)
     def test_deserialize(self, openapi_doc_data: dict, entire_openapi_config: dict, data_model: Transferable):
-        set_component_definition(OpenAPIParser(data=entire_openapi_config))
+        # Previous process
+        set_openapi_version(OpenAPIVersion.V2)
+        set_component_definition(OpenAPIV2Parser(data=entire_openapi_config))
+        data_model.reload_parser_factory()
+
+        # Run test
         super().test_deserialize(openapi_doc_data, data_model)
+
+        # Finally
+        set_openapi_version(OpenAPIVersion.V3)
+        data_model.reload_parser_factory()
 
     def test_invalid_deserialize(self, data_model: API):
         data_model.process_response_strategy = None
@@ -303,10 +335,12 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
     @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API)
     def test__process_api_params(self, openapi_doc_data: List[dict], entire_openapi_config: dict, data_model: API):
         # Pre-process
-        set_component_definition(OpenAPIParser(data=entire_openapi_config))
+        set_openapi_version(OpenAPIVersion.V2)
+        set_component_definition(OpenAPIV2Parser(data=entire_openapi_config))
+        data_model.reload_parser_factory()
 
         # Run target function
-        parameters = data_model._process_api_params(openapi_doc_data)
+        parameters = data_model._process_api_params(OpenAPIV2PathParser({"parameters": openapi_doc_data}))
 
         # Verify
         assert parameters and isinstance(parameters, list)
@@ -314,12 +348,16 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         type_checksum = list(map(lambda p: isinstance(p, APIParameter), parameters))
         assert False not in type_checksum
 
+        # Finally
+        set_openapi_version(OpenAPIVersion.V3)
+        data_model.reload_parser_factory()
+
     @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_API_PARAMETERS_JSON_FOR_API)
     def test__process_has_ref_parameters_with_valid_value(
         self, openapi_doc_data: dict, entire_openapi_config: dict, data_model: API
     ):
         # Pre-process
-        set_component_definition(OpenAPIParser(data=entire_openapi_config))
+        set_component_definition(OpenAPIV2Parser(data=entire_openapi_config))
 
         # Run target function
         parameters = data_model._process_has_ref_parameters(openapi_doc_data)
@@ -344,22 +382,37 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         self, strategy: ResponseStrategy, api_detail: dict, entire_config: dict, data_model: API
     ):
         # Pre-process
-        set_component_definition(OpenAPIParser(data=entire_config))
+        set_component_definition(OpenAPIV2Parser(data=entire_config))
 
         # Run target function under test
+        print(f"[DEBUG in test] api_detail: {api_detail}")
         response_data = data_model._process_response(
-            openapi_path_parser=OpenAPIPathParser(data=api_detail), strategy=strategy
+            openapi_path_parser=OpenAPIV2PathParser(data=api_detail), strategy=strategy
         )
         print(f"[DEBUG in test] response_data: {response_data}")
 
         # Verify
+        resp_200 = api_detail["responses"]["200"]
+        if _YamlSchema.has_schema(resp_200):
+            should_check_name = True
+        else:
+            response_content = resp_200["content"]
+            resp_val_format = list(filter(lambda f: f in response_content.keys(), ["application/json", "*/*"]))
+            response_detail = response_content[resp_val_format[0]]["schema"]
+            if not response_detail:
+                should_check_name = False
+            else:
+                should_check_name = True
+        print(f"[DEBUG in test] should_check_name: {should_check_name}")
+
         assert response_data and isinstance(response_data, dict)
         data_details = response_data["data"]
         if strategy is ResponseStrategy.OBJECT:
             assert data_details is not None and isinstance(data_details, list)
             for d in data_details:
-                assert d["name"]
-                assert d["type"]
+                if should_check_name:
+                    assert d["name"]
+                    assert d["type"]
                 assert d["required"] is not None
                 assert d["format"] is None  # FIXME: Should activate this verify after support this feature
                 if d["type"] == "list":
@@ -372,17 +425,27 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
             assert data_details is not None and isinstance(data_details, dict)
             for v in data_details.values():
                 if isinstance(v, str):
-                    assert v in [
-                        "random string value",
-                        "random integer value",
-                        "random boolean value",
-                        "random file output stream",
-                        "FIXME: Handle the reference",
-                    ]
+                    if should_check_name:
+                        assert v in [
+                            "random string value",
+                            "random integer value",
+                            "random boolean value",
+                            "random file output stream",
+                            "FIXME: Handle the reference",
+                        ]
+                    else:
+                        assert v == "empty value"
                 else:
                     for item in v:
                         for item_value in item.values():
-                            assert item_value in ["random string value", "random integer value", "random boolean value"]
+                            if should_check_name:
+                                assert item_value in [
+                                    "random string value",
+                                    "random integer value",
+                                    "random boolean value",
+                                ]
+                            else:
+                                assert item_value == "empty value"
 
     @pytest.mark.parametrize(
         ("strategy", "api_response_detail", "entire_config"), OPENAPI_API_RESPONSES_PROPERTY_FOR_API
@@ -391,7 +454,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         self, strategy: ResponseStrategy, api_response_detail: dict, entire_config: dict, data_model: API
     ):
         # Pre-process
-        set_component_definition(OpenAPIParser(data=entire_config))
+        set_component_definition(OpenAPIV2Parser(data=entire_config))
 
         # Run target function under test
         response_prop_data = data_model._process_response_value(property_value=api_response_detail, strategy=strategy)
@@ -424,7 +487,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
 
     @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_DOC_JSON)
     def test_deserialize(self, openapi_doc_data: dict, data_model: Transferable):
-        set_component_definition(OpenAPIParser(data=openapi_doc_data))
+        set_component_definition(OpenAPIV2Parser(data=openapi_doc_data))
         super().test_deserialize(openapi_doc_data, data_model)
 
     def _initial(self, data: OpenAPIDocumentConfig) -> None:
@@ -513,10 +576,10 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
     @pytest.mark.parametrize(
         ("data", "expected_openapi_version", "expected_parser_factory"),
         [
-            ({"swagger": "2.0"}, OpenAPIVersion.V2, OpenAPIParserFactory),
-            ({"swagger": "2.6.0"}, OpenAPIVersion.V2, OpenAPIParserFactory),
-            ({"swagger": "3.0"}, OpenAPIVersion.V3, OpenAPIParserFactory),
-            ({"swagger": "3.1.0"}, OpenAPIVersion.V3, OpenAPIParserFactory),
+            ({"swagger": "2.0"}, OpenAPIVersion.V2, OpenAPIV2ParserFactory),
+            ({"swagger": "2.6.0"}, OpenAPIVersion.V2, OpenAPIV2ParserFactory),
+            ({"swagger": "3.0"}, OpenAPIVersion.V3, OpenAPIV3ParserFactory),
+            ({"swagger": "3.1.0"}, OpenAPIVersion.V3, OpenAPIV3ParserFactory),
         ],
     )
     def test__chk_version_and_load_parser(
@@ -531,3 +594,47 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
 
         assert OpenAPI_Document_Version is expected_openapi_version
         assert isinstance(data_model.parser_factory, expected_parser_factory)
+
+    @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON)
+    def test_deserialize_with_openapi_v3(self, openapi_doc_data: dict, data_model: OpenAPIDocumentConfig):
+        set_component_definition(OpenAPIV3Parser(data=openapi_doc_data))
+
+        self._initial(data=data_model)
+        deserialized_data = data_model.deserialize(data=openapi_doc_data)
+        assert deserialized_data
+        self._verify_result_with_openapi_v3(data=deserialized_data, og_data=openapi_doc_data)
+
+    def _verify_result_with_openapi_v3(self, data: OpenAPIDocumentConfig, og_data: dict) -> None:
+        path_with_method_number = [len(v.keys()) for v in og_data["paths"].values()]
+        assert len(data.paths) == sum(path_with_method_number)
+        for api in data.paths:
+            assert api.path in og_data["paths"].keys()
+            assert api.http_method in og_data["paths"][api.path].keys()
+
+            api_http_details = og_data["paths"][api.path][api.http_method]
+            if api.http_method.upper() == "GET":
+                expected_parameters = 0
+                for param in api_http_details.get("parameters", []):
+                    if _YamlSchema.has_ref(param):
+                        expected_parameters += len(_YamlSchema.get_schema_ref(param)["properties"].keys())
+                    else:
+                        expected_parameters += 1
+                assert len(api.parameters) == expected_parameters
+            else:
+                request_body = api_http_details.get("requestBody", {})
+                if request_body:
+                    data_format = list(
+                        filter(lambda b: b in request_body["content"].keys(), ["application/json", "*/*"])
+                    )
+                    assert len(data_format) == 1
+                    assert len(api.parameters) == len(
+                        _YamlSchema.get_schema_ref(request_body["content"][data_format[0]])["properties"].keys()
+                    )
+                else:
+                    expected_parameters = 0
+                    for param in api_http_details["parameters"]:
+                        if _YamlSchema.has_ref(param):
+                            expected_parameters += len(_YamlSchema.get_schema_ref(param)["properties"].keys())
+                        else:
+                            expected_parameters += 1
+                    assert len(api.parameters) == expected_parameters

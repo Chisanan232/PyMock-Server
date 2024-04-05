@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, Mock, call, patch
 import pytest
 from yaml import load as yaml_load
 
-from pymock_api.model.openapi._parse import OpenAPIParser
+from pymock_api.model.openapi._parse import OpenAPIV2Parser
 from pymock_api.model.openapi.config import set_component_definition
 
 try:
@@ -920,7 +920,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         with open(expected_config, "r") as file:
             expected_config_data = yaml_load(file, Loader=Loader)
 
-        set_component_definition(OpenAPIParser(data=swagger_json_data))
+        set_component_definition(OpenAPIV2Parser(data=swagger_json_data))
         with patch("pymock_api.command.pull.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
             with patch(
                 "pymock_api.command.pull.component.URLLibHTTPClient.request", return_value=swagger_json_data
