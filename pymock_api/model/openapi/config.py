@@ -1,15 +1,14 @@
-from abc import ABCMeta, abstractmethod
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
+import pymock_api.model.openapi._base
+
 from .. import APIConfig, MockAPI, MockAPIs
-from ..api_config import BaseConfig, _Config
+from ..api_config import BaseConfig
 from ..api_config.apis import APIParameter as PyMockAPIParameter
 from ..enums import OpenAPIVersion, ResponseStrategy
-from ._parser_factory import BaseOpenAPISchemaParserFactory, get_parser_factory
+from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
 from ._schema_parser import BaseOpenAPIParser, BaseOpenAPIPathParser
-
-Self = Any
 
 
 def convert_js_type(t: str) -> str:
@@ -79,51 +78,6 @@ class _YamlSchema:
         print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")
         # Operate the component definition object
         return _get_schema(get_component_definition(), schema_path, 0)
-
-
-OpenAPI_Document_Version: OpenAPIVersion = OpenAPIVersion.V3
-OpenAPI_Parser_Factory: BaseOpenAPISchemaParserFactory = get_parser_factory(version=OpenAPI_Document_Version)
-
-
-def set_openapi_version(v: Union[str, OpenAPIVersion]) -> None:
-    global OpenAPI_Document_Version
-    OpenAPI_Document_Version = OpenAPIVersion.to_enum(v)
-
-
-def set_parser_factory(f: BaseOpenAPISchemaParserFactory) -> None:
-    global OpenAPI_Parser_Factory
-    OpenAPI_Parser_Factory = f
-
-
-class BaseOpenAPIDataModel(metaclass=ABCMeta):
-
-    @property
-    def parser_factory(self) -> BaseOpenAPISchemaParserFactory:
-        global OpenAPI_Document_Version, OpenAPI_Parser_Factory
-        assert (
-            OpenAPI_Parser_Factory.chk_version(OpenAPI_Document_Version) is True
-        ), "The parser factory is not mapping with the OpenAPI documentation version."
-        return OpenAPI_Parser_Factory
-
-    def load_parser_factory_with_openapi_version(self) -> BaseOpenAPISchemaParserFactory:
-        global OpenAPI_Document_Version
-        return get_parser_factory(version=OpenAPI_Document_Version)
-
-    def reload_parser_factory(self) -> None:
-        self._load_parser_factory()
-
-    def _load_parser_factory(self) -> None:
-        set_parser_factory(self.load_parser_factory_with_openapi_version())
-
-    @abstractmethod
-    def deserialize(self, data: Dict) -> Self:
-        pass
-
-
-class Transferable(BaseOpenAPIDataModel):
-    @abstractmethod
-    def to_api_config(self, **kwargs) -> _Config:
-        pass
 
 
 class Tag(BaseOpenAPIDataModel):
@@ -234,8 +188,7 @@ class API(Transferable):
                 handled_parameters = _initial_non_ref_parameters_value(params_data)
             return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
 
-        global OpenAPI_Document_Version
-        if OpenAPI_Document_Version is OpenAPIVersion.V2:
+        if pymock_api.model.openapi._base.OpenAPI_Document_Version is OpenAPIVersion.V2:
             return _initial_request_parameters_model()
         else:
             if self.http_method.upper() == "GET":

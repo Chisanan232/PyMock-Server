@@ -13,6 +13,7 @@ from pymock_api.model import MockAPI
 from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
+from pymock_api.model.openapi._base import Transferable, set_openapi_version
 from pymock_api.model.openapi._parser_factory import (
     BaseOpenAPISchemaParserFactory,
     OpenAPIV2SchemaParserFactory,
@@ -27,11 +28,9 @@ from pymock_api.model.openapi.config import (
     API,
     APIParameter,
     OpenAPIDocumentConfig,
-    Transferable,
     _YamlSchema,
     convert_js_type,
     set_component_definition,
-    set_openapi_version,
 )
 
 
@@ -175,7 +174,7 @@ class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
         openapi_version: OpenAPIVersion,
         expected_parser_factory: Type[BaseOpenAPISchemaParserFactory],
     ):
-        from pymock_api.model.openapi.config import OpenAPI_Document_Version
+        from pymock_api.model.openapi._base import OpenAPI_Document_Version
 
         assert OpenAPI_Document_Version is openapi_version
         assert isinstance(data_model.parser_factory, expected_parser_factory)
@@ -590,7 +589,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
         expected_parser_factory: Type[BaseOpenAPISchemaParserFactory],
     ):
         data_model._chk_version_and_load_parser(data)
-        from pymock_api.model.openapi.config import OpenAPI_Document_Version
+        from pymock_api.model.openapi._base import OpenAPI_Document_Version
 
         assert OpenAPI_Document_Version is expected_openapi_version
         assert isinstance(data_model.parser_factory, expected_parser_factory)
