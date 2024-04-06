@@ -6,7 +6,7 @@ from .. import APIConfig, MockAPI, MockAPIs
 from ..api_config import BaseConfig, _Config
 from ..api_config.apis import APIParameter as PyMockAPIParameter
 from ..enums import OpenAPIVersion, ResponseStrategy
-from ._parser_factory import BaseOpenAPIParserFactory, get_parser_factory
+from ._parser_factory import BaseOpenAPISchemaParserFactory, get_parser_factory
 from ._schema_parser import BaseOpenAPIParser, BaseOpenAPIPathParser
 
 Self = Any
@@ -82,7 +82,7 @@ class _YamlSchema:
 
 
 OpenAPI_Document_Version: OpenAPIVersion = OpenAPIVersion.V3
-OpenAPI_Parser_Factory: BaseOpenAPIParserFactory = get_parser_factory(version=OpenAPI_Document_Version)
+OpenAPI_Parser_Factory: BaseOpenAPISchemaParserFactory = get_parser_factory(version=OpenAPI_Document_Version)
 
 
 def set_openapi_version(v: Union[str, OpenAPIVersion]) -> None:
@@ -90,7 +90,7 @@ def set_openapi_version(v: Union[str, OpenAPIVersion]) -> None:
     OpenAPI_Document_Version = OpenAPIVersion.to_enum(v)
 
 
-def set_parser_factory(f: BaseOpenAPIParserFactory) -> None:
+def set_parser_factory(f: BaseOpenAPISchemaParserFactory) -> None:
     global OpenAPI_Parser_Factory
     OpenAPI_Parser_Factory = f
 
@@ -98,14 +98,14 @@ def set_parser_factory(f: BaseOpenAPIParserFactory) -> None:
 class BaseOpenAPIDataModel(metaclass=ABCMeta):
 
     @property
-    def parser_factory(self) -> BaseOpenAPIParserFactory:
+    def parser_factory(self) -> BaseOpenAPISchemaParserFactory:
         global OpenAPI_Document_Version, OpenAPI_Parser_Factory
         assert (
             OpenAPI_Parser_Factory.chk_version(OpenAPI_Document_Version) is True
         ), "The parser factory is not mapping with the OpenAPI documentation version."
         return OpenAPI_Parser_Factory
 
-    def load_parser_factory_with_openapi_version(self) -> BaseOpenAPIParserFactory:
+    def load_parser_factory_with_openapi_version(self) -> BaseOpenAPISchemaParserFactory:
         global OpenAPI_Document_Version
         return get_parser_factory(version=OpenAPI_Document_Version)
 
