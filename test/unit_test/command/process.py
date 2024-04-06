@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, Mock, call, patch
 import pytest
 from yaml import load as yaml_load
 
-from pymock_api.model.openapi._parse import OpenAPIV2Parser
+from pymock_api.model.openapi._schema_parser import OpenAPIV2Parser
 from pymock_api.model.openapi.config import set_component_definition
 
 try:

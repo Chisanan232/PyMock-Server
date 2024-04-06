@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Dict, Union
 
 from ..enums import OpenAPIVersion
-from ._parse import (
+from ._schema_parser import (
     BaseOpenAPIObjectParser,
     BaseOpenAPIParser,
     BaseOpenAPIPathParser,

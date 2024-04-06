@@ -5,7 +5,7 @@ from typing import Dict, List, Type
 
 import pytest
 
-from pymock_api.model.openapi._parse import (
+from pymock_api.model.openapi._schema_parser import (
     BaseOpenAPIParser,
     OpenAPIV2Parser,
     OpenAPIV3Parser,

@@ -6,8 +6,8 @@ from .. import APIConfig, MockAPI, MockAPIs
 from ..api_config import BaseConfig, _Config
 from ..api_config.apis import APIParameter as PyMockAPIParameter
 from ..enums import OpenAPIVersion, ResponseStrategy
-from ._parse import BaseOpenAPIParser, BaseOpenAPIPathParser
 from ._parser_factory import BaseOpenAPIParserFactory, get_parser_factory
+from ._schema_parser import BaseOpenAPIParser, BaseOpenAPIPathParser
 
 Self = Any
 

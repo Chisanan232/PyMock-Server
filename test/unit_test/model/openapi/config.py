@@ -13,15 +13,15 @@ from pymock_api.model import MockAPI
 from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
-from pymock_api.model.openapi._parse import (
-    OpenAPIV2Parser,
-    OpenAPIV2PathParser,
-    OpenAPIV3Parser,
-)
 from pymock_api.model.openapi._parser_factory import (
     BaseOpenAPIParserFactory,
     OpenAPIV2ParserFactory,
     OpenAPIV3ParserFactory,
+)
+from pymock_api.model.openapi._schema_parser import (
+    OpenAPIV2Parser,
+    OpenAPIV2PathParser,
+    OpenAPIV3Parser,
 )
 from pymock_api.model.openapi.config import (
     API,
