@@ -11,6 +11,11 @@ OpenAPI_Document_Version: OpenAPIVersion = OpenAPIVersion.V3
 OpenAPI_Parser_Factory: BaseOpenAPISchemaParserFactory = get_parser_factory(version=OpenAPI_Document_Version)
 
 
+def get_openapi_version() -> OpenAPIVersion:
+    global OpenAPI_Document_Version
+    return OpenAPI_Document_Version
+
+
 def set_openapi_version(v: Union[str, OpenAPIVersion]) -> None:
     global OpenAPI_Document_Version
     OpenAPI_Document_Version = OpenAPIVersion.to_enum(v)

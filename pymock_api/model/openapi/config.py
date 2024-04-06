@@ -1,13 +1,16 @@
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
-import pymock_api.model.openapi._base
-
 from .. import APIConfig, MockAPI, MockAPIs
 from ..api_config import BaseConfig
 from ..api_config.apis import APIParameter as PyMockAPIParameter
 from ..enums import OpenAPIVersion, ResponseStrategy
-from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
+from ._base import (
+    BaseOpenAPIDataModel,
+    Transferable,
+    get_openapi_version,
+    set_openapi_version,
+)
 from ._schema_parser import BaseOpenAPIParser, BaseOpenAPIPathParser
 
 
@@ -188,7 +191,7 @@ class API(Transferable):
                 handled_parameters = _initial_non_ref_parameters_value(params_data)
             return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
 
-        if pymock_api.model.openapi._base.OpenAPI_Document_Version is OpenAPIVersion.V2:
+        if get_openapi_version() is OpenAPIVersion.V2:
             return _initial_request_parameters_model()
         else:
             if self.http_method.upper() == "GET":
