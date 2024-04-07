@@ -109,6 +109,10 @@ class APIParameter(Transferable):
         self.default: Any = None
         self.items: Optional[list] = None
 
+    @classmethod
+    def generate(cls, detail: dict) -> "APIParameter":
+        return APIParameter().deserialize(data=detail)
+
     def deserialize(self, data: Dict) -> "APIParameter":
         handled_data = self.parse_schema(data)
         self.name = handled_data["name"]
@@ -201,7 +205,7 @@ class API(Transferable):
             else:
                 # TODO: Parsing the data type of key *items* should be valid type of Python realm
                 handled_parameters = _initial_non_ref_parameters_value(params_data)
-            return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
+            return list(map(lambda p: APIParameter.generate(detail=p), handled_parameters))
 
         if get_openapi_version() is OpenAPIVersion.V2:
             return _initial_request_parameters_model()
@@ -224,7 +228,7 @@ class API(Transferable):
                 else:
                     # TODO: Parsing the data type of key *items* should be valid type of Python realm
                     handled_parameters = _initial_non_ref_parameters_value(params_in_path_data)
-                return list(map(lambda p: APIParameter().deserialize(data=p), handled_parameters))
+                return list(map(lambda p: APIParameter.generate(detail=p), handled_parameters))
 
     def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
         request_body_params = _YamlSchema.get_schema_ref(data)
