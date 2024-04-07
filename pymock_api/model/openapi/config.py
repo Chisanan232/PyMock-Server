@@ -1,5 +1,5 @@
 from pydoc import locate
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 from .. import APIConfig, MockAPI, MockAPIs
 from ..api_config import BaseConfig
@@ -11,6 +11,7 @@ from ._base import (
     get_openapi_version,
     set_openapi_version,
 )
+from ._parser import OpenAPIDocumentConfigParser
 from ._schema_parser import BaseOpenAPIParser, BaseOpenAPIPathParser
 
 
@@ -478,25 +479,14 @@ class OpenAPIDocumentConfig(Transferable):
     def deserialize(self, data: Dict) -> "OpenAPIDocumentConfig":
         self._chk_version_and_load_parser(data)
 
-        openapi_parser = self.schema_parser_factory.entire_config(data=data)
-        apis = openapi_parser.get_paths()
-        for api_path, api_props in apis.items():
-            for one_api_http_method, one_api_details in api_props.items():
-                self.paths.append(
-                    self._initial_api(api_path=api_path, http_method=one_api_http_method, detail=one_api_details)
-                )
+        openapi_schema_parser = self.schema_parser_factory.entire_config(data=data)
+        parser = OpenAPIDocumentConfigParser(parser=openapi_schema_parser)
+        self.paths = cast(List[API], parser.process_paths(data_modal=API))
+        self.tags = cast(List[Tag], parser.process_tags(data_modal=Tag))
 
-        self.tags = list(map(lambda t: self._initial_tag(t), openapi_parser.get_tags()))
-
-        set_component_definition(openapi_parser)
+        set_component_definition(openapi_schema_parser)
 
         return self
-
-    def _initial_api(self, *args, **kwargs) -> API:
-        return API.generate(*args, **kwargs)
-
-    def _initial_tag(self, *args, **kwargs) -> Tag:
-        return Tag.generate(*args, **kwargs)
 
     def _chk_version_and_load_parser(self, data: dict) -> None:
         swagger_version: Optional[str] = data.get("swagger", None)  # OpenAPI version 2
