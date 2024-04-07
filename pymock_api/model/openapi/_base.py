@@ -27,6 +27,11 @@ def set_parser_factory(f: BaseOpenAPISchemaParserFactory) -> None:
     OpenAPI_Parser_Factory = f
 
 
+def get_schema_parser_factory_with_openapi_version() -> BaseOpenAPISchemaParserFactory:
+    global OpenAPI_Document_Version
+    return get_schema_parser_factory(version=OpenAPI_Document_Version)
+
+
 class BaseOpenAPIDataModel(metaclass=ABCMeta):
 
     @property
@@ -38,8 +43,7 @@ class BaseOpenAPIDataModel(metaclass=ABCMeta):
         return OpenAPI_Parser_Factory
 
     def load_schema_parser_factory_with_openapi_version(self) -> BaseOpenAPISchemaParserFactory:
-        global OpenAPI_Document_Version
-        return get_schema_parser_factory(version=OpenAPI_Document_Version)
+        return get_schema_parser_factory_with_openapi_version()
 
     def reload_schema_parser_factory(self) -> None:
         self._load_schema_parser_factory()
