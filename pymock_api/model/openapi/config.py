@@ -205,7 +205,7 @@ class API(Transferable):
             else:
                 # TODO: Parsing the data type of key *items* should be valid type of Python realm
                 handled_parameters = _initial_non_ref_parameters_value(params_data)
-            return list(map(lambda p: APIParameter.generate(detail=p), handled_parameters))
+            return list(map(lambda p: self._initial_api_parameter(detail=p), handled_parameters))
 
         if get_openapi_version() is OpenAPIVersion.V2:
             return _initial_request_parameters_model()
@@ -228,7 +228,10 @@ class API(Transferable):
                 else:
                     # TODO: Parsing the data type of key *items* should be valid type of Python realm
                     handled_parameters = _initial_non_ref_parameters_value(params_in_path_data)
-                return list(map(lambda p: APIParameter.generate(detail=p), handled_parameters))
+                return list(map(lambda p: self._initial_api_parameter(detail=p), handled_parameters))
+
+    def _initial_api_parameter(self, *args, **kwargs) -> APIParameter:
+        return APIParameter.generate(*args, **kwargs)
 
     def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
         request_body_params = _YamlSchema.get_schema_ref(data)
@@ -480,14 +483,20 @@ class OpenAPIDocumentConfig(Transferable):
         for api_path, api_props in apis.items():
             for one_api_http_method, one_api_details in api_props.items():
                 self.paths.append(
-                    API.generate(api_path=api_path, http_method=one_api_http_method, detail=one_api_details)
+                    self._initial_api(api_path=api_path, http_method=one_api_http_method, detail=one_api_details)
                 )
 
-        self.tags = list(map(lambda t: Tag.generate(t), openapi_parser.get_tags()))
+        self.tags = list(map(lambda t: self._initial_tag(t), openapi_parser.get_tags()))
 
         set_component_definition(openapi_parser)
 
         return self
+
+    def _initial_tag(self, *args, **kwargs):
+        return Tag.generate(*args, **kwargs)
+
+    def _initial_api(self, *args, **kwargs) -> API:
+        return API.generate(*args, **kwargs)
 
     def _chk_version_and_load_parser(self, data: dict) -> None:
         swagger_version: Optional[str] = data.get("swagger", None)  # OpenAPI version 2
