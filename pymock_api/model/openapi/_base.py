@@ -22,6 +22,14 @@ def set_openapi_version(v: Union[str, OpenAPIVersion]) -> None:
     OpenAPI_Document_Version = OpenAPIVersion.to_enum(v)
 
 
+def ensure_get_schema_parser_factory() -> BaseOpenAPISchemaParserFactory:
+    global OpenAPI_Document_Version, OpenAPI_Parser_Factory
+    assert (
+        OpenAPI_Parser_Factory.chk_version(OpenAPI_Document_Version) is True
+    ), "The parser factory is not mapping with the OpenAPI documentation version."
+    return OpenAPI_Parser_Factory
+
+
 def set_parser_factory(f: BaseOpenAPISchemaParserFactory) -> None:
     global OpenAPI_Parser_Factory
     OpenAPI_Parser_Factory = f
@@ -36,11 +44,7 @@ class BaseOpenAPIDataModel(metaclass=ABCMeta):
 
     @property
     def schema_parser_factory(self) -> BaseOpenAPISchemaParserFactory:
-        global OpenAPI_Document_Version, OpenAPI_Parser_Factory
-        assert (
-            OpenAPI_Parser_Factory.chk_version(OpenAPI_Document_Version) is True
-        ), "The parser factory is not mapping with the OpenAPI documentation version."
-        return OpenAPI_Parser_Factory
+        return ensure_get_schema_parser_factory()
 
     def load_schema_parser_factory_with_openapi_version(self) -> BaseOpenAPISchemaParserFactory:
         return get_schema_parser_factory_with_openapi_version()
