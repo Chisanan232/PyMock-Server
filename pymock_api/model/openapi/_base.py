@@ -29,22 +29,22 @@ def set_parser_factory(f: BaseOpenAPISchemaParserFactory) -> None:
 class BaseOpenAPIDataModel(metaclass=ABCMeta):
 
     @property
-    def parser_factory(self) -> BaseOpenAPISchemaParserFactory:
+    def schema_parser_factory(self) -> BaseOpenAPISchemaParserFactory:
         global OpenAPI_Document_Version, OpenAPI_Parser_Factory
         assert (
             OpenAPI_Parser_Factory.chk_version(OpenAPI_Document_Version) is True
         ), "The parser factory is not mapping with the OpenAPI documentation version."
         return OpenAPI_Parser_Factory
 
-    def load_parser_factory_with_openapi_version(self) -> BaseOpenAPISchemaParserFactory:
+    def load_schema_parser_factory_with_openapi_version(self) -> BaseOpenAPISchemaParserFactory:
         global OpenAPI_Document_Version
         return get_parser_factory(version=OpenAPI_Document_Version)
 
-    def reload_parser_factory(self) -> None:
-        self._load_parser_factory()
+    def reload_schema_parser_factory(self) -> None:
+        self._load_schema_parser_factory()
 
-    def _load_parser_factory(self) -> None:
-        set_parser_factory(self.load_parser_factory_with_openapi_version())
+    def _load_schema_parser_factory(self) -> None:
+        set_parser_factory(self.load_schema_parser_factory_with_openapi_version())
 
     @classmethod
     def generate(cls, *args, **kwargs) -> Self:
