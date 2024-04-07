@@ -8,11 +8,13 @@ from ..enums import OpenAPIVersion, ResponseStrategy
 from ._base import (
     BaseOpenAPIDataModel,
     Transferable,
+    _YamlSchema,
     get_openapi_version,
+    set_component_definition,
     set_openapi_version,
 )
 from ._parser import OpenAPIDocumentConfigParser
-from ._schema_parser import BaseOpenAPIPathSchemaParser, BaseOpenAPISchemaParser
+from ._schema_parser import BaseOpenAPIPathSchemaParser
 
 
 def convert_js_type(t: str) -> str:
@@ -35,53 +37,6 @@ def ensure_type_is_python_type(t: str) -> str:
     if t in ["string", "integer", "number", "boolean", "array"]:
         return convert_js_type(t)
     return t
-
-
-ComponentDefinition: Dict[str, dict] = {}
-
-
-def get_component_definition() -> Dict:
-    global ComponentDefinition
-    return ComponentDefinition
-
-
-def set_component_definition(openapi_parser: BaseOpenAPISchemaParser) -> None:
-    global ComponentDefinition
-    ComponentDefinition = openapi_parser.get_objects()
-
-
-class _YamlSchema:
-    @classmethod
-    def has_schema(cls, data: Dict) -> bool:
-        return data.get("schema", None) is not None
-
-    @classmethod
-    def has_ref(cls, data: Dict) -> str:
-        if cls.has_schema(data):
-            has_schema_ref = data["schema"].get("$ref", None) is not None
-            return "schema" if has_schema_ref else ""
-        else:
-            _has_ref = data.get("$ref", None) is not None
-            return "ref" if _has_ref else ""
-
-    @classmethod
-    def get_schema_ref(cls, data: dict) -> dict:
-        def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
-            if i == len(paths) - 1:
-                return component_def_data[paths[i]]
-            else:
-                return _get_schema(component_def_data[paths[i]], paths, i + 1)
-
-        print(f"[DEBUG in get_schema_ref] data: {data}")
-        _has_ref = _YamlSchema.has_ref(data)
-        if not _has_ref:
-            raise ValueError("This parameter has no ref in schema.")
-        schema_path = (
-            (data["schema"]["$ref"] if _has_ref == "schema" else data["$ref"]).replace("#/", "").split("/")[1:]
-        )
-        print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")
-        # Operate the component definition object
-        return _get_schema(get_component_definition(), schema_path, 0)
 
 
 class Tag(BaseOpenAPIDataModel):
