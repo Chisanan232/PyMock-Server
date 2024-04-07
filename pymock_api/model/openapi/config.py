@@ -89,6 +89,10 @@ class Tag(BaseOpenAPIDataModel):
         self.name: str = ""
         self.description: str = ""
 
+    @classmethod
+    def generate(cls, detail: dict) -> "Tag":
+        return Tag().deserialize(data=detail)
+
     def deserialize(self, data: Dict) -> "Tag":
         parser = self.parser_factory.tag(data)
         self.name = parser.get_name()
@@ -475,7 +479,7 @@ class OpenAPIDocumentConfig(Transferable):
                     API.generate(api_path=api_path, http_method=one_api_http_method, detail=one_api_details)
                 )
 
-        self.tags = list(map(lambda t: Tag().deserialize(t), openapi_parser.get_tags()))
+        self.tags = list(map(lambda t: Tag.generate(t), openapi_parser.get_tags()))
 
         set_component_definition(openapi_parser)
 
