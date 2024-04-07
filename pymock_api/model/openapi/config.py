@@ -458,6 +458,7 @@ class OpenAPIDocumentConfig(Transferable):
 
     def deserialize(self, data: Dict) -> "OpenAPIDocumentConfig":
         self._chk_version_and_load_parser(data)
+
         openapi_parser = self.parser_factory.entire_config(data=data)
         apis = openapi_parser.get_paths()
         for api_path, api_props in apis.items():
@@ -468,8 +469,7 @@ class OpenAPIDocumentConfig(Transferable):
                 api.deserialize(data=one_api_details)
                 self.paths.append(api)
 
-        tags: List[dict] = openapi_parser.get_tags()
-        self.tags = list(map(lambda t: Tag().deserialize(t), tags))
+        self.tags = list(map(lambda t: Tag().deserialize(t), openapi_parser.get_tags()))
 
         set_component_definition(openapi_parser)
 
