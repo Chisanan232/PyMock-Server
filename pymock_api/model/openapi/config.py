@@ -12,7 +12,7 @@ from ._base import (
     set_openapi_version,
 )
 from ._parser import OpenAPIDocumentConfigParser
-from ._schema_parser import BaseOpenAPIParser, BaseOpenAPIPathParser
+from ._schema_parser import BaseOpenAPIPathSchemaParser, BaseOpenAPISchemaParser
 
 
 def convert_js_type(t: str) -> str:
@@ -45,7 +45,7 @@ def get_component_definition() -> Dict:
     return ComponentDefinition
 
 
-def set_component_definition(openapi_parser: BaseOpenAPIParser) -> None:
+def set_component_definition(openapi_parser: BaseOpenAPISchemaParser) -> None:
     global ComponentDefinition
     ComponentDefinition = openapi_parser.get_objects()
 
@@ -182,7 +182,7 @@ class API(Transferable):
         self.tags = openapi_path_parser.get_all_tags()
         return self
 
-    def _process_api_params(self, openapi_path_parser: BaseOpenAPIPathParser) -> List["APIParameter"]:
+    def _process_api_params(self, openapi_path_parser: BaseOpenAPIPathSchemaParser) -> List["APIParameter"]:
 
         def _initial_non_ref_parameters_value(_params: List[dict]) -> List[dict]:
             for param in _params:
@@ -276,7 +276,7 @@ class API(Transferable):
             )
         return parameters
 
-    def _process_response(self, openapi_path_parser: BaseOpenAPIPathParser, strategy: ResponseStrategy) -> dict:
+    def _process_response(self, openapi_path_parser: BaseOpenAPIPathSchemaParser, strategy: ResponseStrategy) -> dict:
 
         def _initial_response_model_with_ref_value(resp_data: Dict[str, Any], _data: dict) -> Dict[str, Any]:
             response_schema_ref = _YamlSchema.get_schema_ref(_data)

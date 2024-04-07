@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional
 
 
-class BaseOpenAPIObjectParser(metaclass=ABCMeta):
+class BaseOpenAPIObjectSchemaParser(metaclass=ABCMeta):
 
     def __init__(self, data: dict):
         self._data = data
@@ -18,7 +18,7 @@ class BaseOpenAPIObjectParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIObjectParser(BaseOpenAPIObjectParser):
+class OpenAPIObjectSchemaParser(BaseOpenAPIObjectSchemaParser):
 
     def get_required(self, default: Any = None) -> List[str]:
         if default is not None:
@@ -33,7 +33,7 @@ class OpenAPIObjectParser(BaseOpenAPIObjectParser):
             return self._data["properties"]
 
 
-class BaseOpenAPIResponseParser(metaclass=ABCMeta):
+class BaseOpenAPIResponseSchemaParser(metaclass=ABCMeta):
 
     def __init__(self, data: dict):
         self._data = data
@@ -47,7 +47,7 @@ class BaseOpenAPIResponseParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIResponseParser(BaseOpenAPIResponseParser):
+class OpenAPIResponseSchemaParser(BaseOpenAPIResponseSchemaParser):
 
     def get_content(self, value_format: str) -> Dict[str, dict]:
         return self._data["content"][value_format]["schema"]
@@ -56,7 +56,7 @@ class OpenAPIResponseParser(BaseOpenAPIResponseParser):
         return value_format in self._data["content"].keys()
 
 
-class BaseOpenAPIRequestParametersParser(metaclass=ABCMeta):
+class BaseOpenAPIRequestParametersSchemaParser(metaclass=ABCMeta):
 
     def __init__(self, data: dict):
         self._data = data
@@ -82,7 +82,7 @@ class BaseOpenAPIRequestParametersParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIRequestParametersParser(BaseOpenAPIRequestParametersParser):
+class OpenAPIRequestParametersSchemaParser(BaseOpenAPIRequestParametersSchemaParser):
 
     def get_name(self) -> str:
         return self._data["name"]
@@ -100,7 +100,7 @@ class OpenAPIRequestParametersParser(BaseOpenAPIRequestParametersParser):
         return self._data.get("items", None)
 
 
-class BaseOpenAPIPathParser(metaclass=ABCMeta):
+class BaseOpenAPIPathSchemaParser(metaclass=ABCMeta):
 
     def __init__(self, data: dict):
         self._data = data
@@ -125,7 +125,7 @@ class BaseOpenAPIPathParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIV2PathParser(BaseOpenAPIPathParser):
+class OpenAPIV2PathSchemaParser(BaseOpenAPIPathSchemaParser):
 
     def get_request_parameters(self) -> List[dict]:
         return self._data["parameters"]
@@ -140,7 +140,7 @@ class OpenAPIV2PathParser(BaseOpenAPIPathParser):
         return self._data.get("tags", [])
 
 
-class OpenAPIV3PathParser(BaseOpenAPIPathParser):
+class OpenAPIV3PathSchemaParser(BaseOpenAPIPathSchemaParser):
 
     def get_request_parameters(self) -> List[dict]:
         return self._data.get("parameters", [])
@@ -160,7 +160,7 @@ class OpenAPIV3PathParser(BaseOpenAPIPathParser):
         return self._data.get("tags", [])
 
 
-class BaseOpenAPITagParser(metaclass=ABCMeta):
+class BaseOpenAPITagSchemaParser(metaclass=ABCMeta):
 
     def __init__(self, data: dict):
         self._data = data
@@ -174,7 +174,7 @@ class BaseOpenAPITagParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPITagParser(BaseOpenAPITagParser):
+class OpenAPITagSchemaParser(BaseOpenAPITagSchemaParser):
 
     def get_name(self):
         return self._data["name"]
@@ -183,7 +183,7 @@ class OpenAPITagParser(BaseOpenAPITagParser):
         return self._data["description"]
 
 
-class BaseOpenAPIParser(metaclass=ABCMeta):
+class BaseOpenAPISchemaParser(metaclass=ABCMeta):
 
     def __init__(self, file: str = "", data: Dict = {}):
         if file:
@@ -211,7 +211,7 @@ class BaseOpenAPIParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIV2Parser(BaseOpenAPIParser):
+class OpenAPIV2SchemaParser(BaseOpenAPISchemaParser):
 
     def get_paths(self) -> Dict[str, Dict]:
         return self._data["paths"]
@@ -223,7 +223,7 @@ class OpenAPIV2Parser(BaseOpenAPIParser):
         return self._data.get("definitions", {})
 
 
-class OpenAPIV3Parser(BaseOpenAPIParser):
+class OpenAPIV3SchemaParser(BaseOpenAPISchemaParser):
 
     def get_paths(self) -> Dict[str, Dict]:
         return self._data["paths"]

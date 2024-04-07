@@ -9,7 +9,7 @@ from pymock_api.model.openapi._parser_factory import (
     BaseOpenAPISchemaParserFactory,
     OpenAPIV2SchemaParserFactory,
     OpenAPIV3SchemaParserFactory,
-    get_parser_factory,
+    get_schema_parser_factory,
 )
 
 
@@ -29,7 +29,7 @@ from pymock_api.model.openapi._parser_factory import (
 def test_get_schema_parser_factory(
     openapi_version: OpenAPIVersion, expected_factory: Type[BaseOpenAPISchemaParserFactory]
 ):
-    factory = get_parser_factory(version=openapi_version)
+    factory = get_schema_parser_factory(version=openapi_version)
     isinstance(factory, expected_factory)
 
 
@@ -45,5 +45,5 @@ def test_get_schema_parser_factory_with_invalid_version(
 ):
     with patch("pymock_api.model.openapi._parser_factory.OpenAPIVersion.to_enum", return_value=openapi_version):
         with pytest.raises(NotImplementedError) as exc_info:
-            get_parser_factory(version=openapi_version)
+            get_schema_parser_factory(version=openapi_version)
         re.search(re.escape(openapi_version), str(exc_info.value), re.IGNORECASE)

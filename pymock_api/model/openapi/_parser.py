@@ -1,12 +1,12 @@
 from typing import List, Type
 
 from ._base import BaseOpenAPIDataModel
-from ._schema_parser import BaseOpenAPIParser
+from ._schema_parser import BaseOpenAPISchemaParser
 
 
 class OpenAPIDocumentConfigParser:
 
-    def __init__(self, parser: BaseOpenAPIParser):
+    def __init__(self, parser: BaseOpenAPISchemaParser):
         self.parser = parser
 
     def process_paths(self, data_modal: Type[BaseOpenAPIDataModel]) -> List[BaseOpenAPIDataModel]:

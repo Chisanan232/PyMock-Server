@@ -3,12 +3,12 @@ from typing import Any, Dict, Union
 
 from ..api_config import _Config
 from ..enums import OpenAPIVersion
-from ._parser_factory import BaseOpenAPISchemaParserFactory, get_parser_factory
+from ._parser_factory import BaseOpenAPISchemaParserFactory, get_schema_parser_factory
 
 Self = Any
 
 OpenAPI_Document_Version: OpenAPIVersion = OpenAPIVersion.V3
-OpenAPI_Parser_Factory: BaseOpenAPISchemaParserFactory = get_parser_factory(version=OpenAPI_Document_Version)
+OpenAPI_Parser_Factory: BaseOpenAPISchemaParserFactory = get_schema_parser_factory(version=OpenAPI_Document_Version)
 
 
 def get_openapi_version() -> OpenAPIVersion:
@@ -38,7 +38,7 @@ class BaseOpenAPIDataModel(metaclass=ABCMeta):
 
     def load_schema_parser_factory_with_openapi_version(self) -> BaseOpenAPISchemaParserFactory:
         global OpenAPI_Document_Version
-        return get_parser_factory(version=OpenAPI_Document_Version)
+        return get_schema_parser_factory(version=OpenAPI_Document_Version)
 
     def reload_schema_parser_factory(self) -> None:
         self._load_schema_parser_factory()

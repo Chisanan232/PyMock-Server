@@ -6,13 +6,13 @@ from typing import Dict, List, Type
 import pytest
 
 from pymock_api.model.openapi._schema_parser import (
-    BaseOpenAPIParser,
-    OpenAPIV2Parser,
-    OpenAPIV3Parser,
+    BaseOpenAPISchemaParser,
+    OpenAPIV2SchemaParser,
+    OpenAPIV3SchemaParser,
 )
 
 
-class DummyOpenAPIParser(BaseOpenAPIParser):
+class DummyOpenAPISchemaParser(BaseOpenAPISchemaParser):
     def get_paths(self) -> Dict[str, Dict]:
         return {}
 
@@ -26,11 +26,11 @@ class DummyOpenAPIParser(BaseOpenAPIParser):
 class TestOpenAPIParser:
 
     @pytest.fixture(scope="function")
-    def parser(self) -> Type[BaseOpenAPIParser]:
-        return DummyOpenAPIParser
+    def parser(self) -> Type[BaseOpenAPISchemaParser]:
+        return DummyOpenAPISchemaParser
 
-    @pytest.mark.parametrize("impl_parser", [OpenAPIV2Parser, OpenAPIV3Parser])
-    def test_initial_parser_with_valid_file(self, impl_parser: Type[BaseOpenAPIParser]):
+    @pytest.mark.parametrize("impl_parser", [OpenAPIV2SchemaParser, OpenAPIV3SchemaParser])
+    def test_initial_parser_with_valid_file(self, impl_parser: Type[BaseOpenAPISchemaParser]):
         file_path: str = "./test.json"
         try:
             # Given
@@ -45,10 +45,10 @@ class TestOpenAPIParser:
         finally:
             os.remove(file_path)
 
-    def test_initial_parser_with_invalid_file(self, parser: Type[BaseOpenAPIParser]):
+    def test_initial_parser_with_invalid_file(self, parser: Type[BaseOpenAPISchemaParser]):
         # Run target function
         with pytest.raises(FileNotFoundError) as exc_info:
-            DummyOpenAPIParser(file="./not_exist.json")
+            DummyOpenAPISchemaParser(file="./not_exist.json")
 
         # Verify
         assert re.search(r".{0,32}not find.{0,32}OpenAPI format configuration", str(exc_info.value), re.IGNORECASE)

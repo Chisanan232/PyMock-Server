@@ -20,9 +20,9 @@ from pymock_api.model.openapi._parser_factory import (
     OpenAPIV3SchemaParserFactory,
 )
 from pymock_api.model.openapi._schema_parser import (
-    OpenAPIV2Parser,
-    OpenAPIV2PathParser,
-    OpenAPIV3Parser,
+    OpenAPIV2PathSchemaParser,
+    OpenAPIV2SchemaParser,
+    OpenAPIV3SchemaParser,
 )
 from pymock_api.model.openapi.config import (
     API,
@@ -89,7 +89,7 @@ def _get_all_openapi_api_doc() -> None:
 
                     # For testing API response properties
                     status_200_response = api_detail.get("responses", {}).get("200", {})
-                    set_component_definition(OpenAPIV2Parser(data=openapi_api_docs))
+                    set_component_definition(OpenAPIV2SchemaParser(data=openapi_api_docs))
                     if _YamlSchema.has_schema(status_200_response):
                         response_schema = _YamlSchema.get_schema_ref(status_200_response)
                         response_schema_properties = response_schema.get("properties", None)
@@ -256,7 +256,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
     def test_deserialize(self, openapi_doc_data: dict, entire_openapi_config: dict, data_model: Transferable):
         # Previous process
         set_openapi_version(OpenAPIVersion.V2)
-        set_component_definition(OpenAPIV2Parser(data=entire_openapi_config))
+        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
         data_model.reload_schema_parser_factory()
 
         # Run test
@@ -335,11 +335,11 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
     def test__process_api_params(self, openapi_doc_data: List[dict], entire_openapi_config: dict, data_model: API):
         # Pre-process
         set_openapi_version(OpenAPIVersion.V2)
-        set_component_definition(OpenAPIV2Parser(data=entire_openapi_config))
+        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
         data_model.reload_schema_parser_factory()
 
         # Run target function
-        parameters = data_model._process_api_params(OpenAPIV2PathParser({"parameters": openapi_doc_data}))
+        parameters = data_model._process_api_params(OpenAPIV2PathSchemaParser({"parameters": openapi_doc_data}))
 
         # Verify
         assert parameters and isinstance(parameters, list)
@@ -356,7 +356,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         self, openapi_doc_data: dict, entire_openapi_config: dict, data_model: API
     ):
         # Pre-process
-        set_component_definition(OpenAPIV2Parser(data=entire_openapi_config))
+        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
 
         # Run target function
         parameters = data_model._process_has_ref_parameters(openapi_doc_data)
@@ -381,12 +381,12 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         self, strategy: ResponseStrategy, api_detail: dict, entire_config: dict, data_model: API
     ):
         # Pre-process
-        set_component_definition(OpenAPIV2Parser(data=entire_config))
+        set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
 
         # Run target function under test
         print(f"[DEBUG in test] api_detail: {api_detail}")
         response_data = data_model._process_response(
-            openapi_path_parser=OpenAPIV2PathParser(data=api_detail), strategy=strategy
+            openapi_path_parser=OpenAPIV2PathSchemaParser(data=api_detail), strategy=strategy
         )
         print(f"[DEBUG in test] response_data: {response_data}")
 
@@ -453,7 +453,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         self, strategy: ResponseStrategy, api_response_detail: dict, entire_config: dict, data_model: API
     ):
         # Pre-process
-        set_component_definition(OpenAPIV2Parser(data=entire_config))
+        set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
 
         # Run target function under test
         response_prop_data = data_model._process_response_value(property_value=api_response_detail, strategy=strategy)
@@ -486,7 +486,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
 
     @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_DOC_JSON)
     def test_deserialize(self, openapi_doc_data: dict, data_model: Transferable):
-        set_component_definition(OpenAPIV2Parser(data=openapi_doc_data))
+        set_component_definition(OpenAPIV2SchemaParser(data=openapi_doc_data))
         super().test_deserialize(openapi_doc_data, data_model)
 
     def _initial(self, data: OpenAPIDocumentConfig) -> None:
@@ -596,7 +596,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
 
     @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON)
     def test_deserialize_with_openapi_v3(self, openapi_doc_data: dict, data_model: OpenAPIDocumentConfig):
-        set_component_definition(OpenAPIV3Parser(data=openapi_doc_data))
+        set_component_definition(OpenAPIV3SchemaParser(data=openapi_doc_data))
 
         self._initial(data=data_model)
         deserialized_data = data_model.deserialize(data=openapi_doc_data)
