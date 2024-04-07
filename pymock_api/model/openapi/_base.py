@@ -47,7 +47,7 @@ class BaseOpenAPIDataModel(metaclass=ABCMeta):
         set_parser_factory(self.load_parser_factory_with_openapi_version())
 
     @classmethod
-    def generate(cls, **kwargs) -> Self:
+    def generate(cls, *args, **kwargs) -> Self:
         raise NotImplementedError
 
     @abstractmethod

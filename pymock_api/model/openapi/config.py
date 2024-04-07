@@ -90,7 +90,7 @@ class Tag(BaseOpenAPIDataModel):
         self.description: str = ""
 
     @classmethod
-    def generate(cls, detail: dict) -> "Tag":  # type: ignore[override]
+    def generate(cls, detail: dict) -> "Tag":
         return Tag().deserialize(data=detail)
 
     def deserialize(self, data: Dict) -> "Tag":
@@ -110,7 +110,7 @@ class APIParameter(Transferable):
         self.items: Optional[list] = None
 
     @classmethod
-    def generate(cls, detail: dict) -> "APIParameter":  # type: ignore[override]
+    def generate(cls, detail: dict) -> "APIParameter":
         return APIParameter().deserialize(data=detail)
 
     def deserialize(self, data: Dict) -> "APIParameter":
@@ -164,7 +164,7 @@ class API(Transferable):
         self.process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
 
     @classmethod
-    def generate(cls, api_path: str, http_method: str, detail: dict) -> "API":  # type: ignore[override]
+    def generate(cls, api_path: str, http_method: str, detail: dict) -> "API":
         api = API()
         api.path = api_path
         api.http_method = http_method
@@ -492,11 +492,11 @@ class OpenAPIDocumentConfig(Transferable):
 
         return self
 
-    def _initial_tag(self, *args, **kwargs):
-        return Tag.generate(*args, **kwargs)
-
     def _initial_api(self, *args, **kwargs) -> API:
         return API.generate(*args, **kwargs)
+
+    def _initial_tag(self, *args, **kwargs) -> Tag:
+        return Tag.generate(*args, **kwargs)
 
     def _chk_version_and_load_parser(self, data: dict) -> None:
         swagger_version: Optional[str] = data.get("swagger", None)  # OpenAPI version 2
