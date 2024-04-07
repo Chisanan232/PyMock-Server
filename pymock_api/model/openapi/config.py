@@ -90,7 +90,7 @@ class Tag(BaseOpenAPIDataModel):
         self.description: str = ""
 
     @classmethod
-    def generate(cls, detail: dict) -> "Tag":
+    def generate(cls, detail: dict) -> "Tag":  # type: ignore[override]
         return Tag().deserialize(data=detail)
 
     def deserialize(self, data: Dict) -> "Tag":
@@ -110,7 +110,7 @@ class APIParameter(Transferable):
         self.items: Optional[list] = None
 
     @classmethod
-    def generate(cls, detail: dict) -> "APIParameter":
+    def generate(cls, detail: dict) -> "APIParameter":  # type: ignore[override]
         return APIParameter().deserialize(data=detail)
 
     def deserialize(self, data: Dict) -> "APIParameter":
@@ -164,7 +164,7 @@ class API(Transferable):
         self.process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
 
     @classmethod
-    def generate(cls, api_path: str, http_method: str, detail: dict) -> "API":
+    def generate(cls, api_path: str, http_method: str, detail: dict) -> "API":  # type: ignore[override]
         api = API()
         api.path = api_path
         api.http_method = http_method
