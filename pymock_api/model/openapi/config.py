@@ -155,6 +155,14 @@ class API(Transferable):
 
         self.process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
 
+    @classmethod
+    def generate(cls, api_path: str, http_method: str, detail: dict) -> "API":
+        api = API()
+        api.path = api_path
+        api.http_method = http_method
+        api.deserialize(data=detail)
+        return api
+
     def deserialize(self, data: Dict) -> "API":
         # FIXME: Does it have better way to set the HTTP response strategy?
         if not self.process_response_strategy:
@@ -463,11 +471,9 @@ class OpenAPIDocumentConfig(Transferable):
         apis = openapi_parser.get_paths()
         for api_path, api_props in apis.items():
             for one_api_http_method, one_api_details in api_props.items():
-                api = API()
-                api.path = api_path
-                api.http_method = one_api_http_method
-                api.deserialize(data=one_api_details)
-                self.paths.append(api)
+                self.paths.append(
+                    API.generate(api_path=api_path, http_method=one_api_http_method, detail=one_api_details)
+                )
 
         self.tags = list(map(lambda t: Tag().deserialize(t), openapi_parser.get_tags()))
 
