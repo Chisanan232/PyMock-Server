@@ -11,22 +11,8 @@ from ._base import (
     set_component_definition,
     set_openapi_version,
 )
+from ._js_handlers import convert_js_type
 from ._parser import APIParser, OpenAPIDocumentConfigParser
-
-
-def convert_js_type(t: str) -> str:
-    if t == "string":
-        return "str"
-    elif t in ["integer", "number"]:
-        return "int"
-    elif t == "boolean":
-        return "bool"
-    elif t == "array":
-        return "list"
-    elif t == "file":
-        return "file"
-    else:
-        raise TypeError(f"Currently, it cannot parse JS type '{t}'.")
 
 
 class Tag(BaseOpenAPIDataModel):
