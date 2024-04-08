@@ -1,7 +1,3 @@
-import glob
-import json
-import os
-import pathlib
 import re
 from abc import ABCMeta, abstractmethod
 from typing import Type
@@ -41,6 +37,7 @@ from ._test_case import (
     OPENAPI_API_PARAMETERS_JSON,
     OPENAPI_ONE_API_JSON,
     ensure_load_openapi_test_cases,
+    load_different_version_openapi_api_doc,
 )
 
 
@@ -63,22 +60,8 @@ def test_fail_convert_js_type():
     assert "cannot parse JS type" in str(exc_info.value)
 
 
-def _get_different_version_openapi_api_doc() -> None:
-    json_dir = os.path.join(
-        str(pathlib.Path(__file__).parent.parent.parent.parent),
-        "data",
-        "deserialize_openapi_config_test",
-        "different_version",
-        "*.json",
-    )
-    for json_config_path in glob.glob(json_dir):
-        with open(json_config_path, "r", encoding="utf-8") as file_stream:
-            openapi_api_docs = json.loads(file_stream.read())
-            OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON.append(openapi_api_docs)
-
-
 ensure_load_openapi_test_cases()
-_get_different_version_openapi_api_doc()
+load_different_version_openapi_api_doc()
 
 
 class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
