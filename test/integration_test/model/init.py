@@ -1,18 +1,22 @@
 import glob
+import json
 import os
 import pathlib
-from typing import List
+from typing import Dict, List
 
 import pytest
 
 from pymock_api import APIConfig
-from pymock_api.model import load_config
+from pymock_api.model import deserialize_swagger_api_config, load_config
 
 from ..._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
 from ..._spec import run_test
 
 # [(under_test_path, expected_path)]
 DIVIDING_YAML_PATHS: List[tuple] = []
+
+# [config_path]
+OPENAPI_DOCUMENT_CONFIG_PATHS: List[str] = []
 
 
 def _get_all_yaml_for_dividing() -> None:
@@ -36,7 +40,27 @@ def _get_all_yaml_for_dividing() -> None:
             DIVIDING_YAML_PATHS.append(one_test_scenario)
 
 
+def _get_all_openapi_config_path() -> None:
+    def _get_path(config_type_dir: str) -> str:
+        _path = (
+            str(pathlib.Path(__file__).parent.parent.parent),
+            "data",
+            "deserialize_openapi_config_test",
+            config_type_dir,
+            "*.json",
+        )
+        return os.path.join(*_path)
+
+    openapi_v2_dir = _get_path(config_type_dir="different_version")
+    openapi_v3_dir = _get_path(config_type_dir="entire_config")
+    for openapi_dir in [openapi_v2_dir, openapi_v3_dir]:
+        global OPENAPI_DOCUMENT_CONFIG_PATHS
+        for openapi_config_path in glob.glob(openapi_dir):
+            OPENAPI_DOCUMENT_CONFIG_PATHS.append(openapi_config_path)
+
+
 _get_all_yaml_for_dividing()
+_get_all_openapi_config_path()
 
 
 class TestInitFunctions:
@@ -109,3 +133,22 @@ class TestInitFunctions:
             assert api_config.http.response is not None
             assert expected_api_config.http.response is not None
             assert api_config.http.response.serialize() == expected_api_config.http.response.serialize()
+
+    @pytest.mark.parametrize("openapi_config_path", OPENAPI_DOCUMENT_CONFIG_PATHS)
+    def test_deserialize_swagger_api_config_with_openapi_config(self, openapi_config_path: str):
+        # Pre-process
+        with open(openapi_config_path, "r", encoding="utf-8") as io_stream:
+            openapi_config_json = json.load(io_stream)
+
+        # Run target
+        openapi_config = deserialize_swagger_api_config(data=openapi_config_json)
+
+        # Verify
+        assert openapi_config is not None
+        assert len(openapi_config.paths) != 0
+
+        total_apis_cnt = 0
+        paths: Dict[str, dict] = openapi_config_json["paths"]
+        for p in paths.keys():
+            total_apis_cnt += len(paths[p].keys())
+        assert len(openapi_config.paths) == total_apis_cnt
