@@ -18,7 +18,7 @@ from pymock_api.model.openapi._schema_parser import (
 )
 from pymock_api.model.openapi.config import APIParameter
 
-from .config import (
+from ._test_case import (
     OPENAPI_API_PARAMETERS_JSON,
     OPENAPI_API_PARAMETERS_JSON_FOR_API,
     OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API,
