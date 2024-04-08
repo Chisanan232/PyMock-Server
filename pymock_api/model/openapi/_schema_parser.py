@@ -4,10 +4,12 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional
 
 
-class BaseOpenAPIObjectSchemaParser(metaclass=ABCMeta):
-
+class BaseSchemaParser(metaclass=ABCMeta):
     def __init__(self, data: dict):
         self._data = data
+
+
+class BaseOpenAPIObjectSchemaParser(BaseSchemaParser):
 
     @abstractmethod
     def get_required(self, default: Any = None) -> List[str]:
@@ -33,10 +35,7 @@ class OpenAPIObjectSchemaParser(BaseOpenAPIObjectSchemaParser):
             return self._data["properties"]
 
 
-class BaseOpenAPIResponseSchemaParser(metaclass=ABCMeta):
-
-    def __init__(self, data: dict):
-        self._data = data
+class BaseOpenAPIResponseSchemaParser(BaseSchemaParser):
 
     @abstractmethod
     def get_content(self, value_format: str) -> Dict[str, dict]:
@@ -56,10 +55,7 @@ class OpenAPIResponseSchemaParser(BaseOpenAPIResponseSchemaParser):
         return value_format in self._data["content"].keys()
 
 
-class BaseOpenAPIRequestParametersSchemaParser(metaclass=ABCMeta):
-
-    def __init__(self, data: dict):
-        self._data = data
+class BaseOpenAPIRequestParametersSchemaParser(BaseSchemaParser):
 
     @abstractmethod
     def get_name(self) -> str:
@@ -100,10 +96,7 @@ class OpenAPIRequestParametersSchemaParser(BaseOpenAPIRequestParametersSchemaPar
         return self._data.get("items", None)
 
 
-class BaseOpenAPIPathSchemaParser(metaclass=ABCMeta):
-
-    def __init__(self, data: dict):
-        self._data = data
+class BaseOpenAPIPathSchemaParser(BaseSchemaParser):
 
     @abstractmethod
     def get_request_parameters(self) -> List[dict]:
@@ -160,10 +153,7 @@ class OpenAPIV3PathSchemaParser(BaseOpenAPIPathSchemaParser):
         return self._data.get("tags", [])
 
 
-class BaseOpenAPITagSchemaParser(metaclass=ABCMeta):
-
-    def __init__(self, data: dict):
-        self._data = data
+class BaseOpenAPITagSchemaParser(BaseSchemaParser):
 
     @abstractmethod
     def get_name(self):
@@ -183,18 +173,17 @@ class OpenAPITagSchemaParser(BaseOpenAPITagSchemaParser):
         return self._data["description"]
 
 
-class BaseOpenAPISchemaParser(metaclass=ABCMeta):
+class BaseOpenAPISchemaParser(BaseSchemaParser):
 
     def __init__(self, file: str = "", data: Dict = {}):
+        super().__init__(data=data)
+
         if file:
             file_path = pathlib.Path(file)
             if not file_path.exists():
                 raise FileNotFoundError(f"Cannot find the OpenAPI format configuration at file path *{file_path}*.")
             with open(str(file_path), "r", encoding="utf-8") as io_stream:
                 self._data = json.load(io_stream)
-
-        if data:
-            self._data = data
 
         assert self._data, "No any data. Parse OpenAPI config fail."
 

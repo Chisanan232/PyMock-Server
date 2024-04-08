@@ -1,5 +1,6 @@
+from abc import ABCMeta, abstractmethod
 from pydoc import locate
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union, cast
 
 from ..enums import OpenAPIVersion, ResponseStrategy
 from ._base import (
@@ -10,16 +11,31 @@ from ._base import (
 )
 from ._js_handlers import convert_js_type, ensure_type_is_python_type
 from ._parser_factory import BaseOpenAPISchemaParserFactory
-from ._schema_parser import BaseOpenAPIPathSchemaParser, BaseOpenAPISchemaParser
+from ._schema_parser import (
+    BaseOpenAPIPathSchemaParser,
+    BaseOpenAPISchemaParser,
+    BaseSchemaParser,
+)
 
 
-class APIParser:
-    def __init__(self, parser: BaseOpenAPIPathSchemaParser):
-        self.parser = parser
+class BaseParser(metaclass=ABCMeta):
+    def __init__(self, parser: BaseSchemaParser):
+        self._parser = parser
+
+    @property
+    @abstractmethod
+    def parser(self) -> BaseSchemaParser:
+        return self._parser
 
     @property
     def schema_parser_factory(self) -> BaseOpenAPISchemaParserFactory:
         return ensure_get_schema_parser_factory()
+
+
+class APIParser(BaseParser):
+    @property
+    def parser(self) -> BaseOpenAPIPathSchemaParser:
+        return cast(BaseOpenAPIPathSchemaParser, super().parser)
 
     def process_api_parameters(
         self, data_modal: Type[BaseOpenAPIDataModel], http_method: str
@@ -293,10 +309,10 @@ class APIParser:
         return self.parser.get_all_tags()
 
 
-class OpenAPIDocumentConfigParser:
-
-    def __init__(self, parser: BaseOpenAPISchemaParser):
-        self.parser = parser
+class OpenAPIDocumentConfigParser(BaseParser):
+    @property
+    def parser(self) -> BaseOpenAPISchemaParser:
+        return cast(BaseOpenAPISchemaParser, super().parser)
 
     def process_paths(self, data_modal: Type[BaseOpenAPIDataModel]) -> List[BaseOpenAPIDataModel]:
         apis = self.parser.get_paths()
