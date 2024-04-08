@@ -11,7 +11,7 @@ from pymock_api.model.openapi._base import (
     set_openapi_version,
     set_parser_factory,
 )
-from pymock_api.model.openapi._parser import APIParser
+from pymock_api.model.openapi._parser import APIParameterParser, APIParser
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2PathSchemaParser,
     OpenAPIV2SchemaParser,
@@ -37,6 +37,20 @@ if (
 
 class DummyPathSchemaParser(OpenAPIV2PathSchemaParser):
     pass
+
+
+class TestAPIParameterParser:
+
+    @pytest.fixture(scope="function")
+    def parser(self) -> Type[APIParameterParser]:
+        return APIParameterParser
+
+    def test_parse_schema_with_invalid_value(self, parser: Type[APIParameterParser]):
+        invalid_values = {}
+        with pytest.raises(ValueError) as exc_info:
+            parser_instance = parser(DummyPathSchemaParser({}))
+            parser_instance.process_parameter(invalid_values, accept_no_schema=False)
+        assert re.search(r".{0,64}doesn't have key 'schema'.{0,64}", str(exc_info.value), re.IGNORECASE)
 
 
 class TestAPIParser:

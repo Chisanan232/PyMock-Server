@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from collections import namedtuple
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Type, Union, cast
 
@@ -13,8 +14,15 @@ from ._js_handlers import convert_js_type, ensure_type_is_python_type
 from ._parser_factory import BaseOpenAPISchemaParserFactory
 from ._schema_parser import (
     BaseOpenAPIPathSchemaParser,
+    BaseOpenAPIRequestParametersSchemaParser,
     BaseOpenAPISchemaParser,
     BaseSchemaParser,
+)
+
+OpenAPIAPIParameterConfig = namedtuple(  # type: ignore[misc]
+    typename="OpenAPIAPIParameterConfig",
+    field_names=("name", "required", "type", "default", "items"),
+    defaults={"default": None, "items": None},  # type: ignore[misc]
 )
 
 
@@ -30,6 +38,41 @@ class BaseParser(metaclass=ABCMeta):
     @property
     def schema_parser_factory(self) -> BaseOpenAPISchemaParserFactory:
         return ensure_get_schema_parser_factory()
+
+
+class APIParameterParser(BaseParser):
+    @property
+    def parser(self) -> BaseOpenAPIRequestParametersSchemaParser:
+        return cast(BaseOpenAPIRequestParametersSchemaParser, super().parser)
+
+    def process_parameter(self, data: Dict, accept_no_schema: bool = True) -> OpenAPIAPIParameterConfig:
+        if not _YamlSchema.has_schema(data):
+            if accept_no_schema:
+                return self._convert_from_data(data)
+            raise ValueError(f"This data '{data}' doesn't have key 'schema'.")
+
+        if _YamlSchema.has_ref(data):
+            raise NotImplementedError
+        else:
+            return self._convert_from_parser()
+
+    def _convert_from_data(self, data: dict) -> OpenAPIAPIParameterConfig:
+        return OpenAPIAPIParameterConfig(  # type: ignore[call-arg]
+            name=data["name"],
+            required=data["required"],
+            type=data["type"],
+            default=data.get("default", None),
+            items=data.get("items", None),
+        )
+
+    def _convert_from_parser(self) -> OpenAPIAPIParameterConfig:
+        return OpenAPIAPIParameterConfig(  # type: ignore[call-arg]
+            name=self.parser.get_name(),
+            required=self.parser.get_required(),
+            type=self.parser.get_type(),
+            default=self.parser.get_default(),
+            items=self.parser.get_items(),
+        )
 
 
 class APIParser(BaseParser):

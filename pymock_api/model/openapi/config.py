@@ -7,12 +7,11 @@ from ..enums import ResponseStrategy
 from ._base import (
     BaseOpenAPIDataModel,
     Transferable,
-    _YamlSchema,
     set_component_definition,
     set_openapi_version,
 )
 from ._js_handlers import convert_js_type
-from ._parser import APIParser, OpenAPIDocumentConfigParser
+from ._parser import APIParameterParser, APIParser, OpenAPIDocumentConfigParser
 
 
 class Tag(BaseOpenAPIDataModel):
@@ -46,12 +45,13 @@ class APIParameter(Transferable):
         return APIParameter().deserialize(data=detail)
 
     def deserialize(self, data: Dict) -> "APIParameter":
-        handled_data = self.parse_schema(data)
-        self.name = handled_data["name"]
-        self.required = handled_data["required"]
-        self.value_type = convert_js_type(handled_data["type"])
-        self.default = handled_data.get("default", None)
-        items = handled_data.get("items", None)
+        parser = APIParameterParser(self.schema_parser_factory.request_parameters(data))
+        handled_data = parser.process_parameter(data)
+        self.name = handled_data.name  # type: ignore[attr-defined]
+        self.required = handled_data.required  # type: ignore[attr-defined]
+        self.value_type = convert_js_type(handled_data.type)  # type: ignore[attr-defined]
+        self.default = handled_data.default  # type: ignore[attr-defined]
+        items = handled_data.items  # type: ignore[attr-defined]
         if items is not None:
             self.items = items if isinstance(items, list) else [items]
         return self
@@ -65,23 +65,6 @@ class APIParameter(Transferable):
             value_format=None,
             items=self.items,
         )
-
-    def parse_schema(self, data: Dict, accept_no_schema: bool = True) -> dict:
-        if not _YamlSchema.has_schema(data):
-            if accept_no_schema:
-                return data
-            raise ValueError(f"This data '{data}' doesn't have key 'schema'.")
-
-        if _YamlSchema.has_ref(data):
-            raise NotImplementedError
-        else:
-            parser = self.schema_parser_factory.request_parameters(data)
-            return {
-                "name": parser.get_name(),
-                "required": parser.get_required(),
-                "type": parser.get_type(),
-                "default": parser.get_default(),
-            }
 
 
 class API(Transferable):
