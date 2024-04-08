@@ -245,8 +245,9 @@ class APIParser(BaseParser):
                 print(f"[DEBUG] response_data: {response_data}")
         return response_data
 
-    def _process_response_value(self, property_value: dict, strategy: ResponseStrategy) -> Union[str, dict]:
-        if not property_value:
+    def _process_response_value(self, property_value: dict, strategy: ResponseStrategy) -> Union[str, list, dict]:
+
+        def _handle_empty_data() -> Union[str, dict]:
             if strategy is ResponseStrategy.OBJECT:
                 return {
                     "name": "",
@@ -260,7 +261,8 @@ class APIParser(BaseParser):
                 }
             else:
                 return "empty value"
-        if _YamlSchema.has_ref(property_value):
+
+        def _handle_ref_data() -> Union[str, dict]:
             # FIXME: Handle the reference
             v_ref = _YamlSchema.get_schema_ref(property_value)
             if strategy is ResponseStrategy.OBJECT:
@@ -276,8 +278,9 @@ class APIParser(BaseParser):
                     "FIXME": "Handle the reference",
                 }
             else:
-                k_value = "FIXME: Handle the reference"
-        else:
+                return "FIXME: Handle the reference"
+
+        def _handle_not_ref_data() -> Union[str, list, dict]:
             v_type = convert_js_type(property_value["type"])
             if strategy is ResponseStrategy.OBJECT:
                 if locate(v_type) == list:
@@ -334,22 +337,28 @@ class APIParser(BaseParser):
                             else:
                                 raise NotImplementedError
                             item[item_k] = random_value
-                    k_value = [item]  # type: ignore[assignment]
+                    return [item]
                 elif locate(v_type) == str:
                     # lowercase_letters = string.ascii_lowercase
                     # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                    k_value = "random string value"
+                    return "random string value"
                 elif locate(v_type) == int:
                     # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                    k_value = "random integer value"
+                    return "random integer value"
                 elif locate(v_type) == bool:
-                    k_value = "random boolean value"
+                    return "random boolean value"
                 elif v_type == "file":
                     # TODO: Handle the file download feature
-                    k_value = "random file output stream"
+                    return "random file output stream"
                 else:
                     raise NotImplementedError
-        return k_value
+
+        if not property_value:
+            return _handle_empty_data()
+        if _YamlSchema.has_ref(property_value):
+            return _handle_ref_data()
+        else:
+            return _handle_not_ref_data()
 
     def process_tags(self) -> List[str]:
         return self.parser.get_all_tags()
