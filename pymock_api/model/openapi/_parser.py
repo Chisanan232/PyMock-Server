@@ -262,9 +262,9 @@ class APIParser(BaseParser):
             else:
                 return "empty value"
 
-        def _handle_ref_data() -> Union[str, dict]:
+        def _handle_ref_data(resp_prop_data: dict) -> Union[str, dict]:
             # FIXME: Handle the reference
-            v_ref = _YamlSchema.get_schema_ref(property_value)
+            v_ref = _YamlSchema.get_schema_ref(resp_prop_data)
             if strategy is ResponseStrategy.OBJECT:
                 return {
                     "name": "",
@@ -280,8 +280,8 @@ class APIParser(BaseParser):
             else:
                 return "FIXME: Handle the reference"
 
-        def _handle_not_ref_data() -> Union[str, list, dict]:
-            v_type = convert_js_type(property_value["type"])
+        def _handle_not_ref_data(resp_prop_data: dict) -> Union[str, list, dict]:
+            v_type = convert_js_type(resp_prop_data["type"])
             if strategy is ResponseStrategy.OBJECT:
                 if locate(v_type) == list:
                     response_data_prop = {
@@ -294,7 +294,7 @@ class APIParser(BaseParser):
                         "items": [],
                     }
 
-                    single_response = _YamlSchema.get_schema_ref(property_value["items"])
+                    single_response = _YamlSchema.get_schema_ref(resp_prop_data["items"])
                     parser = self.schema_parser_factory.object(single_response)
                     single_response_properties = parser.get_properties(default={})
                     if single_response_properties:
@@ -319,7 +319,7 @@ class APIParser(BaseParser):
                     }
             else:
                 if locate(v_type) == list:
-                    single_response = _YamlSchema.get_schema_ref(property_value["items"])
+                    single_response = _YamlSchema.get_schema_ref(resp_prop_data["items"])
                     parser = self.schema_parser_factory.object(single_response)
                     item = {}
                     single_response_properties = parser.get_properties(default={})
@@ -356,9 +356,9 @@ class APIParser(BaseParser):
         if not property_value:
             return _handle_empty_data()
         if _YamlSchema.has_ref(property_value):
-            return _handle_ref_data()
+            return _handle_ref_data(property_value)
         else:
-            return _handle_not_ref_data()
+            return _handle_not_ref_data(property_value)
 
     def process_tags(self) -> List[str]:
         return self.parser.get_all_tags()
