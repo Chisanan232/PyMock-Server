@@ -4,10 +4,12 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional
 
 
-class BaseOpenAPIObjectParser(metaclass=ABCMeta):
-
+class BaseSchemaParser(metaclass=ABCMeta):
     def __init__(self, data: dict):
         self._data = data
+
+
+class BaseOpenAPIObjectSchemaParser(BaseSchemaParser):
 
     @abstractmethod
     def get_required(self, default: Any = None) -> List[str]:
@@ -18,7 +20,7 @@ class BaseOpenAPIObjectParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIObjectParser(BaseOpenAPIObjectParser):
+class OpenAPIObjectSchemaParser(BaseOpenAPIObjectSchemaParser):
 
     def get_required(self, default: Any = None) -> List[str]:
         if default is not None:
@@ -33,10 +35,7 @@ class OpenAPIObjectParser(BaseOpenAPIObjectParser):
             return self._data["properties"]
 
 
-class BaseOpenAPIResponseParser(metaclass=ABCMeta):
-
-    def __init__(self, data: dict):
-        self._data = data
+class BaseOpenAPIResponseSchemaParser(BaseSchemaParser):
 
     @abstractmethod
     def get_content(self, value_format: str) -> Dict[str, dict]:
@@ -47,7 +46,7 @@ class BaseOpenAPIResponseParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIResponseParser(BaseOpenAPIResponseParser):
+class OpenAPIResponseSchemaParser(BaseOpenAPIResponseSchemaParser):
 
     def get_content(self, value_format: str) -> Dict[str, dict]:
         return self._data["content"][value_format]["schema"]
@@ -56,10 +55,7 @@ class OpenAPIResponseParser(BaseOpenAPIResponseParser):
         return value_format in self._data["content"].keys()
 
 
-class BaseOpenAPIRequestParametersParser(metaclass=ABCMeta):
-
-    def __init__(self, data: dict):
-        self._data = data
+class BaseOpenAPIRequestParametersSchemaParser(BaseSchemaParser):
 
     @abstractmethod
     def get_name(self) -> str:
@@ -82,7 +78,7 @@ class BaseOpenAPIRequestParametersParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIRequestParametersParser(BaseOpenAPIRequestParametersParser):
+class OpenAPIRequestParametersSchemaParser(BaseOpenAPIRequestParametersSchemaParser):
 
     def get_name(self) -> str:
         return self._data["name"]
@@ -100,10 +96,7 @@ class OpenAPIRequestParametersParser(BaseOpenAPIRequestParametersParser):
         return self._data.get("items", None)
 
 
-class BaseOpenAPIPathParser(metaclass=ABCMeta):
-
-    def __init__(self, data: dict):
-        self._data = data
+class BaseOpenAPIPathSchemaParser(BaseSchemaParser):
 
     @abstractmethod
     def get_request_parameters(self) -> List[dict]:
@@ -125,7 +118,7 @@ class BaseOpenAPIPathParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIV2PathParser(BaseOpenAPIPathParser):
+class OpenAPIV2PathSchemaParser(BaseOpenAPIPathSchemaParser):
 
     def get_request_parameters(self) -> List[dict]:
         return self._data["parameters"]
@@ -140,7 +133,7 @@ class OpenAPIV2PathParser(BaseOpenAPIPathParser):
         return self._data.get("tags", [])
 
 
-class OpenAPIV3PathParser(BaseOpenAPIPathParser):
+class OpenAPIV3PathSchemaParser(BaseOpenAPIPathSchemaParser):
 
     def get_request_parameters(self) -> List[dict]:
         return self._data.get("parameters", [])
@@ -160,10 +153,7 @@ class OpenAPIV3PathParser(BaseOpenAPIPathParser):
         return self._data.get("tags", [])
 
 
-class BaseOpenAPITagParser(metaclass=ABCMeta):
-
-    def __init__(self, data: dict):
-        self._data = data
+class BaseOpenAPITagSchemaParser(BaseSchemaParser):
 
     @abstractmethod
     def get_name(self):
@@ -174,7 +164,7 @@ class BaseOpenAPITagParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPITagParser(BaseOpenAPITagParser):
+class OpenAPITagSchemaParser(BaseOpenAPITagSchemaParser):
 
     def get_name(self):
         return self._data["name"]
@@ -183,18 +173,17 @@ class OpenAPITagParser(BaseOpenAPITagParser):
         return self._data["description"]
 
 
-class BaseOpenAPIParser(metaclass=ABCMeta):
+class BaseOpenAPISchemaParser(BaseSchemaParser):
 
     def __init__(self, file: str = "", data: Dict = {}):
+        super().__init__(data=data)
+
         if file:
             file_path = pathlib.Path(file)
             if not file_path.exists():
                 raise FileNotFoundError(f"Cannot find the OpenAPI format configuration at file path *{file_path}*.")
             with open(str(file_path), "r", encoding="utf-8") as io_stream:
                 self._data = json.load(io_stream)
-
-        if data:
-            self._data = data
 
         assert self._data, "No any data. Parse OpenAPI config fail."
 
@@ -211,7 +200,7 @@ class BaseOpenAPIParser(metaclass=ABCMeta):
         pass
 
 
-class OpenAPIV2Parser(BaseOpenAPIParser):
+class OpenAPIV2SchemaParser(BaseOpenAPISchemaParser):
 
     def get_paths(self) -> Dict[str, Dict]:
         return self._data["paths"]
@@ -223,7 +212,7 @@ class OpenAPIV2Parser(BaseOpenAPIParser):
         return self._data.get("definitions", {})
 
 
-class OpenAPIV3Parser(BaseOpenAPIParser):
+class OpenAPIV3SchemaParser(BaseOpenAPISchemaParser):
 
     def get_paths(self) -> Dict[str, Dict]:
         return self._data["paths"]
