@@ -90,8 +90,7 @@ class API(Transferable):
         # FIXME: Does it have better way to set the HTTP response strategy?
         if not self.process_response_strategy:
             raise ValueError("Please set the strategy how it should process HTTP response.")
-        openapi_path_parser = self.schema_parser_factory.path(data=data)
-        parser = APIParser(parser=openapi_path_parser)
+        parser = APIParser(parser=self.schema_parser_factory.path(data=data))
 
         self.parameters = cast(
             List[APIParameter], parser.process_api_parameters(data_modal=APIParameter, http_method=self.http_method)
