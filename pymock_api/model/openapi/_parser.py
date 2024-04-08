@@ -76,6 +76,9 @@ class APIParameterParser(BaseParser):
 
 
 class APIParser(BaseParser):
+
+    Response_Content_Type: List[str] = ["application/json", "application/octet-stream", "*/*"]
+
     @property
     def parser(self) -> BaseOpenAPIPathSchemaParser:
         return cast(BaseOpenAPIPathSchemaParser, super().parser)
@@ -230,7 +233,7 @@ class APIParser(BaseParser):
         else:
             resp_parser = self.schema_parser_factory.response(status_200_response)
             resp_value_format = list(
-                filter(lambda vf: resp_parser.exist_in_content(value_format=vf), ["application/json", "*/*"])
+                filter(lambda vf: resp_parser.exist_in_content(value_format=vf), self.Response_Content_Type)
             )
             response_schema = resp_parser.get_content(value_format=resp_value_format[0])
             if _YamlSchema.has_ref(response_schema):
