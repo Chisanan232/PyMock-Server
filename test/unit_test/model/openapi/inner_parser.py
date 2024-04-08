@@ -3,8 +3,9 @@ from typing import List, Type
 
 import pytest
 
-from pymock_api.model.enums import OpenAPIVersion
+from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
 from pymock_api.model.openapi._base import (
+    _YamlSchema,
     get_schema_parser_factory_with_openapi_version,
     set_component_definition,
     set_openapi_version,
@@ -21,6 +22,8 @@ from .config import (
     OPENAPI_API_PARAMETERS_JSON,
     OPENAPI_API_PARAMETERS_JSON_FOR_API,
     OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API,
+    OPENAPI_API_RESPONSES_FOR_API,
+    OPENAPI_API_RESPONSES_PROPERTY_FOR_API,
     _get_all_openapi_api_doc,
 )
 
@@ -30,6 +33,10 @@ if (
     and not OPENAPI_API_PARAMETERS_JSON_FOR_API
 ):
     _get_all_openapi_api_doc()
+
+
+class DummyPathSchemaParser(OpenAPIV2PathSchemaParser):
+    pass
 
 
 class TestAPIParser:
@@ -89,3 +96,107 @@ class TestAPIParser:
 
         # Verify
         assert re.search(r".{1,64}no ref.{1,64}", str(exc_info.value), re.IGNORECASE)
+
+    @pytest.mark.parametrize(("strategy", "api_detail", "entire_config"), OPENAPI_API_RESPONSES_FOR_API)
+    def test__process_http_response(
+        self, parser: Type[APIParser], strategy: ResponseStrategy, api_detail: dict, entire_config: dict
+    ):
+        # Pre-process
+        set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
+
+        # Run target function under test
+        print(f"[DEBUG in test] api_detail: {api_detail}")
+        parser_instance = parser(parser=OpenAPIV2PathSchemaParser(data=api_detail))
+        response_data = parser_instance.process_responses(strategy=strategy)
+        print(f"[DEBUG in test] response_data: {response_data}")
+
+        # Verify
+        resp_200 = api_detail["responses"]["200"]
+        if _YamlSchema.has_schema(resp_200):
+            should_check_name = True
+        else:
+            response_content = resp_200["content"]
+            resp_val_format = list(filter(lambda f: f in response_content.keys(), ["application/json", "*/*"]))
+            response_detail = response_content[resp_val_format[0]]["schema"]
+            if not response_detail:
+                should_check_name = False
+            else:
+                should_check_name = True
+        print(f"[DEBUG in test] should_check_name: {should_check_name}")
+
+        assert response_data and isinstance(response_data, dict)
+        data_details = response_data["data"]
+        if strategy is ResponseStrategy.OBJECT:
+            assert data_details is not None and isinstance(data_details, list)
+            for d in data_details:
+                if should_check_name:
+                    assert d["name"]
+                    assert d["type"]
+                assert d["required"] is not None
+                assert d["format"] is None  # FIXME: Should activate this verify after support this feature
+                if d["type"] == "list":
+                    assert d["items"] is not None
+                    for item in d["items"]:
+                        assert item["name"]
+                        assert item["type"]
+                        assert item["required"] is not None
+        else:
+            assert data_details is not None and isinstance(data_details, dict)
+            for v in data_details.values():
+                if isinstance(v, str):
+                    if should_check_name:
+                        assert v in [
+                            "random string value",
+                            "random integer value",
+                            "random boolean value",
+                            "random file output stream",
+                            "FIXME: Handle the reference",
+                        ]
+                    else:
+                        assert v == "empty value"
+                else:
+                    for item in v:
+                        for item_value in item.values():
+                            if should_check_name:
+                                assert item_value in [
+                                    "random string value",
+                                    "random integer value",
+                                    "random boolean value",
+                                ]
+                            else:
+                                assert item_value == "empty value"
+
+    @pytest.mark.parametrize(
+        ("strategy", "api_response_detail", "entire_config"), OPENAPI_API_RESPONSES_PROPERTY_FOR_API
+    )
+    def test__process_response_value(
+        self, parser: Type[APIParser], strategy: ResponseStrategy, api_response_detail: dict, entire_config: dict
+    ):
+        # Pre-process
+        set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
+
+        # Run target function under test
+        parser_instance = parser(parser=DummyPathSchemaParser({}))
+        response_prop_data = parser_instance._process_response_value(
+            property_value=api_response_detail, strategy=strategy
+        )
+
+        # Verify
+        if strategy is ResponseStrategy.OBJECT:
+            assert response_prop_data and isinstance(response_prop_data, dict)
+            for resp_k, resp_v in response_prop_data.items():
+                assert resp_k in ["name", "required", "type", "format", "items", "FIXME"]
+        else:
+            assert response_prop_data and isinstance(response_prop_data, (str, list))
+            if response_prop_data and isinstance(response_prop_data, str):
+                assert response_prop_data in [
+                    "random string value",
+                    "random integer value",
+                    "random boolean value",
+                    "random file output stream",
+                    "FIXME: Handle the reference",
+                ]
+            else:
+                for item in response_prop_data:
+                    for item_value in item.values():
+                        assert item_value in ["random string value", "random integer value", "random boolean value"]
