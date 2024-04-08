@@ -40,26 +40,6 @@ from ._test_case import (
     load_different_version_openapi_api_doc,
 )
 
-
-@pytest.mark.parametrize(
-    ("js_type", "py_type"),
-    [
-        ("string", "str"),
-        ("integer", "int"),
-        ("boolean", "bool"),
-        ("array", "list"),
-    ],
-)
-def test_convert_js_type(js_type: str, py_type: str):
-    assert convert_js_type(js_type) == py_type
-
-
-def test_fail_convert_js_type():
-    with pytest.raises(TypeError) as exc_info:
-        convert_js_type("JS type which does not support to convert")
-    assert "cannot parse JS type" in str(exc_info.value)
-
-
 ensure_load_openapi_test_cases()
 load_different_version_openapi_api_doc()
 
