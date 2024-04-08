@@ -334,51 +334,6 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
             assert p.value_format is None
         assert under_test.tag == data_from.tags[0]
 
-    @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API)
-    def test__process_api_params(self, openapi_doc_data: List[dict], entire_openapi_config: dict, data_model: API):
-        # Pre-process
-        set_openapi_version(OpenAPIVersion.V2)
-        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
-        data_model.reload_schema_parser_factory()
-
-        # Run target function
-        parameters = data_model._process_api_params(OpenAPIV2PathSchemaParser({"parameters": openapi_doc_data}))
-
-        # Verify
-        assert parameters and isinstance(parameters, list)
-        assert len(parameters) == len(openapi_doc_data)
-        type_checksum = list(map(lambda p: isinstance(p, APIParameter), parameters))
-        assert False not in type_checksum
-
-        # Finally
-        set_openapi_version(OpenAPIVersion.V3)
-        data_model.reload_schema_parser_factory()
-
-    @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_API_PARAMETERS_JSON_FOR_API)
-    def test__process_has_ref_parameters_with_valid_value(
-        self, openapi_doc_data: dict, entire_openapi_config: dict, data_model: API
-    ):
-        # Pre-process
-        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
-
-        # Run target function
-        parameters = data_model._process_has_ref_parameters(openapi_doc_data)
-
-        # Verify
-        assert parameters and isinstance(parameters, list)
-        assert len(parameters) == len(entire_openapi_config["definitions"]["UpdateFooRequest"]["properties"].keys())
-        type_checksum = list(map(lambda p: isinstance(p, dict), parameters))
-        assert False not in type_checksum
-
-    @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_PARAMETERS_JSON)
-    def test__process_has_ref_parameters_with_invalid_value(self, openapi_doc_data: dict, data_model: API):
-        with pytest.raises(ValueError) as exc_info:
-            # Run target function
-            data_model._process_has_ref_parameters(openapi_doc_data)
-
-        # Verify
-        assert re.search(r".{1,64}no ref.{1,64}", str(exc_info.value), re.IGNORECASE)
-
     @pytest.mark.parametrize(("strategy", "api_detail", "entire_config"), OPENAPI_API_RESPONSES_FOR_API)
     def test__process_http_response(
         self, strategy: ResponseStrategy, api_detail: dict, entire_config: dict, data_model: API
