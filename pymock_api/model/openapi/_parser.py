@@ -310,8 +310,8 @@ class APIParser:
                     raise NotImplementedError
         return k_value
 
-    def process_tags(self):
-        pass
+    def process_tags(self) -> List[str]:
+        return self.parser.get_all_tags()
 
 
 class OpenAPIDocumentConfigParser:

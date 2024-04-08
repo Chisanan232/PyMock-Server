@@ -128,7 +128,7 @@ class API(Transferable):
             List[APIParameter], parser.process_api_parameters(data_modal=APIParameter, http_method=self.http_method)
         )
         self.response = parser.process_responses(strategy=self.process_response_strategy)
-        self.tags = openapi_path_parser.get_all_tags()
+        self.tags = parser.process_tags()
 
         return self
 
