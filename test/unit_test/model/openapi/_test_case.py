@@ -18,7 +18,7 @@ OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[ResponseStrategy, dict, dict]
 OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON: List[tuple] = []
 
 
-def _get_all_openapi_api_doc() -> None:
+def get_all_openapi_api_doc() -> None:
     json_dir = os.path.join(
         str(pathlib.Path(__file__).parent.parent.parent.parent),
         "data",
@@ -61,3 +61,8 @@ def _get_all_openapi_api_doc() -> None:
                             OPENAPI_API_PARAMETERS_JSON.append(param)
                         else:
                             OPENAPI_API_PARAMETERS_JSON_FOR_API.append((param, openapi_api_docs))
+
+
+def ensure_load_openapi_test_cases() -> None:
+    if not OPENAPI_API_DOC_JSON:
+        get_all_openapi_api_doc()

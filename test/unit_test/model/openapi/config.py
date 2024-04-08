@@ -3,15 +3,7 @@ import json
 import os
 import pathlib
 import re
-import test.unit_test.model.openapi._test_case
 from abc import ABCMeta, abstractmethod
-from test.unit_test.model.openapi._test_case import (
-    OPENAPI_API_DOC_JSON,
-    OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON,
-    OPENAPI_API_PARAMETERS_JSON,
-    OPENAPI_ONE_API_JSON,
-    _get_all_openapi_api_doc,
-)
 from typing import Type
 
 import pytest
@@ -41,6 +33,14 @@ from pymock_api.model.openapi.config import (
     APIParameter,
     OpenAPIDocumentConfig,
     convert_js_type,
+)
+
+from ._test_case import (
+    OPENAPI_API_DOC_JSON,
+    OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON,
+    OPENAPI_API_PARAMETERS_JSON,
+    OPENAPI_ONE_API_JSON,
+    ensure_load_openapi_test_cases,
 )
 
 
@@ -74,10 +74,10 @@ def _get_different_version_openapi_api_doc() -> None:
     for json_config_path in glob.glob(json_dir):
         with open(json_config_path, "r", encoding="utf-8") as file_stream:
             openapi_api_docs = json.loads(file_stream.read())
-            test.unit_test.model.openapi._test_case.OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON.append(openapi_api_docs)
+            OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON.append(openapi_api_docs)
 
 
-_get_all_openapi_api_doc()
+ensure_load_openapi_test_cases()
 _get_different_version_openapi_api_doc()
 
 
