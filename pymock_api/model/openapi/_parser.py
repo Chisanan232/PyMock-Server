@@ -281,38 +281,42 @@ class APIParser(BaseParser):
                 return "FIXME: Handle the reference"
 
         def _handle_not_ref_data(resp_prop_data: dict) -> Union[str, list, dict]:
+
+            def _handle_list_type_value_with_object_strategy() -> dict:
+                response_data_prop = {
+                    "name": "",
+                    # TODO: Set the *required* property correctly
+                    "required": True,
+                    "type": v_type,
+                    # TODO: Set the *format* property correctly
+                    "format": None,
+                    "items": [],
+                }
+
+                single_response = _YamlSchema.get_schema_ref(resp_prop_data["items"])
+                parser = self.schema_parser_factory.object(single_response)
+                single_response_properties = parser.get_properties(default={})
+                if single_response_properties:
+                    for item_k, item_v in parser.get_properties().items():
+                        if _YamlSchema.has_ref(item_v):
+                            # TODO: Should consider the algorithm to handle nested reference case
+                            print("[WARNING] Not implement yet ...")
+                        else:
+                            item_type = convert_js_type(item_v["type"])
+                            # TODO: Set the *required* property correctly
+                            item = {"name": item_k, "required": True, "type": item_type}
+                            assert isinstance(
+                                response_data_prop["items"], list
+                            ), "The data type of property *items* must be *list*."
+                            response_data_prop["items"].append(item)
+                return response_data_prop
+
             print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
             v_type = convert_js_type(resp_prop_data["type"])
             if strategy is ResponseStrategy.OBJECT:
                 if locate(v_type) == list:
-                    response_data_prop = {
-                        "name": "",
-                        # TODO: Set the *required* property correctly
-                        "required": True,
-                        "type": v_type,
-                        # TODO: Set the *format* property correctly
-                        "format": None,
-                        "items": [],
-                    }
-
-                    single_response = _YamlSchema.get_schema_ref(resp_prop_data["items"])
-                    parser = self.schema_parser_factory.object(single_response)
-                    single_response_properties = parser.get_properties(default={})
-                    if single_response_properties:
-                        for item_k, item_v in parser.get_properties().items():
-                            if _YamlSchema.has_ref(item_v):
-                                # TODO: Should consider the algorithm to handle nested reference case
-                                print("[WARNING] Not implement yet ...")
-                            else:
-                                item_type = convert_js_type(item_v["type"])
-                                # TODO: Set the *required* property correctly
-                                item = {"name": item_k, "required": True, "type": item_type}
-                                assert isinstance(
-                                    response_data_prop["items"], list
-                                ), "The data type of property *items* must be *list*."
-                                response_data_prop["items"].append(item)
-                    return response_data_prop
-                if locate(v_type) == dict:
+                    return _handle_list_type_value_with_object_strategy()
+                elif locate(v_type) == dict:
                     # FIXME: handle the reference like object type
                     return {
                         "name": "",
