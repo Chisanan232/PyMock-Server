@@ -282,7 +282,7 @@ class APIParser(BaseParser):
 
         def _handle_not_ref_data(resp_prop_data: dict) -> Union[str, list, dict]:
 
-            def _handle_list_type_value_with_object_strategy(data) -> dict:
+            def _handle_list_type_value_with_object_strategy(data: dict) -> dict:
                 response_data_prop = {
                     "name": "",
                     # TODO: Set the *required* property correctly
@@ -311,7 +311,7 @@ class APIParser(BaseParser):
                             response_data_prop["items"].append(item)
                 return response_data_prop
 
-            def _handle_object_type_value_with_object_strategy(v_type) -> dict:
+            def _handle_object_type_value_with_object_strategy(v_type: str) -> dict:
                 # FIXME: handle the reference like object type
                 return {
                     "name": "",
@@ -323,7 +323,7 @@ class APIParser(BaseParser):
                     "items": None,
                 }
 
-            def _handle_other_types_value_with_object_strategy(v_type) -> dict:
+            def _handle_other_types_value_with_object_strategy(v_type: str) -> dict:
                 return {
                     "name": "",
                     # TODO: Set the *required* property correctly
@@ -333,6 +333,32 @@ class APIParser(BaseParser):
                     "format": None,
                     "items": None,
                 }
+
+            def _handle_list_type_value_with_non_object_strategy(data: dict) -> list:
+                single_response = _YamlSchema.get_schema_ref(data["items"])
+                parser = self.schema_parser_factory.object(single_response)
+                item = {}
+                single_response_properties = parser.get_properties(default={})
+                if single_response_properties:
+                    for item_k, item_v in parser.get_properties().items():
+                        if _YamlSchema.has_ref(item_v):
+                            # TODO: Should consider the algorithm to handle nested reference case
+                            obj_item_type = convert_js_type(item_v["additionalProperties"]["type"])
+                            print("[WARNING] Not implement yet ...")
+                        else:
+                            item_type = convert_js_type(item_v["type"])
+                            if locate(item_type) is str:
+                                # lowercase_letters = string.ascii_lowercase
+                                # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                                random_value = "random string value"
+                            elif locate(item_type) is int:
+                                # random_value = int(
+                                #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                                random_value = "random integer value"
+                            else:
+                                raise NotImplementedError
+                            item[item_k] = random_value
+                return [item]
 
             print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
             v_type = convert_js_type(resp_prop_data["type"])
@@ -345,30 +371,7 @@ class APIParser(BaseParser):
                     return _handle_other_types_value_with_object_strategy(v_type)
             else:
                 if locate(v_type) == list:
-                    single_response = _YamlSchema.get_schema_ref(resp_prop_data["items"])
-                    parser = self.schema_parser_factory.object(single_response)
-                    item = {}
-                    single_response_properties = parser.get_properties(default={})
-                    if single_response_properties:
-                        for item_k, item_v in parser.get_properties().items():
-                            if _YamlSchema.has_ref(item_v):
-                                # TODO: Should consider the algorithm to handle nested reference case
-                                obj_item_type = convert_js_type(item_v["additionalProperties"]["type"])
-                                print("[WARNING] Not implement yet ...")
-                            else:
-                                item_type = convert_js_type(item_v["type"])
-                                if locate(item_type) is str:
-                                    # lowercase_letters = string.ascii_lowercase
-                                    # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                                    random_value = "random string value"
-                                elif locate(item_type) is int:
-                                    # random_value = int(
-                                    #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                                    random_value = "random integer value"
-                                else:
-                                    raise NotImplementedError
-                                item[item_k] = random_value
-                    return [item]
+                    return _handle_list_type_value_with_non_object_strategy(resp_prop_data)
                 elif locate(v_type) == dict:
                     # FIXME: handle the reference like object type
                     return "random object value"
