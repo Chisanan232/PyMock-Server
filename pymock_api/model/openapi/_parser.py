@@ -282,7 +282,7 @@ class APIParser(BaseParser):
 
         def _handle_not_ref_data(resp_prop_data: dict) -> Union[str, list, dict]:
 
-            def _handle_list_type_value_with_object_strategy() -> dict:
+            def _handle_list_type_value_with_object_strategy(data) -> dict:
                 response_data_prop = {
                     "name": "",
                     # TODO: Set the *required* property correctly
@@ -293,7 +293,7 @@ class APIParser(BaseParser):
                     "items": [],
                 }
 
-                single_response = _YamlSchema.get_schema_ref(resp_prop_data["items"])
+                single_response = _YamlSchema.get_schema_ref(data["items"])
                 parser = self.schema_parser_factory.object(single_response)
                 single_response_properties = parser.get_properties(default={})
                 if single_response_properties:
@@ -311,32 +311,38 @@ class APIParser(BaseParser):
                             response_data_prop["items"].append(item)
                 return response_data_prop
 
+            def _handle_object_type_value_with_object_strategy(v_type) -> dict:
+                # FIXME: handle the reference like object type
+                return {
+                    "name": "",
+                    # TODO: Set the *required* property correctly
+                    "required": True,
+                    "type": v_type,
+                    # TODO: Set the *format* property correctly
+                    "format": None,
+                    "items": None,
+                }
+
+            def _handle_other_types_value_with_object_strategy(v_type) -> dict:
+                return {
+                    "name": "",
+                    # TODO: Set the *required* property correctly
+                    "required": True,
+                    "type": v_type,
+                    # TODO: Set the *format* property correctly
+                    "format": None,
+                    "items": None,
+                }
+
             print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
             v_type = convert_js_type(resp_prop_data["type"])
             if strategy is ResponseStrategy.OBJECT:
                 if locate(v_type) == list:
-                    return _handle_list_type_value_with_object_strategy()
+                    return _handle_list_type_value_with_object_strategy(resp_prop_data)
                 elif locate(v_type) == dict:
-                    # FIXME: handle the reference like object type
-                    return {
-                        "name": "",
-                        # TODO: Set the *required* property correctly
-                        "required": True,
-                        "type": v_type,
-                        # TODO: Set the *format* property correctly
-                        "format": None,
-                        "items": None,
-                    }
+                    return _handle_object_type_value_with_object_strategy(v_type)
                 else:
-                    return {
-                        "name": "",
-                        # TODO: Set the *required* property correctly
-                        "required": True,
-                        "type": v_type,
-                        # TODO: Set the *format* property correctly
-                        "format": None,
-                        "items": None,
-                    }
+                    return _handle_other_types_value_with_object_strategy(v_type)
             else:
                 if locate(v_type) == list:
                     single_response = _YamlSchema.get_schema_ref(resp_prop_data["items"])
