@@ -70,7 +70,46 @@ class ResponseStrategy(Enum):
         get_ref_callback: Callable,
     ) -> Union[str, list, dict]:
 
+        def _handle_list_type_data(
+            data: dict, ref_val_process_callback: Callable, noref_val_process_callback: Callable, response: dict = {}
+        ) -> dict:
+            single_response = get_ref_callback(data["items"])
+            parser = get_schema_parser_factory().object(single_response)
+            single_response_properties = parser.get_properties(default={})
+            if single_response_properties:
+                for item_k, item_v in parser.get_properties().items():
+                    if has_ref_callback(item_v):
+                        # TODO: Should consider the algorithm to handle nested reference case
+                        print("[WARNING] Not implement yet ...")
+                        response = ref_val_process_callback(item_k, item_v, response)
+                    else:
+                        response = noref_val_process_callback(item_k, item_v, response)
+                        # item_type = convert_js_type(item_v["type"])
+                        # # TODO: Set the *required* property correctly
+                        # item = {"name": item_k, "required": True, "type": item_type}
+                        # assert isinstance(
+                        #     response_data_prop["items"], list
+                        # ), "The data type of property *items* must be *list*."
+                        # response_data_prop["items"].append(item)
+            return response
+
         def _handle_list_type_value_with_object_strategy(data: dict) -> dict:
+
+            def _ref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
+                # TODO: Should consider the algorithm to handle nested reference case
+                print("[WARNING] Not implement yet ...")
+                return response_data_prop
+
+            def _noref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
+                item_type = convert_js_type(item_v["type"])
+                # TODO: Set the *required* property correctly
+                item = {"name": item_k, "required": True, "type": item_type}
+                assert isinstance(
+                    response_data_prop["items"], list
+                ), "The data type of property *items* must be *list*."
+                response_data_prop["items"].append(item)
+                return response_data_prop
+
             response_data_prop = {
                 "name": "",
                 # TODO: Set the *required* property correctly
@@ -80,23 +119,29 @@ class ResponseStrategy(Enum):
                 "format": None,
                 "items": [],
             }
+            response_data_prop = _handle_list_type_data(
+                data=data,
+                ref_val_process_callback=_ref_process_callback,
+                noref_val_process_callback=_noref_process_callback,
+                response=response_data_prop,
+            )
 
-            single_response = get_ref_callback(data["items"])
-            parser = get_schema_parser_factory().object(single_response)
-            single_response_properties = parser.get_properties(default={})
-            if single_response_properties:
-                for item_k, item_v in parser.get_properties().items():
-                    if has_ref_callback(item_v):
-                        # TODO: Should consider the algorithm to handle nested reference case
-                        print("[WARNING] Not implement yet ...")
-                    else:
-                        item_type = convert_js_type(item_v["type"])
-                        # TODO: Set the *required* property correctly
-                        item = {"name": item_k, "required": True, "type": item_type}
-                        assert isinstance(
-                            response_data_prop["items"], list
-                        ), "The data type of property *items* must be *list*."
-                        response_data_prop["items"].append(item)
+            # single_response = get_ref_callback(data["items"])
+            # parser = get_schema_parser_factory().object(single_response)
+            # single_response_properties = parser.get_properties(default={})
+            # if single_response_properties:
+            #     for item_k, item_v in parser.get_properties().items():
+            #         if has_ref_callback(item_v):
+            #             # TODO: Should consider the algorithm to handle nested reference case
+            #             print("[WARNING] Not implement yet ...")
+            #         else:
+            #             item_type = convert_js_type(item_v["type"])
+            #             # TODO: Set the *required* property correctly
+            #             item = {"name": item_k, "required": True, "type": item_type}
+            #             assert isinstance(
+            #                 response_data_prop["items"], list
+            #             ), "The data type of property *items* must be *list*."
+            #             response_data_prop["items"].append(item)
             return response_data_prop
 
         def _handle_object_type_value_with_object_strategy(v_type: str) -> dict:
@@ -123,30 +168,59 @@ class ResponseStrategy(Enum):
             }
 
         def _handle_list_type_value_with_non_object_strategy(data: dict) -> list:
-            single_response = get_ref_callback(data["items"])
-            parser = get_schema_parser_factory().object(single_response)
-            item = {}
-            single_response_properties = parser.get_properties(default={})
-            if single_response_properties:
-                for item_k, item_v in parser.get_properties().items():
-                    if has_ref_callback(item_v):
-                        # TODO: Should consider the algorithm to handle nested reference case
-                        obj_item_type = convert_js_type(item_v["additionalProperties"]["type"])
-                        print("[WARNING] Not implement yet ...")
-                    else:
-                        item_type = convert_js_type(item_v["type"])
-                        if locate(item_type) is str:
-                            # lowercase_letters = string.ascii_lowercase
-                            # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                            random_value = "random string value"
-                        elif locate(item_type) is int:
-                            # random_value = int(
-                            #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                            random_value = "random integer value"
-                        else:
-                            raise NotImplementedError
-                        item[item_k] = random_value
-            return [item]
+
+            def _ref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
+                # TODO: Should consider the algorithm to handle nested reference case
+                print("[WARNING] Not implement yet ...")
+                return response_data_prop
+
+            def _noref_process_callback(item_k: str, item_v: dict, item: dict) -> dict:
+                item_type = convert_js_type(item_v["type"])
+                if locate(item_type) is str:
+                    # lowercase_letters = string.ascii_lowercase
+                    # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                    random_value = "random string value"
+                elif locate(item_type) is int:
+                    # random_value = int(
+                    #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                    random_value = "random integer value"
+                else:
+                    raise NotImplementedError
+                item[item_k] = random_value
+                return item
+
+            item_info: dict = {}
+            item_info = _handle_list_type_data(
+                data=data,
+                ref_val_process_callback=_ref_process_callback,
+                noref_val_process_callback=_noref_process_callback,
+                response=item_info,
+            )
+
+            # single_response = get_ref_callback(data["items"])
+            # parser = get_schema_parser_factory().object(single_response)
+            # item = {}
+            # single_response_properties = parser.get_properties(default={})
+            # if single_response_properties:
+            #     for item_k, item_v in parser.get_properties().items():
+            #         if has_ref_callback(item_v):
+            #             # TODO: Should consider the algorithm to handle nested reference case
+            #             obj_item_type = convert_js_type(item_v["additionalProperties"]["type"])
+            #             print("[WARNING] Not implement yet ...")
+            #         else:
+            #             item_type = convert_js_type(item_v["type"])
+            #             if locate(item_type) is str:
+            #                 # lowercase_letters = string.ascii_lowercase
+            #                 # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+            #                 random_value = "random string value"
+            #             elif locate(item_type) is int:
+            #                 # random_value = int(
+            #                 #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+            #                 random_value = "random integer value"
+            #             else:
+            #                 raise NotImplementedError
+            #             item[item_k] = random_value
+            return [item_info]
 
         print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
         v_type = convert_js_type(resp_prop_data["type"])
