@@ -220,16 +220,17 @@ class ResponseStrategy(Enum):
             #             item[item_k] = random_value
             return [item_info]
 
-        print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
-        v_type = convert_js_type(resp_prop_data["type"])
-        if self is ResponseStrategy.OBJECT:
+        def _handle_each_data_types_response_with_object_strategy(data: dict, v_type: str) -> dict:
             if locate(v_type) == list:
-                return _handle_list_type_value_with_object_strategy(resp_prop_data)
+                return _handle_list_type_value_with_object_strategy(data)
             elif locate(v_type) == dict:
                 return _handle_object_type_value_with_object_strategy(v_type)
             else:
                 return _handle_other_types_value_with_object_strategy(v_type)
-        else:
+
+        def _handle_each_data_types_response_with_non_object_strategy(
+            resp_prop_data: dict, v_type: str
+        ) -> Union[str, list]:
             if locate(v_type) == list:
                 return _handle_list_type_value_with_non_object_strategy(resp_prop_data)
             elif locate(v_type) == dict:
@@ -249,6 +250,38 @@ class ResponseStrategy(Enum):
                 return "random file output stream"
             else:
                 raise NotImplementedError
+
+        print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
+        v_type = convert_js_type(resp_prop_data["type"])
+        if self is ResponseStrategy.OBJECT:
+            return _handle_each_data_types_response_with_object_strategy(resp_prop_data, v_type)
+            # if locate(v_type) == list:
+            #     return _handle_list_type_value_with_object_strategy(resp_prop_data)
+            # elif locate(v_type) == dict:
+            #     return _handle_object_type_value_with_object_strategy(v_type)
+            # else:
+            #     return _handle_other_types_value_with_object_strategy(v_type)
+        else:
+            return _handle_each_data_types_response_with_non_object_strategy(resp_prop_data, v_type)
+            # if locate(v_type) == list:
+            #     return _handle_list_type_value_with_non_object_strategy(resp_prop_data)
+            # elif locate(v_type) == dict:
+            #     # FIXME: handle the reference like object type
+            #     return "random object value"
+            # elif locate(v_type) == str:
+            #     # lowercase_letters = string.ascii_lowercase
+            #     # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+            #     return "random string value"
+            # elif locate(v_type) == int:
+            #     # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+            #     return "random integer value"
+            # elif locate(v_type) == bool:
+            #     return "random boolean value"
+            # elif v_type == "file":
+            #     # TODO: Handle the file download feature
+            #     return "random file output stream"
+            # else:
+            #     raise NotImplementedError
 
 
 class ConfigLoadingOrderKey(Enum):
