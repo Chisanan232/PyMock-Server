@@ -152,24 +152,32 @@ class TestResponseStrategy(EnumTestSuite):
                 {"name": "", "required": True, "type": "dict", "format": None, "items": None},
             ),
             # # Special data
-            # (
-            #     ResponseStrategy.STRING,
-            #     {
-            #         "type": "object",
-            #         "additionalProperties": {
-            #             "type": "array",
-            #             "items": {"type": "string", "enum": ["IP_HOLDER", "PARTNER"]},
-            #         },
-            #     },
-            #     [
-            #         {
-            #             "id": "random integer value",
-            #             "name": "random string value",
-            #             "value1": "random string value",
-            #             "value2": "random string value",
-            #         }
-            #     ],
-            # ),
+            (
+                ResponseStrategy.STRING,
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {"type": "string", "enum": ["TYPE_1", "TYPE_2"]},
+                    },
+                },
+                ["random string value"],
+            ),
+            (
+                ResponseStrategy.STRING,
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/components/schemas/FooResponse",
+                    },
+                },
+                {
+                    "id": "random integer value",
+                    "name": "random string value",
+                    "value1": "random string value",
+                    "value2": "random string value",
+                },
+            ),
         ],
     )
     def test_generate_response_from_data(
