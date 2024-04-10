@@ -66,39 +66,37 @@ class ResponseStrategy(Enum):
         self,
         resp_prop_data: dict,
         get_schema_parser_factory: Callable,
-        has_ref_callback: Callable,
+        # has_ref_callback: Callable,
         get_ref_callback: Callable,
     ) -> Union[str, list, dict]:
 
-        def _handle_list_type_data(
-            data: dict, ref_val_process_callback: Callable, noref_val_process_callback: Callable, response: dict = {}
-        ) -> dict:
+        def _handle_list_type_data(data: dict, noref_val_process_callback: Callable, response: dict = {}) -> dict:
             single_response = get_ref_callback(data["items"])
             parser = get_schema_parser_factory().object(single_response)
             single_response_properties = parser.get_properties(default={})
             if single_response_properties:
                 for item_k, item_v in parser.get_properties().items():
-                    if has_ref_callback(item_v):
-                        # TODO: Should consider the algorithm to handle nested reference case
-                        print("[WARNING] Not implement yet ...")
-                        response = ref_val_process_callback(item_k, item_v, response)
-                    else:
-                        response = noref_val_process_callback(item_k, item_v, response)
-                        # item_type = convert_js_type(item_v["type"])
-                        # # TODO: Set the *required* property correctly
-                        # item = {"name": item_k, "required": True, "type": item_type}
-                        # assert isinstance(
-                        #     response_data_prop["items"], list
-                        # ), "The data type of property *items* must be *list*."
-                        # response_data_prop["items"].append(item)
+                    # if has_ref_callback(item_v):
+                    #     # TODO: Should consider the algorithm to handle nested reference case
+                    #     print("[WARNING] Not implement yet ...")
+                    #     response = ref_val_process_callback(item_k, item_v, response)
+                    # else:
+                    response = noref_val_process_callback(item_k, item_v, response)
+                    # item_type = convert_js_type(item_v["type"])
+                    # # TODO: Set the *required* property correctly
+                    # item = {"name": item_k, "required": True, "type": item_type}
+                    # assert isinstance(
+                    #     response_data_prop["items"], list
+                    # ), "The data type of property *items* must be *list*."
+                    # response_data_prop["items"].append(item)
             return response
 
         def _handle_list_type_value_with_object_strategy(data: dict) -> dict:
 
-            def _ref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
-                # TODO: Should consider the algorithm to handle nested reference case
-                print("[WARNING] Not implement yet ...")
-                return response_data_prop
+            # def _ref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
+            #     # TODO: Should consider the algorithm to handle nested reference case
+            #     print("[WARNING] Not implement yet ...")
+            #     return response_data_prop
 
             def _noref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
                 item_type = convert_js_type(item_v["type"])
@@ -121,7 +119,7 @@ class ResponseStrategy(Enum):
             }
             response_data_prop = _handle_list_type_data(
                 data=data,
-                ref_val_process_callback=_ref_process_callback,
+                # ref_val_process_callback=_ref_process_callback,
                 noref_val_process_callback=_noref_process_callback,
                 response=response_data_prop,
             )
@@ -169,10 +167,10 @@ class ResponseStrategy(Enum):
 
         def _handle_list_type_value_with_non_object_strategy(data: dict) -> list:
 
-            def _ref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
-                # TODO: Should consider the algorithm to handle nested reference case
-                print("[WARNING] Not implement yet ...")
-                return response_data_prop
+            # def _ref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
+            #     # TODO: Should consider the algorithm to handle nested reference case
+            #     print("[WARNING] Not implement yet ...")
+            #     return response_data_prop
 
             def _noref_process_callback(item_k: str, item_v: dict, item: dict) -> dict:
                 item_type = convert_js_type(item_v["type"])
@@ -192,7 +190,7 @@ class ResponseStrategy(Enum):
             item_info: dict = {}
             item_info = _handle_list_type_data(
                 data=data,
-                ref_val_process_callback=_ref_process_callback,
+                # ref_val_process_callback=_ref_process_callback,
                 noref_val_process_callback=_noref_process_callback,
                 response=item_info,
             )

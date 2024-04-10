@@ -152,7 +152,24 @@ class TestResponseStrategy(EnumTestSuite):
                 {"name": "", "required": True, "type": "dict", "format": None, "items": None},
             ),
             # # Special data
-            # (ResponseStrategy.STRING, {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "string", "enum": ["IP_HOLDER", "PARTNER"]}}}, [{"id": "random integer value", "name": "random string value", "value1": "random string value", "value2": "random string value"}]),
+            # (
+            #     ResponseStrategy.STRING,
+            #     {
+            #         "type": "object",
+            #         "additionalProperties": {
+            #             "type": "array",
+            #             "items": {"type": "string", "enum": ["IP_HOLDER", "PARTNER"]},
+            #         },
+            #     },
+            #     [
+            #         {
+            #             "id": "random integer value",
+            #             "name": "random string value",
+            #             "value1": "random string value",
+            #             "value2": "random string value",
+            #         }
+            #     ],
+            # ),
         ],
     )
     def test_generate_response_from_data(
@@ -186,7 +203,7 @@ class TestResponseStrategy(EnumTestSuite):
         resp = ut_enum.generate_response_from_data(
             resp_prop_data=test_response_data,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
-            has_ref_callback=_YamlSchema.has_ref,
+            # has_ref_callback=_YamlSchema.has_ref,
             get_ref_callback=_YamlSchema.get_schema_ref,
         )
 

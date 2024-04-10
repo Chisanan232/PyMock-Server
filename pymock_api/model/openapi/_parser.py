@@ -401,7 +401,7 @@ class APIParser(BaseParser):
             return strategy.generate_response_from_data(
                 resp_prop_data=property_value,
                 get_schema_parser_factory=ensure_get_schema_parser_factory,
-                has_ref_callback=_YamlSchema.has_ref,
+                # has_ref_callback=_YamlSchema.has_ref,
                 get_ref_callback=_YamlSchema.get_schema_ref,
             )
             # return _handle_not_ref_data(property_value)
