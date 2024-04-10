@@ -1,6 +1,9 @@
 import re
 from enum import Enum
-from typing import Callable, Dict, Optional, Union
+from pydoc import locate
+from typing import Any, Callable, Dict, Optional, Union
+
+from pymock_api.model.openapi._js_handlers import convert_js_type
 
 
 class Format(Enum):
@@ -27,6 +30,153 @@ class ResponseStrategy(Enum):
             return ResponseStrategy(v.lower())
         else:
             return v
+
+    def generate_empty_response(self) -> Union[str, Dict[str, Any]]:
+        if self is ResponseStrategy.OBJECT:
+            return {
+                "name": "",
+                # TODO: Set the *required* property correctly
+                "required": False,
+                # TODO: Set the *type* property correctly
+                "type": None,
+                # TODO: Set the *format* property correctly
+                "format": None,
+                "items": [],
+            }
+        else:
+            return "empty value"
+
+    def generate_response_from_reference(self, ref_data: dict) -> Union[str, Dict[str, Any]]:
+        if self is ResponseStrategy.OBJECT:
+            return {
+                "name": "",
+                # TODO: Set the *required* property correctly
+                "required": True,
+                # TODO: Set the *type* property correctly
+                "type": "file",
+                # TODO: Set the *format* property correctly
+                "format": None,
+                "items": [],
+                "FIXME": "Handle the reference",
+            }
+        else:
+            return "FIXME: Handle the reference"
+
+    def generate_response_from_data(
+        self,
+        resp_prop_data: dict,
+        get_schema_parser_factory: Callable,
+        has_ref_callback: Callable,
+        get_ref_callback: Callable,
+    ) -> Union[str, list, dict]:
+
+        def _handle_list_type_value_with_object_strategy(data: dict) -> dict:
+            response_data_prop = {
+                "name": "",
+                # TODO: Set the *required* property correctly
+                "required": True,
+                "type": v_type,
+                # TODO: Set the *format* property correctly
+                "format": None,
+                "items": [],
+            }
+
+            single_response = get_ref_callback(data["items"])
+            parser = get_schema_parser_factory().object(single_response)
+            single_response_properties = parser.get_properties(default={})
+            if single_response_properties:
+                for item_k, item_v in parser.get_properties().items():
+                    if has_ref_callback(item_v):
+                        # TODO: Should consider the algorithm to handle nested reference case
+                        print("[WARNING] Not implement yet ...")
+                    else:
+                        item_type = convert_js_type(item_v["type"])
+                        # TODO: Set the *required* property correctly
+                        item = {"name": item_k, "required": True, "type": item_type}
+                        assert isinstance(
+                            response_data_prop["items"], list
+                        ), "The data type of property *items* must be *list*."
+                        response_data_prop["items"].append(item)
+            return response_data_prop
+
+        def _handle_object_type_value_with_object_strategy(v_type: str) -> dict:
+            # FIXME: handle the reference like object type
+            return {
+                "name": "",
+                # TODO: Set the *required* property correctly
+                "required": True,
+                "type": v_type,
+                # TODO: Set the *format* property correctly
+                "format": None,
+                "items": None,
+            }
+
+        def _handle_other_types_value_with_object_strategy(v_type: str) -> dict:
+            return {
+                "name": "",
+                # TODO: Set the *required* property correctly
+                "required": True,
+                "type": v_type,
+                # TODO: Set the *format* property correctly
+                "format": None,
+                "items": None,
+            }
+
+        def _handle_list_type_value_with_non_object_strategy(data: dict) -> list:
+            single_response = get_ref_callback(data["items"])
+            parser = get_schema_parser_factory().object(single_response)
+            item = {}
+            single_response_properties = parser.get_properties(default={})
+            if single_response_properties:
+                for item_k, item_v in parser.get_properties().items():
+                    if has_ref_callback(item_v):
+                        # TODO: Should consider the algorithm to handle nested reference case
+                        obj_item_type = convert_js_type(item_v["additionalProperties"]["type"])
+                        print("[WARNING] Not implement yet ...")
+                    else:
+                        item_type = convert_js_type(item_v["type"])
+                        if locate(item_type) is str:
+                            # lowercase_letters = string.ascii_lowercase
+                            # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                            random_value = "random string value"
+                        elif locate(item_type) is int:
+                            # random_value = int(
+                            #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                            random_value = "random integer value"
+                        else:
+                            raise NotImplementedError
+                        item[item_k] = random_value
+            return [item]
+
+        print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
+        v_type = convert_js_type(resp_prop_data["type"])
+        if self is ResponseStrategy.OBJECT:
+            if locate(v_type) == list:
+                return _handle_list_type_value_with_object_strategy(resp_prop_data)
+            elif locate(v_type) == dict:
+                return _handle_object_type_value_with_object_strategy(v_type)
+            else:
+                return _handle_other_types_value_with_object_strategy(v_type)
+        else:
+            if locate(v_type) == list:
+                return _handle_list_type_value_with_non_object_strategy(resp_prop_data)
+            elif locate(v_type) == dict:
+                # FIXME: handle the reference like object type
+                return "random object value"
+            elif locate(v_type) == str:
+                # lowercase_letters = string.ascii_lowercase
+                # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                return "random string value"
+            elif locate(v_type) == int:
+                # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                return "random integer value"
+            elif locate(v_type) == bool:
+                return "random boolean value"
+            elif v_type == "file":
+                # TODO: Handle the file download feature
+                return "random file output stream"
+            else:
+                raise NotImplementedError
 
 
 class ConfigLoadingOrderKey(Enum):
