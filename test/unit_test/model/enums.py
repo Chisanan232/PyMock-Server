@@ -16,7 +16,17 @@ from pymock_api.model.openapi._base import (
     ensure_get_schema_parser_factory,
     set_component_definition,
 )
-from pymock_api.model.openapi._schema_parser import OpenAPIV3SchemaParser
+from pymock_api.model.openapi._schema_parser import (
+    OpenAPIV2SchemaParser,
+    OpenAPIV3SchemaParser,
+)
+
+from ..model.openapi._test_case import (
+    OPENAPI_API_RESPONSES_PROPERTY_FOR_API,
+    ensure_load_openapi_test_cases,
+)
+
+ensure_load_openapi_test_cases()
 
 
 def test_set_loading_function():
@@ -54,6 +64,41 @@ class TestResponseStrategy(EnumTestSuite):
     )
     def test_to_enum(self, value: Any, enum_obj: Type[ResponseStrategy]):
         super().test_to_enum(value, enum_obj)
+
+    @pytest.mark.parametrize(
+        ("strategy", "api_response_detail", "entire_config"), OPENAPI_API_RESPONSES_PROPERTY_FOR_API
+    )
+    def test_generate_response(self, strategy: ResponseStrategy, api_response_detail: dict, entire_config: dict):
+        # Pre-process
+        set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
+
+        # Run target function under test
+        response_prop_data = strategy.generate_response(
+            property_value=api_response_detail,
+            get_schema_parser_factory=ensure_get_schema_parser_factory,
+            has_ref_callback=_YamlSchema.has_ref,
+            get_ref_callback=_YamlSchema.get_schema_ref,
+        )
+
+        # Verify
+        if strategy is ResponseStrategy.OBJECT:
+            assert response_prop_data and isinstance(response_prop_data, dict)
+            for resp_k, resp_v in response_prop_data.items():
+                assert resp_k in ["name", "required", "type", "format", "items", "FIXME"]
+        else:
+            assert response_prop_data and isinstance(response_prop_data, (str, list))
+            if response_prop_data and isinstance(response_prop_data, str):
+                assert response_prop_data in [
+                    "random string value",
+                    "random integer value",
+                    "random boolean value",
+                    "random file output stream",
+                    "FIXME: Handle the reference",
+                ]
+            else:
+                for item in response_prop_data:
+                    for item_value in item.values():
+                        assert item_value in ["random string value", "random integer value", "random boolean value"]
 
     @pytest.mark.parametrize(
         ("ut_enum", "expected_type"),
