@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
-from typing import Any, Dict, List, Optional, Type, cast
+from typing import Dict, List, Optional, Type, cast
 
 from ..enums import OpenAPIVersion, ResponseStrategy
 from ._base import (
@@ -177,66 +177,66 @@ class APIParser(BaseParser):
 
     def process_responses(self, strategy: ResponseStrategy) -> dict:
 
-        def _initial_response_model_with_ref_value(resp_data: Dict[str, Any], _data: dict) -> Dict[str, Any]:
-            response_schema_ref = _YamlSchema.get_schema_ref(_data)
-            parser = self.schema_parser_factory.object(response_schema_ref)
-            response_schema_properties: Optional[dict] = parser.get_properties(default=None)
-            if response_schema_properties:
-                for k, v in response_schema_properties.items():
-                    if strategy is ResponseStrategy.OBJECT:
-                        # response_data_prop = self._process_response_value(property_value=v, strategy=strategy)
-                        response_data_prop = strategy.generate_response(
-                            property_value=v,
-                            get_schema_parser_factory=ensure_get_schema_parser_factory,
-                            has_ref_callback=_YamlSchema.has_ref,
-                            get_ref_callback=_YamlSchema.get_schema_ref,
-                        )
-                        assert isinstance(response_data_prop, dict)
-                        response_data_prop["name"] = k
-                        response_data_prop["required"] = k in parser.get_required(default=[k])
-                        assert isinstance(
-                            resp_data["data"], list
-                        ), "The response data type must be *list* if its HTTP response strategy is object."
-                        resp_data["data"].append(response_data_prop)
-                    else:
-                        assert isinstance(
-                            resp_data["data"], dict
-                        ), "The response data type must be *dict* if its HTTP response strategy is not object."
-                        # resp_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
-                        resp_data["data"][k] = strategy.generate_response(
-                            property_value=v,
-                            get_schema_parser_factory=ensure_get_schema_parser_factory,
-                            has_ref_callback=_YamlSchema.has_ref,
-                            get_ref_callback=_YamlSchema.get_schema_ref,
-                        )
-            return resp_data
+        # def _initial_response_model_with_ref_value(resp_data: Dict[str, Any], _data: dict) -> Dict[str, Any]:
+        #     response_schema_ref = _YamlSchema.get_schema_ref(_data)
+        #     parser = self.schema_parser_factory.object(response_schema_ref)
+        #     response_schema_properties: Optional[dict] = parser.get_properties(default=None)
+        #     if response_schema_properties:
+        #         for k, v in response_schema_properties.items():
+        #             if strategy is ResponseStrategy.OBJECT:
+        #                 # response_data_prop = self._process_response_value(property_value=v, strategy=strategy)
+        #                 response_data_prop = strategy.generate_response(
+        #                     property_value=v,
+        #                     get_schema_parser_factory=ensure_get_schema_parser_factory,
+        #                     has_ref_callback=_YamlSchema.has_ref,
+        #                     get_ref_callback=_YamlSchema.get_schema_ref,
+        #                 )
+        #                 assert isinstance(response_data_prop, dict)
+        #                 response_data_prop["name"] = k
+        #                 response_data_prop["required"] = k in parser.get_required(default=[k])
+        #                 assert isinstance(
+        #                     resp_data["data"], list
+        #                 ), "The response data type must be *list* if its HTTP response strategy is object."
+        #                 resp_data["data"].append(response_data_prop)
+        #             else:
+        #                 assert isinstance(
+        #                     resp_data["data"], dict
+        #                 ), "The response data type must be *dict* if its HTTP response strategy is not object."
+        #                 # resp_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
+        #                 resp_data["data"][k] = strategy.generate_response(
+        #                     property_value=v,
+        #                     get_schema_parser_factory=ensure_get_schema_parser_factory,
+        #                     has_ref_callback=_YamlSchema.has_ref,
+        #                     get_ref_callback=_YamlSchema.get_schema_ref,
+        #                 )
+        #     return resp_data
 
-        def _initial_response_model_with_no_ref_value(resp_data: Dict[str, Any], _data: dict) -> Dict[str, Any]:
-            if strategy is ResponseStrategy.OBJECT:
-                # response_data_prop = self._process_response_value(property_value=_data, strategy=strategy)
-                response_data_prop = strategy.generate_response(
-                    property_value=_data,
-                    get_schema_parser_factory=ensure_get_schema_parser_factory,
-                    has_ref_callback=_YamlSchema.has_ref,
-                    get_ref_callback=_YamlSchema.get_schema_ref,
-                )
-                assert isinstance(response_data_prop, dict)
-                assert isinstance(
-                    resp_data["data"], list
-                ), "The response data type must be *list* if its HTTP response strategy is object."
-                resp_data["data"].append(response_data_prop)
-            else:
-                assert isinstance(
-                    resp_data["data"], dict
-                ), "The response data type must be *dict* if its HTTP response strategy is not object."
-                # resp_data["data"][0] = self._process_response_value(property_value=_data, strategy=strategy)
-                resp_data["data"][0] = strategy.generate_response(
-                    property_value=_data,
-                    get_schema_parser_factory=ensure_get_schema_parser_factory,
-                    has_ref_callback=_YamlSchema.has_ref,
-                    get_ref_callback=_YamlSchema.get_schema_ref,
-                )
-            return resp_data
+        # def _initial_response_model_with_no_ref_value(resp_data: Dict[str, Any], _data: dict) -> Dict[str, Any]:
+        #     if strategy is ResponseStrategy.OBJECT:
+        #         # response_data_prop = self._process_response_value(property_value=_data, strategy=strategy)
+        #         response_data_prop = strategy.generate_response(
+        #             property_value=_data,
+        #             get_schema_parser_factory=ensure_get_schema_parser_factory,
+        #             has_ref_callback=_YamlSchema.has_ref,
+        #             get_ref_callback=_YamlSchema.get_schema_ref,
+        #         )
+        #         assert isinstance(response_data_prop, dict)
+        #         assert isinstance(
+        #             resp_data["data"], list
+        #         ), "The response data type must be *list* if its HTTP response strategy is object."
+        #         resp_data["data"].append(response_data_prop)
+        #     else:
+        #         assert isinstance(
+        #             resp_data["data"], dict
+        #         ), "The response data type must be *dict* if its HTTP response strategy is not object."
+        #         # resp_data["data"][0] = self._process_response_value(property_value=_data, strategy=strategy)
+        #         resp_data["data"][0] = strategy.generate_response(
+        #             property_value=_data,
+        #             get_schema_parser_factory=ensure_get_schema_parser_factory,
+        #             has_ref_callback=_YamlSchema.has_ref,
+        #             get_ref_callback=_YamlSchema.get_schema_ref,
+        #         )
+        #     return resp_data
 
         assert self.parser.exist_in_response(status_code="200") is True
         status_200_response = self.parser.get_response(status_code="200")
@@ -253,7 +253,14 @@ class APIParser(BaseParser):
         #     }
         print(f"[DEBUG] status_200_response: {status_200_response}")
         if _YamlSchema.has_schema(status_200_response):
-            response_data = _initial_response_model_with_ref_value(response_data, status_200_response)
+            # response_data = _initial_response_model_with_ref_value(response_data, status_200_response)
+            response_data = strategy.process_response_from_reference(
+                init_response=response_data,
+                data=status_200_response,
+                get_schema_parser_factory=ensure_get_schema_parser_factory,
+                has_ref_callback=_YamlSchema.has_ref,
+                get_ref_callback=_YamlSchema.get_schema_ref,
+            )
             # response_data = strategy.process_response_from_reference(
             #     init_resp_data=response_data,
             #     data=status_200_response,
@@ -268,7 +275,14 @@ class APIParser(BaseParser):
             )
             response_schema = resp_parser.get_content(value_format=resp_value_format[0])
             if _YamlSchema.has_ref(response_schema):
-                response_data = _initial_response_model_with_ref_value(response_data, response_schema)
+                # response_data = _initial_response_model_with_ref_value(response_data, response_schema)
+                response_data = strategy.process_response_from_reference(
+                    init_response=response_data,
+                    data=response_schema,
+                    get_schema_parser_factory=ensure_get_schema_parser_factory,
+                    has_ref_callback=_YamlSchema.has_ref,
+                    get_ref_callback=_YamlSchema.get_schema_ref,
+                )
                 # response_data = strategy.process_response_from_reference(
                 #     init_resp_data=response_data,
                 #     data=status_200_response,
@@ -279,7 +293,14 @@ class APIParser(BaseParser):
             else:
                 print(f"[DEBUG] response_schema: {response_schema}")
                 # Data may '{}' or '{ "type": "integer", "title": "Id" }'
-                response_data = _initial_response_model_with_no_ref_value(response_data, response_schema)
+                # response_data = _initial_response_model_with_no_ref_value(response_data, response_schema)
+                response_data = strategy.process_response_from_data(
+                    init_response=response_data,
+                    data=response_schema,
+                    get_schema_parser_factory=ensure_get_schema_parser_factory,
+                    has_ref_callback=_YamlSchema.has_ref,
+                    get_ref_callback=_YamlSchema.get_schema_ref,
+                )
                 # response_data = strategy.process_response_from_data(
                 #     init_resp_data=response_data,
                 #     data=status_200_response,

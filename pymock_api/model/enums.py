@@ -42,6 +42,81 @@ class ResponseStrategy(Enum):
             response_data["data"] = {}
         return response_data
 
+    def process_response_from_reference(
+        self,
+        init_response: dict,
+        data: dict,
+        get_schema_parser_factory: Callable,
+        has_ref_callback: Callable,
+        get_ref_callback: Callable,
+    ) -> dict:
+        response_schema_ref = get_ref_callback(data)
+        parser = get_schema_parser_factory().object(response_schema_ref)
+        response_schema_properties: Optional[dict] = parser.get_properties(default=None)
+        if response_schema_properties:
+            for k, v in response_schema_properties.items():
+                if self is ResponseStrategy.OBJECT:
+                    # response_data_prop = self._process_response_value(property_value=v, strategy=strategy)
+                    response_data_prop = self.generate_response(
+                        property_value=v,
+                        get_schema_parser_factory=get_schema_parser_factory,
+                        has_ref_callback=has_ref_callback,
+                        get_ref_callback=get_ref_callback,
+                    )
+                    assert isinstance(response_data_prop, dict)
+                    response_data_prop["name"] = k
+                    response_data_prop["required"] = k in parser.get_required(default=[k])
+                    assert isinstance(
+                        init_response["data"], list
+                    ), "The response data type must be *list* if its HTTP response strategy is object."
+                    init_response["data"].append(response_data_prop)
+                else:
+                    assert isinstance(
+                        init_response["data"], dict
+                    ), "The response data type must be *dict* if its HTTP response strategy is not object."
+                    # resp_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
+                    init_response["data"][k] = self.generate_response(
+                        property_value=v,
+                        get_schema_parser_factory=get_schema_parser_factory,
+                        has_ref_callback=has_ref_callback,
+                        get_ref_callback=get_ref_callback,
+                    )
+        return init_response
+
+    def process_response_from_data(
+        self,
+        init_response: dict,
+        data: dict,
+        get_schema_parser_factory: Callable,
+        has_ref_callback: Callable,
+        get_ref_callback: Callable,
+    ) -> dict:
+        if self is ResponseStrategy.OBJECT:
+            # response_data_prop = self._process_response_value(property_value=_data, strategy=strategy)
+            response_data_prop = self.generate_response(
+                property_value=data,
+                get_schema_parser_factory=get_schema_parser_factory,
+                has_ref_callback=has_ref_callback,
+                get_ref_callback=get_ref_callback,
+            )
+            assert isinstance(response_data_prop, dict)
+            assert isinstance(
+                init_response["data"], list
+            ), "The response data type must be *list* if its HTTP response strategy is object."
+            init_response["data"].append(response_data_prop)
+        else:
+            assert isinstance(
+                init_response["data"], dict
+            ), "The response data type must be *dict* if its HTTP response strategy is not object."
+            # resp_data["data"][0] = self._process_response_value(property_value=_data, strategy=strategy)
+            init_response["data"][0] = self.generate_response(
+                property_value=data,
+                get_schema_parser_factory=get_schema_parser_factory,
+                has_ref_callback=has_ref_callback,
+                get_ref_callback=get_ref_callback,
+            )
+        return init_response
+
     def generate_response(
         self,
         property_value: dict,
