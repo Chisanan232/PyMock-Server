@@ -31,6 +31,35 @@ class ResponseStrategy(Enum):
         else:
             return v
 
+    def initial_response_data(self) -> Dict[str, Union["ResponseStrategy", list, dict]]:
+        response_data: Dict[str, Union["ResponseStrategy", list, dict]] = {
+            "strategy": self,
+            # "data": None,
+        }
+        if self is ResponseStrategy.OBJECT:
+            response_data["data"] = []
+        else:
+            response_data["data"] = {}
+        return response_data
+
+    def generate_response(
+        self,
+        property_value: dict,
+        get_schema_parser_factory: Callable,
+        has_ref_callback: Callable,
+        get_ref_callback: Callable,
+    ) -> Union[str, list, dict]:
+        if not property_value:
+            return self.generate_empty_response()
+        if has_ref_callback(property_value):
+            return self.generate_response_from_reference(get_ref_callback(property_value))
+        else:
+            return self.generate_response_from_data(
+                resp_prop_data=property_value,
+                get_schema_parser_factory=get_schema_parser_factory,
+                get_ref_callback=get_ref_callback,
+            )
+
     def generate_empty_response(self) -> Union[str, Dict[str, Any]]:
         if self is ResponseStrategy.OBJECT:
             return {
