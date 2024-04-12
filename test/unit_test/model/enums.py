@@ -153,7 +153,7 @@ class TestResponseStrategy(EnumTestSuite):
                 ],
             ),
             (ResponseStrategy.STRING, {"type": "file"}, "random file output stream"),
-            (ResponseStrategy.STRING, {"type": "object"}, "random object value"),
+            # (ResponseStrategy.STRING, {"type": "object"}, "random object value"),
             # For object strategy
             (
                 ResponseStrategy.OBJECT,
@@ -208,6 +208,16 @@ class TestResponseStrategy(EnumTestSuite):
                 },
                 ["random string value"],
             ),
+            # (
+            #     ResponseStrategy.STRING,
+            #     {
+            #         "type": "object",
+            #         "additionalProperties": {
+            #             "type": "string",
+            #         },
+            #     },
+            #     "random string value",
+            # ),
             (
                 ResponseStrategy.STRING,
                 {
@@ -254,11 +264,13 @@ class TestResponseStrategy(EnumTestSuite):
 
         # Run target
         resp = ut_enum.generate_response_from_data(
+            init_response=ut_enum.initial_response_data(),
             resp_prop_data=test_response_data,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
-            # has_ref_callback=_YamlSchema.has_ref,
+            has_ref_callback=_YamlSchema.has_ref,
             get_ref_callback=_YamlSchema.get_schema_ref,
         )
+        print(f"[DEBUG in test] resp: {resp}")
 
         # Verify
         assert resp

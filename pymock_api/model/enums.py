@@ -58,6 +58,7 @@ class ResponseStrategy(Enum):
                 if self is ResponseStrategy.OBJECT:
                     # response_data_prop = self._process_response_value(property_value=v, strategy=strategy)
                     response_data_prop = self.generate_response(
+                        init_response=init_response,
                         property_value=v,
                         get_schema_parser_factory=get_schema_parser_factory,
                         has_ref_callback=has_ref_callback,
@@ -76,6 +77,7 @@ class ResponseStrategy(Enum):
                     ), "The response data type must be *dict* if its HTTP response strategy is not object."
                     # resp_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
                     init_response["data"][k] = self.generate_response(
+                        init_response=init_response,
                         property_value=v,
                         get_schema_parser_factory=get_schema_parser_factory,
                         has_ref_callback=has_ref_callback,
@@ -94,6 +96,7 @@ class ResponseStrategy(Enum):
         if self is ResponseStrategy.OBJECT:
             # response_data_prop = self._process_response_value(property_value=_data, strategy=strategy)
             response_data_prop = self.generate_response(
+                init_response=init_response,
                 property_value=data,
                 get_schema_parser_factory=get_schema_parser_factory,
                 has_ref_callback=has_ref_callback,
@@ -110,6 +113,7 @@ class ResponseStrategy(Enum):
             ), "The response data type must be *dict* if its HTTP response strategy is not object."
             # resp_data["data"][0] = self._process_response_value(property_value=_data, strategy=strategy)
             init_response["data"][0] = self.generate_response(
+                init_response=init_response,
                 property_value=data,
                 get_schema_parser_factory=get_schema_parser_factory,
                 has_ref_callback=has_ref_callback,
@@ -119,6 +123,7 @@ class ResponseStrategy(Enum):
 
     def generate_response(
         self,
+        init_response: dict,
         property_value: dict,
         get_schema_parser_factory: Callable,
         has_ref_callback: Callable,
@@ -130,8 +135,10 @@ class ResponseStrategy(Enum):
             return self.generate_response_from_reference(get_ref_callback(property_value))
         else:
             return self.generate_response_from_data(
+                init_response=init_response,
                 resp_prop_data=property_value,
                 get_schema_parser_factory=get_schema_parser_factory,
+                has_ref_callback=has_ref_callback,
                 get_ref_callback=get_ref_callback,
             )
 
@@ -168,31 +175,43 @@ class ResponseStrategy(Enum):
 
     def generate_response_from_data(
         self,
+        init_response: dict,
         resp_prop_data: dict,
         get_schema_parser_factory: Callable,
-        # has_ref_callback: Callable,
+        has_ref_callback: Callable,
         get_ref_callback: Callable,
     ) -> Union[str, list, dict]:
 
         def _handle_list_type_data(data: dict, noref_val_process_callback: Callable, response: dict = {}) -> dict:
-            single_response = get_ref_callback(data["items"])
-            parser = get_schema_parser_factory().object(single_response)
-            single_response_properties = parser.get_properties(default={})
-            if single_response_properties:
-                for item_k, item_v in parser.get_properties().items():
-                    # if has_ref_callback(item_v):
-                    #     # TODO: Should consider the algorithm to handle nested reference case
-                    #     print("[WARNING] Not implement yet ...")
-                    #     response = ref_val_process_callback(item_k, item_v, response)
-                    # else:
-                    response = noref_val_process_callback(item_k, item_v, response)
-                    # item_type = convert_js_type(item_v["type"])
-                    # # TODO: Set the *required* property correctly
-                    # item = {"name": item_k, "required": True, "type": item_type}
-                    # assert isinstance(
-                    #     response_data_prop["items"], list
-                    # ), "The data type of property *items* must be *list*."
-                    # response_data_prop["items"].append(item)
+            items_data = data["items"]
+            if has_ref_callback(items_data):
+                single_response = get_ref_callback(items_data)
+                parser = get_schema_parser_factory().object(single_response)
+                single_response_properties = parser.get_properties(default={})
+                if single_response_properties:
+                    for item_k, item_v in parser.get_properties().items():
+                        # if has_ref_callback(item_v):
+                        #     # TODO: Should consider the algorithm to handle nested reference case
+                        #     print("[WARNING] Not implement yet ...")
+                        #     response = ref_val_process_callback(item_k, item_v, response)
+                        # else:
+                        response = noref_val_process_callback(item_k, item_v, response)
+                        # item_type = convert_js_type(item_v["type"])
+                        # # TODO: Set the *required* property correctly
+                        # item = {"name": item_k, "required": True, "type": item_type}
+                        # assert isinstance(
+                        #     response_data_prop["items"], list
+                        # ), "The data type of property *items* must be *list*."
+                        # response_data_prop["items"].append(item)
+            else:
+                response = self.generate_response_from_data(  # type: ignore[assignment]
+                    init_response=init_response,
+                    resp_prop_data=items_data,
+                    get_schema_parser_factory=get_schema_parser_factory,
+                    get_ref_callback=get_ref_callback,
+                    has_ref_callback=has_ref_callback,
+                )
+                print(f"[DEBUG in _handle_list_type_data] response: {response}")
             return response
 
         def _handle_list_type_value_with_object_strategy(data: dict) -> dict:
@@ -334,12 +353,29 @@ class ResponseStrategy(Enum):
 
         def _handle_each_data_types_response_with_non_object_strategy(
             resp_prop_data: dict, v_type: str
-        ) -> Union[str, list]:
+        ) -> Union[str, list, dict]:
             if locate(v_type) == list:
                 return _handle_list_type_value_with_non_object_strategy(resp_prop_data)
             elif locate(v_type) == dict:
                 # FIXME: handle the reference like object type
-                return "random object value"
+                additional_properties = resp_prop_data["additionalProperties"]
+                if has_ref_callback(additional_properties):
+                    return self.process_response_from_reference(
+                        init_response=init_response,
+                        data=additional_properties,
+                        get_schema_parser_factory=get_schema_parser_factory,
+                        has_ref_callback=has_ref_callback,
+                        get_ref_callback=get_ref_callback,
+                    )["data"]
+                else:
+                    return self.process_response_from_data(
+                        init_response=init_response,
+                        data=additional_properties,
+                        get_schema_parser_factory=get_schema_parser_factory,
+                        has_ref_callback=has_ref_callback,
+                        get_ref_callback=get_ref_callback,
+                    )["data"]
+                # return "random object value"
             elif locate(v_type) == str:
                 # lowercase_letters = string.ascii_lowercase
                 # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
