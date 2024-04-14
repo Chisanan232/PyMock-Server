@@ -142,11 +142,8 @@ class ResponseStrategy(Enum):
         if self is ResponseStrategy.OBJECT:
             return {
                 "name": "",
-                # TODO: Set the *required* property correctly
                 "required": False,
-                # TODO: Set the *type* property correctly
                 "type": None,
-                # TODO: Set the *format* property correctly
                 "format": None,
                 "items": [],
             }
