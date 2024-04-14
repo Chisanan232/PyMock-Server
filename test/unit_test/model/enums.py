@@ -203,6 +203,16 @@ class TestResponseStrategy(EnumTestSuite):
                 {
                     "type": "object",
                     "additionalProperties": {
+                        "type": "string",
+                    },
+                },
+                "random string value",
+            ),
+            (
+                ResponseStrategy.STRING,
+                {
+                    "type": "object",
+                    "additionalProperties": {
                         "type": "array",
                         "items": {"type": "string", "enum": ["TYPE_1", "TYPE_2"]},
                     },
