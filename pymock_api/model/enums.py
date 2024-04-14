@@ -345,7 +345,6 @@ class ResponseStrategy(Enum):
                         has_ref_callback=has_ref_callback,
                         get_ref_callback=get_ref_callback,
                     )["data"][0]
-                # return "random object value"
             elif locate(v_type) == str:
                 # lowercase_letters = string.ascii_lowercase
                 # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
