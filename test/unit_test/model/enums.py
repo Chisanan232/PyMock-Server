@@ -234,6 +234,56 @@ class TestResponseStrategy(EnumTestSuite):
                     "value2": "random string value",
                 },
             ),
+            (
+                ResponseStrategy.OBJECT,
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string",
+                    },
+                },
+                {"name": "", "required": True, "type": "str", "format": None, "items": None},
+            ),
+            (
+                ResponseStrategy.OBJECT,
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {"type": "string", "enum": ["TYPE_1", "TYPE_2"]},
+                    },
+                },
+                {
+                    "name": "",
+                    "required": True,
+                    "type": "list",
+                    "format": None,
+                    "items": [
+                        {"name": "", "required": True, "type": "str"},
+                    ],
+                },
+            ),
+            (
+                ResponseStrategy.OBJECT,
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/components/schemas/FooResponse",
+                    },
+                },
+                {
+                    "name": "",
+                    "required": True,
+                    "type": "list",
+                    "format": None,
+                    "items": [
+                        {"name": "id", "required": True, "type": "int"},
+                        {"name": "name", "required": True, "type": "str"},
+                        {"name": "value1", "required": True, "type": "str"},
+                        {"name": "value2", "required": True, "type": "str"},
+                    ],
+                },
+            ),
         ],
     )
     def test_generate_response_from_data(
