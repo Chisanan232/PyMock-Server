@@ -154,7 +154,6 @@ class TestResponseStrategy(EnumTestSuite):
                 ],
             ),
             (ResponseStrategy.STRING, {"type": "file"}, "random file output stream"),
-            # (ResponseStrategy.STRING, {"type": "object"}, "random object value"),
             # For object strategy
             (
                 ResponseStrategy.OBJECT,
@@ -192,11 +191,6 @@ class TestResponseStrategy(EnumTestSuite):
                 {"type": "file"},
                 {"name": "", "required": True, "type": "file", "format": None, "items": None},
             ),
-            # (
-            #     ResponseStrategy.OBJECT,
-            #     {"type": "object"},
-            #     {"name": "", "required": True, "type": "dict", "format": None, "items": None},
-            # ),
             # # Special data
             (
                 ResponseStrategy.STRING,
