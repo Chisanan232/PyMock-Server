@@ -206,7 +206,7 @@ class ResponseStrategy(Enum):
             else:
                 print(f"[DEBUG in _handle_list_type_data] init_response: {init_response}")
                 print(f"[DEBUG in _handle_list_type_data] items_data: {items_data}")
-                response_value = self.generate_response_from_data(  # type: ignore[assignment]
+                response_value = self.generate_response_from_data(
                     init_response=init_response,
                     resp_prop_data=items_data,
                     get_schema_parser_factory=get_schema_parser_factory,
@@ -216,14 +216,16 @@ class ResponseStrategy(Enum):
                 print(f"[DEBUG in _handle_list_type_data] response_value: {response_value}")
                 if isinstance(response_value, list):
                     # TODO: Need to check whether here logic is valid or not
-                    response = response_value
+                    response = response_value  # type: ignore[assignment]
                 elif isinstance(response_value, dict):
                     # TODO: Need to check whether here logic is valid or not
                     response = response_value
                 elif isinstance(response_value, str):
-                    response = response_value
+                    response = response_value  # type: ignore[assignment]
                 else:
-                    raise TypeError(f"Not implement the process to handle the data type '{type(response_value)}' response.")
+                    raise TypeError(
+                        f"Not implement the process to handle the data type '{type(response_value)}' response."
+                    )
                 print(f"[DEBUG in _handle_list_type_data] response: {response}")
             return response
 
@@ -278,17 +280,44 @@ class ResponseStrategy(Enum):
             #             response_data_prop["items"].append(item)
             return response_data_prop
 
-        def _handle_object_type_value_with_object_strategy(v_type: str) -> dict:
-            # FIXME: handle the reference like object type
-            return {
-                "name": "",
-                # TODO: Set the *required* property correctly
-                "required": True,
-                "type": v_type,
-                # TODO: Set the *format* property correctly
-                "format": None,
-                "items": None,
-            }
+        def _handle_object_type_value_with_object_strategy(data: dict) -> dict:
+            additional_properties = data["additionalProperties"]
+            if has_ref_callback(additional_properties):
+                resp = self.process_response_from_reference(
+                    init_response=init_response,
+                    data=additional_properties,
+                    get_schema_parser_factory=get_schema_parser_factory,
+                    has_ref_callback=has_ref_callback,
+                    get_ref_callback=get_ref_callback,
+                )
+                print(f"[DEBUG in _handle_object_type_value_with_object_strategy] resp: {resp}")
+                return resp["data"]
+            else:
+                additional_properties_type = convert_js_type(additional_properties["type"])
+                if locate(additional_properties_type) in [list, dict, "file"]:
+                    items_config_data = _handle_list_type_value_with_object_strategy(additional_properties)
+                    print(
+                        f"[DEBUG in _handle_object_type_value_with_object_strategy] items_config_data: {items_config_data}"
+                    )
+                    return {
+                        "name": "",
+                        # TODO: Set the *required* property correctly
+                        "required": True,
+                        "type": additional_properties_type,
+                        # TODO: Set the *format* property correctly
+                        "format": None,
+                        "items": [items_config_data],
+                    }
+                else:
+                    return {
+                        "name": "",
+                        # TODO: Set the *required* property correctly
+                        "required": True,
+                        "type": additional_properties_type,
+                        # TODO: Set the *format* property correctly
+                        "format": None,
+                        "items": None,
+                    }
 
         def _handle_other_types_value_with_object_strategy(v_type: str) -> dict:
             return {
@@ -360,7 +389,7 @@ class ResponseStrategy(Enum):
             if locate(v_type) == list:
                 return _handle_list_type_value_with_object_strategy(data)
             elif locate(v_type) == dict:
-                return _handle_object_type_value_with_object_strategy(v_type)
+                return _handle_object_type_value_with_object_strategy(data)
             else:
                 return _handle_other_types_value_with_object_strategy(v_type)
 
