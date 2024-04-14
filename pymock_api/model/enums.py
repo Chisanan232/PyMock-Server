@@ -183,10 +183,8 @@ class ResponseStrategy(Enum):
             if has_ref_callback(items_data):
                 single_response = get_ref_callback(items_data)
                 parser = get_schema_parser_factory().object(single_response)
-                single_response_properties = parser.get_properties(default={})
-                if single_response_properties:
-                    for item_k, item_v in parser.get_properties().items():
-                        response = noref_val_process_callback(item_k, item_v, response)
+                for item_k, item_v in parser.get_properties(default={}).items():
+                    response = noref_val_process_callback(item_k, item_v, response)
             else:
                 print(f"[DEBUG in _handle_list_type_data] init_response: {init_response}")
                 print(f"[DEBUG in _handle_list_type_data] items_data: {items_data}")
