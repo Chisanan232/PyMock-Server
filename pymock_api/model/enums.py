@@ -204,12 +204,9 @@ class ResponseStrategy(Enum):
                 elif isinstance(response_value, dict):
                     # TODO: Need to check whether here logic is valid or not
                     response = response_value
-                elif isinstance(response_value, str):
-                    response = response_value  # type: ignore[assignment]
                 else:
-                    raise TypeError(
-                        f"Not implement the process to handle the data type '{type(response_value)}' response."
-                    )
+                    assert isinstance(response_value, str)
+                    response = response_value  # type: ignore[assignment]
                 print(f"[DEBUG in _handle_list_type_data] response: {response}")
             return response
 
