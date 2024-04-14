@@ -322,7 +322,6 @@ class ResponseStrategy(Enum):
             if locate(v_type) == list:
                 return _handle_list_type_value_with_non_object_strategy(resp_prop_data)
             elif locate(v_type) == dict:
-                # FIXME: handle the reference like object type
                 additional_properties = resp_prop_data["additionalProperties"]
                 if has_ref_callback(additional_properties):
                     return self.process_response_from_reference(
