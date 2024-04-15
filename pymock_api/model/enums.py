@@ -61,7 +61,7 @@ class ResponseStrategy(Enum):
         if response_schema_properties:
             for k, v in response_schema_properties.items():
                 if self is ResponseStrategy.OBJECT:
-                    response_data_prop = self.generate_response(
+                    response_data_prop = self._generate_response(
                         init_response=init_response,
                         property_value=v,
                         get_schema_parser_factory=get_schema_parser_factory,
@@ -79,7 +79,7 @@ class ResponseStrategy(Enum):
                     assert isinstance(
                         init_response["data"], dict
                     ), "The response data type must be *dict* if its HTTP response strategy is not object."
-                    init_response["data"][k] = self.generate_response(
+                    init_response["data"][k] = self._generate_response(
                         init_response=init_response,
                         property_value=v,
                         get_schema_parser_factory=get_schema_parser_factory,
@@ -97,7 +97,7 @@ class ResponseStrategy(Enum):
         get_ref_callback: Callable,
     ) -> dict:
         if self is ResponseStrategy.OBJECT:
-            response_data_prop = self.generate_response(
+            response_data_prop = self._generate_response(
                 init_response=init_response,
                 property_value=data,
                 get_schema_parser_factory=get_schema_parser_factory,
@@ -113,7 +113,7 @@ class ResponseStrategy(Enum):
             assert isinstance(
                 init_response["data"], dict
             ), "The response data type must be *dict* if its HTTP response strategy is not object."
-            init_response["data"][0] = self.generate_response(
+            init_response["data"][0] = self._generate_response(
                 init_response=init_response,
                 property_value=data,
                 get_schema_parser_factory=get_schema_parser_factory,
@@ -122,7 +122,7 @@ class ResponseStrategy(Enum):
             )
         return init_response
 
-    def generate_response(
+    def _generate_response(
         self,
         init_response: dict,
         property_value: dict,
@@ -131,11 +131,11 @@ class ResponseStrategy(Enum):
         get_ref_callback: Callable,
     ) -> Union[str, list, dict]:
         if not property_value:
-            return self.generate_empty_response()
+            return self._generate_empty_response()
         if has_ref_callback(property_value):
-            return self.generate_response_from_reference(get_ref_callback(property_value))
+            return self._generate_response_from_reference(get_ref_callback(property_value))
         else:
-            return self.generate_response_from_data(
+            return self._generate_response_from_data(
                 init_response=init_response,
                 resp_prop_data=property_value,
                 get_schema_parser_factory=get_schema_parser_factory,
@@ -143,7 +143,7 @@ class ResponseStrategy(Enum):
                 get_ref_callback=get_ref_callback,
             )
 
-    def generate_empty_response(self) -> Union[str, Dict[str, Any]]:
+    def _generate_empty_response(self) -> Union[str, Dict[str, Any]]:
         if self is ResponseStrategy.OBJECT:
             return {
                 "name": "",
@@ -155,7 +155,7 @@ class ResponseStrategy(Enum):
         else:
             return "empty value"
 
-    def generate_response_from_reference(self, ref_data: dict) -> Union[str, Dict[str, Any]]:
+    def _generate_response_from_reference(self, ref_data: dict) -> Union[str, Dict[str, Any]]:
         if self is ResponseStrategy.OBJECT:
             return {
                 "name": "",
@@ -170,7 +170,7 @@ class ResponseStrategy(Enum):
         else:
             return "FIXME: Handle the reference"
 
-    def generate_response_from_data(
+    def _generate_response_from_data(
         self,
         init_response: dict,
         resp_prop_data: dict,
@@ -189,7 +189,7 @@ class ResponseStrategy(Enum):
             else:
                 print(f"[DEBUG in _handle_list_type_data] init_response: {init_response}")
                 print(f"[DEBUG in _handle_list_type_data] items_data: {items_data}")
-                response_value = self.generate_response_from_data(
+                response_value = self._generate_response_from_data(
                     init_response=init_response,
                     resp_prop_data=items_data,
                     get_schema_parser_factory=get_schema_parser_factory,

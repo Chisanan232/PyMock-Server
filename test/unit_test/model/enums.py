@@ -73,7 +73,7 @@ class TestResponseStrategy(EnumTestSuite):
         set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
 
         # Run target function under test
-        response_prop_data = strategy.generate_response(
+        response_prop_data = strategy._generate_response(
             init_response={},
             property_value=api_response_detail,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
@@ -110,7 +110,7 @@ class TestResponseStrategy(EnumTestSuite):
         ],
     )
     def test_generate_empty_response(self, ut_enum: ResponseStrategy, expected_type: type):
-        empty_resp = ut_enum.generate_empty_response()
+        empty_resp = ut_enum._generate_empty_response()
         assert isinstance(empty_resp, expected_type)
 
     @pytest.mark.parametrize(
@@ -122,7 +122,7 @@ class TestResponseStrategy(EnumTestSuite):
         ],
     )
     def test_generate_response_from_reference(self, ut_enum: ResponseStrategy, expected_type: type):
-        resp = ut_enum.generate_response_from_reference({"response reference data": {}})
+        resp = ut_enum._generate_response_from_reference({"response reference data": {}})
         assert isinstance(resp, expected_type)
 
     @pytest.mark.parametrize(
@@ -302,7 +302,7 @@ class TestResponseStrategy(EnumTestSuite):
             )
 
         # Run target
-        resp = ut_enum.generate_response_from_data(
+        resp = ut_enum._generate_response_from_data(
             init_response=ut_enum.initial_response_data(),
             resp_prop_data=test_response_data,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
