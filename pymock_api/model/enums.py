@@ -60,14 +60,15 @@ class ResponseStrategy(Enum):
         response_schema_properties: Optional[dict] = parser.get_properties(default=None)
         if response_schema_properties:
             for k, v in response_schema_properties.items():
+                response_config = self._generate_response(
+                    init_response=init_response,
+                    property_value=v,
+                    get_schema_parser_factory=get_schema_parser_factory,
+                    has_ref_callback=has_ref_callback,
+                    get_ref_callback=get_ref_callback,
+                )
                 if self is ResponseStrategy.OBJECT:
-                    response_data_prop = self._generate_response(
-                        init_response=init_response,
-                        property_value=v,
-                        get_schema_parser_factory=get_schema_parser_factory,
-                        has_ref_callback=has_ref_callback,
-                        get_ref_callback=get_ref_callback,
-                    )
+                    response_data_prop = response_config
                     assert isinstance(response_data_prop, dict)
                     response_data_prop["name"] = k
                     response_data_prop["required"] = k in parser.get_required(default=[k])
@@ -79,13 +80,7 @@ class ResponseStrategy(Enum):
                     assert isinstance(
                         init_response["data"], dict
                     ), "The response data type must be *dict* if its HTTP response strategy is not object."
-                    init_response["data"][k] = self._generate_response(
-                        init_response=init_response,
-                        property_value=v,
-                        get_schema_parser_factory=get_schema_parser_factory,
-                        has_ref_callback=has_ref_callback,
-                        get_ref_callback=get_ref_callback,
-                    )
+                    init_response["data"][k] = response_config
         return init_response
 
     def process_response_from_data(
@@ -96,14 +91,15 @@ class ResponseStrategy(Enum):
         has_ref_callback: Callable,
         get_ref_callback: Callable,
     ) -> dict:
+        response_config = self._generate_response(
+            init_response=init_response,
+            property_value=data,
+            get_schema_parser_factory=get_schema_parser_factory,
+            has_ref_callback=has_ref_callback,
+            get_ref_callback=get_ref_callback,
+        )
         if self is ResponseStrategy.OBJECT:
-            response_data_prop = self._generate_response(
-                init_response=init_response,
-                property_value=data,
-                get_schema_parser_factory=get_schema_parser_factory,
-                has_ref_callback=has_ref_callback,
-                get_ref_callback=get_ref_callback,
-            )
+            response_data_prop = response_config
             assert isinstance(response_data_prop, dict)
             assert isinstance(
                 init_response["data"], list
@@ -113,13 +109,7 @@ class ResponseStrategy(Enum):
             assert isinstance(
                 init_response["data"], dict
             ), "The response data type must be *dict* if its HTTP response strategy is not object."
-            init_response["data"][0] = self._generate_response(
-                init_response=init_response,
-                property_value=data,
-                get_schema_parser_factory=get_schema_parser_factory,
-                has_ref_callback=has_ref_callback,
-                get_ref_callback=get_ref_callback,
-            )
+            init_response["data"][0] = response_config
         return init_response
 
     def _generate_response(
