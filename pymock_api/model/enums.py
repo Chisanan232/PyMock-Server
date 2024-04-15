@@ -1,4 +1,5 @@
 import re
+from collections import namedtuple
 from enum import Enum
 from pydoc import locate
 from typing import Any, Callable, Dict, Optional, Union
@@ -17,6 +18,10 @@ class SampleType(Enum):
     RESPONSE_AS_STR: str = "response_as_str"
     RESPONSE_AS_JSON: str = "response_as_json"
     RESPONSE_WITH_FILE: str = "response_with_file"
+
+
+_PropertyDefaultRequired = namedtuple("_PropertyDefaultRequired", ("empty", "general"))
+_Default_Required: _PropertyDefaultRequired = _PropertyDefaultRequired(empty=False, general=True)
 
 
 class ResponseStrategy(Enum):
@@ -142,7 +147,7 @@ class ResponseStrategy(Enum):
         if self is ResponseStrategy.OBJECT:
             return {
                 "name": "",
-                "required": False,
+                "required": _Default_Required.empty,
                 "type": None,
                 "format": None,
                 "items": [],
@@ -154,8 +159,7 @@ class ResponseStrategy(Enum):
         if self is ResponseStrategy.OBJECT:
             return {
                 "name": "",
-                # TODO: Set the *required* property correctly
-                "required": True,
+                "required": _Default_Required.general,
                 # TODO: Set the *type* property correctly
                 "type": "file",
                 # TODO: Set the *format* property correctly
@@ -209,8 +213,7 @@ class ResponseStrategy(Enum):
 
             def _noref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
                 item_type = convert_js_type(item_v["type"])
-                # TODO: Set the *required* property correctly
-                item = {"name": item_k, "required": True, "type": item_type}
+                item = {"name": item_k, "required": _Default_Required.general, "type": item_type}
                 assert isinstance(
                     response_data_prop["items"], list
                 ), "The data type of property *items* must be *list*."
@@ -219,8 +222,7 @@ class ResponseStrategy(Enum):
 
             response_data_prop = {
                 "name": "",
-                # TODO: Set the *required* property correctly
-                "required": True,
+                "required": _Default_Required.general,
                 "type": v_type,
                 # TODO: Set the *format* property correctly
                 "format": None,
@@ -254,8 +256,7 @@ class ResponseStrategy(Enum):
                     )
                     return {
                         "name": "",
-                        # TODO: Set the *required* property correctly
-                        "required": True,
+                        "required": _Default_Required.general,
                         "type": additional_properties_type,
                         # TODO: Set the *format* property correctly
                         "format": None,
@@ -264,8 +265,7 @@ class ResponseStrategy(Enum):
                 else:
                     return {
                         "name": "",
-                        # TODO: Set the *required* property correctly
-                        "required": True,
+                        "required": _Default_Required.general,
                         "type": additional_properties_type,
                         # TODO: Set the *format* property correctly
                         "format": None,
@@ -275,8 +275,7 @@ class ResponseStrategy(Enum):
         def _handle_other_types_value_with_object_strategy(v_type: str) -> dict:
             return {
                 "name": "",
-                # TODO: Set the *required* property correctly
-                "required": True,
+                "required": _Default_Required.general,
                 "type": v_type,
                 # TODO: Set the *format* property correctly
                 "format": None,
