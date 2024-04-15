@@ -75,6 +75,9 @@ class ResponseStrategy(Enum):
                     assert isinstance(
                         init_response["data"], list
                     ), "The response data type must be *list* if its HTTP response strategy is object."
+                    assert (
+                        len(list(filter(lambda d: not isinstance(d, dict), init_response["data"]))) == 0
+                    ), "Each column detail must be *dict* if its HTTP response strategy is object."
                     init_response["data"].append(response_data_prop)
                 else:
                     assert isinstance(
