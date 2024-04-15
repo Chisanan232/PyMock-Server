@@ -56,7 +56,6 @@ class ResponseStrategy(Enum):
         if response_schema_properties:
             for k, v in response_schema_properties.items():
                 if self is ResponseStrategy.OBJECT:
-                    # response_data_prop = self._process_response_value(property_value=v, strategy=strategy)
                     response_data_prop = self.generate_response(
                         init_response=init_response,
                         property_value=v,
@@ -75,7 +74,6 @@ class ResponseStrategy(Enum):
                     assert isinstance(
                         init_response["data"], dict
                     ), "The response data type must be *dict* if its HTTP response strategy is not object."
-                    # resp_data["data"][k] = self._process_response_value(property_value=v, strategy=strategy)
                     init_response["data"][k] = self.generate_response(
                         init_response=init_response,
                         property_value=v,
@@ -94,7 +92,6 @@ class ResponseStrategy(Enum):
         get_ref_callback: Callable,
     ) -> dict:
         if self is ResponseStrategy.OBJECT:
-            # response_data_prop = self._process_response_value(property_value=_data, strategy=strategy)
             response_data_prop = self.generate_response(
                 init_response=init_response,
                 property_value=data,
@@ -111,7 +108,6 @@ class ResponseStrategy(Enum):
             assert isinstance(
                 init_response["data"], dict
             ), "The response data type must be *dict* if its HTTP response strategy is not object."
-            # resp_data["data"][0] = self._process_response_value(property_value=_data, strategy=strategy)
             init_response["data"][0] = self.generate_response(
                 init_response=init_response,
                 property_value=data,
@@ -146,11 +142,8 @@ class ResponseStrategy(Enum):
         if self is ResponseStrategy.OBJECT:
             return {
                 "name": "",
-                # TODO: Set the *required* property correctly
                 "required": False,
-                # TODO: Set the *type* property correctly
                 "type": None,
-                # TODO: Set the *format* property correctly
                 "format": None,
                 "items": [],
             }
@@ -187,39 +180,32 @@ class ResponseStrategy(Enum):
             if has_ref_callback(items_data):
                 single_response = get_ref_callback(items_data)
                 parser = get_schema_parser_factory().object(single_response)
-                single_response_properties = parser.get_properties(default={})
-                if single_response_properties:
-                    for item_k, item_v in parser.get_properties().items():
-                        # if has_ref_callback(item_v):
-                        #     # TODO: Should consider the algorithm to handle nested reference case
-                        #     print("[WARNING] Not implement yet ...")
-                        #     response = ref_val_process_callback(item_k, item_v, response)
-                        # else:
-                        response = noref_val_process_callback(item_k, item_v, response)
-                        # item_type = convert_js_type(item_v["type"])
-                        # # TODO: Set the *required* property correctly
-                        # item = {"name": item_k, "required": True, "type": item_type}
-                        # assert isinstance(
-                        #     response_data_prop["items"], list
-                        # ), "The data type of property *items* must be *list*."
-                        # response_data_prop["items"].append(item)
+                for item_k, item_v in parser.get_properties(default={}).items():
+                    response = noref_val_process_callback(item_k, item_v, response)
             else:
-                response = self.generate_response_from_data(  # type: ignore[assignment]
+                print(f"[DEBUG in _handle_list_type_data] init_response: {init_response}")
+                print(f"[DEBUG in _handle_list_type_data] items_data: {items_data}")
+                response_value = self.generate_response_from_data(
                     init_response=init_response,
                     resp_prop_data=items_data,
                     get_schema_parser_factory=get_schema_parser_factory,
                     get_ref_callback=get_ref_callback,
                     has_ref_callback=has_ref_callback,
                 )
+                print(f"[DEBUG in _handle_list_type_data] response_value: {response_value}")
+                if isinstance(response_value, list):
+                    # TODO: Need to check whether here logic is valid or not
+                    response = response_value  # type: ignore[assignment]
+                elif isinstance(response_value, dict):
+                    # TODO: Need to check whether here logic is valid or not
+                    response = response_value
+                else:
+                    assert isinstance(response_value, str)
+                    response = response_value  # type: ignore[assignment]
                 print(f"[DEBUG in _handle_list_type_data] response: {response}")
             return response
 
         def _handle_list_type_value_with_object_strategy(data: dict) -> dict:
-
-            # def _ref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
-            #     # TODO: Should consider the algorithm to handle nested reference case
-            #     print("[WARNING] Not implement yet ...")
-            #     return response_data_prop
 
             def _noref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
                 item_type = convert_js_type(item_v["type"])
@@ -242,40 +228,49 @@ class ResponseStrategy(Enum):
             }
             response_data_prop = _handle_list_type_data(
                 data=data,
-                # ref_val_process_callback=_ref_process_callback,
                 noref_val_process_callback=_noref_process_callback,
                 response=response_data_prop,
             )
-
-            # single_response = get_ref_callback(data["items"])
-            # parser = get_schema_parser_factory().object(single_response)
-            # single_response_properties = parser.get_properties(default={})
-            # if single_response_properties:
-            #     for item_k, item_v in parser.get_properties().items():
-            #         if has_ref_callback(item_v):
-            #             # TODO: Should consider the algorithm to handle nested reference case
-            #             print("[WARNING] Not implement yet ...")
-            #         else:
-            #             item_type = convert_js_type(item_v["type"])
-            #             # TODO: Set the *required* property correctly
-            #             item = {"name": item_k, "required": True, "type": item_type}
-            #             assert isinstance(
-            #                 response_data_prop["items"], list
-            #             ), "The data type of property *items* must be *list*."
-            #             response_data_prop["items"].append(item)
             return response_data_prop
 
-        def _handle_object_type_value_with_object_strategy(v_type: str) -> dict:
-            # FIXME: handle the reference like object type
-            return {
-                "name": "",
-                # TODO: Set the *required* property correctly
-                "required": True,
-                "type": v_type,
-                # TODO: Set the *format* property correctly
-                "format": None,
-                "items": None,
-            }
+        def _handle_object_type_value_with_object_strategy(data: dict) -> dict:
+            additional_properties = data["additionalProperties"]
+            if has_ref_callback(additional_properties):
+                resp = self.process_response_from_reference(
+                    init_response=init_response,
+                    data=additional_properties,
+                    get_schema_parser_factory=get_schema_parser_factory,
+                    has_ref_callback=has_ref_callback,
+                    get_ref_callback=get_ref_callback,
+                )
+                print(f"[DEBUG in _handle_object_type_value_with_object_strategy] resp: {resp}")
+                return resp["data"]
+            else:
+                additional_properties_type = convert_js_type(additional_properties["type"])
+                if locate(additional_properties_type) in [list, dict, "file"]:
+                    items_config_data = _handle_list_type_value_with_object_strategy(additional_properties)
+                    print(
+                        f"[DEBUG in _handle_object_type_value_with_object_strategy] items_config_data: {items_config_data}"
+                    )
+                    return {
+                        "name": "",
+                        # TODO: Set the *required* property correctly
+                        "required": True,
+                        "type": additional_properties_type,
+                        # TODO: Set the *format* property correctly
+                        "format": None,
+                        "items": [items_config_data],
+                    }
+                else:
+                    return {
+                        "name": "",
+                        # TODO: Set the *required* property correctly
+                        "required": True,
+                        "type": additional_properties_type,
+                        # TODO: Set the *format* property correctly
+                        "format": None,
+                        "items": None,
+                    }
 
         def _handle_other_types_value_with_object_strategy(v_type: str) -> dict:
             return {
@@ -289,11 +284,6 @@ class ResponseStrategy(Enum):
             }
 
         def _handle_list_type_value_with_non_object_strategy(data: dict) -> list:
-
-            # def _ref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
-            #     # TODO: Should consider the algorithm to handle nested reference case
-            #     print("[WARNING] Not implement yet ...")
-            #     return response_data_prop
 
             def _noref_process_callback(item_k: str, item_v: dict, item: dict) -> dict:
                 item_type = convert_js_type(item_v["type"])
@@ -313,41 +303,16 @@ class ResponseStrategy(Enum):
             item_info: dict = {}
             item_info = _handle_list_type_data(
                 data=data,
-                # ref_val_process_callback=_ref_process_callback,
                 noref_val_process_callback=_noref_process_callback,
                 response=item_info,
             )
-
-            # single_response = get_ref_callback(data["items"])
-            # parser = get_schema_parser_factory().object(single_response)
-            # item = {}
-            # single_response_properties = parser.get_properties(default={})
-            # if single_response_properties:
-            #     for item_k, item_v in parser.get_properties().items():
-            #         if has_ref_callback(item_v):
-            #             # TODO: Should consider the algorithm to handle nested reference case
-            #             obj_item_type = convert_js_type(item_v["additionalProperties"]["type"])
-            #             print("[WARNING] Not implement yet ...")
-            #         else:
-            #             item_type = convert_js_type(item_v["type"])
-            #             if locate(item_type) is str:
-            #                 # lowercase_letters = string.ascii_lowercase
-            #                 # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-            #                 random_value = "random string value"
-            #             elif locate(item_type) is int:
-            #                 # random_value = int(
-            #                 #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-            #                 random_value = "random integer value"
-            #             else:
-            #                 raise NotImplementedError
-            #             item[item_k] = random_value
             return [item_info]
 
         def _handle_each_data_types_response_with_object_strategy(data: dict, v_type: str) -> dict:
             if locate(v_type) == list:
                 return _handle_list_type_value_with_object_strategy(data)
             elif locate(v_type) == dict:
-                return _handle_object_type_value_with_object_strategy(v_type)
+                return _handle_object_type_value_with_object_strategy(data)
             else:
                 return _handle_other_types_value_with_object_strategy(v_type)
 
@@ -357,7 +322,6 @@ class ResponseStrategy(Enum):
             if locate(v_type) == list:
                 return _handle_list_type_value_with_non_object_strategy(resp_prop_data)
             elif locate(v_type) == dict:
-                # FIXME: handle the reference like object type
                 additional_properties = resp_prop_data["additionalProperties"]
                 if has_ref_callback(additional_properties):
                     return self.process_response_from_reference(
@@ -374,8 +338,7 @@ class ResponseStrategy(Enum):
                         get_schema_parser_factory=get_schema_parser_factory,
                         has_ref_callback=has_ref_callback,
                         get_ref_callback=get_ref_callback,
-                    )["data"]
-                # return "random object value"
+                    )["data"][0]
             elif locate(v_type) == str:
                 # lowercase_letters = string.ascii_lowercase
                 # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
@@ -395,33 +358,8 @@ class ResponseStrategy(Enum):
         v_type = convert_js_type(resp_prop_data["type"])
         if self is ResponseStrategy.OBJECT:
             return _handle_each_data_types_response_with_object_strategy(resp_prop_data, v_type)
-            # if locate(v_type) == list:
-            #     return _handle_list_type_value_with_object_strategy(resp_prop_data)
-            # elif locate(v_type) == dict:
-            #     return _handle_object_type_value_with_object_strategy(v_type)
-            # else:
-            #     return _handle_other_types_value_with_object_strategy(v_type)
         else:
             return _handle_each_data_types_response_with_non_object_strategy(resp_prop_data, v_type)
-            # if locate(v_type) == list:
-            #     return _handle_list_type_value_with_non_object_strategy(resp_prop_data)
-            # elif locate(v_type) == dict:
-            #     # FIXME: handle the reference like object type
-            #     return "random object value"
-            # elif locate(v_type) == str:
-            #     # lowercase_letters = string.ascii_lowercase
-            #     # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-            #     return "random string value"
-            # elif locate(v_type) == int:
-            #     # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-            #     return "random integer value"
-            # elif locate(v_type) == bool:
-            #     return "random boolean value"
-            # elif v_type == "file":
-            #     # TODO: Handle the file download feature
-            #     return "random file output stream"
-            # else:
-            #     raise NotImplementedError
 
 
 class ConfigLoadingOrderKey(Enum):

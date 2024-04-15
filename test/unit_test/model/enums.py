@@ -74,6 +74,7 @@ class TestResponseStrategy(EnumTestSuite):
 
         # Run target function under test
         response_prop_data = strategy.generate_response(
+            init_response={},
             property_value=api_response_detail,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
             has_ref_callback=_YamlSchema.has_ref,
@@ -153,7 +154,6 @@ class TestResponseStrategy(EnumTestSuite):
                 ],
             ),
             (ResponseStrategy.STRING, {"type": "file"}, "random file output stream"),
-            # (ResponseStrategy.STRING, {"type": "object"}, "random object value"),
             # For object strategy
             (
                 ResponseStrategy.OBJECT,
@@ -191,12 +191,17 @@ class TestResponseStrategy(EnumTestSuite):
                 {"type": "file"},
                 {"name": "", "required": True, "type": "file", "format": None, "items": None},
             ),
-            (
-                ResponseStrategy.OBJECT,
-                {"type": "object"},
-                {"name": "", "required": True, "type": "dict", "format": None, "items": None},
-            ),
             # # Special data
+            (
+                ResponseStrategy.STRING,
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string",
+                    },
+                },
+                "random string value",
+            ),
             (
                 ResponseStrategy.STRING,
                 {
@@ -208,16 +213,6 @@ class TestResponseStrategy(EnumTestSuite):
                 },
                 ["random string value"],
             ),
-            # (
-            #     ResponseStrategy.STRING,
-            #     {
-            #         "type": "object",
-            #         "additionalProperties": {
-            #             "type": "string",
-            #         },
-            #     },
-            #     "random string value",
-            # ),
             (
                 ResponseStrategy.STRING,
                 {
@@ -232,6 +227,50 @@ class TestResponseStrategy(EnumTestSuite):
                     "value1": "random string value",
                     "value2": "random string value",
                 },
+            ),
+            (
+                ResponseStrategy.OBJECT,
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string",
+                    },
+                },
+                {"name": "", "required": True, "type": "str", "format": None, "items": None},
+            ),
+            (
+                ResponseStrategy.OBJECT,
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {"type": "string", "enum": ["TYPE_1", "TYPE_2"]},
+                    },
+                },
+                {
+                    "name": "",
+                    "required": True,
+                    "type": "list",
+                    "format": None,
+                    "items": [
+                        {"name": "", "required": True, "type": "str", "format": None, "items": None},
+                    ],
+                },
+            ),
+            (
+                ResponseStrategy.OBJECT,
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/components/schemas/FooResponse",
+                    },
+                },
+                [
+                    {"name": "id", "required": True, "type": "int", "format": None, "items": None},
+                    {"name": "name", "required": False, "type": "str", "format": None, "items": None},
+                    {"name": "value1", "required": False, "type": "str", "format": None, "items": None},
+                    {"name": "value2", "required": False, "type": "str", "format": None, "items": None},
+                ],
             ),
         ],
     )
@@ -270,7 +309,6 @@ class TestResponseStrategy(EnumTestSuite):
             has_ref_callback=_YamlSchema.has_ref,
             get_ref_callback=_YamlSchema.get_schema_ref,
         )
-        print(f"[DEBUG in test] resp: {resp}")
 
         # Verify
         assert resp
