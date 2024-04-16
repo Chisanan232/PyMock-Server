@@ -5,8 +5,11 @@ import pathlib
 from typing import List, Tuple
 
 from pymock_api.model.enums import ResponseStrategy
-from pymock_api.model.openapi._base import _YamlSchema, set_component_definition
-from pymock_api.model.openapi._schema_parser import OpenAPIV2SchemaParser
+from pymock_api.model.openapi._schema_parser import (
+    OpenAPIV2SchemaParser,
+    _ReferenceObjectParser,
+    set_component_definition,
+)
 
 OPENAPI_API_DOC_JSON: List[tuple] = []
 OPENAPI_ONE_API_JSON: List[tuple] = []
@@ -44,8 +47,8 @@ def load_all_openapi_api_doc() -> None:
                     # For testing API response properties
                     status_200_response = api_detail.get("responses", {}).get("200", {})
                     set_component_definition(OpenAPIV2SchemaParser(data=openapi_api_docs))
-                    if _YamlSchema.has_schema(status_200_response):
-                        response_schema = _YamlSchema.get_schema_ref(status_200_response)
+                    if _ReferenceObjectParser.has_schema(status_200_response):
+                        response_schema = _ReferenceObjectParser.get_schema_ref(status_200_response)
                         response_schema_properties = response_schema.get("properties", None)
                         if response_schema_properties:
                             for k, v in response_schema_properties.items():

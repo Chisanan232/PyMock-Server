@@ -12,8 +12,10 @@ from pymock_api.command.options import SubCommand
 from pymock_api.command.pull.component import SubCmdPullComponent
 from pymock_api.model import SubcmdPullArguments, load_config
 from pymock_api.model.api_config import TemplateConfig
-from pymock_api.model.openapi._base import set_component_definition
-from pymock_api.model.openapi._schema_parser import OpenAPIV2SchemaParser
+from pymock_api.model.openapi._schema_parser import (
+    OpenAPIV2SchemaParser,
+    set_component_definition,
+)
 
 from ...._values import _API_Doc_Source, _Test_Request_With_Https
 
