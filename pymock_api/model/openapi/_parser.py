@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Type, cast
 from ..enums import OpenAPIVersion, ResponseStrategy
 from ._base import (
     BaseOpenAPIDataModel,
-    _YamlSchema,
+    _ReferenceObjectParser,
     ensure_get_schema_parser_factory,
     get_openapi_version,
 )
@@ -45,12 +45,12 @@ class APIParameterParser(BaseParser):
         return cast(BaseOpenAPIRequestParametersSchemaParser, super().parser)
 
     def process_parameter(self, data: Dict, accept_no_schema: bool = True) -> OpenAPIAPIParameterConfig:
-        if not _YamlSchema.has_schema(data):
+        if not _ReferenceObjectParser.has_schema(data):
             if accept_no_schema:
                 return self._convert_from_data(data)
             raise ValueError(f"This data '{data}' doesn't have key 'schema'.")
 
-        if _YamlSchema.has_ref(data):
+        if _ReferenceObjectParser.has_ref(data):
             raise NotImplementedError
         else:
             return self._convert_from_parser()
@@ -97,7 +97,7 @@ class APIParser(BaseParser):
         def _initial_request_parameters_model() -> List[BaseOpenAPIDataModel]:
             params_data: List[dict] = self.parser.get_request_parameters()
             print(f"[DEBUG] params_data: {params_data}")
-            has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", params_data))
+            has_ref_in_schema_param = list(filter(lambda p: _ReferenceObjectParser.has_ref(p) != "", params_data))
             print(f"[DEBUG in src] has_ref_in_schema_param: {has_ref_in_schema_param}")
             if has_ref_in_schema_param:
                 # TODO: Ensure the value maps this condition is really only one
@@ -121,7 +121,7 @@ class APIParser(BaseParser):
                 params_in_path_data: List[dict] = self.parser.get_request_parameters()
                 params_data: dict = self.parser.get_request_body()
                 print(f"[DEBUG] params_data: {params_data}")
-                has_ref_in_schema_param = list(filter(lambda p: _YamlSchema.has_ref(p) != "", [params_data]))
+                has_ref_in_schema_param = list(filter(lambda p: _ReferenceObjectParser.has_ref(p) != "", [params_data]))
                 print(f"[DEBUG in src] has_ref_in_schema_param: {has_ref_in_schema_param}")
                 if has_ref_in_schema_param:
                     # TODO: Ensure the value maps this condition is really only one
@@ -134,15 +134,15 @@ class APIParser(BaseParser):
                 return list(map(lambda p: data_modal.generate(detail=p), handled_parameters))
 
     def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
-        request_body_params = _YamlSchema.get_schema_ref(data)
+        request_body_params = _ReferenceObjectParser.get_schema_ref(data)
         # TODO: Should use the reference to get the details of parameters.
         parameters: List[dict] = []
         parser = self.schema_parser_factory.object(request_body_params)
         for param_name, param_props in parser.get_properties().items():
             items: Optional[dict] = param_props.get("items", None)
             items_props = []
-            if items and _YamlSchema.has_ref(items):
-                items = _YamlSchema.get_schema_ref(items)
+            if items and _ReferenceObjectParser.has_ref(items):
+                items = _ReferenceObjectParser.get_schema_ref(items)
                 # Sample data:
                 # {
                 #     'type': 'object',
@@ -180,13 +180,13 @@ class APIParser(BaseParser):
         status_200_response = self.parser.get_response(status_code="200")
         response_data = strategy.initial_response_data()
         print(f"[DEBUG] status_200_response: {status_200_response}")
-        if _YamlSchema.has_schema(status_200_response):
+        if _ReferenceObjectParser.has_schema(status_200_response):
             response_data = strategy.process_response_from_reference(
                 init_response=response_data,
                 data=status_200_response,
                 get_schema_parser_factory=ensure_get_schema_parser_factory,
-                has_ref_callback=_YamlSchema.has_ref,
-                get_ref_callback=_YamlSchema.get_schema_ref,
+                has_ref_callback=_ReferenceObjectParser.has_ref,
+                get_ref_callback=_ReferenceObjectParser.get_schema_ref,
             )
         else:
             resp_parser = self.schema_parser_factory.response(status_200_response)
@@ -194,13 +194,13 @@ class APIParser(BaseParser):
                 filter(lambda vf: resp_parser.exist_in_content(value_format=vf), self.Response_Content_Type)
             )
             response_schema = resp_parser.get_content(value_format=resp_value_format[0])
-            if _YamlSchema.has_ref(response_schema):
+            if _ReferenceObjectParser.has_ref(response_schema):
                 response_data = strategy.process_response_from_reference(
                     init_response=response_data,
                     data=response_schema,
                     get_schema_parser_factory=ensure_get_schema_parser_factory,
-                    has_ref_callback=_YamlSchema.has_ref,
-                    get_ref_callback=_YamlSchema.get_schema_ref,
+                    has_ref_callback=_ReferenceObjectParser.has_ref,
+                    get_ref_callback=_ReferenceObjectParser.get_schema_ref,
                 )
             else:
                 print(f"[DEBUG] response_schema: {response_schema}")
@@ -209,8 +209,8 @@ class APIParser(BaseParser):
                     init_response=response_data,
                     data=response_schema,
                     get_schema_parser_factory=ensure_get_schema_parser_factory,
-                    has_ref_callback=_YamlSchema.has_ref,
-                    get_ref_callback=_YamlSchema.get_schema_ref,
+                    has_ref_callback=_ReferenceObjectParser.has_ref,
+                    get_ref_callback=_ReferenceObjectParser.get_schema_ref,
                 )
                 print(f"[DEBUG] response_data: {response_data}")
         return response_data

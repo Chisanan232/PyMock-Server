@@ -11,7 +11,7 @@ from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
 from pymock_api.model.openapi._base import (
     Transferable,
-    _YamlSchema,
+    _ReferenceObjectParser,
     set_component_definition,
     set_openapi_version,
 )
@@ -377,8 +377,8 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             if api.http_method.upper() == "GET":
                 expected_parameters = 0
                 for param in api_http_details.get("parameters", []):
-                    if _YamlSchema.has_ref(param):
-                        expected_parameters += len(_YamlSchema.get_schema_ref(param)["properties"].keys())
+                    if _ReferenceObjectParser.has_ref(param):
+                        expected_parameters += len(_ReferenceObjectParser.get_schema_ref(param)["properties"].keys())
                     else:
                         expected_parameters += 1
                 assert len(api.parameters) == expected_parameters
@@ -390,13 +390,17 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                     )
                     assert len(data_format) == 1
                     assert len(api.parameters) == len(
-                        _YamlSchema.get_schema_ref(request_body["content"][data_format[0]])["properties"].keys()
+                        _ReferenceObjectParser.get_schema_ref(request_body["content"][data_format[0]])[
+                            "properties"
+                        ].keys()
                     )
                 else:
                     expected_parameters = 0
                     for param in api_http_details["parameters"]:
-                        if _YamlSchema.has_ref(param):
-                            expected_parameters += len(_YamlSchema.get_schema_ref(param)["properties"].keys())
+                        if _ReferenceObjectParser.has_ref(param):
+                            expected_parameters += len(
+                                _ReferenceObjectParser.get_schema_ref(param)["properties"].keys()
+                            )
                         else:
                             expected_parameters += 1
                     assert len(api.parameters) == expected_parameters

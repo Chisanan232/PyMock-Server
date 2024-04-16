@@ -12,7 +12,7 @@ from pymock_api.model.enums import (
     set_loading_function,
 )
 from pymock_api.model.openapi._base import (
-    _YamlSchema,
+    _ReferenceObjectParser,
     ensure_get_schema_parser_factory,
     set_component_definition,
 )
@@ -77,8 +77,8 @@ class TestResponseStrategy(EnumTestSuite):
             init_response={},
             property_value=api_response_detail,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
-            has_ref_callback=_YamlSchema.has_ref,
-            get_ref_callback=_YamlSchema.get_schema_ref,
+            has_ref_callback=_ReferenceObjectParser.has_ref,
+            get_ref_callback=_ReferenceObjectParser.get_schema_ref,
         )
 
         # Verify
@@ -306,8 +306,8 @@ class TestResponseStrategy(EnumTestSuite):
             init_response=ut_enum.initial_response_data(),
             resp_prop_data=test_response_data,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
-            has_ref_callback=_YamlSchema.has_ref,
-            get_ref_callback=_YamlSchema.get_schema_ref,
+            has_ref_callback=_ReferenceObjectParser.has_ref,
+            get_ref_callback=_ReferenceObjectParser.get_schema_ref,
         )
 
         # Verify

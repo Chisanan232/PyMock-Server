@@ -83,7 +83,7 @@ def set_component_definition(openapi_parser: BaseOpenAPISchemaParser) -> None:
     ComponentDefinition = openapi_parser.get_objects()
 
 
-class _YamlSchema:
+class _ReferenceObjectParser:
     @classmethod
     def has_schema(cls, data: Dict) -> bool:
         return data.get("schema", None) is not None
@@ -106,7 +106,7 @@ class _YamlSchema:
                 return _get_schema(component_def_data[paths[i]], paths, i + 1)
 
         print(f"[DEBUG in get_schema_ref] data: {data}")
-        _has_ref = _YamlSchema.has_ref(data)
+        _has_ref = _ReferenceObjectParser.has_ref(data)
         if not _has_ref:
             raise ValueError("This parameter has no ref in schema.")
         schema_path = (

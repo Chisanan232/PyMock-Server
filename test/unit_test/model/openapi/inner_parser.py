@@ -5,7 +5,7 @@ import pytest
 
 from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
 from pymock_api.model.openapi._base import (
-    _YamlSchema,
+    _ReferenceObjectParser,
     get_schema_parser_factory_with_openapi_version,
     set_component_definition,
     set_openapi_version,
@@ -120,7 +120,7 @@ class TestAPIParser:
 
         # Verify
         resp_200 = api_detail["responses"]["200"]
-        if _YamlSchema.has_schema(resp_200):
+        if _ReferenceObjectParser.has_schema(resp_200):
             should_check_name = True
         else:
             response_content = resp_200["content"]
