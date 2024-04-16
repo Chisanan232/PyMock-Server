@@ -4,14 +4,10 @@ from .. import APIConfig, MockAPI, MockAPIs
 from ..api_config import BaseConfig
 from ..api_config.apis import APIParameter as PyMockAPIParameter
 from ..enums import ResponseStrategy
-from ._base import (
-    BaseOpenAPIDataModel,
-    Transferable,
-    set_component_definition,
-    set_openapi_version,
-)
+from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
 from ._js_handlers import convert_js_type
 from ._parser import APIParameterParser, APIParser, OpenAPIDocumentConfigParser
+from ._schema_parser import set_component_definition
 
 
 class Tag(BaseOpenAPIDataModel):

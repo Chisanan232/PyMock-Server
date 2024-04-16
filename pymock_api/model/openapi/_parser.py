@@ -5,7 +5,6 @@ from typing import Dict, List, Optional, Type, cast
 from ..enums import OpenAPIVersion, ResponseStrategy
 from ._base import (
     BaseOpenAPIDataModel,
-    _ReferenceObjectParser,
     ensure_get_schema_parser_factory,
     get_openapi_version,
 )
@@ -16,6 +15,7 @@ from ._schema_parser import (
     BaseOpenAPIRequestParametersSchemaParser,
     BaseOpenAPISchemaParser,
     BaseSchemaParser,
+    _ReferenceObjectParser,
 )
 
 OpenAPIAPIParameterConfig = namedtuple(  # type: ignore[misc]

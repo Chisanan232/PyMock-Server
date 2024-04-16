@@ -5,11 +5,11 @@ import pathlib
 from typing import List, Tuple
 
 from pymock_api.model.enums import ResponseStrategy
-from pymock_api.model.openapi._base import (
+from pymock_api.model.openapi._schema_parser import (
+    OpenAPIV2SchemaParser,
     _ReferenceObjectParser,
     set_component_definition,
 )
-from pymock_api.model.openapi._schema_parser import OpenAPIV2SchemaParser
 
 OPENAPI_API_DOC_JSON: List[tuple] = []
 OPENAPI_ONE_API_JSON: List[tuple] = []

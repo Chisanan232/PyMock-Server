@@ -11,14 +11,12 @@ from pymock_api.model.enums import (
     ResponseStrategy,
     set_loading_function,
 )
-from pymock_api.model.openapi._base import (
-    _ReferenceObjectParser,
-    ensure_get_schema_parser_factory,
-    set_component_definition,
-)
+from pymock_api.model.openapi._base import ensure_get_schema_parser_factory
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     OpenAPIV3SchemaParser,
+    _ReferenceObjectParser,
+    set_component_definition,
 )
 
 from ..model.openapi._test_case import (
