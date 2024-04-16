@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Dict, Union
+from typing import Dict, Type, Union
 
 from ..enums import OpenAPIVersion
 from ._schema_parser import (
@@ -17,6 +17,7 @@ from ._schema_parser import (
     OpenAPIV2SchemaParser,
     OpenAPIV3PathSchemaParser,
     OpenAPIV3SchemaParser,
+    _ReferenceObjectParser,
 )
 
 
@@ -47,6 +48,9 @@ class BaseOpenAPISchemaParserFactory(metaclass=ABCMeta):
     @abstractmethod
     def object(self, data: Dict) -> BaseOpenAPIObjectSchemaParser:
         pass
+
+    def reference_object(self) -> Type[_ReferenceObjectParser]:
+        return _ReferenceObjectParser
 
 
 class OpenAPIV2SchemaParserFactory(BaseOpenAPISchemaParserFactory):

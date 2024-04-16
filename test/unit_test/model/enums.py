@@ -15,7 +15,6 @@ from pymock_api.model.openapi._base import ensure_get_schema_parser_factory
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     OpenAPIV3SchemaParser,
-    _ReferenceObjectParser,
     set_component_definition,
 )
 
@@ -75,8 +74,6 @@ class TestResponseStrategy(EnumTestSuite):
             init_response={},
             property_value=api_response_detail,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
-            has_ref_callback=_ReferenceObjectParser.has_ref,
-            get_ref_callback=_ReferenceObjectParser.get_schema_ref,
         )
 
         # Verify
@@ -304,8 +301,6 @@ class TestResponseStrategy(EnumTestSuite):
             init_response=ut_enum.initial_response_data(),
             resp_prop_data=test_response_data,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
-            has_ref_callback=_ReferenceObjectParser.has_ref,
-            get_ref_callback=_ReferenceObjectParser.get_schema_ref,
         )
 
         # Verify

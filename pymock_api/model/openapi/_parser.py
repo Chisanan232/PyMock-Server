@@ -185,8 +185,6 @@ class APIParser(BaseParser):
                 init_response=response_data,
                 data=status_200_response,
                 get_schema_parser_factory=ensure_get_schema_parser_factory,
-                has_ref_callback=_ReferenceObjectParser.has_ref,
-                get_ref_callback=_ReferenceObjectParser.get_schema_ref,
             )
         else:
             resp_parser = self.schema_parser_factory.response(status_200_response)
@@ -199,8 +197,6 @@ class APIParser(BaseParser):
                     init_response=response_data,
                     data=response_schema,
                     get_schema_parser_factory=ensure_get_schema_parser_factory,
-                    has_ref_callback=_ReferenceObjectParser.has_ref,
-                    get_ref_callback=_ReferenceObjectParser.get_schema_ref,
                 )
             else:
                 print(f"[DEBUG] response_schema: {response_schema}")
@@ -209,8 +205,6 @@ class APIParser(BaseParser):
                     init_response=response_data,
                     data=response_schema,
                     get_schema_parser_factory=ensure_get_schema_parser_factory,
-                    has_ref_callback=_ReferenceObjectParser.has_ref,
-                    get_ref_callback=_ReferenceObjectParser.get_schema_ref,
                 )
                 print(f"[DEBUG] response_data: {response_data}")
         return response_data

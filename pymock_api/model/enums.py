@@ -52,10 +52,8 @@ class ResponseStrategy(Enum):
         init_response: dict,
         data: dict,
         get_schema_parser_factory: Callable,
-        has_ref_callback: Callable,
-        get_ref_callback: Callable,
     ) -> dict:
-        response_schema_ref = get_ref_callback(data)
+        response_schema_ref = get_schema_parser_factory().reference_object().get_schema_ref(data)
         parser = get_schema_parser_factory().object(response_schema_ref)
         response_schema_properties: Optional[dict] = parser.get_properties(default=None)
         if response_schema_properties:
@@ -64,8 +62,6 @@ class ResponseStrategy(Enum):
                     init_response=init_response,
                     property_value=v,
                     get_schema_parser_factory=get_schema_parser_factory,
-                    has_ref_callback=has_ref_callback,
-                    get_ref_callback=get_ref_callback,
                 )
                 if self is ResponseStrategy.OBJECT:
                     response_data_prop = response_config
@@ -91,15 +87,11 @@ class ResponseStrategy(Enum):
         init_response: dict,
         data: dict,
         get_schema_parser_factory: Callable,
-        has_ref_callback: Callable,
-        get_ref_callback: Callable,
     ) -> dict:
         response_config = self._generate_response(
             init_response=init_response,
             property_value=data,
             get_schema_parser_factory=get_schema_parser_factory,
-            has_ref_callback=has_ref_callback,
-            get_ref_callback=get_ref_callback,
         )
         if self is ResponseStrategy.OBJECT:
             response_data_prop = response_config
@@ -120,20 +112,18 @@ class ResponseStrategy(Enum):
         init_response: dict,
         property_value: dict,
         get_schema_parser_factory: Callable,
-        has_ref_callback: Callable,
-        get_ref_callback: Callable,
     ) -> Union[str, list, dict]:
         if not property_value:
             return self._generate_empty_response()
-        if has_ref_callback(property_value):
-            return self._generate_response_from_reference(get_ref_callback(property_value))
+        if get_schema_parser_factory().reference_object().has_ref(property_value):
+            return self._generate_response_from_reference(
+                get_schema_parser_factory().reference_object().get_schema_ref(property_value)
+            )
         else:
             return self._generate_response_from_data(
                 init_response=init_response,
                 resp_prop_data=property_value,
                 get_schema_parser_factory=get_schema_parser_factory,
-                has_ref_callback=has_ref_callback,
-                get_ref_callback=get_ref_callback,
             )
 
     def _generate_empty_response(self) -> Union[str, Dict[str, Any]]:
@@ -168,14 +158,12 @@ class ResponseStrategy(Enum):
         init_response: dict,
         resp_prop_data: dict,
         get_schema_parser_factory: Callable,
-        has_ref_callback: Callable,
-        get_ref_callback: Callable,
     ) -> Union[str, list, dict]:
 
         def _handle_list_type_data(data: dict, noref_val_process_callback: Callable, response: dict = {}) -> dict:
             items_data = data["items"]
-            if has_ref_callback(items_data):
-                single_response = get_ref_callback(items_data)
+            if get_schema_parser_factory().reference_object().has_ref(items_data):
+                single_response = get_schema_parser_factory().reference_object().get_schema_ref(items_data)
                 parser = get_schema_parser_factory().object(single_response)
                 for item_k, item_v in parser.get_properties(default={}).items():
                     response = noref_val_process_callback(item_k, item_v, response)
@@ -186,8 +174,6 @@ class ResponseStrategy(Enum):
                     init_response=init_response,
                     resp_prop_data=items_data,
                     get_schema_parser_factory=get_schema_parser_factory,
-                    get_ref_callback=get_ref_callback,
-                    has_ref_callback=has_ref_callback,
                 )
                 print(f"[DEBUG in _handle_list_type_data] response_value: {response_value}")
                 if isinstance(response_value, list):
@@ -230,13 +216,11 @@ class ResponseStrategy(Enum):
 
         def _handle_object_type_value_with_object_strategy(data: dict) -> dict:
             additional_properties = data["additionalProperties"]
-            if has_ref_callback(additional_properties):
+            if get_schema_parser_factory().reference_object().has_ref(additional_properties):
                 resp = self.process_response_from_reference(
                     init_response=init_response,
                     data=additional_properties,
                     get_schema_parser_factory=get_schema_parser_factory,
-                    has_ref_callback=has_ref_callback,
-                    get_ref_callback=get_ref_callback,
                 )
                 print(f"[DEBUG in _handle_object_type_value_with_object_strategy] resp: {resp}")
                 return resp["data"]
@@ -315,21 +299,17 @@ class ResponseStrategy(Enum):
                 return _handle_list_type_value_with_non_object_strategy(resp_prop_data)
             elif locate(v_type) == dict:
                 additional_properties = resp_prop_data["additionalProperties"]
-                if has_ref_callback(additional_properties):
+                if get_schema_parser_factory().reference_object().has_ref(additional_properties):
                     return self.process_response_from_reference(
                         init_response=init_response,
                         data=additional_properties,
                         get_schema_parser_factory=get_schema_parser_factory,
-                        has_ref_callback=has_ref_callback,
-                        get_ref_callback=get_ref_callback,
                     )["data"]
                 else:
                     return self.process_response_from_data(
                         init_response=init_response,
                         data=additional_properties,
                         get_schema_parser_factory=get_schema_parser_factory,
-                        has_ref_callback=has_ref_callback,
-                        get_ref_callback=get_ref_callback,
                     )["data"][0]
             elif locate(v_type) == str:
                 # lowercase_letters = string.ascii_lowercase
