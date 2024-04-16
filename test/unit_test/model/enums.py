@@ -267,6 +267,65 @@ class TestResponseStrategy(EnumTestSuite):
                     {"name": "value2", "required": False, "type": "str", "format": None, "items": None},
                 ],
             ),
+            # # Special data about nested config
+            (
+                ResponseStrategy.STRING,
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/components/schemas/NestedFooResponse",
+                    },
+                },
+                [
+                    {
+                        "id": "random integer value",
+                        "name": "random string value",
+                        "data": [
+                            {
+                                "id": "random integer value",
+                                "value": "random string value",
+                                "url": "random string value",
+                                "urlProperties": {
+                                    "homePage": {
+                                        "domain": "www.home-test.com",
+                                        "needAuth": False,
+                                    },
+                                    "detailInfo": {
+                                        "domain": "www.test.com",
+                                        "needAuth": True,
+                                    },
+                                },
+                            },
+                        ],
+                    }
+                ],
+            ),
+            (
+                ResponseStrategy.OBJECT,
+                {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/components/schemas/NestedFooResponse",
+                    },
+                },
+                [
+                    {"name": "id", "required": True, "type": "int", "format": None, "items": None},
+                    {"name": "name", "required": False, "type": "str", "format": None, "items": None},
+                    {
+                        "name": "data",
+                        "required": False,
+                        "type": "list",
+                        "format": None,
+                        "items": [
+                            {"name": "id", "required": True, "type": "int"},
+                            {"name": "value", "required": True, "type": "str"},
+                            {"name": "url", "required": True, "type": "str"},
+                            # FIXME: The test data structure should change because it cannot apply nested case
+                            {"name": "urlProperties", "required": True, "type": "str"},
+                        ],
+                    },
+                ],
+            ),
         ],
     )
     def test_generate_response_from_data(
@@ -279,6 +338,7 @@ class TestResponseStrategy(EnumTestSuite):
                     data={
                         "components": {
                             "schemas": {
+                                # For general test
                                 "FooResponse": {
                                     "type": "object",
                                     "required": ["id"],
@@ -289,6 +349,45 @@ class TestResponseStrategy(EnumTestSuite):
                                         "value2": {"type": "string"},
                                     },
                                     "title": "FooResponse",
+                                },
+                                # For special case test about nested detail data
+                                "NestedFooResponse": {
+                                    "type": "object",
+                                    "required": ["id"],
+                                    "properties": {
+                                        "id": {"type": "integer", "format": "int64"},
+                                        "name": {"type": "string"},
+                                        "data": {
+                                            "type": "array",
+                                            "items": {"$ref": "#/components/schemas/FooDetailResponse"},
+                                        },
+                                    },
+                                },
+                                "FooDetailResponse": {
+                                    "type": "object",
+                                    "required": ["id"],
+                                    "properties": {
+                                        "id": {"type": "integer", "format": "int64"},
+                                        "value": {"type": "string"},
+                                        "url": {"type": "string", "format": "uri"},
+                                        "urlProperties": {"$ref": "#/components/schemas/UrlProperties"},
+                                    },
+                                },
+                                "UrlProperties": {
+                                    "type": "object",
+                                    "required": ["homePage", "detailInfo"],
+                                    "properties": {
+                                        "homePage": {"$ref": "#/components/schemas/DomainProperty"},
+                                        "detailInfo": {"$ref": "#/components/schemas/DomainProperty"},
+                                    },
+                                },
+                                "DomainProperty": {
+                                    "type": "object",
+                                    "required": ["homePage", "needAuth"],
+                                    "properties": {
+                                        "domain": {"type": "string"},
+                                        "needAuth": {"type": "boolean"},
+                                    },
                                 },
                             },
                         },
