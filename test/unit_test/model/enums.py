@@ -320,8 +320,31 @@ class TestResponseStrategy(EnumTestSuite):
                             {"name": "id", "required": True, "type": "int"},
                             {"name": "value", "required": True, "type": "str"},
                             {"name": "url", "required": True, "type": "str"},
-                            # FIXME: The test data structure should change because it cannot apply nested case
-                            {"name": "urlProperties", "required": True, "type": "str"},
+                            {
+                                "name": "urlProperties",
+                                "required": True,
+                                "type": "dict",
+                                "items": [
+                                    {
+                                        "name": "homePage",
+                                        "required": True,
+                                        "type": "dict",
+                                        "items": [
+                                            {"name": "domain", "required": True, "type": "str"},
+                                            {"name": "needAuth", "required": True, "type": "bool"},
+                                        ],
+                                    },
+                                    {
+                                        "name": "detailInfo",
+                                        "required": True,
+                                        "type": "dict",
+                                        "items": [
+                                            {"name": "domain", "required": True, "type": "str"},
+                                            {"name": "needAuth", "required": True, "type": "bool"},
+                                        ],
+                                    },
+                                ],
+                            },
                         ],
                     },
                 ],
