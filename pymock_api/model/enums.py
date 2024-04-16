@@ -65,20 +65,14 @@ class ResponseStrategy(Enum):
                 )
                 if self is ResponseStrategy.OBJECT:
                     response_data_prop = response_config
-                    assert isinstance(response_data_prop, dict)
+                    response_data_prop = self._ensure_data_structure_when_object_strategy(
+                        init_response, response_data_prop
+                    )
                     response_data_prop["name"] = k
                     response_data_prop["required"] = k in parser.get_required(default=[k])
-                    assert isinstance(
-                        init_response["data"], list
-                    ), "The response data type must be *list* if its HTTP response strategy is object."
-                    assert (
-                        len(list(filter(lambda d: not isinstance(d, dict), init_response["data"]))) == 0
-                    ), "Each column detail must be *dict* if its HTTP response strategy is object."
                     init_response["data"].append(response_data_prop)
                 else:
-                    assert isinstance(
-                        init_response["data"], dict
-                    ), "The response data type must be *dict* if its HTTP response strategy is not object."
+                    self._ensure_data_structure_when_non_object_strategy(init_response)
                     init_response["data"][k] = response_config
         return init_response
 
@@ -95,17 +89,29 @@ class ResponseStrategy(Enum):
         )
         if self is ResponseStrategy.OBJECT:
             response_data_prop = response_config
-            assert isinstance(response_data_prop, dict)
-            assert isinstance(
-                init_response["data"], list
-            ), "The response data type must be *list* if its HTTP response strategy is object."
+            self._ensure_data_structure_when_object_strategy(init_response, response_data_prop)
             init_response["data"].append(response_data_prop)
         else:
-            assert isinstance(
-                init_response["data"], dict
-            ), "The response data type must be *dict* if its HTTP response strategy is not object."
+            self._ensure_data_structure_when_non_object_strategy(init_response)
             init_response["data"][0] = response_config
         return init_response
+
+    def _ensure_data_structure_when_object_strategy(
+        self, init_response: dict, response_data_prop: Union[str, dict, list]
+    ) -> dict:
+        assert isinstance(response_data_prop, dict)
+        assert isinstance(
+            init_response["data"], list
+        ), "The response data type must be *list* if its HTTP response strategy is object."
+        assert (
+            len(list(filter(lambda d: not isinstance(d, dict), init_response["data"]))) == 0
+        ), "Each column detail must be *dict* if its HTTP response strategy is object."
+        return response_data_prop
+
+    def _ensure_data_structure_when_non_object_strategy(self, init_response: dict) -> None:
+        assert isinstance(
+            init_response["data"], dict
+        ), "The response data type must be *dict* if its HTTP response strategy is not object."
 
     def _generate_response(
         self,
