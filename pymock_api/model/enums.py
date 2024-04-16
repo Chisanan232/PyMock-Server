@@ -64,9 +64,8 @@ class ResponseStrategy(Enum):
                     get_schema_parser_factory=get_schema_parser_factory,
                 )
                 if self is ResponseStrategy.OBJECT:
-                    response_data_prop = response_config
                     response_data_prop = self._ensure_data_structure_when_object_strategy(
-                        init_response, response_data_prop
+                        init_response, response_config
                     )
                     response_data_prop["name"] = k
                     response_data_prop["required"] = k in parser.get_required(default=[k])
@@ -88,8 +87,7 @@ class ResponseStrategy(Enum):
             get_schema_parser_factory=get_schema_parser_factory,
         )
         if self is ResponseStrategy.OBJECT:
-            response_data_prop = response_config
-            self._ensure_data_structure_when_object_strategy(init_response, response_data_prop)
+            response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
             init_response["data"].append(response_data_prop)
         else:
             self._ensure_data_structure_when_non_object_strategy(init_response)
