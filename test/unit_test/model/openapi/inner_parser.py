@@ -23,7 +23,6 @@ from ._test_case import (
     OPENAPI_API_PARAMETERS_JSON_FOR_API,
     OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API,
     OPENAPI_API_RESPONSES_FOR_API,
-    OPENAPI_API_RESPONSES_PROPERTY_FOR_API,
     ensure_load_openapi_test_cases,
 )
 
@@ -174,38 +173,3 @@ class TestAPIParser:
                                 ]
                             else:
                                 assert item_value == "empty value"
-
-    @pytest.mark.parametrize(
-        ("strategy", "api_response_detail", "entire_config"), OPENAPI_API_RESPONSES_PROPERTY_FOR_API
-    )
-    def test__process_response_value(
-        self, parser: Type[APIParser], strategy: ResponseStrategy, api_response_detail: dict, entire_config: dict
-    ):
-        # Pre-process
-        set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
-
-        # Run target function under test
-        parser_instance = parser(parser=DummyPathSchemaParser({}))
-        response_prop_data = parser_instance._process_response_value(
-            property_value=api_response_detail, strategy=strategy
-        )
-
-        # Verify
-        if strategy is ResponseStrategy.OBJECT:
-            assert response_prop_data and isinstance(response_prop_data, dict)
-            for resp_k, resp_v in response_prop_data.items():
-                assert resp_k in ["name", "required", "type", "format", "items", "FIXME"]
-        else:
-            assert response_prop_data and isinstance(response_prop_data, (str, list))
-            if response_prop_data and isinstance(response_prop_data, str):
-                assert response_prop_data in [
-                    "random string value",
-                    "random integer value",
-                    "random boolean value",
-                    "random file output stream",
-                    "FIXME: Handle the reference",
-                ]
-            else:
-                for item in response_prop_data:
-                    for item_value in item.values():
-                        assert item_value in ["random string value", "random integer value", "random boolean value"]

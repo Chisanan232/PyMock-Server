@@ -1,6 +1,10 @@
 import re
+from collections import namedtuple
 from enum import Enum
-from typing import Callable, Dict, Optional, Union
+from pydoc import locate
+from typing import Any, Callable, Dict, Optional, Union
+
+from pymock_api.model.openapi._js_handlers import convert_js_type
 
 
 class Format(Enum):
@@ -16,6 +20,10 @@ class SampleType(Enum):
     RESPONSE_WITH_FILE: str = "response_with_file"
 
 
+_PropertyDefaultRequired = namedtuple("_PropertyDefaultRequired", ("empty", "general"))
+_Default_Required: _PropertyDefaultRequired = _PropertyDefaultRequired(empty=False, general=True)
+
+
 class ResponseStrategy(Enum):
     STRING: str = "string"
     FILE: str = "file"
@@ -27,6 +35,323 @@ class ResponseStrategy(Enum):
             return ResponseStrategy(v.lower())
         else:
             return v
+
+    def initial_response_data(self) -> Dict[str, Union["ResponseStrategy", list, dict]]:
+        response_data: Dict[str, Union["ResponseStrategy", list, dict]] = {
+            "strategy": self,
+            # "data": None,
+        }
+        if self is ResponseStrategy.OBJECT:
+            response_data["data"] = []
+        else:
+            response_data["data"] = {}
+        return response_data
+
+    def process_response_from_reference(
+        self,
+        init_response: dict,
+        data: dict,
+        get_schema_parser_factory: Callable,
+        has_ref_callback: Callable,
+        get_ref_callback: Callable,
+    ) -> dict:
+        response_schema_ref = get_ref_callback(data)
+        parser = get_schema_parser_factory().object(response_schema_ref)
+        response_schema_properties: Optional[dict] = parser.get_properties(default=None)
+        if response_schema_properties:
+            for k, v in response_schema_properties.items():
+                response_config = self._generate_response(
+                    init_response=init_response,
+                    property_value=v,
+                    get_schema_parser_factory=get_schema_parser_factory,
+                    has_ref_callback=has_ref_callback,
+                    get_ref_callback=get_ref_callback,
+                )
+                if self is ResponseStrategy.OBJECT:
+                    response_data_prop = response_config
+                    assert isinstance(response_data_prop, dict)
+                    response_data_prop["name"] = k
+                    response_data_prop["required"] = k in parser.get_required(default=[k])
+                    assert isinstance(
+                        init_response["data"], list
+                    ), "The response data type must be *list* if its HTTP response strategy is object."
+                    assert (
+                        len(list(filter(lambda d: not isinstance(d, dict), init_response["data"]))) == 0
+                    ), "Each column detail must be *dict* if its HTTP response strategy is object."
+                    init_response["data"].append(response_data_prop)
+                else:
+                    assert isinstance(
+                        init_response["data"], dict
+                    ), "The response data type must be *dict* if its HTTP response strategy is not object."
+                    init_response["data"][k] = response_config
+        return init_response
+
+    def process_response_from_data(
+        self,
+        init_response: dict,
+        data: dict,
+        get_schema_parser_factory: Callable,
+        has_ref_callback: Callable,
+        get_ref_callback: Callable,
+    ) -> dict:
+        response_config = self._generate_response(
+            init_response=init_response,
+            property_value=data,
+            get_schema_parser_factory=get_schema_parser_factory,
+            has_ref_callback=has_ref_callback,
+            get_ref_callback=get_ref_callback,
+        )
+        if self is ResponseStrategy.OBJECT:
+            response_data_prop = response_config
+            assert isinstance(response_data_prop, dict)
+            assert isinstance(
+                init_response["data"], list
+            ), "The response data type must be *list* if its HTTP response strategy is object."
+            init_response["data"].append(response_data_prop)
+        else:
+            assert isinstance(
+                init_response["data"], dict
+            ), "The response data type must be *dict* if its HTTP response strategy is not object."
+            init_response["data"][0] = response_config
+        return init_response
+
+    def _generate_response(
+        self,
+        init_response: dict,
+        property_value: dict,
+        get_schema_parser_factory: Callable,
+        has_ref_callback: Callable,
+        get_ref_callback: Callable,
+    ) -> Union[str, list, dict]:
+        if not property_value:
+            return self._generate_empty_response()
+        if has_ref_callback(property_value):
+            return self._generate_response_from_reference(get_ref_callback(property_value))
+        else:
+            return self._generate_response_from_data(
+                init_response=init_response,
+                resp_prop_data=property_value,
+                get_schema_parser_factory=get_schema_parser_factory,
+                has_ref_callback=has_ref_callback,
+                get_ref_callback=get_ref_callback,
+            )
+
+    def _generate_empty_response(self) -> Union[str, Dict[str, Any]]:
+        if self is ResponseStrategy.OBJECT:
+            return {
+                "name": "",
+                "required": _Default_Required.empty,
+                "type": None,
+                "format": None,
+                "items": [],
+            }
+        else:
+            return "empty value"
+
+    def _generate_response_from_reference(self, ref_data: dict) -> Union[str, Dict[str, Any]]:
+        if self is ResponseStrategy.OBJECT:
+            return {
+                "name": "",
+                "required": _Default_Required.general,
+                # TODO: Set the *type* property correctly
+                "type": "file",
+                # TODO: Set the *format* property correctly
+                "format": None,
+                "items": [],
+                "FIXME": "Handle the reference",
+            }
+        else:
+            return "FIXME: Handle the reference"
+
+    def _generate_response_from_data(
+        self,
+        init_response: dict,
+        resp_prop_data: dict,
+        get_schema_parser_factory: Callable,
+        has_ref_callback: Callable,
+        get_ref_callback: Callable,
+    ) -> Union[str, list, dict]:
+
+        def _handle_list_type_data(data: dict, noref_val_process_callback: Callable, response: dict = {}) -> dict:
+            items_data = data["items"]
+            if has_ref_callback(items_data):
+                single_response = get_ref_callback(items_data)
+                parser = get_schema_parser_factory().object(single_response)
+                for item_k, item_v in parser.get_properties(default={}).items():
+                    response = noref_val_process_callback(item_k, item_v, response)
+            else:
+                print(f"[DEBUG in _handle_list_type_data] init_response: {init_response}")
+                print(f"[DEBUG in _handle_list_type_data] items_data: {items_data}")
+                response_value = self._generate_response_from_data(
+                    init_response=init_response,
+                    resp_prop_data=items_data,
+                    get_schema_parser_factory=get_schema_parser_factory,
+                    get_ref_callback=get_ref_callback,
+                    has_ref_callback=has_ref_callback,
+                )
+                print(f"[DEBUG in _handle_list_type_data] response_value: {response_value}")
+                if isinstance(response_value, list):
+                    # TODO: Need to check whether here logic is valid or not
+                    response = response_value  # type: ignore[assignment]
+                elif isinstance(response_value, dict):
+                    # TODO: Need to check whether here logic is valid or not
+                    response = response_value
+                else:
+                    assert isinstance(response_value, str)
+                    response = response_value  # type: ignore[assignment]
+                print(f"[DEBUG in _handle_list_type_data] response: {response}")
+            return response
+
+        def _handle_list_type_value_with_object_strategy(data: dict) -> dict:
+
+            def _noref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
+                item_type = convert_js_type(item_v["type"])
+                item = {"name": item_k, "required": _Default_Required.general, "type": item_type}
+                assert isinstance(
+                    response_data_prop["items"], list
+                ), "The data type of property *items* must be *list*."
+                response_data_prop["items"].append(item)
+                return response_data_prop
+
+            response_data_prop = {
+                "name": "",
+                "required": _Default_Required.general,
+                "type": v_type,
+                # TODO: Set the *format* property correctly
+                "format": None,
+                "items": [],
+            }
+            response_data_prop = _handle_list_type_data(
+                data=data,
+                noref_val_process_callback=_noref_process_callback,
+                response=response_data_prop,
+            )
+            return response_data_prop
+
+        def _handle_object_type_value_with_object_strategy(data: dict) -> dict:
+            additional_properties = data["additionalProperties"]
+            if has_ref_callback(additional_properties):
+                resp = self.process_response_from_reference(
+                    init_response=init_response,
+                    data=additional_properties,
+                    get_schema_parser_factory=get_schema_parser_factory,
+                    has_ref_callback=has_ref_callback,
+                    get_ref_callback=get_ref_callback,
+                )
+                print(f"[DEBUG in _handle_object_type_value_with_object_strategy] resp: {resp}")
+                return resp["data"]
+            else:
+                additional_properties_type = convert_js_type(additional_properties["type"])
+                if locate(additional_properties_type) in [list, dict, "file"]:
+                    items_config_data = _handle_list_type_value_with_object_strategy(additional_properties)
+                    print(
+                        f"[DEBUG in _handle_object_type_value_with_object_strategy] items_config_data: {items_config_data}"
+                    )
+                    return {
+                        "name": "",
+                        "required": _Default_Required.general,
+                        "type": additional_properties_type,
+                        # TODO: Set the *format* property correctly
+                        "format": None,
+                        "items": [items_config_data],
+                    }
+                else:
+                    return {
+                        "name": "",
+                        "required": _Default_Required.general,
+                        "type": additional_properties_type,
+                        # TODO: Set the *format* property correctly
+                        "format": None,
+                        "items": None,
+                    }
+
+        def _handle_other_types_value_with_object_strategy(v_type: str) -> dict:
+            return {
+                "name": "",
+                "required": _Default_Required.general,
+                "type": v_type,
+                # TODO: Set the *format* property correctly
+                "format": None,
+                "items": None,
+            }
+
+        def _handle_list_type_value_with_non_object_strategy(data: dict) -> list:
+
+            def _noref_process_callback(item_k: str, item_v: dict, item: dict) -> dict:
+                item_type = convert_js_type(item_v["type"])
+                if locate(item_type) is str:
+                    # lowercase_letters = string.ascii_lowercase
+                    # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                    random_value = "random string value"
+                elif locate(item_type) is int:
+                    # random_value = int(
+                    #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                    random_value = "random integer value"
+                else:
+                    raise NotImplementedError
+                item[item_k] = random_value
+                return item
+
+            item_info: dict = {}
+            item_info = _handle_list_type_data(
+                data=data,
+                noref_val_process_callback=_noref_process_callback,
+                response=item_info,
+            )
+            return [item_info]
+
+        def _handle_each_data_types_response_with_object_strategy(data: dict, v_type: str) -> dict:
+            if locate(v_type) == list:
+                return _handle_list_type_value_with_object_strategy(data)
+            elif locate(v_type) == dict:
+                return _handle_object_type_value_with_object_strategy(data)
+            else:
+                return _handle_other_types_value_with_object_strategy(v_type)
+
+        def _handle_each_data_types_response_with_non_object_strategy(
+            resp_prop_data: dict, v_type: str
+        ) -> Union[str, list, dict]:
+            if locate(v_type) == list:
+                return _handle_list_type_value_with_non_object_strategy(resp_prop_data)
+            elif locate(v_type) == dict:
+                additional_properties = resp_prop_data["additionalProperties"]
+                if has_ref_callback(additional_properties):
+                    return self.process_response_from_reference(
+                        init_response=init_response,
+                        data=additional_properties,
+                        get_schema_parser_factory=get_schema_parser_factory,
+                        has_ref_callback=has_ref_callback,
+                        get_ref_callback=get_ref_callback,
+                    )["data"]
+                else:
+                    return self.process_response_from_data(
+                        init_response=init_response,
+                        data=additional_properties,
+                        get_schema_parser_factory=get_schema_parser_factory,
+                        has_ref_callback=has_ref_callback,
+                        get_ref_callback=get_ref_callback,
+                    )["data"][0]
+            elif locate(v_type) == str:
+                # lowercase_letters = string.ascii_lowercase
+                # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                return "random string value"
+            elif locate(v_type) == int:
+                # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                return "random integer value"
+            elif locate(v_type) == bool:
+                return "random boolean value"
+            elif v_type == "file":
+                # TODO: Handle the file download feature
+                return "random file output stream"
+            else:
+                raise NotImplementedError
+
+        print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
+        v_type = convert_js_type(resp_prop_data["type"])
+        if self is ResponseStrategy.OBJECT:
+            return _handle_each_data_types_response_with_object_strategy(resp_prop_data, v_type)
+        else:
+            return _handle_each_data_types_response_with_non_object_strategy(resp_prop_data, v_type)
 
 
 class ConfigLoadingOrderKey(Enum):

@@ -129,11 +129,10 @@ class OpenAPIDocumentConfig(Transferable):
         self._chk_version_and_load_parser(data)
 
         openapi_schema_parser = self.schema_parser_factory.entire_config(data=data)
+        set_component_definition(openapi_schema_parser)
         parser = OpenAPIDocumentConfigParser(parser=openapi_schema_parser)
         self.paths = cast(List[API], parser.process_paths(data_modal=API))
         self.tags = cast(List[Tag], parser.process_tags(data_modal=Tag))
-
-        set_component_definition(openapi_schema_parser)
 
         return self
 

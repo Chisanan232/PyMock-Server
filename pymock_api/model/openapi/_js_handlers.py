@@ -9,6 +9,8 @@ def convert_js_type(t: str) -> str:
         return "list"
     elif t == "file":
         return "file"
+    elif t == "object":
+        return "dict"
     else:
         raise TypeError(f"Currently, it cannot parse JS type '{t}'.")
 
