@@ -172,23 +172,7 @@ class ResponseStrategy(Enum):
         def _handle_list_type_data(data: dict, noref_val_process_callback: Callable, response: dict = {}) -> dict:
             items_data = data["items"]
             if get_schema_parser_factory().reference_object().has_ref(items_data):
-                single_response = get_schema_parser_factory().reference_object().get_schema_ref(items_data)
-                parser = get_schema_parser_factory().object(single_response)
-                for item_k, item_v in parser.get_properties(default={}).items():
-                    print(f"[DEBUG in nested data issue at _handle_list_type_data] item_v: {item_v}")
-                    print(f"[DEBUG in nested data issue at _handle_list_type_data] response: {response}")
-                    if get_schema_parser_factory().reference_object().has_ref(item_v):
-                        ref_item_v_response = self.process_response_from_data(
-                            init_response=init_response,
-                            data=item_v,
-                            get_schema_parser_factory=get_schema_parser_factory,
-                        )
-                        print(
-                            f"[DEBUG in nested data issue at _handle_list_type_data] ref_item_v_response from data which has reference object: {ref_item_v_response}"
-                        )
-                        raise NotImplementedError("Please keep implement the feature.")
-                    else:
-                        response = noref_val_process_callback(item_k, item_v, response)
+                response = _handle_reference_object(response, items_data, noref_val_process_callback)
             else:
                 print(f"[DEBUG in _handle_list_type_data] init_response: {init_response}")
                 print(f"[DEBUG in _handle_list_type_data] items_data: {items_data}")
@@ -208,6 +192,26 @@ class ResponseStrategy(Enum):
                     assert isinstance(response_value, str)
                     response = response_value  # type: ignore[assignment]
                 print(f"[DEBUG in _handle_list_type_data] response: {response}")
+            return response
+
+        def _handle_reference_object(response: dict, items_data: dict, noref_val_process_callback: Callable) -> dict:
+            single_response = get_schema_parser_factory().reference_object().get_schema_ref(items_data)
+            parser = get_schema_parser_factory().object(single_response)
+            for item_k, item_v in parser.get_properties(default={}).items():
+                print(f"[DEBUG in nested data issue at _handle_list_type_data] item_v: {item_v}")
+                print(f"[DEBUG in nested data issue at _handle_list_type_data] response: {response}")
+                if get_schema_parser_factory().reference_object().has_ref(item_v):
+                    ref_item_v_response = _handle_reference_object(
+                        items_data=item_v,
+                        noref_val_process_callback=noref_val_process_callback,
+                        response=response,
+                    )
+                    print(
+                        f"[DEBUG in nested data issue at _handle_list_type_data] ref_item_v_response from data which has reference object: {ref_item_v_response}"
+                    )
+                    raise NotImplementedError("Please keep implement the feature.")
+                else:
+                    response = noref_val_process_callback(item_k, item_v, response)
             return response
 
         def _handle_list_type_value_with_object_strategy(data: dict) -> dict:
