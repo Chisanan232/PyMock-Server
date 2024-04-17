@@ -170,7 +170,20 @@ class ResponseStrategy(Enum):
                 single_response = get_schema_parser_factory().reference_object().get_schema_ref(items_data)
                 parser = get_schema_parser_factory().object(single_response)
                 for item_k, item_v in parser.get_properties(default={}).items():
-                    response = noref_val_process_callback(item_k, item_v, response)
+                    print(f"[DEBUG in nested data issue at _handle_list_type_data] item_v: {item_v}")
+                    print(f"[DEBUG in nested data issue at _handle_list_type_data] response: {response}")
+                    if get_schema_parser_factory().reference_object().has_ref(item_v):
+                        ref_item_v_response = self.process_response_from_data(
+                            init_response=init_response,
+                            data=item_v,
+                            get_schema_parser_factory=get_schema_parser_factory,
+                        )
+                        print(
+                            f"[DEBUG in nested data issue at _handle_list_type_data] ref_item_v_response from data which has reference object: {ref_item_v_response}"
+                        )
+                        raise NotImplementedError("Please keep implement the feature.")
+                    else:
+                        response = noref_val_process_callback(item_k, item_v, response)
             else:
                 print(f"[DEBUG in _handle_list_type_data] init_response: {init_response}")
                 print(f"[DEBUG in _handle_list_type_data] items_data: {items_data}")
