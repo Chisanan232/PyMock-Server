@@ -120,8 +120,13 @@ class ResponseStrategy(Enum):
         if not property_value:
             return self._generate_empty_response()
         if get_schema_parser_factory().reference_object().has_ref(property_value):
-            return self._generate_response_from_reference(
-                get_schema_parser_factory().reference_object().get_schema_ref(property_value)
+            # return self._generate_response_from_reference(
+            #     get_schema_parser_factory().reference_object().get_schema_ref(property_value)
+            # )
+            return self._generate_response_from_data(
+                init_response=init_response,
+                resp_prop_data=get_schema_parser_factory().reference_object().get_schema_ref(property_value),
+                get_schema_parser_factory=get_schema_parser_factory,
             )
         else:
             return self._generate_response_from_data(
