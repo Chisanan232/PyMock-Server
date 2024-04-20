@@ -238,8 +238,18 @@ class ResponseStrategy(Enum):
                                 else ref_item_v_response
                             )
                     else:
-                        # FIXME: Implement the logic to process parsing *object* type JavaScript data with non-object strategy
-                        raise NotImplementedError
+                        ref_item_v_response = _handle_reference_object(
+                            items_data=item_v,
+                            noref_val_process_callback=noref_val_process_callback,
+                            response={},
+                        )
+                        response[item_k] = ref_item_v_response
+                        print(
+                            f"[DEBUG in nested data issue at _handle_list_type_data] ref_item_v_response from data which has reference object: {ref_item_v_response}"
+                        )
+                        print(
+                            f"[DEBUG in nested data issue at _handle_list_type_data] response from data which has reference object: {response}"
+                        )
                 else:
                     response = noref_val_process_callback(item_k, item_v, response)
             return response
