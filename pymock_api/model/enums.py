@@ -200,16 +200,40 @@ class ResponseStrategy(Enum):
             for item_k, item_v in parser.get_properties(default={}).items():
                 print(f"[DEBUG in nested data issue at _handle_list_type_data] item_v: {item_v}")
                 print(f"[DEBUG in nested data issue at _handle_list_type_data] response: {response}")
+                print(
+                    f"[DEBUG in nested data issue at _handle_list_type_data] parser.get_required(): {parser.get_required()}"
+                )
                 if get_schema_parser_factory().reference_object().has_ref(item_v):
+                    item_k_data_prop = {
+                        "name": item_k,
+                        "required": item_k in parser.get_required(),
+                        "type": convert_js_type(item_v.get("type", "object")),
+                        # TODO: Set the *format* property correctly
+                        "format": None,
+                        "items": [],
+                    }
                     ref_item_v_response = _handle_reference_object(
                         items_data=item_v,
                         noref_val_process_callback=noref_val_process_callback,
-                        response=response,
+                        response=item_k_data_prop,
                     )
                     print(
                         f"[DEBUG in nested data issue at _handle_list_type_data] ref_item_v_response from data which has reference object: {ref_item_v_response}"
                     )
-                    raise NotImplementedError("Please keep implement the feature.")
+                    print(
+                        f"[DEBUG in nested data issue at _handle_list_type_data] response from data which has reference object: {response}"
+                    )
+                    print(
+                        f"[DEBUG in _handle_list_type_data] check whether the itme is empty or not: {response['items']}"
+                    )
+                    if response["items"]:
+                        print(f"[DEBUG in _handle_list_type_data] the response item has data")
+                        response["items"].append(ref_item_v_response)
+                    else:
+                        print(f"[DEBUG in _handle_list_type_data] the response item doesn't have data")
+                        response["items"] = (
+                            [ref_item_v_response] if not isinstance(ref_item_v_response, list) else ref_item_v_response
+                        )
                 else:
                     response = noref_val_process_callback(item_k, item_v, response)
             return response

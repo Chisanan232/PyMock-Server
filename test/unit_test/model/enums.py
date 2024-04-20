@@ -314,21 +314,23 @@ class TestResponseStrategy(EnumTestSuite):
                     {
                         "name": "data",
                         "required": False,
-                        "type": "list",
                         "format": None,
+                        "type": "list",
                         "items": [
                             {"name": "id", "required": True, "type": "int"},
                             {"name": "value", "required": True, "type": "str"},
                             {"name": "url", "required": True, "type": "str"},
                             {
                                 "name": "urlProperties",
-                                "required": True,
+                                "required": False,
+                                "format": None,
                                 "type": "dict",
                                 "items": [
                                     {
                                         "name": "homePage",
                                         "required": True,
                                         "type": "dict",
+                                        "format": None,
                                         "items": [
                                             {"name": "domain", "required": True, "type": "str"},
                                             {"name": "needAuth", "required": True, "type": "bool"},
@@ -338,6 +340,7 @@ class TestResponseStrategy(EnumTestSuite):
                                         "name": "detailInfo",
                                         "required": True,
                                         "type": "dict",
+                                        "format": None,
                                         "items": [
                                             {"name": "domain", "required": True, "type": "str"},
                                             {"name": "needAuth", "required": True, "type": "bool"},
@@ -426,6 +429,7 @@ class TestResponseStrategy(EnumTestSuite):
         )
 
         # Verify
+        print(f"resp: {resp}")
         assert resp
         assert resp == expected_value
 
