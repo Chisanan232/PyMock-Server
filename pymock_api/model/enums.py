@@ -204,36 +204,42 @@ class ResponseStrategy(Enum):
                     f"[DEBUG in nested data issue at _handle_list_type_data] parser.get_required(): {parser.get_required()}"
                 )
                 if get_schema_parser_factory().reference_object().has_ref(item_v):
-                    item_k_data_prop = {
-                        "name": item_k,
-                        "required": item_k in parser.get_required(),
-                        "type": convert_js_type(item_v.get("type", "object")),
-                        # TODO: Set the *format* property correctly
-                        "format": None,
-                        "items": [],
-                    }
-                    ref_item_v_response = _handle_reference_object(
-                        items_data=item_v,
-                        noref_val_process_callback=noref_val_process_callback,
-                        response=item_k_data_prop,
-                    )
-                    print(
-                        f"[DEBUG in nested data issue at _handle_list_type_data] ref_item_v_response from data which has reference object: {ref_item_v_response}"
-                    )
-                    print(
-                        f"[DEBUG in nested data issue at _handle_list_type_data] response from data which has reference object: {response}"
-                    )
-                    print(
-                        f"[DEBUG in _handle_list_type_data] check whether the itme is empty or not: {response['items']}"
-                    )
-                    if response["items"]:
-                        print(f"[DEBUG in _handle_list_type_data] the response item has data")
-                        response["items"].append(ref_item_v_response)
-                    else:
-                        print(f"[DEBUG in _handle_list_type_data] the response item doesn't have data")
-                        response["items"] = (
-                            [ref_item_v_response] if not isinstance(ref_item_v_response, list) else ref_item_v_response
+                    if self is ResponseStrategy.OBJECT:
+                        item_k_data_prop = {
+                            "name": item_k,
+                            "required": item_k in parser.get_required(),
+                            "type": convert_js_type(item_v.get("type", "object")),
+                            # TODO: Set the *format* property correctly
+                            "format": None,
+                            "items": [],
+                        }
+                        ref_item_v_response = _handle_reference_object(
+                            items_data=item_v,
+                            noref_val_process_callback=noref_val_process_callback,
+                            response=item_k_data_prop,
                         )
+                        print(
+                            f"[DEBUG in nested data issue at _handle_list_type_data] ref_item_v_response from data which has reference object: {ref_item_v_response}"
+                        )
+                        print(
+                            f"[DEBUG in nested data issue at _handle_list_type_data] response from data which has reference object: {response}"
+                        )
+                        print(
+                            f"[DEBUG in _handle_list_type_data] check whether the itme is empty or not: {response['items']}"
+                        )
+                        if response["items"]:
+                            print(f"[DEBUG in _handle_list_type_data] the response item has data")
+                            response["items"].append(ref_item_v_response)
+                        else:
+                            print(f"[DEBUG in _handle_list_type_data] the response item doesn't have data")
+                            response["items"] = (
+                                [ref_item_v_response]
+                                if not isinstance(ref_item_v_response, list)
+                                else ref_item_v_response
+                            )
+                    else:
+                        # FIXME: Implement the logic to process parsing *object* type JavaScript data with non-object strategy
+                        raise NotImplementedError
                 else:
                     response = noref_val_process_callback(item_k, item_v, response)
             return response
@@ -313,6 +319,9 @@ class ResponseStrategy(Enum):
 
             def _noref_process_callback(item_k: str, item_v: dict, item: dict) -> dict:
                 item_type = convert_js_type(item_v["type"])
+                print(
+                    f"[DEBUG in src] _handle_list_type_value_with_non_object_strategy._noref_process_callback item_type: {item_type}"
+                )
                 if locate(item_type) is str:
                     # lowercase_letters = string.ascii_lowercase
                     # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
@@ -321,6 +330,16 @@ class ResponseStrategy(Enum):
                     # random_value = int(
                     #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
                     random_value = "random integer value"
+                elif locate(item_type) == bool:
+                    random_value = "random boolean value"
+                # elif locate(item_type) is dict:
+                #     # random_value = int(
+                #     #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                #     assert get_schema_parser_factory().reference_object().has_ref(item_v)
+                #     item = get_schema_parser_factory().reference_object().get_schema_ref(item_v)
+                #     random_value = "random integer value"
+                #     print(f"[DEBUG in src] _handle_list_type_value_with_non_object_strategy._noref_process_callback item: {item}")
+                #     raise NotImplementedError
                 else:
                     raise NotImplementedError
                 item[item_k] = random_value
