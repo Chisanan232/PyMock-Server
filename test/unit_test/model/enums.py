@@ -276,29 +276,27 @@ class TestResponseStrategy(EnumTestSuite):
                         "$ref": "#/components/schemas/NestedFooResponse",
                     },
                 },
-                [
-                    {
-                        "id": "random integer value",
-                        "name": "random string value",
-                        "data": [
-                            {
-                                "id": "random integer value",
-                                "value": "random string value",
-                                "url": "random string value",
-                                "urlProperties": {
-                                    "homePage": {
-                                        "domain": "www.home-test.com",
-                                        "needAuth": False,
-                                    },
-                                    "detailInfo": {
-                                        "domain": "www.test.com",
-                                        "needAuth": True,
-                                    },
+                {
+                    "id": "random integer value",
+                    "name": "random string value",
+                    "data": [
+                        {
+                            "id": "random integer value",
+                            "value": "random string value",
+                            "url": "random string value",
+                            "urlProperties": {
+                                "homePage": {
+                                    "domain": "random string value",
+                                    "needAuth": "random boolean value",
+                                },
+                                "detailInfo": {
+                                    "domain": "random string value",
+                                    "needAuth": "random boolean value",
                                 },
                             },
-                        ],
-                    }
-                ],
+                        },
+                    ],
+                },
             ),
             (
                 ResponseStrategy.OBJECT,
