@@ -323,7 +323,24 @@ class ResponseStrategy(Enum):
             return response_data_prop
 
         def _handle_object_type_value_with_object_strategy(data: dict) -> dict:
-            additional_properties = data["additionalProperties"]
+            print(f"[DEBUG in _handle_object_type_value_with_object_strategy] data: {data}")
+            data_title = data.get("title", "")
+            if data_title:
+                # TODO: It should also consider the scenario about input stream part (download file)
+                # Example data: {'type': 'object', 'title': 'InputStream'}
+                if re.search(data_title, "InputStream", re.IGNORECASE):
+                    return {
+                        "name": "",
+                        "required": _Default_Required.general,
+                        "type": "file",
+                        # TODO: Set the *format* property correctly
+                        "format": None,
+                        "items": None,
+                    }
+                else:
+                    raise NotImplementedError
+
+            additional_properties = data.get("additionalProperties", {})
             if get_schema_parser_factory().reference_object().has_ref(additional_properties):
                 resp = self.process_response_from_reference(
                     init_response=init_response,
@@ -438,6 +455,15 @@ class ResponseStrategy(Enum):
             if locate(v_type) == list:
                 return _handle_list_type_value_with_non_object_strategy(resp_prop_data)
             elif locate(v_type) == dict:
+                data_title = resp_prop_data.get("title", "")
+                if data_title:
+                    # TODO: It should also consider the scenario about input stream part (download file)
+                    # Example data: {'type': 'object', 'title': 'InputStream'}
+                    if re.search(data_title, "InputStream", re.IGNORECASE):
+                        return "random file output stream"
+                    else:
+                        raise NotImplementedError
+
                 additional_properties = resp_prop_data["additionalProperties"]
                 if get_schema_parser_factory().reference_object().has_ref(additional_properties):
                     return self.process_response_from_reference(
