@@ -239,10 +239,10 @@ class ResponseStrategy(Enum):
                 )
                 print(f"[DEBUG in _handle_list_type_data] check whether the itme is empty or not: {response['items']}")
                 if response["items"]:
-                    print(f"[DEBUG in _handle_list_type_data] the response item has data")
-                    response["items"].append(ref_item_v_response)
+                    print("[DEBUG in _handle_list_type_data] the response item has data")
+                    response["items"].gappend(ref_item_v_response)
                 else:
-                    print(f"[DEBUG in _handle_list_type_data] the response item doesn't have data")
+                    print("[DEBUG in _handle_list_type_data] the response item doesn't have data")
                     response["items"] = (
                         [ref_item_v_response] if not isinstance(ref_item_v_response, list) else ref_item_v_response
                     )
