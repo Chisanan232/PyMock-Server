@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 import pytest
@@ -60,3 +61,10 @@ class TestIteratorItem(CheckableTestSuite):
                 assert list(
                     filter(lambda i: i["type"] == item.value_type, _Test_Response_Property_Details_Dict["items"])
                 ), _assertion_msg
+
+    def test_cannot_serialize_with_invalid_element_in_items(self):
+        with pytest.raises(TypeError) as exc_info:
+            IteratorItem(items="invalid value")
+        assert re.search(
+            r".{0,32}key \*items\*.{0,32}be dict or IteratorItem.{0,32}", str(exc_info.value), re.IGNORECASE
+        )
