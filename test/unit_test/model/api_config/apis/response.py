@@ -6,6 +6,7 @@ import pytest
 
 from pymock_api.model.api_config import ResponseProperty, _Config
 from pymock_api.model.api_config.apis import HTTPResponse
+from pymock_api.model.api_config.apis._property import _HasItemsPropConfig
 from pymock_api.model.enums import ResponseStrategy
 
 from ....._values import (
@@ -69,7 +70,9 @@ class TestResponseProperty(ConfigTestSpec):
         with pytest.raises(TypeError) as exc_info:
             ResponseProperty(items=["invalid element"])
         assert re.search(
-            r".{0,32}key \*items\*.{0,32}be dict or IteratorItem.{0,32}", str(exc_info.value), re.IGNORECASE
+            r".{0,32}key \*items\*.{0,32}be 'dict' or '" + re.escape(_HasItemsPropConfig.__name__) + r"'.{0,32}",
+            str(exc_info.value),
+            re.IGNORECASE,
         )
 
 

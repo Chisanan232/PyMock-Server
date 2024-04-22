@@ -1,48 +1,136 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type
 
 from .._base import _Checkable, _Config
 from ..item import IteratorItem
 
 
 @dataclass(eq=False)
-class BaseProperty(_Config, _Checkable, ABC):
-    name: str = field(default_factory=str)
-    required: Optional[bool] = None
-    value_type: Optional[str] = None  # A type value as string
-    value_format: Optional[str] = None
-    items: Optional[List[IteratorItem]] = None
+class _HasItemsPropConfig(_Config, _Checkable, ABC):
+    items: Optional[List["_HasItemsPropConfig"]] = None
 
-    def _compare(self, other: "BaseProperty") -> bool:
-        return (
-            self.name == other.name
-            and self.required == other.required
-            and self.value_type == other.value_type
-            and self.value_format == other.value_format
-            and self.items == other.items
-        )
+    def _compare(self, other: "_HasItemsPropConfig") -> bool:
+        return self.items == other.items
 
     def __post_init__(self) -> None:
         if self.items is not None:
             self._convert_items()
 
     def _convert_items(self):
-        def _deserialize_item(i: dict) -> IteratorItem:
-            item = IteratorItem(
-                name=i.get("name", ""),
-                value_type=i.get("type", None),
-                required=i.get("required", True),
-                items=i.get("items", None),
+        if False in list(map(lambda i: isinstance(i, (dict, self._item_type())), self.items)):
+            raise TypeError(
+                f"The data type of key *items* must be 'dict' or '{_HasItemsPropConfig.__name__}' type data."
             )
-            item.absolute_model_key = self.key
-            return item
+        self.items = [self._deserialize_item_with_data(i) if isinstance(i, dict) else i for i in self.items]
 
-        if False in list(map(lambda i: isinstance(i, (dict, IteratorItem)), self.items)):
-            raise TypeError("The data type of key *items* must be dict or IteratorItem.")
-        self.items = [_deserialize_item(i) if isinstance(i, dict) else i for i in self.items]
+    # def _deserialize_item(self, i: dict) -> "_HasItemsPropConfig":
+    #     if i:
+    #         return self._deserialize_empty_item()
+    #     else:
+    #         return self._deserialize_item_with_data(i)
 
-    def serialize(self, data: Optional["BaseProperty"] = None) -> Optional[Dict[str, Any]]:
+    @abstractmethod
+    def _item_type(self) -> Type["_HasItemsPropConfig"]:
+        pass
+
+    @abstractmethod
+    def _deserialize_empty_item(self) -> "_HasItemsPropConfig":
+        pass
+
+    @abstractmethod
+    def _deserialize_item_with_data(self, i: dict) -> "_HasItemsPropConfig":
+        pass
+
+    def serialize(self, data: Optional["_HasItemsPropConfig"] = None) -> Optional[Dict[str, Any]]:
+        serialized_data = {}
+        items = self._get_prop(data, prop="items")
+        if items:
+            serialized_data["items"] = [
+                item.serialize() if isinstance(item, self._item_type()) else item for item in items
+            ]
+            # serialized_data["items"] = [item.serialize() for item in items]
+        return serialized_data
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["_HasItemsPropConfig"]:
+        # print(f"[DEBUG in _HasItemsPropConfig.deserialize] data: {data}")
+        items = [
+            self._deserialize_empty_item().deserialize(item) if isinstance(item, dict) else item
+            for item in (data.get("items", []) or [])
+        ]
+        # items = [IteratorItem().deserialize(item) for item in (data.get("items", []) or [])]
+        # self.items = items if items else None
+        self.items = items if items else None
+        return self
+
+    def is_work(self) -> bool:
+        if self.items:
+
+            def _i_is_work(i: "_HasItemsPropConfig") -> bool:
+                i.stop_if_fail = self.stop_if_fail
+                return i.is_work()
+
+            is_work_props = list(filter(lambda i: _i_is_work(i), self.items))
+            if len(is_work_props) != len(self.items):
+                return False
+        return True
+
+
+@dataclass(eq=False)
+class BaseProperty(_HasItemsPropConfig, ABC):
+    name: str = field(default_factory=str)
+    required: Optional[bool] = None
+    value_type: Optional[str] = None  # A type value as string
+    value_format: Optional[str] = None
+    items: Optional[List[IteratorItem]] = None  # type: ignore[assignment]
+
+    def _compare(self, other: "BaseProperty") -> bool:  # type: ignore[override]
+        return (
+            self.name == other.name
+            and self.required == other.required
+            and self.value_type == other.value_type
+            and self.value_format == other.value_format
+            and super()._compare(other)
+            # and self.items == other.items
+        )
+
+    # def __post_init__(self) -> None:
+    #     if self.items is not None:
+    #         self._convert_items()
+
+    # def _convert_items(self):
+    #     def _deserialize_item(i: dict) -> IteratorItem:
+    #         item = IteratorItem(
+    #             name=i.get("name", ""),
+    #             value_type=i.get("type", None),
+    #             required=i.get("required", True),
+    #             items=i.get("items", None),
+    #         )
+    #         item.absolute_model_key = self.key
+    #         return item
+    #
+    #     if False in list(map(lambda i: isinstance(i, (dict, IteratorItem)), self.items)):
+    #         raise TypeError("The data type of key *items* must be dict or IteratorItem.")
+    #     self.items = [_deserialize_item(i) if isinstance(i, dict) else i for i in self.items]
+
+    def _item_type(self) -> Type["IteratorItem"]:  # type: ignore[override]
+        return IteratorItem
+
+    def _deserialize_empty_item(self) -> "IteratorItem":  # type: ignore[override]
+        return IteratorItem()
+
+    def _deserialize_item_with_data(self, i: dict) -> "IteratorItem":  # type: ignore[override]
+        item = IteratorItem(
+            name=i.get("name", None),
+            value_type=i.get("type", None),
+            required=i.get("required", True),
+            items=i.get("items", None),
+        )
+        item.absolute_model_key = self.key
+        return item
+
+    def serialize(self, data: Optional["BaseProperty"] = None) -> Optional[Dict[str, Any]]:  # type: ignore[override]
         name: str = self._get_prop(data, prop="name")
         required: bool = self._get_prop(data, prop="required")
         value_type: type = self._get_prop(data, prop="value_type")
@@ -55,19 +143,26 @@ class BaseProperty(_Config, _Checkable, ABC):
             "type": value_type,
             "format": value_format,
         }
-        items = self._get_prop(data, prop="items")
+        # serialize 'items'
+        items = super().serialize(data)
+        # items = self._get_prop(data, prop="items")
         if items:
-            serialized_data["items"] = [item.serialize() for item in items]
+            # serialized_data["items"] = [item.serialize() for item in items]
+            serialized_data.update(items)
         return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["BaseProperty"]:
+        # print(f"[DEBUG in BaseProperty.deserialize] data: {data}")
         self.name = data.get("name", None)
         self.required = data.get("required", None)
         self.value_type = data.get("type", None)
         self.value_format = data.get("format", None)
-        items = [IteratorItem().deserialize(item) for item in (data.get("items", []) or [])]
-        self.items = items if items else None
+
+        # deserialize 'items'
+        super().deserialize(data)
+        # items = [IteratorItem().deserialize(item) for item in (data.get("items", []) or [])]
+        # self.items = items if items else None
         return self
 
     def is_work(self) -> bool:
@@ -99,13 +194,18 @@ class BaseProperty(_Config, _Checkable, ABC):
             err_msg="It's meaningless if it has item setting but its data type is not collection. The items value setting sould not be None if the data type is one of collection types.",
         ):
             return False
-        if self.items:
 
-            def _i_is_work(i: IteratorItem) -> bool:
-                i.stop_if_fail = self.stop_if_fail
-                return i.is_work()
-
-            is_work_props = list(filter(lambda i: _i_is_work(i), self.items))
-            if len(is_work_props) != len(self.items):
-                return False
+        # check 'items'
+        items_chk = super().is_work()
+        if items_chk is False:
+            return items_chk
+        # if self.items:
+        #
+        #     def _i_is_work(i: IteratorItem) -> bool:
+        #         i.stop_if_fail = self.stop_if_fail
+        #         return i.is_work()
+        #
+        #     is_work_props = list(filter(lambda i: _i_is_work(i), self.items))
+        #     if len(is_work_props) != len(self.items):
+        #         return False
         return True
