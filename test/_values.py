@@ -91,13 +91,11 @@ _Test_Iterable_Parameter_Item_Name: dict = {
     "name": "name",
     "required": True,
     "type": "str",
-    "items": None,
 }
 _Test_Iterable_Parameter_Item_Value: dict = {
     "name": "value",
     "required": True,
     "type": "str",
-    "items": None,
 }
 _Test_Iterable_Parameter_Items: List[dict] = [_Test_Iterable_Parameter_Item_Name, _Test_Iterable_Parameter_Item_Value]
 _Test_Iterable_Parameter_With_Single_Value: dict = {
@@ -203,13 +201,11 @@ _Test_Response_Property_Priority_System_A_Dict: dict = {
     "name": "system_a",
     "required": False,
     "type": "bool",
-    "items": None,
 }
 _Test_Response_Property_Priority_System_B_Dict: dict = {
     "name": "system_b",
     "required": False,
     "type": "bool",
-    "items": None,
 }
 _Test_Response_Property_Priority_Dict: dict = {
     "name": "priority",

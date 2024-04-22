@@ -53,7 +53,6 @@ class IteratorItem(_Config, _Checkable):
         serialized_data = {
             "required": required,
             "type": value_type,
-            "items": None,
         }
         if name:
             serialized_data["name"] = name
