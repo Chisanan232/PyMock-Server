@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from pydoc import locate
 from typing import Any, Dict, List, Optional
 
 from ._base import _Checkable, _Config
@@ -85,6 +86,15 @@ class IteratorItem(_Config, _Checkable):
             accept_empty=False,
         ):
             return False
+        assert self.value_type
+        if locate(self.value_type) in [list, dict] and not self.props_should_not_be_none(
+            under_check={
+                f"{self.absolute_model_key}.items": self.items,
+            },
+            accept_empty=False,
+        ):
+            return False
+
         if self.items:
 
             def _i_is_work(i: IteratorItem) -> bool:
