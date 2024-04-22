@@ -53,11 +53,13 @@ class IteratorItem(_Config, _Checkable):
         serialized_data = {
             "required": required,
             "type": value_type,
+            "items": None,
         }
         if name:
             serialized_data["name"] = name
-        if self.items:
-            serialized_data["items"] = [item.serialize() for item in self.items]
+        items = self._get_prop(data, prop="items")
+        if items:
+            serialized_data["items"] = [item.serialize() for item in items]
         return serialized_data
 
     @_Config._ensure_process_with_not_empty_value

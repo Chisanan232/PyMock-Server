@@ -30,7 +30,10 @@ class BaseProperty(_Config, _Checkable, ABC):
     def _convert_items(self):
         def _deserialize_item(i: dict) -> IteratorItem:
             item = IteratorItem(
-                name=i.get("name", ""), value_type=i.get("type", None), required=i.get("required", True)
+                name=i.get("name", ""),
+                value_type=i.get("type", None),
+                required=i.get("required", True),
+                items=i.get("items", None),
             )
             item.absolute_model_key = self.key
             return item
@@ -52,8 +55,9 @@ class BaseProperty(_Config, _Checkable, ABC):
             "type": value_type,
             "format": value_format,
         }
-        if self.items:
-            serialized_data["items"] = [item.serialize() for item in self.items]
+        items = self._get_prop(data, prop="items")
+        if items:
+            serialized_data["items"] = [item.serialize() for item in items]
         return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
