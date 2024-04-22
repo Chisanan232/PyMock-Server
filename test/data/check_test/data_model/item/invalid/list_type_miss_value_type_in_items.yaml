@@ -1,0 +1,6 @@
+name: "value"
+required: true
+type: list
+items:
+  - name: "column"
+    required: true
