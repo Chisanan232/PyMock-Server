@@ -21,27 +21,7 @@ class BaseProperty(_HasItemsPropConfig, ABC):
             and self.value_type == other.value_type
             and self.value_format == other.value_format
             and super()._compare(other)
-            # and self.items == other.items
         )
-
-    # def __post_init__(self) -> None:
-    #     if self.items is not None:
-    #         self._convert_items()
-
-    # def _convert_items(self):
-    #     def _deserialize_item(i: dict) -> IteratorItem:
-    #         item = IteratorItem(
-    #             name=i.get("name", ""),
-    #             value_type=i.get("type", None),
-    #             required=i.get("required", True),
-    #             items=i.get("items", None),
-    #         )
-    #         item.absolute_model_key = self.key
-    #         return item
-    #
-    #     if False in list(map(lambda i: isinstance(i, (dict, IteratorItem)), self.items)):
-    #         raise TypeError("The data type of key *items* must be dict or IteratorItem.")
-    #     self.items = [_deserialize_item(i) if isinstance(i, dict) else i for i in self.items]
 
     def _item_type(self) -> Type["IteratorItem"]:
         return IteratorItem
@@ -74,15 +54,12 @@ class BaseProperty(_HasItemsPropConfig, ABC):
         }
         # serialize 'items'
         items = super().serialize(data)
-        # items = self._get_prop(data, prop="items")
         if items:
-            # serialized_data["items"] = [item.serialize() for item in items]
             serialized_data.update(items)
         return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["BaseProperty"]:
-        # print(f"[DEBUG in BaseProperty.deserialize] data: {data}")
         self.name = data.get("name", None)
         self.required = data.get("required", None)
         self.value_type = data.get("type", None)
@@ -90,8 +67,6 @@ class BaseProperty(_HasItemsPropConfig, ABC):
 
         # deserialize 'items'
         super().deserialize(data)
-        # items = [IteratorItem().deserialize(item) for item in (data.get("items", []) or [])]
-        # self.items = items if items else None
         return self
 
     def is_work(self) -> bool:
@@ -128,13 +103,4 @@ class BaseProperty(_HasItemsPropConfig, ABC):
         items_chk = super().is_work()
         if items_chk is False:
             return items_chk
-        # if self.items:
-        #
-        #     def _i_is_work(i: IteratorItem) -> bool:
-        #         i.stop_if_fail = self.stop_if_fail
-        #         return i.is_work()
-        #
-        #     is_work_props = list(filter(lambda i: _i_is_work(i), self.items))
-        #     if len(is_work_props) != len(self.items):
-        #         return False
         return True

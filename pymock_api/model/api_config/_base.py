@@ -181,12 +181,6 @@ class _HasItemsPropConfig(_Config, _Checkable, ABC):
             )
         self.items = [self._deserialize_item_with_data(i) if isinstance(i, dict) else i for i in self.items]
 
-    # def _deserialize_item(self, i: dict) -> "_HasItemsPropConfig":
-    #     if i:
-    #         return self._deserialize_empty_item()
-    #     else:
-    #         return self._deserialize_item_with_data(i)
-
     @abstractmethod
     def _item_type(self) -> Type["_HasItemsPropConfig"]:
         pass
@@ -206,18 +200,14 @@ class _HasItemsPropConfig(_Config, _Checkable, ABC):
             serialized_data["items"] = [
                 item.serialize() if isinstance(item, self._item_type()) else item for item in items
             ]
-            # serialized_data["items"] = [item.serialize() for item in items]
         return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["_HasItemsPropConfig"]:
-        # print(f"[DEBUG in _HasItemsPropConfig.deserialize] data: {data}")
         items = [
             self._deserialize_empty_item().deserialize(item) if isinstance(item, dict) else item
             for item in (data.get("items", []) or [])
         ]
-        # items = [IteratorItem().deserialize(item) for item in (data.get("items", []) or [])]
-        # self.items = items if items else None
         self.items = items if items else None
         return self
 
