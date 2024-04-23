@@ -11,7 +11,13 @@ from pymock_api.model.api_config import ResponseProperty
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
 from pymock_api.model.enums import Format, ResponseStrategy
 
-from ....._values import _Test_Response_Properties, _Test_Tag, _Test_URL, _TestConfig
+from ....._values import (
+    _Test_Response_Properties,
+    _Test_Response_Property_Dict,
+    _Test_Tag,
+    _Test_URL,
+    _TestConfig,
+)
 from .._base import (
     MOCK_MODEL,
     MOCK_RETURN_VALUE,
@@ -236,6 +242,8 @@ class TestMockAPI(TemplatableConfigTestSuite, CheckableTestSuite, DividableTestS
                 ResponseStrategy.OBJECT,
                 _Test_Response_Properties,
             ),
+            # object strategy response with nested object data
+            (None, ResponseStrategy.OBJECT, [_Test_Response_Property_Dict]),
         ],
     )
     def test_set_valid_response(

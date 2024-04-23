@@ -3,6 +3,7 @@ import re
 import pytest
 
 from pymock_api.model.api_config import IteratorItem
+from pymock_api.model.api_config._base import _HasItemsPropConfig
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest
 
 from ....._values import (
@@ -151,7 +152,9 @@ class TestAPIParameter(ConfigTestSpec):
                 items=[1, [], ()],
             )
         assert re.search(
-            r".{0,64}data type.{0,64}key \*items\*.{0,64}be dict or IteratorItem.{0,64}",
+            r".{0,64}data type.{0,64}key \*items\*.{0,64}be 'dict' or '"
+            + re.escape(_HasItemsPropConfig.__name__)
+            + r"'.{0,64}",
             str(exc_info.value),
             re.IGNORECASE,
         )

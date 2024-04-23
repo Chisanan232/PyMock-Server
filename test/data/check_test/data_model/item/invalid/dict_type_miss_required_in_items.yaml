@@ -1,0 +1,6 @@
+name: "value"
+required: true
+type: dict
+items:
+  - name: "column"
+    type: str

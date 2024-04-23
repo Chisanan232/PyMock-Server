@@ -184,6 +184,43 @@ _Test_Response_Properties: List[dict] = [
     _Test_Response_Property_List,
 ]
 
+# Nested test data
+_Test_Response_Property_Info_Dict: dict = {
+    "name": "info",
+    "required": False,
+    "type": "dict",
+    "items": _Test_Iterable_Parameter_Items,
+}
+_Test_Response_Property_Details_Dict: dict = {
+    "name": "details",
+    "required": False,
+    "type": "dict",
+    "items": [_Test_Response_Property_Info_Dict],
+}
+_Test_Response_Property_Priority_System_A_Dict: dict = {
+    "name": "system_a",
+    "required": False,
+    "type": "bool",
+}
+_Test_Response_Property_Priority_System_B_Dict: dict = {
+    "name": "system_b",
+    "required": False,
+    "type": "bool",
+}
+_Test_Response_Property_Priority_Dict: dict = {
+    "name": "priority",
+    "required": False,
+    "type": "dict",
+    "items": [_Test_Response_Property_Priority_System_A_Dict, _Test_Response_Property_Priority_System_B_Dict],
+}
+_Test_Response_Property_Dict: dict = {
+    "name": "account_1",
+    "required": False,
+    "type": "dict",
+    "format": None,
+    "items": [_Test_Response_Property_Details_Dict, _Test_Response_Property_Priority_Dict],
+}
+
 
 def _api_params(iterable_param_type: str) -> List[dict]:
     params = _Test_API_Parameters.copy()

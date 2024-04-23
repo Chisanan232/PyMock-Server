@@ -1,7 +1,7 @@
 import sys
-from abc import ABCMeta, abstractmethod
-from dataclasses import field
-from typing import Any, Callable, Dict, Optional
+from abc import ABC, ABCMeta, abstractmethod
+from dataclasses import dataclass, field
+from typing import Any, Callable, Dict, List, Optional, Type
 
 # The truly semantically is more near like following:
 #
@@ -161,3 +161,64 @@ class _Checkable(metaclass=ABCMeta):
         if msg:
             print(msg)
         sys.exit(exit_code)
+
+
+@dataclass(eq=False)
+class _HasItemsPropConfig(_Config, _Checkable, ABC):
+    items: Optional[List["_HasItemsPropConfig"]] = None
+
+    def _compare(self, other: "_HasItemsPropConfig") -> bool:
+        return self.items == other.items
+
+    def __post_init__(self) -> None:
+        if self.items is not None:
+            self._convert_items()
+
+    def _convert_items(self):
+        if False in list(map(lambda i: isinstance(i, (dict, self._item_type())), self.items)):
+            raise TypeError(
+                f"The data type of key *items* must be 'dict' or '{_HasItemsPropConfig.__name__}' type data."
+            )
+        self.items = [self._deserialize_item_with_data(i) if isinstance(i, dict) else i for i in self.items]
+
+    @abstractmethod
+    def _item_type(self) -> Type["_HasItemsPropConfig"]:
+        pass
+
+    @abstractmethod
+    def _deserialize_empty_item(self) -> "_HasItemsPropConfig":
+        pass
+
+    @abstractmethod
+    def _deserialize_item_with_data(self, i: dict) -> "_HasItemsPropConfig":
+        pass
+
+    def serialize(self, data: Optional["_HasItemsPropConfig"] = None) -> Optional[Dict[str, Any]]:
+        serialized_data = {}
+        items = self._get_prop(data, prop="items")
+        if items:
+            serialized_data["items"] = [
+                item.serialize() if isinstance(item, self._item_type()) else item for item in items
+            ]
+        return serialized_data
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["_HasItemsPropConfig"]:
+        items = [
+            self._deserialize_empty_item().deserialize(item) if isinstance(item, dict) else item
+            for item in (data.get("items", []) or [])
+        ]
+        self.items = items if items else None
+        return self
+
+    def is_work(self) -> bool:
+        if self.items:
+
+            def _i_is_work(i: "_HasItemsPropConfig") -> bool:
+                i.stop_if_fail = self.stop_if_fail
+                return i.is_work()
+
+            is_work_props = list(filter(lambda i: _i_is_work(i), self.items))
+            if len(is_work_props) != len(self.items):
+                return False
+        return True

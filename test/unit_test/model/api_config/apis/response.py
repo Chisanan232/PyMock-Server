@@ -5,10 +5,16 @@ from typing import Any
 import pytest
 
 from pymock_api.model.api_config import ResponseProperty, _Config
+from pymock_api.model.api_config._base import _HasItemsPropConfig
 from pymock_api.model.api_config.apis import HTTPResponse
 from pymock_api.model.enums import ResponseStrategy
 
-from ....._values import _Test_HTTP_Resp, _Test_Response_Property_List, _TestConfig
+from ....._values import (
+    _Test_HTTP_Resp,
+    _Test_Response_Property_Dict,
+    _Test_Response_Property_List,
+    _TestConfig,
+)
 from .._base import (
     CheckableTestSuite,
     ConfigTestSpec,
@@ -64,8 +70,48 @@ class TestResponseProperty(ConfigTestSpec):
         with pytest.raises(TypeError) as exc_info:
             ResponseProperty(items=["invalid element"])
         assert re.search(
-            r".{0,32}key \*items\*.{0,32}be dict or IteratorItem.{0,32}", str(exc_info.value), re.IGNORECASE
+            r".{0,32}key \*items\*.{0,32}be 'dict' or '" + re.escape(_HasItemsPropConfig.__name__) + r"'.{0,32}",
+            str(exc_info.value),
+            re.IGNORECASE,
         )
+
+
+class TestResponsePropertyWithNestedData(TestResponseProperty):
+    @pytest.fixture(scope="function")
+    def sut(self) -> ResponseProperty:
+        return ResponseProperty(
+            name=_Test_Response_Property_Dict["name"],
+            required=_Test_Response_Property_Dict["required"],
+            value_type=_Test_Response_Property_Dict["type"],
+            value_format=_Test_Response_Property_Dict["format"],
+            items=_Test_Response_Property_Dict["items"],
+        )
+
+    def test_value_attributes(self, sut: ResponseProperty):
+        assert sut.name == _Test_Response_Property_Dict["name"], _assertion_msg
+        assert sut.required is _Test_Response_Property_Dict["required"], _assertion_msg
+        assert sut.value_type == _Test_Response_Property_Dict["type"], _assertion_msg
+        assert sut.value_format == _Test_Response_Property_Dict["format"], _assertion_msg
+        assert isinstance(sut.items, list)
+        for item in sut.items:
+            assert list(filter(lambda i: i["name"] == item.name, _Test_Response_Property_Dict["items"]))
+            assert list(filter(lambda i: i["required"] == item.required, _Test_Response_Property_Dict["items"]))
+            assert list(filter(lambda i: i["type"] == item.value_type, _Test_Response_Property_Dict["items"]))
+
+    def _expected_serialize_value(self) -> Any:
+        return _Test_Response_Property_Dict
+
+    def _expected_deserialize_value(self, obj: ResponseProperty) -> None:
+        assert isinstance(obj, ResponseProperty)
+        assert obj.name == _Test_Response_Property_Dict["name"]
+        assert obj.required is _Test_Response_Property_Dict["required"]
+        assert obj.value_type == _Test_Response_Property_Dict["type"]
+        assert obj.value_format == _Test_Response_Property_Dict["format"]
+        assert isinstance(obj.items, list)
+        for item in obj.items:
+            assert list(filter(lambda i: i["name"] == item.name, _Test_Response_Property_Dict["items"]))
+            assert list(filter(lambda i: i["required"] == item.required, _Test_Response_Property_Dict["items"]))
+            assert list(filter(lambda i: i["type"] == item.value_type, _Test_Response_Property_Dict["items"]))
 
 
 class TestHTTPResponse(TemplatableConfigTestSuite, CheckableTestSuite):
