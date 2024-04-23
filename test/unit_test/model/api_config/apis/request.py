@@ -3,8 +3,8 @@ import re
 import pytest
 
 from pymock_api.model.api_config import IteratorItem
+from pymock_api.model.api_config._base import _HasItemsPropConfig
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest
-from pymock_api.model.api_config.apis._property import _HasItemsPropConfig
 
 from ....._values import (
     _Test_API_Parameter,

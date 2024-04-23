@@ -5,8 +5,8 @@ from typing import Any
 import pytest
 
 from pymock_api.model.api_config import ResponseProperty, _Config
+from pymock_api.model.api_config._base import _HasItemsPropConfig
 from pymock_api.model.api_config.apis import HTTPResponse
-from pymock_api.model.api_config.apis._property import _HasItemsPropConfig
 from pymock_api.model.enums import ResponseStrategy
 
 from ....._values import (

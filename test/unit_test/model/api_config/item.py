@@ -4,6 +4,7 @@ from typing import Any
 import pytest
 
 from pymock_api.model.api_config import IteratorItem
+from pymock_api.model.api_config._base import _HasItemsPropConfig
 
 from ...._values import _Test_Response_Property_Details_Dict
 from ._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
@@ -66,5 +67,7 @@ class TestIteratorItem(CheckableTestSuite):
         with pytest.raises(TypeError) as exc_info:
             IteratorItem(items="invalid value")
         assert re.search(
-            r".{0,32}key \*items\*.{0,32}be dict or IteratorItem.{0,32}", str(exc_info.value), re.IGNORECASE
+            r".{0,32}key \*items\*.{0,32}be 'dict' or '" + re.escape(_HasItemsPropConfig.__name__) + r"'.{0,32}",
+            str(exc_info.value),
+            re.IGNORECASE,
         )
