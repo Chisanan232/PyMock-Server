@@ -43,13 +43,13 @@ class BaseProperty(_HasItemsPropConfig, ABC):
     #         raise TypeError("The data type of key *items* must be dict or IteratorItem.")
     #     self.items = [_deserialize_item(i) if isinstance(i, dict) else i for i in self.items]
 
-    def _item_type(self) -> Type["IteratorItem"]:  # type: ignore[override]
+    def _item_type(self) -> Type["IteratorItem"]:
         return IteratorItem
 
-    def _deserialize_empty_item(self) -> "IteratorItem":  # type: ignore[override]
+    def _deserialize_empty_item(self) -> "IteratorItem":
         return IteratorItem()
 
-    def _deserialize_item_with_data(self, i: dict) -> "IteratorItem":  # type: ignore[override]
+    def _deserialize_item_with_data(self, i: dict) -> "IteratorItem":
         item = IteratorItem(
             name=i.get("name", None),
             value_type=i.get("type", None),
