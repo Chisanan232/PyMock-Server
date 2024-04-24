@@ -9,14 +9,15 @@ from pymock_api.model import deserialize_swagger_api_config, load_config
 from ..._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
 from ..._spec import run_test
 from ._test_case import (
-    DIVIDING_YAML_PATHS,
-    OPENAPI_DOCUMENT_CONFIG_PATHS,
-    _get_all_openapi_config_path,
-    _get_all_yaml_for_dividing,
+    DeserializeOpenAPIConfigTestCaseFactory,
+    LoadApiConfigWithDividingConfigTestCaseFactory,
 )
 
-_get_all_yaml_for_dividing()
-_get_all_openapi_config_path()
+LoadApiConfigWithDividingConfigTestCaseFactory.load()
+LOAD_DIVIDING_CONFIG_TEST_CASE = LoadApiConfigWithDividingConfigTestCaseFactory.get_test_data()
+
+DeserializeOpenAPIConfigTestCaseFactory.load()
+DESERIALIZE_OPENAPI_DOCUMENT_CONFIG_TEST_CASE = DeserializeOpenAPIConfigTestCaseFactory.get_test_case()
 
 
 class TestInitFunctions:
@@ -42,7 +43,7 @@ class TestInitFunctions:
             expected_err_msg = f"The target configuration file {self.not_exist_file_path} doesn't exist."
             assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
 
-    @pytest.mark.parametrize(("yaml_config_path", "expected_yaml_config_path"), DIVIDING_YAML_PATHS)
+    @pytest.mark.parametrize(("yaml_config_path", "expected_yaml_config_path"), LOAD_DIVIDING_CONFIG_TEST_CASE)
     def test_load_config_with_dividing_feature(self, yaml_config_path: str, expected_yaml_config_path: str):
         # Run utility function loads configuration to get config data
         dividing_config = load_config(yaml_config_path)
@@ -90,7 +91,7 @@ class TestInitFunctions:
             assert expected_api_config.http.response is not None
             assert api_config.http.response.serialize() == expected_api_config.http.response.serialize()
 
-    @pytest.mark.parametrize("openapi_config_path", OPENAPI_DOCUMENT_CONFIG_PATHS)
+    @pytest.mark.parametrize("openapi_config_path", DESERIALIZE_OPENAPI_DOCUMENT_CONFIG_TEST_CASE)
     def test_deserialize_swagger_api_config_with_openapi_config(self, openapi_config_path: str):
         # Pre-process
         with open(openapi_config_path, "r", encoding="utf-8") as io_stream:
