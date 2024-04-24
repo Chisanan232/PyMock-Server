@@ -15,12 +15,12 @@ from pymock_api.model.openapi._schema_parser import (
 
 from ...._values import _API_Doc_Source, _Test_Request_With_Https
 from ._test_case import (
-    DIVIDING_YAML_PATHS,
+    PullOpenAPIDocConfigAsDividingConfigTestCaseFactory,
     SubCmdPullTestArgs,
-    _get_all_yaml_for_dividing,
 )
 
-_get_all_yaml_for_dividing()
+PullOpenAPIDocConfigAsDividingConfigTestCaseFactory.load()
+PULL_OPENAPI_DOC_AS_DIVIDING_CONFIG_TEST_CASE = PullOpenAPIDocConfigAsDividingConfigTestCaseFactory.get_test_case()
 
 
 class TestSubCmdPullComponent:
@@ -28,7 +28,9 @@ class TestSubCmdPullComponent:
     def sub_cmd(self) -> SubCmdPullComponent:
         return SubCmdPullComponent()
 
-    @pytest.mark.parametrize(("swagger_api_resp_path", "cmd_arg", "expected_yaml_config_path"), DIVIDING_YAML_PATHS)
+    @pytest.mark.parametrize(
+        ("swagger_api_resp_path", "cmd_arg", "expected_yaml_config_path"), PULL_OPENAPI_DOC_AS_DIVIDING_CONFIG_TEST_CASE
+    )
     def test_pull_swagger_api_as_dividing_config(
         self,
         swagger_api_resp_path: str,
