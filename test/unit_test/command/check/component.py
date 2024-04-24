@@ -31,10 +31,8 @@ from ...._values import (
     _Workers_Amount,
 )
 from ._test_case import (
-    RESPONSE_JSON_PATHS,
-    RESPONSE_JSON_PATHS_WITH_EX_CODE,
-    _get_all_json,
-    _get_all_swagger_config,
+    SubCmdCheckComponentTestCaseFactory,
+    SwaggerDiffCheckTestCaseFactory,
 )
 
 
@@ -82,11 +80,13 @@ def _given_parser_args(
         )
 
 
-_get_all_json(has_base_info=False, config_type="valid", exit_code=0)
-_get_all_json(has_base_info=True, config_type="valid", exit_code=0)
-_get_all_json(has_base_info=False, config_type="invalid", exit_code=1)
+SubCmdCheckComponentTestCaseFactory.load(has_base_info=False, config_type="valid", exit_code=0)
+SubCmdCheckComponentTestCaseFactory.load(has_base_info=True, config_type="valid", exit_code=0)
+SubCmdCheckComponentTestCaseFactory.load(has_base_info=False, config_type="invalid", exit_code=1)
+SUBCMD_CHECK_COMPONENT_TEST_CASE = SubCmdCheckComponentTestCaseFactory.get_test_case()
 
-_get_all_swagger_config()
+SwaggerDiffCheckTestCaseFactory.load()
+SWAGGER_DIFF_CHECKER_TEST_CASE = SwaggerDiffCheckTestCaseFactory.get_test_case()
 
 
 class TestSubCmdCheckComponent:
@@ -96,7 +96,7 @@ class TestSubCmdCheckComponent:
 
     @pytest.mark.parametrize(
         ("api_resp_path", "dummy_yaml_path", "stop_if_fail", "expected_exit_code"),
-        RESPONSE_JSON_PATHS_WITH_EX_CODE,
+        SUBCMD_CHECK_COMPONENT_TEST_CASE,
     )
     def test_with_command_processor_of_diff_swagger(
         self,
@@ -171,7 +171,7 @@ class TestSwaggerDiffChecking:
     def checking(self) -> SwaggerDiffChecking:
         return SwaggerDiffChecking()
 
-    @pytest.mark.parametrize("swagger_config_response", RESPONSE_JSON_PATHS)
+    @pytest.mark.parametrize("swagger_config_response", SWAGGER_DIFF_CHECKER_TEST_CASE)
     def test__get_swagger_config(self, swagger_config_response: str, checking: SwaggerDiffChecking):
         with patch("pymock_api.command.check.component.URLLibHTTPClient.request") as mock_api_client_request:
             with open(swagger_config_response, "r", encoding="utf-8") as file_stream:
