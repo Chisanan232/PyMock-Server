@@ -16,12 +16,7 @@ from pymock_api.model.openapi._schema_parser import (
     set_component_definition,
 )
 
-from ._test_case import (
-    GET_YAML_PATHS_WITH_EX_CODE,
-    PULL_YAML_PATHS_WITH_CONFIG,
-    _get_all_yaml_for_subcmd_get,
-    _get_all_yaml_for_subcmd_pull,
-)
+from ._test_case import SubCmdGetTestCaseFactory, SubCmdPullTestCaseFactory
 
 try:
     from yaml import CLoader as Loader
@@ -615,14 +610,16 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
 
 
 # With valid configuration
-_get_all_yaml_for_subcmd_get(get_api_path="/foo-home", is_valid_config=True, exit_code=0)
-_get_all_yaml_for_subcmd_get(get_api_path="/not-exist-api", is_valid_config=True, exit_code=1)
+SubCmdGetTestCaseFactory.load(get_api_path="/foo-home", is_valid_config=True, exit_code=0)
+SubCmdGetTestCaseFactory.load(get_api_path="/not-exist-api", is_valid_config=True, exit_code=1)
 
 # With invalid configuration
-_get_all_yaml_for_subcmd_get(get_api_path="/foo-home", is_valid_config=False, acceptable_error=True, exit_code=0)
-_get_all_yaml_for_subcmd_get(get_api_path="/foo-home", is_valid_config=False, acceptable_error=False, exit_code=1)
-_get_all_yaml_for_subcmd_get(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=True, exit_code=1)
-_get_all_yaml_for_subcmd_get(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=False, exit_code=1)
+SubCmdGetTestCaseFactory.load(get_api_path="/foo-home", is_valid_config=False, acceptable_error=True, exit_code=0)
+SubCmdGetTestCaseFactory.load(get_api_path="/foo-home", is_valid_config=False, acceptable_error=False, exit_code=1)
+SubCmdGetTestCaseFactory.load(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=True, exit_code=1)
+SubCmdGetTestCaseFactory.load(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=False, exit_code=1)
+
+SUBCMD_GET_TEST_CASE = SubCmdGetTestCaseFactory.get_test_case()
 
 
 class TestSubCmdGet(BaseCommandProcessorTestSpec):
@@ -632,7 +629,7 @@ class TestSubCmdGet(BaseCommandProcessorTestSpec):
 
     @pytest.mark.parametrize(
         ("yaml_config_path", "get_api_path", "expected_exit_code"),
-        GET_YAML_PATHS_WITH_EX_CODE,
+        SUBCMD_GET_TEST_CASE,
     )
     def test_with_command_processor(
         self, yaml_config_path: str, get_api_path: str, expected_exit_code: int, object_under_test: Callable, **kwargs
@@ -647,7 +644,7 @@ class TestSubCmdGet(BaseCommandProcessorTestSpec):
 
     @pytest.mark.parametrize(
         ("yaml_config_path", "get_api_path", "expected_exit_code"),
-        GET_YAML_PATHS_WITH_EX_CODE,
+        SUBCMD_GET_TEST_CASE,
     )
     def test_with_run_entry_point(
         self,
@@ -811,7 +808,8 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
             assert str(exc_info.value) == "1"
 
 
-_get_all_yaml_for_subcmd_pull()
+SubCmdPullTestCaseFactory.load()
+SUBCMD_PULL_TEST_CASE = SubCmdPullTestCaseFactory.get_test_case()
 
 
 class TestSubCmdPull(BaseCommandProcessorTestSpec):
@@ -821,7 +819,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
 
     @pytest.mark.parametrize(
         ("swagger_config", "dry_run", "expected_config"),
-        PULL_YAML_PATHS_WITH_CONFIG,
+        SUBCMD_PULL_TEST_CASE,
     )
     def test_with_command_processor(
         self, swagger_config: str, dry_run: bool, expected_config: str, object_under_test: Callable
@@ -836,7 +834,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
 
     @pytest.mark.parametrize(
         ("swagger_config", "dry_run", "expected_config"),
-        PULL_YAML_PATHS_WITH_CONFIG,
+        SUBCMD_PULL_TEST_CASE,
     )
     def test_with_run_entry_point(
         self, swagger_config: str, dry_run: bool, expected_config: str, entry_point_under_test: Callable
