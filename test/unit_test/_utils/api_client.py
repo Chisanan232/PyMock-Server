@@ -7,9 +7,10 @@ from urllib3 import HTTPResponse, PoolManager
 
 from pymock_api._utils.api_client import BaseAPIClient, URLLibHTTPClient
 
-from ._test_case import RESPONSE_JSON_PATHS, _get_all_swagger_config
+from ._test_case import APIClientRequestTestCaseFactory
 
-_get_all_swagger_config()
+APIClientRequestTestCaseFactory.load()
+API_CLIENT_REQUEST_TEST_CASE = APIClientRequestTestCaseFactory.get_test_case()
 
 
 class APIClientTestSuite(metaclass=ABCMeta):
@@ -18,7 +19,7 @@ class APIClientTestSuite(metaclass=ABCMeta):
     def client(self) -> BaseAPIClient:
         pass
 
-    @pytest.mark.parametrize("swagger_config_response_path", RESPONSE_JSON_PATHS)
+    @pytest.mark.parametrize("swagger_config_response_path", API_CLIENT_REQUEST_TEST_CASE)
     def test_request(self, swagger_config_response_path: str, client: BaseAPIClient):
         with self._mock_request_process() as mock_request:
             mock_request.return_value = self._mock_return_value(swagger_config_response_path)
