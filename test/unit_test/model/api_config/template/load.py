@@ -1,3 +1,5 @@
+from typing import List
+
 import pytest
 
 from pymock_api.model.api_config import APIConfig
@@ -7,9 +9,10 @@ from pymock_api.model.api_config.template._load import (
     _BaseTemplateConfigLoader,
 )
 
-from ._test_case import _get_test_case_for_loading, _Test_Data
+from ._test_case import DeserializeAPIConfigFromYamlTestCaseFactory as test_case_factory
 
-_get_test_case_for_loading()
+test_case_factory.load()
+_Test_Data: List[str] = test_case_factory.get_test_case()
 
 
 @pytest.fixture(scope="function")
