@@ -1,8 +1,3 @@
-import glob
-import os
-import pathlib
-from typing import List
-
 import pytest
 
 from pymock_api.model.api_config import APIConfig
@@ -12,19 +7,9 @@ from pymock_api.model.api_config.template._load import (
     _BaseTemplateConfigLoader,
 )
 
-# _Test_Data: str = "./test/data/check_test/data_model/entire_api/valid/has-base-info_and_tags.yaml"
-_Test_Data: List[str] = []
-yaml_dir = os.path.join(
-    str(pathlib.Path(__file__).parent.parent.parent.parent.parent),
-    "data",
-    "check_test",
-    "data_model",
-    "entire_api",
-    "valid",
-    "*.yaml",
-)
-for yaml_config_path in glob.glob(yaml_dir):
-    _Test_Data.append(yaml_config_path)
+from ._test_case import _get_test_case_for_loading, _Test_Data
+
+_get_test_case_for_loading()
 
 
 @pytest.fixture(scope="function")
