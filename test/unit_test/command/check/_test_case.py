@@ -3,12 +3,14 @@ import os
 import pathlib
 from typing import List, Union
 
+from ...._base_test_case import BaseTestCaseFactory
+
 # [("api_resp_path", "dummy_yaml_path", "stop_if_fail", "expected_exit_code")]
 RESPONSE_JSON_PATHS_WITH_EX_CODE: List[tuple] = []
 RESPONSE_JSON_PATHS: List[str] = []
 
 
-class SubCmdCheckComponentTestCaseFactory:
+class SubCmdCheckComponentTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def get_test_case(cls) -> List[tuple]:
@@ -44,7 +46,7 @@ class SubCmdCheckComponentTestCaseFactory:
                     RESPONSE_JSON_PATHS_WITH_EX_CODE.append(one_test_scenario)
 
 
-class SwaggerDiffCheckTestCaseFactory:
+class SwaggerDiffCheckTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def get_test_case(cls) -> List[str]:

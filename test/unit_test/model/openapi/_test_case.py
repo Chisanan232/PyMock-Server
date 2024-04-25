@@ -12,6 +12,8 @@ from pymock_api.model.openapi._schema_parser import (
     set_component_definition,
 )
 
+from ...._base_test_case import BaseTestCaseFactory
+
 # For version 2 OpenAPI
 OPENAPI_API_DOC_JSON: List[tuple] = []
 OPENAPI_ONE_API_JSON: List[tuple] = []
@@ -39,7 +41,7 @@ V2OpenAPIDocConfigTestCase = namedtuple(
 )
 
 
-class DeserializeV2OpenAPIConfigTestCaseFactory:
+class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def get_test_case(cls) -> V2OpenAPIDocConfigTestCase:
@@ -104,7 +106,7 @@ class DeserializeV2OpenAPIConfigTestCaseFactory:
                                 OPENAPI_API_PARAMETERS_JSON_FOR_API.append((param, openapi_api_docs))
 
 
-class DeserializeV3OpenAPIConfigTestCaseFactory:
+class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def get_test_case(cls) -> List[tuple]:

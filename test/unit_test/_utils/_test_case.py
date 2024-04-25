@@ -3,10 +3,12 @@ import os
 import pathlib
 from typing import List
 
+from ..._base_test_case import BaseTestCaseFactory
+
 RESPONSE_JSON_PATHS: List[str] = []
 
 
-class APIClientRequestTestCaseFactory:
+class APIClientRequestTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def get_test_case(cls) -> List[str]:

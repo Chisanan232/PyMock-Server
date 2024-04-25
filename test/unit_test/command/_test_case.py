@@ -3,11 +3,13 @@ import os
 import pathlib
 from typing import List, Union
 
+from ..._base_test_case import BaseTestCaseFactory
+
 # [("yaml_config_path", "get_api_path", "expected_exit_code")]
 GET_YAML_PATHS_WITH_EX_CODE: List[tuple] = []
 
 
-class SubCmdGetTestCaseFactory:
+class SubCmdGetTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def get_test_case(cls) -> List[tuple]:
@@ -48,7 +50,7 @@ class SubCmdGetTestCaseFactory:
 PULL_YAML_PATHS_WITH_CONFIG: List[tuple] = []
 
 
-class SubCmdPullTestCaseFactory:
+class SubCmdPullTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def get_test_case(cls) -> List[tuple]:

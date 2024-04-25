@@ -3,6 +3,8 @@ import os
 import pathlib
 from typing import List
 
+from ..._base_test_case import BaseTestCaseFactory
+
 # [(under_test_path, expected_path)]
 DIVIDING_YAML_PATHS: List[tuple] = []
 
@@ -10,10 +12,10 @@ DIVIDING_YAML_PATHS: List[tuple] = []
 OPENAPI_DOCUMENT_CONFIG_PATHS: List[str] = []
 
 
-class LoadApiConfigWithDividingConfigTestCaseFactory:
+class LoadApiConfigWithDividingConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
-    def get_test_data(cls) -> List[tuple]:
+    def get_test_case(cls) -> List[tuple]:
         return DIVIDING_YAML_PATHS
 
     @classmethod
@@ -38,7 +40,7 @@ class LoadApiConfigWithDividingConfigTestCaseFactory:
                 DIVIDING_YAML_PATHS.append(one_test_scenario)
 
 
-class DeserializeOpenAPIConfigTestCaseFactory:
+class DeserializeOpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def get_test_case(cls) -> List[str]:

@@ -4,6 +4,8 @@ import pathlib
 from collections import namedtuple
 from typing import List
 
+from ...._base_test_case import BaseTestCaseFactory
+
 # [(swagger_api_config_path, cmd_arg, expected_path)]
 DIVIDING_YAML_PATHS: List[tuple] = []
 
@@ -21,7 +23,7 @@ SubCmdPullTestArgs = namedtuple(
 )
 
 
-class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory:
+class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def get_test_case(cls) -> List[tuple]:

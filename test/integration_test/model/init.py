@@ -14,7 +14,7 @@ from ._test_case import (
 )
 
 LoadApiConfigWithDividingConfigTestCaseFactory.load()
-LOAD_DIVIDING_CONFIG_TEST_CASE = LoadApiConfigWithDividingConfigTestCaseFactory.get_test_data()
+LOAD_DIVIDING_CONFIG_TEST_CASE = LoadApiConfigWithDividingConfigTestCaseFactory.get_test_case()
 
 DeserializeOpenAPIConfigTestCaseFactory.load()
 DESERIALIZE_OPENAPI_DOCUMENT_CONFIG_TEST_CASE = DeserializeOpenAPIConfigTestCaseFactory.get_test_case()
