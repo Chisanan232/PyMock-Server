@@ -30,15 +30,16 @@ from pymock_api.model.openapi.config import (
 
 from ._test_case import (
     OPENAPI_API_DOC_JSON,
-    OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON,
     OPENAPI_API_PARAMETERS_JSON,
     OPENAPI_ONE_API_JSON,
-    ensure_load_openapi_test_cases,
-    load_different_version_openapi_api_doc,
+    DeserializeV2OpenAPIConfigTestCaseFactory,
+    DeserializeV3OpenAPIConfigTestCaseFactory,
 )
 
-ensure_load_openapi_test_cases()
-load_different_version_openapi_api_doc()
+DeserializeV2OpenAPIConfigTestCaseFactory.load()
+
+DeserializeV3OpenAPIConfigTestCaseFactory.load()
+V3_OPENAPI_API_DOC_CONFIG_TEST_CASE = DeserializeV3OpenAPIConfigTestCaseFactory.get_test_case()
 
 
 class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
@@ -354,7 +355,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
         assert OpenAPI_Document_Version is expected_openapi_version
         assert isinstance(data_model.schema_parser_factory, expected_parser_factory)
 
-    @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON)
+    @pytest.mark.parametrize("openapi_doc_data", V3_OPENAPI_API_DOC_CONFIG_TEST_CASE)
     def test_deserialize_with_openapi_v3(self, openapi_doc_data: dict, data_model: OpenAPIDocumentConfig):
         set_component_definition(OpenAPIV3SchemaParser(data=openapi_doc_data))
 

@@ -20,10 +20,10 @@ from pymock_api.model.openapi._schema_parser import (
 
 from ..model.openapi._test_case import (
     OPENAPI_API_RESPONSES_PROPERTY_FOR_API,
-    ensure_load_openapi_test_cases,
+    DeserializeV2OpenAPIConfigTestCaseFactory,
 )
 
-ensure_load_openapi_test_cases()
+DeserializeV2OpenAPIConfigTestCaseFactory.load()
 
 
 def test_set_loading_function():

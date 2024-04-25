@@ -23,10 +23,10 @@ from ._test_case import (
     OPENAPI_API_PARAMETERS_JSON_FOR_API,
     OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API,
     OPENAPI_API_RESPONSES_FOR_API,
-    ensure_load_openapi_test_cases,
+    DeserializeV2OpenAPIConfigTestCaseFactory,
 )
 
-ensure_load_openapi_test_cases()
+DeserializeV2OpenAPIConfigTestCaseFactory.load()
 
 
 class DummyPathSchemaParser(OpenAPIV2PathSchemaParser):
