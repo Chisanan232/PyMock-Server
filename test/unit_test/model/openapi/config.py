@@ -29,14 +29,17 @@ from pymock_api.model.openapi.config import (
 )
 
 from ._test_case import (
-    OPENAPI_API_DOC_JSON,
-    OPENAPI_API_PARAMETERS_JSON,
-    OPENAPI_ONE_API_JSON,
     DeserializeV2OpenAPIConfigTestCaseFactory,
     DeserializeV3OpenAPIConfigTestCaseFactory,
 )
 
 DeserializeV2OpenAPIConfigTestCaseFactory.load()
+DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE = DeserializeV2OpenAPIConfigTestCaseFactory.get_test_case()
+DESERIALIZE_V2_OPENAPI_ENTIRE_CONFIG_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.entire_config
+DESERIALIZE_V2_OPENAPI_ENTIRE_API_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.each_apis
+DESERIALIZE_V2_OPENAPI_API_REQUEST_PARAMETERS_TEST_CASE = (
+    DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.reference_api_http_request_parameters
+)
 
 DeserializeV3OpenAPIConfigTestCaseFactory.load()
 V3_OPENAPI_API_DOC_CONFIG_TEST_CASE = DeserializeV3OpenAPIConfigTestCaseFactory.get_test_case()
@@ -121,7 +124,7 @@ class TestAPIParameters(_OpenAPIDocumentDataModelTestSuite):
     def data_model(self) -> APIParameter:
         return APIParameter()
 
-    @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_PARAMETERS_JSON)
+    @pytest.mark.parametrize("openapi_doc_data", DESERIALIZE_V2_OPENAPI_API_REQUEST_PARAMETERS_TEST_CASE)
     def test_deserialize(self, openapi_doc_data: dict, data_model: Transferable):
         super().test_deserialize(openapi_doc_data, data_model)
 
@@ -160,7 +163,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
     def data_model(self) -> API:
         return API()
 
-    @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_ONE_API_JSON)
+    @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), DESERIALIZE_V2_OPENAPI_ENTIRE_API_TEST_CASE)
     def test_deserialize(self, openapi_doc_data: dict, entire_openapi_config: dict, data_model: Transferable):
         # Previous process
         set_openapi_version(OpenAPIVersion.V2)
@@ -245,7 +248,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
     def data_model(self) -> OpenAPIDocumentConfig:
         return OpenAPIDocumentConfig()
 
-    @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_DOC_JSON)
+    @pytest.mark.parametrize("openapi_doc_data", DESERIALIZE_V2_OPENAPI_ENTIRE_CONFIG_TEST_CASE)
     def test_deserialize(self, openapi_doc_data: dict, data_model: Transferable):
         set_component_definition(OpenAPIV2SchemaParser(data=openapi_doc_data))
         super().test_deserialize(openapi_doc_data, data_model)

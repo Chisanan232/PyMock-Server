@@ -2,6 +2,7 @@ import glob
 import json
 import os
 import pathlib
+from collections import namedtuple
 from typing import List, Tuple
 
 from pymock_api.model.enums import ResponseStrategy
@@ -11,6 +12,7 @@ from pymock_api.model.openapi._schema_parser import (
     set_component_definition,
 )
 
+# For version 2 OpenAPI
 OPENAPI_API_DOC_JSON: List[tuple] = []
 OPENAPI_ONE_API_JSON: List[tuple] = []
 OPENAPI_API_PARAMETERS_JSON: List[tuple] = []
@@ -18,15 +20,38 @@ OPENAPI_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
 OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
 OPENAPI_API_RESPONSES_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
 OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
+
+# For version 3 OpenAPI
 OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON: List[tuple] = []
+
+
+V2OpenAPIDocConfigTestCase = namedtuple(
+    "V2OpenAPIDocConfigTestCase",
+    (
+        "entire_config",
+        "each_apis",
+        "entire_api_http_request_parameters",
+        "general_api_http_request_parameters",
+        "reference_api_http_request_parameters",
+        "entire_api_http_response_with_strategy",
+        "each_api_http_response_with_strategy",
+    ),
+)
 
 
 class DeserializeV2OpenAPIConfigTestCaseFactory:
 
     @classmethod
-    def get_test_case(cls):
-        # TODO: How to get the different test cases for different test suite?
-        raise NotImplementedError
+    def get_test_case(cls) -> V2OpenAPIDocConfigTestCase:
+        return V2OpenAPIDocConfigTestCase(
+            entire_config=OPENAPI_API_DOC_JSON,
+            each_apis=OPENAPI_ONE_API_JSON,
+            entire_api_http_request_parameters=OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API,
+            general_api_http_request_parameters=OPENAPI_API_PARAMETERS_JSON_FOR_API,
+            reference_api_http_request_parameters=OPENAPI_API_PARAMETERS_JSON,
+            entire_api_http_response_with_strategy=OPENAPI_API_RESPONSES_FOR_API,
+            each_api_http_response_with_strategy=OPENAPI_API_RESPONSES_PROPERTY_FOR_API,
+        )
 
     @classmethod
     def load(cls) -> None:

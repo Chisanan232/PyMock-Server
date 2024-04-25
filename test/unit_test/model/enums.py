@@ -18,12 +18,13 @@ from pymock_api.model.openapi._schema_parser import (
     set_component_definition,
 )
 
-from ..model.openapi._test_case import (
-    OPENAPI_API_RESPONSES_PROPERTY_FOR_API,
-    DeserializeV2OpenAPIConfigTestCaseFactory,
-)
+from ..model.openapi._test_case import DeserializeV2OpenAPIConfigTestCaseFactory
 
 DeserializeV2OpenAPIConfigTestCaseFactory.load()
+DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE = DeserializeV2OpenAPIConfigTestCaseFactory.get_test_case()
+GENERATE_RESPONSE_CONFIG_FROM_V2_OPENAPI_CONFIG_TEST_CASE = (
+    DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.each_api_http_response_with_strategy
+)
 
 
 def test_set_loading_function():
@@ -63,7 +64,7 @@ class TestResponseStrategy(EnumTestSuite):
         super().test_to_enum(value, enum_obj)
 
     @pytest.mark.parametrize(
-        ("strategy", "api_response_detail", "entire_config"), OPENAPI_API_RESPONSES_PROPERTY_FOR_API
+        ("strategy", "api_response_detail", "entire_config"), GENERATE_RESPONSE_CONFIG_FROM_V2_OPENAPI_CONFIG_TEST_CASE
     )
     def test_generate_response(self, strategy: ResponseStrategy, api_response_detail: dict, entire_config: dict):
         # Pre-process

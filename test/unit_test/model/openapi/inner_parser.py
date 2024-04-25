@@ -18,15 +18,18 @@ from pymock_api.model.openapi._schema_parser import (
 )
 from pymock_api.model.openapi.config import APIParameter
 
-from ._test_case import (
-    OPENAPI_API_PARAMETERS_JSON,
-    OPENAPI_API_PARAMETERS_JSON_FOR_API,
-    OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API,
-    OPENAPI_API_RESPONSES_FOR_API,
-    DeserializeV2OpenAPIConfigTestCaseFactory,
-)
+from ._test_case import DeserializeV2OpenAPIConfigTestCaseFactory
 
 DeserializeV2OpenAPIConfigTestCaseFactory.load()
+DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE = DeserializeV2OpenAPIConfigTestCaseFactory.get_test_case()
+PARSE_FAIL_V2_OPENAPI_REQUEST_PARAMETERS_NO_REFERENCE_INFO_TEST_CASE = (
+    DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.reference_api_http_request_parameters
+)
+PARSE_V2_OPENAPI_REQUEST_PARAMETERS_WITH_REFERENCE_INFO_TEST_CASE = (
+    DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.general_api_http_request_parameters
+)
+PARSE_V2_OPENAPI_REQUEST_PARAMETERS_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.entire_api_http_request_parameters
+PARSE_V2_OPENAPI_RESPONSES_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.entire_api_http_response_with_strategy
 
 
 class DummyPathSchemaParser(OpenAPIV2PathSchemaParser):
@@ -53,7 +56,9 @@ class TestAPIParser:
     def parser(self) -> Type[APIParser]:
         return APIParser
 
-    @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API)
+    @pytest.mark.parametrize(
+        ("openapi_doc_data", "entire_openapi_config"), PARSE_V2_OPENAPI_REQUEST_PARAMETERS_TEST_CASE
+    )
     def test__process_api_params(
         self, parser: Type[APIParser], openapi_doc_data: List[dict], entire_openapi_config: dict
     ):
@@ -78,7 +83,9 @@ class TestAPIParser:
         # Reload schema parser factory
         set_parser_factory(get_schema_parser_factory_with_openapi_version())
 
-    @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), OPENAPI_API_PARAMETERS_JSON_FOR_API)
+    @pytest.mark.parametrize(
+        ("openapi_doc_data", "entire_openapi_config"), PARSE_V2_OPENAPI_REQUEST_PARAMETERS_WITH_REFERENCE_INFO_TEST_CASE
+    )
     def test__process_has_ref_parameters_with_valid_value(
         self, parser: Type[APIParser], openapi_doc_data: dict, entire_openapi_config: dict
     ):
@@ -95,7 +102,7 @@ class TestAPIParser:
         type_checksum = list(map(lambda p: isinstance(p, dict), parameters))
         assert False not in type_checksum
 
-    @pytest.mark.parametrize("openapi_doc_data", OPENAPI_API_PARAMETERS_JSON)
+    @pytest.mark.parametrize("openapi_doc_data", PARSE_FAIL_V2_OPENAPI_REQUEST_PARAMETERS_NO_REFERENCE_INFO_TEST_CASE)
     def test__process_has_ref_parameters_with_invalid_value(self, parser: Type[APIParser], openapi_doc_data: dict):
         with pytest.raises(ValueError) as exc_info:
             # Run target function
@@ -105,7 +112,7 @@ class TestAPIParser:
         # Verify
         assert re.search(r".{1,64}no ref.{1,64}", str(exc_info.value), re.IGNORECASE)
 
-    @pytest.mark.parametrize(("strategy", "api_detail", "entire_config"), OPENAPI_API_RESPONSES_FOR_API)
+    @pytest.mark.parametrize(("strategy", "api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
     def test__process_http_response(
         self, parser: Type[APIParser], strategy: ResponseStrategy, api_detail: dict, entire_config: dict
     ):
