@@ -1,7 +1,7 @@
 import glob
 import os
 import pathlib
-from typing import Callable, List, Union
+from typing import Callable, List, Tuple, Union
 
 from ...._base_test_case import BaseTestCaseFactory
 
@@ -55,22 +55,25 @@ class SwaggerDiffCheckTestCaseFactory(BaseTestCaseFactory):
     @classmethod
     def load(cls) -> None:
 
-        def _generate_test_case_callback(json_config_path: str) -> None:
-            one_test_scenario = json_config_path
+        def _generate_test_case_callback(file_path: str) -> None:
+            one_test_scenario = file_path
             global RESPONSE_JSON_PATHS
             RESPONSE_JSON_PATHS.append(one_test_scenario)
 
-        cls._iterate_files_by_path(_generate_test_case_callback)
+        cls._iterate_files_by_path(
+            path=(
+                str(pathlib.Path(__file__).parent.parent.parent.parent),
+                "data",
+                "check_test",
+                "diff_with_swagger",
+                "api_response",
+                "*.json",
+            ),
+            generate_test_case_callback=_generate_test_case_callback,
+        )
 
     @classmethod
-    def _iterate_files_by_path(cls, _generate_test_case_callback: Callable) -> None:
-        json_dir = os.path.join(
-            str(pathlib.Path(__file__).parent.parent.parent.parent),
-            "data",
-            "check_test",
-            "diff_with_swagger",
-            "api_response",
-            "*.json",
-        )
+    def _iterate_files_by_path(cls, path: Tuple, generate_test_case_callback: Callable) -> None:
+        json_dir = os.path.join(*path)
         for json_config_path in glob.glob(json_dir):
-            _generate_test_case_callback(json_config_path)
+            generate_test_case_callback(json_config_path)
