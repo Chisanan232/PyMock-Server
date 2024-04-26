@@ -1,7 +1,7 @@
 import glob
 import os
 import pathlib
-from typing import Callable, List, Tuple, Union
+from typing import List, Union
 
 from ...._base_test_case import BaseTestCaseFactory
 
@@ -71,9 +71,3 @@ class SwaggerDiffCheckTestCaseFactory(BaseTestCaseFactory):
             ),
             generate_test_case_callback=_generate_test_case_callback,
         )
-
-    @classmethod
-    def _iterate_files_by_path(cls, path: Tuple, generate_test_case_callback: Callable) -> None:
-        json_dir = os.path.join(*path)
-        for json_config_path in glob.glob(json_dir):
-            generate_test_case_callback(json_config_path)
