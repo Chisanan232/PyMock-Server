@@ -54,6 +54,11 @@ class SwaggerDiffCheckTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def load(cls) -> None:
+
+        def _generate_test_case_callback(json_config_path: str) -> None:
+            one_test_scenario = json_config_path
+            RESPONSE_JSON_PATHS.append(one_test_scenario)
+
         json_dir = os.path.join(
             str(pathlib.Path(__file__).parent.parent.parent.parent),
             "data",
@@ -64,5 +69,4 @@ class SwaggerDiffCheckTestCaseFactory(BaseTestCaseFactory):
         )
         global RESPONSE_JSON_PATHS
         for json_config_path in glob.glob(json_dir):
-            one_test_scenario = json_config_path
-            RESPONSE_JSON_PATHS.append(one_test_scenario)
+            _generate_test_case_callback(json_config_path)
