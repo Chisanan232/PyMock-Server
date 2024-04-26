@@ -1,6 +1,4 @@
-import glob
 import json
-import os
 import pathlib
 from collections import namedtuple
 from typing import List, Tuple
@@ -62,16 +60,9 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def _load_all_openapi_api_doc(cls) -> None:
-        json_dir = os.path.join(
-            str(pathlib.Path(__file__).parent.parent.parent.parent),
-            "data",
-            "deserialize_openapi_config_test",
-            "entire_config",
-            "*.json",
-        )
-        global OPENAPI_API_DOC_JSON
-        for json_config_path in glob.glob(json_dir):
-            with open(json_config_path, "r", encoding="utf-8") as file_stream:
+
+        def _generate_test_case_callback(file_path: str) -> None:
+            with open(file_path, "r", encoding="utf-8") as file_stream:
                 openapi_api_docs = json.loads(file_stream.read())
                 OPENAPI_API_DOC_JSON.append(openapi_api_docs)
                 apis: dict = openapi_api_docs["paths"]
@@ -105,6 +96,17 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                             else:
                                 OPENAPI_API_PARAMETERS_JSON_FOR_API.append((param, openapi_api_docs))
 
+        cls._iterate_files_by_path(
+            path=(
+                str(pathlib.Path(__file__).parent.parent.parent.parent),
+                "data",
+                "deserialize_openapi_config_test",
+                "entire_config",
+                "*.json",
+            ),
+            generate_test_case_callback=_generate_test_case_callback,
+        )
+
 
 class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
 
@@ -114,14 +116,19 @@ class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def load(cls) -> None:
-        json_dir = os.path.join(
-            str(pathlib.Path(__file__).parent.parent.parent.parent),
-            "data",
-            "deserialize_openapi_config_test",
-            "different_version",
-            "*.json",
-        )
-        for json_config_path in glob.glob(json_dir):
-            with open(json_config_path, "r", encoding="utf-8") as file_stream:
+
+        def _generate_test_case_callback(file_path: str) -> None:
+            with open(file_path, "r", encoding="utf-8") as file_stream:
                 openapi_api_docs = json.loads(file_stream.read())
                 OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON.append(openapi_api_docs)
+
+        cls._iterate_files_by_path(
+            path=(
+                str(pathlib.Path(__file__).parent.parent.parent.parent),
+                "data",
+                "deserialize_openapi_config_test",
+                "different_version",
+                "*.json",
+            ),
+            generate_test_case_callback=_generate_test_case_callback,
+        )

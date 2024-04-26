@@ -1,5 +1,3 @@
-import glob
-import os
 import pathlib
 from typing import List
 
@@ -17,14 +15,19 @@ class DeserializeAPIConfigFromYamlTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def load(cls) -> None:
-        yaml_dir = os.path.join(
-            str(pathlib.Path(__file__).parent.parent.parent.parent.parent),
-            "data",
-            "check_test",
-            "data_model",
-            "entire_api",
-            "valid",
-            "*.yaml",
+
+        def _generate_test_case_callback(file_path: str) -> None:
+            _Test_Data.append(file_path)
+
+        cls._iterate_files_by_path(
+            path=(
+                str(pathlib.Path(__file__).parent.parent.parent.parent.parent),
+                "data",
+                "check_test",
+                "data_model",
+                "entire_api",
+                "valid",
+                "*.yaml",
+            ),
+            generate_test_case_callback=_generate_test_case_callback,
         )
-        for yaml_config_path in glob.glob(yaml_dir):
-            _Test_Data.append(yaml_config_path)

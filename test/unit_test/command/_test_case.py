@@ -19,6 +19,12 @@ class SubCmdGetTestCaseFactory(BaseTestCaseFactory):
     def load(
         cls, get_api_path: str, is_valid_config: bool, exit_code: Union[str, int], acceptable_error: bool = None
     ) -> None:
+
+        def _generate_test_case_callback(file_path: str) -> None:
+            expected_exit_code = exit_code if isinstance(exit_code, str) and exit_code.isdigit() else str(exit_code)
+            one_test_scenario = (file_path, get_api_path, expected_exit_code)
+            GET_YAML_PATHS_WITH_EX_CODE.append(one_test_scenario)
+
         is_valid_path = "valid" if is_valid_config else "invalid"
         if is_valid_config is False and acceptable_error is not None:
             config_folder = "warn" if acceptable_error else "error"
@@ -38,12 +44,10 @@ class SubCmdGetTestCaseFactory(BaseTestCaseFactory):
                 is_valid_path,
                 "*.yaml",
             )
-        yaml_dir = os.path.join(*entire_config_path)
-        global GET_YAML_PATHS_WITH_EX_CODE
-        for yaml_config_path in glob.glob(yaml_dir):
-            expected_exit_code = exit_code if isinstance(exit_code, str) and exit_code.isdigit() else str(exit_code)
-            one_test_scenario = (yaml_config_path, get_api_path, expected_exit_code)
-            GET_YAML_PATHS_WITH_EX_CODE.append(one_test_scenario)
+        cls._iterate_files_by_path(
+            path=entire_config_path,
+            generate_test_case_callback=_generate_test_case_callback,
+        )
 
 
 # [("swagger_config", "dry_run", "expected_config")]
