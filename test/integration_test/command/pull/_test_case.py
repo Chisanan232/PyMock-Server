@@ -1,8 +1,6 @@
-import glob
-import os
 import pathlib
 from collections import namedtuple
-from typing import List
+from typing import List, Tuple
 
 from ...._base_test_case import BaseTestCaseFactory
 
@@ -31,24 +29,26 @@ class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def load(cls) -> None:
-        def _get_path(scenario_folder: str = "", yaml_file_naming: str = "") -> str:
-            _path = (
+        def _get_path(scenario_folder: str = "", yaml_file_naming: str = "") -> Tuple:
+            return (
                 str(pathlib.Path(__file__).parent.parent.parent.parent),
                 "data",
                 "divide_test_pull",
                 scenario_folder,
                 yaml_file_naming,
             )
-            return os.path.join(*_path)
 
         def _generate_test_case_from_folder_callback(folder_path: str) -> None:
+
             test_cmd_opt_arg = cls._divide_chk(folder_path)
-            swagger_api = _get_path(scenario_folder=folder_path, yaml_file_naming="swagger_api.json")
-            expected_yaml_dir = _get_path(scenario_folder=folder_path, yaml_file_naming="expect_config/api.yaml")
-            global DIVIDING_YAML_PATHS
-            for swagger_api_resp_path, expected_yaml_config_path in zip(
-                glob.glob(swagger_api), glob.glob(expected_yaml_dir)
-            ):
+
+            def _generate_test_case_from_files_callback(pair_paths: tuple) -> None:
+                assert pair_paths
+                assert pair_paths[0]
+                assert pair_paths[1]
+                swagger_api_resp_path = pair_paths[0]
+                expected_yaml_config_path = pair_paths[1]
+
                 if "has_tag" in swagger_api_resp_path:
                     base_url = "/api/v1/test"
                 else:
@@ -66,6 +66,14 @@ class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
                 cmd_arg = SubCmdPullTestArgs(**test_cmd_opt_arg)
                 one_test_scenario = (swagger_api_resp_path, cmd_arg, expected_yaml_config_path)
                 DIVIDING_YAML_PATHS.append(one_test_scenario)
+
+            cls._iterate_files_by_paths(
+                paths=(
+                    _get_path(scenario_folder=folder_path, yaml_file_naming="swagger_api.json"),
+                    _get_path(scenario_folder=folder_path, yaml_file_naming="expect_config/api.yaml"),
+                ),
+                generate_test_case_callback=_generate_test_case_from_files_callback,
+            )
 
         cls._iterate_files_by_directory(
             path=_get_path(),
