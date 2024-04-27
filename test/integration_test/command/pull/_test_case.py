@@ -41,11 +41,10 @@ class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
             )
             return os.path.join(*_path)
 
-        different_scenarios_data_folder = os.listdir(_get_path())
-        for f in different_scenarios_data_folder:
-            test_cmd_opt_arg = cls._divide_chk(f)
-            swagger_api = _get_path(scenario_folder=f, yaml_file_naming="swagger_api.json")
-            expected_yaml_dir = _get_path(scenario_folder=f, yaml_file_naming="expect_config/api.yaml")
+        def _generate_test_case_from_folder_callback(folder_path: str) -> None:
+            test_cmd_opt_arg = cls._divide_chk(folder_path)
+            swagger_api = _get_path(scenario_folder=folder_path, yaml_file_naming="swagger_api.json")
+            expected_yaml_dir = _get_path(scenario_folder=folder_path, yaml_file_naming="expect_config/api.yaml")
             global DIVIDING_YAML_PATHS
             for swagger_api_resp_path, expected_yaml_config_path in zip(
                 glob.glob(swagger_api), glob.glob(expected_yaml_dir)
@@ -67,6 +66,11 @@ class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
                 cmd_arg = SubCmdPullTestArgs(**test_cmd_opt_arg)
                 one_test_scenario = (swagger_api_resp_path, cmd_arg, expected_yaml_config_path)
                 DIVIDING_YAML_PATHS.append(one_test_scenario)
+
+        cls._iterate_files_by_directory(
+            path=_get_path(),
+            generate_test_case_from_folder_callback=_generate_test_case_from_folder_callback,
+        )
 
     @classmethod
     def _divide_chk(cls, test_scenario_dir: str) -> dict:
