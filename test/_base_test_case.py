@@ -17,8 +17,12 @@ class BaseTestCaseFactory(metaclass=ABCMeta):
         pass
 
     @classmethod
-    def _iterate_files_by_path(cls, path: Tuple, generate_test_case_callback: Callable[[str], None]) -> None:
-        json_dir = os.path.join(*path)
+    def _iterate_files_by_path(
+        cls, path: Union[AnyStr, Tuple], generate_test_case_callback: Callable[[str], None]
+    ) -> None:
+        if not isinstance(path, (str, tuple)):
+            raise TypeError("The parameter *path* only accept 'str' or 'Tuple[str]' types.")
+        json_dir = path if isinstance(path, str) else str(os.path.join(*path))
         for json_config_path in glob.glob(json_dir):
             generate_test_case_callback(json_config_path)
 
