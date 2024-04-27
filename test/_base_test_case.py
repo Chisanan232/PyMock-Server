@@ -22,8 +22,8 @@ class BaseTestCaseFactory(metaclass=ABCMeta):
     ) -> None:
         if not isinstance(path, (str, tuple)):
             raise TypeError("The parameter *path* only accept 'str' or 'Tuple[str]' types.")
-        json_dir = path if isinstance(path, str) else str(os.path.join(*path))
-        for json_config_path in glob.glob(json_dir):
+        regex_files_path = path if isinstance(path, str) else str(os.path.join(*path))
+        for json_config_path in glob.glob(regex_files_path):
             generate_test_case_callback(json_config_path)
 
     @classmethod
@@ -38,6 +38,6 @@ class BaseTestCaseFactory(metaclass=ABCMeta):
     ) -> None:
         if not isinstance(path, (str, tuple)):
             raise TypeError("The parameter *path* only accept 'str' or 'Tuple[str]' types.")
-        json_dir = path if isinstance(path, str) else str(os.path.join(*path))
-        for folder_path in os.listdir(json_dir):
+        regex_files_path = path if isinstance(path, str) else str(os.path.join(*path))
+        for folder_path in os.listdir(regex_files_path):
             generate_test_case_from_folder_callback(folder_path)
