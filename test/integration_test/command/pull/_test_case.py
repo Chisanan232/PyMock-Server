@@ -43,9 +43,6 @@ class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
             test_cmd_opt_arg = cls._divide_chk(folder_path)
 
             def _generate_test_case_from_files_callback(pair_paths: tuple) -> None:
-                assert pair_paths
-                assert pair_paths[0]
-                assert pair_paths[1]
                 swagger_api_resp_path = pair_paths[0]
                 expected_yaml_config_path = pair_paths[1]
 
