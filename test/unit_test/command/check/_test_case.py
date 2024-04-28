@@ -1,7 +1,6 @@
-import pathlib
 from typing import List, Union
 
-from ...._base_test_case import BaseTestCaseFactory
+from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 
 # [("api_resp_path", "dummy_yaml_path", "stop_if_fail", "expected_exit_code")]
 RESPONSE_JSON_PATHS_WITH_EX_CODE: List[tuple] = []
@@ -17,6 +16,8 @@ class SubCmdCheckComponentTestCaseFactory(BaseTestCaseFactory):
     @classmethod
     def load(cls, has_base_info: bool, config_type: str, exit_code: Union[str, int]) -> None:
 
+        test_case_dir = TestCaseDirPath.CHECK_TEST
+
         def _generate_api_response_in_test_case_callback(json_config_path: str) -> None:
 
             def _generate_config_in_test_case_callback(yaml_config_path: str) -> None:
@@ -28,9 +29,9 @@ class SubCmdCheckComponentTestCaseFactory(BaseTestCaseFactory):
             yaml_file_format = "*.yaml" if config_type == "invalid" else f"{file_naming}*.yaml"
             cls._iterate_files_by_path(
                 path=(
-                    str(pathlib.Path(__file__).parent.parent.parent.parent),
-                    "data",
-                    "check_test",
+                    test_case_dir.get_test_source_path(__file__),
+                    test_case_dir.base_data_path,
+                    test_case_dir.name,
                     "diff_with_swagger",
                     "config",
                     config_type,
@@ -42,9 +43,9 @@ class SubCmdCheckComponentTestCaseFactory(BaseTestCaseFactory):
         file_naming = "has-base-info" if has_base_info else "no-base-info"
         cls._iterate_files_by_path(
             path=(
-                str(pathlib.Path(__file__).parent.parent.parent.parent),
-                "data",
-                "check_test",
+                test_case_dir.get_test_source_path(__file__),
+                test_case_dir.base_data_path,
+                test_case_dir.name,
                 "diff_with_swagger",
                 "api_response",
                 f"{file_naming}*.json",
@@ -67,11 +68,12 @@ class SwaggerDiffCheckTestCaseFactory(BaseTestCaseFactory):
             global RESPONSE_JSON_PATHS
             RESPONSE_JSON_PATHS.append(one_test_scenario)
 
+        test_case_dir = TestCaseDirPath.CHECK_TEST
         cls._iterate_files_by_path(
             path=(
-                str(pathlib.Path(__file__).parent.parent.parent.parent),
-                "data",
-                "check_test",
+                test_case_dir.get_test_source_path(__file__),
+                test_case_dir.base_data_path,
+                test_case_dir.name,
                 "diff_with_swagger",
                 "api_response",
                 "*.json",

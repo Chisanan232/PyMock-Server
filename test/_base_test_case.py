@@ -1,7 +1,34 @@
 import glob
 import os
+import pathlib
 from abc import ABCMeta, abstractmethod
+from enum import Enum
 from typing import AnyStr, Callable, List, Tuple, Union
+
+
+class TestCaseDirPath(Enum):
+
+    GET_TEST: str = "get_test"
+    CHECK_TEST: str = "check_test"
+    PULL_TEST: str = "pull_test"
+    DIVIDE_TEST_LOAD: str = "divide_test_load"
+    DIVIDE_TEST_PULL: str = "divide_test_pull"
+    DESERIALIZE_OPENAPI_CONFIG_TEST: str = "deserialize_openapi_config_test"
+
+    def get_test_source_path(self, current_file: str) -> str:
+        tmp_dir_path = pathlib.Path(current_file).parent
+        while True:
+            if str(tmp_dir_path.name) == self.test_source:
+                return str(tmp_dir_path)
+            tmp_dir_path = tmp_dir_path.parent
+
+    @property
+    def test_source(self) -> str:
+        return "test"
+
+    @property
+    def base_data_path(self) -> str:
+        return "data"
 
 
 class BaseTestCaseFactory(metaclass=ABCMeta):

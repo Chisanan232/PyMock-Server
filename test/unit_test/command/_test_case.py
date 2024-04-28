@@ -1,8 +1,7 @@
 import os
-import pathlib
 from typing import List, Union
 
-from ..._base_test_case import BaseTestCaseFactory
+from ..._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 
 # [("yaml_config_path", "get_api_path", "expected_exit_code")]
 GET_YAML_PATHS_WITH_EX_CODE: List[tuple] = []
@@ -24,22 +23,23 @@ class SubCmdGetTestCaseFactory(BaseTestCaseFactory):
             one_test_scenario = (file_path, get_api_path, expected_exit_code)
             GET_YAML_PATHS_WITH_EX_CODE.append(one_test_scenario)
 
+        test_case_dir = TestCaseDirPath.GET_TEST
         is_valid_path = "valid" if is_valid_config else "invalid"
         if is_valid_config is False and acceptable_error is not None:
             config_folder = "warn" if acceptable_error else "error"
             entire_config_path = (
-                str(pathlib.Path(__file__).parent.parent.parent),
-                "data",
-                "get_test",
+                test_case_dir.get_test_source_path(__file__),
+                test_case_dir.base_data_path,
+                test_case_dir.name,
                 is_valid_path,
                 config_folder,
                 "*.yaml",
             )
         else:
             entire_config_path = (
-                str(pathlib.Path(__file__).parent.parent.parent),
-                "data",
-                "get_test",
+                test_case_dir.get_test_source_path(__file__),
+                test_case_dir.base_data_path,
+                test_case_dir.name,
                 is_valid_path,
                 "*.yaml",
             )
@@ -62,10 +62,11 @@ class SubCmdPullTestCaseFactory(BaseTestCaseFactory):
     @classmethod
     def load(cls) -> None:
         def _get_path(data_type: str, file_extension: str) -> str:
+            test_case_dir = TestCaseDirPath.PULL_TEST
             return os.path.join(
-                str(pathlib.Path(__file__).parent.parent.parent),
-                "data",
-                "pull_test",
+                test_case_dir.get_test_source_path(__file__),
+                test_case_dir.base_data_path,
+                test_case_dir.name,
                 data_type,
                 f"*.{file_extension}",
             )

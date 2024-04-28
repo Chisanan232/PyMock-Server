@@ -1,8 +1,7 @@
-import pathlib
 from collections import namedtuple
 from typing import List, Tuple
 
-from ...._base_test_case import BaseTestCaseFactory
+from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 
 # [(swagger_api_config_path, cmd_arg, expected_path)]
 DIVIDING_YAML_PATHS: List[tuple] = []
@@ -32,10 +31,11 @@ class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
         test_cmd_opt_arg: dict = {}
 
         def _get_path(scenario_folder: str = "", yaml_file_naming: str = "") -> Tuple:
+            test_case_dir = TestCaseDirPath.DIVIDE_TEST_PULL
             return (
-                str(pathlib.Path(__file__).parent.parent.parent.parent),
-                "data",
-                "divide_test_pull",
+                test_case_dir.get_test_source_path(__file__),
+                test_case_dir.base_data_path,
+                test_case_dir.name,
                 scenario_folder,
                 yaml_file_naming,
             )

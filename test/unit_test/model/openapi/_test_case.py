@@ -1,5 +1,4 @@
 import json
-import pathlib
 from collections import namedtuple
 from typing import List, Tuple
 
@@ -10,7 +9,7 @@ from pymock_api.model.openapi._schema_parser import (
     set_component_definition,
 )
 
-from ...._base_test_case import BaseTestCaseFactory
+from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 
 # For version 2 OpenAPI
 OPENAPI_API_DOC_JSON: List[tuple] = []
@@ -96,11 +95,12 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                             else:
                                 OPENAPI_API_PARAMETERS_JSON_FOR_API.append((param, openapi_api_docs))
 
+        test_case_dir = TestCaseDirPath.DESERIALIZE_OPENAPI_CONFIG_TEST
         cls._iterate_files_by_path(
             path=(
-                str(pathlib.Path(__file__).parent.parent.parent.parent),
-                "data",
-                "deserialize_openapi_config_test",
+                test_case_dir.get_test_source_path(__file__),
+                test_case_dir.base_data_path,
+                test_case_dir.name,
                 "entire_config",
                 "*.json",
             ),
@@ -122,11 +122,12 @@ class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                 openapi_api_docs = json.loads(file_stream.read())
                 OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON.append(openapi_api_docs)
 
+        test_case_dir = TestCaseDirPath.DESERIALIZE_OPENAPI_CONFIG_TEST
         cls._iterate_files_by_path(
             path=(
-                str(pathlib.Path(__file__).parent.parent.parent.parent),
-                "data",
-                "deserialize_openapi_config_test",
+                test_case_dir.get_test_source_path(__file__),
+                test_case_dir.base_data_path,
+                test_case_dir.name,
                 "different_version",
                 "*.json",
             ),

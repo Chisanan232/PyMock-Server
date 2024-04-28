@@ -1,9 +1,8 @@
 import glob
 import os
-import pathlib
 from typing import List
 
-from ..._base_test_case import BaseTestCaseFactory
+from ..._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 
 # [(under_test_path, expected_path)]
 DIVIDING_YAML_PATHS: List[tuple] = []
@@ -21,10 +20,11 @@ class LoadApiConfigWithDividingConfigTestCaseFactory(BaseTestCaseFactory):
     @classmethod
     def load(cls) -> None:
         def _get_path(scenario_folder: str = "", yaml_file_naming: str = "") -> tuple:
+            test_case_dir = TestCaseDirPath.DIVIDE_TEST_LOAD
             return (
-                str(pathlib.Path(__file__).parent.parent.parent),
-                "data",
-                "divide_test_load",
+                test_case_dir.get_test_source_path(__file__),
+                test_case_dir.base_data_path,
+                test_case_dir.name,
                 scenario_folder,
                 yaml_file_naming,
             )
@@ -56,10 +56,11 @@ class DeserializeOpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
     @classmethod
     def load(cls) -> None:
         def _get_path(config_type_dir: str) -> str:
+            test_case_dir = TestCaseDirPath.DESERIALIZE_OPENAPI_CONFIG_TEST
             _path = (
-                str(pathlib.Path(__file__).parent.parent.parent),
-                "data",
-                "deserialize_openapi_config_test",
+                test_case_dir.get_test_source_path(__file__),
+                test_case_dir.base_data_path,
+                test_case_dir.name,
                 config_type_dir,
                 "*.json",
             )

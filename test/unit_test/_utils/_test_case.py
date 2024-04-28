@@ -1,7 +1,6 @@
-import pathlib
 from typing import List
 
-from ..._base_test_case import BaseTestCaseFactory
+from ..._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 
 RESPONSE_JSON_PATHS: List[str] = []
 
@@ -19,11 +18,12 @@ class APIClientRequestTestCaseFactory(BaseTestCaseFactory):
             one_test_scenario = file_path
             RESPONSE_JSON_PATHS.append(one_test_scenario)
 
+        test_case_dir = TestCaseDirPath.CHECK_TEST
         cls._iterate_files_by_path(
             path=(
-                str(pathlib.Path(__file__).parent.parent.parent),
-                "data",
-                "check_test",
+                test_case_dir.get_test_source_path(__file__),
+                test_case_dir.base_data_path,
+                test_case_dir.name,
                 "diff_with_swagger",
                 "api_response",
                 "*.json",
