@@ -29,6 +29,8 @@ class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def load(cls) -> None:
+        test_cmd_opt_arg: dict = {}
+
         def _get_path(scenario_folder: str = "", yaml_file_naming: str = "") -> Tuple:
             return (
                 str(pathlib.Path(__file__).parent.parent.parent.parent),
@@ -38,43 +40,41 @@ class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
                 yaml_file_naming,
             )
 
-        def _generate_test_case_from_folder_callback(folder_path: str) -> None:
-
+        def _generate_dir_paths(folder_path: str) -> tuple:
+            nonlocal test_cmd_opt_arg
             test_cmd_opt_arg = cls._divide_chk(folder_path)
+            openapi_config_response = _get_path(scenario_folder=folder_path, yaml_file_naming="swagger_api.json")
+            expected_yaml_config = _get_path(scenario_folder=folder_path, yaml_file_naming="expect_config/api.yaml")
+            return openapi_config_response, expected_yaml_config
 
-            def _generate_test_case_from_files_callback(pair_paths: tuple) -> None:
-                swagger_api_resp_path = pair_paths[0]
-                expected_yaml_config_path = pair_paths[1]
+        def _generate_test_case_callback(pair_files: tuple) -> None:
+            swagger_api_resp_path = pair_files[0]
+            expected_yaml_config_path = pair_files[1]
 
-                if "has_tag" in swagger_api_resp_path:
-                    base_url = "/api/v1/test"
-                else:
-                    base_url = ""
-                if "include_template" in swagger_api_resp_path:
-                    include_template_config = True
-                else:
-                    include_template_config = False
-                test_cmd_opt_arg.update(
-                    {
-                        "base_url": base_url,
-                        "include_template_config": include_template_config,
-                    }
-                )
-                cmd_arg = SubCmdPullTestArgs(**test_cmd_opt_arg)
-                one_test_scenario = (swagger_api_resp_path, cmd_arg, expected_yaml_config_path)
-                DIVIDING_YAML_PATHS.append(one_test_scenario)
-
-            cls._iterate_files_by_paths(
-                paths=(
-                    _get_path(scenario_folder=folder_path, yaml_file_naming="swagger_api.json"),
-                    _get_path(scenario_folder=folder_path, yaml_file_naming="expect_config/api.yaml"),
-                ),
-                generate_test_case_callback=_generate_test_case_from_files_callback,
+            if "has_tag" in swagger_api_resp_path:
+                base_url = "/api/v1/test"
+            else:
+                base_url = ""
+            if "include_template" in swagger_api_resp_path:
+                include_template_config = True
+            else:
+                include_template_config = False
+            nonlocal test_cmd_opt_arg
+            assert test_cmd_opt_arg
+            test_cmd_opt_arg.update(
+                {
+                    "base_url": base_url,
+                    "include_template_config": include_template_config,
+                }
             )
+            cmd_arg = SubCmdPullTestArgs(**test_cmd_opt_arg)
+            one_test_scenario = (swagger_api_resp_path, cmd_arg, expected_yaml_config_path)
+            DIVIDING_YAML_PATHS.append(one_test_scenario)
 
-        cls._iterate_files_by_directory(
+        cls._iterate_files_by_directory_new(
             path=_get_path(),
-            generate_test_case_from_folder_callback=_generate_test_case_from_folder_callback,
+            generate_dir_paths=_generate_dir_paths,
+            generate_test_case_callback=_generate_test_case_callback,
         )
 
     @classmethod
