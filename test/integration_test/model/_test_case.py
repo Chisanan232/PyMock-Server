@@ -20,24 +20,31 @@ class LoadApiConfigWithDividingConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
     def load(cls) -> None:
-        def _get_path(scenario_folder: str = "", yaml_file_naming: str = "") -> str:
-            _path = (
+        def _get_path(scenario_folder: str = "", yaml_file_naming: str = "") -> tuple:
+            return (
                 str(pathlib.Path(__file__).parent.parent.parent),
                 "data",
                 "divide_test_load",
                 scenario_folder,
                 yaml_file_naming,
             )
-            return os.path.join(*_path)
 
-        different_scenarios_data_folder = os.listdir(_get_path())
-        for f in different_scenarios_data_folder:
-            yaml_dir = _get_path(scenario_folder=f, yaml_file_naming="api.yaml")
-            expected_yaml_dir = _get_path(scenario_folder=f, yaml_file_naming="_expected_api.yaml")
-            global DIVIDING_YAML_PATHS
-            for yaml_config_path, expected_yaml_config_path in zip(glob.glob(yaml_dir), glob.glob(expected_yaml_dir)):
-                one_test_scenario = (yaml_config_path, expected_yaml_config_path)
-                DIVIDING_YAML_PATHS.append(one_test_scenario)
+        def _generate_dir_paths(folder_path: str) -> tuple:
+            yaml_dir = _get_path(scenario_folder=folder_path, yaml_file_naming="api.yaml")
+            expected_yaml_dir = _get_path(scenario_folder=folder_path, yaml_file_naming="_expected_api.yaml")
+            return yaml_dir, expected_yaml_dir
+
+        def _generate_test_case_callback(pair_files: tuple) -> None:
+            yaml_config_path = pair_files[0]
+            expected_yaml_config_path = pair_files[1]
+            one_test_scenario = (yaml_config_path, expected_yaml_config_path)
+            DIVIDING_YAML_PATHS.append(one_test_scenario)
+
+        cls._iterate_files_by_directory_new(
+            path=_get_path(),
+            generate_dir_paths=_generate_dir_paths,
+            generate_test_case_callback=_generate_test_case_callback,
+        )
 
 
 class DeserializeOpenAPIConfigTestCaseFactory(BaseTestCaseFactory):

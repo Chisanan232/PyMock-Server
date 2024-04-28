@@ -28,7 +28,7 @@ class BaseTestCaseFactory(metaclass=ABCMeta):
 
     @classmethod
     def _iterate_files_by_paths(cls, paths: Tuple, generate_test_case_callback: Callable[[tuple], None]) -> None:
-        glob_files_from_dirs = (glob.glob(os.path.join(*path)) for path in paths)
+        glob_files_from_dirs = (glob.glob(path if isinstance(path, str) else os.path.join(*path)) for path in paths)
         for pair_paths in zip(*glob_files_from_dirs):
             generate_test_case_callback(pair_paths)
 
@@ -41,3 +41,20 @@ class BaseTestCaseFactory(metaclass=ABCMeta):
         regex_files_path = path if isinstance(path, str) else str(os.path.join(*path))
         for folder_path in os.listdir(regex_files_path):
             generate_test_case_from_folder_callback(folder_path)
+
+    @classmethod
+    def _iterate_files_by_directory_new(
+        cls,
+        path: Union[AnyStr, Tuple],
+        generate_dir_paths: Callable[[str], tuple],
+        generate_test_case_callback: Callable[[tuple], None],
+    ) -> None:
+        if not isinstance(path, (str, tuple)):
+            raise TypeError("The parameter *path* only accept 'str' or 'Tuple[str]' types.")
+        regex_files_path = path if isinstance(path, str) else str(os.path.join(*path))
+        for folder_path in os.listdir(regex_files_path):
+            dir_paths: tuple = generate_dir_paths(folder_path)
+            cls._iterate_files_by_paths(
+                paths=dir_paths,
+                generate_test_case_callback=generate_test_case_callback,
+            )
