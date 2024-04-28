@@ -1,4 +1,3 @@
-import glob
 import os
 import pathlib
 from typing import List, Union
@@ -71,13 +70,18 @@ class SubCmdPullTestCaseFactory(BaseTestCaseFactory):
                 f"*.{file_extension}",
             )
 
-        config_yaml_path = _get_path("config", "yaml")
-        swagger_json_path = _get_path("swagger", "json")
-
-        global PULL_YAML_PATHS_WITH_CONFIG
-        for yaml_config_path, json_path in zip(
-            sorted(glob.glob(config_yaml_path)), sorted(glob.glob(swagger_json_path))
-        ):
+        def _generate_test_case_callback(pair_paths: tuple) -> None:
+            yaml_config_path = pair_paths[0]
+            json_path = pair_paths[1]
             for dry_run_scenario in (True, False):
                 one_test_scenario = (json_path, dry_run_scenario, yaml_config_path)
                 PULL_YAML_PATHS_WITH_CONFIG.append(one_test_scenario)
+
+        config_yaml_path = _get_path("config", "yaml")
+        swagger_json_path = _get_path("swagger", "json")
+
+        cls._iterate_files_by_paths(
+            paths=(config_yaml_path, swagger_json_path),
+            generate_test_case_callback=_generate_test_case_callback,
+            sort=True,
+        )

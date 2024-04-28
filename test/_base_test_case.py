@@ -27,8 +27,17 @@ class BaseTestCaseFactory(metaclass=ABCMeta):
             generate_test_case_callback(json_config_path)
 
     @classmethod
-    def _iterate_files_by_paths(cls, paths: Tuple, generate_test_case_callback: Callable[[tuple], None]) -> None:
-        glob_files_from_dirs = (glob.glob(path if isinstance(path, str) else os.path.join(*path)) for path in paths)
+    def _iterate_files_by_paths(
+        cls, paths: Tuple, generate_test_case_callback: Callable[[tuple], None], sort: bool = False
+    ) -> None:
+
+        def _glob_files(path: Union[str, tuple]) -> List[str]:
+            glob_files = glob.glob(path if isinstance(path, str) else os.path.join(*path))
+            if sort:
+                return sorted(glob_files)
+            return glob_files
+
+        glob_files_from_dirs = (_glob_files(path) for path in paths)
         for pair_paths in zip(*glob_files_from_dirs):
             generate_test_case_callback(pair_paths)
 
