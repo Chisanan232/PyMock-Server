@@ -71,7 +71,7 @@ class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
             one_test_scenario = (swagger_api_resp_path, cmd_arg, expected_yaml_config_path)
             DIVIDING_YAML_PATHS.append(one_test_scenario)
 
-        cls._iterate_files_by_directory_new(
+        cls._iterate_files_by_directory(
             path=_get_path(),
             generate_dir_paths=_generate_dir_paths,
             generate_test_case_callback=_generate_test_case_callback,

@@ -34,16 +34,6 @@ class BaseTestCaseFactory(metaclass=ABCMeta):
 
     @classmethod
     def _iterate_files_by_directory(
-        cls, path: Union[AnyStr, Tuple], generate_test_case_from_folder_callback: Callable[[str], None]
-    ) -> None:
-        if not isinstance(path, (str, tuple)):
-            raise TypeError("The parameter *path* only accept 'str' or 'Tuple[str]' types.")
-        regex_files_path = path if isinstance(path, str) else str(os.path.join(*path))
-        for folder_path in os.listdir(regex_files_path):
-            generate_test_case_from_folder_callback(folder_path)
-
-    @classmethod
-    def _iterate_files_by_directory_new(
         cls,
         path: Union[AnyStr, Tuple],
         generate_dir_paths: Callable[[str], tuple],
