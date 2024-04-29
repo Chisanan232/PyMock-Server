@@ -1,8 +1,5 @@
-import glob
-import os
-import pathlib
 from abc import ABCMeta, abstractmethod
-from typing import Any, List
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
@@ -10,25 +7,10 @@ from urllib3 import HTTPResponse, PoolManager
 
 from pymock_api._utils.api_client import BaseAPIClient, URLLibHTTPClient
 
-RESPONSE_JSON_PATHS: List[str] = []
+from ._test_case import APIClientRequestTestCaseFactory
 
-
-def _get_all_swagger_config() -> None:
-    json_dir = os.path.join(
-        str(pathlib.Path(__file__).parent.parent.parent),
-        "data",
-        "check_test",
-        "diff_with_swagger",
-        "api_response",
-        "*.json",
-    )
-    global RESPONSE_JSON_PATHS
-    for json_config_path in glob.glob(json_dir):
-        one_test_scenario = json_config_path
-        RESPONSE_JSON_PATHS.append(one_test_scenario)
-
-
-_get_all_swagger_config()
+APIClientRequestTestCaseFactory.load()
+API_CLIENT_REQUEST_TEST_CASE = APIClientRequestTestCaseFactory.get_test_case()
 
 
 class APIClientTestSuite(metaclass=ABCMeta):
@@ -37,7 +19,7 @@ class APIClientTestSuite(metaclass=ABCMeta):
     def client(self) -> BaseAPIClient:
         pass
 
-    @pytest.mark.parametrize("swagger_config_response_path", RESPONSE_JSON_PATHS)
+    @pytest.mark.parametrize("swagger_config_response_path", API_CLIENT_REQUEST_TEST_CASE)
     def test_request(self, swagger_config_response_path: str, client: BaseAPIClient):
         with self._mock_request_process() as mock_request:
             mock_request.return_value = self._mock_return_value(swagger_config_response_path)

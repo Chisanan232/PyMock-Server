@@ -1,8 +1,5 @@
-import glob
 import json
-import os
-import pathlib
-from typing import Dict, List
+from typing import Dict
 
 import pytest
 
@@ -11,56 +8,16 @@ from pymock_api.model import deserialize_swagger_api_config, load_config
 
 from ..._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
 from ..._spec import run_test
+from ._test_case import (
+    DeserializeOpenAPIConfigTestCaseFactory,
+    LoadApiConfigWithDividingConfigTestCaseFactory,
+)
 
-# [(under_test_path, expected_path)]
-DIVIDING_YAML_PATHS: List[tuple] = []
+LoadApiConfigWithDividingConfigTestCaseFactory.load()
+LOAD_DIVIDING_CONFIG_TEST_CASE = LoadApiConfigWithDividingConfigTestCaseFactory.get_test_case()
 
-# [config_path]
-OPENAPI_DOCUMENT_CONFIG_PATHS: List[str] = []
-
-
-def _get_all_yaml_for_dividing() -> None:
-    def _get_path(scenario_folder: str = "", yaml_file_naming: str = "") -> str:
-        _path = (
-            str(pathlib.Path(__file__).parent.parent.parent),
-            "data",
-            "divide_test_load",
-            scenario_folder,
-            yaml_file_naming,
-        )
-        return os.path.join(*_path)
-
-    different_scenarios_data_folder = os.listdir(_get_path())
-    for f in different_scenarios_data_folder:
-        yaml_dir = _get_path(scenario_folder=f, yaml_file_naming="api.yaml")
-        expected_yaml_dir = _get_path(scenario_folder=f, yaml_file_naming="_expected_api.yaml")
-        global DIVIDING_YAML_PATHS
-        for yaml_config_path, expected_yaml_config_path in zip(glob.glob(yaml_dir), glob.glob(expected_yaml_dir)):
-            one_test_scenario = (yaml_config_path, expected_yaml_config_path)
-            DIVIDING_YAML_PATHS.append(one_test_scenario)
-
-
-def _get_all_openapi_config_path() -> None:
-    def _get_path(config_type_dir: str) -> str:
-        _path = (
-            str(pathlib.Path(__file__).parent.parent.parent),
-            "data",
-            "deserialize_openapi_config_test",
-            config_type_dir,
-            "*.json",
-        )
-        return os.path.join(*_path)
-
-    openapi_v2_dir = _get_path(config_type_dir="different_version")
-    openapi_v3_dir = _get_path(config_type_dir="entire_config")
-    for openapi_dir in [openapi_v2_dir, openapi_v3_dir]:
-        global OPENAPI_DOCUMENT_CONFIG_PATHS
-        for openapi_config_path in glob.glob(openapi_dir):
-            OPENAPI_DOCUMENT_CONFIG_PATHS.append(openapi_config_path)
-
-
-_get_all_yaml_for_dividing()
-_get_all_openapi_config_path()
+DeserializeOpenAPIConfigTestCaseFactory.load()
+DESERIALIZE_OPENAPI_DOCUMENT_CONFIG_TEST_CASE = DeserializeOpenAPIConfigTestCaseFactory.get_test_case()
 
 
 class TestInitFunctions:
@@ -86,7 +43,7 @@ class TestInitFunctions:
             expected_err_msg = f"The target configuration file {self.not_exist_file_path} doesn't exist."
             assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
 
-    @pytest.mark.parametrize(("yaml_config_path", "expected_yaml_config_path"), DIVIDING_YAML_PATHS)
+    @pytest.mark.parametrize(("yaml_config_path", "expected_yaml_config_path"), LOAD_DIVIDING_CONFIG_TEST_CASE)
     def test_load_config_with_dividing_feature(self, yaml_config_path: str, expected_yaml_config_path: str):
         # Run utility function loads configuration to get config data
         dividing_config = load_config(yaml_config_path)
@@ -134,7 +91,7 @@ class TestInitFunctions:
             assert expected_api_config.http.response is not None
             assert api_config.http.response.serialize() == expected_api_config.http.response.serialize()
 
-    @pytest.mark.parametrize("openapi_config_path", OPENAPI_DOCUMENT_CONFIG_PATHS)
+    @pytest.mark.parametrize("openapi_config_path", DESERIALIZE_OPENAPI_DOCUMENT_CONFIG_TEST_CASE)
     def test_deserialize_swagger_api_config_with_openapi_config(self, openapi_config_path: str):
         # Pre-process
         with open(openapi_config_path, "r", encoding="utf-8") as io_stream:
