@@ -19,7 +19,7 @@ class TestCaseDirPath(Enum):
         return (
             self.get_test_source_path(current_file),
             self.base_data_path,
-            self.name,
+            self.value,
             *path,
         )
 
