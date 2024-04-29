@@ -40,6 +40,10 @@ class TestCaseDirPath(Enum):
 
 
 class BaseTestCaseFactory(metaclass=ABCMeta):
+    @classmethod
+    @abstractmethod
+    def test_data_dir(cls) -> TestCaseDirPath:
+        pass
 
     @classmethod
     @abstractmethod

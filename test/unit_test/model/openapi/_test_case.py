@@ -41,6 +41,10 @@ V2OpenAPIDocConfigTestCase = namedtuple(
 class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
+    def test_data_dir(cls) -> TestCaseDirPath:
+        return TestCaseDirPath.DESERIALIZE_OPENAPI_CONFIG_TEST
+
+    @classmethod
     def get_test_case(cls) -> V2OpenAPIDocConfigTestCase:
         return V2OpenAPIDocConfigTestCase(
             entire_config=OPENAPI_API_DOC_JSON,
@@ -95,20 +99,23 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                             else:
                                 OPENAPI_API_PARAMETERS_JSON_FOR_API.append((param, openapi_api_docs))
 
-        test_case_dir = TestCaseDirPath.DESERIALIZE_OPENAPI_CONFIG_TEST
         cls._iterate_files_by_path(
-            path=(
-                test_case_dir.get_test_source_path(__file__),
-                test_case_dir.base_data_path,
-                test_case_dir.name,
-                "entire_config",
-                "*.json",
+            path=cls.test_data_dir().generate_path_with_base_prefix_path(
+                current_file=__file__,
+                path=(
+                    "entire_config",
+                    "*.json",
+                ),
             ),
             generate_test_case_callback=_generate_test_case_callback,
         )
 
 
 class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
+
+    @classmethod
+    def test_data_dir(cls) -> TestCaseDirPath:
+        return TestCaseDirPath.DESERIALIZE_OPENAPI_CONFIG_TEST
 
     @classmethod
     def get_test_case(cls) -> List[tuple]:
@@ -122,14 +129,13 @@ class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                 openapi_api_docs = json.loads(file_stream.read())
                 OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON.append(openapi_api_docs)
 
-        test_case_dir = TestCaseDirPath.DESERIALIZE_OPENAPI_CONFIG_TEST
         cls._iterate_files_by_path(
-            path=(
-                test_case_dir.get_test_source_path(__file__),
-                test_case_dir.base_data_path,
-                test_case_dir.name,
-                "different_version",
-                "*.json",
+            path=cls.test_data_dir().generate_path_with_base_prefix_path(
+                current_file=__file__,
+                path=(
+                    "different_version",
+                    "*.json",
+                ),
             ),
             generate_test_case_callback=_generate_test_case_callback,
         )

@@ -23,6 +23,10 @@ SubCmdPullTestArgs = namedtuple(
 class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
+    def test_data_dir(cls) -> TestCaseDirPath:
+        return TestCaseDirPath.DIVIDE_TEST_PULL
+
+    @classmethod
     def get_test_case(cls) -> List[tuple]:
         return DIVIDING_YAML_PATHS
 
@@ -31,13 +35,12 @@ class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
         test_cmd_opt_arg: dict = {}
 
         def _get_path(scenario_folder: str = "", yaml_file_naming: str = "") -> Tuple:
-            test_case_dir = TestCaseDirPath.DIVIDE_TEST_PULL
-            return (
-                test_case_dir.get_test_source_path(__file__),
-                test_case_dir.base_data_path,
-                test_case_dir.name,
-                scenario_folder,
-                yaml_file_naming,
+            return cls.test_data_dir().generate_path_with_base_prefix_path(
+                current_file=__file__,
+                path=(
+                    scenario_folder,
+                    yaml_file_naming,
+                ),
             )
 
         def _generate_dir_paths(folder_path: str) -> tuple:

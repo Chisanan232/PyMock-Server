@@ -14,19 +14,22 @@ OPENAPI_DOCUMENT_CONFIG_PATHS: List[str] = []
 class LoadApiConfigWithDividingConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
+    def test_data_dir(cls) -> TestCaseDirPath:
+        return TestCaseDirPath.DIVIDE_TEST_LOAD
+
+    @classmethod
     def get_test_case(cls) -> List[tuple]:
         return DIVIDING_YAML_PATHS
 
     @classmethod
     def load(cls) -> None:
         def _get_path(scenario_folder: str = "", yaml_file_naming: str = "") -> tuple:
-            test_case_dir = TestCaseDirPath.DIVIDE_TEST_LOAD
-            return (
-                test_case_dir.get_test_source_path(__file__),
-                test_case_dir.base_data_path,
-                test_case_dir.name,
-                scenario_folder,
-                yaml_file_naming,
+            return cls.test_data_dir().generate_path_with_base_prefix_path(
+                current_file=__file__,
+                path=(
+                    scenario_folder,
+                    yaml_file_naming,
+                ),
             )
 
         def _generate_dir_paths(folder_path: str) -> tuple:
@@ -50,21 +53,24 @@ class LoadApiConfigWithDividingConfigTestCaseFactory(BaseTestCaseFactory):
 class DeserializeOpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
+    def test_data_dir(cls) -> TestCaseDirPath:
+        return TestCaseDirPath.DESERIALIZE_OPENAPI_CONFIG_TEST
+
+    @classmethod
     def get_test_case(cls) -> List[str]:
         return OPENAPI_DOCUMENT_CONFIG_PATHS
 
     @classmethod
     def load(cls) -> None:
         def _get_path(config_type_dir: str) -> str:
-            test_case_dir = TestCaseDirPath.DESERIALIZE_OPENAPI_CONFIG_TEST
-            _path = (
-                test_case_dir.get_test_source_path(__file__),
-                test_case_dir.base_data_path,
-                test_case_dir.name,
-                config_type_dir,
-                "*.json",
+            _path = cls.test_data_dir().generate_path_with_base_prefix_path(
+                current_file=__file__,
+                path=(
+                    config_type_dir,
+                    "*.json",
+                ),
             )
-            return os.path.join(*_path)
+            return str(os.path.join(*_path))
 
         openapi_v2_dir = _get_path(config_type_dir="different_version")
         openapi_v3_dir = _get_path(config_type_dir="entire_config")

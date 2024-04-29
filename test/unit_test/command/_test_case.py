@@ -10,6 +10,10 @@ GET_YAML_PATHS_WITH_EX_CODE: List[tuple] = []
 class SubCmdGetTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
+    def test_data_dir(cls) -> TestCaseDirPath:
+        return TestCaseDirPath.GET_TEST
+
+    @classmethod
     def get_test_case(cls) -> List[tuple]:
         return GET_YAML_PATHS_WITH_EX_CODE
 
@@ -23,25 +27,24 @@ class SubCmdGetTestCaseFactory(BaseTestCaseFactory):
             one_test_scenario = (file_path, get_api_path, expected_exit_code)
             GET_YAML_PATHS_WITH_EX_CODE.append(one_test_scenario)
 
-        test_case_dir = TestCaseDirPath.GET_TEST
         is_valid_path = "valid" if is_valid_config else "invalid"
         if is_valid_config is False and acceptable_error is not None:
             config_folder = "warn" if acceptable_error else "error"
-            entire_config_path = (
-                test_case_dir.get_test_source_path(__file__),
-                test_case_dir.base_data_path,
-                test_case_dir.name,
-                is_valid_path,
-                config_folder,
-                "*.yaml",
+            entire_config_path = cls.test_data_dir().generate_path_with_base_prefix_path(
+                current_file=__file__,
+                path=(
+                    is_valid_path,
+                    config_folder,
+                    "*.yaml",
+                ),
             )
         else:
-            entire_config_path = (
-                test_case_dir.get_test_source_path(__file__),
-                test_case_dir.base_data_path,
-                test_case_dir.name,
-                is_valid_path,
-                "*.yaml",
+            entire_config_path = cls.test_data_dir().generate_path_with_base_prefix_path(
+                current_file=__file__,
+                path=(
+                    is_valid_path,
+                    "*.yaml",
+                ),
             )
         cls._iterate_files_by_path(
             path=entire_config_path,
@@ -56,20 +59,24 @@ PULL_YAML_PATHS_WITH_CONFIG: List[tuple] = []
 class SubCmdPullTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
+    def test_data_dir(cls) -> TestCaseDirPath:
+        return TestCaseDirPath.PULL_TEST
+
+    @classmethod
     def get_test_case(cls) -> List[tuple]:
         return PULL_YAML_PATHS_WITH_CONFIG
 
     @classmethod
     def load(cls) -> None:
         def _get_path(data_type: str, file_extension: str) -> str:
-            test_case_dir = TestCaseDirPath.PULL_TEST
-            return os.path.join(
-                test_case_dir.get_test_source_path(__file__),
-                test_case_dir.base_data_path,
-                test_case_dir.name,
-                data_type,
-                f"*.{file_extension}",
+            path = cls.test_data_dir().generate_path_with_base_prefix_path(
+                current_file=__file__,
+                path=(
+                    data_type,
+                    f"*.{file_extension}",
+                ),
             )
+            return str(os.path.join(*path))
 
         def _generate_test_case_callback(pair_paths: tuple) -> None:
             yaml_config_path = pair_paths[0]

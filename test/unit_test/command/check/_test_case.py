@@ -10,13 +10,15 @@ RESPONSE_JSON_PATHS: List[str] = []
 class SubCmdCheckComponentTestCaseFactory(BaseTestCaseFactory):
 
     @classmethod
+    def test_data_dir(cls) -> TestCaseDirPath:
+        return TestCaseDirPath.CHECK_TEST
+
+    @classmethod
     def get_test_case(cls) -> List[tuple]:
         return RESPONSE_JSON_PATHS_WITH_EX_CODE
 
     @classmethod
     def load(cls, has_base_info: bool, config_type: str, exit_code: Union[str, int]) -> None:
-
-        test_case_dir = TestCaseDirPath.CHECK_TEST
 
         def _generate_api_response_in_test_case_callback(json_config_path: str) -> None:
 
@@ -28,33 +30,37 @@ class SubCmdCheckComponentTestCaseFactory(BaseTestCaseFactory):
 
             yaml_file_format = "*.yaml" if config_type == "invalid" else f"{file_naming}*.yaml"
             cls._iterate_files_by_path(
-                path=(
-                    test_case_dir.get_test_source_path(__file__),
-                    test_case_dir.base_data_path,
-                    test_case_dir.name,
-                    "diff_with_swagger",
-                    "config",
-                    config_type,
-                    yaml_file_format,
+                path=cls.test_data_dir().generate_path_with_base_prefix_path(
+                    current_file=__file__,
+                    path=(
+                        "diff_with_swagger",
+                        "config",
+                        config_type,
+                        yaml_file_format,
+                    ),
                 ),
                 generate_test_case_callback=_generate_config_in_test_case_callback,
             )
 
         file_naming = "has-base-info" if has_base_info else "no-base-info"
         cls._iterate_files_by_path(
-            path=(
-                test_case_dir.get_test_source_path(__file__),
-                test_case_dir.base_data_path,
-                test_case_dir.name,
-                "diff_with_swagger",
-                "api_response",
-                f"{file_naming}*.json",
+            path=cls.test_data_dir().generate_path_with_base_prefix_path(
+                current_file=__file__,
+                path=(
+                    "diff_with_swagger",
+                    "api_response",
+                    f"{file_naming}*.json",
+                ),
             ),
             generate_test_case_callback=_generate_api_response_in_test_case_callback,
         )
 
 
 class SwaggerDiffCheckTestCaseFactory(BaseTestCaseFactory):
+
+    @classmethod
+    def test_data_dir(cls) -> TestCaseDirPath:
+        return TestCaseDirPath.CHECK_TEST
 
     @classmethod
     def get_test_case(cls) -> List[str]:
@@ -68,9 +74,8 @@ class SwaggerDiffCheckTestCaseFactory(BaseTestCaseFactory):
             global RESPONSE_JSON_PATHS
             RESPONSE_JSON_PATHS.append(one_test_scenario)
 
-        test_case_dir = TestCaseDirPath.CHECK_TEST
         cls._iterate_files_by_path(
-            path=test_case_dir.generate_path_with_base_prefix_path(
+            path=cls.test_data_dir().generate_path_with_base_prefix_path(
                 current_file=__file__,
                 path=(
                     "diff_with_swagger",
