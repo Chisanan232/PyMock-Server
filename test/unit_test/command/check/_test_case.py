@@ -70,13 +70,13 @@ class SwaggerDiffCheckTestCaseFactory(BaseTestCaseFactory):
 
         test_case_dir = TestCaseDirPath.CHECK_TEST
         cls._iterate_files_by_path(
-            path=(
-                test_case_dir.get_test_source_path(__file__),
-                test_case_dir.base_data_path,
-                test_case_dir.name,
-                "diff_with_swagger",
-                "api_response",
-                "*.json",
+            path=test_case_dir.generate_path_with_base_prefix_path(
+                current_file=__file__,
+                path=(
+                    "diff_with_swagger",
+                    "api_response",
+                    "*.json",
+                ),
             ),
             generate_test_case_callback=_generate_test_case_callback,
         )

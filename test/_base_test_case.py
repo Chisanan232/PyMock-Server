@@ -15,6 +15,14 @@ class TestCaseDirPath(Enum):
     DIVIDE_TEST_PULL: str = "divide_test_pull"
     DESERIALIZE_OPENAPI_CONFIG_TEST: str = "deserialize_openapi_config_test"
 
+    def generate_path_with_base_prefix_path(self, current_file: str, path: tuple) -> tuple:
+        return (
+            self.get_test_source_path(current_file),
+            self.base_data_path,
+            self.name,
+            *path,
+        )
+
     def get_test_source_path(self, current_file: str) -> str:
         tmp_dir_path = pathlib.Path(current_file).parent
         while True:
