@@ -31,7 +31,6 @@ class SubCmdGetTestCaseFactory(BaseTestCaseFactory):
         if is_valid_config is False and acceptable_error is not None:
             config_folder = "warn" if acceptable_error else "error"
             entire_config_path = cls.test_data_dir().generate_path_with_base_prefix_path(
-                current_file=__file__,
                 path=(
                     is_valid_path,
                     config_folder,
@@ -40,7 +39,6 @@ class SubCmdGetTestCaseFactory(BaseTestCaseFactory):
             )
         else:
             entire_config_path = cls.test_data_dir().generate_path_with_base_prefix_path(
-                current_file=__file__,
                 path=(
                     is_valid_path,
                     "*.yaml",
@@ -70,7 +68,6 @@ class SubCmdPullTestCaseFactory(BaseTestCaseFactory):
     def load(cls) -> None:
         def _get_path(data_type: str, file_extension: str) -> str:
             path = cls.test_data_dir().generate_path_with_base_prefix_path(
-                current_file=__file__,
                 path=(
                     data_type,
                     f"*.{file_extension}",

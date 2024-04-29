@@ -101,7 +101,6 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
 
         cls._iterate_files_by_path(
             path=cls.test_data_dir().generate_path_with_base_prefix_path(
-                current_file=__file__,
                 path=(
                     "entire_config",
                     "*.json",
@@ -131,7 +130,6 @@ class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
 
         cls._iterate_files_by_path(
             path=cls.test_data_dir().generate_path_with_base_prefix_path(
-                current_file=__file__,
                 path=(
                     "different_version",
                     "*.json",

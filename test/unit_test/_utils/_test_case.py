@@ -24,7 +24,6 @@ class APIClientRequestTestCaseFactory(BaseTestCaseFactory):
 
         cls._iterate_files_by_path(
             path=cls.test_data_dir().generate_path_with_base_prefix_path(
-                current_file=__file__,
                 path=(
                     "diff_with_swagger",
                     "api_response",

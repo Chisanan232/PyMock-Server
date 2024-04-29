@@ -31,7 +31,6 @@ class SubCmdCheckComponentTestCaseFactory(BaseTestCaseFactory):
             yaml_file_format = "*.yaml" if config_type == "invalid" else f"{file_naming}*.yaml"
             cls._iterate_files_by_path(
                 path=cls.test_data_dir().generate_path_with_base_prefix_path(
-                    current_file=__file__,
                     path=(
                         "diff_with_swagger",
                         "config",
@@ -45,7 +44,6 @@ class SubCmdCheckComponentTestCaseFactory(BaseTestCaseFactory):
         file_naming = "has-base-info" if has_base_info else "no-base-info"
         cls._iterate_files_by_path(
             path=cls.test_data_dir().generate_path_with_base_prefix_path(
-                current_file=__file__,
                 path=(
                     "diff_with_swagger",
                     "api_response",
@@ -76,7 +74,6 @@ class SwaggerDiffCheckTestCaseFactory(BaseTestCaseFactory):
 
         cls._iterate_files_by_path(
             path=cls.test_data_dir().generate_path_with_base_prefix_path(
-                current_file=__file__,
                 path=(
                     "diff_with_swagger",
                     "api_response",

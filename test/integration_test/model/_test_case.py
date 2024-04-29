@@ -25,7 +25,6 @@ class LoadApiConfigWithDividingConfigTestCaseFactory(BaseTestCaseFactory):
     def load(cls) -> None:
         def _get_path(scenario_folder: str = "", yaml_file_naming: str = "") -> tuple:
             return cls.test_data_dir().generate_path_with_base_prefix_path(
-                current_file=__file__,
                 path=(
                     scenario_folder,
                     yaml_file_naming,
@@ -64,7 +63,6 @@ class DeserializeOpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
     def load(cls) -> None:
         def _get_path(config_type_dir: str) -> str:
             _path = cls.test_data_dir().generate_path_with_base_prefix_path(
-                current_file=__file__,
                 path=(
                     config_type_dir,
                     "*.json",
