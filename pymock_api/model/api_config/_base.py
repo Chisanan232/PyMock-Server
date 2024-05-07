@@ -1,7 +1,8 @@
 import sys
 from abc import ABC, ABCMeta, abstractmethod
+from copy import copy
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 # The truly semantically is more near like following:
 #
@@ -48,6 +49,21 @@ class _Config(metaclass=ABCMeta):
     @abstractmethod
     def key(self) -> str:
         pass
+
+    @staticmethod
+    def _clean_empty_value(function: Callable) -> Callable:
+        _empty_value: Tuple = (None, "", [], (), {})
+
+        def _(self, data: Optional[SelfType] = None) -> Optional[Dict[str, Any]]:
+            serialized_data = function(self, data)
+            if serialized_data:
+                tmp_serialized_data = copy(serialized_data)
+                for k, v in tmp_serialized_data.items():
+                    if v in _empty_value:
+                        serialized_data.pop(k)
+            return serialized_data
+
+        return _
 
     @abstractmethod
     def serialize(self, data: Optional[SelfType] = None) -> Optional[Dict[str, Any]]:
