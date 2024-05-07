@@ -21,7 +21,8 @@ class APIParameter(BaseProperty):
     def key(self) -> str:
         return "parameters.<parameter item>"
 
-    def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:  # type: ignore[override]
+    @_Config._clean_empty_value
+    def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:
         serialized_data = super().serialize(data)
         if serialized_data is not None:
             default: Union[str, list] = self._get_prop(data, prop="default")
