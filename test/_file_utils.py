@@ -3,7 +3,10 @@ import os
 from abc import ABCMeta, abstractmethod
 from typing import Callable, Optional, Union
 
-from yaml import CDumper as Dumper
+try:
+    from yaml import CDumper as Dumper
+except ImportError:
+    from yaml import Dumper  # type: ignore
 from yaml import dump
 
 from ._values import _Test_Config_Value
