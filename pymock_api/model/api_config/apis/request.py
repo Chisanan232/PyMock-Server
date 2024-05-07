@@ -40,8 +40,7 @@ class APIParameter(BaseProperty):
     def is_work(self) -> bool:
         if not self.condition_should_be_true(
             config_key=f"{self.absolute_model_key}.default",
-            condition=(self.required is True and self.default is not None)
-            or (self.required is False and self.default is None),
+            condition=(self.required is True and self.default is not None),
             err_msg="It's meaningless if it has default value but it is required. The default value setting should not be None if the required is 'False'.",
         ):
             return False
