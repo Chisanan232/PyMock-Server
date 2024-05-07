@@ -6,29 +6,22 @@ http:
     parameters:
       - name: 'date'
         required: true
-        default:
         type: str
-        format:
       - name: 'fooType'
         required: true
-        default:
         type: str
-        format:
   response:
     strategy: object
     properties:
       - name: errorMessage
         required: True
         type: str
-        format:
       - name: responseCode
         required: True
         type: str
-        format:
       - name: responseData
         required: False
         type: list
-        format:
         items:
           - name: id
             required: True

@@ -38,15 +38,12 @@ mocked_apis:
             - name: errorMessage
               required: True
               type: str
-              format:
             - name: responseCode
               required: True
               type: str
-              format:
             - name: responseData
               required: False
               type: list
-              format:
               items:
                 - name: id
                   required: True
@@ -70,15 +67,12 @@ mocked_apis:
             - name: errorMessage
               required: True
               type: str
-              format:
             - name: responseCode
               required: True
               type: str
-              format:
             - name: responseData
               required: False
               type: list
-              format:
     get_foo-boo_export:
       url: /foo-boo/export
       tag: foo-boo
@@ -89,34 +83,26 @@ mocked_apis:
             - name: description
               required: True
               type: str
-              format:
             # TODO: implement file stream
             - name: file
               required: True
               type: file
-              format:
             - name: filename
               required: True
               type: str
-              format:
             # TODO: implement file stream
             - name: inputStream
               required: True
               type: file
-              format:
             - name: open
               required: True
               type: bool
-              format:
             - name: readable
               required: True
               type: bool
-              format:
             - name: uri
               required: True
               type: str
-              format:
             - name: url
               required: True
               type: str
-              format:

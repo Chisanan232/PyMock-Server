@@ -39,7 +39,8 @@ class BaseProperty(_HasItemsPropConfig, ABC):
         item.absolute_model_key = self.key
         return item
 
-    def serialize(self, data: Optional["BaseProperty"] = None) -> Optional[Dict[str, Any]]:  # type: ignore[override]
+    @_Config._clean_empty_value
+    def serialize(self, data: Optional["BaseProperty"] = None) -> Optional[Dict[str, Any]]:
         name: str = self._get_prop(data, prop="name")
         required: bool = self._get_prop(data, prop="required")
         value_type: type = self._get_prop(data, prop="value_type")

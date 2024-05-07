@@ -21,7 +21,8 @@ class APIParameter(BaseProperty):
     def key(self) -> str:
         return "parameters.<parameter item>"
 
-    def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:  # type: ignore[override]
+    @_Config._clean_empty_value
+    def serialize(self, data: Optional["APIParameter"] = None) -> Optional[Dict[str, Any]]:
         serialized_data = super().serialize(data)
         if serialized_data is not None:
             default: Union[str, list] = self._get_prop(data, prop="default")
@@ -39,8 +40,7 @@ class APIParameter(BaseProperty):
     def is_work(self) -> bool:
         if not self.condition_should_be_true(
             config_key=f"{self.absolute_model_key}.default",
-            condition=(self.required is True and self.default is not None)
-            or (self.required is False and self.default is None),
+            condition=(self.required is True and self.default is not None),
             err_msg="It's meaningless if it has default value but it is required. The default value setting should not be None if the required is 'False'.",
         ):
             return False

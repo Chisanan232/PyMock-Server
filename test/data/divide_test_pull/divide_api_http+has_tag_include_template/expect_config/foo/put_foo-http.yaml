@@ -3,9 +3,7 @@ request:
   parameters:
     - name: 'balances'
       required: true
-      default: []
       type: list
-      format:
       items:
         - required: true
           type: int
@@ -19,12 +17,9 @@ response:
     - name: errorMessage
       required: True
       type: str
-      format:
     - name: responseCode
       required: True
       type: str
-      format:
     - name: responseData
       required: False
       type: list
-      format:

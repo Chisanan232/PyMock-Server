@@ -7,54 +7,42 @@ http:
         required: false
         default: []
         type: list
-        format:
         items:
           - required: true
             type: str
       - name: 'arg2'
         required: false
-        default: ''
         type: str
-        format:
       - name: 'datetime'
         required: false
         default: ''
         type: str
-        format:
   response:
     strategy: object
     properties:
       - name: description
         required: True
         type: str
-        format:
       # TODO: implement file stream
       - name: file
         required: True
         type: file
-        format:
       - name: filename
         required: True
         type: str
-        format:
       # TODO: implement file stream
       - name: inputStream
         required: True
         type: file
-        format:
       - name: open
         required: True
         type: bool
-        format:
       - name: readable
         required: True
         type: bool
-        format:
       - name: uri
         required: True
         type: str
-        format:
       - name: url
         required: True
         type: str
-        format:

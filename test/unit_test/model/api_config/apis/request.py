@@ -103,7 +103,7 @@ class TestAPIParameter(ConfigTestSpec):
     def test_serialize_api_parameter_with_iterable_items(self, sut_with_nothing: APIParameter):
         sut_with_nothing.deserialize(_Test_Iterable_Parameter_With_MultiValue)
         serialized_data = sut_with_nothing.serialize()
-        assert serialized_data == _Test_Iterable_Parameter_With_MultiValue
+        assert serialized_data == self._clean_prop_with_empty_value(_Test_Iterable_Parameter_With_MultiValue)
 
     def test_deserialize_api_parameter_with_iterable_items(self, sut_with_nothing: APIParameter):
         sut_with_nothing.deserialize(_Test_Iterable_Parameter_With_MultiValue)

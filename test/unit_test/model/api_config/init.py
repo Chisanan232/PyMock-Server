@@ -147,7 +147,9 @@ class TestAPIConfig(CheckableTestSuite):
         assert isinstance(config, APIConfig)
         assert config.name == _Config_Name
         assert config.description == _Config_Description
-        assert config.apis.serialize() == _TestConfig.Mock_APIs
+        clean_api_config = self._clean_prop_with_empty_value(config.apis.serialize())
+        expected_data = self._clean_prop_with_empty_value(_TestConfig.Mock_APIs)
+        assert clean_api_config == expected_data
 
     @patch("pymock_api._utils.file_opt.YAML.write", return_value=None)
     def test_to_yaml_file(self, mock_write_yaml: Mock, sut: APIConfig):
