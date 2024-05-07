@@ -3,12 +3,9 @@ properties:
   - name: errorMessage
     required: True
     type: str
-    format:
   - name: responseCode
     required: True
     type: str
-    format:
   - name: responseData
     required: False
     type: list
-    format:
