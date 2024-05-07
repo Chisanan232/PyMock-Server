@@ -12,11 +12,9 @@ mocked_apis:
           parameters:
             - name: 'date'
               required: true
-              default:
               type: str
             - name: 'fooType'
               required: true
-              default:
               type: str
         response:
           strategy: object
@@ -72,7 +70,6 @@ mocked_apis:
           parameters:
             - name: 'balances'
               required: true
-              default: []
               type: list
               items:
                 - required: true
@@ -102,18 +99,15 @@ mocked_apis:
           parameters:
             - name: 'arg1'
               required: false
-              default: []
               type: list
               items:
                 - required: true
                   type: str
             - name: 'arg2'
               required: false
-              default:
               type: str
             - name: 'datetime'
               required: false
-              default:
               type: str
         response:
           strategy: object

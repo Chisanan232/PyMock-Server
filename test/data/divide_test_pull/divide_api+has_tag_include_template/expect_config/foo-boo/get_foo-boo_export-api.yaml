@@ -6,22 +6,16 @@ http:
     parameters:
       - name: 'arg1'
         required: false
-        default: []
         type: list
-        format:
         items:
           - required: true
             type: str
       - name: 'arg2'
         required: false
-        default:
         type: str
-        format:
       - name: 'datetime'
         required: false
-        default:
         type: str
-        format:
   response:
     strategy: object
     properties:

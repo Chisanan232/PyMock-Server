@@ -178,6 +178,14 @@ class ConfigTestSpec(metaclass=ABCMeta):
                 if isinstance(v, dict):
                     v = self._clean_prop_with_empty_value(v)
                     final_expect_value[k] = v
+                elif isinstance(v, list):
+                    dict_type_es = list(filter(lambda e: isinstance(e, dict), v))
+                    if dict_type_es:
+                        clean_list = []
+                        for e in dict_type_es:
+                            clean_e = self._clean_prop_with_empty_value(e)
+                            clean_list.append(clean_e)
+                        final_expect_value[k] = clean_list
         return final_expect_value
 
     @abstractmethod

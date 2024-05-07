@@ -3,14 +3,10 @@ request:
   parameters:
     - name: 'date'
       required: true
-      default:
       type: str
-      format:
     - name: 'fooType'
       required: true
-      default:
       type: str
-      format:
 response:
   strategy: object
   properties:
