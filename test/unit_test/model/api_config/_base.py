@@ -4,7 +4,8 @@ import pathlib
 import re
 from abc import ABC, ABCMeta, abstractmethod
 from collections import namedtuple
-from typing import Any, Callable, Dict, List, Optional
+from copy import copy
+from typing import Callable, Dict, List, Optional
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
@@ -166,10 +167,21 @@ class ConfigTestSpec(metaclass=ABCMeta):
         pass
 
     def test_serialize(self, sut: _Config):
-        assert sut.serialize() == self._expected_serialize_value()
+        assert sut.serialize() == self._clean_prop_with_empty_value(self._expected_serialize_value())
+
+    def _clean_prop_with_empty_value(self, data: dict) -> dict:
+        final_expect_value = copy(data)
+        for k, v in data.items():
+            if v in (None, "", [], (), {}):
+                final_expect_value.pop(k)
+            else:
+                if isinstance(v, dict):
+                    v = self._clean_prop_with_empty_value(v)
+                    final_expect_value[k] = v
+        return final_expect_value
 
     @abstractmethod
-    def _expected_serialize_value(self) -> Any:
+    def _expected_serialize_value(self) -> dict:
         pass
 
     def test_serialize_with_none(self, sut_with_nothing: _Config):
