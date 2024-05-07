@@ -13,17 +13,14 @@ mocked_apis:
               required: false
               type: str
               default: 'arg1_default_value'
-              format:
             - name: 'arg2'
               required: false
               type: int
               default: 0
-              format:
             - name: 'arg3'
               required: false
               type: bool
               default: false
-              format:
         response:
           strategy: object
           properties: []
