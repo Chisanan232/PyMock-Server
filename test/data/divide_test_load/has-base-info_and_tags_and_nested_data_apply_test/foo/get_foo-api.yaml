@@ -1,0 +1,67 @@
+url: '/foo'
+http:
+  request:
+    method: 'GET'
+    parameters:
+      - name: 'date'
+        required: true
+        type: str
+      - name: 'fooType'
+        required: true
+        type: str
+  response:
+    strategy: object
+    properties:
+      - name: errorMessage
+        required: True
+        type: str
+      - name: responseCode
+        required: True
+        type: str
+      - name: responseData
+        required: False
+        type: list
+        items:
+          - name: id
+            required: True
+            type: int
+          - name: name
+            required: True
+            type: str
+          - name: value1
+            required: True
+            type: str
+          - name: value2
+            required: True
+            type: dict
+            items:
+              - name: personalInfo
+                required: True
+                type: dict
+                items:
+                  - name: domain
+                    required: True
+                    type: str
+                  - name: url
+                    required: True
+                    type: str
+              - name: jobExperience
+                required: False
+                type: dict
+                items:
+                  - name: domain
+                    required: True
+                    type: str
+                  - name: url
+                    required: True
+                    type: str
+              - name: sideProject
+                required: False
+                type: dict
+                items:
+                  - name: domain
+                    required: True
+                    type: str
+                  - name: url
+                    required: True
+                    type: str
