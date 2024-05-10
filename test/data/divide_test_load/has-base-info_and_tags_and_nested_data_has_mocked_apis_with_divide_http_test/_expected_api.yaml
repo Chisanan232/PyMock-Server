@@ -1,0 +1,123 @@
+name: ''
+description: ''
+mocked_apis:
+  base:
+    url: '/api/v1/test'
+  apis:
+    get_foo:
+      url: '/foo'
+      http:
+        request:
+          apply_template_props: True
+          method: 'GET'
+          parameters:
+            - name: 'date'
+              required: true
+              type: str
+            - name: 'fooType'
+              required: true
+              type: str
+        response:
+          strategy: object
+          properties:
+            - name: errorMessage
+              required: True
+              type: str
+            - name: responseCode
+              required: True
+              type: str
+            - name: responseData
+              required: False
+              type: list
+              items:
+                - name: id
+                  required: True
+                  type: int
+                - name: name
+                  required: True
+                  type: str
+                - name: value1
+                  required: True
+                  type: str
+                - name: value2
+                  required: True
+                  type: str
+      tag: 'foo'
+    special_put_foo:
+      url: '/foo'
+      http:
+        request:
+          method: 'PUT'
+          parameters:
+            - name: 'balances'
+              required: true
+              type: list
+              items:
+                - required: true
+                  type: int
+                  name: "value"
+                - required: true
+                  type: int
+                  name: "id"
+        response:
+          strategy: object
+          properties:
+            - name: errorMessage
+              required: True
+              type: str
+            - name: responseCode
+              required: True
+              type: str
+            - name: responseData
+              required: False
+              type: list
+      tag: 'foo'
+    get_foo-boo_export:
+      url: '/foo-boo/export'
+      http:
+        request:
+          method: 'GET'
+          parameters:
+            - name: 'arg1'
+              required: false
+              type: list
+              items:
+                - required: true
+                  type: str
+            - name: 'arg2'
+              required: false
+              type: str
+            - name: 'datetime'
+              required: false
+              type: str
+        response:
+          apply_template_props: True
+          strategy: object
+          properties:
+            - name: description
+              required: True
+              type: str
+            # TODO: implement file stream
+            - name: file
+              required: True
+              type: file
+            - name: filename
+              required: True
+              type: str
+            # TODO: implement file stream
+            - name: inputStream
+              required: True
+              type: file
+            - name: open
+              required: True
+              type: bool
+            - name: readable
+              required: True
+              type: bool
+            - name: uri
+              required: True
+              type: str
+            - name: url
+              required: True
+              type: str
+      tag: 'foo-boo'
