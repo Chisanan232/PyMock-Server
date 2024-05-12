@@ -1,0 +1,9 @@
+request:
+  method: 'GET'
+  parameters:
+    - name: 'date'
+      required: true
+      type: str
+    - name: 'fooType'
+      required: true
+      type: str
