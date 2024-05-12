@@ -244,10 +244,17 @@ class _ReferenceObjectParser:
         return data.get("schema", None) is not None
 
     @classmethod
+    def has_additional_properties(cls, data: Dict) -> bool:
+        return data.get("additionalProperties", None) is not None
+
+    @classmethod
     def has_ref(cls, data: Dict) -> str:
         if cls.has_schema(data):
             has_schema_ref = data["schema"].get("$ref", None) is not None
             return "schema" if has_schema_ref else ""
+        elif cls.has_additional_properties(data):
+            has_additional_properties = data["additionalProperties"].get("$ref", None) is not None
+            return "additionalProperties" if has_additional_properties else ""
         else:
             _has_ref = data.get("$ref", None) is not None
             return "ref" if _has_ref else ""
@@ -264,9 +271,7 @@ class _ReferenceObjectParser:
         _has_ref = _ReferenceObjectParser.has_ref(data)
         if not _has_ref:
             raise ValueError("This parameter has no ref in schema.")
-        schema_path = (
-            (data["schema"]["$ref"] if _has_ref == "schema" else data["$ref"]).replace("#/", "").split("/")[1:]
-        )
+        schema_path = (data[_has_ref]["$ref"] if _has_ref != "ref" else data["$ref"]).replace("#/", "").split("/")[1:]
         print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")
         # Operate the component definition object
         return _get_schema(get_component_definition(), schema_path, 0)
