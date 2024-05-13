@@ -15,11 +15,28 @@ class IteratorItem(_HasItemsPropConfig):
     _absolute_key: str = field(init=False, repr=False)
 
     def _compare(self, other: "IteratorItem") -> bool:  # type: ignore[override]
+        # Compare property *items* details
+        items_prop_is_same: bool = True
+        for item in self.items or []:
+            same_name_other_item = list(filter(lambda i: item.name == i.name, other.items or []))
+            if not same_name_other_item:
+                items_prop_is_same = False
+                break
+            assert len(same_name_other_item) == 1
+            # print(f"[DEBUG in IteratorItem._compare] item: {item}")
+            # print(f"[DEBUG in IteratorItem._compare] same_name_other_item: {same_name_other_item}")
+            if item != same_name_other_item[0]:
+                items_prop_is_same = False
+                break
+
+        # print(f"[DEBUG in IteratorItem._compare] items_prop_is_same: {items_prop_is_same}")
         return (
             self.name == other.name
             and self.required == other.required
             and self.value_type == other.value_type
+            # Compare property *items*
             and super()._compare(other)
+            and items_prop_is_same
         )
 
     def _item_type(self) -> Type["IteratorItem"]:

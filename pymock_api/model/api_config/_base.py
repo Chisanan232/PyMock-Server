@@ -184,6 +184,8 @@ class _HasItemsPropConfig(_Config, _Checkable, ABC):
     items: Optional[List["_HasItemsPropConfig"]] = None
 
     def _compare(self, other: "_HasItemsPropConfig") -> bool:
+        if self.items and other.items:
+            return len(self.items) == len(other.items)
         return self.items == other.items
 
     def __post_init__(self) -> None:
