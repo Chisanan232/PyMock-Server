@@ -13,6 +13,7 @@ from ....._values import (
     _Test_HTTP_Resp,
     _Test_Response_Property_Dict,
     _Test_Response_Property_List,
+    _Test_Response_Property_Priority_Dict,
     _TestConfig,
 )
 from .._base import (
@@ -112,6 +113,16 @@ class TestResponsePropertyWithNestedData(TestResponseProperty):
             assert list(filter(lambda i: i["name"] == item.name, _Test_Response_Property_Dict["items"]))
             assert list(filter(lambda i: i["required"] == item.required, _Test_Response_Property_Dict["items"]))
             assert list(filter(lambda i: i["type"] == item.value_type, _Test_Response_Property_Dict["items"]))
+
+    def test_compare_with_other_has_different_element(self, sut: ResponseProperty):
+        copy_sut = ResponseProperty(
+            name=sut.name,
+            required=sut.required,
+            value_type=sut.value_type,
+            value_format=sut.value_format,
+            items=_Test_Response_Property_Priority_Dict["items"],
+        )
+        assert sut != copy_sut
 
 
 class TestHTTPResponse(TemplatableConfigTestSuite, CheckableTestSuite):

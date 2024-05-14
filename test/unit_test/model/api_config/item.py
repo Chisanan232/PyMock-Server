@@ -6,7 +6,10 @@ import pytest
 from pymock_api.model.api_config import IteratorItem
 from pymock_api.model.api_config._base import _HasItemsPropConfig
 
-from ...._values import _Test_Response_Property_Details_Dict
+from ...._values import (
+    _Test_Iterable_Parameter_Items,
+    _Test_Response_Property_Details_Dict,
+)
 from ._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
 
 
@@ -71,3 +74,12 @@ class TestIteratorItem(CheckableTestSuite):
             str(exc_info.value),
             re.IGNORECASE,
         )
+
+    def test_compare_with_other_has_different_element(self, sut: IteratorItem):
+        copy_sut = IteratorItem(
+            name=sut.name,
+            required=sut.required,
+            value_type=sut.value_type,
+            items=_Test_Iterable_Parameter_Items,
+        )
+        assert sut != copy_sut
