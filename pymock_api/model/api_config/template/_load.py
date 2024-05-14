@@ -70,10 +70,6 @@ class _BaseTemplateConfigLoader:
         args = {
             "path": path,
         }
-        # Get parent config
-        # Set the current config (which is child-config) into the parent config, e.g., set the HTTP config
-        # *HTTP A* into MockAPI config *API A*, doesn't set into MockAPI config *API B*.
-        # parent_config = self._get_parent_config()
         self._template_config_opts._set_template_config(config, **args)
 
     def _deserialize_template_config(self, path: str) -> Optional[_Config]:
