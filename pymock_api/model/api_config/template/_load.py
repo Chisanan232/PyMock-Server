@@ -122,10 +122,7 @@ class TemplateConfigLoaderByScanFile(_BaseTemplateConfigLoader):
             if os.path.isdir(path):
                 self._iterate_files_to_deserialize_template_config(path)
             else:
-                assert os.path.isfile(path) is True
-                if fnmatch.fnmatch(path, self._template_config_opts._config_file_format):
-                    # Doesn't have tag, it's config
-                    self._deserialize_and_set_template_config(path)
+                self._use_specific_file_to_deserialize_template_config(path)
 
     def _iterate_files_to_deserialize_template_config(self, path: str) -> None:
         # Has tag as directory
@@ -151,6 +148,12 @@ class TemplateConfigLoaderByScanFile(_BaseTemplateConfigLoader):
             for path_with_tag in glob.glob(str(pathlib.Path(path, self._template_config_opts._config_file_format))):
                 # In the tag directory, it's config
                 self._deserialize_and_set_template_config(path_with_tag)
+
+    def _use_specific_file_to_deserialize_template_config(self, path: str) -> None:
+        # Doesn't have tag, it's config
+        assert os.path.isfile(path) is True
+        if fnmatch.fnmatch(path, self._template_config_opts._config_file_format):
+            self._deserialize_and_set_template_config(path)
 
 
 class TemplateConfigLoaderByApply(_BaseTemplateConfigLoader):
