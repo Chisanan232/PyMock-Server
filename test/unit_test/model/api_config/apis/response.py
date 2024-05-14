@@ -1,6 +1,6 @@
 import random
 import re
-from typing import Any
+from typing import Any, List
 
 import pytest
 
@@ -13,7 +13,6 @@ from ....._values import (
     _Test_HTTP_Resp,
     _Test_Response_Property_Dict,
     _Test_Response_Property_List,
-    _Test_Response_Property_Priority_Dict,
     _TestConfig,
 )
 from .._base import (
@@ -114,15 +113,96 @@ class TestResponsePropertyWithNestedData(TestResponseProperty):
             assert list(filter(lambda i: i["required"] == item.required, _Test_Response_Property_Dict["items"]))
             assert list(filter(lambda i: i["type"] == item.value_type, _Test_Response_Property_Dict["items"]))
 
-    def test_compare_with_other_has_different_element(self, sut: ResponseProperty):
-        copy_sut = ResponseProperty(
-            name=sut.name,
-            required=sut.required,
-            value_type=sut.value_type,
-            value_format=sut.value_format,
-            items=_Test_Response_Property_Priority_Dict["items"],
+    @pytest.mark.parametrize(
+        "items_data",
+        [
+            # Miss columns
+            [
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+            ],
+            # Have columns it doesn't have
+            [
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+                {"name": "what_is_this", "required": True, "type": "str"},
+            ],
+            # Details in property *items* are different
+            [
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+                {"name": "project", "required": False, "type": "list", "items": [{"required": True, "type": "str"}]},
+                {
+                    "name": "responsibility",
+                    "required": True,
+                    "type": "list",
+                    "items": [
+                        {"name": "project", "required": True, "type": "str"},
+                        {
+                            "name": "language",
+                            "required": True,
+                            "type": "list",
+                            "items": [{"required": True, "type": "str"}],
+                        },
+                    ],
+                },
+            ],
+            # Details in property *items.items* are different
+            [
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+                {"name": "project", "required": True, "type": "list", "items": [{"required": True, "type": "int"}]},
+                {
+                    "name": "responsibility",
+                    "required": True,
+                    "type": "list",
+                    "items": [
+                        {"name": "project", "required": True, "type": "str"},
+                        {
+                            "name": "language",
+                            "required": True,
+                            "type": "list",
+                            "items": [{"required": True, "type": "str"}],
+                        },
+                    ],
+                },
+            ],
+        ],
+    )
+    def test_compare_with_other_has_different_element(self, items_data: List[dict]):
+        resp_prop = ResponseProperty(
+            name="data",
+            required=True,
+            value_type="dict",
+            value_format=None,
+            items=[
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+                {"name": "project", "required": True, "type": "list", "items": [{"required": True, "type": "str"}]},
+                {
+                    "name": "responsibility",
+                    "required": True,
+                    "type": "list",
+                    "items": [
+                        {"name": "project", "required": True, "type": "str"},
+                        {
+                            "name": "language",
+                            "required": True,
+                            "type": "list",
+                            "items": [{"required": True, "type": "str"}],
+                        },
+                    ],
+                },
+            ],
         )
-        assert sut != copy_sut
+        diff_resp_prop = ResponseProperty(
+            name=resp_prop.name,
+            required=resp_prop.required,
+            value_type=resp_prop.value_type,
+            value_format=resp_prop.value_format,
+            items=items_data,
+        )
+        assert resp_prop != diff_resp_prop
 
 
 class TestHTTPResponse(TemplatableConfigTestSuite, CheckableTestSuite):

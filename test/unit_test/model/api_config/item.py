@@ -1,15 +1,12 @@
 import re
-from typing import Any
+from typing import Any, List
 
 import pytest
 
 from pymock_api.model.api_config import IteratorItem
 from pymock_api.model.api_config._base import _HasItemsPropConfig
 
-from ...._values import (
-    _Test_Iterable_Parameter_Items,
-    _Test_Response_Property_Details_Dict,
-)
+from ...._values import _Test_Response_Property_Details_Dict
 from ._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
 
 
@@ -75,11 +72,91 @@ class TestIteratorItem(CheckableTestSuite):
             re.IGNORECASE,
         )
 
-    def test_compare_with_other_has_different_element(self, sut: IteratorItem):
-        copy_sut = IteratorItem(
-            name=sut.name,
-            required=sut.required,
-            value_type=sut.value_type,
-            items=_Test_Iterable_Parameter_Items,
+    @pytest.mark.parametrize(
+        "items_data",
+        [
+            # Miss columns
+            [
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+            ],
+            # Have columns it doesn't have
+            [
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+                {"name": "what_is_this", "required": True, "type": "str"},
+            ],
+            # Details in property *items* are different
+            [
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+                {"name": "project", "required": False, "type": "list", "items": [{"required": True, "type": "str"}]},
+                {
+                    "name": "responsibility",
+                    "required": True,
+                    "type": "list",
+                    "items": [
+                        {"name": "project", "required": True, "type": "str"},
+                        {
+                            "name": "language",
+                            "required": True,
+                            "type": "list",
+                            "items": [{"required": True, "type": "str"}],
+                        },
+                    ],
+                },
+            ],
+            # Details in property *items.items* are different
+            [
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+                {"name": "project", "required": True, "type": "list", "items": [{"required": True, "type": "int"}]},
+                {
+                    "name": "responsibility",
+                    "required": True,
+                    "type": "list",
+                    "items": [
+                        {"name": "project", "required": True, "type": "str"},
+                        {
+                            "name": "language",
+                            "required": True,
+                            "type": "list",
+                            "items": [{"required": True, "type": "str"}],
+                        },
+                    ],
+                },
+            ],
+        ],
+    )
+    def test_compare_with_other_has_different_element(self, items_data: List[dict]):
+        item = IteratorItem(
+            name="data",
+            required=True,
+            value_type="dict",
+            items=[
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+                {"name": "project", "required": True, "type": "list", "items": [{"required": True, "type": "str"}]},
+                {
+                    "name": "responsibility",
+                    "required": True,
+                    "type": "list",
+                    "items": [
+                        {"name": "project", "required": True, "type": "str"},
+                        {
+                            "name": "language",
+                            "required": True,
+                            "type": "list",
+                            "items": [{"required": True, "type": "str"}],
+                        },
+                    ],
+                },
+            ],
         )
-        assert sut != copy_sut
+        diff_item = IteratorItem(
+            name=item.name,
+            required=item.required,
+            value_type=item.value_type,
+            items=items_data,
+        )
+        assert item != diff_item
