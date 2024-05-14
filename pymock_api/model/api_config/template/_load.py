@@ -70,6 +70,10 @@ class _BaseTemplateConfigLoader:
         args = {
             "path": path,
         }
+        # Get parent config
+        # Set the current config (which is child-config) into the parent config, e.g., set the HTTP config
+        # *HTTP A* into MockAPI config *API A*, doesn't set into MockAPI config *API B*.
+        # parent_config = self._get_parent_config()
         self._template_config_opts._set_template_config(config, **args)
 
     def _deserialize_template_config(self, path: str) -> Optional[_Config]:
@@ -121,9 +125,30 @@ class TemplateConfigLoaderByScanFile(_BaseTemplateConfigLoader):
         for path in all_paths:
             if os.path.isdir(path):
                 # Has tag as directory
-                for path_with_tag in glob.glob(str(pathlib.Path(path, self._template_config_opts._config_file_format))):
-                    # In the tag directory, it's config
-                    self._deserialize_and_set_template_config(path_with_tag)
+                if hasattr(self._template_config_opts, "config_path"):
+                    # NOTE: ``get the specific file directly when *self._template_config_opts* is NOT *MockAPIs*``
+                    # If it's setting the configuration like *HTTP*, *HTTP request* or something else which is for THE
+                    # SPECIFIC one *MockAPI* data model, it should also use THE SPECIFIC one configuration file to set
+                    # its request or response.
+                    file_name_head = self._template_config_opts.config_path.split("-")[0]
+                    config_path = pathlib.Path(
+                        path, self._template_config_opts._config_file_format.replace("**", file_name_head)
+                    )
+                    if config_path.exists():
+                        self._deserialize_and_set_template_config(str(config_path))
+                else:
+                    # NOTE: ``only iterates all files when *self._template_config_opts* is *MockAPIs*``
+                    # Only iterate all files to get its content and convert it as configuration when the current data
+                    # model is *MockAPIs*. Reason is easy and clear, please consider it also divide the config *HTTP*
+                    # or *HTTP request* or something else, and it has multiple APIs. It may iterate other files which
+                    # are not relative with it at all.
+                    # Please refer to test data *divide_api_http_response_with_nested_data+has_tag_include_template*
+                    # to clear the usage scenario.
+                    for path_with_tag in glob.glob(
+                        str(pathlib.Path(path, self._template_config_opts._config_file_format))
+                    ):
+                        # In the tag directory, it's config
+                        self._deserialize_and_set_template_config(path_with_tag)
             else:
                 assert os.path.isfile(path) is True
                 if fnmatch.fnmatch(path, self._template_config_opts._config_file_format):
