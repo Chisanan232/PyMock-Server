@@ -19,6 +19,37 @@ properties:
       - name: value1
         required: True
         type: str
-#      - name: value2
-#        required: True
-#        type: str
+      - name: info
+        required: False
+        type: dict
+        items:
+          - name: personalInfo
+            required: True
+            type: dict
+            items:
+              - name: domain
+                required: True
+                type: str
+              - name: url
+                required: True
+                type: str
+          - name: jobExperience
+            required: False
+            type: dict
+            items:
+              - name: domain
+                required: True
+                type: str
+              - name: url
+                required: True
+                type: str
+          - name: sideProject
+            required: False
+            type: dict
+            items:
+              - name: domain
+                required: True
+                type: str
+              - name: url
+                required: True
+                type: str
