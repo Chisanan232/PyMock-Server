@@ -23,13 +23,10 @@ class IteratorItem(_HasItemsPropConfig):
                 items_prop_is_same = False
                 break
             assert len(same_name_other_item) == 1
-            # print(f"[DEBUG in IteratorItem._compare] item: {item}")
-            # print(f"[DEBUG in IteratorItem._compare] same_name_other_item: {same_name_other_item}")
             if item != same_name_other_item[0]:
                 items_prop_is_same = False
                 break
 
-        # print(f"[DEBUG in IteratorItem._compare] items_prop_is_same: {items_prop_is_same}")
         return (
             self.name == other.name
             and self.required == other.required
