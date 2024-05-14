@@ -15,18 +15,6 @@ class BaseProperty(_HasItemsPropConfig, ABC):
     items: Optional[List[IteratorItem]] = None  # type: ignore[assignment]
 
     def _compare(self, other: "BaseProperty") -> bool:  # type: ignore[override]
-        # Compare property *items* details
-        items_prop_is_same: bool = True
-        for item in self.items or []:
-            same_name_other_item = list(filter(lambda i: item.name == i.name, other.items or []))
-            if not same_name_other_item:
-                items_prop_is_same = False
-                break
-            assert len(same_name_other_item) == 1
-            if item != same_name_other_item[0]:
-                items_prop_is_same = False
-                break
-
         return (
             self.name == other.name
             and self.required == other.required
@@ -34,8 +22,10 @@ class BaseProperty(_HasItemsPropConfig, ABC):
             and self.value_format == other.value_format
             # Compare property *items*
             and super()._compare(other)
-            and items_prop_is_same
         )
+
+    def _find_same_key_item_to_compare(self, self_item: "BaseProperty", other_item: "BaseProperty") -> bool:  # type: ignore[override]
+        return self_item.name == other_item.name
 
     def _item_type(self) -> Type["IteratorItem"]:
         return IteratorItem
