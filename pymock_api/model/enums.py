@@ -58,6 +58,7 @@ class ResponseStrategy(Enum):
         response_schema_properties: Optional[dict] = parser.get_properties(default=None)
         if response_schema_properties:
             for k, v in response_schema_properties.items():
+                print(f"[DEBUG in process_response_from_reference] v: {v}")
                 response_config = self._generate_response(
                     init_response=init_response,
                     property_value=v,
@@ -119,6 +120,7 @@ class ResponseStrategy(Enum):
     ) -> Union[str, list, dict]:
         if not property_value:
             return self._generate_empty_response()
+        print(f"[DEBUG in _generate_response] property_value: {property_value}")
         if get_schema_parser_factory().reference_object().has_ref(property_value):
             return self._generate_response_from_data(
                 init_response=init_response,
@@ -291,16 +293,17 @@ class ResponseStrategy(Enum):
                 else:
                     raise NotImplementedError
 
-            additional_properties = data.get("additionalProperties", {})
-            if get_schema_parser_factory().reference_object().has_ref(additional_properties):
+            if get_schema_parser_factory().reference_object().has_ref(data):
                 resp = self.process_response_from_reference(
                     init_response=init_response,
-                    data=additional_properties,
+                    data=data,
                     get_schema_parser_factory=get_schema_parser_factory,
                 )
                 print(f"[DEBUG in _handle_object_type_value_with_object_strategy] resp: {resp}")
                 return resp["data"]
-            else:
+            elif "additionalProperties" in data.keys():
+                # Handle the schema *additionalProperties*
+                additional_properties = data["additionalProperties"]
                 additional_properties_type = convert_js_type(additional_properties["type"])
                 if locate(additional_properties_type) in [list, dict, "file"]:
                     items_config_data = _handle_list_type_value_with_object_strategy(additional_properties)
@@ -324,6 +327,8 @@ class ResponseStrategy(Enum):
                         "format": None,
                         "items": None,
                     }
+            else:
+                raise NotImplementedError("It should parse the configuration which is entire object.")
 
         def _handle_other_types_value_with_object_strategy(v_type: str) -> dict:
             return {
