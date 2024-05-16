@@ -55,7 +55,7 @@ class ResponseStrategy(Enum):
     ) -> dict:
         response_schema_ref = get_schema_parser_factory().reference_object().get_schema_ref(data)
         parser = get_schema_parser_factory().object(response_schema_ref)
-        response_schema_properties: Optional[dict] = parser.get_properties(default=None)
+        response_schema_properties: Optional[dict] = parser.get_properties(default={})
         if response_schema_properties:
             for k, v in response_schema_properties.items():
                 print(f"[DEBUG in process_response_from_reference] v: {v}")
@@ -121,12 +121,30 @@ class ResponseStrategy(Enum):
         if not property_value:
             return self._generate_empty_response()
         print(f"[DEBUG in _generate_response] property_value: {property_value}")
-        if get_schema_parser_factory().reference_object().has_ref(property_value):
-            return self._generate_response_from_data(
+        ref_schema = get_schema_parser_factory().reference_object().has_ref(property_value)
+        if ref_schema:
+            # if ref_schema == "ref":
+            #     resp = self.process_response_from_reference(
+            #         init_response=init_response,
+            #         data=property_value,
+            #         get_schema_parser_factory=get_schema_parser_factory,
+            #     )
+            #     print(f"[DEBUG in _generate_response] resp: {resp}")
+            #     return resp
+            # else:
+            # resp_1 = self._generate_response_from_data(
+            #     init_response=init_response,
+            #     resp_prop_data=get_schema_parser_factory().reference_object().get_schema_ref(property_value),
+            #     get_schema_parser_factory=get_schema_parser_factory,
+            # )
+            # print(f"[DEBUG in _generate_response] resp_1: {resp_1}")
+            resp_2 = self.process_response_from_reference(
                 init_response=init_response,
-                resp_prop_data=get_schema_parser_factory().reference_object().get_schema_ref(property_value),
+                data=property_value,
                 get_schema_parser_factory=get_schema_parser_factory,
             )
+            print(f"[DEBUG in _generate_response] resp_2: {resp_2}")
+            return resp_2
         else:
             return self._generate_response_from_data(
                 init_response=init_response,
@@ -328,7 +346,9 @@ class ResponseStrategy(Enum):
                         "items": None,
                     }
             else:
-                raise NotImplementedError("It should parse the configuration which is entire object.")
+                raise NotImplementedError(
+                    "It should re-consider the parsing logic about handle object type config with object strategy."
+                )
 
         def _handle_other_types_value_with_object_strategy(v_type: str) -> dict:
             return {
