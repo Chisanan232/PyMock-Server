@@ -423,6 +423,8 @@ class ResponseStrategy(Enum):
                             "items": None,
                         }
                 else:
+                    # FIXME: it should focus on processing the config data which data structure is for one specific
+                    #  column, not for entire object.
                     # Process non-reference
                     resp = self.process_response_from_reference(
                         init_response={"strategy": ResponseStrategy.OBJECT, "data": []},
