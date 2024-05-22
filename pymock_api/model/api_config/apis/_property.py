@@ -20,8 +20,12 @@ class BaseProperty(_HasItemsPropConfig, ABC):
             and self.required == other.required
             and self.value_type == other.value_type
             and self.value_format == other.value_format
+            # Compare property *items*
             and super()._compare(other)
         )
+
+    def _find_same_key_item_to_compare(self, self_item: "BaseProperty", other_item: "BaseProperty") -> bool:  # type: ignore[override]
+        return self_item.name == other_item.name
 
     def _item_type(self) -> Type["IteratorItem"]:
         return IteratorItem

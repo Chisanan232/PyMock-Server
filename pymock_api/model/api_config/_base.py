@@ -184,7 +184,32 @@ class _HasItemsPropConfig(_Config, _Checkable, ABC):
     items: Optional[List["_HasItemsPropConfig"]] = None
 
     def _compare(self, other: "_HasItemsPropConfig") -> bool:
-        return self.items == other.items
+        items_prop_is_same: bool = True
+
+        # Compare property *items* size
+        if self.items and other.items:
+            items_prop_is_same = len(self.items) == len(other.items)
+
+        # Compare property *items* details
+        for item in self.items or []:
+            same_name_other_item = list(
+                filter(lambda i: self._find_same_key_item_to_compare(self_item=item, other_item=i), other.items or [])
+            )
+            if not same_name_other_item:
+                items_prop_is_same = False
+                break
+            assert len(same_name_other_item) == 1
+            if item != same_name_other_item[0]:
+                items_prop_is_same = False
+                break
+
+        return items_prop_is_same
+
+    @abstractmethod
+    def _find_same_key_item_to_compare(
+        self, self_item: "_HasItemsPropConfig", other_item: "_HasItemsPropConfig"
+    ) -> bool:
+        pass
 
     def __post_init__(self) -> None:
         if self.items is not None:

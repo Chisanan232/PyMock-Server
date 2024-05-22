@@ -5,7 +5,7 @@ import re
 from abc import ABC, ABCMeta, abstractmethod
 from collections import namedtuple
 from copy import copy
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Type
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
@@ -21,6 +21,7 @@ from pymock_api.model.api_config import (
     _Checkable,
     _Config,
 )
+from pymock_api.model.api_config._base import _HasItemsPropConfig
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
 from pymock_api.model.api_config.template import (
     LoadConfig,
@@ -274,6 +275,104 @@ class CheckableTestSuite(ConfigTestSpec, ABC):
             data_model.stop_if_fail = False
             is_valid_to_work = data_model.is_work()
             assert is_valid_to_work is criteria
+
+
+class HasItemsPropConfigTestSuite(ConfigTestSpec, ABC):
+
+    @pytest.mark.parametrize(
+        "items_data",
+        [
+            # Miss columns
+            [
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+            ],
+            # Have columns it doesn't have
+            [
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+                {"name": "what_is_this", "required": True, "type": "str"},
+            ],
+            # Details in property *items* are different
+            [
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+                {"name": "project", "required": False, "type": "list", "items": [{"required": True, "type": "str"}]},
+                {
+                    "name": "responsibility",
+                    "required": True,
+                    "type": "list",
+                    "items": [
+                        {"name": "project", "required": True, "type": "str"},
+                        {
+                            "name": "language",
+                            "required": True,
+                            "type": "list",
+                            "items": [{"required": True, "type": "str"}],
+                        },
+                    ],
+                },
+            ],
+            # Details in property *items.items* are different
+            [
+                {"name": "id", "required": True, "type": "str"},
+                {"name": "name", "required": True, "type": "str"},
+                {"name": "project", "required": True, "type": "list", "items": [{"required": True, "type": "int"}]},
+                {
+                    "name": "responsibility",
+                    "required": True,
+                    "type": "list",
+                    "items": [
+                        {"name": "project", "required": True, "type": "str"},
+                        {
+                            "name": "language",
+                            "required": True,
+                            "type": "list",
+                            "items": [{"required": True, "type": "str"}],
+                        },
+                    ],
+                },
+            ],
+        ],
+    )
+    def test_compare_with_other_has_different_nested_element(self, items_data: List[dict]):
+        constructor = self._data_model_constructor
+        constructor["items"] = [
+            {"name": "id", "required": True, "type": "str"},
+            {"name": "name", "required": True, "type": "str"},
+            {"name": "project", "required": True, "type": "list", "items": [{"required": True, "type": "str"}]},
+            {
+                "name": "responsibility",
+                "required": True,
+                "type": "list",
+                "items": [
+                    {"name": "project", "required": True, "type": "str"},
+                    {
+                        "name": "language",
+                        "required": True,
+                        "type": "list",
+                        "items": [{"required": True, "type": "str"}],
+                    },
+                ],
+            },
+        ]
+        item = self._data_model_not_instantiate_yet(**constructor)
+
+        diff_constructor = constructor
+        diff_constructor["items"] = items_data
+        diff_item = self._data_model_not_instantiate_yet(**diff_constructor)
+
+        assert item != diff_item
+
+    @property
+    @abstractmethod
+    def _data_model_not_instantiate_yet(self) -> Type[_HasItemsPropConfig]:
+        pass
+
+    @property
+    @abstractmethod
+    def _data_model_constructor(self) -> dict:
+        pass
 
 
 TestDividingData = namedtuple(

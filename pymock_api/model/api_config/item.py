@@ -19,8 +19,12 @@ class IteratorItem(_HasItemsPropConfig):
             self.name == other.name
             and self.required == other.required
             and self.value_type == other.value_type
+            # Compare property *items*
             and super()._compare(other)
         )
+
+    def _find_same_key_item_to_compare(self, self_item: "IteratorItem", other_item: "IteratorItem") -> bool:  # type: ignore[override]
+        return self_item.name == other_item.name
 
     def _item_type(self) -> Type["IteratorItem"]:
         return IteratorItem

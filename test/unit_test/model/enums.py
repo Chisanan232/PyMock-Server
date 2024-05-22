@@ -300,6 +300,33 @@ class TestResponseStrategy(EnumTestSuite):
                 },
             ),
             (
+                ResponseStrategy.STRING,
+                {
+                    "$ref": "#/components/schemas/NestedFooResponse",
+                },
+                {
+                    "id": "random integer value",
+                    "name": "random string value",
+                    "data": [
+                        {
+                            "id": "random integer value",
+                            "value": "random string value",
+                            "url": "random string value",
+                            "urlProperties": {
+                                "homePage": {
+                                    "domain": "random string value",
+                                    "needAuth": "random boolean value",
+                                },
+                                "detailInfo": {
+                                    "domain": "random string value",
+                                    "needAuth": "random boolean value",
+                                },
+                            },
+                        },
+                    ],
+                },
+            ),
+            (
                 ResponseStrategy.OBJECT,
                 {
                     "type": "object",
@@ -351,13 +378,62 @@ class TestResponseStrategy(EnumTestSuite):
                     },
                 ],
             ),
+            (
+                ResponseStrategy.OBJECT,
+                {
+                    "$ref": "#/components/schemas/NestedFooResponse",
+                },
+                [
+                    {"name": "id", "required": True, "type": "int", "format": None, "items": None},
+                    {"name": "name", "required": False, "type": "str", "format": None, "items": None},
+                    {
+                        "name": "data",
+                        "required": False,
+                        "format": None,
+                        "type": "list",
+                        "items": [
+                            {"name": "id", "required": True, "type": "int"},
+                            {"name": "value", "required": True, "type": "str"},
+                            {"name": "url", "required": True, "type": "str"},
+                            {
+                                "name": "urlProperties",
+                                "required": False,
+                                "format": None,
+                                "type": "dict",
+                                "items": [
+                                    {
+                                        "name": "homePage",
+                                        "required": True,
+                                        "type": "dict",
+                                        "format": None,
+                                        "items": [
+                                            {"name": "domain", "required": True, "type": "str"},
+                                            {"name": "needAuth", "required": True, "type": "bool"},
+                                        ],
+                                    },
+                                    {
+                                        "name": "detailInfo",
+                                        "required": True,
+                                        "type": "dict",
+                                        "format": None,
+                                        "items": [
+                                            {"name": "domain", "required": True, "type": "str"},
+                                            {"name": "needAuth", "required": True, "type": "bool"},
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            ),
         ],
     )
     def test_generate_response_from_data(
         self, ut_enum: ResponseStrategy, test_response_data: dict, expected_value: str
     ):
         # Pre-process
-        if test_response_data["type"] == "array":
+        if test_response_data.get("type", "array") == "array":
             set_component_definition(
                 OpenAPIV3SchemaParser(
                     data={

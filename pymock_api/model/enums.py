@@ -53,26 +53,81 @@ class ResponseStrategy(Enum):
         data: dict,
         get_schema_parser_factory: Callable,
     ) -> dict:
-        response_schema_ref = get_schema_parser_factory().reference_object().get_schema_ref(data)
+        return self._process_reference_object(
+            init_response=init_response,
+            response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(data),
+            get_schema_parser_factory=get_schema_parser_factory,
+        )
+
+    def _process_reference_object(
+        self,
+        init_response: dict,
+        response_schema_ref: dict,
+        get_schema_parser_factory: Callable,
+        empty_body_key: str = "",
+    ) -> dict:
         parser = get_schema_parser_factory().object(response_schema_ref)
-        response_schema_properties: Optional[dict] = parser.get_properties(default=None)
+        response_schema_properties: Optional[dict] = parser.get_properties(default={})
+        print(f"[DEBUG in process_response_from_reference] response_schema_ref: {response_schema_ref}")
+        print(f"[DEBUG in process_response_from_reference] response_schema_properties: {response_schema_properties}")
         if response_schema_properties:
             for k, v in response_schema_properties.items():
-                response_config = self._generate_response(
-                    init_response=init_response,
-                    property_value=v,
-                    get_schema_parser_factory=get_schema_parser_factory,
-                )
+                print(f"[DEBUG in process_response_from_reference] k: {k}")
+                print(f"[DEBUG in process_response_from_reference] v: {v}")
+                # Check reference again
+                if get_schema_parser_factory().reference_object().has_ref(v):
+                    response_config = self._process_reference_object(
+                        init_response=self.initial_response_data(),
+                        response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(v),
+                        get_schema_parser_factory=get_schema_parser_factory,
+                        empty_body_key=k,
+                    )
+                    if self is ResponseStrategy.OBJECT:
+                        print(
+                            f"[DEBUG in process_response_from_reference] before asserion, response_config: {response_config}"
+                        )
+                        response_config = response_config["data"][0]
+                    else:
+                        response_config = response_config["data"][k]
+                else:
+                    response_config = self._generate_response(  # type: ignore[assignment]
+                        init_response=init_response,
+                        property_value=v,
+                        get_schema_parser_factory=get_schema_parser_factory,
+                    )
+                print(f"[DEBUG in process_response_from_reference] response_config: {response_config}")
                 if self is ResponseStrategy.OBJECT:
                     response_data_prop = self._ensure_data_structure_when_object_strategy(
                         init_response, response_config
                     )
+                    print(f"[DEBUG in process_response_from_reference] response_data_prop: {response_data_prop}")
                     response_data_prop["name"] = k
                     response_data_prop["required"] = k in parser.get_required(default=[k])
                     init_response["data"].append(response_data_prop)
                 else:
                     self._ensure_data_structure_when_non_object_strategy(init_response)
                     init_response["data"][k] = response_config
+            print(f"[DEBUG in process_response_from_reference] parse with body, init_response: {init_response}")
+        else:
+            # The section which doesn't have setting body
+            response_config = self._generate_empty_response()  # type: ignore[assignment]
+            if "title" in response_schema_ref.keys() and response_schema_ref["title"] == "InputStream":
+                if self is ResponseStrategy.OBJECT:
+                    response_config["type"] = "file"
+                else:
+                    response_config = "random file output stream"  # type: ignore[assignment]
+
+            if self is ResponseStrategy.OBJECT:
+                response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
+                print(f"[DEBUG in process_response_from_reference] response_data_prop: {response_data_prop}")
+                response_data_prop["name"] = empty_body_key
+                response_data_prop["required"] = empty_body_key in parser.get_required(default=[empty_body_key])
+                init_response["data"].append(response_data_prop)
+            else:
+                self._ensure_data_structure_when_non_object_strategy(init_response)
+                init_response["data"][empty_body_key] = response_config
+            print(f"[DEBUG in process_response_from_reference] empty_body_key: {empty_body_key}")
+            print(f"[DEBUG in process_response_from_reference] parse with empty body, init_response: {init_response}")
         return init_response
 
     def process_response_from_data(
@@ -119,18 +174,17 @@ class ResponseStrategy(Enum):
     ) -> Union[str, list, dict]:
         if not property_value:
             return self._generate_empty_response()
+        print(f"[DEBUG in _generate_response] property_value: {property_value}")
+        print(f"[DEBUG in _generate_response] before it have init_response: {init_response}")
         if get_schema_parser_factory().reference_object().has_ref(property_value):
-            return self._generate_response_from_data(
-                init_response=init_response,
-                resp_prop_data=get_schema_parser_factory().reference_object().get_schema_ref(property_value),
-                get_schema_parser_factory=get_schema_parser_factory,
-            )
+            resp_prop_data = get_schema_parser_factory().reference_object().get_schema_ref(property_value)
         else:
-            return self._generate_response_from_data(
-                init_response=init_response,
-                resp_prop_data=property_value,
-                get_schema_parser_factory=get_schema_parser_factory,
-            )
+            resp_prop_data = property_value
+        return self._generate_response_from_data(
+            init_response=init_response,
+            resp_prop_data=resp_prop_data,
+            get_schema_parser_factory=get_schema_parser_factory,
+        )
 
     def _generate_empty_response(self) -> Union[str, Dict[str, Any]]:
         if self is ResponseStrategy.OBJECT:
@@ -291,16 +345,20 @@ class ResponseStrategy(Enum):
                 else:
                     raise NotImplementedError
 
-            additional_properties = data.get("additionalProperties", {})
-            if get_schema_parser_factory().reference_object().has_ref(additional_properties):
+            # Check reference first
+            if get_schema_parser_factory().reference_object().has_ref(data):
+                # Process reference
                 resp = self.process_response_from_reference(
                     init_response=init_response,
-                    data=additional_properties,
+                    data=data,
                     get_schema_parser_factory=get_schema_parser_factory,
                 )
+                print("[DEBUG in _handle_object_type_value_with_object_strategy] has reference schema")
                 print(f"[DEBUG in _handle_object_type_value_with_object_strategy] resp: {resp}")
                 return resp["data"]
             else:
+                # Handle the schema *additionalProperties*
+                additional_properties = data["additionalProperties"]
                 additional_properties_type = convert_js_type(additional_properties["type"])
                 if locate(additional_properties_type) in [list, dict, "file"]:
                     items_config_data = _handle_list_type_value_with_object_strategy(additional_properties)
@@ -436,6 +494,9 @@ class ResponseStrategy(Enum):
                 raise NotImplementedError
 
         print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
+        if not resp_prop_data.get("type", None):
+            assert get_schema_parser_factory().reference_object().has_ref(resp_prop_data)
+            return _handle_each_data_types_response_with_object_strategy(resp_prop_data, "dict")
         v_type = convert_js_type(resp_prop_data["type"])
         if self is ResponseStrategy.OBJECT:
             return _handle_each_data_types_response_with_object_strategy(resp_prop_data, v_type)

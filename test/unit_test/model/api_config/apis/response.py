@@ -1,6 +1,6 @@
 import random
 import re
-from typing import Any
+from typing import Any, Type
 
 import pytest
 
@@ -18,6 +18,7 @@ from ....._values import (
 from .._base import (
     CheckableTestSuite,
     ConfigTestSpec,
+    HasItemsPropConfigTestSuite,
     MockModel,
     _assertion_msg,
     set_checking_test_data,
@@ -76,7 +77,7 @@ class TestResponseProperty(ConfigTestSpec):
         )
 
 
-class TestResponsePropertyWithNestedData(TestResponseProperty):
+class TestResponsePropertyWithNestedData(TestResponseProperty, HasItemsPropConfigTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> ResponseProperty:
         return ResponseProperty(
@@ -112,6 +113,19 @@ class TestResponsePropertyWithNestedData(TestResponseProperty):
             assert list(filter(lambda i: i["name"] == item.name, _Test_Response_Property_Dict["items"]))
             assert list(filter(lambda i: i["required"] == item.required, _Test_Response_Property_Dict["items"]))
             assert list(filter(lambda i: i["type"] == item.value_type, _Test_Response_Property_Dict["items"]))
+
+    @property
+    def _data_model_not_instantiate_yet(self) -> Type[ResponseProperty]:
+        return ResponseProperty
+
+    @property
+    def _data_model_constructor(self) -> dict:
+        return {
+            "name": "data",
+            "required": True,
+            "value_type": "dict",
+            "value_format": None,
+        }
 
 
 class TestHTTPResponse(TemplatableConfigTestSuite, CheckableTestSuite):
