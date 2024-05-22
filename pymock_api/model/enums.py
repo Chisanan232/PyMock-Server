@@ -109,35 +109,8 @@ class ResponseStrategy(Enum):
                     self._ensure_data_structure_when_non_object_strategy(init_response)
                     init_response["data"][k] = response_config
             print(f"[DEBUG in process_response_from_reference] parse with body, init_response: {init_response}")
-            return init_response
         else:
             # The section which doesn't have setting body
-            # response_config = self._generate_response(
-            #     init_response=init_response,
-            #     property_value={},  # It's {}
-            #     get_schema_parser_factory=get_schema_parser_factory,
-            # )
-            # print(
-            #     f"[DEBUG in process_response_from_reference] parse with empty body, response_config: {response_config}"
-            # )
-            # if self is ResponseStrategy.OBJECT:
-            #     response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
-            #     response_data_prop["name"] = response_schema_ref["title"]
-            #     response_data_prop["required"] = _Default_Required.empty
-            #     response_data_prop["type"] = "file"
-            #     init_response["data"].append(response_data_prop)
-            # else:
-            #     self._ensure_data_structure_when_non_object_strategy(init_response)
-            #     init_response["data"][response_schema_ref["title"]] = response_config
-
-            # TODO: Study here how to implement
-            # response_config = self._generate_response(
-            #     init_response={},
-            #     property_value={},  # It's {}
-            #     get_schema_parser_factory=get_schema_parser_factory,
-            #     property_key=empty_body_key,
-            # )
-
             response_config = self._generate_empty_response()  # type: ignore[assignment]
             if "title" in response_schema_ref.keys() and response_schema_ref["title"] == "InputStream":
                 if self is ResponseStrategy.OBJECT:
@@ -154,26 +127,9 @@ class ResponseStrategy(Enum):
             else:
                 self._ensure_data_structure_when_non_object_strategy(init_response)
                 init_response["data"][empty_body_key] = response_config
-
-            # empty_response = self._generate_empty_response()
-            # if self is ResponseStrategy.OBJECT:
-            #     response_data_prop = self._ensure_data_structure_when_object_strategy(
-            #         init_response, empty_response
-            #     )
-            #     print(f"[DEBUG in process_response_from_reference] response_data_prop: {response_data_prop}")
-            #     response_data_prop["name"] = empty_body_key
-            #     response_data_prop["required"] = empty_body_key in parser.get_required(default=[empty_body_key])
-            #     init_response["data"].append(response_data_prop)
-            # else:
-            #     self._ensure_data_structure_when_non_object_strategy(init_response)
-            #     init_response["data"][empty_body_key] = empty_response
-            # print(f"[DEBUG in process_response_from_reference] empty_response: {empty_response}")
-
             print(f"[DEBUG in process_response_from_reference] empty_body_key: {empty_body_key}")
             print(f"[DEBUG in process_response_from_reference] parse with empty body, init_response: {init_response}")
-            return init_response
-            # assert False
-        # return init_response
+        return init_response
 
     def process_response_from_data(
         self,
