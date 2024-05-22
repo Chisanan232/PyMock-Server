@@ -94,7 +94,6 @@ class ResponseStrategy(Enum):
                         init_response=init_response,
                         property_value=v,
                         get_schema_parser_factory=get_schema_parser_factory,
-                        property_key=k,
                     )
                 print(f"[DEBUG in process_response_from_reference] response_config: {response_config}")
                 if self is ResponseStrategy.OBJECT:
@@ -172,7 +171,6 @@ class ResponseStrategy(Enum):
         init_response: dict,
         property_value: dict,
         get_schema_parser_factory: Callable,
-        property_key: str = "",
     ) -> Union[str, list, dict]:
         if not property_value:
             return self._generate_empty_response()
@@ -182,61 +180,13 @@ class ResponseStrategy(Enum):
             print(f"[DEBUG in _generate_response] before it have ref_schema: {ref_schema}")
             print(f"[DEBUG in _generate_response] before it have init_response: {init_response}")
             print(f"[DEBUG in _generate_response] before it have resp_2: {property_value}")
-            # if ref_schema == "ref":
-            #     resp = self.process_response_from_reference(
-            #         init_response=init_response,
-            #         data=property_value,
-            #         get_schema_parser_factory=get_schema_parser_factory,
-            #     )
-            #     print(f"[DEBUG in _generate_response] resp: {resp}")
-            #     return resp
-            # else:
-            # if ref_schema == "ref":
-            #     resp_1 = self._generate_response_from_data(
-            #         init_response=init_response,
-            #         resp_prop_data=property_value,
-            #         get_schema_parser_factory=get_schema_parser_factory,
-            #     )
-            # else:
             # # Currently solution
             resp_1 = self._generate_response_from_data(
                 init_response=init_response,
                 resp_prop_data=get_schema_parser_factory().reference_object().get_schema_ref(property_value),
                 get_schema_parser_factory=get_schema_parser_factory,
             )
-            # # test ...
-
-            # resp_1 = self._process_reference_object(
-            #     init_response=init_response,
-            #     response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(property_value),
-            #     get_schema_parser_factory=get_schema_parser_factory,
-            #     empty_body_key=property_key,
-            # )
-            print(f"[DEBUG in _generate_response] resp_1: {resp_1}")
-            # resp_2 = self.process_response_from_reference(
-            #     init_response=init_response,
-            #     data=property_value,
-            #     get_schema_parser_factory=get_schema_parser_factory,
-            # )
-            # print(f"[DEBUG in _generate_response] resp_2: {resp_2}")
-            # Find the specific element and return it
-            # for e in resp_2["data"]:
-            #     print(f"[DEBUG in _generate_response] e: {e}")
-            #     if e["name"] in property_value[f"${ref_schema}"]:
-            #         assert isinstance(e, dict)
-            #         print(f"[DEBUG in _generate_response] under resp_2 e: {e}")
-            #         return e
-            # Note:
-            # Data format should be like:
-            # {
-            #      "name": "",
-            #      "required": _Default_Required.empty,
-            #      "type": None,
-            #      "format": None,
-            #      "items": [],
-            # }
             return resp_1
-            # assert False
         else:
             resp_from_data = self._generate_response_from_data(
                 init_response=init_response,
