@@ -53,11 +53,9 @@ class ResponseStrategy(Enum):
         data: dict,
         get_schema_parser_factory: Callable,
     ) -> dict:
-        response_schema_ref = get_schema_parser_factory().reference_object().get_schema_ref(data)
-        print(f"[DEBUG in process_response_from_reference] data: {data}")
         return self._process_reference_object(
             init_response=init_response,
-            response_schema_ref=response_schema_ref,
+            response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(data),
             get_schema_parser_factory=get_schema_parser_factory,
         )
 
