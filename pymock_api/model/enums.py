@@ -353,7 +353,7 @@ class ResponseStrategy(Enum):
                     data=data,
                     get_schema_parser_factory=get_schema_parser_factory,
                 )
-                print(f"[DEBUG in _handle_object_type_value_with_object_strategy] has reference schema")
+                print("[DEBUG in _handle_object_type_value_with_object_strategy] has reference schema")
                 print(f"[DEBUG in _handle_object_type_value_with_object_strategy] resp: {resp}")
                 return resp["data"]
             else:
