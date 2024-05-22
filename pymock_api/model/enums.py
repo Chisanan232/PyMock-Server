@@ -52,14 +52,14 @@ class ResponseStrategy(Enum):
         init_response: dict,
         data: dict,
         get_schema_parser_factory: Callable,
-        parse_from_schema: bool = True,
     ) -> dict:
-        if parse_from_schema:
-            response_schema_ref = get_schema_parser_factory().reference_object().get_schema_ref(data)
-        else:
-            response_schema_ref = data
+        response_schema_ref = get_schema_parser_factory().reference_object().get_schema_ref(data)
         print(f"[DEBUG in process_response_from_reference] data: {data}")
-        return self._process_reference_object(init_response, response_schema_ref, get_schema_parser_factory)
+        return self._process_reference_object(
+            init_response=init_response,
+            response_schema_ref=response_schema_ref,
+            get_schema_parser_factory=get_schema_parser_factory,
+        )
 
     def _process_reference_object(
         self,
@@ -511,7 +511,6 @@ class ResponseStrategy(Enum):
                         init_response={"strategy": ResponseStrategy.OBJECT, "data": []},
                         data=data,
                         get_schema_parser_factory=get_schema_parser_factory,
-                        parse_from_schema=False,
                     )
                     print(
                         f'[DEBUG in _handle_object_type_value_with_object_strategy] before *"additionalProperties" in data.keys()* data: {data}'
