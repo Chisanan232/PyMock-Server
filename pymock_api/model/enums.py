@@ -65,7 +65,6 @@ class ResponseStrategy(Enum):
         response_schema_ref: dict,
         get_schema_parser_factory: Callable,
         empty_body_key: str = "",
-        not_set_init_resp: bool = False,
     ) -> dict:
         parser = get_schema_parser_factory().object(response_schema_ref)
         response_schema_properties: Optional[dict] = parser.get_properties(default={})
