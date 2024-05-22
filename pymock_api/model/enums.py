@@ -175,26 +175,16 @@ class ResponseStrategy(Enum):
         if not property_value:
             return self._generate_empty_response()
         print(f"[DEBUG in _generate_response] property_value: {property_value}")
-        ref_schema = get_schema_parser_factory().reference_object().has_ref(property_value)
-        if ref_schema:
-            print(f"[DEBUG in _generate_response] before it have ref_schema: {ref_schema}")
-            print(f"[DEBUG in _generate_response] before it have init_response: {init_response}")
-            print(f"[DEBUG in _generate_response] before it have resp_2: {property_value}")
-            # # Currently solution
-            resp_1 = self._generate_response_from_data(
-                init_response=init_response,
-                resp_prop_data=get_schema_parser_factory().reference_object().get_schema_ref(property_value),
-                get_schema_parser_factory=get_schema_parser_factory,
-            )
-            return resp_1
+        print(f"[DEBUG in _generate_response] before it have init_response: {init_response}")
+        if get_schema_parser_factory().reference_object().has_ref(property_value):
+            resp_prop_data = get_schema_parser_factory().reference_object().get_schema_ref(property_value)
         else:
-            resp_from_data = self._generate_response_from_data(
-                init_response=init_response,
-                resp_prop_data=property_value,
-                get_schema_parser_factory=get_schema_parser_factory,
-            )
-            print(f"[DEBUG in _generate_response] resp_from_data: {resp_from_data}")
-            return resp_from_data
+            resp_prop_data = property_value
+        return self._generate_response_from_data(
+            init_response=init_response,
+            resp_prop_data=resp_prop_data,
+            get_schema_parser_factory=get_schema_parser_factory,
+        )
 
     def _generate_empty_response(self) -> Union[str, Dict[str, Any]]:
         if self is ResponseStrategy.OBJECT:
