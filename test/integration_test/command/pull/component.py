@@ -6,8 +6,12 @@ import pytest
 
 from pymock_api.command.options import SubCommand
 from pymock_api.command.pull.component import SubCmdPullComponent
-from pymock_api.model import SubcmdPullArguments, load_config
-from pymock_api.model.api_config import TemplateConfig
+from pymock_api.model import (
+    SubcmdPullArguments,
+    deserialize_swagger_api_config,
+    load_config,
+)
+from pymock_api.model.api_config import DivideStrategy, TemplateConfig
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     set_component_definition,
@@ -23,10 +27,245 @@ PullOpenAPIDocConfigAsDividingConfigTestCaseFactory.load()
 PULL_OPENAPI_DOC_AS_DIVIDING_CONFIG_TEST_CASE = PullOpenAPIDocConfigAsDividingConfigTestCaseFactory.get_test_case()
 
 
+_OpenAPI_Doc_Config: dict = {
+    "openapi": "3.0.2",
+    "info": {"title": "FastAPI", "version": "0.1.0"},
+    "paths": {
+        "/foo": {
+            "get": {
+                "summary": "Foo Home",
+                "operationId": "foo_home_foo_get",
+                "parameters": [
+                    {
+                        "required": False,
+                        "schema": {"title": "Arg1", "type": "string", "default": "arg1_default_value"},
+                        "name": "arg1",
+                        "in": "query",
+                    },
+                    {
+                        "required": False,
+                        "schema": {"title": "Arg2", "type": "integer", "default": 0},
+                        "name": "arg2",
+                        "in": "query",
+                    },
+                    {
+                        "required": False,
+                        "schema": {"title": "Arg3", "type": "boolean", "default": False},
+                        "name": "arg3",
+                        "in": "query",
+                    },
+                ],
+                "responses": {
+                    "200": {"description": "Successful Response", "content": {"application/json": {"schema": {}}}},
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {"schema": {"$ref": "#/components/schemas/HTTPValidationError"}}
+                        },
+                    },
+                },
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "HTTPValidationError": {
+                "title": "HTTPValidationError",
+                "type": "object",
+                "properties": {
+                    "detail": {
+                        "title": "Detail",
+                        "type": "array",
+                        "items": {"$ref": "#/components/schemas/ValidationError"},
+                    }
+                },
+            },
+            "ValidationError": {
+                "title": "ValidationError",
+                "required": ["loc", "msg", "type"],
+                "type": "object",
+                "properties": {
+                    "loc": {
+                        "title": "Location",
+                        "type": "array",
+                        "items": {"anyOf": [{"type": "string"}, {"type": "integer"}]},
+                    },
+                    "msg": {"title": "Message", "type": "string"},
+                    "type": {"title": "Error Type", "type": "string"},
+                },
+            },
+        }
+    },
+}
+
+
 class TestSubCmdPullComponent:
     @pytest.fixture(scope="function")
     def sub_cmd(self) -> SubCmdPullComponent:
         return SubCmdPullComponent()
+
+    @pytest.mark.parametrize(
+        "cmd_args",
+        [
+            # Not dry run
+            # Doesn't include template section config
+            SubcmdPullArguments(
+                subparser_name=SubCommand.Pull,
+                request_with_https=_Test_Request_With_Https,
+                source=_API_Doc_Source,
+                config_path="./api.yaml",
+                base_url="",
+                include_template_config=False,
+                base_file_path="./",
+                dry_run=False,
+                divide_api=False,
+                divide_http=False,
+                divide_http_request=False,
+                divide_http_response=False,
+            ),
+            SubcmdPullArguments(
+                subparser_name=SubCommand.Pull,
+                request_with_https=_Test_Request_With_Https,
+                source=_API_Doc_Source,
+                config_path="./test_dir/api.yaml",
+                base_url="",
+                include_template_config=False,
+                base_file_path="./test_dir",
+                dry_run=False,
+                divide_api=False,
+                divide_http=False,
+                divide_http_request=False,
+                divide_http_response=False,
+            ),
+            # Not dry run
+            # Include template section config
+            SubcmdPullArguments(
+                subparser_name=SubCommand.Pull,
+                request_with_https=_Test_Request_With_Https,
+                source=_API_Doc_Source,
+                config_path="./api.yaml",
+                base_url="",
+                include_template_config=True,
+                base_file_path="./",
+                dry_run=False,
+                divide_api=False,
+                divide_http=False,
+                divide_http_request=False,
+                divide_http_response=False,
+            ),
+            SubcmdPullArguments(
+                subparser_name=SubCommand.Pull,
+                request_with_https=_Test_Request_With_Https,
+                source=_API_Doc_Source,
+                config_path="./test_dir/api.yaml",
+                base_url="",
+                include_template_config=True,
+                base_file_path="./test_dir",
+                dry_run=False,
+                divide_api=False,
+                divide_http=False,
+                divide_http_request=False,
+                divide_http_response=False,
+            ),
+            # Dry run
+            # Doesn't include template section config
+            SubcmdPullArguments(
+                subparser_name=SubCommand.Pull,
+                request_with_https=_Test_Request_With_Https,
+                source=_API_Doc_Source,
+                config_path="./api.yaml",
+                base_url="",
+                include_template_config=False,
+                base_file_path="./",
+                dry_run=True,
+                divide_api=False,
+                divide_http=False,
+                divide_http_request=False,
+                divide_http_response=False,
+            ),
+            SubcmdPullArguments(
+                subparser_name=SubCommand.Pull,
+                request_with_https=_Test_Request_With_Https,
+                source=_API_Doc_Source,
+                config_path="./test_dir/api.yaml",
+                base_url="",
+                include_template_config=False,
+                base_file_path="./test_dir",
+                dry_run=True,
+                divide_api=False,
+                divide_http=False,
+                divide_http_request=False,
+                divide_http_response=False,
+            ),
+            # Dry run
+            # Include template section config
+            SubcmdPullArguments(
+                subparser_name=SubCommand.Pull,
+                request_with_https=_Test_Request_With_Https,
+                source=_API_Doc_Source,
+                config_path="./api.yaml",
+                base_url="",
+                include_template_config=True,
+                base_file_path="./",
+                dry_run=True,
+                divide_api=True,
+                divide_http=False,
+                divide_http_request=False,
+                divide_http_response=False,
+            ),
+            SubcmdPullArguments(
+                subparser_name=SubCommand.Pull,
+                request_with_https=_Test_Request_With_Https,
+                source=_API_Doc_Source,
+                config_path="./test_dir/api.yaml",
+                base_url="",
+                include_template_config=True,
+                base_file_path="./test_dir",
+                dry_run=True,
+                divide_api=True,
+                divide_http=False,
+                divide_http_request=False,
+                divide_http_response=False,
+            ),
+        ],
+    )
+    def test_command_line_argument_setting(self, sub_cmd: SubCmdPullComponent, cmd_args: SubcmdPullArguments):
+        # Mock function and its return value if it needs
+        with patch.object(sub_cmd, "_get_swagger_config") as mock_get_swagger_config:
+            openapi_doc_config = deserialize_swagger_api_config(data=_OpenAPI_Doc_Config)
+            mock_get_swagger_config.return_value = openapi_doc_config
+            with patch.object(sub_cmd, "_dry_run_final_process") as mock_dry_run_final_process:
+                with patch.object(sub_cmd, "_final_process") as mock_final_process:
+                    # Run target function
+                    sub_cmd.process(args=cmd_args)
+
+                    # Verify
+                    http_proto = "https" if cmd_args.request_with_https else "http"
+                    swagger_api_doc_url = f"{http_proto}://{cmd_args.source}"
+                    mock_get_swagger_config.assert_called_once_with(swagger_url=swagger_api_doc_url)
+
+                    api_config = openapi_doc_config.to_api_config(base_url=cmd_args.base_url)
+                    # Some settings
+                    api_config.is_pull = True
+                    api_config.dry_run = cmd_args.dry_run
+                    api_config.divide_strategy = DivideStrategy(
+                        divide_api=cmd_args.divide_api,
+                        divide_http=cmd_args.divide_http,
+                        divide_http_request=cmd_args.divide_http_request,
+                        divide_http_response=cmd_args.divide_http_response,
+                    )
+                    api_config.set_template_in_config = cmd_args.include_template_config
+                    # The property *base_file_path* in template section part
+                    assert api_config.apis
+                    assert api_config.apis.template
+                    api_config.apis.template.values.base_file_path = cmd_args.base_file_path
+                    api_config_serialize_data = api_config.serialize()
+                    if cmd_args.dry_run:
+                        mock_dry_run_final_process.assert_called_once_with(api_config_serialize_data)
+                        mock_final_process.assert_not_called()
+                    else:
+                        mock_dry_run_final_process.assert_not_called()
+                        mock_final_process.assert_called_once_with(cmd_args, api_config_serialize_data)
 
     @pytest.mark.parametrize(
         ("swagger_api_resp_path", "cmd_arg", "expected_yaml_config_path"), PULL_OPENAPI_DOC_AS_DIVIDING_CONFIG_TEST_CASE

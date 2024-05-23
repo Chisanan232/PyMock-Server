@@ -470,6 +470,7 @@ class APIConfig(_Config, _Checkable):
         apis.set_template_in_config = self.set_template_in_config
         apis.dry_run = self.dry_run
         apis.divide_strategy = self.divide_strategy
+        apis.base_file_path = self.base_file_path
         return {
             "name": name,
             "description": description,
