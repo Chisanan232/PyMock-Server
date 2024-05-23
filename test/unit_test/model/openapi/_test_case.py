@@ -102,7 +102,7 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
         cls._iterate_files_by_path(
             path=cls.test_data_dir().generate_path_with_base_prefix_path(
                 path=(
-                    "entire_config",
+                    "version2_openapi_doc",
                     "*.json",
                 ),
             ),
@@ -131,7 +131,7 @@ class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
         cls._iterate_files_by_path(
             path=cls.test_data_dir().generate_path_with_base_prefix_path(
                 path=(
-                    "different_version",
+                    "version3_openapi_doc",
                     "*.json",
                 ),
             ),
