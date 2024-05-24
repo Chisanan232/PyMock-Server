@@ -45,7 +45,7 @@ class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
         def _generate_dir_paths(folder_path: str) -> tuple:
             nonlocal test_cmd_opt_arg
             test_cmd_opt_arg = cls._divide_chk(folder_path)
-            openapi_config_response = _get_path(scenario_folder=folder_path, yaml_file_naming="swagger_api.json")
+            openapi_config_response = _get_path(scenario_folder=folder_path, yaml_file_naming="v2_openapi_config.json")
             expected_yaml_config = _get_path(scenario_folder=folder_path, yaml_file_naming="expect_config/api.yaml")
             return openapi_config_response, expected_yaml_config
 

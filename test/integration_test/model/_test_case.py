@@ -70,8 +70,8 @@ class DeserializeOpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
             )
             return str(os.path.join(*_path))
 
-        openapi_v2_dir = _get_path(config_type_dir="different_version")
-        openapi_v3_dir = _get_path(config_type_dir="entire_config")
+        openapi_v2_dir = _get_path(config_type_dir="version3_openapi_doc")
+        openapi_v3_dir = _get_path(config_type_dir="version2_openapi_doc")
         for openapi_dir in [openapi_v2_dir, openapi_v3_dir]:
             global OPENAPI_DOCUMENT_CONFIG_PATHS
             for openapi_config_path in glob.glob(openapi_dir):

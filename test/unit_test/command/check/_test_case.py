@@ -46,7 +46,8 @@ class SubCmdCheckComponentTestCaseFactory(BaseTestCaseFactory):
             path=cls.test_data_dir().generate_path_with_base_prefix_path(
                 path=(
                     "diff_with_swagger",
-                    "api_response",
+                    "openapi_config",
+                    "version3",
                     f"{file_naming}*.json",
                 ),
             ),
@@ -76,7 +77,8 @@ class SwaggerDiffCheckTestCaseFactory(BaseTestCaseFactory):
             path=cls.test_data_dir().generate_path_with_base_prefix_path(
                 path=(
                     "diff_with_swagger",
-                    "api_response",
+                    "openapi_config",
+                    "version3",
                     "*.json",
                 ),
             ),

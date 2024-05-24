@@ -103,7 +103,7 @@ class TemplatableConfigDividable(metaclass=ABCMeta):
             path = pathlib.Path(config_base_path, data.tag, config_file)
             if self.save_data:
                 if tag_dir and not os.path.exists(tag_dir):
-                    os.mkdir(tag_dir)
+                    os.makedirs(tag_dir)
                 self._configuration.write(path=str(path), config=self.serialize_lower_layer(data=data), mode="w+")
                 return
             else:
