@@ -27,11 +27,11 @@ http:
             required: True
             type: int
           - name: name
-            required: True
+            required: False
             type: str
           - name: value1
-            required: True
+            required: False
             type: str
           - name: value2
-            required: True
+            required: False
             type: str
