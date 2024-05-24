@@ -86,7 +86,18 @@ class ResponseStrategy(Enum):
                         print(
                             f"[DEBUG in process_response_from_reference] before asserion, response_config: {response_config}"
                         )
-                        response_config = response_config["data"][0]
+                        # TODO: It should have better way to handle output streaming
+                        if len(list(filter(lambda d: d["type"] == "file", response_config["data"]))) != 0:
+                            # It's file inputStream
+                            response_config = response_config["data"][0]
+                        else:
+                            response_config = {
+                                "name": "",
+                                "required": _Default_Required.empty,
+                                "type": "dict",
+                                "format": None,
+                                "items": response_config["data"],
+                            }
                     else:
                         response_config = response_config["data"][k]
                 else:
