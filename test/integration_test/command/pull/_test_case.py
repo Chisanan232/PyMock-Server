@@ -42,10 +42,15 @@ class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
                 ),
             )
 
-        def _generate_dir_paths(folder_path: str) -> tuple:
+        def _generate_dir_paths_with_v2_openapi_doc(folder_path: str) -> tuple:
+            return _generate_dir_paths_by_openapi_version(
+                folder_path=folder_path, openapi_doc_config_file="v2_openapi_config.json"
+            )
+
+        def _generate_dir_paths_by_openapi_version(folder_path: str, openapi_doc_config_file: str):
             nonlocal test_cmd_opt_arg
             test_cmd_opt_arg = cls._divide_chk(folder_path)
-            openapi_config_response = _get_path(scenario_folder=folder_path, yaml_file_naming="v2_openapi_config.json")
+            openapi_config_response = _get_path(scenario_folder=folder_path, yaml_file_naming=openapi_doc_config_file)
             expected_yaml_config = _get_path(scenario_folder=folder_path, yaml_file_naming="expect_config/api.yaml")
             return openapi_config_response, expected_yaml_config
 
@@ -75,7 +80,7 @@ class PullOpenAPIDocConfigAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
 
         cls._iterate_files_by_directory(
             path=_get_path(),
-            generate_dir_paths=_generate_dir_paths,
+            generate_dir_paths=_generate_dir_paths_with_v2_openapi_doc,
             generate_test_case_callback=_generate_test_case_callback,
         )
 
