@@ -24,6 +24,7 @@ mocked_apis:
           - get_foo
           - put_foo
         - foo-boo:
+          - get_foo-boo
           - get_foo-boo_export
   base:
     url: '/api/v1/test'
