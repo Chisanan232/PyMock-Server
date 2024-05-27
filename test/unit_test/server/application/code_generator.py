@@ -22,13 +22,13 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
         pass
 
     @pytest.mark.parametrize(
-        ("mock_api_key", "mock_api"),
+        ("mock_api_key", "mock_api", "expected_api_func_naming"),
         [
-            ("/Function/name", MockAPI(url="/foo/api/url", http=Mock(HTTP()))),
+            # NOTE: It should implement the test data here in child-class
         ],
     )
     def test_generate_pycode_about_annotating_function(
-        self, sut: BaseWebServerCodeGenerator, mock_api_key: str, mock_api: MockAPI
+        self, sut: BaseWebServerCodeGenerator, mock_api_key: str, mock_api: MockAPI, expected_api_func_naming: str
     ):
         mock_api.http.request.parameters = [APIParameter().deserialize(p) for p in _Test_API_Parameters]
 
@@ -36,7 +36,7 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
             api_name=mock_api_key, api_config=self._mock_api_config_data(mock_api)
         )
 
-        assert sut._api_controller_name(mock_api_key) in annotate_function_pycode
+        assert f"def {expected_api_func_naming}(" in annotate_function_pycode
 
     @abstractmethod
     def _mock_api_config_data(self, api: MockAPI) -> Union[MockAPI, List[MockAPI]]:
@@ -82,8 +82,21 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
 
 class TestFlaskCodeGenerator(WebServerCodeGeneratorTestSpec):
     @pytest.fixture(scope="function")
-    def sut(self) -> BaseWebServerCodeGenerator:
+    def sut(self) -> FlaskCodeGenerator:
         return FlaskCodeGenerator()
+
+    @pytest.mark.parametrize(
+        ("mock_api_key", "mock_api", "expected_api_func_naming"),
+        [
+            ("/foo/api/url", MockAPI(url="/foo/api/url", http=Mock(HTTP())), "foo_api_url"),
+        ],
+    )
+    def test_generate_pycode_about_annotating_function(
+        self, sut: FlaskCodeGenerator, mock_api_key: str, mock_api: MockAPI, expected_api_func_naming: str
+    ):
+        super().test_generate_pycode_about_annotating_function(
+            sut=sut, mock_api_key=mock_api_key, mock_api=mock_api, expected_api_func_naming=expected_api_func_naming
+        )
 
     def _mock_api_config_data(self, api: MockAPI) -> List[MockAPI]:
         return [api]
@@ -107,8 +120,21 @@ class TestFlaskCodeGenerator(WebServerCodeGeneratorTestSpec):
 
 class TestFastAPICodeGenerator(WebServerCodeGeneratorTestSpec):
     @pytest.fixture(scope="function")
-    def sut(self) -> BaseWebServerCodeGenerator:
+    def sut(self) -> FastAPICodeGenerator:
         return FastAPICodeGenerator()
+
+    @pytest.mark.parametrize(
+        ("mock_api_key", "mock_api", "expected_api_func_naming"),
+        [
+            ("foo_api_url", MockAPI(url="/foo/api/url", http=Mock(HTTP())), "foo_api_url"),
+        ],
+    )
+    def test_generate_pycode_about_annotating_function(
+        self, sut: FastAPICodeGenerator, mock_api_key: str, mock_api: MockAPI, expected_api_func_naming: str
+    ):
+        super().test_generate_pycode_about_annotating_function(
+            sut=sut, mock_api_key=mock_api_key, mock_api=mock_api, expected_api_func_naming=expected_api_func_naming
+        )
 
     def _mock_api_config_data(self, api: MockAPI) -> MockAPI:
         return api
