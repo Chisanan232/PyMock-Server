@@ -1,0 +1,37 @@
+url: '/foo-boo'
+tag: foo-boo
+http:
+  request:
+    method: 'GET'
+    parameters:
+      - name: 'date'
+        required: true
+        type: str
+      - name: 'fooType'
+        required: true
+        type: str
+  response:
+    strategy: object
+    properties:
+      - name: errorMessage
+        required: True
+        type: str
+      - name: responseCode
+        required: True
+        type: str
+      - name: responseData
+        required: False
+        type: dict
+        items:
+          - name: id
+            required: True
+            type: int
+          - name: name
+            required: False
+            type: str
+          - name: value1
+            required: False
+            type: str
+          - name: value2
+            required: False
+            type: str

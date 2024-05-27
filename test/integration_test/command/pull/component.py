@@ -280,9 +280,10 @@ class TestSubCmdPullComponent:
         # Given command line argument
         print(f"[DEBUG in test] cmd_arg: {cmd_arg}")
         test_scenario_dir = pathlib.Path(swagger_api_resp_path).parent
-        ut_dir = pathlib.Path(test_scenario_dir, "under_test")
+        under_test_dir = "v3_openapi" if "v3" in swagger_api_resp_path else "v2_openapi"
+        ut_dir = pathlib.Path(test_scenario_dir, "under_test", under_test_dir)
         if not ut_dir.exists():
-            ut_dir.mkdir()
+            ut_dir.mkdir(parents=True)
         ut_config_path = str(pathlib.Path(ut_dir, "api.yaml"))
         cmd_args = SubcmdPullArguments(
             subparser_name=SubCommand.Pull,

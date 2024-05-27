@@ -55,7 +55,7 @@ class ResponseStrategy(Enum):
     ) -> dict:
         return self._process_reference_object(
             init_response=init_response,
-            response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(data),
+            response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(data, accept_no_ref=True),
             get_schema_parser_factory=get_schema_parser_factory,
         )
 
@@ -86,7 +86,18 @@ class ResponseStrategy(Enum):
                         print(
                             f"[DEBUG in process_response_from_reference] before asserion, response_config: {response_config}"
                         )
-                        response_config = response_config["data"][0]
+                        # TODO: It should have better way to handle output streaming
+                        if len(list(filter(lambda d: d["type"] == "file", response_config["data"]))) != 0:
+                            # It's file inputStream
+                            response_config = response_config["data"][0]
+                        else:
+                            response_config = {
+                                "name": "",
+                                "required": _Default_Required.empty,
+                                "type": "dict",
+                                "format": None,
+                                "items": response_config["data"],
+                            }
                     else:
                         response_config = response_config["data"][k]
                 else:
