@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from collections import namedtuple
 from typing import List, Optional, Union
 from unittest.mock import Mock, patch
 
@@ -37,6 +38,7 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
         )
 
         assert f"def {expected_api_func_naming}(" in annotate_function_pycode
+        return annotate_function_pycode
 
     @abstractmethod
     def _mock_api_config_data(self, api: MockAPI) -> Union[MockAPI, List[MockAPI]]:
@@ -119,24 +121,41 @@ class TestFlaskCodeGenerator(WebServerCodeGeneratorTestSpec):
                 sut.add_api(api_name=ut_url, api_config=ut_api_config)
 
 
+FastAPIGenCodeExpect = namedtuple("FastAPIGenCodeExpect", ("func_naming", "req_body_obj_naming"))
+
+
 class TestFastAPICodeGenerator(WebServerCodeGeneratorTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> FastAPICodeGenerator:
         return FastAPICodeGenerator()
 
     @pytest.mark.parametrize(
-        ("mock_api_key", "mock_api", "expected_api_func_naming"),
+        ("mock_api_key", "mock_api", "expect"),
         [
-            ("foo_api_url", MockAPI(url="/foo/api/url", http=Mock(HTTP())), "foo_api_url"),
-            ("foo-boo_api_url", MockAPI(url="/foo-boo/api/url", http=Mock(HTTP())), "foo_boo_api_url"),
+            (
+                "foo_api_url",
+                MockAPI(url="/foo/api/url", http=Mock(HTTP())),
+                FastAPIGenCodeExpect("foo_api_url", "FooApiUrlParameter"),
+            ),
+            (
+                "foo-boo_api_url",
+                MockAPI(url="/foo-boo/api/url", http=Mock(HTTP())),
+                FastAPIGenCodeExpect("foo_boo_api_url", "FooBooApiUrlParameter"),
+            ),
         ],
     )
     def test_generate_pycode_about_annotating_function(
-        self, sut: FastAPICodeGenerator, mock_api_key: str, mock_api: MockAPI, expected_api_func_naming: str
+        self,
+        sut: FastAPICodeGenerator,
+        mock_api_key: str,
+        mock_api: MockAPI,
+        expect: FastAPIGenCodeExpect,
     ):
-        super().test_generate_pycode_about_annotating_function(
-            sut=sut, mock_api_key=mock_api_key, mock_api=mock_api, expected_api_func_naming=expected_api_func_naming
+        annotate_function_pycode = super().test_generate_pycode_about_annotating_function(
+            sut=sut, mock_api_key=mock_api_key, mock_api=mock_api, expected_api_func_naming=expect.func_naming
         )
+
+        assert expect.req_body_obj_naming in annotate_function_pycode
 
     def _mock_api_config_data(self, api: MockAPI) -> MockAPI:
         return api
