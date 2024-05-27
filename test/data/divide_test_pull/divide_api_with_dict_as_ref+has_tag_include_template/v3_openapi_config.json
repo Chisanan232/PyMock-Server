@@ -91,6 +91,51 @@
                 }
             }
         },
+        "/api/v1/test/foo-boo": {
+            "get": {
+                "tags": [
+                    "foo-boo"
+                ],
+                "summary": "This is Foo-Boo API",
+                "description": "  400 - Bad request error\n 401 - Unauthorized error\n 404 - Not found voucher\n 500 - Unexpected error\n",
+                "operationId": "",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "Start date, format: ISO_OFFSET_DATE_TIME. Any special characters must be URL encoded, especially for `+`, `-`",
+                        "required": true,
+                        "type": "string",
+                        "format": "date-time",
+                        "x-example": "2022-03-06T00:00:00.000+09:00"
+                    },
+                    {
+                        "name": "fooType",
+                        "in": "query",
+                        "description": "Foo Type. Default value is selecting all.",
+                        "required": true,
+                        "type": "string",
+                        "x-example": "ENUM1",
+                        "enum": [
+                            "ENUM1",
+                            "ENUM2"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseDTOFooBooResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/test/foo-boo/export": {
             "get": {
                 "tags": [
@@ -225,6 +270,25 @@
                         "items": {
                             "$ref": "#/components/schemas/FooResponse"
                         }
+                    }
+                },
+                "title": "ResponseDTO«List«FooResponse»»"
+            },
+            "ResponseDTOFooBooResponse": {
+                "type": "object",
+                "required": [
+                    "errorMessage",
+                    "responseCode"
+                ],
+                "properties": {
+                    "errorMessage": {
+                        "type": "string"
+                    },
+                    "responseCode": {
+                        "type": "string"
+                    },
+                    "responseData": {
+                        "$ref": "#/components/schemas/FooResponse"
                     }
                 },
                 "title": "ResponseDTO«List«FooResponse»»"
