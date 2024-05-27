@@ -21,16 +21,22 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
     def sut(self) -> BaseWebServerCodeGenerator:
         pass
 
-    def test_generate_pycode_about_annotating_function(self, sut: BaseWebServerCodeGenerator):
-        for_test_api_name = "/Function/name"
-        api = MockAPI(url="/foo/api/url", http=Mock(HTTP()))
-        api.http.request.parameters = [APIParameter().deserialize(p) for p in _Test_API_Parameters]
+    @pytest.mark.parametrize(
+        ("mock_api_key", "mock_api"),
+        [
+            ("/Function/name", MockAPI(url="/foo/api/url", http=Mock(HTTP()))),
+        ],
+    )
+    def test_generate_pycode_about_annotating_function(
+        self, sut: BaseWebServerCodeGenerator, mock_api_key: str, mock_api: MockAPI
+    ):
+        mock_api.http.request.parameters = [APIParameter().deserialize(p) for p in _Test_API_Parameters]
 
         annotate_function_pycode = sut.annotate_function(
-            api_name=for_test_api_name, api_config=self._mock_api_config_data(api)
+            api_name=mock_api_key, api_config=self._mock_api_config_data(mock_api)
         )
 
-        assert sut._api_controller_name(for_test_api_name) in annotate_function_pycode
+        assert sut._api_controller_name(mock_api_key) in annotate_function_pycode
 
     @abstractmethod
     def _mock_api_config_data(self, api: MockAPI) -> Union[MockAPI, List[MockAPI]]:
