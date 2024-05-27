@@ -260,7 +260,7 @@ class _ReferenceObjectParser:
             return "ref" if _has_ref else ""
 
     @classmethod
-    def get_schema_ref(cls, data: dict) -> dict:
+    def get_schema_ref(cls, data: dict, accept_no_ref: bool = False) -> dict:
         def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
             if i == len(paths) - 1:
                 return component_def_data[paths[i]]
@@ -270,6 +270,8 @@ class _ReferenceObjectParser:
         print(f"[DEBUG in get_schema_ref] data: {data}")
         _has_ref = _ReferenceObjectParser.has_ref(data)
         if not _has_ref:
+            if accept_no_ref:
+                return {}
             raise ValueError("This parameter has no ref in schema.")
         schema_path = (data[_has_ref]["$ref"] if _has_ref != "ref" else data["$ref"]).replace("#/", "").split("/")[1:]
         print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")

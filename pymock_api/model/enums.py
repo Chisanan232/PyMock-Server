@@ -55,7 +55,7 @@ class ResponseStrategy(Enum):
     ) -> dict:
         return self._process_reference_object(
             init_response=init_response,
-            response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(data),
+            response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(data, accept_no_ref=True),
             get_schema_parser_factory=get_schema_parser_factory,
         )
 
