@@ -89,6 +89,7 @@ class TestFlaskCodeGenerator(WebServerCodeGeneratorTestSpec):
         ("mock_api_key", "mock_api", "expected_api_func_naming"),
         [
             ("/foo/api/url", MockAPI(url="/foo/api/url", http=Mock(HTTP())), "foo_api_url"),
+            ("/foo-boo/api/url", MockAPI(url="/foo-boo/api/url", http=Mock(HTTP())), "foo_boo_api_url"),
         ],
     )
     def test_generate_pycode_about_annotating_function(
@@ -127,6 +128,7 @@ class TestFastAPICodeGenerator(WebServerCodeGeneratorTestSpec):
         ("mock_api_key", "mock_api", "expected_api_func_naming"),
         [
             ("foo_api_url", MockAPI(url="/foo/api/url", http=Mock(HTTP())), "foo_api_url"),
+            ("foo-boo_api_url", MockAPI(url="/foo-boo/api/url", http=Mock(HTTP())), "foo_boo_api_url"),
         ],
     )
     def test_generate_pycode_about_annotating_function(
