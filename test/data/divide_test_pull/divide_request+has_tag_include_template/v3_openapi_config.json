@@ -1,0 +1,355 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "description": "Some description about this API documentation",
+        "version": "A1",
+        "title": "PyTest testing API",
+        "license": {}
+    },
+    "paths": {
+        "/api/v1/test/foo": {
+            "get": {
+                "tags": [
+                    "foo"
+                ],
+                "summary": "This is Foo API",
+                "description": "  400 - Bad request error\n 401 - Unauthorized error\n 404 - Not found voucher\n 500 - Unexpected error\n",
+                "operationId": "",
+                "produces": [
+                    "*/*"
+                ],
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "description": "Start date, format: ISO_OFFSET_DATE_TIME. Any special characters must be URL encoded, especially for `+`, `-`",
+                        "required": true,
+                        "type": "string",
+                        "format": "date-time",
+                        "x-example": "2022-03-06T00:00:00.000+09:00"
+                    },
+                    {
+                        "name": "fooType",
+                        "in": "query",
+                        "description": "Foo Type. Default value is selecting all.",
+                        "required": true,
+                        "type": "string",
+                        "x-example": "ENUM1",
+                        "enum": [
+                            "ENUM1",
+                            "ENUM2"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseDTO«List«FooResponse»»"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "foo"
+                ],
+                "summary": "update Foo",
+                "description": "  400 - Bad request error\n 401 - Unauthorized error\n 404 - Not found voucher\n 500 - Unexpected error\n",
+                "operationId": "",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "*/*"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateFooRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                          "application/json": {
+                               "schema": {
+                                   "$ref": "#/components/schemas/ResponseDTO«Unit»"
+                               }
+                          }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/test/foo-boo/export": {
+            "get": {
+                "tags": [
+                    "foo-boo"
+                ],
+                "summary": "export something as file",
+                "operationId": "",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "parameters": [
+                    {
+                        "name": "arg1",
+                        "in": "query",
+                        "required": false,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "ENUM1",
+                                "ENUM2"
+                            ]
+                        },
+                        "collectionFormat": "multi",
+                        "enum": [
+                            "ENUM1",
+                            "ENUM2"
+                        ]
+                    },
+                    {
+                        "name": "arg2",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "enum": [
+                            "ENUM1",
+                            "ENUM2"
+                        ]
+                    },
+                    {
+                        "name": "datetime",
+                        "in": "query",
+                        "required": false,
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                          "application/json": {
+                              "schema": {
+                                  "$ref": "#/components/schemas/Resource"
+                              }
+                          }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "TestResponse": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "value"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                },
+                "title": "Test"
+            },
+            "Resource": {
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "type": "string"
+                    },
+                    "file": {
+                        "type": "file"
+                    },
+                    "filename": {
+                        "type": "string"
+                    },
+                    "inputStream": {
+                        "$ref": "#/components/schemas/InputStream"
+                    },
+                    "open": {
+                        "type": "boolean"
+                    },
+                    "readable": {
+                        "type": "boolean"
+                    },
+                    "uri": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "url"
+                    }
+                },
+                "title": "Resource"
+            },
+            "InputStream": {
+                "type": "object",
+                "title": "InputStream"
+            },
+            "ResponseDTO«List«FooResponse»»": {
+                "type": "object",
+                "required": [
+                    "errorMessage",
+                    "responseCode"
+                ],
+                "properties": {
+                    "errorMessage": {
+                        "type": "string"
+                    },
+                    "responseCode": {
+                        "type": "string"
+                    },
+                    "responseData": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FooResponse"
+                        }
+                    }
+                },
+                "title": "ResponseDTO«List«FooResponse»»"
+            },
+            "ResponseDTO«Unit»": {
+                "type": "object",
+                "required": [
+                    "errorMessage",
+                    "responseCode"
+                ],
+                "properties": {
+                    "errorMessage": {
+                        "type": "string"
+                    },
+                    "responseCode": {
+                        "type": "string"
+                    },
+                    "responseData": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Unit"
+                        }
+                    }
+                },
+                "title": "ResponseDTO«List«FooResponse»»"
+            },
+            "Sort": {
+                "type": "object",
+                "properties": {
+                    "empty": {
+                        "type": "boolean"
+                    },
+                    "sorted": {
+                        "type": "boolean"
+                    },
+                    "unsorted": {
+                        "type": "boolean"
+                    }
+                },
+                "title": "Sort"
+            },
+            "SwaggerPageable": {
+                "type": "object",
+                "properties": {
+                    "page": {
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 0,
+                        "description": "Results page you want to retrieve (0..N)"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 20,
+                        "description": "Number of records per page"
+                    },
+                    "sort": {
+                        "type": "string",
+                        "description": "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported."
+                    }
+                },
+                "title": "SwaggerPageable"
+            },
+            "UpdateFooRequest": {
+                "type": "object",
+                "required": [
+                    "balances"
+                ],
+                "properties": {
+                    "balances": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UpdateOneFooDto"
+                        }
+                    }
+                },
+                "title": "UpdateFooRequest"
+            },
+            "UpdateOneFooDto": {
+                "type": "object",
+                "required": [
+                    "value",
+                    "id"
+                ],
+                "properties": {
+                    "value": {
+                        "type": "number",
+                        "example": 23434,
+                        "description": "value"
+                    },
+                    "id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1,
+                        "description": "ID"
+                    }
+                },
+                "title": "UpdateOneFooDto"
+            },
+            "Unit": {
+                "type": "object",
+                "title": "Unit"
+            },
+            "FooResponse": {
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "value1": {
+                        "type": "string"
+                    },
+                    "value2": {
+                        "type": "string"
+                    }
+                },
+                "title": "FooResponse"
+            }
+        }
+    }
+}
