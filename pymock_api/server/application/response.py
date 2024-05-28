@@ -53,11 +53,7 @@ class HTTPResponse:
         if data.strategy is ResponseStrategy.STRING:
             return cls._generate_response_as_string(data)
         elif data.strategy is ResponseStrategy.FILE:
-            file_path = data.path
-            if cls._is_file(path=file_path):
-                return cls._read_file(path=file_path)
-            # FIXME: Here would be invalid value as file path. How to handle it?
-            return data.path
+            return cls._generate_response_by_file(data)
         elif data.strategy is ResponseStrategy.OBJECT:
             response_properties = data.properties
             response = {}
@@ -103,6 +99,14 @@ class HTTPResponse:
             return json.loads(response_value)
         except:  # pylint: disable=broad-except, bare-except
             return response_value
+
+    @classmethod
+    def _generate_response_by_file(cls, data: MockAPIHTTPResponseConfig) -> Union[str, dict]:
+        file_path = data.path
+        if cls._is_file(path=file_path):
+            return cls._read_file(path=file_path)
+        # FIXME: Here would be invalid value as file path. How to handle it?
+        return data.path
 
     @classmethod
     def _is_file(cls, path: str) -> bool:
