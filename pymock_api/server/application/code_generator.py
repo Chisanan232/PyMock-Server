@@ -31,10 +31,26 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
         """
 
     def _parse_variable_in_api(self, api_function_name: str) -> Dict[str, str]:
-        has_variable_in_url = re.findall(r"<\w{1,32}>", api_function_name)
+        var_mapping_table_with_angle_brackets = self._parse_variable_in_api_with_prefix(
+            api_function_name=api_function_name, first_prefix="<", last_prefix=">"
+        )
+        var_mapping_table_with_curly_brackets = self._parse_variable_in_api_with_prefix(
+            api_function_name=api_function_name, first_prefix="{", last_prefix="}"
+        )
+        var_mapping_table_with_angle_brackets.update(var_mapping_table_with_curly_brackets)
+        return var_mapping_table_with_angle_brackets
+
+    def _parse_variable_in_api_with_prefix(
+        self, api_function_name: str, first_prefix: str, last_prefix: str
+    ) -> Dict[str, str]:
+        has_variable_in_url = re.findall(
+            re.escape(first_prefix) + r"[\w\-_]{1,32}" + re.escape(last_prefix), api_function_name
+        )
         var_mapping_table = {}
         for one_var_in_url in has_variable_in_url:
-            new_one_var_in_url = str(one_var_in_url).replace("<", "var_").replace(">", "")
+            new_one_var_in_url = (
+                str(one_var_in_url).replace(first_prefix, "var_").replace(last_prefix, "").replace("-", "_")
+            )
             var_mapping_table[one_var_in_url] = new_one_var_in_url
         return var_mapping_table
 
