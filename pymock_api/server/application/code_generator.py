@@ -265,7 +265,7 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
 
     def _api_name_as_camel_case(self, api_name: str) -> str:
         new_api_name: List[str] = []
-        for i in map(lambda e: e.split("-") if "-" in e else e, api_name.split("_")):
+        for i in map(lambda e: e.split("-") if "-" in e else e, self._api_controller_name(api_name).split("_")):
             if type(i) is list:
                 new_api_name.extend(i)
             else:
