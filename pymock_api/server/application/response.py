@@ -92,14 +92,7 @@ class HTTPResponse:
                 value = [] if locate(v.value_type) is list else {}  # type: ignore[assignment]
                 item = {}
                 for i in v.items or []:
-                    assert i.value_type
-                    if locate(i.value_type) is str:
-                        item_value = "random string"
-                    elif locate(i.value_type) is int:
-                        item_value = "random integer"
-                    else:
-                        raise NotImplementedError
-                    item[i.name] = item_value
+                    item[i.name] = _initial_resp_details(i)  # type: ignore[arg-type]
                 if locate(v.value_type) is list:
                     value.append(item)  # type: ignore[attr-defined]
                     assert isinstance(value, list)
