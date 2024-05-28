@@ -148,6 +148,24 @@ class TestInnerHTTPResponse:
                 ),
                 {"details": [{"key": "random string", "id": "random integer", "name": "random string"}]},
             ),
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="details",
+                            required=True,
+                            value_type="dict",
+                            items=[
+                                IteratorItem(name="name", value_type="str", required=True),
+                                IteratorItem(name="id", value_type="int", required=True),
+                                IteratorItem(name="key", value_type="str", required=True),
+                            ],
+                        )
+                    ],
+                ),
+                {"details": {"key": "random string", "id": "random integer", "name": "random string"}},
+            ),
         ],
     )
     def test_response_with_object(
