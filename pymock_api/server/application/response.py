@@ -90,9 +90,12 @@ class HTTPResponse:
                 value = "random integer"
             elif locate(v.value_type) in (list, dict):
                 value = [] if locate(v.value_type) is list else {}  # type: ignore[assignment]
-                item = {}
+                item = {}  # type: ignore[var-annotated]
                 for i in v.items or []:
-                    item[i.name] = _initial_resp_details(i)  # type: ignore[arg-type]
+                    if len(v.items) == 1 and i.name == "":  # type: ignore[arg-type]
+                        item = _initial_resp_details(i)  # type: ignore[arg-type, assignment]
+                    else:
+                        item[i.name] = _initial_resp_details(i)  # type: ignore[arg-type]
                 if locate(v.value_type) is list:
                     value.append(item)  # type: ignore[attr-defined]
                     assert isinstance(value, list)
