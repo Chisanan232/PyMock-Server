@@ -84,26 +84,7 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
     @pytest.mark.parametrize(
         ("api_name", "expect_var_mapping_table"),
         [
-            # For *FlaskCodeGenerator*
-            ("/foo/api/url", {}),
-            ("/foo-boo/api/url", {}),
-            ("/foo/api/url/<id>", {"<id>": "var_id"}),
-            ("/foo-boo/api/url/<id>", {"<id>": "var_id"}),
-            ("/foo/api/url/<id>/test/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
-            ("/foo/api/url/<id>/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
-            ("/foo-boo/api/url/<id>", {"<id>": "var_id"}),
-            ("/foo-boo/api/url/<id>/test/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
-            ("/foo-boo/api/url/<id>/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
-            # For *FastAPICodeGenerator*
-            ("foo_api_url", {}),
-            ("foo-boo_api_url", {}),
-            ("foo_api_url_{id}", {"{id}": "var_id"}),
-            ("foo-boo_api_url_{id}", {"{id}": "var_id"}),
-            ("foo_api_url_{id}_test_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
-            ("foo_api_url_{id}_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
-            ("foo-boo_api_url_{id}", {"{id}": "var_id"}),
-            ("foo-boo_api_url_{id}_test_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
-            ("foo-boo_api_url_{id}_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
+            # NOTE: It should implement the test data here in child-class
         ],
     )
     def test__parse_variable_in_api(
@@ -155,6 +136,27 @@ class TestFlaskCodeGenerator(WebServerCodeGeneratorTestSpec):
         with patch.object(sut, "_record_api_params_info"):
             with pytest.raises(TypeError):
                 sut.add_api(api_name=ut_url, api_config=ut_api_config)
+
+    @pytest.mark.parametrize(
+        ("api_name", "expect_var_mapping_table"),
+        [
+            ("/foo/api/url", {}),
+            ("/foo-boo/api/url", {}),
+            ("/foo/api/url/<id>", {"<id>": "var_id"}),
+            ("/foo-boo/api/url/<id>", {"<id>": "var_id"}),
+            ("/foo/api/url/<id>/test/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
+            ("/foo/api/url/<id>/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
+            ("/foo-boo/api/url/<id>", {"<id>": "var_id"}),
+            ("/foo-boo/api/url/<id>/test/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
+            ("/foo-boo/api/url/<id>/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
+        ],
+    )
+    def test__parse_variable_in_api(
+        self, sut: BaseWebServerCodeGenerator, api_name: str, expect_var_mapping_table: Dict[str, str]
+    ):
+        super().test__parse_variable_in_api(
+            sut=sut, api_name=api_name, expect_var_mapping_table=expect_var_mapping_table
+        )
 
 
 FastAPIGenCodeExpect = namedtuple("FastAPIGenCodeExpect", ("func_naming", "req_body_obj_naming"))
@@ -228,3 +230,24 @@ class TestFastAPICodeGenerator(WebServerCodeGeneratorTestSpec):
         with patch.object(sut, "_record_api_params_info"):
             with pytest.raises(TypeError):
                 sut.add_api(api_name=ut_url, api_config=ut_api_config)
+
+    @pytest.mark.parametrize(
+        ("api_name", "expect_var_mapping_table"),
+        [
+            ("foo_api_url", {}),
+            ("foo-boo_api_url", {}),
+            ("foo_api_url_{id}", {"{id}": "var_id"}),
+            ("foo-boo_api_url_{id}", {"{id}": "var_id"}),
+            ("foo_api_url_{id}_test_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
+            ("foo_api_url_{id}_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
+            ("foo-boo_api_url_{id}", {"{id}": "var_id"}),
+            ("foo-boo_api_url_{id}_test_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
+            ("foo-boo_api_url_{id}_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
+        ],
+    )
+    def test__parse_variable_in_api(
+        self, sut: BaseWebServerCodeGenerator, api_name: str, expect_var_mapping_table: Dict[str, str]
+    ):
+        super().test__parse_variable_in_api(
+            sut=sut, api_name=api_name, expect_var_mapping_table=expect_var_mapping_table
+        )
