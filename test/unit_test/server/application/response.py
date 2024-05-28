@@ -116,6 +116,7 @@ class TestInnerHTTPResponse:
     @pytest.mark.parametrize(
         ("mock_response_data", "expect_result"),
         [
+            # *int* type value only
             (
                 HTTPResponse(
                     strategy=ResponseStrategy.OBJECT,
@@ -123,6 +124,7 @@ class TestInnerHTTPResponse:
                 ),
                 {"id": "random integer"},
             ),
+            # *str* type value only
             (
                 HTTPResponse(
                     strategy=ResponseStrategy.OBJECT,
@@ -130,6 +132,7 @@ class TestInnerHTTPResponse:
                 ),
                 {"role": "random string"},
             ),
+            # *list* type value only (no nested data)
             (
                 HTTPResponse(
                     strategy=ResponseStrategy.OBJECT,
@@ -148,6 +151,7 @@ class TestInnerHTTPResponse:
                 ),
                 {"details": [{"key": "random string", "id": "random integer", "name": "random string"}]},
             ),
+            # *dict* type value only (no nested data)
             (
                 HTTPResponse(
                     strategy=ResponseStrategy.OBJECT,
@@ -166,6 +170,7 @@ class TestInnerHTTPResponse:
                 ),
                 {"details": {"key": "random string", "id": "random integer", "name": "random string"}},
             ),
+            # *dict* type value with nested data
             (
                 HTTPResponse(
                     strategy=ResponseStrategy.OBJECT,
