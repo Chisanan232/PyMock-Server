@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 from unittest.mock import Mock, patch
 
 import pytest
@@ -80,6 +80,37 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
         ut_api_config = "Invalid API configuration"
         with pytest.raises(TypeError):
             sut._record_api_params_info(url=ut_url, api_config=ut_api_config)
+
+    @pytest.mark.parametrize(
+        ("api_name", "expect_var_mapping_table"),
+        [
+            # For *FlaskCodeGenerator*
+            ("/foo/api/url", {}),
+            ("/foo-boo/api/url", {}),
+            ("/foo/api/url/<id>", {"<id>": "var_id"}),
+            ("/foo-boo/api/url/<id>", {"<id>": "var_id"}),
+            ("/foo/api/url/<id>/test/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
+            ("/foo/api/url/<id>/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
+            ("/foo-boo/api/url/<id>", {"<id>": "var_id"}),
+            ("/foo-boo/api/url/<id>/test/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
+            ("/foo-boo/api/url/<id>/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
+            # For *FastAPICodeGenerator*
+            ("foo_api_url", {}),
+            ("foo-boo_api_url", {}),
+            ("foo_api_url_{id}", {"{id}": "var_id"}),
+            ("foo-boo_api_url_{id}", {"{id}": "var_id"}),
+            ("foo_api_url_{id}_test_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
+            ("foo_api_url_{id}_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
+            ("foo-boo_api_url_{id}", {"{id}": "var_id"}),
+            ("foo-boo_api_url_{id}_test_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
+            ("foo-boo_api_url_{id}_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
+        ],
+    )
+    def test__parse_variable_in_api(
+        self, sut: BaseWebServerCodeGenerator, api_name: str, expect_var_mapping_table: Dict[str, str]
+    ):
+        var_mapping_table = sut._parse_variable_in_api(api_function_name=api_name)
+        assert var_mapping_table == expect_var_mapping_table
 
 
 class TestFlaskCodeGenerator(WebServerCodeGeneratorTestSpec):
