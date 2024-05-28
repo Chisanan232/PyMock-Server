@@ -51,11 +51,7 @@ class HTTPResponse:
 
         """
         if data.strategy is ResponseStrategy.STRING:
-            response_value = data.value
-            try:
-                return json.loads(response_value)
-            except:  # pylint: disable=broad-except, bare-except
-                return response_value
+            return cls._generate_response_as_string(data)
         elif data.strategy is ResponseStrategy.FILE:
             file_path = data.path
             if cls._is_file(path=file_path):
@@ -99,6 +95,14 @@ class HTTPResponse:
             return response
         else:
             raise TypeError(f"Cannot identify invalid HTTP response strategy *{data.strategy}*.")
+
+    @classmethod
+    def _generate_response_as_string(cls, data: MockAPIHTTPResponseConfig) -> str:
+        response_value = data.value
+        try:
+            return json.loads(response_value)
+        except:  # pylint: disable=broad-except, bare-except
+            return response_value
 
     @classmethod
     def _is_file(cls, path: str) -> bool:
