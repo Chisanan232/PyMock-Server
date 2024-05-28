@@ -6,6 +6,7 @@ from typing import Any, List, Union
 
 from ..._utils import import_web_lib
 from ...exceptions import FileFormatNotSupport
+from ...model.api_config import ResponseProperty
 from ...model.api_config.apis import HTTPResponse as MockAPIHTTPResponseConfig
 from ...model.enums import ResponseStrategy
 
@@ -77,10 +78,8 @@ class HTTPResponse:
 
     @classmethod
     def _generate_response_from_object(cls, data: MockAPIHTTPResponseConfig) -> dict:
-        response_properties = data.properties
-        response = {}
-        for v in response_properties:
-            # TODO: Handle the value with key *format*
+
+        def _initial_resp_details(v: ResponseProperty) -> Union[str, dict]:
             assert v.value_type
             if locate(v.value_type) is str:
                 # lowercase_letters = string.ascii_lowercase
@@ -109,7 +108,13 @@ class HTTPResponse:
                     assert isinstance(value, dict)
             else:
                 raise NotImplementedError
-            response[v.name] = value
+            return value
+
+        response_properties = data.properties
+        response = {}
+        for v in response_properties:
+            # TODO: Handle the value with key *format*
+            response[v.name] = _initial_resp_details(v)
         return response
 
     @classmethod
