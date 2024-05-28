@@ -193,14 +193,6 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
             + define_function_for_api
         )
 
-    def _parse_variable_in_api(self, api_function_name: str) -> Dict[str, str]:
-        has_variable_in_url = re.findall(r"<\w{1,32}>", api_function_name)
-        var_mapping_table = {}
-        for one_var_in_url in has_variable_in_url:
-            new_one_var_in_url = str(one_var_in_url).replace("<", "var_").replace(">", "")
-            var_mapping_table[one_var_in_url] = new_one_var_in_url
-        return var_mapping_table
-
     def _define_api_function_pycode(self, api_name: str, api_config: MockAPI) -> str:  # type: ignore[override]
         # The code implementation is different if the HTTP method is *GET* or not
         if api_config.http.request.method.upper() != "GET":  # type: ignore[union-attr]
