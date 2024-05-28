@@ -75,8 +75,8 @@ class HTTPResponse:
                 elif locate(v.value_type) is int:
                     # value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
                     value = "random integer"
-                elif locate(v.value_type) is list:
-                    value = []  # type: ignore[assignment]
+                elif locate(v.value_type) in (list, dict):
+                    value = [] if locate(v.value_type) is list else {}  # type: ignore[assignment]
                     item = {}
                     for i in v.items or []:
                         assert i.value_type
@@ -87,7 +87,12 @@ class HTTPResponse:
                         else:
                             raise NotImplementedError
                         item[i.name] = item_value
-                    value.append(item)  # type: ignore[attr-defined]
+                    if locate(v.value_type) is list:
+                        value.append(item)  # type: ignore[attr-defined]
+                        assert isinstance(value, list)
+                    else:
+                        value = item  # type: ignore[assignment]
+                        assert isinstance(value, dict)
                 else:
                     raise NotImplementedError
                 response[v.name] = value
