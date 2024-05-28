@@ -70,7 +70,7 @@ class HTTPRequest(_DividableOnlyTemplatableConfig, _Checkable):
         method: str = self._get_prop(data, prop="method")
         all_parameters = (data or self).parameters if (data and data.parameters) or self.parameters else None
         parameters = [param.serialize() for param in (all_parameters or [])]
-        if not (method and parameters):
+        if not method:
             return None
         serialized_data = super().serialize(data)
         assert serialized_data is not None
