@@ -48,10 +48,6 @@ class _MockHTTPResponse:
     def with_unexpected_file_strategy() -> HTTPResponse:
         return HTTPResponse(strategy=ResponseStrategy.FILE, path=_Unexpected_File_Name)
 
-    # @staticmethod
-    # def with_object_strategy() -> HTTPResponse:
-    #     return HTTPResponse(strategy=ResponseStrategy.OBJECT, properties=_HTTP_Response_Properties_With_Object_Strategy)
-
     @staticmethod
     def with_invalid_strategy() -> HTTPResponse:
         http_response = Mock()
