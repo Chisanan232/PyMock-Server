@@ -55,40 +55,7 @@ class HTTPResponse:
         elif data.strategy is ResponseStrategy.FILE:
             return cls._generate_response_by_file(data)
         elif data.strategy is ResponseStrategy.OBJECT:
-            response_properties = data.properties
-            response = {}
-            for v in response_properties:
-                # TODO: Handle the value with key *format*
-                assert v.value_type
-                if locate(v.value_type) is str:
-                    # lowercase_letters = string.ascii_lowercase
-                    # value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                    value = "random string"
-                elif locate(v.value_type) is int:
-                    # value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                    value = "random integer"
-                elif locate(v.value_type) in (list, dict):
-                    value = [] if locate(v.value_type) is list else {}  # type: ignore[assignment]
-                    item = {}
-                    for i in v.items or []:
-                        assert i.value_type
-                        if locate(i.value_type) is str:
-                            item_value = "random string"
-                        elif locate(i.value_type) is int:
-                            item_value = "random integer"
-                        else:
-                            raise NotImplementedError
-                        item[i.name] = item_value
-                    if locate(v.value_type) is list:
-                        value.append(item)  # type: ignore[attr-defined]
-                        assert isinstance(value, list)
-                    else:
-                        value = item  # type: ignore[assignment]
-                        assert isinstance(value, dict)
-                else:
-                    raise NotImplementedError
-                response[v.name] = value
-            return response
+            return cls._generate_response_from_object(data)
         else:
             raise TypeError(f"Cannot identify invalid HTTP response strategy *{data.strategy}*.")
 
@@ -107,6 +74,43 @@ class HTTPResponse:
             return cls._read_file(path=file_path)
         # FIXME: Here would be invalid value as file path. How to handle it?
         return data.path
+
+    @classmethod
+    def _generate_response_from_object(cls, data: MockAPIHTTPResponseConfig) -> dict:
+        response_properties = data.properties
+        response = {}
+        for v in response_properties:
+            # TODO: Handle the value with key *format*
+            assert v.value_type
+            if locate(v.value_type) is str:
+                # lowercase_letters = string.ascii_lowercase
+                # value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+                value = "random string"
+            elif locate(v.value_type) is int:
+                # value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+                value = "random integer"
+            elif locate(v.value_type) in (list, dict):
+                value = [] if locate(v.value_type) is list else {}  # type: ignore[assignment]
+                item = {}
+                for i in v.items or []:
+                    assert i.value_type
+                    if locate(i.value_type) is str:
+                        item_value = "random string"
+                    elif locate(i.value_type) is int:
+                        item_value = "random integer"
+                    else:
+                        raise NotImplementedError
+                    item[i.name] = item_value
+                if locate(v.value_type) is list:
+                    value.append(item)  # type: ignore[attr-defined]
+                    assert isinstance(value, list)
+                else:
+                    value = item  # type: ignore[assignment]
+                    assert isinstance(value, dict)
+            else:
+                raise NotImplementedError
+            response[v.name] = value
+        return response
 
     @classmethod
     def _is_file(cls, path: str) -> bool:
