@@ -87,7 +87,7 @@ class HTTPResponse:
                         else:
                             raise NotImplementedError
                         item[i.name] = item_value
-                        value.append(item)  # type: ignore[attr-defined]
+                    value.append(item)  # type: ignore[attr-defined]
                 else:
                     raise NotImplementedError
                 response[v.name] = value
