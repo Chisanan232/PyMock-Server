@@ -31,10 +31,26 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
         """
 
     def _parse_variable_in_api(self, api_function_name: str) -> Dict[str, str]:
-        has_variable_in_url = re.findall(r"<\w{1,32}>", api_function_name)
+        var_mapping_table_with_angle_brackets = self._parse_variable_in_api_with_prefix(
+            api_function_name=api_function_name, first_prefix="<", last_prefix=">"
+        )
+        var_mapping_table_with_curly_brackets = self._parse_variable_in_api_with_prefix(
+            api_function_name=api_function_name, first_prefix="{", last_prefix="}"
+        )
+        var_mapping_table_with_angle_brackets.update(var_mapping_table_with_curly_brackets)
+        return var_mapping_table_with_angle_brackets
+
+    def _parse_variable_in_api_with_prefix(
+        self, api_function_name: str, first_prefix: str, last_prefix: str
+    ) -> Dict[str, str]:
+        has_variable_in_url = re.findall(
+            re.escape(first_prefix) + r"[\w\-_]{1,32}" + re.escape(last_prefix), api_function_name
+        )
         var_mapping_table = {}
         for one_var_in_url in has_variable_in_url:
-            new_one_var_in_url = str(one_var_in_url).replace("<", "var_").replace(">", "")
+            new_one_var_in_url = (
+                str(one_var_in_url).replace(first_prefix, "var_").replace(last_prefix, "").replace("-", "_")
+            )
             var_mapping_table[one_var_in_url] = new_one_var_in_url
         return var_mapping_table
 
@@ -177,14 +193,6 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
             + define_function_for_api
         )
 
-    def _parse_variable_in_api(self, api_function_name: str) -> Dict[str, str]:
-        has_variable_in_url = re.findall(r"<\w{1,32}>", api_function_name)
-        var_mapping_table = {}
-        for one_var_in_url in has_variable_in_url:
-            new_one_var_in_url = str(one_var_in_url).replace("<", "var_").replace(">", "")
-            var_mapping_table[one_var_in_url] = new_one_var_in_url
-        return var_mapping_table
-
     def _define_api_function_pycode(self, api_name: str, api_config: MockAPI) -> str:  # type: ignore[override]
         # The code implementation is different if the HTTP method is *GET* or not
         if api_config.http.request.method.upper() != "GET":  # type: ignore[union-attr]
@@ -257,7 +265,7 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
 
     def _api_name_as_camel_case(self, api_name: str) -> str:
         new_api_name: List[str] = []
-        for i in map(lambda e: e.split("-") if "-" in e else e, api_name.split("_")):
+        for i in map(lambda e: e.split("-") if "-" in e else e, self._api_controller_name(api_name).split("_")):
             if type(i) is list:
                 new_api_name.extend(i)
             else:
@@ -341,4 +349,7 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
         return new_url
 
     def _api_controller_name(self, api_name: str) -> str:
-        return api_name.replace("-", "_")
+        api_function_name = api_name.replace("-", "_")
+        for var_in_url, new_name in self._variables_in_url.items():
+            api_function_name = api_function_name.replace(var_in_url, new_name)
+        return api_function_name

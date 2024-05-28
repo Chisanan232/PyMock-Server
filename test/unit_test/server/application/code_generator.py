@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional, Union
+from collections import namedtuple
+from typing import Dict, List, Optional, Union
 from unittest.mock import Mock, patch
 
 import pytest
@@ -21,16 +22,23 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
     def sut(self) -> BaseWebServerCodeGenerator:
         pass
 
-    def test_generate_pycode_about_annotating_function(self, sut: BaseWebServerCodeGenerator):
-        for_test_api_name = "/Function/name"
-        api = MockAPI(url="/foo/api/url", http=Mock(HTTP()))
-        api.http.request.parameters = [APIParameter().deserialize(p) for p in _Test_API_Parameters]
+    @pytest.mark.parametrize(
+        ("mock_api_key", "mock_api", "expected_api_func_naming"),
+        [
+            # NOTE: It should implement the test data here in child-class
+        ],
+    )
+    def test_generate_pycode_about_annotating_function(
+        self, sut: BaseWebServerCodeGenerator, mock_api_key: str, mock_api: MockAPI, expected_api_func_naming: str
+    ):
+        mock_api.http.request.parameters = [APIParameter().deserialize(p) for p in _Test_API_Parameters]
 
         annotate_function_pycode = sut.annotate_function(
-            api_name=for_test_api_name, api_config=self._mock_api_config_data(api)
+            api_name=mock_api_key, api_config=self._mock_api_config_data(mock_api)
         )
 
-        assert sut._api_controller_name(for_test_api_name) in annotate_function_pycode
+        assert f"def {expected_api_func_naming}(" in annotate_function_pycode
+        return annotate_function_pycode
 
     @abstractmethod
     def _mock_api_config_data(self, api: MockAPI) -> Union[MockAPI, List[MockAPI]]:
@@ -73,11 +81,42 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
         with pytest.raises(TypeError):
             sut._record_api_params_info(url=ut_url, api_config=ut_api_config)
 
+    @pytest.mark.parametrize(
+        ("api_name", "expect_var_mapping_table"),
+        [
+            # NOTE: It should implement the test data here in child-class
+        ],
+    )
+    def test__parse_variable_in_api(
+        self, sut: BaseWebServerCodeGenerator, api_name: str, expect_var_mapping_table: Dict[str, str]
+    ):
+        var_mapping_table = sut._parse_variable_in_api(api_function_name=api_name)
+        assert var_mapping_table == expect_var_mapping_table
+
 
 class TestFlaskCodeGenerator(WebServerCodeGeneratorTestSpec):
     @pytest.fixture(scope="function")
-    def sut(self) -> BaseWebServerCodeGenerator:
+    def sut(self) -> FlaskCodeGenerator:
         return FlaskCodeGenerator()
+
+    @pytest.mark.parametrize(
+        ("mock_api_key", "mock_api", "expected_api_func_naming"),
+        [
+            ("/foo/api/url", MockAPI(url="/foo/api/url", http=Mock(HTTP())), "foo_api_url"),
+            ("/foo-boo/api/url", MockAPI(url="/foo-boo/api/url", http=Mock(HTTP())), "foo_boo_api_url"),
+            (
+                "/foo-boo/api/url/<id>",
+                MockAPI(url="/foo-boo/api/url/<id>", http=Mock(HTTP())),
+                "foo_boo_api_url_var_id",
+            ),
+        ],
+    )
+    def test_generate_pycode_about_annotating_function(
+        self, sut: FlaskCodeGenerator, mock_api_key: str, mock_api: MockAPI, expected_api_func_naming: str
+    ):
+        super().test_generate_pycode_about_annotating_function(
+            sut=sut, mock_api_key=mock_api_key, mock_api=mock_api, expected_api_func_naming=expected_api_func_naming
+        )
 
     def _mock_api_config_data(self, api: MockAPI) -> List[MockAPI]:
         return [api]
@@ -98,11 +137,68 @@ class TestFlaskCodeGenerator(WebServerCodeGeneratorTestSpec):
             with pytest.raises(TypeError):
                 sut.add_api(api_name=ut_url, api_config=ut_api_config)
 
+    @pytest.mark.parametrize(
+        ("api_name", "expect_var_mapping_table"),
+        [
+            ("/foo/api/url", {}),
+            ("/foo-boo/api/url", {}),
+            ("/foo/api/url/<id>", {"<id>": "var_id"}),
+            ("/foo-boo/api/url/<id>", {"<id>": "var_id"}),
+            ("/foo/api/url/<id>/test/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
+            ("/foo/api/url/<id>/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
+            ("/foo-boo/api/url/<id>", {"<id>": "var_id"}),
+            ("/foo-boo/api/url/<id>/test/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
+            ("/foo-boo/api/url/<id>/<other-id>", {"<id>": "var_id", "<other-id>": "var_other_id"}),
+        ],
+    )
+    def test__parse_variable_in_api(
+        self, sut: BaseWebServerCodeGenerator, api_name: str, expect_var_mapping_table: Dict[str, str]
+    ):
+        super().test__parse_variable_in_api(
+            sut=sut, api_name=api_name, expect_var_mapping_table=expect_var_mapping_table
+        )
+
+
+FastAPIGenCodeExpect = namedtuple("FastAPIGenCodeExpect", ("func_naming", "req_body_obj_naming"))
+
 
 class TestFastAPICodeGenerator(WebServerCodeGeneratorTestSpec):
     @pytest.fixture(scope="function")
-    def sut(self) -> BaseWebServerCodeGenerator:
+    def sut(self) -> FastAPICodeGenerator:
         return FastAPICodeGenerator()
+
+    @pytest.mark.parametrize(
+        ("mock_api_key", "mock_api", "expect"),
+        [
+            (
+                "foo_api_url",
+                MockAPI(url="/foo/api/url", http=Mock(HTTP())),
+                FastAPIGenCodeExpect("foo_api_url", "FooApiUrlParameter"),
+            ),
+            (
+                "foo-boo_api_url",
+                MockAPI(url="/foo-boo/api/url", http=Mock(HTTP())),
+                FastAPIGenCodeExpect("foo_boo_api_url", "FooBooApiUrlParameter"),
+            ),
+            (
+                "foo-boo_api_url_{id}",
+                MockAPI(url="/foo-boo/api/url/{id}", http=Mock(HTTP())),
+                FastAPIGenCodeExpect("foo_boo_api_url_var_id", "FooBooApiUrlVarIdParameter"),
+            ),
+        ],
+    )
+    def test_generate_pycode_about_annotating_function(
+        self,
+        sut: FastAPICodeGenerator,
+        mock_api_key: str,
+        mock_api: MockAPI,
+        expect: FastAPIGenCodeExpect,
+    ):
+        annotate_function_pycode = super().test_generate_pycode_about_annotating_function(
+            sut=sut, mock_api_key=mock_api_key, mock_api=mock_api, expected_api_func_naming=expect.func_naming
+        )
+
+        assert expect.req_body_obj_naming in annotate_function_pycode
 
     def _mock_api_config_data(self, api: MockAPI) -> MockAPI:
         return api
@@ -134,3 +230,24 @@ class TestFastAPICodeGenerator(WebServerCodeGeneratorTestSpec):
         with patch.object(sut, "_record_api_params_info"):
             with pytest.raises(TypeError):
                 sut.add_api(api_name=ut_url, api_config=ut_api_config)
+
+    @pytest.mark.parametrize(
+        ("api_name", "expect_var_mapping_table"),
+        [
+            ("foo_api_url", {}),
+            ("foo-boo_api_url", {}),
+            ("foo_api_url_{id}", {"{id}": "var_id"}),
+            ("foo-boo_api_url_{id}", {"{id}": "var_id"}),
+            ("foo_api_url_{id}_test_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
+            ("foo_api_url_{id}_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
+            ("foo-boo_api_url_{id}", {"{id}": "var_id"}),
+            ("foo-boo_api_url_{id}_test_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
+            ("foo-boo_api_url_{id}_{other-id}", {"{id}": "var_id", "{other-id}": "var_other_id"}),
+        ],
+    )
+    def test__parse_variable_in_api(
+        self, sut: BaseWebServerCodeGenerator, api_name: str, expect_var_mapping_table: Dict[str, str]
+    ):
+        super().test__parse_variable_in_api(
+            sut=sut, api_name=api_name, expect_var_mapping_table=expect_var_mapping_table
+        )
