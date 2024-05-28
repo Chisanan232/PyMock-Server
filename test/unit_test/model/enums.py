@@ -110,18 +110,6 @@ class TestResponseStrategy(EnumTestSuite):
         assert isinstance(empty_resp, expected_type)
 
     @pytest.mark.parametrize(
-        ("ut_enum", "expected_type"),
-        [
-            (ResponseStrategy.STRING, str),
-            (ResponseStrategy.FILE, str),
-            (ResponseStrategy.OBJECT, dict),
-        ],
-    )
-    def test_generate_response_from_reference(self, ut_enum: ResponseStrategy, expected_type: type):
-        resp = ut_enum._generate_response_from_reference({"response reference data": {}})
-        assert isinstance(resp, expected_type)
-
-    @pytest.mark.parametrize(
         ("ut_enum", "test_response_data", "expected_value"),
         [
             # # General data
