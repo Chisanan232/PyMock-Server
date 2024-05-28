@@ -92,6 +92,11 @@ class TestFlaskCodeGenerator(WebServerCodeGeneratorTestSpec):
         [
             ("/foo/api/url", MockAPI(url="/foo/api/url", http=Mock(HTTP())), "foo_api_url"),
             ("/foo-boo/api/url", MockAPI(url="/foo-boo/api/url", http=Mock(HTTP())), "foo_boo_api_url"),
+            (
+                "/foo-boo/api/url/<id>",
+                MockAPI(url="/foo-boo/api/url/<id>", http=Mock(HTTP())),
+                "foo_boo_api_url_var_id",
+            ),
         ],
     )
     def test_generate_pycode_about_annotating_function(
@@ -141,6 +146,11 @@ class TestFastAPICodeGenerator(WebServerCodeGeneratorTestSpec):
                 "foo-boo_api_url",
                 MockAPI(url="/foo-boo/api/url", http=Mock(HTTP())),
                 FastAPIGenCodeExpect("foo_boo_api_url", "FooBooApiUrlParameter"),
+            ),
+            (
+                "foo-boo_api_url_{id}",
+                MockAPI(url="/foo-boo/api/url/{id}", http=Mock(HTTP())),
+                FastAPIGenCodeExpect("foo_boo_api_url_var_id", "FooBooApiUrlVarIdParameter"),
             ),
         ],
     )
