@@ -349,4 +349,7 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
         return new_url
 
     def _api_controller_name(self, api_name: str) -> str:
-        return api_name.replace("-", "_")
+        api_function_name = api_name.replace("-", "_")
+        for var_in_url, new_name in self._variables_in_url.items():
+            api_function_name = api_function_name.replace(var_in_url, new_name)
+        return api_function_name
