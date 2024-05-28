@@ -132,6 +132,23 @@ class TestInnerHTTPResponse:
                 ),
                 {"role": "random string"},
             ),
+            # *list* type value only (only one data which has name and no nested data)
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="white_list",
+                            required=True,
+                            value_type="list",
+                            items=[
+                                IteratorItem(name="name", value_type="str", required=True),
+                            ],
+                        )
+                    ],
+                ),
+                {"white_list": [{"name": "random string"}]},
+            ),
             # *list* type value only (no nested data)
             (
                 HTTPResponse(
