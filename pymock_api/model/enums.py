@@ -209,21 +209,6 @@ class ResponseStrategy(Enum):
         else:
             return "empty value"
 
-    def _generate_response_from_reference(self, ref_data: dict) -> Union[str, Dict[str, Any]]:
-        if self is ResponseStrategy.OBJECT:
-            return {
-                "name": "",
-                "required": _Default_Required.general,
-                # TODO: Set the *type* property correctly
-                "type": "file",
-                # TODO: Set the *format* property correctly
-                "format": None,
-                "items": [],
-                "FIXME": "Handle the reference",
-            }
-        else:
-            return "FIXME: Handle the reference"
-
     def _generate_response_from_data(
         self,
         init_response: dict,
