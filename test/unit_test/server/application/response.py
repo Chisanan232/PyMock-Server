@@ -320,6 +320,91 @@ class TestInnerHTTPResponse:
                     }
                 },
             ),
+            # *list* type value with deeper nested data
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="details",
+                            required=True,
+                            value_type="list",
+                            items=[
+                                IteratorItem(name="name", value_type="str", required=True),
+                                IteratorItem(name="id", value_type="int", required=True),
+                                IteratorItem(
+                                    name="projects",
+                                    value_type="list",
+                                    required=True,
+                                    items=[
+                                        IteratorItem(name="name", value_type="str", required=True),
+                                        IteratorItem(name="description", value_type="str", required=True),
+                                        IteratorItem(name="author", value_type="str", required=True),
+                                        IteratorItem(
+                                            name="languages",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(name="", value_type="str", required=True),
+                                            ],
+                                        ),
+                                        IteratorItem(name="url", value_type="str", required=True),
+                                        IteratorItem(
+                                            name="start",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(name="number", value_type="int", required=True),
+                                                IteratorItem(
+                                                    name="people",
+                                                    value_type="list",
+                                                    required=True,
+                                                    items=[
+                                                        IteratorItem(name="name", value_type="str", required=True),
+                                                        IteratorItem(name="url", value_type="str", required=True),
+                                                    ],
+                                                ),
+                                            ],
+                                        ),
+                                        IteratorItem(
+                                            name="tags",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(name="", value_type="str", required=True),
+                                            ],
+                                        ),
+                                    ],
+                                ),
+                            ],
+                        )
+                    ],
+                ),
+                {
+                    "details": [
+                        {
+                            "name": "random string",
+                            "id": "random integer",
+                            "projects": [
+                                {
+                                    "name": "random string",
+                                    "description": "random string",
+                                    "author": "random string",
+                                    "languages": ["random string"],
+                                    "url": "random string",
+                                    "start": [
+                                        {
+                                            "number": "random integer",
+                                            "people": [{"name": "random string", "url": "random string"}],
+                                        },
+                                    ],
+                                    "tags": ["random string"],
+                                },
+                            ],
+                        }
+                    ],
+                },
+            ),
         ],
     )
     def test_response_with_object(
