@@ -81,6 +81,7 @@ class BaseAppServer(metaclass=ABCMeta):
         aggregated_mocked_apis = self._get_all_api_details(mocked_apis)
         for api_name, api_config in aggregated_mocked_apis.items():
             if api_name and api_config:
+                print(f"[DEBUG in src] api_name: {api_name}")
                 annotate_function_pycode = self._code_generator.annotate_function(api_name, api_config)
                 add_api_pycode = self._code_generator.add_api(
                     api_name, api_config, base_url=mocked_apis.base.url if mocked_apis.base else None
