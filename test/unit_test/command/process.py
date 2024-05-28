@@ -911,6 +911,8 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
                         # Verify mock API URL
                         assert expected_api_config["url"] == confirm_expected_api_config["url"]
                         # Verify mock API request properties - HTTP method
+                        assert expected_api_config["http"]["request"] is not None
+                        assert confirm_expected_api_config["http"]["request"] is not None
                         assert (
                             expected_api_config["http"]["request"]["method"]
                             == confirm_expected_api_config["http"]["request"]["method"]
