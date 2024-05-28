@@ -1,20 +1,19 @@
 import json
 import os
 import re
-from pydoc import locate
 from typing import Type
 from unittest.mock import Mock, mock_open, patch
 
 import pytest
 
 from pymock_api.exceptions import FileFormatNotSupport
+from pymock_api.model.api_config import IteratorItem, ResponseProperty
 from pymock_api.model.api_config.apis import HTTPResponse
 from pymock_api.model.enums import ResponseStrategy
 from pymock_api.server.application.response import HTTPResponse as _HTTPResponse
 
 from ...._values import (
     _General_String_Value,
-    _HTTP_Response_Properties_With_Object_Strategy,
     _Json_File_Content,
     _Json_File_Name,
     _Not_Exist_File_Name,
@@ -48,10 +47,6 @@ class _MockHTTPResponse:
     @staticmethod
     def with_unexpected_file_strategy() -> HTTPResponse:
         return HTTPResponse(strategy=ResponseStrategy.FILE, path=_Unexpected_File_Name)
-
-    @staticmethod
-    def with_object_strategy() -> HTTPResponse:
-        return HTTPResponse(strategy=ResponseStrategy.OBJECT, properties=_HTTP_Response_Properties_With_Object_Strategy)
 
     @staticmethod
     def with_invalid_strategy() -> HTTPResponse:
@@ -114,46 +109,306 @@ class TestInnerHTTPResponse:
             assert response == _Unexpected_File_Name
             mock_file_stream.assert_not_called()
 
-    def test_response_with_object(self, http_resp: Type[_HTTPResponse]):
-        resp_data = http_resp.generate(data=_MockHTTPResponse.with_object_strategy())
-        """
-        {'details': [{'key': 'random string',
-                      'level': 'random integer',
-                      'name': 'random string'},
-                     {'key': 'random string',
-                      'level': 'random integer',
-                      'name': 'random string'},
-                     {'key': 'random string',
-                      'level': 'random integer',
-                      'name': 'random string'}],
-         'id': 'random integer',
-         'role': 'random string'}
-        """
-        assert resp_data
-        for k, v in resp_data.items():
-            prop = list(filter(lambda p: p["name"] == k, _HTTP_Response_Properties_With_Object_Strategy))
-            assert prop and len(prop) == 1
-
-            # TODO: Change to here easy and clear verify
-            # assert isinstance(v, locate(prop[0]["type"]))
-            if locate(prop[0]["type"]) is str:
-                assert v == "random string"
-            elif locate(prop[0]["type"]) is int:
-                assert v == "random integer"
-            elif locate(prop[0]["type"]) is list:
-                assert type(v) is list
-                for v_ele in v:
-                    for v_ele_k, v_ele_v in v_ele.items():
-                        v_list_ele = list(filter(lambda p: p["name"] == v_ele_k, prop[0]["items"]))
-                        assert v_list_ele and len(v_list_ele) == 1
-                        if locate(v_list_ele[0]["type"]) is str:
-                            assert v_ele_v == "random string"
-                        elif locate(v_list_ele[0]["type"]) is int:
-                            assert v_ele_v == "random integer"
-                        else:
-                            assert False, "Invalid data type of response for verifying."
-            else:
-                assert False, "Invalid data type of response for verifying."
+    @pytest.mark.parametrize(
+        ("mock_response_data", "expect_result"),
+        [
+            # *int* type value only
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[ResponseProperty(name="id", required=True, value_type="int")],
+                ),
+                {"id": "random integer"},
+            ),
+            # *str* type value only
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[ResponseProperty(name="role", required=True, value_type="str")],
+                ),
+                {"role": "random string"},
+            ),
+            # *list* type value only (only one data which has name and no nested data)
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="white_list",
+                            required=True,
+                            value_type="list",
+                            items=[
+                                IteratorItem(name="name", value_type="str", required=True),
+                            ],
+                        )
+                    ],
+                ),
+                {"white_list": [{"name": "random string"}]},
+            ),
+            # *list* type value only (only one data without name and no nested data)
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="white_list",
+                            required=True,
+                            value_type="list",
+                            items=[
+                                IteratorItem(name="", value_type="str", required=True),
+                            ],
+                        )
+                    ],
+                ),
+                {"white_list": ["random string"]},
+            ),
+            # *list* type value only (no nested data)
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="details",
+                            required=True,
+                            value_type="list",
+                            items=[
+                                IteratorItem(name="name", value_type="str", required=True),
+                                IteratorItem(name="id", value_type="int", required=True),
+                                IteratorItem(name="key", value_type="str", required=True),
+                            ],
+                        )
+                    ],
+                ),
+                {"details": [{"key": "random string", "id": "random integer", "name": "random string"}]},
+            ),
+            # *dict* type value only (no nested data)
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="details",
+                            required=True,
+                            value_type="dict",
+                            items=[
+                                IteratorItem(name="name", value_type="str", required=True),
+                                IteratorItem(name="id", value_type="int", required=True),
+                                IteratorItem(name="key", value_type="str", required=True),
+                            ],
+                        )
+                    ],
+                ),
+                {"details": {"key": "random string", "id": "random integer", "name": "random string"}},
+            ),
+            # *dict* type value with nested data
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="details",
+                            required=True,
+                            value_type="dict",
+                            items=[
+                                IteratorItem(name="name", value_type="str", required=True),
+                                IteratorItem(name="id", value_type="int", required=True),
+                                IteratorItem(
+                                    name="key",
+                                    value_type="dict",
+                                    required=True,
+                                    items=[
+                                        IteratorItem(name="base_authentication", value_type="str", required=True),
+                                        IteratorItem(name="projects", value_type="str", required=True),
+                                    ],
+                                ),
+                            ],
+                        )
+                    ],
+                ),
+                {
+                    "details": {
+                        "id": "random integer",
+                        "name": "random string",
+                        "key": {"base_authentication": "random string", "projects": "random string"},
+                    }
+                },
+            ),
+            # *dict* type value with more deeper nested data
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="details",
+                            required=True,
+                            value_type="dict",
+                            items=[
+                                IteratorItem(name="name", value_type="str", required=True),
+                                IteratorItem(name="id", value_type="int", required=True),
+                                IteratorItem(
+                                    name="projects",
+                                    value_type="list",
+                                    required=True,
+                                    items=[
+                                        IteratorItem(name="name", value_type="str", required=True),
+                                        IteratorItem(name="description", value_type="str", required=True),
+                                        IteratorItem(name="author", value_type="str", required=True),
+                                        IteratorItem(
+                                            name="languages",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(name="", value_type="str", required=True),
+                                            ],
+                                        ),
+                                        IteratorItem(name="url", value_type="str", required=True),
+                                        IteratorItem(
+                                            name="start",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(name="number", value_type="int", required=True),
+                                                IteratorItem(
+                                                    name="people",
+                                                    value_type="list",
+                                                    required=True,
+                                                    items=[
+                                                        IteratorItem(name="name", value_type="str", required=True),
+                                                        IteratorItem(name="url", value_type="str", required=True),
+                                                    ],
+                                                ),
+                                            ],
+                                        ),
+                                        IteratorItem(
+                                            name="tags",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(name="", value_type="str", required=True),
+                                            ],
+                                        ),
+                                    ],
+                                ),
+                            ],
+                        )
+                    ],
+                ),
+                {
+                    "details": {
+                        "name": "random string",
+                        "id": "random integer",
+                        "projects": [
+                            {
+                                "name": "random string",
+                                "description": "random string",
+                                "author": "random string",
+                                "languages": ["random string"],
+                                "url": "random string",
+                                "start": [
+                                    {
+                                        "number": "random integer",
+                                        "people": [{"name": "random string", "url": "random string"}],
+                                    },
+                                ],
+                                "tags": ["random string"],
+                            },
+                        ],
+                    }
+                },
+            ),
+            # *list* type value with deeper nested data
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="details",
+                            required=True,
+                            value_type="list",
+                            items=[
+                                IteratorItem(name="name", value_type="str", required=True),
+                                IteratorItem(name="id", value_type="int", required=True),
+                                IteratorItem(
+                                    name="projects",
+                                    value_type="list",
+                                    required=True,
+                                    items=[
+                                        IteratorItem(name="name", value_type="str", required=True),
+                                        IteratorItem(name="description", value_type="str", required=True),
+                                        IteratorItem(name="author", value_type="str", required=True),
+                                        IteratorItem(
+                                            name="languages",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(name="", value_type="str", required=True),
+                                            ],
+                                        ),
+                                        IteratorItem(name="url", value_type="str", required=True),
+                                        IteratorItem(
+                                            name="start",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(name="number", value_type="int", required=True),
+                                                IteratorItem(
+                                                    name="people",
+                                                    value_type="list",
+                                                    required=True,
+                                                    items=[
+                                                        IteratorItem(name="name", value_type="str", required=True),
+                                                        IteratorItem(name="url", value_type="str", required=True),
+                                                    ],
+                                                ),
+                                            ],
+                                        ),
+                                        IteratorItem(
+                                            name="tags",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(name="", value_type="str", required=True),
+                                            ],
+                                        ),
+                                    ],
+                                ),
+                            ],
+                        )
+                    ],
+                ),
+                {
+                    "details": [
+                        {
+                            "name": "random string",
+                            "id": "random integer",
+                            "projects": [
+                                {
+                                    "name": "random string",
+                                    "description": "random string",
+                                    "author": "random string",
+                                    "languages": ["random string"],
+                                    "url": "random string",
+                                    "start": [
+                                        {
+                                            "number": "random integer",
+                                            "people": [{"name": "random string", "url": "random string"}],
+                                        },
+                                    ],
+                                    "tags": ["random string"],
+                                },
+                            ],
+                        }
+                    ],
+                },
+            ),
+        ],
+    )
+    def test_response_with_object(
+        self, http_resp: Type[_HTTPResponse], mock_response_data: HTTPResponse, expect_result: dict
+    ):
+        resp_data = http_resp.generate(data=mock_response_data)
+        assert resp_data is not None
+        assert resp_data == expect_result
 
     def test_response_with_invalid_strategy(self, http_resp: Type[_HTTPResponse]):
         with pytest.raises(TypeError) as exc_info:
