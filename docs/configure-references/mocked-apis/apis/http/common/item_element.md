@@ -19,6 +19,12 @@ Whether item's value is required to response or not.
 
 The data type of item's value. Please use [Python built-in types](https://docs.python.org/3/library/stdtypes.html) to set this option.
 
+Currently, it only supports following data types: ``str``, ``int``, ``list``, ``dict``.
+
+!!! hints "Usage notes"
+
+    If the type is collection, remember to set the option ``items[*].items`` for the detail settings of element in the collection.
+
 
 ## ``items[*].items``
 
