@@ -17,7 +17,7 @@ Whether item's value is required to response or not.
 
 ## ``items[*].type``
 
-The data type of item's value. Please use Pythonic way to set this option.
+The data type of item's value. Please use [Python built-in types](https://docs.python.org/3/library/stdtypes.html) to set this option.
 
 
 ## ``items[*].items``
