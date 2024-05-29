@@ -109,7 +109,7 @@ git clone https://github.com/Chisanan232/PyMock-API.git ./pymock-api -b <git bra
 
 !!! note "The dividing rule of git branch"
 
-    **_PyMock-API_** project has been divided into several git branches with different stages:
+    It apply Trunk-base developmenet at **_PyMock-API_** project and its trunk branch is **_master_**.:
 
     ![demonstration](../images/project_process_stages.png)
     
@@ -117,16 +117,8 @@ git clone https://github.com/Chisanan232/PyMock-API.git ./pymock-api -b <git bra
         * Git branch: _develop/**_
         * Majot process: All the development should base on this branch to work. The code of this branch always be latest
         but also unstable.
-    * pre-release
-        * Git branch: _develop/pre-release_
-        * Majot process: Summarize all the code from develop branch and all the PR to _release_ branch should be sended
-        from this branch. The code in this branch are possible under verify and review so it still not really stable.
-    * release
-        * Git branch: _release_
-        * Majot process: The code which be ready for releasing. All the PR to _master_ branch should be sended from this
-        branch. In generally, the features in this branch is stable and ready for releasing.
     * master
-        * Git branch: _master_
+        * Git branch: _master_ (it's also trunk branch)
         * Majot process: The final code to release to PyPI incudes documentation. The code of this branch is stablest and
         it also be same as the code in PyPI.
 
