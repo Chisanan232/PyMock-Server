@@ -78,6 +78,9 @@ The default value of parameter. If the parameter in request is empty or ``None``
 The data type of the parameter value API should accept. The setting value should be a valid type for Python realm, i.e.,
 string type value as ``str``, integer type value as ``int``, etc. 
 
+Please refer to [Python built-in types](https://docs.python.org/3/library/stdtypes.html) document to get more detail if
+you need.
+
 !!! note "What data type you should use?"
 
     As the description mention, the data type should be vallid for Python realm. Here provides some data type to help you
