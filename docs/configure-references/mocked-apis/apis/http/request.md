@@ -85,7 +85,6 @@ string type value as ``str``, integer type value as ``int``, etc.
     
     * Text type value: ```str```
     * Integer type value: ```int```
-    * Floating point number type value: ```float```
     * Boolean type value: ```bool```
     * Some object of list type value: ```list```
     * Key-value map type value: ```dict```
