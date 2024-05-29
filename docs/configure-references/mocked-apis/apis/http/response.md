@@ -75,6 +75,10 @@ The data type of value. Please use Pythonic way to set this option.
 
 The data format.
 
+!!! warning "Not support current but coming soon"
+
+    Currently, it just let you set this option. But it doesn't have essentially function to work.
+
 
 #### ``properties[*].items``
 
