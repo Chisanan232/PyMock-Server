@@ -79,7 +79,7 @@ The data format.
 #### ``properties[*].items``
 
 If the data type of value is list type, it should use this key to configure its element details. The element detail follow 
-[item element settings](/configure-references/mocked-apis/apis/http/request/#itemstype).
+[item element settings](/configure-references/mocked-apis/apis/http/common/item_element).
 
 
 Let's demonstrate the same HTTP response with each different strategies.

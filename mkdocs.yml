@@ -135,6 +135,9 @@ nav:
           - configure-references/mocked-apis/apis/http/index.md
           - HTTP request: configure-references/mocked-apis/apis/http/request.md
           - HTTP response: configure-references/mocked-apis/apis/http/response.md
+          - Common:
+            - configure-references/mocked-apis/apis/http/common/index.md
+            - Item element: configure-references/mocked-apis/apis/http/common/item_element.md
   - Development:
     - development/index.md
     - How it works: development/how-it-works.md
