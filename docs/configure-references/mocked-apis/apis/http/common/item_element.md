@@ -49,7 +49,7 @@ it is totally same as **item element**.
     Result data:
 
     ```text
-    ['random integer']
+    {"sample_list": ['random integer']}
     ```
 
     * *dict* type data
@@ -72,7 +72,7 @@ it is totally same as **item element**.
     Result data:
 
     ```text
-    {'key_1': 'random string', 'key_2': 'random integer'}
+    {"sample_dict": {'key_1': 'random string', 'key_2': 'random integer'}}
     ```
 
     * *list* of *dict* type elements
@@ -95,5 +95,5 @@ it is totally same as **item element**.
     Result data:
 
     ```text
-    [{'key_1': 'random string', 'key_2': 'random integer'}]
+    {"sample_list": [{'key_1': 'random string', 'key_2': 'random integer'}]}
     ```
