@@ -125,6 +125,7 @@ class TestResponseStrategy(EnumTestSuite):
             (ResponseStrategy.STRING, {"type": "integer"}, "random integer value"),
             (ResponseStrategy.STRING, {"type": "number"}, "random integer value"),
             (ResponseStrategy.STRING, {"type": "boolean"}, "random boolean value"),
+            (ResponseStrategy.STRING, {"type": "array", "items": {"type": "integer"}}, ["random integer value"]),
             (
                 ResponseStrategy.STRING,
                 {"type": "array", "items": {"$ref": "#/components/schemas/FooResponse"}},
@@ -153,6 +154,17 @@ class TestResponseStrategy(EnumTestSuite):
                 ResponseStrategy.OBJECT,
                 {"type": "boolean"},
                 {"name": "", "required": True, "type": "bool", "format": None, "items": None},
+            ),
+            (
+                ResponseStrategy.OBJECT,
+                {"type": "array", "items": {"type": "integer"}},
+                {
+                    "name": "",
+                    "required": True,
+                    "type": "list",
+                    "format": None,
+                    "items": [{"name": "", "required": True, "type": "int"}],
+                },
             ),
             (
                 ResponseStrategy.OBJECT,
