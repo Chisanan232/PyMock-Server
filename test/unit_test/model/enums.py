@@ -163,7 +163,7 @@ class TestResponseStrategy(EnumTestSuite):
                     "required": True,
                     "type": "list",
                     "format": None,
-                    "items": [{"name": "", "required": True, "type": "int"}],
+                    "items": [{"name": "", "required": True, "type": "int", "format": None, "items": None}],
                 },
             ),
             (
@@ -196,7 +196,7 @@ class TestResponseStrategy(EnumTestSuite):
                         "type": "string",
                     },
                 },
-                "random string value",
+                {"additionalKey": "random string value"},
             ),
             (
                 ResponseStrategy.STRING,
@@ -207,7 +207,7 @@ class TestResponseStrategy(EnumTestSuite):
                         "items": {"type": "string", "enum": ["TYPE_1", "TYPE_2"]},
                     },
                 },
-                ["random string value"],
+                {"additionalKey": ["random string value"]},
             ),
             (
                 ResponseStrategy.STRING,
@@ -218,10 +218,12 @@ class TestResponseStrategy(EnumTestSuite):
                     },
                 },
                 {
-                    "id": "random integer value",
-                    "name": "random string value",
-                    "value1": "random string value",
-                    "value2": "random string value",
+                    "additionalKey": {
+                        "id": "random integer value",
+                        "name": "random string value",
+                        "value1": "random string value",
+                        "value2": "random string value",
+                    },
                 },
             ),
             (
@@ -232,7 +234,15 @@ class TestResponseStrategy(EnumTestSuite):
                         "type": "string",
                     },
                 },
-                {"name": "", "required": True, "type": "str", "format": None, "items": None},
+                {
+                    "name": "",
+                    "required": True,
+                    "type": "dict",
+                    "format": None,
+                    "items": [
+                        {"name": "additionalKey", "required": True, "type": "str", "format": None, "items": None}
+                    ],
+                },
             ),
             (
                 ResponseStrategy.OBJECT,
@@ -261,12 +271,18 @@ class TestResponseStrategy(EnumTestSuite):
                         "$ref": "#/components/schemas/FooResponse",
                     },
                 },
-                [
-                    {"name": "id", "required": True, "type": "int", "format": None, "items": None},
-                    {"name": "name", "required": False, "type": "str", "format": None, "items": None},
-                    {"name": "value1", "required": False, "type": "str", "format": None, "items": None},
-                    {"name": "value2", "required": False, "type": "str", "format": None, "items": None},
-                ],
+                {
+                    "name": "additionalKey",
+                    "required": True,
+                    "type": "dict",
+                    "format": None,
+                    "items": [
+                        {"name": "id", "required": True, "type": "int", "format": None, "items": None},
+                        {"name": "name", "required": False, "type": "str", "format": None, "items": None},
+                        {"name": "value1", "required": False, "type": "str", "format": None, "items": None},
+                        {"name": "value2", "required": False, "type": "str", "format": None, "items": None},
+                    ],
+                },
             ),
             # # Special data about nested config
             (
@@ -278,25 +294,27 @@ class TestResponseStrategy(EnumTestSuite):
                     },
                 },
                 {
-                    "id": "random integer value",
-                    "name": "random string value",
-                    "data": [
-                        {
-                            "id": "random integer value",
-                            "value": "random string value",
-                            "url": "random string value",
-                            "urlProperties": {
-                                "homePage": {
-                                    "domain": "random string value",
-                                    "needAuth": "random boolean value",
-                                },
-                                "detailInfo": {
-                                    "domain": "random string value",
-                                    "needAuth": "random boolean value",
+                    "additionalKey": {
+                        "id": "random integer value",
+                        "name": "random string value",
+                        "data": [
+                            {
+                                "id": "random integer value",
+                                "value": "random string value",
+                                "url": "random string value",
+                                "urlProperties": {
+                                    "homePage": {
+                                        "domain": "random string value",
+                                        "needAuth": "random boolean value",
+                                    },
+                                    "detailInfo": {
+                                        "domain": "random string value",
+                                        "needAuth": "random boolean value",
+                                    },
                                 },
                             },
-                        },
-                    ],
+                        ],
+                    }
                 },
             ),
             (
@@ -334,49 +352,55 @@ class TestResponseStrategy(EnumTestSuite):
                         "$ref": "#/components/schemas/NestedFooResponse",
                     },
                 },
-                [
-                    {"name": "id", "required": True, "type": "int", "format": None, "items": None},
-                    {"name": "name", "required": False, "type": "str", "format": None, "items": None},
-                    {
-                        "name": "data",
-                        "required": False,
-                        "format": None,
-                        "type": "list",
-                        "items": [
-                            {"name": "id", "required": True, "type": "int"},
-                            {"name": "value", "required": True, "type": "str"},
-                            {"name": "url", "required": True, "type": "str"},
-                            {
-                                "name": "urlProperties",
-                                "required": False,
-                                "format": None,
-                                "type": "dict",
-                                "items": [
-                                    {
-                                        "name": "homePage",
-                                        "required": True,
-                                        "type": "dict",
-                                        "format": None,
-                                        "items": [
-                                            {"name": "domain", "required": True, "type": "str"},
-                                            {"name": "needAuth", "required": True, "type": "bool"},
-                                        ],
-                                    },
-                                    {
-                                        "name": "detailInfo",
-                                        "required": True,
-                                        "type": "dict",
-                                        "format": None,
-                                        "items": [
-                                            {"name": "domain", "required": True, "type": "str"},
-                                            {"name": "needAuth", "required": True, "type": "bool"},
-                                        ],
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                ],
+                {
+                    "name": "additionalKey",
+                    "required": True,
+                    "type": "dict",
+                    "format": None,
+                    "items": [
+                        {"name": "id", "required": True, "type": "int", "format": None, "items": None},
+                        {"name": "name", "required": False, "type": "str", "format": None, "items": None},
+                        {
+                            "name": "data",
+                            "required": False,
+                            "format": None,
+                            "type": "list",
+                            "items": [
+                                {"name": "id", "required": True, "type": "int"},
+                                {"name": "value", "required": True, "type": "str"},
+                                {"name": "url", "required": True, "type": "str"},
+                                {
+                                    "name": "urlProperties",
+                                    "required": False,
+                                    "format": None,
+                                    "type": "dict",
+                                    "items": [
+                                        {
+                                            "name": "homePage",
+                                            "required": True,
+                                            "type": "dict",
+                                            "format": None,
+                                            "items": [
+                                                {"name": "domain", "required": True, "type": "str"},
+                                                {"name": "needAuth", "required": True, "type": "bool"},
+                                            ],
+                                        },
+                                        {
+                                            "name": "detailInfo",
+                                            "required": True,
+                                            "type": "dict",
+                                            "format": None,
+                                            "items": [
+                                                {"name": "domain", "required": True, "type": "str"},
+                                                {"name": "needAuth", "required": True, "type": "bool"},
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
             ),
             (
                 ResponseStrategy.OBJECT,
