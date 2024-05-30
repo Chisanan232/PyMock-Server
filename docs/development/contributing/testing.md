@@ -106,6 +106,10 @@ script accept one argument --- test type. You have 3 types value could use:
 
     Run all integration tests and the test modules are in directory _test/integration_test_.
 
+* system-test
+
+    Run all system tests and the test modules are in directory _test/system_test_.
+
 === "Out of Poetry shell"
     
     ```console
@@ -121,63 +125,8 @@ script accept one argument --- test type. You have 3 types value could use:
 
 ## How to add test sub-package?
 
-For clean file naming, **_PyMock-API_** won't add character ``test`` at file naming. It would use shell script _scripts/run_all_tests.sh_
-to control which test module it should run. 
-
-Shell script _scripts/run_all_tests.sh_ would use the test sub-package path to get all test modules in it. For example, it has
-a test sub-package _A_, and there are 3 test modules _aaa.py_, _bbb.py_ and _ccc.py_ in it. It needs to set the test sub-package
-path _A_ in the shell script, and it would help us to get all paths of modules _test/A/aaa.py_, _test/A/bbb.py_ and _test/A/ccc.py_
-to us.
-
-So if we have new test sub-package, it needs to add the new test sub-package path in shell scripts to let _scripts/run_all_tests.sh_
-could get the new test module to run.
-
-The new test sub-package in different test type, then it should add the path to mapping shell script.
-
-* _scripts/ci/get-unit-test-paths.sh_
-
-    The shell script for getting all unit test modules which are in directory _test/unit_test_.
-
-* _scripts/ci/get-integration-test-paths.sh_
-
-    The shell script for getting all integration test modules which are in directory _test/integration_test_..
-
-Below demonstrate how to add new test sub-package path in shell script.
-
-```shell
-
-# Some shell ...
-
-# The variable for saving all test modules in the new test sub-package
-declare -a new_test_subpkg_tests
-
-# Some shell ...
-
-getalltests() {
-    # Some shell ...
-
-    # The condition for identifying the test sub-package path
-    elif echo "$1" | grep -q "new_test_subpkg";
-    then
-        # shellcheck disable=SC2124
-        # shellcheck disable=SC2178
-        new_test_subpkg_tests=${alltestpaths[@]}
-
-# Some shell ...
-
-# The new test sub-package path
-new_test_subpkg_path=./test/unit_test/new_test_subpkg
-
-# Some shell ...
-
-# Run the function to get all the test module paths
-getalltests $new_test_subpkg_path
-
-# Combine all paths as return value
-dest=( "${init_tests[@]} ${utils_tests[@]} ${model_tests[@]} ${server_tests[@]} ${server_sgi_tests[@]} ${new_test_subpkg_tests[@]}" )
-
-# Some shell ...
-```
+It would auto-detect the test sub-packages and test modules under test directory. So we don't do anything and just add 
+the new test sub-package or test module directly.
 
 You will see the running result includes the new path of all test modules which are in new test sub-package.
 

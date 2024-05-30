@@ -75,11 +75,15 @@ The data type of value. Please use Pythonic way to set this option.
 
 The data format.
 
+!!! warning "Not support current but coming soon"
+
+    Currently, it just let you set this option. But it doesn't have essentially function to work.
+
 
 #### ``properties[*].items``
 
 If the data type of value is list type, it should use this key to configure its element details. The element detail follow 
-[item element settings](/configure-references/mocked-apis/apis/http/request/#itemstype).
+[item element settings](/configure-references/mocked-apis/apis/http/common/item_element).
 
 
 Let's demonstrate the same HTTP response with each different strategies.

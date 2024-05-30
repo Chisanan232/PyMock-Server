@@ -78,6 +78,9 @@ The default value of parameter. If the parameter in request is empty or ``None``
 The data type of the parameter value API should accept. The setting value should be a valid type for Python realm, i.e.,
 string type value as ``str``, integer type value as ``int``, etc. 
 
+Please refer to [Python built-in types](https://docs.python.org/3/library/stdtypes.html) document to get more detail if
+you need.
+
 !!! note "What data type you should use?"
 
     As the description mention, the data type should be vallid for Python realm. Here provides some data type to help you
@@ -85,7 +88,6 @@ string type value as ``str``, integer type value as ``int``, etc.
     
     * Text type value: ```str```
     * Integer type value: ```int```
-    * Floating point number type value: ```float```
     * Boolean type value: ```bool```
     * Some object of list type value: ```list```
     * Key-value map type value: ```dict```
@@ -100,24 +102,4 @@ satisfied.
 ### ``parameters[*].items``
 
 If the data type of parameter value is list type, it should use this key to configure its element details. The element detail 
-follow [item element settings](#items-element-settings).
-
-
-## ``items element settings``
-
-All the element of list type value follows these attributes to configure.
-
-
-### ``items[*].name``
-
-The naming of item's value.
-
-
-### ``items[*].required``
-
-Whether item's value is required to response or not.
-
-
-### ``items[*].type``
-
-The data type of item's value. Please use Pythonic way to set this option.
+follow [item element settings](/configure-references/mocked-apis/apis/http/common/item_element).
