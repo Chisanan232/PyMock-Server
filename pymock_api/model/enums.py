@@ -383,17 +383,9 @@ class ResponseStrategy(Enum):
                     print(
                         f"[DEBUG in _handle_object_type_value_with_object_strategy] items_config_data: {items_config_data}"
                     )
-                    if items_config_data["type"] == "list":
-                        return items_config_data
-                    else:
-                        return {
-                            "name": "",
-                            "required": _Default_Required.general,
-                            "type": additional_properties_type,
-                            # TODO: Set the *format* property correctly
-                            "format": None,
-                            "items": [items_config_data],
-                        }
+                    # Collection type config has been wrap one level of *additionalKey*. So it doesn't need to wrap
+                    # it again.
+                    return items_config_data
                 else:
                     return {
                         "name": "",
