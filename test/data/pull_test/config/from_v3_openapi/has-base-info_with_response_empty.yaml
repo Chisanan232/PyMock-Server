@@ -1,0 +1,26 @@
+name: ''
+description: ''
+mocked_apis:
+  base:
+    url: '/api/v1/test'
+  apis:
+    patch_foo:
+      url: '/foo'
+      http:
+        request:
+          method: 'PATCH'
+          parameters: []
+        response:
+          strategy: object
+          properties:
+            - name: respCode
+              required: true
+              type: str
+            - name: errMsg
+              required: true
+              type: str
+            - name: respData
+              required: false
+              type: dict
+              items: []
+      tag: ''
