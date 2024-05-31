@@ -1,0 +1,177 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "FastAPI",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "api/v1/test/foo": {
+      "patch": {
+        "summary": "Foo Home",
+        "operationId": "foo_home_test_v1_foo_patch",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseDTO«List«FooResponse»»"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ResponseDTO«List«FooResponse»»": {
+          "type": "object",
+          "required": [
+              "errorMessage",
+              "responseCode"
+          ],
+          "properties": {
+              "errorMessage": {
+                  "type": "string"
+              },
+              "responseCode": {
+                  "type": "string"
+              },
+              "responseData": {
+                  "type": "array",
+                  "items": {
+                      "$ref": "#/components/schemas/FooResponse"
+                  }
+              }
+          },
+          "title": "ResponseDTO«List«FooResponse»»"
+      },
+      "FooResponse": {
+          "type": "object",
+          "required": [
+              "id"
+          ],
+          "properties": {
+              "id": {
+                  "type": "integer",
+                  "format": "int64"
+              },
+              "name": {
+                  "type": "string"
+              },
+              "value1": {
+                  "type": "string"
+              },
+              "info": {
+                  "type": "object",
+                  "additionalProperties": {
+                      "$ref": "#/components/schemas/UrlProperties"
+                  }
+              }
+          },
+          "title": "FooResponse"
+      },
+      "UrlProperties": {
+          "type": "object",
+          "required": [
+              "personalInfo"
+          ],
+          "properties": {
+              "personalInfo": {
+                  "type": "object",
+                  "additionalProperties": {
+                      "$ref": "#/components/schemas/UrlDetail"
+                  }
+              },
+              "jobExperience": {
+                  "type": "object",
+                  "additionalProperties": {
+                      "$ref": "#/components/schemas/UrlDetail"
+                  }
+              },
+              "sideProject": {
+                  "type": "object",
+                  "additionalProperties": {
+                      "$ref": "#/components/schemas/UrlDetail"
+                  }
+              }
+          },
+          "title": "UrlProperties"
+      },
+      "UrlDetail": {
+          "type": "object",
+          "required": [
+              "domain",
+              "url"
+          ],
+          "properties": {
+              "domain": {
+                  "type": "string"
+              },
+              "url": {
+                  "type": "string"
+              }
+          },
+          "title": "UrlProperties"
+      },
+      "HTTPValidationError": {
+        "title": "HTTPValidationError",
+        "type": "object",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "title": "ValidationError",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "loc": {
+            "title": "Location",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            }
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
