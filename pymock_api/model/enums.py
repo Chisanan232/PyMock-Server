@@ -227,21 +227,33 @@ class ResponseStrategy(Enum):
             else:
                 print(f"[DEBUG in _handle_list_type_data] init_response: {init_response}")
                 print(f"[DEBUG in _handle_list_type_data] items_data: {items_data}")
-                response_value = self._generate_response_from_data(
+                response_item_value = self._generate_response_from_data(
                     init_response=init_response,
                     resp_prop_data=items_data,
                     get_schema_parser_factory=get_schema_parser_factory,
                 )
-                print(f"[DEBUG in _handle_list_type_data] response_value: {response_value}")
-                if isinstance(response_value, list):
+                print(f"[DEBUG in _handle_list_type_data] response_item_value: {response_item_value}")
+                if isinstance(response_item_value, list):
                     # TODO: Need to check whether here logic is valid or not
-                    response = response_value  # type: ignore[assignment]
-                elif isinstance(response_value, dict):
+                    response_item = response_item_value
+                elif isinstance(response_item_value, dict):
                     # TODO: Need to check whether here logic is valid or not
-                    response = response_value
+                    response_item = response_item_value  # type: ignore[assignment]
                 else:
-                    assert isinstance(response_value, str)
-                    response = response_value  # type: ignore[assignment]
+                    assert isinstance(response_item_value, str)
+                    response_item = response_item_value  # type: ignore[assignment]
+                print(f"[DEBUG in _handle_list_type_data] response_item: {response_item}")
+                if self is ResponseStrategy.OBJECT:
+                    response = {
+                        "name": "",
+                        "required": _Default_Required.general,
+                        "type": "list",
+                        # TODO: Set the *format* property correctly
+                        "format": None,
+                        "items": [response_item],
+                    }
+                else:
+                    response = response_item  # type: ignore[assignment]
                 print(f"[DEBUG in _handle_list_type_data] response: {response}")
             return response
 
@@ -342,7 +354,8 @@ class ResponseStrategy(Enum):
                     raise NotImplementedError
 
             # Check reference first
-            if get_schema_parser_factory().reference_object().has_ref(data):
+            has_ref = get_schema_parser_factory().reference_object().has_ref(data)
+            if has_ref:
                 # Process reference
                 resp = self.process_response_from_reference(
                     init_response=init_response,
@@ -351,6 +364,15 @@ class ResponseStrategy(Enum):
                 )
                 print("[DEBUG in _handle_object_type_value_with_object_strategy] has reference schema")
                 print(f"[DEBUG in _handle_object_type_value_with_object_strategy] resp: {resp}")
+                if has_ref == "additionalProperties":
+                    return {
+                        "name": "additionalKey",
+                        "required": _Default_Required.general,
+                        "type": "dict",
+                        # TODO: Set the *format* property correctly
+                        "format": None,
+                        "items": resp["data"],
+                    }
                 return resp["data"]
             else:
                 # Handle the schema *additionalProperties*
@@ -361,22 +383,34 @@ class ResponseStrategy(Enum):
                     print(
                         f"[DEBUG in _handle_object_type_value_with_object_strategy] items_config_data: {items_config_data}"
                     )
-                    return {
-                        "name": "",
-                        "required": _Default_Required.general,
-                        "type": additional_properties_type,
-                        # TODO: Set the *format* property correctly
-                        "format": None,
-                        "items": [items_config_data],
-                    }
+                    if items_config_data["type"] == "list":
+                        return items_config_data
+                    else:
+                        return {
+                            "name": "",
+                            "required": _Default_Required.general,
+                            "type": additional_properties_type,
+                            # TODO: Set the *format* property correctly
+                            "format": None,
+                            "items": [items_config_data],
+                        }
                 else:
                     return {
                         "name": "",
                         "required": _Default_Required.general,
-                        "type": additional_properties_type,
+                        "type": "dict",
                         # TODO: Set the *format* property correctly
                         "format": None,
-                        "items": None,
+                        "items": [
+                            {
+                                "name": "additionalKey",
+                                "required": _Default_Required.general,
+                                "type": additional_properties_type,
+                                # TODO: Set the *format* property correctly
+                                "format": None,
+                                "items": None,
+                            }
+                        ],
                     }
 
         def _handle_other_types_value_with_object_strategy(v_type: str) -> dict:
@@ -463,17 +497,18 @@ class ResponseStrategy(Enum):
 
                 additional_properties = resp_prop_data["additionalProperties"]
                 if get_schema_parser_factory().reference_object().has_ref(additional_properties):
-                    return self.process_response_from_reference(
+                    response_details = self.process_response_from_reference(
                         init_response=init_response,
                         data=additional_properties,
                         get_schema_parser_factory=get_schema_parser_factory,
                     )["data"]
                 else:
-                    return self.process_response_from_data(
+                    response_details = self.process_response_from_data(
                         init_response=init_response,
                         data=additional_properties,
                         get_schema_parser_factory=get_schema_parser_factory,
                     )["data"][0]
+                return {"additionalKey": response_details}
             elif locate(v_type) == str:
                 # lowercase_letters = string.ascii_lowercase
                 # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
