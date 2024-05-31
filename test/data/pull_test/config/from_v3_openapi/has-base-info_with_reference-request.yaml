@@ -1,0 +1,28 @@
+name: ''
+description: ''
+mocked_apis:
+  base:
+    url: '/api/v1/test'
+  apis:
+    patch_foo:
+      url: '/foo'
+      http:
+        request:
+          method: 'PATCH'
+          parameters:
+            - name: 'arg1'
+              required: true
+              type: str
+            - name: 'arg2'
+              required: false
+              type: int
+            - name: 'arg3'
+              required: false
+              type: list
+              items:
+                - required: True
+                  type: int
+        response:
+          strategy: object
+          properties: []
+      tag: ''

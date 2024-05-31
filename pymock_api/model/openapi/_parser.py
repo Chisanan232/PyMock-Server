@@ -141,26 +141,37 @@ class APIParser(BaseParser):
         for param_name, param_props in parser.get_properties().items():
             items: Optional[dict] = param_props.get("items", None)
             items_props = []
-            if items and _ReferenceObjectParser.has_ref(items):
-                items = _ReferenceObjectParser.get_schema_ref(items)
-                # Sample data:
-                # {
-                #     'type': 'object',
-                #     'required': ['values', 'id'],
-                #     'properties': {
-                #         'values': {'type': 'number', 'example': 23434, 'description': 'value'},
-                #         'id': {'type': 'integer', 'format': 'int64', 'example': 1, 'description': 'ID'}
-                #     },
-                #     'title': 'UpdateOneFooDto'
-                # }
-                items_parser = self.schema_parser_factory.object(items)
-                for item_name, item_prop in items_parser.get_properties(default={}).items():
+            print(f"[DEBUG in APIParser._process_has_ref_parameters] items: {items}")
+            if items:
+                if items and _ReferenceObjectParser.has_ref(items):
+                    items = _ReferenceObjectParser.get_schema_ref(items)
+                    # Sample data:
+                    # {
+                    #     'type': 'object',
+                    #     'required': ['values', 'id'],
+                    #     'properties': {
+                    #         'values': {'type': 'number', 'example': 23434, 'description': 'value'},
+                    #         'id': {'type': 'integer', 'format': 'int64', 'example': 1, 'description': 'ID'}
+                    #     },
+                    #     'title': 'UpdateOneFooDto'
+                    # }
+                    items_parser = self.schema_parser_factory.object(items)
+                    for item_name, item_prop in items_parser.get_properties(default={}).items():
+                        items_props.append(
+                            {
+                                "name": item_name,
+                                "required": item_name in items_parser.get_required(),
+                                "type": convert_js_type(item_prop["type"]),
+                                "default": item_prop.get("default", None),
+                            }
+                        )
+                else:
                     items_props.append(
                         {
-                            "name": item_name,
-                            "required": item_name in items_parser.get_required(),
-                            "type": convert_js_type(item_prop["type"]),
-                            "default": item_prop.get("default", None),
+                            "name": "",
+                            "required": True,
+                            "type": convert_js_type(items["type"]),
+                            "default": items.get("default", None),
                         }
                     )
 
@@ -173,6 +184,7 @@ class APIParser(BaseParser):
                     "items": items_props if items is not None else items,
                 }
             )
+        print(f"[DEBUG in APIParser._process_has_ref_parameters] parameters: {parameters}")
         return parameters
 
     def process_responses(self, strategy: ResponseStrategy) -> dict:

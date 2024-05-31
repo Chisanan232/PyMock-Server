@@ -1,0 +1,69 @@
+name: ''
+description: ''
+mocked_apis:
+  base:
+    url: '/api/v1/test'
+  apis:
+    patch_foo:
+      url: '/foo'
+      http:
+        request:
+          method: 'PATCH'
+          parameters: []
+        response:
+          strategy: object
+          properties:
+            - name: errorMessage
+              required: True
+              type: str
+            - name: responseCode
+              required: True
+              type: str
+            - name: responseData
+              required: False
+              type: list
+              items:
+                - name: id
+                  required: True
+                  type: int
+                - name: name
+                  required: True
+                  type: str
+                - name: value1
+                  required: True
+                  type: str
+                - name: info
+                  required: False
+                  type: dict
+                  items:
+                    - name: personalInfo
+                      required: True
+                      type: dict
+                      items:
+                        - name: domain
+                          required: True
+                          type: str
+                        - name: url
+                          required: True
+                          type: str
+                    - name: jobExperience
+                      required: False
+                      type: dict
+                      items:
+                        - name: domain
+                          required: True
+                          type: str
+                        - name: url
+                          required: True
+                          type: str
+                    - name: sideProject
+                      required: False
+                      type: dict
+                      items:
+                        - name: domain
+                          required: True
+                          type: str
+                        - name: url
+                          required: True
+                          type: str
+      tag: ''
