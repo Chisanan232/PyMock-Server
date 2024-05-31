@@ -111,7 +111,9 @@ class ResponseStrategy(Enum):
                     response_data_prop = self._ensure_data_structure_when_object_strategy(
                         init_response, response_config
                     )
-                    print(f"[DEBUG in process_response_from_reference] response_data_prop: {response_data_prop}")
+                    print(
+                        f"[DEBUG in process_response_from_reference] has properties, response_data_prop: {response_data_prop}"
+                    )
                     response_data_prop["name"] = k
                     response_data_prop["required"] = k in parser.get_required(default=[k])
                     init_response["data"].append(response_data_prop)
@@ -125,20 +127,40 @@ class ResponseStrategy(Enum):
             if "title" in response_schema_ref.keys() and response_schema_ref["title"] == "InputStream":
                 if self is ResponseStrategy.OBJECT:
                     response_config["type"] = "file"
+
+                    response_data_prop = self._ensure_data_structure_when_object_strategy(
+                        init_response, response_config
+                    )
+                    print(
+                        f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
+                    )
+                    response_data_prop["name"] = empty_body_key
+                    response_data_prop["required"] = empty_body_key in parser.get_required(default=[empty_body_key])
+                    init_response["data"].append(response_data_prop)
                 else:
                     response_config = "random file output stream"  # type: ignore[assignment]
 
-            if self is ResponseStrategy.OBJECT:
-                response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
-                print(f"[DEBUG in process_response_from_reference] response_data_prop: {response_data_prop}")
-                response_data_prop["name"] = empty_body_key
-                response_data_prop["required"] = empty_body_key in parser.get_required(default=[empty_body_key])
-                init_response["data"].append(response_data_prop)
+                    self._ensure_data_structure_when_non_object_strategy(init_response)
+                    init_response["data"][empty_body_key] = response_config
             else:
-                self._ensure_data_structure_when_non_object_strategy(init_response)
-                init_response["data"][empty_body_key] = response_config
-            print(f"[DEBUG in process_response_from_reference] empty_body_key: {empty_body_key}")
-            print(f"[DEBUG in process_response_from_reference] parse with empty body, init_response: {init_response}")
+                if self is ResponseStrategy.OBJECT:
+                    response_data_prop = self._ensure_data_structure_when_object_strategy(
+                        init_response, response_config
+                    )
+                    print(
+                        f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
+                    )
+                    response_data_prop["name"] = "THIS_IS_EMPTY"
+                    response_data_prop["type"] = "str"
+                    response_data_prop["required"] = False
+                    init_response["data"].append(response_data_prop)
+                else:
+                    self._ensure_data_structure_when_non_object_strategy(init_response)
+                    init_response["data"][empty_body_key] = response_config
+                print(f"[DEBUG in process_response_from_reference] empty_body_key: {empty_body_key}")
+                print(
+                    f"[DEBUG in process_response_from_reference] parse with empty body, init_response: {init_response}"
+                )
         return init_response
 
     def process_response_from_data(
