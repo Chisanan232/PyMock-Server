@@ -1,0 +1,8 @@
+strategy: object
+properties:
+  - name: description
+    required: True
+    type: not_collection_type
+    format:
+    is_empty: false
+    items: []
