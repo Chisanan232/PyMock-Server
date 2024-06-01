@@ -81,6 +81,10 @@ class ResponseStrategy(Enum):
                     if response_data_prop_items[0].get("name", "") == "THIS_IS_EMPTY":
                         resp_column["is_empty"] = True
                         resp_column["items"] = []
+                    else:
+                        resp_column["items"] = self._process_empty_body_response(
+                            response_columns_setting=response_data_prop_items
+                        )
             new_response_columns_setting.append(resp_column)
         return new_response_columns_setting
 
