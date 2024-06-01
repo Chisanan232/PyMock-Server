@@ -22,5 +22,5 @@ mocked_apis:
             - name: respData
               required: false
               type: dict
-              items: []
+              is_empty: true
       tag: ''

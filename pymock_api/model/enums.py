@@ -2,7 +2,7 @@ import re
 from collections import namedtuple
 from enum import Enum
 from pydoc import locate
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from pymock_api.model.openapi._js_handlers import convert_js_type
 
@@ -53,11 +53,36 @@ class ResponseStrategy(Enum):
         data: dict,
         get_schema_parser_factory: Callable,
     ) -> dict:
-        return self._process_reference_object(
+        response = self._process_reference_object(
             init_response=init_response,
             response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(data, accept_no_ref=True),
             get_schema_parser_factory=get_schema_parser_factory,
         )
+
+        # Handle the collection data which has empty body
+        if self is ResponseStrategy.OBJECT:
+            new_response = response.copy()
+            new_response["data"] = self._process_empty_body_response(response_columns_setting=response.get("data", []))
+            response = new_response
+
+        return response
+
+    def _process_empty_body_response(self, response_columns_setting: List[dict]) -> List[dict]:
+        new_response_columns_setting = []
+        for resp_column in response_columns_setting:
+            # element self
+            if resp_column["name"] == "THIS_IS_EMPTY":
+                resp_column["name"] = ""
+                resp_column["is_empty"] = True
+            else:
+                # element's property *items*
+                response_data_prop_items = resp_column.get("items", [])
+                if response_data_prop_items and len(response_data_prop_items) != 0:
+                    if response_data_prop_items[0].get("name", "") == "THIS_IS_EMPTY":
+                        resp_column["is_empty"] = True
+                        resp_column["items"] = []
+            new_response_columns_setting.append(resp_column)
+        return new_response_columns_setting
 
     def _process_reference_object(
         self,
@@ -151,7 +176,7 @@ class ResponseStrategy(Enum):
                         f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
                     )
                     response_data_prop["name"] = "THIS_IS_EMPTY"
-                    response_data_prop["type"] = "str"
+                    # response_data_prop["type"] = "str"
                     response_data_prop["required"] = False
                     init_response["data"].append(response_data_prop)
                 else:
