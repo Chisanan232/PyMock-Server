@@ -26,6 +26,14 @@ configuration.
 It receives a string value about the host address or URL path.
 
 
+## ``--source-file`` or ``-f`` <API document configuration file\>
+
+Set the source file that is the specific file it would try to get the API documentation configuration and convert it 
+as **_PyMock-API_** format configuration.
+
+It receives a string value about the configuration file path.
+
+
 ## ``--base-url`` <base API path\>
 
 Set the base URL for deserialization of API documentation configuration.
