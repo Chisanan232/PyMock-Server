@@ -239,9 +239,9 @@ class TestSubCmdPullComponent:
     )
     def test_command_line_argument_setting(self, sub_cmd: SubCmdPullComponent, cmd_args: SubcmdPullArguments):
         # Mock function and its return value if it needs
-        with patch.object(sub_cmd, "_get_openapi_doc_config") as mock_get_swagger_config:
+        with patch.object(sub_cmd, "_get_openapi_doc_config") as mock_get_openapi_doc_config:
             openapi_doc_config = deserialize_openapi_doc_config(data=_OpenAPI_Doc_Config)
-            mock_get_swagger_config.return_value = openapi_doc_config
+            mock_get_openapi_doc_config.return_value = openapi_doc_config
             with patch.object(sub_cmd, "_dry_run_final_process") as mock_dry_run_final_process:
                 with patch.object(sub_cmd, "_final_process") as mock_final_process:
                     # Run target function
@@ -250,7 +250,9 @@ class TestSubCmdPullComponent:
                     # Verify
                     http_proto = "https" if cmd_args.request_with_https else "http"
                     openapi_doc_url = f"{http_proto}://{cmd_args.source}"
-                    mock_get_swagger_config.assert_called_once_with(openapi_doc_url=openapi_doc_url)
+                    mock_get_openapi_doc_config.assert_called_once_with(
+                        url=openapi_doc_url, config_file=cmd_args.source_file
+                    )
 
                     api_config = openapi_doc_config.to_api_config(base_url=cmd_args.base_url)
                     # Some settings
