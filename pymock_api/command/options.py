@@ -550,6 +550,14 @@ class Source(BaseSubCmdPullOption):
     cli_option: str = "-s, --source"
     name: str = "source"
     help_description: str = "The source where keeps API details as documentation."
+    default_value: str = ""
+
+
+class SourceFile(BaseSubCmdPullOption):
+    cli_option: str = "-f, --source-file"
+    name: str = "source_file"
+    help_description: str = "The source file which is the OpenAPI documentation configuration."
+    default_value: str = ""
 
 
 class PullRequestWithHttps(BaseSubCmdPullOption):

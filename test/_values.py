@@ -505,6 +505,7 @@ _Sample_Data_Type: str = "all"
 _Test_SubCommand_Pull: str = "pull"
 _Test_Request_With_Https: bool = False
 _API_Doc_Source: str = "127.0.0.1:8080"
+_API_Doc_Source_File: str = "./example-openapi-doc.json"
 _Default_Base_File_Path: str = "./"
 _Default_Include_Template_Config: bool = False
 _Test_Dry_Run: bool = True

@@ -52,6 +52,7 @@ from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (
     _API_Doc_Source,
+    _API_Doc_Source_File,
     _Base_URL,
     _Bind_Host_And_Port,
     _Cmd_Arg_API_Path,
@@ -854,6 +855,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
             subparser_name=_Test_SubCommand_Pull,
             request_with_https=_Test_Request_With_Https,
             source=_API_Doc_Source,
+            source_file=_API_Doc_Source_File,
             config_path=_Test_Config,
             base_url=base_url,
             base_file_path=_Default_Base_File_Path,
@@ -946,6 +948,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         args_namespace.subcommand = SubCommand.Pull
         args_namespace.request_with_https = _Test_Request_With_Https
         args_namespace.source = _API_Doc_Source
+        args_namespace.source_file = _API_Doc_Source_File
         args_namespace.base_url = _Base_URL
         args_namespace.base_file_path = _Default_Base_File_Path
         args_namespace.config_path = _Test_Config

@@ -73,6 +73,7 @@ class SubcmdSampleArguments(ParserArguments):
 class SubcmdPullArguments(ParserArguments):
     request_with_https: bool
     source: str
+    source_file: str
     config_path: str
     base_url: str
     include_template_config: bool
@@ -163,6 +164,7 @@ class DeserializeParsedArgs:
             subparser_name=args.subcommand,
             request_with_https=args.request_with_https,
             source=args.source,
+            source_file=args.source_file,
             config_path=args.config_path,
             base_url=args.base_url,
             include_template_config=args.include_template_config,
