@@ -60,10 +60,16 @@ class ResponseStrategy(Enum):
         )
 
         # Handle the collection data which has empty body
+        new_response = response.copy()
         if self is ResponseStrategy.OBJECT:
-            new_response = response.copy()
-            new_response["data"] = self._process_empty_body_response(response_columns_setting=response.get("data", []))
-            response = new_response
+            response_columns_setting = response.get("data", [])
+            new_response["data"] = self._process_empty_body_response(response_columns_setting=response_columns_setting)
+        else:
+            response_columns_setting = response.get("data", {})
+            new_response["data"] = self._process_empty_body_response_by_string_strategy(
+                response_columns_setting=response_columns_setting
+            )
+        response = new_response
 
         return response
 
@@ -87,6 +93,9 @@ class ResponseStrategy(Enum):
                         )
             new_response_columns_setting.append(resp_column)
         return new_response_columns_setting
+
+    def _process_empty_body_response_by_string_strategy(self, response_columns_setting: dict) -> dict:
+        return response_columns_setting
 
     def _process_reference_object(
         self,
