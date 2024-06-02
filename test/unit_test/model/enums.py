@@ -571,6 +571,11 @@ class TestResponseStrategy(EnumTestSuite):
             ),
             (
                 ResponseStrategy.STRING,
+                {"key1": "value1", "sample_list": ["empty value"]},
+                {"key1": "value1", "sample_list": ["empty value"]},
+            ),
+            (
+                ResponseStrategy.STRING,
                 {"key1": "value1", "sample_list": [{"THIS_IS_EMPTY": "empty value"}]},
                 {"key1": "value1", "sample_list": []},
             ),
@@ -586,6 +591,23 @@ class TestResponseStrategy(EnumTestSuite):
                     "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {"THIS_IS_EMPTY": "empty value"}}],
                 },
                 {"key1": "value1", "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {}}]},
+            ),
+            (
+                ResponseStrategy.STRING,
+                {
+                    "key1": "value1",
+                    "sample_list": [
+                        {
+                            "inner_dict": "inner_value",
+                            "inner_dict2": {"THIS_IS_EMPTY": "empty value"},
+                            "inner_list": ["empty value"],
+                        }
+                    ],
+                },
+                {
+                    "key1": "value1",
+                    "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {}, "inner_list": ["empty value"]}],
+                },
             ),
         ],
     )
