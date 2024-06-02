@@ -561,6 +561,41 @@ class TestResponseStrategy(EnumTestSuite):
         assert response_config == expected_value
 
     @pytest.mark.parametrize(
+        ("ut_enum", "ut_response_data", "expect_result"),
+        [
+            (ResponseStrategy.STRING, {"THIS_IS_EMPTY": "empty value"}, {}),
+            (
+                ResponseStrategy.STRING,
+                {"key1": "value1", "sample_dict": {"THIS_IS_EMPTY": "empty value"}},
+                {"key1": "value1", "sample_dict": {}},
+            ),
+            (
+                ResponseStrategy.STRING,
+                {"key1": "value1", "sample_list": [{"THIS_IS_EMPTY": "empty value"}]},
+                {"key1": "value1", "sample_list": []},
+            ),
+            (
+                ResponseStrategy.STRING,
+                {"key1": "value1", "sample_dict": {"inner_list": [{"THIS_IS_EMPTY": "empty value"}]}},
+                {"key1": "value1", "sample_dict": {"inner_list": []}},
+            ),
+            (
+                ResponseStrategy.STRING,
+                {
+                    "key1": "value1",
+                    "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {"THIS_IS_EMPTY": "empty value"}}],
+                },
+                {"key1": "value1", "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {}}]},
+            ),
+        ],
+    )
+    def test__process_empty_body_response_by_string_strategy(
+        self, ut_enum: ResponseStrategy, ut_response_data: dict, expect_result: dict
+    ):
+        ut_response = ut_enum._process_empty_body_response_by_string_strategy(response_columns_setting=ut_response_data)
+        assert ut_response == expect_result
+
+    @pytest.mark.parametrize(
         ("ut_enum", "ut_response_config", "expect_result"),
         [
             (

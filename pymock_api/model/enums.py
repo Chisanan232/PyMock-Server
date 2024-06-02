@@ -95,7 +95,28 @@ class ResponseStrategy(Enum):
         return new_response_columns_setting
 
     def _process_empty_body_response_by_string_strategy(self, response_columns_setting: dict) -> dict:
-        return response_columns_setting
+        new_response_columns_setting: Dict[str, Any] = {}
+        for column_name, column_value in response_columns_setting.items():
+            if column_name == "THIS_IS_EMPTY":
+                new_response_columns_setting = {}
+            else:
+                if isinstance(column_value, list):
+                    for ele in column_value:
+                        if isinstance(ele, dict):
+                            new_column_value = new_response_columns_setting.get(column_name, [])
+                            new_ele = self._process_empty_body_response_by_string_strategy(response_columns_setting=ele)
+                            if new_ele:
+                                new_column_value.append(new_ele)
+                            new_response_columns_setting[column_name] = new_column_value
+                        else:
+                            new_response_columns_setting[column_name] = column_value
+                elif isinstance(column_value, dict):
+                    new_response_columns_setting[column_name] = self._process_empty_body_response_by_string_strategy(
+                        response_columns_setting=column_value
+                    )
+                else:
+                    new_response_columns_setting[column_name] = column_value
+        return new_response_columns_setting
 
     def _process_reference_object(
         self,
