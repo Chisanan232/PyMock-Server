@@ -184,7 +184,7 @@ class ResponseStrategy(Enum):
                     init_response["data"].append(response_data_prop)
                 else:
                     self._ensure_data_structure_when_non_object_strategy(init_response)
-                    init_response["data"][empty_body_key] = response_config
+                    init_response["data"]["THIS_IS_EMPTY"] = response_config
                 print(f"[DEBUG in process_response_from_reference] empty_body_key: {empty_body_key}")
                 print(
                     f"[DEBUG in process_response_from_reference] parse with empty body, init_response: {init_response}"

@@ -533,6 +533,34 @@ class TestResponseStrategy(EnumTestSuite):
         assert resp == expected_value
 
     @pytest.mark.parametrize(
+        ("ut_enum", "test_response_data", "expected_value"),
+        [
+            (
+                ResponseStrategy.STRING,
+                {"type": "object"},
+                {"strategy": ResponseStrategy.STRING, "data": {"THIS_IS_EMPTY": "empty value"}},
+            ),
+            (
+                ResponseStrategy.OBJECT,
+                {"type": "object"},
+                {
+                    "strategy": ResponseStrategy.OBJECT,
+                    "data": [{"name": "THIS_IS_EMPTY", "required": False, "type": None, "format": None, "items": []}],
+                },
+            ),
+        ],
+    )
+    def test__process_reference_object_with_empty_body_response(
+        self, ut_enum: ResponseStrategy, test_response_data: dict, expected_value: str
+    ):
+        response_config = ut_enum._process_reference_object(
+            init_response=ut_enum.initial_response_data(),
+            response_schema_ref=test_response_data,
+            get_schema_parser_factory=ensure_get_schema_parser_factory,
+        )
+        assert response_config == expected_value
+
+    @pytest.mark.parametrize(
         ("ut_enum", "ut_response_config", "expect_result"),
         [
             (
