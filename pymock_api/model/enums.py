@@ -180,7 +180,6 @@ class ResponseStrategy(Enum):
                         f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
                     )
                     response_data_prop["name"] = "THIS_IS_EMPTY"
-                    # response_data_prop["type"] = "str"
                     response_data_prop["required"] = False
                     init_response["data"].append(response_data_prop)
                 else:
