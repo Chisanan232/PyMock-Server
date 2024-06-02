@@ -20,8 +20,8 @@ quickly.
 
 ## ``--source`` or ``-s`` <API document URL\>
 
-Set the source where it should try to get the API documentation configuration and convert it as **_PyMock-API_** format
-configuration.
+Set the source that is the endpoint of OpenAPI document it would try to get the API documentation configuration and 
+convert it as **_PyMock-API_** format configuration.
 
 It receives a string value about the host address or URL path.
 
