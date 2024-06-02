@@ -13,9 +13,67 @@ from ._property import BaseProperty
 
 @dataclass(eq=False)
 class ResponseProperty(BaseProperty):
+    is_empty: Optional[bool] = None
+
+    def _compare(self, other: "ResponseProperty") -> bool:  # type: ignore[override]
+        return super()._compare(other) and self.is_empty == other.is_empty
+
     @property
     def key(self) -> str:
         return "properties.<property item>"
+
+    @_Config._clean_empty_value
+    def serialize(self, data: Optional["ResponseProperty"] = None) -> Optional[Dict[str, Any]]:
+        serialized_data = super().serialize(data)
+        if serialized_data:
+            serialized_data["is_empty"] = self._get_prop(data, prop="is_empty")
+        return serialized_data
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["ResponseProperty"]:
+        super().deserialize(data)
+        self.is_empty = data.get("is_empty", None)
+        return self
+
+    def is_work(self) -> bool:
+        response_props_chk = super().is_work()
+        if response_props_chk is False:
+            return False
+
+        if not self.condition_should_be_true(
+            config_key=f"{self.absolute_model_key}.is_empty",
+            condition=(
+                self.value_type in ["list", "tuple", "set", "dict"] and self.is_empty and len(self.items or []) != 0  # type: ignore[arg-type]
+            ),
+            err_msg="It's meaningless if it's collection type data and it's empty, but it has property *items* setting.",
+        ):
+            return False
+        if not self.condition_should_be_true(
+            config_key=f"{self.absolute_model_key}.is_empty",
+            condition=(self.value_type not in ["list", "tuple", "set", "dict"] and self.is_empty is not None),
+            err_msg="It's meaningless if it isn't collection type data, but it has property *is_empty* setting.",
+        ):
+            return False
+
+        return True
+
+    def _prop_items_is_work(self) -> bool:
+        if not self.condition_should_be_true(
+            config_key=f"{self.absolute_model_key}.items",
+            condition=(
+                self.value_type not in ["list", "tuple", "set", "dict"]
+                and not self.is_empty
+                and len(self.items or []) != 0
+            )
+            or (
+                self.value_type in ["list", "tuple", "set", "dict"]
+                and self.is_empty is not True
+                and not (self.items or [])
+            ),
+            err_msg="It's meaningless if it has item setting but its data type is not collection. The items value setting sould not be None if the data type is one of collection types.",
+        ):
+            return False
+        return True
 
 
 @dataclass(eq=False)

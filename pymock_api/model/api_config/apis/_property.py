@@ -96,6 +96,16 @@ class BaseProperty(_HasItemsPropConfig, ABC):
         ):
             return False
 
+        if not self._prop_items_is_work():
+            return False
+
+        # check 'items'
+        items_chk = super().is_work()
+        if items_chk is False:
+            return items_chk
+        return True
+
+    def _prop_items_is_work(self) -> bool:
         if not self.condition_should_be_true(
             config_key=f"{self.absolute_model_key}.items",
             condition=(self.value_type not in ["list", "tuple", "set", "dict"] and len(self.items or []) != 0)
@@ -103,9 +113,4 @@ class BaseProperty(_HasItemsPropConfig, ABC):
             err_msg="It's meaningless if it has item setting but its data type is not collection. The items value setting sould not be None if the data type is one of collection types.",
         ):
             return False
-
-        # check 'items'
-        items_chk = super().is_work()
-        if items_chk is False:
-            return items_chk
         return True

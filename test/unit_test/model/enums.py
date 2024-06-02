@@ -532,6 +532,191 @@ class TestResponseStrategy(EnumTestSuite):
         assert resp
         assert resp == expected_value
 
+    @pytest.mark.parametrize(
+        ("ut_enum", "test_response_data", "expected_value"),
+        [
+            (
+                ResponseStrategy.STRING,
+                {"type": "object"},
+                {"strategy": ResponseStrategy.STRING, "data": {"THIS_IS_EMPTY": "empty value"}},
+            ),
+            (
+                ResponseStrategy.OBJECT,
+                {"type": "object"},
+                {
+                    "strategy": ResponseStrategy.OBJECT,
+                    "data": [{"name": "THIS_IS_EMPTY", "required": False, "type": None, "format": None, "items": []}],
+                },
+            ),
+        ],
+    )
+    def test__process_reference_object_with_empty_body_response(
+        self, ut_enum: ResponseStrategy, test_response_data: dict, expected_value: str
+    ):
+        response_config = ut_enum._process_reference_object(
+            init_response=ut_enum.initial_response_data(),
+            response_schema_ref=test_response_data,
+            get_schema_parser_factory=ensure_get_schema_parser_factory,
+        )
+        assert response_config == expected_value
+
+    @pytest.mark.parametrize(
+        ("ut_enum", "ut_response_data", "expect_result"),
+        [
+            (ResponseStrategy.STRING, {"THIS_IS_EMPTY": "empty value"}, {}),
+            (
+                ResponseStrategy.STRING,
+                {"key1": "value1", "sample_dict": {"THIS_IS_EMPTY": "empty value"}},
+                {"key1": "value1", "sample_dict": {}},
+            ),
+            (
+                ResponseStrategy.STRING,
+                {"key1": "value1", "sample_list": ["empty value"]},
+                {"key1": "value1", "sample_list": ["empty value"]},
+            ),
+            (
+                ResponseStrategy.STRING,
+                {"key1": "value1", "sample_list": [{"THIS_IS_EMPTY": "empty value"}]},
+                {"key1": "value1", "sample_list": []},
+            ),
+            (
+                ResponseStrategy.STRING,
+                {"key1": "value1", "sample_dict": {"inner_list": [{"THIS_IS_EMPTY": "empty value"}]}},
+                {"key1": "value1", "sample_dict": {"inner_list": []}},
+            ),
+            (
+                ResponseStrategy.STRING,
+                {
+                    "key1": "value1",
+                    "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {"THIS_IS_EMPTY": "empty value"}}],
+                },
+                {"key1": "value1", "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {}}]},
+            ),
+            (
+                ResponseStrategy.STRING,
+                {
+                    "key1": "value1",
+                    "sample_list": [
+                        {
+                            "inner_dict": "inner_value",
+                            "inner_dict2": {"THIS_IS_EMPTY": "empty value"},
+                            "inner_list": ["empty value"],
+                        }
+                    ],
+                },
+                {
+                    "key1": "value1",
+                    "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {}, "inner_list": ["empty value"]}],
+                },
+            ),
+        ],
+    )
+    def test__process_empty_body_response_by_string_strategy(
+        self, ut_enum: ResponseStrategy, ut_response_data: dict, expect_result: dict
+    ):
+        ut_response = ut_enum._process_empty_body_response_by_string_strategy(response_columns_setting=ut_response_data)
+        assert ut_response == expect_result
+
+    @pytest.mark.parametrize(
+        ("ut_enum", "ut_response_config", "expect_result"),
+        [
+            (
+                ResponseStrategy.OBJECT,
+                [{"name": "THIS_IS_EMPTY", "required": True, "type": None, "format": None, "items": None}],
+                [{"name": "", "required": True, "type": None, "format": None, "is_empty": True, "items": None}],
+            ),
+            (
+                ResponseStrategy.OBJECT,
+                [
+                    {
+                        "name": "sample_list",
+                        "required": True,
+                        "type": "list",
+                        "format": None,
+                        "items": [
+                            {"name": "THIS_IS_EMPTY", "required": True, "type": None, "format": None, "items": None}
+                        ],
+                    },
+                ],
+                [
+                    {
+                        "name": "sample_list",
+                        "required": True,
+                        "type": "list",
+                        "format": None,
+                        "is_empty": True,
+                        "items": [],
+                    },
+                ],
+            ),
+            (
+                ResponseStrategy.OBJECT,
+                [
+                    {
+                        "name": "sample_list",
+                        "required": True,
+                        "type": "list",
+                        "format": None,
+                        "items": [
+                            {
+                                "name": "sample_nested_list",
+                                "required": True,
+                                "type": "list",
+                                "format": None,
+                                "items": [{"name": "", "required": True, "type": "str", "format": None, "items": None}],
+                            },
+                            {
+                                "name": "sample_nested_dict",
+                                "required": True,
+                                "type": "dict",
+                                "format": None,
+                                "items": [
+                                    {
+                                        "name": "THIS_IS_EMPTY",
+                                        "required": True,
+                                        "type": None,
+                                        "format": None,
+                                        "items": None,
+                                    }
+                                ],
+                            },
+                        ],
+                    }
+                ],
+                [
+                    {
+                        "name": "sample_list",
+                        "required": True,
+                        "type": "list",
+                        "format": None,
+                        "items": [
+                            {
+                                "name": "sample_nested_list",
+                                "required": True,
+                                "type": "list",
+                                "format": None,
+                                "items": [{"name": "", "required": True, "type": "str", "format": None, "items": None}],
+                            },
+                            {
+                                "name": "sample_nested_dict",
+                                "required": True,
+                                "type": "dict",
+                                "format": None,
+                                "is_empty": True,
+                                "items": [],
+                            },
+                        ],
+                    }
+                ],
+            ),
+        ],
+    )
+    def test__process_empty_body_response(
+        self, ut_enum: ResponseStrategy, ut_response_config: dict, expect_result: dict
+    ):
+        new_response_config = ut_enum._process_empty_body_response(response_columns_setting=ut_response_config)
+        assert new_response_config == expect_result
+
 
 class TestConfigLoadingOrder(EnumTestSuite):
     @pytest.fixture(scope="function")

@@ -1,0 +1,9 @@
+strategy: object
+properties:
+  - name: description
+    required: True
+    type: list
+    format:
+    items:
+      - required: true
+        type: str

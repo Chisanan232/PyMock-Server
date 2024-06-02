@@ -1,0 +1,8 @@
+strategy: object
+properties:
+  - name: description
+    required: True
+    type: list
+    format:
+    is_empty: false
+    items: []

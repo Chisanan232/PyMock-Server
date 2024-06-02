@@ -2,7 +2,7 @@ import re
 from collections import namedtuple
 from enum import Enum
 from pydoc import locate
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from pymock_api.model.openapi._js_handlers import convert_js_type
 
@@ -53,11 +53,70 @@ class ResponseStrategy(Enum):
         data: dict,
         get_schema_parser_factory: Callable,
     ) -> dict:
-        return self._process_reference_object(
+        response = self._process_reference_object(
             init_response=init_response,
             response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(data, accept_no_ref=True),
             get_schema_parser_factory=get_schema_parser_factory,
         )
+
+        # Handle the collection data which has empty body
+        new_response = response.copy()
+        if self is ResponseStrategy.OBJECT:
+            response_columns_setting = response.get("data", [])
+            new_response["data"] = self._process_empty_body_response(response_columns_setting=response_columns_setting)
+        else:
+            response_columns_setting = response.get("data", {})
+            new_response["data"] = self._process_empty_body_response_by_string_strategy(
+                response_columns_setting=response_columns_setting
+            )
+        response = new_response
+
+        return response
+
+    def _process_empty_body_response(self, response_columns_setting: List[dict]) -> List[dict]:
+        new_response_columns_setting = []
+        for resp_column in response_columns_setting:
+            # element self
+            if resp_column["name"] == "THIS_IS_EMPTY":
+                resp_column["name"] = ""
+                resp_column["is_empty"] = True
+            else:
+                # element's property *items*
+                response_data_prop_items = resp_column.get("items", [])
+                if response_data_prop_items and len(response_data_prop_items) != 0:
+                    if response_data_prop_items[0].get("name", "") == "THIS_IS_EMPTY":
+                        resp_column["is_empty"] = True
+                        resp_column["items"] = []
+                    else:
+                        resp_column["items"] = self._process_empty_body_response(
+                            response_columns_setting=response_data_prop_items
+                        )
+            new_response_columns_setting.append(resp_column)
+        return new_response_columns_setting
+
+    def _process_empty_body_response_by_string_strategy(self, response_columns_setting: dict) -> dict:
+        new_response_columns_setting: Dict[str, Any] = {}
+        for column_name, column_value in response_columns_setting.items():
+            if column_name == "THIS_IS_EMPTY":
+                new_response_columns_setting = {}
+            else:
+                if isinstance(column_value, list):
+                    for ele in column_value:
+                        if isinstance(ele, dict):
+                            new_column_value = new_response_columns_setting.get(column_name, [])
+                            new_ele = self._process_empty_body_response_by_string_strategy(response_columns_setting=ele)
+                            if new_ele:
+                                new_column_value.append(new_ele)
+                            new_response_columns_setting[column_name] = new_column_value
+                        else:
+                            new_response_columns_setting[column_name] = column_value
+                elif isinstance(column_value, dict):
+                    new_response_columns_setting[column_name] = self._process_empty_body_response_by_string_strategy(
+                        response_columns_setting=column_value
+                    )
+                else:
+                    new_response_columns_setting[column_name] = column_value
+        return new_response_columns_setting
 
     def _process_reference_object(
         self,
@@ -111,7 +170,9 @@ class ResponseStrategy(Enum):
                     response_data_prop = self._ensure_data_structure_when_object_strategy(
                         init_response, response_config
                     )
-                    print(f"[DEBUG in process_response_from_reference] response_data_prop: {response_data_prop}")
+                    print(
+                        f"[DEBUG in process_response_from_reference] has properties, response_data_prop: {response_data_prop}"
+                    )
                     response_data_prop["name"] = k
                     response_data_prop["required"] = k in parser.get_required(default=[k])
                     init_response["data"].append(response_data_prop)
@@ -125,20 +186,39 @@ class ResponseStrategy(Enum):
             if "title" in response_schema_ref.keys() and response_schema_ref["title"] == "InputStream":
                 if self is ResponseStrategy.OBJECT:
                     response_config["type"] = "file"
+
+                    response_data_prop = self._ensure_data_structure_when_object_strategy(
+                        init_response, response_config
+                    )
+                    print(
+                        f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
+                    )
+                    response_data_prop["name"] = empty_body_key
+                    response_data_prop["required"] = empty_body_key in parser.get_required(default=[empty_body_key])
+                    init_response["data"].append(response_data_prop)
                 else:
                     response_config = "random file output stream"  # type: ignore[assignment]
 
-            if self is ResponseStrategy.OBJECT:
-                response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
-                print(f"[DEBUG in process_response_from_reference] response_data_prop: {response_data_prop}")
-                response_data_prop["name"] = empty_body_key
-                response_data_prop["required"] = empty_body_key in parser.get_required(default=[empty_body_key])
-                init_response["data"].append(response_data_prop)
+                    self._ensure_data_structure_when_non_object_strategy(init_response)
+                    init_response["data"][empty_body_key] = response_config
             else:
-                self._ensure_data_structure_when_non_object_strategy(init_response)
-                init_response["data"][empty_body_key] = response_config
-            print(f"[DEBUG in process_response_from_reference] empty_body_key: {empty_body_key}")
-            print(f"[DEBUG in process_response_from_reference] parse with empty body, init_response: {init_response}")
+                if self is ResponseStrategy.OBJECT:
+                    response_data_prop = self._ensure_data_structure_when_object_strategy(
+                        init_response, response_config
+                    )
+                    print(
+                        f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
+                    )
+                    response_data_prop["name"] = "THIS_IS_EMPTY"
+                    response_data_prop["required"] = False
+                    init_response["data"].append(response_data_prop)
+                else:
+                    self._ensure_data_structure_when_non_object_strategy(init_response)
+                    init_response["data"]["THIS_IS_EMPTY"] = response_config
+                print(f"[DEBUG in process_response_from_reference] empty_body_key: {empty_body_key}")
+                print(
+                    f"[DEBUG in process_response_from_reference] parse with empty body, init_response: {init_response}"
+                )
         return init_response
 
     def process_response_from_data(
