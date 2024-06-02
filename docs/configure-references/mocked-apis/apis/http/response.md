@@ -80,6 +80,15 @@ The data format.
     Currently, it just let you set this option. But it doesn't have essentially function to work.
 
 
+#### ``properties[*].is_empty``
+
+If the data type (property ``properties[*].type``) is collection and is empty body, this option will be true. In the 
+other words, it would be valid about ``properties[*].items`` is empty when ``properties[*].type`` is collection with 
+this option is true.
+
+In generally, this option would be used for sub-command line ``pull``.
+
+
 #### ``properties[*].items``
 
 If the data type of value is list type, it should use this key to configure its element details. The element detail follow 
