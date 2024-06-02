@@ -45,7 +45,7 @@ from pymock_api.model import (
     SubcmdPullArguments,
     SubcmdRunArguments,
     SubcmdSampleArguments,
-    deserialize_swagger_api_config,
+    deserialize_openapi_doc_config,
 )
 from pymock_api.model.enums import Format, ResponseStrategy, SampleType
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
@@ -886,7 +886,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
                 mock_swagger_request.assert_called_once_with(method="GET", url=f"http://{_API_Doc_Source}")
 
                 # Run one core logic of target function
-                under_test_api_config = deserialize_swagger_api_config(swagger_json_data).to_api_config(
+                under_test_api_config = deserialize_openapi_doc_config(swagger_json_data).to_api_config(
                     mock_parser_arg.base_url
                 )
                 under_test_api_config.set_template_in_config = False

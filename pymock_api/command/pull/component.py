@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional
 
 from ..._utils import YAML
 from ..._utils.api_client import URLLibHTTPClient
-from ...model import OpenAPIDocumentConfig, deserialize_swagger_api_config
+from ...model import OpenAPIDocumentConfig, deserialize_openapi_doc_config
 from ...model.api_config import APIConfig, DivideStrategy
 from ...model.cmd_args import SubcmdPullArguments
 from ..component import BaseSubCmdComponent
@@ -15,19 +15,19 @@ class SubCmdPullComponent(BaseSubCmdComponent):
 
     def process(self, args: SubcmdPullArguments) -> None:  # type: ignore[override]
         http_proto = "https" if args.request_with_https else "http"
-        swagger_api_doc_url = f"{http_proto}://{args.source}"
-        print(f"Try to get Swagger API documentation content at '{swagger_api_doc_url}'.")
-        swagger_api_doc = self._get_swagger_config(swagger_url=swagger_api_doc_url)
-        api_config = swagger_api_doc.to_api_config(base_url=args.base_url)
+        openapi_doc_url = f"{http_proto}://{args.source}"
+        print(f"Try to get OpenAPI API (aka Swagger API before) documentation content at '{openapi_doc_url}'.")
+        openapi_doc_config = self._get_openapi_doc_config(openapi_doc_url=openapi_doc_url)
+        api_config = openapi_doc_config.to_api_config(base_url=args.base_url)
         serialized_api_config = self._serialize_api_config_with_cmd_args(cmd_args=args, api_config=api_config)
         if args.dry_run:
             self._dry_run_final_process(serialized_api_config)
         else:
             self._final_process(args, serialized_api_config)
 
-    def _get_swagger_config(self, swagger_url: str) -> OpenAPIDocumentConfig:
-        swagger_api_doc: dict = self._api_client.request(method="GET", url=swagger_url)
-        return deserialize_swagger_api_config(data=swagger_api_doc)
+    def _get_openapi_doc_config(self, openapi_doc_url: str = "") -> OpenAPIDocumentConfig:
+        openapi_doc_config: dict = self._api_client.request(method="GET", url=openapi_doc_url)
+        return deserialize_openapi_doc_config(data=openapi_doc_config)
 
     def _serialize_api_config_with_cmd_args(
         self, cmd_args: SubcmdPullArguments, api_config: APIConfig

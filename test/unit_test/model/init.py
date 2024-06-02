@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 from pymock_api.model import (
     DeserializeParsedArgs,
     deserialize_args,
-    deserialize_swagger_api_config,
+    deserialize_openapi_doc_config,
 )
 
 from ..._values import (
@@ -94,7 +94,7 @@ def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
-def test_deserialize_swagger_api_config():
+def test_deserialize_openapi_doc_config():
     with patch("pymock_api.model.OpenAPIDocumentConfig.deserialize") as mock_deserialize_swagger_config_function:
-        deserialize_swagger_api_config(data={"some key": "some value"})
+        deserialize_openapi_doc_config(data={"some key": "some value"})
         mock_deserialize_swagger_config_function.assert_called_once_with(data={"some key": "some value"})

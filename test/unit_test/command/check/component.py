@@ -15,7 +15,7 @@ from pymock_api.model import (
     SubcmdCheckArguments,
     SubcmdGetArguments,
     SubcmdRunArguments,
-    deserialize_swagger_api_config,
+    deserialize_openapi_doc_config,
     load_config,
 )
 
@@ -130,7 +130,7 @@ class TestSubCmdCheckComponent:
             mock_load_config.return_value = load_config(dummy_yaml_path)
             with patch.object(SwaggerDiffChecking, "_get_swagger_config") as mock_get_swagger_config:
                 with open(api_resp_path, "r", encoding="utf-8") as file_stream:
-                    mock_get_swagger_config.return_value = deserialize_swagger_api_config(
+                    mock_get_swagger_config.return_value = deserialize_openapi_doc_config(
                         json.loads(file_stream.read())
                     )
 

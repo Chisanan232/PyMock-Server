@@ -8,7 +8,7 @@ from pymock_api.command.options import SubCommand
 from pymock_api.command.pull.component import SubCmdPullComponent
 from pymock_api.model import (
     SubcmdPullArguments,
-    deserialize_swagger_api_config,
+    deserialize_openapi_doc_config,
     load_config,
 )
 from pymock_api.model.api_config import DivideStrategy, TemplateConfig
@@ -239,8 +239,8 @@ class TestSubCmdPullComponent:
     )
     def test_command_line_argument_setting(self, sub_cmd: SubCmdPullComponent, cmd_args: SubcmdPullArguments):
         # Mock function and its return value if it needs
-        with patch.object(sub_cmd, "_get_swagger_config") as mock_get_swagger_config:
-            openapi_doc_config = deserialize_swagger_api_config(data=_OpenAPI_Doc_Config)
+        with patch.object(sub_cmd, "_get_openapi_doc_config") as mock_get_swagger_config:
+            openapi_doc_config = deserialize_openapi_doc_config(data=_OpenAPI_Doc_Config)
             mock_get_swagger_config.return_value = openapi_doc_config
             with patch.object(sub_cmd, "_dry_run_final_process") as mock_dry_run_final_process:
                 with patch.object(sub_cmd, "_final_process") as mock_final_process:
@@ -249,8 +249,8 @@ class TestSubCmdPullComponent:
 
                     # Verify
                     http_proto = "https" if cmd_args.request_with_https else "http"
-                    swagger_api_doc_url = f"{http_proto}://{cmd_args.source}"
-                    mock_get_swagger_config.assert_called_once_with(swagger_url=swagger_api_doc_url)
+                    openapi_doc_url = f"{http_proto}://{cmd_args.source}"
+                    mock_get_swagger_config.assert_called_once_with(openapi_doc_url=openapi_doc_url)
 
                     api_config = openapi_doc_config.to_api_config(base_url=cmd_args.base_url)
                     # Some settings
