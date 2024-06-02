@@ -1,6 +1,7 @@
-from typing import Any, Dict, Optional
+from pathlib import Path
+from typing import Any, Dict, Optional, Union
 
-from ..._utils import YAML
+from ..._utils import JSON, YAML
 from ..._utils.api_client import URLLibHTTPClient
 from ...model import OpenAPIDocumentConfig, deserialize_openapi_doc_config
 from ...model.api_config import APIConfig, DivideStrategy
@@ -17,7 +18,7 @@ class SubCmdPullComponent(BaseSubCmdComponent):
         http_proto = "https" if args.request_with_https else "http"
         openapi_doc_url = f"{http_proto}://{args.source}"
         print(f"Try to get OpenAPI API (aka Swagger API before) documentation content at '{openapi_doc_url}'.")
-        openapi_doc_config = self._get_openapi_doc_config(openapi_doc_url=openapi_doc_url)
+        openapi_doc_config = self._get_openapi_doc_config(url=openapi_doc_url)
         api_config = openapi_doc_config.to_api_config(base_url=args.base_url)
         serialized_api_config = self._serialize_api_config_with_cmd_args(cmd_args=args, api_config=api_config)
         if args.dry_run:
@@ -25,8 +26,16 @@ class SubCmdPullComponent(BaseSubCmdComponent):
         else:
             self._final_process(args, serialized_api_config)
 
-    def _get_openapi_doc_config(self, openapi_doc_url: str = "") -> OpenAPIDocumentConfig:
-        openapi_doc_config: dict = self._api_client.request(method="GET", url=openapi_doc_url)
+    def _get_openapi_doc_config(self, url: str = "", config_file: Union[str, Path] = "") -> OpenAPIDocumentConfig:
+        openapi_doc_config: dict = {}
+        if url:
+            openapi_doc_config = self._api_client.request(method="GET", url=url)
+        if config_file and not openapi_doc_config:
+            openapi_doc_config = JSON().read(path=config_file if isinstance(config_file, str) else str(config_file))
+        if not openapi_doc_config:
+            raise ValueError(
+                "It must has host URL or configuration file path to get the OpenAPI documentation details."
+            )
         return deserialize_openapi_doc_config(data=openapi_doc_config)
 
     def _serialize_api_config_with_cmd_args(
