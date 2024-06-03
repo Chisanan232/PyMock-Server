@@ -139,7 +139,7 @@ class HTTPRequest(_DividableOnlyTemplatableConfig, _Checkable):
         if not self.should_be_valid(
             config_key=f"{self.absolute_model_key}.method",
             config_value=self.method,
-            criteria=["GET", "POST", "PUT", "DELETE", "HEAD", "OPTION"],
+            criteria=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTION"],
         ):
             return False
         if self.parameters:

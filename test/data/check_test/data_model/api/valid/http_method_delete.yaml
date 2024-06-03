@@ -1,0 +1,8 @@
+url: '/foo-boo'
+http:
+  request:
+    method: 'DELETE'
+    parameters: []
+  response:
+    strategy: string
+    value: 'This is foo-boo DELETE API response.'

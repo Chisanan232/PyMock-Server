@@ -1,0 +1,8 @@
+url: '/foo-boo'
+http:
+  request:
+    method: 'PUT'
+    parameters: []
+  response:
+    strategy: string
+    value: 'This is foo-boo PUT API response.'

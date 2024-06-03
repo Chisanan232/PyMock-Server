@@ -1,0 +1,8 @@
+url: '/foo-boo'
+http:
+  request:
+    method: 'PATCH'
+    parameters: []
+  response:
+    strategy: string
+    value: 'This is foo-boo PATCH API response.'
