@@ -45,13 +45,14 @@ from pymock_api.model import (
     SubcmdPullArguments,
     SubcmdRunArguments,
     SubcmdSampleArguments,
-    deserialize_swagger_api_config,
+    deserialize_openapi_doc_config,
 )
 from pymock_api.model.enums import Format, ResponseStrategy, SampleType
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (
     _API_Doc_Source,
+    _API_Doc_Source_File,
     _Base_URL,
     _Bind_Host_And_Port,
     _Cmd_Arg_API_Path,
@@ -854,6 +855,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
             subparser_name=_Test_SubCommand_Pull,
             request_with_https=_Test_Request_With_Https,
             source=_API_Doc_Source,
+            source_file=_API_Doc_Source_File,
             config_path=_Test_Config,
             base_url=base_url,
             base_file_path=_Default_Base_File_Path,
@@ -884,7 +886,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
                 mock_swagger_request.assert_called_once_with(method="GET", url=f"http://{_API_Doc_Source}")
 
                 # Run one core logic of target function
-                under_test_api_config = deserialize_swagger_api_config(swagger_json_data).to_api_config(
+                under_test_api_config = deserialize_openapi_doc_config(swagger_json_data).to_api_config(
                     mock_parser_arg.base_url
                 )
                 under_test_api_config.set_template_in_config = False
@@ -946,6 +948,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         args_namespace.subcommand = SubCommand.Pull
         args_namespace.request_with_https = _Test_Request_With_Https
         args_namespace.source = _API_Doc_Source
+        args_namespace.source_file = _API_Doc_Source_File
         args_namespace.base_url = _Base_URL
         args_namespace.base_file_path = _Default_Base_File_Path
         args_namespace.config_path = _Test_Config

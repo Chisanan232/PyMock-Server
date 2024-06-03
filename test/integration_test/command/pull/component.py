@@ -8,7 +8,7 @@ from pymock_api.command.options import SubCommand
 from pymock_api.command.pull.component import SubCmdPullComponent
 from pymock_api.model import (
     SubcmdPullArguments,
-    deserialize_swagger_api_config,
+    deserialize_openapi_doc_config,
     load_config,
 )
 from pymock_api.model.api_config import DivideStrategy, TemplateConfig
@@ -17,7 +17,7 @@ from pymock_api.model.openapi._schema_parser import (
     set_component_definition,
 )
 
-from ...._values import _API_Doc_Source, _Test_Request_With_Https
+from ...._values import _API_Doc_Source, _API_Doc_Source_File, _Test_Request_With_Https
 from ._test_case import (
     PullOpenAPIDocConfigAsDividingConfigTestCaseFactory,
     SubCmdPullTestArgs,
@@ -113,6 +113,7 @@ class TestSubCmdPullComponent:
                 subparser_name=SubCommand.Pull,
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
+                source_file=_API_Doc_Source_File,
                 config_path="./api.yaml",
                 base_url="",
                 include_template_config=False,
@@ -127,6 +128,7 @@ class TestSubCmdPullComponent:
                 subparser_name=SubCommand.Pull,
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
+                source_file=_API_Doc_Source_File,
                 config_path="./test_dir/api.yaml",
                 base_url="",
                 include_template_config=False,
@@ -143,6 +145,7 @@ class TestSubCmdPullComponent:
                 subparser_name=SubCommand.Pull,
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
+                source_file=_API_Doc_Source_File,
                 config_path="./api.yaml",
                 base_url="",
                 include_template_config=True,
@@ -157,6 +160,7 @@ class TestSubCmdPullComponent:
                 subparser_name=SubCommand.Pull,
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
+                source_file=_API_Doc_Source_File,
                 config_path="./test_dir/api.yaml",
                 base_url="",
                 include_template_config=True,
@@ -173,6 +177,7 @@ class TestSubCmdPullComponent:
                 subparser_name=SubCommand.Pull,
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
+                source_file=_API_Doc_Source_File,
                 config_path="./api.yaml",
                 base_url="",
                 include_template_config=False,
@@ -187,6 +192,7 @@ class TestSubCmdPullComponent:
                 subparser_name=SubCommand.Pull,
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
+                source_file=_API_Doc_Source_File,
                 config_path="./test_dir/api.yaml",
                 base_url="",
                 include_template_config=False,
@@ -203,6 +209,7 @@ class TestSubCmdPullComponent:
                 subparser_name=SubCommand.Pull,
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
+                source_file=_API_Doc_Source_File,
                 config_path="./api.yaml",
                 base_url="",
                 include_template_config=True,
@@ -217,6 +224,7 @@ class TestSubCmdPullComponent:
                 subparser_name=SubCommand.Pull,
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
+                source_file=_API_Doc_Source_File,
                 config_path="./test_dir/api.yaml",
                 base_url="",
                 include_template_config=True,
@@ -231,9 +239,9 @@ class TestSubCmdPullComponent:
     )
     def test_command_line_argument_setting(self, sub_cmd: SubCmdPullComponent, cmd_args: SubcmdPullArguments):
         # Mock function and its return value if it needs
-        with patch.object(sub_cmd, "_get_swagger_config") as mock_get_swagger_config:
-            openapi_doc_config = deserialize_swagger_api_config(data=_OpenAPI_Doc_Config)
-            mock_get_swagger_config.return_value = openapi_doc_config
+        with patch.object(sub_cmd, "_get_openapi_doc_config") as mock_get_openapi_doc_config:
+            openapi_doc_config = deserialize_openapi_doc_config(data=_OpenAPI_Doc_Config)
+            mock_get_openapi_doc_config.return_value = openapi_doc_config
             with patch.object(sub_cmd, "_dry_run_final_process") as mock_dry_run_final_process:
                 with patch.object(sub_cmd, "_final_process") as mock_final_process:
                     # Run target function
@@ -241,8 +249,10 @@ class TestSubCmdPullComponent:
 
                     # Verify
                     http_proto = "https" if cmd_args.request_with_https else "http"
-                    swagger_api_doc_url = f"{http_proto}://{cmd_args.source}"
-                    mock_get_swagger_config.assert_called_once_with(swagger_url=swagger_api_doc_url)
+                    openapi_doc_url = f"{http_proto}://{cmd_args.source}"
+                    mock_get_openapi_doc_config.assert_called_once_with(
+                        url=openapi_doc_url, config_file=cmd_args.source_file
+                    )
 
                     api_config = openapi_doc_config.to_api_config(base_url=cmd_args.base_url)
                     # Some settings
@@ -289,6 +299,7 @@ class TestSubCmdPullComponent:
             subparser_name=SubCommand.Pull,
             request_with_https=_Test_Request_With_Https,
             source=_API_Doc_Source,
+            source_file=_API_Doc_Source_File,
             config_path=ut_config_path,
             base_url=cmd_arg.base_url,
             include_template_config=cmd_arg.include_template_config,

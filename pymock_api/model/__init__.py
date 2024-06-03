@@ -104,7 +104,7 @@ class deserialize_args:
         return DeserializeParsedArgs.subcommand_pull(args)
 
 
-def deserialize_swagger_api_config(data: dict) -> OpenAPIDocumentConfig:
+def deserialize_openapi_doc_config(data: dict) -> OpenAPIDocumentConfig:
     return OpenAPIDocumentConfig().deserialize(data=data)
 
 

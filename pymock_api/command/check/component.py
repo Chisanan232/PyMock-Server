@@ -8,7 +8,7 @@ from ..._utils.api_client import URLLibHTTPClient
 from ...model import (
     OpenAPIDocumentConfig,
     SubcmdCheckArguments,
-    deserialize_swagger_api_config,
+    deserialize_openapi_doc_config,
     load_config,
 )
 from ...model.api_config.apis import APIParameter as MockedAPIParameter
@@ -219,7 +219,7 @@ class SwaggerDiffChecking(_BaseChecking):
 
     def _get_swagger_config(self, swagger_url: str) -> OpenAPIDocumentConfig:
         swagger_api_doc: dict = self._api_client.request(method="GET", url=swagger_url)
-        return deserialize_swagger_api_config(data=swagger_api_doc)
+        return deserialize_openapi_doc_config(data=swagger_api_doc)
 
     def _chk_api_params_error_log(
         self,
