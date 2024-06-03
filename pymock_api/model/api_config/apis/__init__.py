@@ -409,11 +409,13 @@ class MockAPI(_GeneralTemplatableConfig, _Checkable):
             accept_empty=False,
         ):
             return False
-        valid_url = re.findall(r"\/[\w,\-,\_]{1,32}", self.url)
+        valid_url = re.findall(r"\/[\w,\-,\_,\{,\}]{1,32}", self.url)
         url_copy = copy.copy(self.url)
         if not valid_url:
+            print("URL is invalid.")
             return False
         if url_copy.replace("".join(valid_url), ""):
+            print("URL is invalid.")
             return False
 
         assert self.http is not None
