@@ -1,0 +1,8 @@
+url: '/foo-boo'
+http:
+  request:
+    method: 'HEAD'
+    parameters: []
+  response:
+    strategy: string
+    value: 'This is foo-boo HEAD API response.'

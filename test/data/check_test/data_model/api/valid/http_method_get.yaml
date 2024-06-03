@@ -1,0 +1,8 @@
+url: '/foo-boo'
+http:
+  request:
+    method: 'GET'
+    parameters: []
+  response:
+    strategy: string
+    value: 'This is foo-boo GET API response.'
