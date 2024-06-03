@@ -14,6 +14,17 @@ class ParserArguments:
 
 
 @dataclass(frozen=True)
+class _BaseSubCmdArgumentsSavingConfig(ParserArguments):
+    include_template_config: bool
+    base_file_path: str
+    dry_run: bool
+    divide_api: bool
+    divide_http: bool
+    divide_http_request: bool
+    divide_http_response: bool
+
+
+@dataclass(frozen=True)
 class SubcmdRunArguments(ParserArguments):
     config: str
     app_type: str
@@ -70,19 +81,12 @@ class SubcmdSampleArguments(ParserArguments):
 
 
 @dataclass(frozen=True)
-class SubcmdPullArguments(ParserArguments):
+class SubcmdPullArguments(_BaseSubCmdArgumentsSavingConfig):
     request_with_https: bool
     source: str
     source_file: str
     config_path: str
     base_url: str
-    include_template_config: bool
-    base_file_path: str
-    dry_run: bool
-    divide_api: bool
-    divide_http: bool
-    divide_http_request: bool
-    divide_http_response: bool
 
 
 class DeserializeParsedArgs:
