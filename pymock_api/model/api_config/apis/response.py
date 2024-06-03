@@ -210,8 +210,10 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
         elif self.strategy is ResponseStrategy.FILE:
             self.path = data.get("path", None)
         elif self.strategy is ResponseStrategy.OBJECT:
-            properties = [_deserialize_response_property(prop) for prop in (data.get("properties", []) or [])]
-            self.properties = properties if properties else None  # type: ignore[assignment]
+            properties = data.get("properties", None)
+            if properties is not None:
+                properties = [_deserialize_response_property(prop) for prop in (properties or [])]
+            self.properties = properties
         else:
             raise NotImplementedError
         return self
@@ -289,3 +291,4 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
                 assert isinstance(v, ResponseProperty)
                 v.stop_if_fail = self.stop_if_fail
                 return v.is_work()
+            return True
