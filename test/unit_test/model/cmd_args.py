@@ -89,6 +89,13 @@ class TestDeserialize:
             "parameters": ['{"name": "arg1", "required": false, "default": "val1", "type": "str"}'],
             "response_strategy": _Test_Response_Strategy,
             "response_value": [_Test_HTTP_Resp],
+            "base_file_path": _Default_Base_File_Path,
+            "include_template_config": _Default_Include_Template_Config,
+            "dry_run": _Test_Dry_Run,
+            "divide_api": _Test_Divide_Api,
+            "divide_http": _Test_Divide_Http,
+            "divide_http_request": _Test_Divide_Http_Request,
+            "divide_http_response": _Test_Divide_Http_Response,
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_add(namespace)
@@ -99,6 +106,13 @@ class TestDeserialize:
         assert arguments.http_method == _Test_HTTP_Method
         assert arguments.parameters == [{"name": "arg1", "required": False, "default": "val1", "type": "str"}]
         assert arguments.response_value == [_Test_HTTP_Resp]
+        assert arguments.base_file_path == _Default_Base_File_Path
+        assert arguments.include_template_config == _Default_Include_Template_Config
+        assert arguments.dry_run == _Test_Dry_Run
+        assert arguments.divide_api == _Test_Divide_Api
+        assert arguments.divide_http == _Test_Divide_Http
+        assert arguments.divide_http_request == _Test_Divide_Http_Request
+        assert arguments.divide_http_response == _Test_Divide_Http_Response
 
     @pytest.mark.parametrize(
         (

@@ -34,7 +34,7 @@ class SubcmdRunArguments(ParserArguments):
 
 
 @dataclass(frozen=True)
-class SubcmdAddArguments(ParserArguments):
+class SubcmdAddArguments(_BaseSubCmdArgumentsSavingConfig):
     api_config_path: str
     api_path: str
     http_method: str
@@ -123,6 +123,14 @@ class DeserializeParsedArgs:
             parameters=args.parameters,
             response_strategy=args.response_strategy,
             response_value=args.response_value,
+            # Common arguments about saving configuration
+            include_template_config=args.include_template_config,
+            base_file_path=args.base_file_path,
+            dry_run=args.dry_run,
+            divide_api=args.divide_api,
+            divide_http=args.divide_http,
+            divide_http_request=args.divide_http_request,
+            divide_http_response=args.divide_http_response,
         )
 
     @classmethod
@@ -171,6 +179,7 @@ class DeserializeParsedArgs:
             source_file=args.source_file,
             config_path=args.config_path,
             base_url=args.base_url,
+            # Common arguments about saving configuration
             include_template_config=args.include_template_config,
             base_file_path=args.base_file_path,
             dry_run=args.dry_run,

@@ -120,6 +120,13 @@ def _given_parser_args(
             parameters=[],
             response_strategy=ResponseStrategy.STRING,
             response_value=_Test_HTTP_Resp,
+            include_template_config=False,
+            base_file_path="./",
+            dry_run=False,
+            divide_api=False,
+            divide_http=False,
+            divide_http_request=False,
+            divide_http_response=False,
         )
     elif subcommand == "check":
         return SubcmdCheckArguments(
@@ -495,6 +502,13 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
             parameters=params,
             response_strategy=response_strategy,
             response_value=response_value,
+            include_template_config=False,
+            base_file_path="./",
+            dry_run=False,
+            divide_api=False,
+            divide_http=False,
+            divide_http_request=False,
+            divide_http_response=False,
         )
 
         with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
@@ -512,6 +526,13 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         args_namespace.parameters = ""
         args_namespace.response_strategy = _Test_Response_Strategy
         args_namespace.response_value = _Test_HTTP_Resp
+        args_namespace.include_template_config = False
+        args_namespace.base_file_path = "./"
+        args_namespace.dry_run = False
+        args_namespace.divide_api = False
+        args_namespace.divide_http = False
+        args_namespace.divide_http_request = False
+        args_namespace.divide_http_response = False
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:

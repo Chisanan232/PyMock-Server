@@ -40,6 +40,13 @@ class TestSubCmdAddComponent:
             parameters=[],
             response_strategy=_Test_Response_Strategy,
             response_value=[""],
+            include_template_config=False,
+            base_file_path="./",
+            dry_run=False,
+            divide_api=False,
+            divide_http=False,
+            divide_http_request=False,
+            divide_http_response=False,
         )
 
         # Run target function to test
@@ -74,6 +81,13 @@ class TestSubCmdAddComponent:
                         parameters=[],
                         response_strategy=_Test_Response_Strategy,
                         response_value=["OK"],
+                        include_template_config=False,
+                        base_file_path="./",
+                        dry_run=False,
+                        divide_api=False,
+                        divide_http=False,
+                        divide_http_request=False,
+                        divide_http_response=False,
                     )
                     component._get_api_config(args)
 
@@ -131,6 +145,13 @@ class TestSubCmdAddComponent:
                     parameters=parameters,
                     response_strategy=response_strategy,
                     response_value=response_value,
+                    include_template_config=False,
+                    base_file_path="./",
+                    dry_run=False,
+                    divide_api=False,
+                    divide_http=False,
+                    divide_http_request=False,
+                    divide_http_response=False,
                 )
                 component.process(args)
 
@@ -197,6 +218,13 @@ class TestSubCmdAddComponent:
                     parameters=parameters,
                     response_strategy=response_strategy,
                     response_value=response_value,
+                    include_template_config=False,
+                    base_file_path="./",
+                    dry_run=False,
+                    divide_api=False,
+                    divide_http=False,
+                    divide_http_request=False,
+                    divide_http_response=False,
                 )
                 with pytest.raises(SystemExit) as exc_info:
                     component.process(args)
