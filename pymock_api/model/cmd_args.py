@@ -15,6 +15,7 @@ class ParserArguments:
 
 @dataclass(frozen=True)
 class _BaseSubCmdArgumentsSavingConfig(ParserArguments):
+    config_path: str
     include_template_config: bool
     base_file_path: str
     dry_run: bool
@@ -35,7 +36,6 @@ class SubcmdRunArguments(ParserArguments):
 
 @dataclass(frozen=True)
 class SubcmdAddArguments(_BaseSubCmdArgumentsSavingConfig):
-    config_path: str
     api_path: str
     http_method: str
     parameters: List[dict]
@@ -85,7 +85,6 @@ class SubcmdPullArguments(_BaseSubCmdArgumentsSavingConfig):
     request_with_https: bool
     source: str
     source_file: str
-    config_path: str
     base_url: str
 
 
