@@ -12,7 +12,6 @@ from ..component import BaseSubCmdComponent
 class SubCmdPullComponent(BaseSubCmdComponent):
     def __init__(self):
         self._api_client = URLLibHTTPClient()
-        # self._file = YAML()
 
         self._saving_config_component = SavingConfigComponent()
 
