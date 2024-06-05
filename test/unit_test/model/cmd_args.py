@@ -83,7 +83,7 @@ class TestDeserialize:
     def test_parser_subcommand_add_arguments(self, deserialize: Type[DeserializeParsedArgs]):
         namespace_args = {
             "subcommand": _Test_SubCommand_Add,
-            "api_config_path": _Sample_File_Path,
+            "config_path": _Sample_File_Path,
             "api_path": _Test_URL,
             "http_method": _Test_HTTP_Method,
             "parameters": ['{"name": "arg1", "required": false, "default": "val1", "type": "str"}'],
@@ -101,7 +101,7 @@ class TestDeserialize:
         arguments = deserialize.subcommand_add(namespace)
         assert isinstance(arguments, SubcmdAddArguments)
         assert arguments.subparser_name == _Test_SubCommand_Add
-        assert arguments.api_config_path == _Sample_File_Path
+        assert arguments.config_path == _Sample_File_Path
         assert arguments.api_path == _Test_URL
         assert arguments.http_method == _Test_HTTP_Method
         assert arguments.parameters == [{"name": "arg1", "required": False, "default": "val1", "type": "str"}]

@@ -114,7 +114,7 @@ def _given_parser_args(
     elif subcommand == "add":
         return SubcmdAddArguments(
             subparser_name=subcommand,
-            api_config_path=_Sample_File_Path,
+            config_path=_Sample_File_Path,
             api_path=_Test_URL,
             http_method=_Test_HTTP_Method,
             parameters=[],
@@ -496,7 +496,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         FakeYAML.write = MagicMock()
         mock_parser_arg = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
-            api_config_path=_Test_Config,
+            config_path=_Test_Config,
             api_path=url_path,
             http_method=method,
             parameters=params,
@@ -520,7 +520,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
         args_namespace.subcommand = SubCommand.Add
-        args_namespace.api_config_path = ""
+        args_namespace.config_path = ""
         args_namespace.api_path = _Test_URL
         args_namespace.http_method = _Test_HTTP_Method
         args_namespace.parameters = ""

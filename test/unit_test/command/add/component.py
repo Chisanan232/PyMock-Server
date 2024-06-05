@@ -34,7 +34,7 @@ class TestSubCmdAddComponent:
 
         invalid_args = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
-            api_config_path="",
+            config_path="",
             api_path="",
             http_method="",
             parameters=[],
@@ -75,7 +75,7 @@ class TestSubCmdAddComponent:
                 with patch("os.path.exists", return_value=file_exist) as mock_path_exist:
                     args = SubcmdAddArguments(
                         subparser_name=_Test_SubCommand_Add,
-                        api_config_path=_Test_Config,
+                        config_path=_Test_Config,
                         api_path=_Test_URL,
                         http_method="GET",
                         parameters=[],
@@ -139,7 +139,7 @@ class TestSubCmdAddComponent:
             with patch("os.path.exists", return_value=False) as mock_path_exist:
                 args = SubcmdAddArguments(
                     subparser_name=_Test_SubCommand_Add,
-                    api_config_path=_Test_Config,
+                    config_path=_Test_Config,
                     api_path=_Test_URL,
                     http_method=http_method,
                     parameters=parameters,
@@ -212,7 +212,7 @@ class TestSubCmdAddComponent:
             with patch("os.path.exists", return_value=False) as mock_path_exist:
                 args = SubcmdAddArguments(
                     subparser_name=_Test_SubCommand_Add,
-                    api_config_path=_Test_Config,
+                    config_path=_Test_Config,
                     api_path=url_path,
                     http_method=http_method,
                     parameters=parameters,

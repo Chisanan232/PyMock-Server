@@ -35,7 +35,7 @@ class SubcmdRunArguments(ParserArguments):
 
 @dataclass(frozen=True)
 class SubcmdAddArguments(_BaseSubCmdArgumentsSavingConfig):
-    api_config_path: str
+    config_path: str
     api_path: str
     http_method: str
     parameters: List[dict]
@@ -49,7 +49,7 @@ class SubcmdAddArguments(_BaseSubCmdArgumentsSavingConfig):
                 return s != ""
             return False
 
-        string_chksum = list(map(_string_is_not_empty, [self.api_config_path, self.api_path]))
+        string_chksum = list(map(_string_is_not_empty, [self.config_path, self.api_path]))
         return False not in string_chksum
 
 
@@ -117,7 +117,7 @@ class DeserializeParsedArgs:
             )
         return SubcmdAddArguments(
             subparser_name=args.subcommand,
-            api_config_path=args.api_config_path,
+            config_path=args.config_path,
             api_path=args.api_path,
             http_method=args.http_method,
             parameters=args.parameters,

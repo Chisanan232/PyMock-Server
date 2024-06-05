@@ -400,8 +400,8 @@ class DemoSampleType(BaseSubCmdSampleOption):
 
 
 class APIConfigPath(BaseSubCmdAddOption):
-    cli_option: str = "--api-config-path"
-    name: str = "api_config_path"
+    cli_option: str = "--config-path"
+    name: str = "config_path"
     help_description: str = "The configuration file path."
     option_value_type: type = str
     default_value: str = "api.yaml"
