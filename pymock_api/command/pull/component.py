@@ -35,10 +35,7 @@ class SubCmdPullComponent(BaseSubCmdComponent):
         serialized_api_config = self._saving_config_component.serialize_api_config_with_cmd_args(
             cmd_args=args, api_config=api_config
         )
-        if args.dry_run:
-            self._dry_run_final_process(serialized_api_config)
-        else:
-            self._final_process(args, serialized_api_config)
+        self._save_api_config(args, serialized_api_config)
 
     def _get_openapi_doc_config(self, url: str = "", config_file: Union[str, Path] = "") -> OpenAPIDocumentConfig:
         openapi_doc_config: dict = {}
@@ -51,6 +48,12 @@ class SubCmdPullComponent(BaseSubCmdComponent):
                 "It must has host URL or configuration file path to get the OpenAPI documentation details."
             )
         return deserialize_openapi_doc_config(data=openapi_doc_config)
+
+    def _save_api_config(self, cmd_args: SubcmdPullArguments, serialized_api_config: Optional[Dict[str, Any]]) -> None:
+        if cmd_args.dry_run:
+            self._dry_run_final_process(serialized_api_config)
+        else:
+            self._final_process(cmd_args, serialized_api_config)
 
     def _final_process(self, cmd_args: SubcmdPullArguments, serialized_api_config: Optional[Dict[str, Any]]) -> None:
         print("Write the API configuration to file ...")
