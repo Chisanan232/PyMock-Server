@@ -1,11 +1,15 @@
 from typing import Any, Dict, Optional
 
+from ..._utils import YAML
 from ...model.api_config import APIConfig
 from ...model.api_config.template._divide import DivideStrategy
 from ...model.cmd_args import _BaseSubCmdArgumentsSavingConfig
 
 
 class SavingConfigComponent:
+
+    def __init__(self):
+        self._file = YAML()
 
     def serialize_api_config_with_cmd_args(
         self, cmd_args: _BaseSubCmdArgumentsSavingConfig, api_config: APIConfig
@@ -26,3 +30,22 @@ class SavingConfigComponent:
         )
 
         return api_config.serialize()
+
+    def save_api_config(
+        self, cmd_args: _BaseSubCmdArgumentsSavingConfig, serialized_api_config: Optional[Dict[str, Any]]
+    ) -> None:
+        if cmd_args.dry_run:
+            self._dry_run_final_process(serialized_api_config)
+        else:
+            self._final_process(cmd_args, serialized_api_config)
+
+    def _final_process(
+        self, cmd_args: _BaseSubCmdArgumentsSavingConfig, serialized_api_config: Optional[Dict[str, Any]]
+    ) -> None:
+        print("Write the API configuration to file ...")
+        self._file.write(path=cmd_args.config_path, config=serialized_api_config, mode="w+")
+        print(f"All configuration has been writen in file '{cmd_args.config_path}'.")
+
+    def _dry_run_final_process(self, serialized_api_config: Optional[Dict[str, Any]]) -> None:
+        print("The result serialized API configuration:\n")
+        print(serialized_api_config)

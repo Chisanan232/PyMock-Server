@@ -242,8 +242,12 @@ class TestSubCmdPullComponent:
         with patch.object(sub_cmd, "_get_openapi_doc_config") as mock_get_openapi_doc_config:
             openapi_doc_config = deserialize_openapi_doc_config(data=_OpenAPI_Doc_Config)
             mock_get_openapi_doc_config.return_value = openapi_doc_config
-            with patch.object(sub_cmd, "_dry_run_final_process") as mock_dry_run_final_process:
-                with patch.object(sub_cmd, "_final_process") as mock_final_process:
+            with patch(
+                "pymock_api.command._common.component.SavingConfigComponent._dry_run_final_process"
+            ) as mock_dry_run_final_process:
+                with patch(
+                    "pymock_api.command._common.component.SavingConfigComponent._final_process"
+                ) as mock_final_process:
                     # Run target function
                     sub_cmd.process(args=cmd_args)
 

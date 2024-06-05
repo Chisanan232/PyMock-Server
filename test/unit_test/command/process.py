@@ -895,7 +895,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
             expected_config_data = yaml_load(file, Loader=Loader)
 
         set_component_definition(OpenAPIV2SchemaParser(data=swagger_json_data))
-        with patch("pymock_api.command.pull.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+        with patch("pymock_api.command._common.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
             with patch(
                 "pymock_api.command.pull.component.URLLibHTTPClient.request", return_value=swagger_json_data
             ) as mock_swagger_request:
