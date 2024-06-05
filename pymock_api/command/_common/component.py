@@ -11,6 +11,10 @@ class SavingConfigComponent:
     def __init__(self):
         self._file = YAML()
 
+    def serialize_and_save(self, cmd_args: _BaseSubCmdArgumentsSavingConfig, api_config: APIConfig) -> None:
+        serialized_api_config = self.serialize_api_config_with_cmd_args(cmd_args=cmd_args, api_config=api_config)
+        self.save_api_config(cmd_args, serialized_api_config)
+
     def serialize_api_config_with_cmd_args(
         self, cmd_args: _BaseSubCmdArgumentsSavingConfig, api_config: APIConfig
     ) -> Optional[Dict[str, Any]]:

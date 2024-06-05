@@ -32,10 +32,7 @@ class SubCmdPullComponent(BaseSubCmdComponent):
         print(f"Try to get OpenAPI API (aka Swagger API before) documentation content from {source_info_log}.")
         openapi_doc_config = self._get_openapi_doc_config(url=openapi_doc_url, config_file=openapi_doc_config_file)
         api_config = openapi_doc_config.to_api_config(base_url=args.base_url)
-        serialized_api_config = self._saving_config_component.serialize_api_config_with_cmd_args(
-            cmd_args=args, api_config=api_config
-        )
-        self._saving_config_component.save_api_config(args, serialized_api_config)
+        self._saving_config_component.serialize_and_save(cmd_args=args, api_config=api_config)
 
     def _get_openapi_doc_config(self, url: str = "", config_file: Union[str, Path] = "") -> OpenAPIDocumentConfig:
         openapi_doc_config: dict = {}
