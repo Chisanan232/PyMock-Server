@@ -1,0 +1,11 @@
+strategy: object
+properties:
+  - name: errorMessage
+    required: True
+    type: str
+  - name: responseCode
+    required: True
+    type: str
+  - name: responseData
+    required: False
+    type: list

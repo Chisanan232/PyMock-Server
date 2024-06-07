@@ -1,0 +1,15 @@
+url: '/test-url'
+tag: test-url
+http:
+  request:
+    method: 'GET'
+    parameters:
+      - name: 'arg1'
+        required: false
+        type: str
+  response:
+    strategy: object
+    properties:
+      - name: responseCode
+        required: true
+        type: str
