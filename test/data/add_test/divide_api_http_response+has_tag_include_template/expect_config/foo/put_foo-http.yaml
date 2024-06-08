@@ -1,0 +1,13 @@
+request:
+  method: 'PUT'
+  parameters:
+    - name: 'balances'
+      required: true
+      type: list
+      items:
+        - required: true
+          type: int
+          name: "value"
+        - required: true
+          type: int
+          name: "id"

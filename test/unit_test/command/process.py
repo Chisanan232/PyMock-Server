@@ -114,12 +114,19 @@ def _given_parser_args(
     elif subcommand == "add":
         return SubcmdAddArguments(
             subparser_name=subcommand,
-            api_config_path=_Sample_File_Path,
+            config_path=_Sample_File_Path,
             api_path=_Test_URL,
             http_method=_Test_HTTP_Method,
             parameters=[],
             response_strategy=ResponseStrategy.STRING,
             response_value=_Test_HTTP_Resp,
+            include_template_config=False,
+            base_file_path="./",
+            dry_run=False,
+            divide_api=False,
+            divide_http=False,
+            divide_http_request=False,
+            divide_http_response=False,
         )
     elif subcommand == "check":
         return SubcmdCheckArguments(
@@ -489,12 +496,19 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         FakeYAML.write = MagicMock()
         mock_parser_arg = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
-            api_config_path=_Test_Config,
+            config_path=_Test_Config,
             api_path=url_path,
             http_method=method,
             parameters=params,
             response_strategy=response_strategy,
             response_value=response_value,
+            include_template_config=False,
+            base_file_path="./",
+            dry_run=False,
+            divide_api=False,
+            divide_http=False,
+            divide_http_request=False,
+            divide_http_response=False,
         )
 
         with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
@@ -506,12 +520,19 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
         args_namespace.subcommand = SubCommand.Add
-        args_namespace.api_config_path = ""
+        args_namespace.config_path = ""
         args_namespace.api_path = _Test_URL
         args_namespace.http_method = _Test_HTTP_Method
         args_namespace.parameters = ""
         args_namespace.response_strategy = _Test_Response_Strategy
         args_namespace.response_value = _Test_HTTP_Resp
+        args_namespace.include_template_config = False
+        args_namespace.base_file_path = "./"
+        args_namespace.dry_run = False
+        args_namespace.divide_api = False
+        args_namespace.divide_http = False
+        args_namespace.divide_http_request = False
+        args_namespace.divide_http_response = False
         return args_namespace
 
     def _given_subcmd(self) -> Optional[str]:
@@ -874,7 +895,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
             expected_config_data = yaml_load(file, Loader=Loader)
 
         set_component_definition(OpenAPIV2SchemaParser(data=swagger_json_data))
-        with patch("pymock_api.command.pull.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+        with patch("pymock_api.command._common.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
             with patch(
                 "pymock_api.command.pull.component.URLLibHTTPClient.request", return_value=swagger_json_data
             ) as mock_swagger_request:

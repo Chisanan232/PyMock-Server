@@ -83,22 +83,36 @@ class TestDeserialize:
     def test_parser_subcommand_add_arguments(self, deserialize: Type[DeserializeParsedArgs]):
         namespace_args = {
             "subcommand": _Test_SubCommand_Add,
-            "api_config_path": _Sample_File_Path,
+            "config_path": _Sample_File_Path,
             "api_path": _Test_URL,
             "http_method": _Test_HTTP_Method,
             "parameters": ['{"name": "arg1", "required": false, "default": "val1", "type": "str"}'],
             "response_strategy": _Test_Response_Strategy,
             "response_value": [_Test_HTTP_Resp],
+            "base_file_path": _Default_Base_File_Path,
+            "include_template_config": _Default_Include_Template_Config,
+            "dry_run": _Test_Dry_Run,
+            "divide_api": _Test_Divide_Api,
+            "divide_http": _Test_Divide_Http,
+            "divide_http_request": _Test_Divide_Http_Request,
+            "divide_http_response": _Test_Divide_Http_Response,
         }
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_add(namespace)
         assert isinstance(arguments, SubcmdAddArguments)
         assert arguments.subparser_name == _Test_SubCommand_Add
-        assert arguments.api_config_path == _Sample_File_Path
+        assert arguments.config_path == _Sample_File_Path
         assert arguments.api_path == _Test_URL
         assert arguments.http_method == _Test_HTTP_Method
         assert arguments.parameters == [{"name": "arg1", "required": False, "default": "val1", "type": "str"}]
         assert arguments.response_value == [_Test_HTTP_Resp]
+        assert arguments.base_file_path == _Default_Base_File_Path
+        assert arguments.include_template_config == _Default_Include_Template_Config
+        assert arguments.dry_run == _Test_Dry_Run
+        assert arguments.divide_api == _Test_Divide_Api
+        assert arguments.divide_http == _Test_Divide_Http
+        assert arguments.divide_http_request == _Test_Divide_Http_Request
+        assert arguments.divide_http_response == _Test_Divide_Http_Response
 
     @pytest.mark.parametrize(
         (

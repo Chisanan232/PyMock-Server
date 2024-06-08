@@ -400,8 +400,8 @@ class DemoSampleType(BaseSubCmdSampleOption):
 
 
 class APIConfigPath(BaseSubCmdAddOption):
-    cli_option: str = "--api-config-path"
-    name: str = "api_config_path"
+    cli_option: str = "--config-path"
+    name: str = "config_path"
     help_description: str = "The configuration file path."
     option_value_type: type = str
     default_value: str = "api.yaml"
@@ -446,6 +446,80 @@ class AddResponse(BaseSubCmdAddOption):
     action: str = "append"
     option_value_type: type = str
     default_value: str = "OK."
+
+
+class AddBaseFilePath(BaseSubCmdAddOption):
+    cli_option: str = "--base-file-path"
+    name: str = "base_file_path"
+    help_description: str = (
+        "The path which is the basic value of all configuration file paths. In the other "
+        "words, it would automatically add the base path in front of all the other file "
+        "paths in configuration."
+    )
+
+
+class AddIncludeTemplateConfig(BaseSubCmdAddOption):
+    cli_option: str = "--include-template-config"
+    name: str = "include_template_config"
+    help_description: str = "If it's true, it would also configure *template* section setting in result configuration."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
+class AddDryRun(BaseSubCmdAddOption):
+    cli_option: str = "--dry-run"
+    name: str = "dry_run"
+    help_description: str = "If it's true, it would run pulling process without saving result configuration."
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
+class AddDivideApi(BaseSubCmdAddOption):
+    cli_option: str = "--divide-api"
+    name: str = "divide_api"
+    help_description: str = (
+        "If it's true, it would divide the setting values of mocked API section " "(mocked_apis.apis.<mock API>)."
+    )
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
+class AddDivideHttp(BaseSubCmdAddOption):
+    cli_option: str = "--divide-http"
+    name: str = "divide_http"
+    help_description: str = (
+        "If it's true, it would divide the setting values of HTTP part section " "(mocked_apis.apis.<mock API>.http)."
+    )
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
+class AddDivideHttpRequest(BaseSubCmdAddOption):
+    cli_option: str = "--divide-http-request"
+    name: str = "divide_http_request"
+    help_description: str = (
+        "If it's true, it would divide the setting values of HTTP request part section "
+        "(mocked_apis.apis.<mock API>.http.request)."
+    )
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
+
+
+class AddDivideHttpResponse(BaseSubCmdAddOption):
+    cli_option: str = "--divide-http-response"
+    name: str = "divide_http_response"
+    help_description: str = (
+        "If it's true, it would divide the setting values of HTTP response part section "
+        "(mocked_apis.apis.<mock API>.http.response)."
+    )
+    action: str = "store_true"
+    option_value_type: Optional[type] = None
+    default_value: bool = False
 
 
 class ConfigPath(BaseSubCmdCheckOption):

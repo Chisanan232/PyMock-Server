@@ -1,0 +1,28 @@
+url: '/foo'
+tag: foo
+http:
+  request:
+    method: 'PUT'
+    parameters:
+      - name: 'balances'
+        required: true
+        type: list
+        items:
+          - required: true
+            type: int
+            name: "value"
+          - required: true
+            type: int
+            name: "id"
+  response:
+    strategy: object
+    properties:
+      - name: errorMessage
+        required: True
+        type: str
+      - name: responseCode
+        required: True
+        type: str
+      - name: responseData
+        required: False
+        type: list

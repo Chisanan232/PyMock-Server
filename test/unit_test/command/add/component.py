@@ -34,12 +34,19 @@ class TestSubCmdAddComponent:
 
         invalid_args = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
-            api_config_path="",
+            config_path="",
             api_path="",
             http_method="",
             parameters=[],
             response_strategy=_Test_Response_Strategy,
             response_value=[""],
+            include_template_config=False,
+            base_file_path="./",
+            dry_run=False,
+            divide_api=False,
+            divide_http=False,
+            divide_http_request=False,
+            divide_http_response=False,
         )
 
         # Run target function to test
@@ -68,12 +75,19 @@ class TestSubCmdAddComponent:
                 with patch("os.path.exists", return_value=file_exist) as mock_path_exist:
                     args = SubcmdAddArguments(
                         subparser_name=_Test_SubCommand_Add,
-                        api_config_path=_Test_Config,
+                        config_path=_Test_Config,
                         api_path=_Test_URL,
                         http_method="GET",
                         parameters=[],
                         response_strategy=_Test_Response_Strategy,
                         response_value=["OK"],
+                        include_template_config=False,
+                        base_file_path="./",
+                        dry_run=False,
+                        divide_api=False,
+                        divide_http=False,
+                        divide_http_request=False,
+                        divide_http_response=False,
                     )
                     component._get_api_config(args)
 
@@ -125,12 +139,19 @@ class TestSubCmdAddComponent:
             with patch("os.path.exists", return_value=False) as mock_path_exist:
                 args = SubcmdAddArguments(
                     subparser_name=_Test_SubCommand_Add,
-                    api_config_path=_Test_Config,
+                    config_path=_Test_Config,
                     api_path=_Test_URL,
                     http_method=http_method,
                     parameters=parameters,
                     response_strategy=response_strategy,
                     response_value=response_value,
+                    include_template_config=False,
+                    base_file_path="./",
+                    dry_run=False,
+                    divide_api=False,
+                    divide_http=False,
+                    divide_http_request=False,
+                    divide_http_response=False,
                 )
                 component.process(args)
 
@@ -191,12 +212,19 @@ class TestSubCmdAddComponent:
             with patch("os.path.exists", return_value=False) as mock_path_exist:
                 args = SubcmdAddArguments(
                     subparser_name=_Test_SubCommand_Add,
-                    api_config_path=_Test_Config,
+                    config_path=_Test_Config,
                     api_path=url_path,
                     http_method=http_method,
                     parameters=parameters,
                     response_strategy=response_strategy,
                     response_value=response_value,
+                    include_template_config=False,
+                    base_file_path="./",
+                    dry_run=False,
+                    divide_api=False,
+                    divide_http=False,
+                    divide_http_request=False,
+                    divide_http_response=False,
                 )
                 with pytest.raises(SystemExit) as exc_info:
                     component.process(args)

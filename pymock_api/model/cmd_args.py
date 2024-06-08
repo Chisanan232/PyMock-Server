@@ -14,6 +14,18 @@ class ParserArguments:
 
 
 @dataclass(frozen=True)
+class _BaseSubCmdArgumentsSavingConfig(ParserArguments):
+    config_path: str
+    include_template_config: bool
+    base_file_path: str
+    dry_run: bool
+    divide_api: bool
+    divide_http: bool
+    divide_http_request: bool
+    divide_http_response: bool
+
+
+@dataclass(frozen=True)
 class SubcmdRunArguments(ParserArguments):
     config: str
     app_type: str
@@ -23,8 +35,7 @@ class SubcmdRunArguments(ParserArguments):
 
 
 @dataclass(frozen=True)
-class SubcmdAddArguments(ParserArguments):
-    api_config_path: str
+class SubcmdAddArguments(_BaseSubCmdArgumentsSavingConfig):
     api_path: str
     http_method: str
     parameters: List[dict]
@@ -38,7 +49,7 @@ class SubcmdAddArguments(ParserArguments):
                 return s != ""
             return False
 
-        string_chksum = list(map(_string_is_not_empty, [self.api_config_path, self.api_path]))
+        string_chksum = list(map(_string_is_not_empty, [self.config_path, self.api_path]))
         return False not in string_chksum
 
 
@@ -70,19 +81,11 @@ class SubcmdSampleArguments(ParserArguments):
 
 
 @dataclass(frozen=True)
-class SubcmdPullArguments(ParserArguments):
+class SubcmdPullArguments(_BaseSubCmdArgumentsSavingConfig):
     request_with_https: bool
     source: str
     source_file: str
-    config_path: str
     base_url: str
-    include_template_config: bool
-    base_file_path: str
-    dry_run: bool
-    divide_api: bool
-    divide_http: bool
-    divide_http_request: bool
-    divide_http_response: bool
 
 
 class DeserializeParsedArgs:
@@ -113,12 +116,20 @@ class DeserializeParsedArgs:
             )
         return SubcmdAddArguments(
             subparser_name=args.subcommand,
-            api_config_path=args.api_config_path,
+            config_path=args.config_path,
             api_path=args.api_path,
             http_method=args.http_method,
             parameters=args.parameters,
             response_strategy=args.response_strategy,
             response_value=args.response_value,
+            # Common arguments about saving configuration
+            include_template_config=args.include_template_config,
+            base_file_path=args.base_file_path,
+            dry_run=args.dry_run,
+            divide_api=args.divide_api,
+            divide_http=args.divide_http,
+            divide_http_request=args.divide_http_request,
+            divide_http_response=args.divide_http_response,
         )
 
     @classmethod
@@ -167,6 +178,7 @@ class DeserializeParsedArgs:
             source_file=args.source_file,
             config_path=args.config_path,
             base_url=args.base_url,
+            # Common arguments about saving configuration
             include_template_config=args.include_template_config,
             base_file_path=args.base_file_path,
             dry_run=args.dry_run,

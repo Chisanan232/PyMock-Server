@@ -10,6 +10,7 @@ class TestCaseDirPath(Enum):
 
     GET_TEST: str = "get_test"
     CHECK_TEST: str = "check_test"
+    ADD_TEST: str = "add_test"
     PULL_TEST: str = "pull_test"
     DIVIDE_TEST_LOAD: str = "divide_test_load"
     DIVIDE_TEST_PULL: str = "divide_test_pull"
