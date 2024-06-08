@@ -2,10 +2,10 @@ import os
 import sys
 
 from ... import APIConfig
-from ..._utils import YAML
 from ...model import MockAPI, generate_empty_config, load_config
 from ...model.cmd_args import SubcmdAddArguments
 from ...model.enums import ResponseStrategy
+from .._common.component import SavingConfigComponent
 from ..component import BaseSubCmdComponent
 
 
@@ -14,17 +14,20 @@ def _option_cannot_be_empty_assertion(cmd_option: str) -> str:
 
 
 class SubCmdAddComponent(BaseSubCmdComponent):
+    def __init__(self):
+        self._saving_config_component = SavingConfigComponent()
+
     def process(self, args: SubcmdAddArguments) -> None:  # type: ignore[override]
         # TODO: Add logic about using mapping file operation by the file extension.
         assert args.config_path, _option_cannot_be_empty_assertion("-o, --output")
         if not args.api_info_is_complete():
             print(f"❌  API info is not enough to add new API.")
             sys.exit(1)
-        yaml: YAML = YAML()
+        # yaml: YAML = YAML()
         api_config = self._get_api_config(args)
         api_config = self._generate_api_config(api_config, args)
-        # TODO: Align the implementation to be same as sub-cmd *pull* to save.
-        yaml.write(path=args.config_path, config=api_config.serialize())  # type: ignore[arg-type]
+        self._saving_config_component.serialize_and_save(cmd_args=args, api_config=api_config)
+        # yaml.write(path=args.config_path, config=api_config.serialize())  # type: ignore[arg-type]
 
     def _get_api_config(self, args: SubcmdAddArguments) -> APIConfig:
         if os.path.exists(args.config_path):
