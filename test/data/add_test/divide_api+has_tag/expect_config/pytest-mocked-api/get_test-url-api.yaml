@@ -1,5 +1,5 @@
 url: '/test-url'
-tag: test-url
+tag: pytest-mocked-api
 http:
   request:
     method: 'GET'
