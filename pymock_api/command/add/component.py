@@ -42,16 +42,20 @@ class SubCmdAddComponent(BaseSubCmdComponent):
         assert api_config.apis is not None
         base = api_config.apis.base
         mocked_api = MockAPI()
+        # Set *<mock_api>.tag*
         if args.tag:
             mocked_api.tag = args.tag
+        # Set *<mock_api>.url*
         if args.api_path:
             mocked_api.url = args.api_path.replace(base.url, "") if base else args.api_path
+        # Set *<mock_api>.http.request*
         if args.http_method or args.parameters:
             try:
                 mocked_api.set_request(method=args.http_method, parameters=args.parameters)  # type: ignore[arg-type]
             except ValueError:
                 print("❌  The data format of API parameter is incorrect.")
                 sys.exit(1)
+        # Set *<mock_api>.http.response*
         if args.response_strategy is ResponseStrategy.OBJECT:
             mocked_api.set_response(strategy=args.response_strategy, iterable_value=args.response_value)
         else:
@@ -61,6 +65,7 @@ class SubCmdAddComponent(BaseSubCmdComponent):
             mocked_api.set_response(
                 strategy=args.response_strategy, value=args.response_value[0] if args.response_value else None  # type: ignore[arg-type]
             )
+        # Set up *<mock_api>* in configuration
         api_config.apis.apis[self._generate_api_key(args)] = mocked_api
         return api_config
 
