@@ -18,6 +18,7 @@ class _BaseSubCmdArgumentsSavingConfig(ParserArguments):
     config_path: str
     include_template_config: bool
     base_file_path: str
+    base_url: str
     dry_run: bool
     divide_api: bool
     divide_http: bool
@@ -85,7 +86,6 @@ class SubcmdPullArguments(_BaseSubCmdArgumentsSavingConfig):
     request_with_https: bool
     source: str
     source_file: str
-    base_url: str
 
 
 class DeserializeParsedArgs:
@@ -125,11 +125,12 @@ class DeserializeParsedArgs:
             # Common arguments about saving configuration
             include_template_config=args.include_template_config,
             base_file_path=args.base_file_path,
-            dry_run=args.dry_run,
+            base_url=args.base_url,
             divide_api=args.divide_api,
             divide_http=args.divide_http,
             divide_http_request=args.divide_http_request,
             divide_http_response=args.divide_http_response,
+            dry_run=args.dry_run,
         )
 
     @classmethod
@@ -177,13 +178,13 @@ class DeserializeParsedArgs:
             source=args.source,
             source_file=args.source_file,
             config_path=args.config_path,
-            base_url=args.base_url,
             # Common arguments about saving configuration
             include_template_config=args.include_template_config,
             base_file_path=args.base_file_path,
-            dry_run=args.dry_run,
+            base_url=args.base_url,
             divide_api=args.divide_api,
             divide_http=args.divide_http,
             divide_http_request=args.divide_http_request,
             divide_http_response=args.divide_http_response,
+            dry_run=args.dry_run,
         )

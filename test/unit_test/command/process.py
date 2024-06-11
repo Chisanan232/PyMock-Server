@@ -508,6 +508,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
             response_value=response_value,
             include_template_config=False,
             base_file_path="./",
+            base_url="",
             dry_run=False,
             divide_api=False,
             divide_http=False,
@@ -534,6 +535,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         args_namespace.response_value = _Test_HTTP_Resp
         args_namespace.include_template_config = False
         args_namespace.base_file_path = "./"
+        args_namespace.base_url = ""
         args_namespace.dry_run = False
         args_namespace.divide_api = False
         args_namespace.divide_http = False

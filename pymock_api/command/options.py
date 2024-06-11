@@ -467,6 +467,12 @@ class AddIncludeTemplateConfig(BaseSubCmdAddOption):
     default_value: bool = False
 
 
+class AddBaseURL(BaseSubCmdAddOption):
+    cli_option: str = "--base-url"
+    name: str = "base_url"
+    help_description: str = "The base URL which must be the part of path all the APIs begin with."
+
+
 class AddDryRun(BaseSubCmdAddOption):
     cli_option: str = "--dry-run"
     name: str = "dry_run"
