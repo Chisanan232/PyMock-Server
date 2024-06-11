@@ -1,3 +1,4 @@
+import pathlib
 from collections import namedtuple
 from typing import List, Tuple
 
@@ -45,19 +46,17 @@ class AddMockAPIAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
         def generate_dir_paths_callback(folder_path: str) -> tuple:
             nonlocal test_cmd_opt_arg
             test_cmd_opt_arg = cls._divide_chk(folder_path)
-            new_config_has_new_api = _get_path(scenario_folder=folder_path, yaml_file_naming="add_test")
             expected_yaml_config = _get_path(scenario_folder=folder_path, yaml_file_naming="expect_config/api.yaml")
-            return new_config_has_new_api, expected_yaml_config
+            return (expected_yaml_config,)
 
         def _generate_test_case_callback(pair_files: tuple) -> None:
-            new_config_path_has_new_api = pair_files[0]
-            expected_yaml_config_path = pair_files[1]
+            expected_yaml_config_path = pair_files[0]
 
-            if "has_tag" in new_config_path_has_new_api:
+            if "has_tag" in expected_yaml_config_path:
                 base_url = "/api/v1/test"
             else:
                 base_url = ""
-            if "include_template" in new_config_path_has_new_api:
+            if "include_template" in expected_yaml_config_path:
                 include_template_config = True
             else:
                 include_template_config = False
@@ -70,8 +69,8 @@ class AddMockAPIAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
                 }
             )
             cmd_arg = SubCmdAddTestArgs(**test_cmd_opt_arg)
-            one_test_scenario = (new_config_path_has_new_api, cmd_arg, expected_yaml_config_path)
-            print(f"[DEBUG in general] one_test_scenario: {one_test_scenario}")
+            under_test_dir = pathlib.Path(pathlib.Path(expected_yaml_config_path).parent.parent, "under_test")
+            one_test_scenario = (under_test_dir, cmd_arg, expected_yaml_config_path)
             ADD_AS_DIVIDING_YAML_PATHS.append(one_test_scenario)
 
         cls._iterate_files_by_directory(
