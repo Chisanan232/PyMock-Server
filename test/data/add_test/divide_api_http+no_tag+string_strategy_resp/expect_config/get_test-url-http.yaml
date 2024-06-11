@@ -1,0 +1,9 @@
+request:
+  method: 'GET'
+  parameters:
+    - name: 'arg1'
+      required: false
+      type: str
+response:
+  strategy: string
+  value: This is foo.

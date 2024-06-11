@@ -1,0 +1,6 @@
+request:
+  method: 'GET'
+  parameters:
+    - name: 'arg1'
+      required: true
+      type: str

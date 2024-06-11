@@ -11,7 +11,7 @@ mocked_apis:
         - 'apply'
         - 'file'
     values:
-      base_file_path: './test/data/add_test/divide_api_http+no_tag/expect_config'
+      base_file_path: './test/data/add_test/divide_api_http+no_tag+object_strategy_resp/expect_config'
       api:
         config_path_format: '**-api.yaml'    # ex. ./foo/get_foo.yaml
       http:
