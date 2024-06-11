@@ -37,6 +37,7 @@ class SubcmdRunArguments(ParserArguments):
 
 @dataclass(frozen=True)
 class SubcmdAddArguments(_BaseSubCmdArgumentsSavingConfig):
+    tag: str
     api_path: str
     http_method: str
     parameters: List[dict]
@@ -117,6 +118,7 @@ class DeserializeParsedArgs:
         return SubcmdAddArguments(
             subparser_name=args.subcommand,
             config_path=args.config_path,
+            tag=args.tag,
             api_path=args.api_path,
             http_method=args.http_method,
             parameters=args.parameters,

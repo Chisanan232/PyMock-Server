@@ -48,6 +48,7 @@ from ..._values import (
     _Test_SubCommand_Pull,
     _Test_SubCommand_Run,
     _Test_SubCommand_Sample,
+    _Test_Tag,
     _Test_URL,
     _Workers_Amount,
 )
@@ -84,6 +85,7 @@ class TestDeserialize:
         namespace_args = {
             "subcommand": _Test_SubCommand_Add,
             "config_path": _Sample_File_Path,
+            "tag": _Test_Tag,
             "api_path": _Test_URL,
             "http_method": _Test_HTTP_Method,
             "parameters": ['{"name": "arg1", "required": false, "default": "val1", "type": "str"}'],
@@ -103,6 +105,7 @@ class TestDeserialize:
         assert isinstance(arguments, SubcmdAddArguments)
         assert arguments.subparser_name == _Test_SubCommand_Add
         assert arguments.config_path == _Sample_File_Path
+        assert arguments.tag == _Test_Tag
         assert arguments.api_path == _Test_URL
         assert arguments.http_method == _Test_HTTP_Method
         assert arguments.parameters == [{"name": "arg1", "required": False, "default": "val1", "type": "str"}]

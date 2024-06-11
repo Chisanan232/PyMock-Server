@@ -473,6 +473,12 @@ class AddBaseURL(BaseSubCmdAddOption):
     help_description: str = "The base URL which must be the part of path all the APIs begin with."
 
 
+class AddTag(BaseSubCmdAddOption):
+    cli_option: str = "--tag"
+    name: str = "tag"
+    help_description: str = "Set tag at the new mock API."
+
+
 class AddDryRun(BaseSubCmdAddOption):
     cli_option: str = "--dry-run"
     name: str = "dry_run"

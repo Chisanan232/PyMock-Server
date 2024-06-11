@@ -36,6 +36,7 @@ class TestSubCmdAddComponent:
         invalid_args = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
             config_path="",
+            tag="",
             api_path="",
             http_method="",
             parameters=[],
@@ -76,6 +77,7 @@ class TestSubCmdAddComponent:
                     args = SubcmdAddArguments(
                         subparser_name=_Test_SubCommand_Add,
                         config_path=_Test_Config,
+                        tag="",
                         api_path=_Test_URL,
                         http_method="GET",
                         parameters=[],
@@ -141,6 +143,7 @@ class TestSubCmdAddComponent:
             args = SubcmdAddArguments(
                 subparser_name=_Test_SubCommand_Add,
                 config_path=_Test_Config,
+                tag="",
                 api_path=_Test_URL,
                 http_method=http_method,
                 parameters=parameters,
@@ -216,6 +219,7 @@ class TestSubCmdAddComponent:
             args = SubcmdAddArguments(
                 subparser_name=_Test_SubCommand_Add,
                 config_path=_Test_Config,
+                tag="",
                 api_path=url_path,
                 http_method=http_method,
                 parameters=parameters,

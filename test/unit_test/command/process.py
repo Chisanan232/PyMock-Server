@@ -501,6 +501,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         mock_parser_arg = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
             config_path=_Test_Config,
+            tag="",
             api_path=url_path,
             http_method=method,
             parameters=params,
@@ -528,6 +529,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         args_namespace = Namespace()
         args_namespace.subcommand = SubCommand.Add
         args_namespace.config_path = ""
+        args_namespace.tag = ""
         args_namespace.api_path = _Test_URL
         args_namespace.http_method = _Test_HTTP_Method
         args_namespace.parameters = ""
