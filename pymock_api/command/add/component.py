@@ -42,6 +42,8 @@ class SubCmdAddComponent(BaseSubCmdComponent):
         assert api_config.apis is not None
         base = api_config.apis.base
         mocked_api = MockAPI()
+        if args.tag:
+            mocked_api.tag = args.tag
         if args.api_path:
             mocked_api.url = args.api_path.replace(base.url, "") if base else args.api_path
         if args.http_method or args.parameters:
@@ -59,8 +61,8 @@ class SubCmdAddComponent(BaseSubCmdComponent):
             mocked_api.set_response(
                 strategy=args.response_strategy, value=args.response_value[0] if args.response_value else None  # type: ignore[arg-type]
             )
-        api_config.apis.apis[self._generate_api_key("", args)] = mocked_api
+        api_config.apis.apis[self._generate_api_key(args)] = mocked_api
         return api_config
 
-    def _generate_api_key(self, base_url: str, args: SubcmdAddArguments) -> str:
-        return "_".join([args.http_method.lower(), args.api_path.replace(base_url, "")[1:].replace("/", "_")])
+    def _generate_api_key(self, args: SubcmdAddArguments) -> str:
+        return "_".join([args.http_method.lower(), args.api_path.replace(args.base_url, "")[1:].replace("/", "_")])

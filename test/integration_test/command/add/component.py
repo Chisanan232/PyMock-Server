@@ -113,6 +113,7 @@ class TestSubCmdAddComponent:
                 subparser_name=SubCommand.Add,
                 config_path="./api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -132,6 +133,7 @@ class TestSubCmdAddComponent:
                 subparser_name=SubCommand.Add,
                 config_path="./test_dir/api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -153,6 +155,7 @@ class TestSubCmdAddComponent:
                 subparser_name=SubCommand.Add,
                 config_path="./api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -172,6 +175,7 @@ class TestSubCmdAddComponent:
                 subparser_name=SubCommand.Add,
                 config_path="./test_dir/api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -193,6 +197,7 @@ class TestSubCmdAddComponent:
                 subparser_name=SubCommand.Add,
                 config_path="./api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -212,6 +217,7 @@ class TestSubCmdAddComponent:
                 subparser_name=SubCommand.Add,
                 config_path="./test_dir/api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -233,6 +239,7 @@ class TestSubCmdAddComponent:
                 subparser_name=SubCommand.Add,
                 config_path="./api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -252,6 +259,7 @@ class TestSubCmdAddComponent:
                 subparser_name=SubCommand.Add,
                 config_path="./test_dir/api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -318,6 +326,7 @@ class TestSubCmdAddComponent:
             subparser_name=SubCommand.Add,
             config_path=ut_config_path,
             # new mock API
+            tag=cmd_arg.tag,
             api_path=_Test_URL,
             http_method=_Test_HTTP_Method,
             parameters=_Dummy_Add_Arg_Parameter,

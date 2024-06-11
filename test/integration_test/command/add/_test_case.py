@@ -3,6 +3,7 @@ from collections import namedtuple
 from typing import List, Tuple
 
 from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
+from ...._values import _Test_Tag
 
 # [(swagger_api_config_path, cmd_arg, expected_path)]
 ADD_AS_DIVIDING_YAML_PATHS: List[tuple] = []
@@ -13,6 +14,7 @@ SubCmdAddTestArgs = namedtuple(
     (
         "base_url",
         "include_template_config",
+        "tag",
         "divide_api",
         "divide_http",
         "divide_http_request",
@@ -54,8 +56,10 @@ class AddMockAPIAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
 
             if "has_tag" in expected_yaml_config_path:
                 base_url = "/api/v1/test"
+                tag = _Test_Tag
             else:
                 base_url = ""
+                tag = ""
             if "include_template" in expected_yaml_config_path:
                 include_template_config = True
             else:
@@ -66,6 +70,7 @@ class AddMockAPIAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
                 {
                     "base_url": base_url,
                     "include_template_config": include_template_config,
+                    "tag": tag,
                 }
             )
             cmd_arg = SubCmdAddTestArgs(**test_cmd_opt_arg)
