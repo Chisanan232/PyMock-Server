@@ -104,7 +104,7 @@ class TestSubCmdAddComponent:
     @pytest.mark.parametrize(
         ("http_method", "parameters", "response_strategy", "response_value"),
         [
-            (None, [], _Test_Response_Strategy, None),
+            ("GET", [], _Test_Response_Strategy, None),
             (
                 "POST",
                 [{"name": "arg1", "required": False, "default": "val1", "type": "str"}],
@@ -131,35 +131,37 @@ class TestSubCmdAddComponent:
         component: SubCmdAddComponent,
     ):
         # Mock functions
+        component._saving_config_component = FakeSavingConfigComponent
         FakeSavingConfigComponent.serialize_and_save = MagicMock()
 
-        with patch("pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent):
-            with patch("os.path.exists", return_value=False) as mock_path_exist:
-                args = SubcmdAddArguments(
-                    subparser_name=_Test_SubCommand_Add,
-                    config_path=_Test_Config,
-                    api_path=_Test_URL,
-                    http_method=http_method,
-                    parameters=parameters,
-                    response_strategy=response_strategy,
-                    response_value=response_value,
-                    include_template_config=False,
-                    base_file_path="./",
-                    dry_run=False,
-                    divide_api=False,
-                    divide_http=False,
-                    divide_http_request=False,
-                    divide_http_response=False,
-                )
-                component.process(args)
+        # with patch("pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent):
+        with patch("os.path.exists", return_value=False) as mock_path_exist:
+            args = SubcmdAddArguments(
+                subparser_name=_Test_SubCommand_Add,
+                config_path=_Test_Config,
+                api_path=_Test_URL,
+                http_method=http_method,
+                parameters=parameters,
+                response_strategy=response_strategy,
+                response_value=response_value,
+                include_template_config=False,
+                base_file_path="./",
+                dry_run=False,
+                divide_api=False,
+                divide_http=False,
+                divide_http_request=False,
+                divide_http_response=False,
+            )
+            component.process(args)
 
-                api_config = generate_empty_config()
-                api_config = component._generate_api_config(api_config, args)
+            api_config = generate_empty_config()
+            api_config = component._generate_api_config(api_config=api_config, args=args)
 
-                mock_path_exist.assert_called_once_with(_Test_Config)
-                FakeSavingConfigComponent.serialize_and_save.assert_called_once_with(
-                    path=_Test_Config, config=api_config.serialize()
-                )
+            mock_path_exist.assert_called_once_with(_Test_Config)
+            FakeSavingConfigComponent.serialize_and_save.assert_called_once_with(
+                cmd_args=args,
+                api_config=api_config,
+            )
 
     @pytest.mark.parametrize(
         ("url_path", "http_method", "parameters", "response_strategy", "response_value"),
