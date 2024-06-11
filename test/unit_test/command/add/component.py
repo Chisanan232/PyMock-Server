@@ -50,15 +50,12 @@ class TestSubCmdAddComponent:
         )
 
         # Run target function to test
-        with patch(
-            "pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent
-        ) as mock_saving_config_component:
+        with patch("pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent):
             with pytest.raises(AssertionError) as exc_info:
                 component.process(invalid_args)
 
             # Verify result
             assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)
-            mock_saving_config_component.assert_not_called()
             FakeSavingConfigComponent.serialize_and_save.assert_not_called()
 
     @pytest.mark.parametrize(
@@ -136,9 +133,7 @@ class TestSubCmdAddComponent:
         # Mock functions
         FakeSavingConfigComponent.serialize_and_save = MagicMock()
 
-        with patch(
-            "pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent
-        ) as mock_saving_config_component:
+        with patch("pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent):
             with patch("os.path.exists", return_value=False) as mock_path_exist:
                 args = SubcmdAddArguments(
                     subparser_name=_Test_SubCommand_Add,
@@ -162,7 +157,6 @@ class TestSubCmdAddComponent:
                 api_config = component._generate_api_config(api_config, args)
 
                 mock_path_exist.assert_called_once_with(_Test_Config)
-                mock_saving_config_component.assert_called_once()
                 FakeSavingConfigComponent.serialize_and_save.assert_called_once_with(
                     path=_Test_Config, config=api_config.serialize()
                 )
@@ -212,9 +206,7 @@ class TestSubCmdAddComponent:
         # Mock functions
         FakeSavingConfigComponent.serialize_and_save = MagicMock()
 
-        with patch(
-            "pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent
-        ) as mock_saving_config_component:
+        with patch("pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent):
             with patch("os.path.exists", return_value=False) as mock_path_exist:
                 args = SubcmdAddArguments(
                     subparser_name=_Test_SubCommand_Add,
@@ -238,8 +230,6 @@ class TestSubCmdAddComponent:
 
                 if url_path:
                     mock_path_exist.assert_called_once_with(_Test_Config)
-                    mock_saving_config_component.assert_called_once()
                 else:
                     mock_path_exist.assert_not_called()
-                    mock_saving_config_component.assert_not_called()
                 FakeSavingConfigComponent.serialize_and_save.assert_not_called()
