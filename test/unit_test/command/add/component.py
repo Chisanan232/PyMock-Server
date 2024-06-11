@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from pymock_api import APIConfig
-from pymock_api._utils.file_opt import YAML
+from pymock_api.command._common.component import SavingConfigComponent
 from pymock_api.command.add.component import SubCmdAddComponent
 from pymock_api.model import generate_empty_config
 from pymock_api.model.cmd_args import SubcmdAddArguments
@@ -19,7 +19,7 @@ from ...._values import (
 )
 
 
-class FakeYAML(YAML):
+class FakeSavingConfigComponent(SavingConfigComponent):
     pass
 
 
@@ -30,7 +30,7 @@ class TestSubCmdAddComponent:
 
     def test_assert_error_with_empty_api_config_path(self, component: SubCmdAddComponent):
         # Mock functions
-        FakeYAML.write = MagicMock()
+        FakeSavingConfigComponent.serialize_and_save = MagicMock()
 
         invalid_args = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
@@ -50,14 +50,16 @@ class TestSubCmdAddComponent:
         )
 
         # Run target function to test
-        with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+        with patch(
+            "pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent
+        ) as mock_saving_config_component:
             with pytest.raises(AssertionError) as exc_info:
                 component.process(invalid_args)
 
             # Verify result
             assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)
-            mock_instantiate_writer.assert_not_called()
-            FakeYAML.write.assert_not_called()
+            mock_saving_config_component.assert_not_called()
+            FakeSavingConfigComponent.serialize_and_save.assert_not_called()
 
     @pytest.mark.parametrize(
         ("file_exist", "load_config_result"),
@@ -132,10 +134,11 @@ class TestSubCmdAddComponent:
         component: SubCmdAddComponent,
     ):
         # Mock functions
-        FakeYAML.serialize = MagicMock()
-        FakeYAML.write = MagicMock()
+        FakeSavingConfigComponent.serialize_and_save = MagicMock()
 
-        with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+        with patch(
+            "pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent
+        ) as mock_saving_config_component:
             with patch("os.path.exists", return_value=False) as mock_path_exist:
                 args = SubcmdAddArguments(
                     subparser_name=_Test_SubCommand_Add,
@@ -159,8 +162,10 @@ class TestSubCmdAddComponent:
                 api_config = component._generate_api_config(api_config, args)
 
                 mock_path_exist.assert_called_once_with(_Test_Config)
-                mock_instantiate_writer.assert_called_once()
-                FakeYAML.write.assert_called_once_with(path=_Test_Config, config=api_config.serialize())
+                mock_saving_config_component.assert_called_once()
+                FakeSavingConfigComponent.serialize_and_save.assert_called_once_with(
+                    path=_Test_Config, config=api_config.serialize()
+                )
 
     @pytest.mark.parametrize(
         ("url_path", "http_method", "parameters", "response_strategy", "response_value"),
@@ -205,10 +210,11 @@ class TestSubCmdAddComponent:
         component: SubCmdAddComponent,
     ):
         # Mock functions
-        FakeYAML.serialize = MagicMock()
-        FakeYAML.write = MagicMock()
+        FakeSavingConfigComponent.serialize_and_save = MagicMock()
 
-        with patch("pymock_api.command.add.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+        with patch(
+            "pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent
+        ) as mock_saving_config_component:
             with patch("os.path.exists", return_value=False) as mock_path_exist:
                 args = SubcmdAddArguments(
                     subparser_name=_Test_SubCommand_Add,
@@ -232,8 +238,8 @@ class TestSubCmdAddComponent:
 
                 if url_path:
                     mock_path_exist.assert_called_once_with(_Test_Config)
-                    mock_instantiate_writer.assert_called_once()
+                    mock_saving_config_component.assert_called_once()
                 else:
                     mock_path_exist.assert_not_called()
-                    mock_instantiate_writer.assert_not_called()
-                FakeYAML.write.assert_not_called()
+                    mock_saving_config_component.assert_not_called()
+                FakeSavingConfigComponent.serialize_and_save.assert_not_called()
