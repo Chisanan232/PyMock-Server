@@ -330,8 +330,8 @@ class TestSubCmdAddComponent:
             api_path=_Test_URL,
             http_method=_Test_HTTP_Method,
             parameters=_Dummy_Add_Arg_Parameter,
-            response_strategy=_Dummy_Add_Arg_Strategy,
-            response_value=_Dummy_Add_Arg_Values,
+            response_strategy=cmd_arg.resp_strategy,
+            response_value=cmd_arg.resp_details,
             # saving details
             include_template_config=cmd_arg.include_template_config,
             base_file_path=str(under_test_dir),

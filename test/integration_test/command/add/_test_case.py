@@ -2,8 +2,10 @@ import pathlib
 from collections import namedtuple
 from typing import List, Tuple
 
+from pymock_api.model.enums import ResponseStrategy
+
 from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
-from ...._values import _Test_Tag
+from ...._values import _generate_response_for_add, _Test_Tag
 
 # [(swagger_api_config_path, cmd_arg, expected_path)]
 ADD_AS_DIVIDING_YAML_PATHS: List[tuple] = []
@@ -19,6 +21,9 @@ SubCmdAddTestArgs = namedtuple(
         "divide_http",
         "divide_http_request",
         "divide_http_response",
+        # response setting
+        "resp_strategy",
+        "resp_details",
     ),
 )
 
@@ -47,7 +52,10 @@ class AddMockAPIAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
 
         def generate_dir_paths_callback(folder_path: str) -> tuple:
             nonlocal test_cmd_opt_arg
-            test_cmd_opt_arg = cls._divide_chk(folder_path)
+            divide_arg = cls._divide_chk(folder_path)
+            resp_args = cls._resp_chk(folder_path)
+            test_cmd_opt_arg.update(divide_arg)
+            test_cmd_opt_arg.update(resp_args)
             expected_yaml_config = _get_path(scenario_folder=folder_path, yaml_file_naming="expect_config/api.yaml")
             return (expected_yaml_config,)
 
@@ -104,3 +112,18 @@ class AddMockAPIAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
         _set_val("response", "http_response")
 
         return cmd_divide_arg
+
+    @classmethod
+    def _resp_chk(cls, test_scenario_dir: str):
+        resp_arg = {}
+
+        if "string_strategy_resp" in test_scenario_dir:
+            strategy, resp_setting = _generate_response_for_add(ResponseStrategy.STRING)
+        elif "object_strategy_resp" in test_scenario_dir:
+            strategy, resp_setting = _generate_response_for_add(ResponseStrategy.OBJECT)
+        else:
+            raise ValueError("Not support this test criteria. Please check it.")
+
+        resp_arg["resp_strategy"] = strategy
+        resp_arg["resp_details"] = resp_setting  # type: ignore[assignment]
+        return resp_arg
