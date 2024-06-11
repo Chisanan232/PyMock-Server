@@ -2,7 +2,7 @@ request:
   method: 'GET'
   parameters:
     - name: 'arg1'
-      required: false
+      required: true
       type: str
 response:
   strategy: string
