@@ -289,24 +289,23 @@ class TestSubCmdAddComponent:
                         mock_final_process.assert_called_once_with(cmd_args, api_config_serialize_data)
 
     @pytest.mark.parametrize(
-        ("under_test_api_config", "cmd_arg", "expected_yaml_config_path"), ADD_API_AS_DIVIDING_CONFIG_TEST_CASE
+        ("under_test_api_config_dir", "cmd_arg", "expected_yaml_config_path"), ADD_API_AS_DIVIDING_CONFIG_TEST_CASE
     )
     def test_add_new_api_as_dividing_config(
         self,
         sub_cmd: SubCmdAddComponent,
-        under_test_api_config: str,
+        under_test_api_config_dir: str,
         cmd_arg: SubCmdAddTestArgs,
         expected_yaml_config_path: str,
     ):
         # Given command line argument
         print(f"[DEBUG in test] cmd_arg: {cmd_arg}")
-        # test_scenario_dir = pathlib.Path(under_test_api_config).parent
+        under_test_dir = pathlib.Path(under_test_api_config_dir)
         # under_test_dir = "v3_openapi" if "v3" in under_test_api_config else "v2_openapi"
         # ut_dir = pathlib.Path(test_scenario_dir, "under_test", under_test_dir)
-        # if not ut_dir.exists():
-        #     ut_dir.mkdir(parents=True)
-        print(f"[DEBUG in test] under_test_api_config: {under_test_api_config}")
-        ut_config_path = str(pathlib.Path(under_test_api_config, "api.yaml"))
+        if not under_test_dir.exists():
+            under_test_dir.mkdir(parents=True)
+        ut_config_path = str(pathlib.Path(under_test_dir, "api.yaml"))
         cmd_args = SubcmdAddArguments(
             subparser_name=SubCommand.Add,
             config_path=ut_config_path,
@@ -318,7 +317,7 @@ class TestSubCmdAddComponent:
             response_value=_Dummy_Add_Arg_Values,
             # saving details
             include_template_config=cmd_arg.include_template_config,
-            base_file_path=str(under_test_api_config),
+            base_file_path=str(under_test_dir),
             dry_run=False,
             divide_api=cmd_arg.divide_api,
             divide_http=cmd_arg.divide_http,
@@ -336,7 +335,7 @@ class TestSubCmdAddComponent:
             "pymock_api.model.api_config.MockAPIs.template", new_callable=PropertyMock
         ) as mock_mock_apis_template:
             template_config = TemplateConfig()
-            template_config.values.base_file_path = str(under_test_api_config)
+            template_config.values.base_file_path = str(under_test_dir)
             mock_mock_apis_template.return_value = template_config
 
             # Set the Swagger API reference data for testing
@@ -353,7 +352,7 @@ class TestSubCmdAddComponent:
 
             # Verify
             # mock_swagger_request.assert_called_once()
-            ut_config_data_modal = load_config(under_test_api_config, is_pull=True)
+            ut_config_data_modal = load_config(ut_config_path, is_pull=True)
             assert ut_config_data_modal is not None
             assert expected_config_data_modal is not None
 
