@@ -2,7 +2,7 @@ import os
 import sys
 
 from ... import APIConfig
-from ...model import MockAPI, generate_empty_config, load_config
+from ...model import BaseConfig, MockAPI, generate_empty_config, load_config
 from ...model.cmd_args import SubcmdAddArguments
 from ...model.enums import ResponseStrategy
 from .._common.component import SavingConfigComponent
@@ -40,7 +40,13 @@ class SubCmdAddComponent(BaseSubCmdComponent):
 
     def _generate_api_config(self, api_config: APIConfig, args: SubcmdAddArguments) -> APIConfig:
         assert api_config.apis is not None
+        # Set *base*
+        if args.base_url:
+            if not api_config.apis.base:
+                api_config.apis.base = BaseConfig()
+            api_config.apis.base.url = args.base_url
         base = api_config.apis.base
+
         mocked_api = MockAPI()
         # Set *<mock_api>.tag*
         if args.tag:
@@ -67,6 +73,7 @@ class SubCmdAddComponent(BaseSubCmdComponent):
             )
         # Set up *<mock_api>* in configuration
         api_config.apis.apis[self._generate_api_key(args)] = mocked_api
+
         return api_config
 
     def _generate_api_key(self, args: SubcmdAddArguments) -> str:

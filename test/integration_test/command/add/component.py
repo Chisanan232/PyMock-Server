@@ -335,7 +335,7 @@ class TestSubCmdAddComponent:
             # saving details
             include_template_config=cmd_arg.include_template_config,
             base_file_path=str(under_test_dir),
-            base_url="",
+            base_url=cmd_arg.base_url,
             divide_api=cmd_arg.divide_api,
             divide_http=cmd_arg.divide_http,
             divide_http_request=cmd_arg.divide_http_request,
