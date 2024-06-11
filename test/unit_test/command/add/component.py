@@ -30,6 +30,7 @@ class TestSubCmdAddComponent:
 
     def test_assert_error_with_empty_api_config_path(self, component: SubCmdAddComponent):
         # Mock functions
+        component._saving_config_component = FakeSavingConfigComponent
         FakeSavingConfigComponent.serialize_and_save = MagicMock()
 
         invalid_args = SubcmdAddArguments(
@@ -50,13 +51,12 @@ class TestSubCmdAddComponent:
         )
 
         # Run target function to test
-        with patch("pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent):
-            with pytest.raises(AssertionError) as exc_info:
-                component.process(invalid_args)
+        with pytest.raises(AssertionError) as exc_info:
+            component.process(invalid_args)
 
-            # Verify result
-            assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)
-            FakeSavingConfigComponent.serialize_and_save.assert_not_called()
+        # Verify result
+        assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)
+        FakeSavingConfigComponent.serialize_and_save.assert_not_called()
 
     @pytest.mark.parametrize(
         ("file_exist", "load_config_result"),
@@ -206,32 +206,32 @@ class TestSubCmdAddComponent:
         component: SubCmdAddComponent,
     ):
         # Mock functions
+        component._saving_config_component = FakeSavingConfigComponent
         FakeSavingConfigComponent.serialize_and_save = MagicMock()
 
-        with patch("pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent):
-            with patch("os.path.exists", return_value=False) as mock_path_exist:
-                args = SubcmdAddArguments(
-                    subparser_name=_Test_SubCommand_Add,
-                    config_path=_Test_Config,
-                    api_path=url_path,
-                    http_method=http_method,
-                    parameters=parameters,
-                    response_strategy=response_strategy,
-                    response_value=response_value,
-                    include_template_config=False,
-                    base_file_path="./",
-                    dry_run=False,
-                    divide_api=False,
-                    divide_http=False,
-                    divide_http_request=False,
-                    divide_http_response=False,
-                )
-                with pytest.raises(SystemExit) as exc_info:
-                    component.process(args)
-                assert str(exc_info.value) == "1"
+        with patch("os.path.exists", return_value=False) as mock_path_exist:
+            args = SubcmdAddArguments(
+                subparser_name=_Test_SubCommand_Add,
+                config_path=_Test_Config,
+                api_path=url_path,
+                http_method=http_method,
+                parameters=parameters,
+                response_strategy=response_strategy,
+                response_value=response_value,
+                include_template_config=False,
+                base_file_path="./",
+                dry_run=False,
+                divide_api=False,
+                divide_http=False,
+                divide_http_request=False,
+                divide_http_response=False,
+            )
+            with pytest.raises(SystemExit) as exc_info:
+                component.process(args)
+            assert str(exc_info.value) == "1"
 
-                if url_path:
-                    mock_path_exist.assert_called_once_with(_Test_Config)
-                else:
-                    mock_path_exist.assert_not_called()
-                FakeSavingConfigComponent.serialize_and_save.assert_not_called()
+            if url_path:
+                mock_path_exist.assert_called_once_with(_Test_Config)
+            else:
+                mock_path_exist.assert_not_called()
+            FakeSavingConfigComponent.serialize_and_save.assert_not_called()
