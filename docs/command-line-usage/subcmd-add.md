@@ -22,6 +22,34 @@ It receives a value which is the configuration file path and default value is ``
     It would generate a new configuration file add the new API to it.
 
 
+## ``--base-url`` <base API path\>
+
+Set the base URL for deserialization of API documentation configuration.
+
+It receives a string value about the base URL path.
+
+
+## ``--include-template-config``
+
+If it's ``True``, it would set the template settings in the output configuration.
+
+It doesn't accept any value and default is ``False``. It's ``True`` if set this option.
+
+
+## ``--base-file-path`` <directory path\>
+
+The path which would be used as root path to find the other files.
+
+It receives a string value about the base path.
+
+
+## ``--dry-run``
+
+If it's ``True``, it would run the ``add`` feature without result.
+
+It doesn't accept any value and default is ``False``. It's ``True`` if set this option.
+
+
 ## ``--api-path`` <URL\>
 
 Set the URL path of mocking API.
@@ -209,3 +237,261 @@ set its settings.
 
     In general usage scenarios, it's okay to use any one of these 2 ways. However, if the 
     response properties are complex, it's better to set the value in configuration directly.
+
+
+## ``--divide-api``
+
+If it's ``True``, it would divide the configuration about mocked API part to another single file.
+
+It doesn't accept any value and default is ``False``. It's ``True`` if set this option.
+
+Let's demonstrate an example configuration for you. Below is a general entire configuration. If you set this option, it
+would divide the highlight part and save it to another single file.
+
+```yaml hl_lines="8-51"
+name: ''
+description: ''
+mocked_apis:
+  base:
+    url: '/api/v1/test'
+  apis:
+    get_foo:
+      url: '/foo'
+      http:
+        request:
+          method: 'GET'
+          parameters:
+            - name: 'date'
+              required: true
+              default:
+              type: str
+              format:
+            - name: 'fooType'
+              required: true
+              default:
+              type: str
+              format:
+        response:
+          strategy: object
+          properties:
+            - name: errorMessage
+              required: True
+              type: str
+              format:
+            - name: responseCode
+              required: True
+              type: str
+              format:
+            - name: responseData
+              required: False
+              type: list
+              format:
+              items:
+                - name: id
+                  required: True
+                  type: int
+                - name: name
+                  required: True
+                  type: str
+                - name: value1
+                  required: True
+                  type: str
+                - name: value2
+                  required: True
+                  type: str
+      tag: 'foo'
+```
+
+
+## ``--divide-http``
+
+If it's ``True``, it would divide the configuration about the HTTP part of each mocked APIs to another single file.
+
+It doesn't accept any value and default is ``False``. It's ``True`` if set this option.
+
+Let's demonstrate an example configuration for you. Below is a general entire configuration. If you set this option, it
+would divide the highlight part and save it to another single file.
+
+```yaml hl_lines="10-51"
+name: ''
+description: ''
+mocked_apis:
+  base:
+    url: '/api/v1/test'
+  apis:
+    get_foo:
+      url: '/foo'
+      http:
+        request:
+          method: 'GET'
+          parameters:
+            - name: 'date'
+              required: true
+              default:
+              type: str
+              format:
+            - name: 'fooType'
+              required: true
+              default:
+              type: str
+              format:
+        response:
+          strategy: object
+          properties:
+            - name: errorMessage
+              required: True
+              type: str
+              format:
+            - name: responseCode
+              required: True
+              type: str
+              format:
+            - name: responseData
+              required: False
+              type: list
+              format:
+              items:
+                - name: id
+                  required: True
+                  type: int
+                - name: name
+                  required: True
+                  type: str
+                - name: value1
+                  required: True
+                  type: str
+                - name: value2
+                  required: True
+                  type: str
+      tag: 'foo'
+```
+
+
+## ``--divide-http-request``
+
+If it's ``True``, it would divide the configuration about the request part in HTTP section of each mocked APIs to another
+single file.
+
+It doesn't accept any value and default is ``False``. It's ``True`` if set this option.
+
+Let's demonstrate an example configuration for you. Below is a general entire configuration. If you set this option, it
+would divide the highlight part and save it to another single file.
+
+```yaml hl_lines="11-22"
+name: ''
+description: ''
+mocked_apis:
+  base:
+    url: '/api/v1/test'
+  apis:
+    get_foo:
+      url: '/foo'
+      http:
+        request:
+          method: 'GET'
+          parameters:
+            - name: 'date'
+              required: true
+              default:
+              type: str
+              format:
+            - name: 'fooType'
+              required: true
+              default:
+              type: str
+              format:
+        response:
+          strategy: object
+          properties:
+            - name: errorMessage
+              required: True
+              type: str
+              format:
+            - name: responseCode
+              required: True
+              type: str
+              format:
+            - name: responseData
+              required: False
+              type: list
+              format:
+              items:
+                - name: id
+                  required: True
+                  type: int
+                - name: name
+                  required: True
+                  type: str
+                - name: value1
+                  required: True
+                  type: str
+                - name: value2
+                  required: True
+                  type: str
+      tag: 'foo'
+```
+
+
+## ``--divide-http-response``
+
+If it's ``True``, it would divide the configuration about the response part in HTTP section of each mocked APIs to another
+single file.
+
+It doesn't accept any value and default is ``False``. It's ``True`` if set this option.
+
+Let's demonstrate an example configuration for you. Below is a general entire configuration. If you set this option, it
+would divide the highlight part and save it to another single file.
+
+```yaml hl_lines="24-50"
+name: ''
+description: ''
+mocked_apis:
+  base:
+    url: '/api/v1/test'
+  apis:
+    get_foo:
+      url: '/foo'
+      http:
+        request:
+          method: 'GET'
+          parameters:
+            - name: 'date'
+              required: true
+              default:
+              type: str
+              format:
+            - name: 'fooType'
+              required: true
+              default:
+              type: str
+              format:
+        response:
+          strategy: object
+          properties:
+            - name: errorMessage
+              required: True
+              type: str
+              format:
+            - name: responseCode
+              required: True
+              type: str
+              format:
+            - name: responseData
+              required: False
+              type: list
+              format:
+              items:
+                - name: id
+                  required: True
+                  type: int
+                - name: name
+                  required: True
+                  type: str
+                - name: value1
+                  required: True
+                  type: str
+                - name: value2
+                  required: True
+                  type: str
+      tag: 'foo'
+```
