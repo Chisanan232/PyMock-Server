@@ -2,7 +2,7 @@ import os
 import sys
 
 from ... import APIConfig
-from ...model import BaseConfig, MockAPI, generate_empty_config, load_config
+from ...model import MockAPI, generate_empty_config, load_config
 from ...model.cmd_args import SubcmdAddArguments
 from ...model.enums import ResponseStrategy
 from .._common.component import SavingConfigComponent
@@ -42,8 +42,7 @@ class SubCmdAddComponent(BaseSubCmdComponent):
         assert api_config.apis is not None
         # Set *base*
         if args.base_url:
-            if not api_config.apis.base:
-                api_config.apis.base = BaseConfig()
+            assert api_config.apis.base, "Section *base* must not be empty."
             api_config.apis.base.url = args.base_url
         base = api_config.apis.base
 
