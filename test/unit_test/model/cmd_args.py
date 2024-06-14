@@ -48,6 +48,7 @@ from ..._values import (
     _Test_SubCommand_Pull,
     _Test_SubCommand_Run,
     _Test_SubCommand_Sample,
+    _Test_Tag,
     _Test_URL,
     _Workers_Amount,
 )
@@ -84,12 +85,14 @@ class TestDeserialize:
         namespace_args = {
             "subcommand": _Test_SubCommand_Add,
             "config_path": _Sample_File_Path,
+            "tag": _Test_Tag,
             "api_path": _Test_URL,
             "http_method": _Test_HTTP_Method,
             "parameters": ['{"name": "arg1", "required": false, "default": "val1", "type": "str"}'],
             "response_strategy": _Test_Response_Strategy,
             "response_value": [_Test_HTTP_Resp],
             "base_file_path": _Default_Base_File_Path,
+            "base_url": _Base_URL,
             "include_template_config": _Default_Include_Template_Config,
             "dry_run": _Test_Dry_Run,
             "divide_api": _Test_Divide_Api,
@@ -102,11 +105,13 @@ class TestDeserialize:
         assert isinstance(arguments, SubcmdAddArguments)
         assert arguments.subparser_name == _Test_SubCommand_Add
         assert arguments.config_path == _Sample_File_Path
+        assert arguments.tag == _Test_Tag
         assert arguments.api_path == _Test_URL
         assert arguments.http_method == _Test_HTTP_Method
         assert arguments.parameters == [{"name": "arg1", "required": False, "default": "val1", "type": "str"}]
         assert arguments.response_value == [_Test_HTTP_Resp]
         assert arguments.base_file_path == _Default_Base_File_Path
+        assert arguments.base_url == _Base_URL
         assert arguments.include_template_config == _Default_Include_Template_Config
         assert arguments.dry_run == _Test_Dry_Run
         assert arguments.divide_api == _Test_Divide_Api

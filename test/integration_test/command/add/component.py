@@ -113,6 +113,7 @@ class TestSubCmdAddComponent:
                 subparser_name=SubCommand.Add,
                 config_path="./api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -121,16 +122,18 @@ class TestSubCmdAddComponent:
                 # saving details
                 include_template_config=False,
                 base_file_path="./",
-                dry_run=False,
+                base_url="",
                 divide_api=False,
                 divide_http=False,
                 divide_http_request=False,
                 divide_http_response=False,
+                dry_run=False,
             ),
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
                 config_path="./test_dir/api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -139,11 +142,12 @@ class TestSubCmdAddComponent:
                 # saving details
                 include_template_config=False,
                 base_file_path="./test_dir",
-                dry_run=False,
+                base_url="",
                 divide_api=False,
                 divide_http=False,
                 divide_http_request=False,
                 divide_http_response=False,
+                dry_run=False,
             ),
             # Not dry run
             # Include template section config
@@ -151,6 +155,7 @@ class TestSubCmdAddComponent:
                 subparser_name=SubCommand.Add,
                 config_path="./api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -159,16 +164,18 @@ class TestSubCmdAddComponent:
                 # saving details
                 include_template_config=True,
                 base_file_path="./",
-                dry_run=False,
+                base_url="",
                 divide_api=False,
                 divide_http=False,
                 divide_http_request=False,
                 divide_http_response=False,
+                dry_run=False,
             ),
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
                 config_path="./test_dir/api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -177,11 +184,12 @@ class TestSubCmdAddComponent:
                 # saving details
                 include_template_config=True,
                 base_file_path="./test_dir",
-                dry_run=False,
+                base_url="",
                 divide_api=False,
                 divide_http=False,
                 divide_http_request=False,
                 divide_http_response=False,
+                dry_run=False,
             ),
             # Dry run
             # Doesn't include template section config
@@ -189,6 +197,7 @@ class TestSubCmdAddComponent:
                 subparser_name=SubCommand.Add,
                 config_path="./api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -197,16 +206,18 @@ class TestSubCmdAddComponent:
                 # saving details
                 include_template_config=False,
                 base_file_path="./",
-                dry_run=True,
+                base_url="",
                 divide_api=False,
                 divide_http=False,
                 divide_http_request=False,
                 divide_http_response=False,
+                dry_run=True,
             ),
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
                 config_path="./test_dir/api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -215,11 +226,12 @@ class TestSubCmdAddComponent:
                 # saving details
                 include_template_config=False,
                 base_file_path="./test_dir",
-                dry_run=True,
+                base_url="",
                 divide_api=False,
                 divide_http=False,
                 divide_http_request=False,
                 divide_http_response=False,
+                dry_run=True,
             ),
             # Dry run
             # Include template section config
@@ -227,6 +239,7 @@ class TestSubCmdAddComponent:
                 subparser_name=SubCommand.Add,
                 config_path="./api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -235,16 +248,18 @@ class TestSubCmdAddComponent:
                 # saving details
                 include_template_config=True,
                 base_file_path="./",
-                dry_run=True,
+                base_url="",
                 divide_api=True,
                 divide_http=False,
                 divide_http_request=False,
                 divide_http_response=False,
+                dry_run=True,
             ),
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
                 config_path="./test_dir/api.yaml",
                 # new mock API
+                tag="",
                 api_path=_Test_URL,
                 http_method=_Test_HTTP_Method,
                 parameters=_Dummy_Add_Arg_Parameter,
@@ -253,11 +268,12 @@ class TestSubCmdAddComponent:
                 # saving details
                 include_template_config=True,
                 base_file_path="./test_dir",
-                dry_run=True,
+                base_url="",
                 divide_api=True,
                 divide_http=False,
                 divide_http_request=False,
                 divide_http_response=False,
+                dry_run=True,
             ),
         ],
     )
@@ -310,19 +326,21 @@ class TestSubCmdAddComponent:
             subparser_name=SubCommand.Add,
             config_path=ut_config_path,
             # new mock API
+            tag=cmd_arg.tag,
             api_path=_Test_URL,
             http_method=_Test_HTTP_Method,
             parameters=_Dummy_Add_Arg_Parameter,
-            response_strategy=_Dummy_Add_Arg_Strategy,
-            response_value=_Dummy_Add_Arg_Values,
+            response_strategy=cmd_arg.resp_strategy,
+            response_value=cmd_arg.resp_details,
             # saving details
             include_template_config=cmd_arg.include_template_config,
             base_file_path=str(under_test_dir),
-            dry_run=False,
+            base_url=cmd_arg.base_url,
             divide_api=cmd_arg.divide_api,
             divide_http=cmd_arg.divide_http,
             divide_http_request=cmd_arg.divide_http_request,
             divide_http_response=cmd_arg.divide_http_response,
+            dry_run=False,
         )
 
         # new_api_config_has_new_api = YAML().read(path=under_test_api_config)

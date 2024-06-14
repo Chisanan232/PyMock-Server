@@ -1,0 +1,12 @@
+request:
+  method: 'GET'
+  parameters:
+    - name: 'arg1'
+      required: true
+      type: str
+response:
+  strategy: object
+  properties:
+    - name: responseCode
+      required: true
+      type: str

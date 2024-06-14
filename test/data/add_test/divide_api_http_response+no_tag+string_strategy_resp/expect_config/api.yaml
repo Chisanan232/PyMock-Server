@@ -1,0 +1,22 @@
+# Swagger API documentation config from Python FastAPI library
+name: ''
+description: ''
+mocked_apis:
+  template:
+    activate: true
+    load_config:
+      includes_apis: True
+      order:
+        - 'apis'
+        - 'apply'
+        - 'file'
+    values:
+      base_file_path: './test/data/add_test/divide_api_http_response+no_tag+string_strategy_resp/expect_config'
+      api:
+        config_path_format: '**-api.yaml'    # ex. ./foo/get_foo.yaml
+      http:
+        config_path_format: '**-http.yaml'
+      request:
+        config_path_format: '**-request.yaml'
+      response:
+        config_path_format: '**-response.yaml'

@@ -131,7 +131,7 @@ class TemplateConfigLoaderByScanFile(_BaseTemplateConfigLoader):
             # If it's setting the configuration like *HTTP*, *HTTP request* or something else which is for THE
             # SPECIFIC one *MockAPI* data model, it should also use THE SPECIFIC one configuration file to set
             # its request or response.
-            file_name_head = self._template_config_opts.config_path.split("-")[0]
+            file_name_head = "-".join(self._template_config_opts.config_path.split("-")[:-1])
             config_path = pathlib.Path(
                 path, self._template_config_opts._config_file_format.replace("**", file_name_head)
             )
