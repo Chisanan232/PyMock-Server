@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import Dict, List
+from typing import Dict, List, Union
 from unittest.mock import Mock
 
 from pymock_api.model.enums import ResponseStrategy
@@ -483,6 +483,22 @@ _Test_FastAPI_App_Type: str = "fastapi"
 # Test subcommand *add* options
 _Test_SubCommand_Add: str = "add"
 _Test_Response_Strategy: ResponseStrategy = ResponseStrategy.STRING
+_Dummy_Add_Arg_Parameter: List[dict] = [{"name": "arg1", "required": True, "type": "str"}]
+
+
+# Test subcommand *add* options
+def _generate_response_for_add(strategy: ResponseStrategy) -> tuple[ResponseStrategy, List[Union[str, dict]]]:
+    _strategy: ResponseStrategy = strategy
+    if strategy is ResponseStrategy.STRING:
+        _values: List[str] = ["This is foo."]
+    elif strategy is ResponseStrategy.FILE:
+        _values: List[str] = ["./example-response.json"]  # type: ignore[no-redef]
+    elif strategy is ResponseStrategy.OBJECT:
+        _values: List[dict] = [{"name": "responseCode", "required": True, "type": "str"}]  # type: ignore[no-redef]
+    else:
+        raise ValueError
+    return _strategy, _values  # type: ignore[return-value]
+
 
 # Test subcommand *check* options
 _Test_SubCommand_Check: str = "check"

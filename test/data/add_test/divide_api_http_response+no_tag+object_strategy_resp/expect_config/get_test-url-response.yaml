@@ -1,0 +1,5 @@
+strategy: object
+properties:
+  - name: responseCode
+    required: true
+    type: str
