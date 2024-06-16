@@ -235,7 +235,7 @@ class TestTemplateConfig(CheckableTestSuite):
     def _expected_deserialize_value(self, obj: TemplateConfig) -> None:
         assert isinstance(obj, TemplateConfig)
         assert obj.activate == _Mock_Template_Setting.get("activate")
-        assert obj.config_path_values.serialize() == _Mock_Template_Setting.get("values")
+        assert obj.config_path_values.serialize() == _Mock_Template_Setting.get("config_path_values")
         assert obj.apply.serialize() == _Mock_Template_Setting.get("apply")
 
 

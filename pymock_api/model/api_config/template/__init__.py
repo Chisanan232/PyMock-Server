@@ -160,7 +160,7 @@ class TemplateConfigPathValues(_Config, _Checkable):
 
     @property
     def key(self) -> str:
-        return "values"
+        return "config_path_values"
 
     def serialize(self, data: Optional["TemplateConfigPathValues"] = None) -> Optional[Dict[str, Any]]:
         base_file_path: str = self._get_prop(data, prop="base_file_path")
@@ -282,7 +282,7 @@ class TemplateConfig(_Config, _Checkable):
         return {
             "activate": activate,
             "load_config": load_config.serialize(),
-            "values": config_path_values.serialize(),
+            "config_path_values": config_path_values.serialize(),
             "apply": apply.serialize(),
         }
 
@@ -296,7 +296,7 @@ class TemplateConfig(_Config, _Checkable):
 
         template_values = TemplateConfigPathValues()
         template_values.absolute_model_key = self.key
-        self.config_path_values = template_values.deserialize(data.get("values", {}))
+        self.config_path_values = template_values.deserialize(data.get("config_path_values", {}))
 
         template_apply = TemplateApply()
         template_apply.absolute_model_key = self.key
@@ -314,7 +314,7 @@ class TemplateConfig(_Config, _Checkable):
         if not self.props_should_not_be_none(
             under_check={
                 f"{self.absolute_model_key}.load_config": self.load_config,
-                f"{self.absolute_model_key}.values": self.config_path_values,
+                f"{self.absolute_model_key}.config_path_values": self.config_path_values,
             },
         ):
             return False

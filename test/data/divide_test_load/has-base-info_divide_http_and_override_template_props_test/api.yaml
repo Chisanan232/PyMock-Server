@@ -6,7 +6,7 @@ mocked_apis:
     activate: true
     load_config:
       includes_apis: True
-    values:
+    config_path_values:
       base_file_path: './test/data/divide_test_load/has-base-info_divide_http_and_override_template_props_test/'
       api:
         config_path_format: '**-api.yaml'    # ex. ./foo/get_foo.yaml

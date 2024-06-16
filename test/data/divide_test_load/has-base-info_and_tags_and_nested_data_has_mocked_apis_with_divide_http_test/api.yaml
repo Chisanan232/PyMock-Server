@@ -10,7 +10,7 @@ mocked_apis:
         - 'apis'
         - 'apply'
         - 'file'
-    values:
+    config_path_values:
       base_file_path: './test/data/divide_test_load/has-base-info_and_tags_and_nested_data_has_mocked_apis_with_divide_http_test/'    # Default value should be current path './'
       api:
         config_path_format: '**-api.yaml'    # ex. ./foo/get_foo.yaml

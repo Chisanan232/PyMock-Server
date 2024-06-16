@@ -311,6 +311,7 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
 
     @property
     def _config_file_format(self) -> str:
+        print(f"[DEBUG in src] self.template.config_path_values: {self.template.config_path_values}")
         return self.template.config_path_values.api.config_path_format
 
     @property
