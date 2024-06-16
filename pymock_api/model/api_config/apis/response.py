@@ -220,7 +220,7 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
 
     @property
     def _template_setting(self) -> TemplateResponse:
-        return self._current_template.values.response
+        return self._current_template.config_path_values.response
 
     def is_work(self) -> bool:
         assert self.strategy is not None

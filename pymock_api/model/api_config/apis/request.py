@@ -122,7 +122,7 @@ class HTTPRequest(_DividableOnlyTemplatableConfig, _Checkable):
 
     @property
     def _template_setting(self) -> TemplateRequest:
-        return self._current_template.values.request
+        return self._current_template.config_path_values.request
 
     def get_one_param_by_name(self, name: str) -> Optional[APIParameter]:
         for param in self.parameters:

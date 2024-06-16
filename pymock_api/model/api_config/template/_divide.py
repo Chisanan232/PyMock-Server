@@ -97,7 +97,7 @@ class TemplatableConfigDividable(metaclass=ABCMeta):
                 and isinstance(data, BeDividedableAsTemplatableConfig)
                 and isinstance(data, _BaseTemplatableConfig)
             )
-            config_base_path = data._current_template.values.base_file_path
+            config_base_path = data._current_template.config_path_values.base_file_path
             tag_dir = str(pathlib.Path(config_base_path, data.tag)) if data.tag else ""
             config_file = f"{data.api_name}-{data.key.replace('<mock API>', 'api')}.yaml"
             path = pathlib.Path(config_base_path, data.tag, config_file)

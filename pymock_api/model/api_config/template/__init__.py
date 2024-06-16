@@ -252,7 +252,7 @@ class TemplateConfig(_Config, _Checkable):
 
     activate: bool = field(default=False)
     load_config: LoadConfig = field(default_factory=LoadConfig)
-    values: TemplateValues = field(default_factory=TemplateValues)
+    config_path_values: TemplateValues = field(default_factory=TemplateValues)
     apply: TemplateApply = field(default_factory=TemplateApply)
 
     _absolute_key: str = field(init=False, repr=False)
@@ -261,7 +261,7 @@ class TemplateConfig(_Config, _Checkable):
         return (
             self.activate == other.activate
             and self.load_config == other.load_config
-            and self.values == other.values
+            and self.config_path_values == other.config_path_values
             and self.apply == other.apply
         )
 
@@ -272,15 +272,15 @@ class TemplateConfig(_Config, _Checkable):
     def serialize(self, data: Optional["TemplateConfig"] = None) -> Optional[Dict[str, Any]]:
         activate: bool = self.activate or self._get_prop(data, prop="activate")
         load_config: LoadConfig = self.load_config or self._get_prop(data, prop="load_config")
-        values: TemplateValues = self.values or self._get_prop(data, prop="values")
+        config_path_values: TemplateValues = self.config_path_values or self._get_prop(data, prop="config_path_values")
         apply: TemplateApply = self.apply or self._get_prop(data, prop="apply")
-        if not (values and apply and activate is not None):
+        if not (config_path_values and apply and activate is not None):
             # TODO: Should it ranse an exception outside?
             return None
         return {
             "activate": activate,
             "load_config": load_config.serialize(),
-            "values": values.serialize(),
+            "values": config_path_values.serialize(),
             "apply": apply.serialize(),
         }
 
@@ -294,7 +294,7 @@ class TemplateConfig(_Config, _Checkable):
 
         template_values = TemplateValues()
         template_values.absolute_model_key = self.key
-        self.values = template_values.deserialize(data.get("values", {}))
+        self.config_path_values = template_values.deserialize(data.get("values", {}))
 
         template_apply = TemplateApply()
         template_apply.absolute_model_key = self.key
@@ -312,17 +312,17 @@ class TemplateConfig(_Config, _Checkable):
         if not self.props_should_not_be_none(
             under_check={
                 f"{self.absolute_model_key}.load_config": self.load_config,
-                f"{self.absolute_model_key}.values": self.values,
+                f"{self.absolute_model_key}.values": self.config_path_values,
             },
         ):
             return False
         self.load_config.stop_if_fail = self.stop_if_fail
-        self.values.stop_if_fail = self.stop_if_fail
+        self.config_path_values.stop_if_fail = self.stop_if_fail
         if self.apply:
             self.apply.stop_if_fail = self.stop_if_fail
         return (
             isinstance(self.activate, bool)
             and self.load_config.is_work()
-            and self.values.is_work()
+            and self.config_path_values.is_work()
             and (self.apply.is_work() if self.apply else True)
         )

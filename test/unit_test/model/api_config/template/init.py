@@ -203,7 +203,7 @@ class TestTemplateConfig(CheckableTestSuite):
         return TemplateConfig(
             activate=_Mock_Template_Config_Activate,
             load_config=MOCK_MODEL.template_load_config,
-            values=MOCK_MODEL.template_values,
+            config_path_values=MOCK_MODEL.template_values,
             apply=MOCK_MODEL.template_apply,
         )
 
@@ -216,16 +216,16 @@ class TestTemplateConfig(CheckableTestSuite):
         assert sut.activate == MOCK_MODEL.template_config.activate
 
         # Verify section *template.values*
-        assert sut.values.api == MOCK_MODEL.template_values_api
-        assert sut.values.request == MOCK_MODEL.template_values_request
-        assert sut.values.response == MOCK_MODEL.template_values_response
+        assert sut.config_path_values.api == MOCK_MODEL.template_values_api
+        assert sut.config_path_values.request == MOCK_MODEL.template_values_request
+        assert sut.config_path_values.response == MOCK_MODEL.template_values_response
 
         # Verify section *template.apply*
         assert sut.apply == MOCK_MODEL.template_apply
 
     def test_serialize_with_none(self, sut_with_nothing: TemplateConfig):
         sut_with_nothing.activate = None
-        sut_with_nothing.values = None
+        sut_with_nothing.config_path_values = None
         sut_with_nothing.apply = None
         super().test_serialize_with_none(sut_with_nothing)
 
@@ -235,7 +235,7 @@ class TestTemplateConfig(CheckableTestSuite):
     def _expected_deserialize_value(self, obj: TemplateConfig) -> None:
         assert isinstance(obj, TemplateConfig)
         assert obj.activate == _Mock_Template_Setting.get("activate")
-        assert obj.values.serialize() == _Mock_Template_Setting.get("values")
+        assert obj.config_path_values.serialize() == _Mock_Template_Setting.get("values")
         assert obj.apply.serialize() == _Mock_Template_Setting.get("apply")
 
 

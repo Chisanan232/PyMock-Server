@@ -90,7 +90,7 @@ class MockModel:
         return TemplateConfig(
             activate=_Mock_Template_Config_Activate,
             load_config=self.template_load_config,
-            values=self.template_values,
+            config_path_values=self.template_values,
             apply=self.template_apply,
         )
 

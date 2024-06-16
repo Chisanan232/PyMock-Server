@@ -113,7 +113,7 @@ class TemplateConfigLoaderByScanFile(_BaseTemplateConfigLoader):
     def load_config(self) -> None:
         customize_config_file_format = "**"
         config_file_format = f"[!_**]{customize_config_file_format}"
-        config_base_path = self._template_config_opts._template_config.values.base_file_path
+        config_base_path = self._template_config_opts._template_config.config_path_values.base_file_path
         all_paths = glob.glob(str(pathlib.Path(config_base_path, config_file_format)))
         api_config_path = str(pathlib.Path(config_base_path, self._template_config_opts.config_file_name))
         if os.path.exists(api_config_path):
@@ -169,7 +169,7 @@ class TemplateConfigLoaderByApply(_BaseTemplateConfigLoader):
             apply_apis = self._template_config_opts._template_config.apply.api
             all_ele_is_dict = list(map(lambda e: isinstance(e, dict), apply_apis))
             config_path_format = self._template_config_opts._config_file_format
-            config_base_path = self._template_config_opts._template_config.values.base_file_path
+            config_base_path = self._template_config_opts._template_config.config_path_values.base_file_path
             if False in all_ele_is_dict:
                 # no tag API
                 for api in apply_apis:

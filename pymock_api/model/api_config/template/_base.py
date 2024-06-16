@@ -67,7 +67,9 @@ class _BaseTemplatableConfig(_Config, ABC):
 
     def _get_dividing_config(self, data: dict) -> dict:
         base_file_path = (
-            self.base_file_path or self._current_template.values.base_file_path or self._default_base_file_path
+            self.base_file_path
+            or self._current_template.config_path_values.base_file_path
+            or self._default_base_file_path
         )
         dividing_config_path = str(pathlib.Path(base_file_path, self.config_path))
         if dividing_config_path and os.path.exists(dividing_config_path) and os.path.isfile(dividing_config_path):
