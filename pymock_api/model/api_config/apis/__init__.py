@@ -7,7 +7,7 @@ from ...._utils import YAML
 from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Checkable, _Config
-from ..template import TemplateAPI, TemplateConfig, TemplateHTTP
+from ..template import TemplateConfig, TemplateConfigPathAPI, TemplateConfigPathHTTP
 from ..template._base import _BaseTemplatableConfig
 from ..template._base_wrapper import _GeneralTemplatableConfig
 from ..template._divide import BeDividedableAsTemplatableConfig
@@ -189,7 +189,7 @@ class HTTP(_GeneralTemplatableConfig, _Checkable):
         return self
 
     @property
-    def _template_setting(self) -> TemplateHTTP:
+    def _template_setting(self) -> TemplateConfigPathHTTP:
         return self._current_template.config_path_values.http
 
     def is_work(self) -> bool:
@@ -423,7 +423,7 @@ class MockAPI(_GeneralTemplatableConfig, _Checkable):
         return self.http.is_work()
 
     @property
-    def _template_setting(self) -> TemplateAPI:
+    def _template_setting(self) -> TemplateConfigPathAPI:
         return self._current_template.config_path_values.api
 
     def set_request(self, method: str = "GET", parameters: Optional[List[Union[dict, APIParameter]]] = None) -> None:

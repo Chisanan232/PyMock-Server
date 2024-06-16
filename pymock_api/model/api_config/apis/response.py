@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 
 from ...enums import ResponseStrategy
 from .._base import _Checkable, _Config
-from ..template import TemplateResponse
+from ..template import TemplateConfigPathResponse
 from ..template._base_wrapper import _DividableOnlyTemplatableConfig
 from ._property import BaseProperty
 
@@ -219,7 +219,7 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
         return self
 
     @property
-    def _template_setting(self) -> TemplateResponse:
+    def _template_setting(self) -> TemplateConfigPathResponse:
         return self._current_template.config_path_values.response
 
     def is_work(self) -> bool:

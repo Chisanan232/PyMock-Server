@@ -25,11 +25,11 @@ from pymock_api.model.api_config._base import _HasItemsPropConfig
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
 from pymock_api.model.api_config.template import (
     LoadConfig,
-    TemplateAPI,
     TemplateApply,
+    TemplateConfigPathAPI,
+    TemplateConfigPathRequest,
+    TemplateConfigPathResponse,
     TemplateConfigPathValues,
-    TemplateRequest,
-    TemplateResponse,
 )
 from pymock_api.model.enums import ResponseStrategy
 
@@ -55,16 +55,16 @@ class MockModel:
         return MockAPIs(template=self.template_config, base=self.base_config, apis=self.mock_api)
 
     @property
-    def template_values_api(self) -> TemplateAPI:
-        return TemplateAPI()
+    def template_values_api(self) -> TemplateConfigPathAPI:
+        return TemplateConfigPathAPI()
 
     @property
-    def template_values_request(self) -> TemplateRequest:
-        return TemplateRequest()
+    def template_values_request(self) -> TemplateConfigPathRequest:
+        return TemplateConfigPathRequest()
 
     @property
-    def template_values_response(self) -> TemplateResponse:
-        return TemplateResponse()
+    def template_values_response(self) -> TemplateConfigPathResponse:
+        return TemplateConfigPathResponse()
 
     @property
     def template_values(self) -> TemplateConfigPathValues:

@@ -66,7 +66,7 @@ class LoadConfig(_Config, _Checkable):
 
 
 @dataclass(eq=False)
-class TemplateSetting(_Config, _Checkable, ABC):
+class TemplateConfigPathSetting(_Config, _Checkable, ABC):
     config_path_format: str = field(default_factory=str)
 
     _absolute_key: str = field(init=False, repr=False)
@@ -75,17 +75,17 @@ class TemplateSetting(_Config, _Checkable, ABC):
         if not self.config_path_format:
             self.config_path_format = self._default_config_path_format
 
-    def _compare(self, other: "TemplateSetting") -> bool:
+    def _compare(self, other: "TemplateConfigPathSetting") -> bool:
         return self.config_path_format == other.config_path_format
 
-    def serialize(self, data: Optional["TemplateSetting"] = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["TemplateConfigPathSetting"] = None) -> Optional[Dict[str, Any]]:
         config_path_format: str = self._get_prop(data, prop="config_path_format")
         return {
             "config_path_format": config_path_format,
         }
 
     @_Config._ensure_process_with_not_empty_value
-    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateSetting"]:
+    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfigPathSetting"]:
         self.config_path_format = data.get("config_path_format", self._default_config_path_format)
         return self
 
@@ -99,7 +99,7 @@ class TemplateSetting(_Config, _Checkable, ABC):
         return True
 
 
-class TemplateAPI(TemplateSetting):
+class TemplateConfigPathAPI(TemplateConfigPathSetting):
     @property
     def key(self) -> str:
         return "api"
@@ -109,7 +109,7 @@ class TemplateAPI(TemplateSetting):
         return "**-api.yaml"
 
 
-class TemplateHTTP(TemplateSetting):
+class TemplateConfigPathHTTP(TemplateConfigPathSetting):
     @property
     def key(self) -> str:
         return "http"
@@ -119,7 +119,7 @@ class TemplateHTTP(TemplateSetting):
         return "**-http.yaml"
 
 
-class TemplateRequest(TemplateSetting):
+class TemplateConfigPathRequest(TemplateConfigPathSetting):
     @property
     def key(self) -> str:
         return "request"
@@ -129,7 +129,7 @@ class TemplateRequest(TemplateSetting):
         return "**-request.yaml"
 
 
-class TemplateResponse(TemplateSetting):
+class TemplateConfigPathResponse(TemplateConfigPathSetting):
     @property
     def key(self) -> str:
         return "response"
@@ -142,10 +142,10 @@ class TemplateResponse(TemplateSetting):
 @dataclass(eq=False)
 class TemplateConfigPathValues(_Config, _Checkable):
     base_file_path: str = field(default="./")
-    api: TemplateAPI = field(default_factory=TemplateAPI)
-    http: TemplateHTTP = field(default_factory=TemplateHTTP)
-    request: TemplateRequest = field(default_factory=TemplateRequest)
-    response: TemplateResponse = field(default_factory=TemplateResponse)
+    api: TemplateConfigPathAPI = field(default_factory=TemplateConfigPathAPI)
+    http: TemplateConfigPathHTTP = field(default_factory=TemplateConfigPathHTTP)
+    request: TemplateConfigPathRequest = field(default_factory=TemplateConfigPathRequest)
+    response: TemplateConfigPathResponse = field(default_factory=TemplateConfigPathResponse)
 
     _absolute_key: str = field(init=False, repr=False)
 
@@ -183,19 +183,19 @@ class TemplateConfigPathValues(_Config, _Checkable):
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfigPathValues"]:
         self.base_file_path = data.get("base_file_path", "./")
 
-        template_api = TemplateAPI()
+        template_api = TemplateConfigPathAPI()
         template_api.absolute_model_key = self.key
         self.api = template_api.deserialize(data.get("api", {}))
 
-        template_http = TemplateHTTP()
+        template_http = TemplateConfigPathHTTP()
         template_http.absolute_model_key = self.key
         self.http = template_http.deserialize(data.get("http", {}))
 
-        template_request = TemplateRequest()
+        template_request = TemplateConfigPathRequest()
         template_request.absolute_model_key = self.key
         self.request = template_request.deserialize(data.get("request", {}))
 
-        template_response = TemplateResponse()
+        template_response = TemplateConfigPathResponse()
         template_response.absolute_model_key = self.key
         self.response = template_response.deserialize(data.get("response", {}))
         return self

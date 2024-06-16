@@ -13,13 +13,13 @@ from pymock_api.model.api_config import (
 )
 from pymock_api.model.api_config.template import (
     LoadConfig,
-    TemplateAPI,
     TemplateApply,
+    TemplateConfigPathAPI,
+    TemplateConfigPathHTTP,
+    TemplateConfigPathRequest,
+    TemplateConfigPathResponse,
+    TemplateConfigPathSetting,
     TemplateConfigPathValues,
-    TemplateHTTP,
-    TemplateRequest,
-    TemplateResponse,
-    TemplateSetting,
 )
 from pymock_api.model.api_config.template._load import (
     TemplateConfigLoaderByApply,
@@ -85,47 +85,47 @@ class TestLoadConfig(ConfigTestSpec):
         assert [o.value for o in obj.order] == _Mock_Load_Config["order"]
 
 
-class TestTemplateAPI(TemplateSettingTestSuite):
+class TestTemplateConfigPathAPI(TemplateSettingTestSuite):
     @property
     def under_test_data(self) -> dict:
         return _Mock_Template_API_Setting
 
     @property
-    def sut_object(self) -> Type[TemplateSetting]:
-        return TemplateAPI
+    def sut_object(self) -> Type[TemplateConfigPathSetting]:
+        return TemplateConfigPathAPI
 
 
-class TestTemplateHTTP(TemplateSettingTestSuite):
+class TestTemplateConfigPathHTTP(TemplateSettingTestSuite):
     @property
     def under_test_data(self) -> dict:
         return _Mock_Template_HTTP_Setting
 
     @property
-    def sut_object(self) -> Type[TemplateHTTP]:
-        return TemplateHTTP
+    def sut_object(self) -> Type[TemplateConfigPathHTTP]:
+        return TemplateConfigPathHTTP
 
 
-class TestTemplateRequest(TemplateSettingTestSuite):
+class TestTemplateConfigPathRequest(TemplateSettingTestSuite):
     @property
     def under_test_data(self) -> dict:
         return _Mock_Template_API_Request_Setting
 
     @property
-    def sut_object(self) -> Type[TemplateSetting]:
-        return TemplateRequest
+    def sut_object(self) -> Type[TemplateConfigPathSetting]:
+        return TemplateConfigPathRequest
 
 
-class TestTemplateResponse(TemplateSettingTestSuite):
+class TestTemplateConfigPathResponse(TemplateSettingTestSuite):
     @property
     def under_test_data(self) -> dict:
         return _Mock_Template_API_Response_Setting
 
     @property
-    def sut_object(self) -> Type[TemplateSetting]:
-        return TemplateResponse
+    def sut_object(self) -> Type[TemplateConfigPathSetting]:
+        return TemplateConfigPathResponse
 
 
-class TestTemplateValues(ConfigTestSpec):
+class TestTemplateConfigPathValues(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut(self) -> TemplateConfigPathValues:
         return TemplateConfigPathValues(

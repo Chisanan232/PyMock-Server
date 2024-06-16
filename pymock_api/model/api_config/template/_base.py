@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional, Type
 from ...._utils import YAML
 from ...._utils.file_opt import _BaseFileOperation
 from .._base import SelfType, _Config
-from . import TemplateConfig, TemplateSetting
+from . import TemplateConfig, TemplateConfigPathSetting
 
 
 @dataclass(eq=False)
@@ -79,7 +79,7 @@ class _BaseTemplatableConfig(_Config, ABC):
 
     @property
     @abstractmethod
-    def _template_setting(self) -> TemplateSetting:
+    def _template_setting(self) -> TemplateConfigPathSetting:
         pass
 
     def _deserialize_as(
