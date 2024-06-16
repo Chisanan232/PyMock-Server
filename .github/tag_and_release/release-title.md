@@ -1,1 +1,1 @@
-v0.1.0 - Newborn Python tool: **_PyMock-API_** <0001f9f9>🍻
+v0.2.0 - Support parsing version 2 and version 3 OpenAPI documentation <0001f9f9>🍻
