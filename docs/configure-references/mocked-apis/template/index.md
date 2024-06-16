@@ -21,10 +21,10 @@ It's a setting section for some detail adjustments about loading configuration. 
 [here](/configure-references/mocked-apis/template/load) to get more details.
 
 
-### ``values``
+### ``config_path_values``
 
 It's a setting section for some detail setting for scanning file to load configuration. Please refer to 
-[here](/configure-references/mocked-apis/template/values) to get more details.
+[here](/configure-references/mocked-apis/template/config_path_values) to get more details.
 
 
 ### ``apply``
