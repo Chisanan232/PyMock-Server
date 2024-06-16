@@ -140,7 +140,7 @@ class TemplateResponse(TemplateSetting):
 
 
 @dataclass(eq=False)
-class TemplateValues(_Config, _Checkable):
+class TemplateConfigPathValues(_Config, _Checkable):
     base_file_path: str = field(default="./")
     api: TemplateAPI = field(default_factory=TemplateAPI)
     http: TemplateHTTP = field(default_factory=TemplateHTTP)
@@ -149,7 +149,7 @@ class TemplateValues(_Config, _Checkable):
 
     _absolute_key: str = field(init=False, repr=False)
 
-    def _compare(self, other: "TemplateValues") -> bool:
+    def _compare(self, other: "TemplateConfigPathValues") -> bool:
         return (
             self.base_file_path == other.base_file_path
             and self.api == other.api
@@ -162,7 +162,7 @@ class TemplateValues(_Config, _Checkable):
     def key(self) -> str:
         return "values"
 
-    def serialize(self, data: Optional["TemplateValues"] = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["TemplateConfigPathValues"] = None) -> Optional[Dict[str, Any]]:
         base_file_path: str = self._get_prop(data, prop="base_file_path")
         api = self.api or self._get_prop(data, prop="api")
         http = self.http or self._get_prop(data, prop="http")
@@ -180,7 +180,7 @@ class TemplateValues(_Config, _Checkable):
         }
 
     @_Config._ensure_process_with_not_empty_value
-    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateValues"]:
+    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfigPathValues"]:
         self.base_file_path = data.get("base_file_path", "./")
 
         template_api = TemplateAPI()
@@ -252,7 +252,7 @@ class TemplateConfig(_Config, _Checkable):
 
     activate: bool = field(default=False)
     load_config: LoadConfig = field(default_factory=LoadConfig)
-    config_path_values: TemplateValues = field(default_factory=TemplateValues)
+    config_path_values: TemplateConfigPathValues = field(default_factory=TemplateConfigPathValues)
     apply: TemplateApply = field(default_factory=TemplateApply)
 
     _absolute_key: str = field(init=False, repr=False)
@@ -272,7 +272,9 @@ class TemplateConfig(_Config, _Checkable):
     def serialize(self, data: Optional["TemplateConfig"] = None) -> Optional[Dict[str, Any]]:
         activate: bool = self.activate or self._get_prop(data, prop="activate")
         load_config: LoadConfig = self.load_config or self._get_prop(data, prop="load_config")
-        config_path_values: TemplateValues = self.config_path_values or self._get_prop(data, prop="config_path_values")
+        config_path_values: TemplateConfigPathValues = self.config_path_values or self._get_prop(
+            data, prop="config_path_values"
+        )
         apply: TemplateApply = self.apply or self._get_prop(data, prop="apply")
         if not (config_path_values and apply and activate is not None):
             # TODO: Should it ranse an exception outside?
@@ -292,7 +294,7 @@ class TemplateConfig(_Config, _Checkable):
         load_config.absolute_model_key = self.key
         self.load_config = load_config.deserialize(data.get("load_config", {}))
 
-        template_values = TemplateValues()
+        template_values = TemplateConfigPathValues()
         template_values.absolute_model_key = self.key
         self.config_path_values = template_values.deserialize(data.get("values", {}))
 

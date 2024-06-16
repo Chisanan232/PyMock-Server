@@ -27,9 +27,9 @@ from pymock_api.model.api_config.template import (
     LoadConfig,
     TemplateAPI,
     TemplateApply,
+    TemplateConfigPathValues,
     TemplateRequest,
     TemplateResponse,
-    TemplateValues,
 )
 from pymock_api.model.enums import ResponseStrategy
 
@@ -67,8 +67,8 @@ class MockModel:
         return TemplateResponse()
 
     @property
-    def template_values(self) -> TemplateValues:
-        return TemplateValues(
+    def template_values(self) -> TemplateConfigPathValues:
+        return TemplateConfigPathValues(
             api=self.template_values_api, request=self.template_values_request, response=self.template_values_response
         )
 
