@@ -9,6 +9,7 @@ from pymock_api.model.enums import (
     ConfigLoadingOrder,
     OpenAPIVersion,
     ResponseStrategy,
+    ValueFormat,
     set_loading_function,
 )
 from pymock_api.model.openapi._base import ensure_get_schema_parser_factory
@@ -766,3 +767,27 @@ class TestOpenAPIVersion(EnumTestSuite):
         with pytest.raises(NotImplementedError) as exc_info:
             enum_obj.to_enum(value)
         assert re.search(re.escape(value), str(exc_info.value)) is not None
+
+
+class TestValueFormat(EnumTestSuite):
+    @pytest.fixture(scope="function")
+    def enum_obj(self) -> Type[ValueFormat]:
+        return ValueFormat
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            ValueFormat.String,
+            ValueFormat.Integer,
+            ValueFormat.BigDecimal,
+            ValueFormat.Boolean,
+            ValueFormat.Enum,
+            "string",
+            "integer",
+            "big_decimal",
+            "boolean",
+            "enum",
+        ],
+    )
+    def test_to_enum(self, value: Any, enum_obj: Type[ValueFormat]):
+        super().test_to_enum(value, enum_obj)
