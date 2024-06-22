@@ -159,7 +159,7 @@ _Not_Exist_File_Name: str = "not_exist.json"
 _Not_Json_File_Name: str = "test.yaml"
 _Unexpected_File_Name: str = ".file"
 
-# Test variables
+# Test variable
 # The expect value it should generate: 123456.123
 _Test_Variables_BigDecimal_USD: dict = {
     "name": "big_decimal_usd",

@@ -3,14 +3,14 @@ from typing import Any
 
 import pytest
 
-from pymock_api.model.api_config.variables import Variable
+from pymock_api.model.api_config.variable import Variable
 
 from ...._values import _Test_Variables_BigDecimal_USD, _Test_Variables_Currency_Code
 from ._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
 
 
 class TestVariable(CheckableTestSuite):
-    test_data_dir = "variables"
+    test_data_dir = "variable"
     set_checking_test_data(test_data_dir)
 
     @pytest.fixture(scope="function")
@@ -47,7 +47,7 @@ class TestVariable(CheckableTestSuite):
 
 
 class TestVariableWithEnumFormat(CheckableTestSuite):
-    test_data_dir = "variables"
+    test_data_dir = "variable"
     set_checking_test_data(test_data_dir)
 
     @pytest.fixture(scope="function")
