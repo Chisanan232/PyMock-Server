@@ -693,3 +693,18 @@ class ValueFormat(Enum):
             return ValueFormat(v.lower())
         else:
             return v
+
+
+class FormatStrategy(Enum):
+    RANDOM_STRING: str = "random_string"
+    RANDOM_INTEGER: str = "random_integer"
+    RANDOM_BIG_DECIMAL: str = "random_big_decimal"
+    RANDOM_BOOLEAN: str = "random_boolean"
+    FROM_ENUMS: str = "from_enums"
+
+    @staticmethod
+    def to_enum(v: Union[str, "FormatStrategy"]) -> "FormatStrategy":
+        if isinstance(v, str):
+            return FormatStrategy(v.lower())
+        else:
+            return v
