@@ -80,13 +80,6 @@ class Variable(_Config, _Checkable):
             accept_empty=False,
         ):
             return False
-        if not self.props_should_not_be_none(
-            under_check={
-                f"{self.absolute_model_key}.value_format": self.value_format,
-            },
-            accept_empty=False,
-        ):
-            return False
         assert self.value_format
         if self.value_format is ValueFormat.Enum and not self.props_should_not_be_none(
             under_check={
