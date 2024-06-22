@@ -7,6 +7,7 @@ import pytest
 
 from pymock_api.model.enums import (
     ConfigLoadingOrder,
+    FormatStrategy,
     OpenAPIVersion,
     ResponseStrategy,
     ValueFormat,
@@ -790,4 +791,28 @@ class TestValueFormat(EnumTestSuite):
         ],
     )
     def test_to_enum(self, value: Any, enum_obj: Type[ValueFormat]):
+        super().test_to_enum(value, enum_obj)
+
+
+class TestFormatStrategy(EnumTestSuite):
+    @pytest.fixture(scope="function")
+    def enum_obj(self) -> Type[FormatStrategy]:
+        return FormatStrategy
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            FormatStrategy.RANDOM_STRING,
+            FormatStrategy.RANDOM_INTEGER,
+            FormatStrategy.RANDOM_BIG_DECIMAL,
+            FormatStrategy.RANDOM_BOOLEAN,
+            FormatStrategy.FROM_ENUMS,
+            "random_string",
+            "random_integer",
+            "random_big_decimal",
+            "random_boolean",
+            "from_enums",
+        ],
+    )
+    def test_to_enum(self, value: Any, enum_obj: Type[FormatStrategy]):
         super().test_to_enum(value, enum_obj)
