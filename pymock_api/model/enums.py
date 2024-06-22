@@ -701,6 +701,7 @@ class FormatStrategy(Enum):
     RANDOM_BIG_DECIMAL: str = "random_big_decimal"
     RANDOM_BOOLEAN: str = "random_boolean"
     FROM_ENUMS: str = "from_enums"
+    CUSTOMIZE: str = "customize"
 
     @staticmethod
     def to_enum(v: Union[str, "FormatStrategy"]) -> "FormatStrategy":

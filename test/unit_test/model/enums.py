@@ -807,11 +807,12 @@ class TestFormatStrategy(EnumTestSuite):
             FormatStrategy.RANDOM_BIG_DECIMAL,
             FormatStrategy.RANDOM_BOOLEAN,
             FormatStrategy.FROM_ENUMS,
+            FormatStrategy.CUSTOMIZE,
             "random_string",
             "random_integer",
             "random_big_decimal",
             "random_boolean",
-            "from_enums",
+            "customize",
         ],
     )
     def test_to_enum(self, value: Any, enum_obj: Type[FormatStrategy]):
