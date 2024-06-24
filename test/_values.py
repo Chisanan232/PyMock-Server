@@ -221,6 +221,17 @@ _Test_Response_Property_Customize_Format: dict = {
     "format": _Customize_Format,
 }
 
+_Customize_Format_With_Self_Vars: dict = {
+    "strategy": "customize",
+    "enums": None,
+    "customize": "<big_decimal_usd> <currency_code>\n<big_decimal_twd> <currency_code>",
+    "variables": [
+        _Test_Variables_BigDecimal_USD,
+        _Test_Variables_BigDecimal_TWD,
+        _Test_Variables_Currency_Code,
+    ],
+}
+
 _Test_Response_Property_Int: dict = {
     "name": "id",
     "required": True,
