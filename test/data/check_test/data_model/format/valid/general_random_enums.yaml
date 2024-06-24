@@ -1,0 +1,4 @@
+strategy: 'from_enums'
+enums:
+  - ENUM_1
+  - ENUM_2

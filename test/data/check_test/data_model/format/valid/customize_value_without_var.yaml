@@ -1,0 +1,3 @@
+strategy: 'customize'
+customize: '<big_decimal_usd> <currency_code>\n<big_decimal_twd> <currency_code>'
+variables:
