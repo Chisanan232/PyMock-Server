@@ -4,6 +4,7 @@ from typing import Any, List
 import pytest
 
 from pymock_api.model.api_config.apis._format import Format
+from pymock_api.model.api_config.variable import Variable
 from pymock_api.model.enums import FormatStrategy
 
 from ....._values import _Customize_Format_With_Self_Vars
@@ -64,6 +65,47 @@ class TestFormat(CheckableTestSuite):
         with pytest.raises(ValueError) as exc_info:
             sut_with_nothing.deserialize(data={"strategy": None})
         assert re.search(r"(.,*){0,32}strategy(.,*){0,32}cannot be empty", str(exc_info.value), re.IGNORECASE)
+
+    @pytest.mark.parametrize(
+        ("ut_obj", "other_obj"),
+        [
+            (Format(strategy=FormatStrategy.RANDOM_STRING), Format(strategy=FormatStrategy.CUSTOMIZE)),
+            (
+                Format(strategy=FormatStrategy.FROM_ENUMS, enums=["ENUM_1", "ENUM_2"]),
+                Format(strategy=FormatStrategy.FROM_ENUMS, enums=["ENUM_3"]),
+            ),
+            (
+                Format(strategy=FormatStrategy.CUSTOMIZE, customize="sample customize"),
+                Format(strategy=FormatStrategy.CUSTOMIZE, customize="different customize"),
+            ),
+            (
+                Format(
+                    strategy=FormatStrategy.CUSTOMIZE,
+                    customize="customize with var",
+                    variables=[Variable(name="sample var")],
+                ),
+                Format(
+                    strategy=FormatStrategy.CUSTOMIZE,
+                    customize="customize with var",
+                    variables=[Variable(name="different var name")],
+                ),
+            ),
+            (
+                Format(
+                    strategy=FormatStrategy.CUSTOMIZE,
+                    customize="customize with var",
+                    variables=[Variable(name="sample var", value="20")],
+                ),
+                Format(
+                    strategy=FormatStrategy.CUSTOMIZE,
+                    customize="customize with var",
+                    variables=[Variable(name="sample var", value="30:2")],
+                ),
+            ),
+        ],
+    )
+    def test_compare(self, ut_obj: Format, other_obj: Format):
+        assert ut_obj != other_obj
 
     @pytest.mark.parametrize(
         ("strategy", "value", "enums", "customize"),

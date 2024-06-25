@@ -36,7 +36,37 @@ class Format(_Config, _Checkable):
         self.variables = [Variable().deserialize(i) if isinstance(i, dict) else i for i in self.variables]
 
     def _compare(self, other: "Format") -> bool:
-        return self.strategy == other.strategy and self.enums == other.enums and self.variables == other.variables
+        variables_prop_is_same: bool = True
+
+        # Compare property *variables* size
+        if self.variables and other.variables:
+            variables_prop_is_same = len(self.variables) == len(other.variables)
+
+        # Compare property *variables* details
+        if variables_prop_is_same is True:
+            for var in self.variables or []:
+                same_name_other_item = list(
+                    filter(
+                        lambda i: self._find_same_key_var_to_compare(self_var=var, other_var=i), other.variables or []
+                    )
+                )
+                if not same_name_other_item:
+                    variables_prop_is_same = False
+                    break
+                assert len(same_name_other_item) == 1
+                if var != same_name_other_item[0]:
+                    variables_prop_is_same = False
+                    break
+
+        return (
+            self.strategy == other.strategy
+            and self.enums == other.enums
+            and self.customize == other.customize
+            and variables_prop_is_same
+        )
+
+    def _find_same_key_var_to_compare(self, self_var: "Variable", other_var: "Variable") -> bool:
+        return self_var.name == other_var.name
 
     @property
     def key(self) -> str:
