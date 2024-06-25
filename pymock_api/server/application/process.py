@@ -1,4 +1,3 @@
-import re
 from abc import ABC, ABCMeta, abstractmethod
 from pydoc import locate
 from typing import Any, Dict, List, Union, cast
@@ -108,8 +107,9 @@ class HTTPRequestProcess(BaseHTTPProcess):
                                     status_code=400,
                                 )
                 # Check the data format of parameter
-                if param_info.value_format and not re.search(
-                    param_info.value_format, one_req_param_value, re.IGNORECASE
+                value_format = param_info.value_format
+                if param_info.value_format and not value_format.value_format_is_match(  # type: ignore[union-attr]
+                    value=one_req_param_value, enums=value_format.enums, customize=value_format.customize  # type: ignore[union-attr]
                 ):
                     return self._generate_http_response(
                         f"The format of data from Font-End site (value: *{one_req_param_value}*) is incorrect. Its "

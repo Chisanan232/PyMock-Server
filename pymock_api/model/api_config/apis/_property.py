@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Type
 
 from .._base import _Config, _HasItemsPropConfig
 from ..item import IteratorItem
+from ._format import Format
 
 
 @dataclass(eq=False)
@@ -11,8 +12,17 @@ class BaseProperty(_HasItemsPropConfig, ABC):
     name: str = field(default_factory=str)
     required: Optional[bool] = None
     value_type: Optional[str] = None  # A type value as string
-    value_format: Optional[str] = None
+    value_format: Optional[Format] = None
     items: Optional[List[IteratorItem]] = None  # type: ignore[assignment]
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.value_format is not None:
+            self._convert_value_format()
+
+    def _convert_value_format(self) -> None:
+        if isinstance(self.value_format, dict):
+            self.value_format = Format().deserialize(self.value_format)
 
     def _compare(self, other: "BaseProperty") -> bool:  # type: ignore[override]
         return (
@@ -48,15 +58,16 @@ class BaseProperty(_HasItemsPropConfig, ABC):
         name: str = self._get_prop(data, prop="name")
         required: bool = self._get_prop(data, prop="required")
         value_type: type = self._get_prop(data, prop="value_type")
-        value_format: str = self._get_prop(data, prop="value_format")
+        value_format = (data or self).value_format if (data and data.value_format) or self.value_format else None
         if not (name and value_type) or (required is None):
             return None
         serialized_data = {
             "name": name,
             "required": required,
             "type": value_type,
-            "format": value_format,
         }
+        if value_format:
+            serialized_data["format"] = value_format.serialize() if value_format is not None else None
         # serialize 'items'
         items = super().serialize(data)
         if items:
@@ -68,7 +79,10 @@ class BaseProperty(_HasItemsPropConfig, ABC):
         self.name = data.get("name", None)
         self.required = data.get("required", None)
         self.value_type = data.get("type", None)
-        self.value_format = data.get("format", None)
+        col_format = data.get("format", None)
+        if col_format is not None:
+            col_format = Format().deserialize(col_format)
+        self.value_format = col_format
 
         # deserialize 'items'
         super().deserialize(data)
@@ -94,6 +108,9 @@ class BaseProperty(_HasItemsPropConfig, ABC):
             config_value=self.required,
             accept_empty=False,
         ):
+            return False
+
+        if self.value_format and not self.value_format.is_work():
             return False
 
         if not self._prop_items_is_work():
