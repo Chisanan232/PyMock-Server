@@ -709,3 +709,19 @@ class FormatStrategy(Enum):
             return FormatStrategy(v.lower())
         else:
             return v
+
+    def chk_format_is_match(self, value: Any, enums: List[str] = [], customize: str = "") -> bool:
+        if self is FormatStrategy.RANDOM_STRING:
+            return isinstance(value, str)
+        elif self is FormatStrategy.RANDOM_INTEGER:
+            return isinstance(value, int)
+        elif self is FormatStrategy.RANDOM_BIG_DECIMAL:
+            return isinstance(value, (int, float))
+        elif self is FormatStrategy.RANDOM_BOOLEAN:
+            return isinstance(value, bool)
+        elif self is FormatStrategy.FROM_ENUMS:
+            return isinstance(value, str) and value in enums
+        elif self is FormatStrategy.CUSTOMIZE:
+            return re.search(re.escape(customize), str(value), re.IGNORECASE) is not None
+        else:
+            raise ValueError("This is program bug, please report this issue.")
