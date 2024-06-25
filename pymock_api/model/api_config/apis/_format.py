@@ -91,3 +91,7 @@ class Format(_Config, _Checkable):
         ):
             return False
         return True
+
+    def value_format_is_match(self, value: Any, enums: List[str] = [], customize: str = "") -> bool:
+        assert self.strategy
+        return self.strategy.chk_format_is_match(value=value, enums=enums, customize=customize)

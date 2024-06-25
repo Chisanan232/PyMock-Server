@@ -1,9 +1,10 @@
 import re
-from typing import Any
+from typing import Any, List
 
 import pytest
 
 from pymock_api.model.api_config.apis._format import Format
+from pymock_api.model.enums import FormatStrategy
 
 from ....._values import _Customize_Format_With_Self_Vars
 from .._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
@@ -63,3 +64,35 @@ class TestFormat(CheckableTestSuite):
         with pytest.raises(ValueError) as exc_info:
             sut_with_nothing.deserialize(data={"strategy": None})
         assert re.search(r"(.,*){0,32}strategy(.,*){0,32}cannot be empty", str(exc_info.value), re.IGNORECASE)
+
+    @pytest.mark.parametrize(
+        ("strategy", "value", "enums", "customize"),
+        [
+            (FormatStrategy.RANDOM_STRING, "random_string", [], ""),
+            (FormatStrategy.RANDOM_INTEGER, 123, [], ""),
+            (FormatStrategy.RANDOM_BIG_DECIMAL, 123.123, [], ""),
+            (FormatStrategy.RANDOM_BOOLEAN, True, [], ""),
+            (FormatStrategy.RANDOM_BOOLEAN, False, [], ""),
+            (FormatStrategy.FROM_ENUMS, "ENUM_2", ["ENUM_1", "ENUM_2", "ENUM_3"], ""),
+            (FormatStrategy.CUSTOMIZE, "sample_format", [], "sample_format"),
+        ],
+    )
+    def test_chk_format_is_match(self, strategy: FormatStrategy, value: Any, enums: List[str], customize: str):
+        format_model = Format(strategy=strategy, enums=enums, customize=customize)
+        assert format_model.value_format_is_match(value=value, enums=enums, customize=customize) is True
+
+    @pytest.mark.parametrize(
+        ("strategy", "value", "enums", "customize"),
+        [
+            (FormatStrategy.RANDOM_STRING, 123, [], ""),
+            (FormatStrategy.RANDOM_INTEGER, "not int value", [], ""),
+            (FormatStrategy.RANDOM_BIG_DECIMAL, "not int or float value", [], ""),
+            (FormatStrategy.RANDOM_BOOLEAN, "not bool value", [], ""),
+            (FormatStrategy.RANDOM_BOOLEAN, "False", [], ""),
+            (FormatStrategy.FROM_ENUMS, "not in enums", ["ENUM_1", "ENUM_2", "ENUM_3"], ""),
+            (FormatStrategy.CUSTOMIZE, "different_format", [], "sample_format"),
+        ],
+    )
+    def test_failure_chk_format_is_match(self, strategy: FormatStrategy, value: Any, enums: List[str], customize: str):
+        format_model = Format(strategy=strategy, enums=enums, customize=customize)
+        assert format_model.value_format_is_match(value=value, enums=enums, customize=customize) is False
