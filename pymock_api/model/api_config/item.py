@@ -3,6 +3,7 @@ from pydoc import locate
 from typing import Any, Dict, List, Optional, Type
 
 from ._base import _Config, _HasItemsPropConfig
+from .apis._format import Format
 
 
 @dataclass(eq=False)
@@ -10,15 +11,26 @@ class IteratorItem(_HasItemsPropConfig):
     name: str = field(default_factory=str)
     required: Optional[bool] = None
     value_type: Optional[str] = None  # A type value as string
+    value_format: Optional[Format] = None
     items: Optional[List["IteratorItem"]] = None  # type: ignore[assignment]
 
     _absolute_key: str = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        if self.value_format is not None:
+            self._convert_value_format()
+
+    def _convert_value_format(self) -> None:
+        if isinstance(self.value_format, dict):
+            self.value_format = Format().deserialize(self.value_format)
 
     def _compare(self, other: "IteratorItem") -> bool:  # type: ignore[override]
         return (
             self.name == other.name
             and self.required == other.required
             and self.value_type == other.value_type
+            and self.value_format == other.value_format
             # Compare property *items*
             and super()._compare(other)
         )
@@ -50,6 +62,7 @@ class IteratorItem(_HasItemsPropConfig):
         name: str = self._get_prop(data, prop="name")
         required: bool = self._get_prop(data, prop="required")
         value_type: type = self._get_prop(data, prop="value_type")
+        value_format = (data or self).value_format if (data and data.value_format) or self.value_format else None
         if not value_type or (required is None):
             return None
         serialized_data = {
@@ -58,6 +71,8 @@ class IteratorItem(_HasItemsPropConfig):
         }
         if name:
             serialized_data["name"] = name
+        if value_format:
+            serialized_data["format"] = value_format.serialize() if value_format is not None else None
         # serialize 'items'
         items = super().serialize(data)
         if items:
@@ -69,6 +84,10 @@ class IteratorItem(_HasItemsPropConfig):
         self.name = data.get("name", None)
         self.required = data.get("required", None)
         self.value_type = data.get("type", None)
+        col_format = data.get("format", None)
+        if col_format is not None:
+            col_format = Format().deserialize(col_format)
+        self.value_format = col_format
 
         # deserialize 'items'
         super().deserialize(data)
@@ -97,6 +116,11 @@ class IteratorItem(_HasItemsPropConfig):
             accept_empty=False,
         ):
             return False
+
+        if self.value_format:
+            self.value_format.stop_if_fail = self.stop_if_fail
+            if not self.value_format.is_work():
+                return False
 
         # check 'items'
         items_chk = super().is_work()

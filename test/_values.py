@@ -245,7 +245,9 @@ _Test_Response_Property_Str: dict = {
     "name": "name",
     "required": True,
     "type": "str",
-    "format": None,
+    "format": {
+        "strategy": "random_string",
+    },
 }
 _Test_Response_Property_List: dict = {
     "name": "keys",
