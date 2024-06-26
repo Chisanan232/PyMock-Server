@@ -1,0 +1,22 @@
+strategy: object
+properties:
+  - name: data
+    required: True
+    type: str
+    format:
+      strategy: 'customize'
+      customize:
+      variables:
+        - name: big_decimal_usd
+          value_format: big_decimal
+          value: 30:3
+        - name: big_decimal_twd
+          value: 30:0
+          value_format: big_decimal
+          range: 0-100
+        - name: currency_code
+          value_format: enum
+          enum:
+            - TWD
+            - USD
+            - JPY
