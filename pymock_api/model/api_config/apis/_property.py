@@ -110,8 +110,10 @@ class BaseProperty(_HasItemsPropConfig, ABC):
         ):
             return False
 
-        if self.value_format and not self.value_format.is_work():
-            return False
+        if self.value_format:
+            self.value_format.stop_if_fail = self.stop_if_fail
+            if not self.value_format.is_work():
+                return False
 
         if not self._prop_items_is_work():
             return False
