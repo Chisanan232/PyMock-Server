@@ -28,3 +28,4 @@ response:
       required: False
       type: list
       format:
+      is_empty: true
