@@ -1,3 +1,4 @@
+from abc import ABC
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -125,3 +126,41 @@ class Format(_Config, _Checkable):
     def value_format_is_match(self, value: Any, enums: List[str] = [], customize: str = "") -> bool:
         assert self.strategy
         return self.strategy.chk_format_is_match(value=value, enums=enums, customize=customize)
+
+
+@dataclass(eq=False)
+class _HasFormatPropConfig(_Config, _Checkable, ABC):
+    value_format: Optional[Format] = None
+
+    def __post_init__(self) -> None:
+        if self.value_format is not None:
+            self._convert_value_format()
+
+    def _convert_value_format(self) -> None:
+        if isinstance(self.value_format, dict):
+            self.value_format = Format().deserialize(self.value_format)
+
+    def _compare(self, other: "_HasFormatPropConfig") -> bool:
+        return self.value_format == other.value_format
+
+    def serialize(self, data: Optional["_HasFormatPropConfig"] = None) -> Optional[Dict[str, Any]]:
+        value_format = (data or self).value_format if (data and data.value_format) or self.value_format else None
+        serialized_data = {}
+        if value_format:
+            serialized_data["format"] = value_format.serialize() if value_format is not None else None
+        return serialized_data
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["_HasFormatPropConfig"]:
+        col_format = data.get("format", None)
+        if col_format is not None:
+            col_format = Format().deserialize(col_format)
+        self.value_format = col_format
+        return self
+
+    def is_work(self) -> bool:
+        if self.value_format:
+            self.value_format.stop_if_fail = self.stop_if_fail
+            if not self.value_format.is_work():
+                return False
+        return True
