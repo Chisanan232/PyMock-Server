@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from ...enums import FormatStrategy
-from .._base import _Checkable, _Config
+from .._base import _BaseConfig, _Checkable, _Config
 from ..variable import Variable
 
 
@@ -129,25 +129,30 @@ class Format(_Config, _Checkable):
 
 
 @dataclass(eq=False)
-class _HasFormatPropConfig(_Config, _Checkable, ABC):
+class _HasFormatPropConfig(_BaseConfig, _Checkable, ABC):
     value_format: Optional[Format] = None
 
     def __post_init__(self) -> None:
         if self.value_format is not None:
             self._convert_value_format()
+        super().__post_init__()
 
     def _convert_value_format(self) -> None:
         if isinstance(self.value_format, dict):
             self.value_format = Format().deserialize(self.value_format)
 
     def _compare(self, other: "_HasFormatPropConfig") -> bool:
-        return self.value_format == other.value_format
+        return self.value_format == other.value_format and super()._compare(other)
 
     def serialize(self, data: Optional["_HasFormatPropConfig"] = None) -> Optional[Dict[str, Any]]:
         value_format = (data or self).value_format if (data and data.value_format) or self.value_format else None
         serialized_data = {}
         if value_format:
             serialized_data["format"] = value_format.serialize() if value_format is not None else None
+
+        serialized_data_model = super().serialize(data)  # type: ignore[safe-super]
+        if serialized_data_model:
+            serialized_data.update(serialized_data_model)
         return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
@@ -156,6 +161,8 @@ class _HasFormatPropConfig(_Config, _Checkable, ABC):
         if col_format is not None:
             col_format = Format().deserialize(col_format)
         self.value_format = col_format
+
+        super().deserialize(data)  # type: ignore[safe-super]
         return self
 
     def is_work(self) -> bool:
@@ -163,4 +170,8 @@ class _HasFormatPropConfig(_Config, _Checkable, ABC):
             self.value_format.stop_if_fail = self.stop_if_fail
             if not self.value_format.is_work():
                 return False
+
+        is_work = super().is_work()  # type: ignore[safe-super]
+        if is_work is False:
+            return False
         return True
