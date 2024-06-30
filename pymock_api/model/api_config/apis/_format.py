@@ -1,6 +1,9 @@
+import copy
+import re
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from decimal import Decimal
+from typing import Any, Dict, List, Optional, Union
 
 from ...enums import FormatStrategy
 from .._base import _BaseConfig, _Checkable, _Config
@@ -126,6 +129,22 @@ class Format(_Config, _Checkable):
     def value_format_is_match(self, value: Any, enums: List[str] = [], customize: str = "") -> bool:
         assert self.strategy
         return self.strategy.chk_format_is_match(value=value, enums=enums, customize=customize)
+
+    def generate_value(self) -> Union[str, int, bool, Decimal]:
+        assert self.strategy
+        if self.strategy is FormatStrategy.CUSTOMIZE:
+            all_vars_in_customize = re.findall(r"<\w{1,128}>", str(self.customize), re.IGNORECASE)
+            value = copy.copy(self.customize)
+            for var in all_vars_in_customize:
+                pure_var = var.replace("<", "").replace(">", "")
+                find_result: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
+                assert len(find_result) == 1, "Cannot find the mapping name of variable setting."
+                assert find_result[0].value_format
+                new_value = find_result[0].value_format.generate_value(enums=find_result[0].enum or [])
+                value = value.replace(var, str(new_value))
+            return value
+        else:
+            return self.strategy.generate_not_customize_value(enums=self.enums)
 
 
 @dataclass(eq=False)

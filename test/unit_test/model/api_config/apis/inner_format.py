@@ -1,11 +1,12 @@
 import re
-from typing import Any, List
+from decimal import Decimal
+from typing import Any, List, Optional
 
 import pytest
 
 from pymock_api.model.api_config.apis._format import Format
 from pymock_api.model.api_config.variable import Variable
-from pymock_api.model.enums import FormatStrategy
+from pymock_api.model.enums import FormatStrategy, ValueFormat
 
 from ....._values import _Customize_Format_With_Self_Vars
 from .._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
@@ -138,3 +139,47 @@ class TestFormat(CheckableTestSuite):
     def test_failure_chk_format_is_match(self, strategy: FormatStrategy, value: Any, enums: List[str], customize: str):
         format_model = Format(strategy=strategy, enums=enums, customize=customize)
         assert format_model.value_format_is_match(value=value, enums=enums, customize=customize) is False
+
+    @pytest.mark.parametrize(
+        ("strategy", "enums", "customize", "expect_type", "expect_value_format"),
+        [
+            (FormatStrategy.RANDOM_STRING, [], "", str, None),
+            (FormatStrategy.RANDOM_INTEGER, [], "", int, None),
+            (FormatStrategy.RANDOM_BIG_DECIMAL, [], "", Decimal, None),
+            (FormatStrategy.RANDOM_BOOLEAN, [], "", bool, None),
+            (FormatStrategy.FROM_ENUMS, ["ENUM_1", "ENUM_2", "ENUM_3"], "", str, None),
+            (
+                FormatStrategy.CUSTOMIZE,
+                [],
+                "<big_decimal_price> <fiat_currency_code>",
+                str,
+                r"\d{0,64}(\.)\d{0,64} \w{0,10}",
+            ),
+        ],
+    )
+    def test_generate_not_customize_value(
+        self,
+        strategy: FormatStrategy,
+        enums: List[str],
+        customize: str,
+        expect_type: type,
+        expect_value_format: Optional[str],
+    ):
+        format_model = Format(
+            strategy=strategy,
+            enums=enums,
+            customize=customize,
+            variables=[
+                Variable(name="big_decimal_price", value_format=ValueFormat.BigDecimal, value="", range="", enum=[]),
+                Variable(
+                    name="fiat_currency_code", value_format=ValueFormat.Enum, value="", range="", enum=["USD", "TWD"]
+                ),
+            ],
+        )
+        value = format_model.generate_value()
+        assert value is not None
+        assert isinstance(value, expect_type)
+        if enums:
+            assert value in enums
+        if expect_value_format:
+            assert re.search(expect_value_format, str(value), re.IGNORECASE) is not None
