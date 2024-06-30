@@ -1,5 +1,8 @@
+import random
 import re
+import string
 from collections import namedtuple
+from decimal import Decimal
 from enum import Enum
 from pydoc import locate
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -723,5 +726,23 @@ class FormatStrategy(Enum):
             return isinstance(value, str) and value in enums
         elif self is FormatStrategy.CUSTOMIZE:
             return re.search(re.escape(customize), str(value), re.IGNORECASE) is not None
+        else:
+            raise ValueError("This is program bug, please report this issue.")
+
+    def generate_not_customize_value(self, enums: List[str] = []) -> Union[str, int, bool, Decimal]:
+        if self is FormatStrategy.RANDOM_STRING:
+            return "".join([string.ascii_letters for _ in range(10)])
+        elif self is FormatStrategy.RANDOM_INTEGER:
+            return random.randint(-127, 128)
+        elif self is FormatStrategy.RANDOM_BIG_DECIMAL:
+            integer = random.randint(-127, 128)
+            decimal = random.randint(-127, 128)
+            return Decimal(f"{integer}.{decimal}")
+        elif self is FormatStrategy.RANDOM_BOOLEAN:
+            return random.choice([True, False])
+        elif self is FormatStrategy.FROM_ENUMS:
+            return random.choice(enums)
+        elif self is FormatStrategy.CUSTOMIZE:
+            raise ValueError("This function doesn't support *FormatStrategy.CUSTOMIZE*, please report this issue.")
         else:
             raise ValueError("This is program bug, please report this issue.")

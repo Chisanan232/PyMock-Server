@@ -1,5 +1,6 @@
 import re
 from abc import ABCMeta, abstractmethod
+from decimal import Decimal
 from enum import Enum
 from typing import Any, List, Type
 
@@ -847,3 +848,25 @@ class TestFormatStrategy(EnumTestSuite):
     )
     def test_failure_chk_format_is_match(self, strategy: FormatStrategy, value: Any, enums: List[str], customize: str):
         assert strategy.chk_format_is_match(value=value, enums=enums, customize=customize) is False
+
+    @pytest.mark.parametrize(
+        ("strategy", "enums", "expect_type"),
+        [
+            (FormatStrategy.RANDOM_STRING, [], str),
+            (FormatStrategy.RANDOM_INTEGER, [], int),
+            (FormatStrategy.RANDOM_BIG_DECIMAL, [], Decimal),
+            (FormatStrategy.RANDOM_BOOLEAN, [], bool),
+            (FormatStrategy.FROM_ENUMS, ["ENUM_1", "ENUM_2", "ENUM_3"], str),
+        ],
+    )
+    def test_generate_not_customize_value(self, strategy: FormatStrategy, enums: List[str], expect_type: type):
+        value = strategy.generate_not_customize_value(enums=enums)
+        assert value is not None
+        assert isinstance(value, expect_type)
+        if enums:
+            assert value in enums
+
+    @pytest.mark.parametrize("strategy", [FormatStrategy.CUSTOMIZE])
+    def test_failure_generate_not_customize_value(self, strategy: FormatStrategy):
+        with pytest.raises(ValueError):
+            assert strategy.generate_not_customize_value()
