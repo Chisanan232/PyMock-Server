@@ -731,11 +731,15 @@ class FormatStrategy(Enum):
 
     def generate_not_customize_value(self, enums: List[str] = []) -> Union[str, int, bool, Decimal]:
         if self is FormatStrategy.RANDOM_STRING:
+            # TODO: Add setting about the string size or string detail format, i.e., integer format string?
             return "".join([string.ascii_letters for _ in range(10)])
         elif self is FormatStrategy.RANDOM_INTEGER:
+            # TODO: Add setting about the range?
             return random.randint(-127, 128)
         elif self is FormatStrategy.RANDOM_BIG_DECIMAL:
+            # TODO: Add setting about the range?
             integer = random.randint(-127, 128)
+            # TODO: Add setting about the range?
             decimal = random.randint(-127, 128)
             return Decimal(f"{integer}.{decimal}")
         elif self is FormatStrategy.RANDOM_BOOLEAN:
