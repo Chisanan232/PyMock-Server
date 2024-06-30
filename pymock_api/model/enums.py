@@ -697,6 +697,26 @@ class ValueFormat(Enum):
         else:
             return v
 
+    def generate_value(self, enums: List[str] = []) -> Union[str, int, bool, Decimal]:
+        if self is ValueFormat.String:
+            # TODO: Add setting about the string size or string detail format, i.e., integer format string?
+            return "".join([string.ascii_letters for _ in range(10)])
+        elif self is ValueFormat.Integer:
+            # TODO: Add setting about the range?
+            return random.randint(-127, 128)
+        elif self is ValueFormat.BigDecimal:
+            # TODO: Add setting about the range?
+            integer = random.randint(-127, 128)
+            # TODO: Add setting about the range?
+            decimal = random.randint(0, 128)
+            return Decimal(f"{integer}.{decimal}")
+        elif self is ValueFormat.Boolean:
+            return random.choice([True, False])
+        elif self is ValueFormat.Enum:
+            return random.choice(enums)
+        else:
+            raise ValueError("This is program bug, please report this issue.")
+
 
 class FormatStrategy(Enum):
     RANDOM_STRING: str = "random_string"

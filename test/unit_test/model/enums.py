@@ -794,6 +794,23 @@ class TestValueFormat(EnumTestSuite):
     def test_to_enum(self, value: Any, enum_obj: Type[ValueFormat]):
         super().test_to_enum(value, enum_obj)
 
+    @pytest.mark.parametrize(
+        ("formatter", "enums", "expect_type"),
+        [
+            (ValueFormat.String, [], str),
+            (ValueFormat.Integer, [], int),
+            (ValueFormat.BigDecimal, [], Decimal),
+            (ValueFormat.Boolean, [], bool),
+            (ValueFormat.Enum, ["ENUM_1", "ENUM_2", "ENUM_3"], str),
+        ],
+    )
+    def test_generate_not_customize_value(self, formatter: ValueFormat, enums: List[str], expect_type: type):
+        value = formatter.generate_value(enums=enums)
+        assert value is not None
+        assert isinstance(value, expect_type)
+        if enums:
+            assert value in enums
+
 
 class TestFormatStrategy(EnumTestSuite):
     @pytest.fixture(scope="function")
