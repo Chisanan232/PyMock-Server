@@ -740,7 +740,7 @@ class FormatStrategy(Enum):
             # TODO: Add setting about the range?
             integer = random.randint(-127, 128)
             # TODO: Add setting about the range?
-            decimal = random.randint(-127, 128)
+            decimal = random.randint(0, 128)
             return Decimal(f"{integer}.{decimal}")
         elif self is FormatStrategy.RANDOM_BOOLEAN:
             return random.choice([True, False])
