@@ -12,6 +12,7 @@ from ...._values import (
 )
 from ._base import (
     CheckableTestSuite,
+    HasFormatPropConfigTestSuite,
     HasItemsPropConfigTestSuite,
     _assertion_msg,
     set_checking_test_data,
@@ -93,7 +94,7 @@ class TestIteratorItem(CheckableTestSuite, HasItemsPropConfigTestSuite):
         }
 
 
-class TestIteratorItemWithFormat(HasItemsPropConfigTestSuite):
+class TestIteratorItemWithFormat(HasItemsPropConfigTestSuite, HasFormatPropConfigTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> IteratorItem:
         return IteratorItem(
@@ -139,6 +140,7 @@ class TestIteratorItemWithFormat(HasItemsPropConfigTestSuite):
             re.IGNORECASE,
         )
 
+    # for base *HasItemsPropConfigTestSuite* and *HasFormatPropConfigTestSuite*
     @property
     def _data_model_not_instantiate_yet(self) -> Type[IteratorItem]:
         return IteratorItem
