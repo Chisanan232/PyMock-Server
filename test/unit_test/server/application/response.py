@@ -1,7 +1,8 @@
 import json
 import os
 import re
-from typing import Type
+from decimal import Decimal
+from typing import Type, Union
 from unittest.mock import Mock, mock_open, patch
 
 import pytest
@@ -9,7 +10,9 @@ import pytest
 from pymock_api.exceptions import FileFormatNotSupport
 from pymock_api.model.api_config import IteratorItem, ResponseProperty
 from pymock_api.model.api_config.apis import HTTPResponse
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.api_config.apis._format import Format
+from pymock_api.model.api_config.variable import Variable
+from pymock_api.model.enums import FormatStrategy, ResponseStrategy, ValueFormat
 from pymock_api.server.application.response import HTTPResponse as _HTTPResponse
 
 from ...._values import (
@@ -409,6 +412,166 @@ class TestInnerHTTPResponse:
         resp_data = http_resp.generate(data=mock_response_data)
         assert resp_data is not None
         assert resp_data == expect_result
+
+    @pytest.mark.parametrize(
+        ("mock_response_data", "expect_result"),
+        [
+            # *str* type value with *format* (random string)
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="role",
+                            required=True,
+                            value_type="str",
+                            value_format=Format(strategy=FormatStrategy.RANDOM_STRING),
+                        )
+                    ],
+                ),
+                str,
+            ),
+            # *int* type value with *format* (random integer)
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="role",
+                            required=True,
+                            value_type="int",
+                            value_format=Format(strategy=FormatStrategy.RANDOM_INTEGER),
+                        )
+                    ],
+                ),
+                int,
+            ),
+            # *float* type value with *format* (random big decimal)
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="role",
+                            required=True,
+                            value_type="float",
+                            value_format=Format(strategy=FormatStrategy.RANDOM_BIG_DECIMAL),
+                        )
+                    ],
+                ),
+                Decimal,
+            ),
+            # *bool* type value with *format* (random boolean)
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="role",
+                            required=True,
+                            value_type="bool",
+                            value_format=Format(strategy=FormatStrategy.RANDOM_BOOLEAN),
+                        )
+                    ],
+                ),
+                bool,
+            ),
+            # *str* type value with *format* (from enums value)
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="role",
+                            required=True,
+                            value_type="str",
+                            value_format=Format(
+                                strategy=FormatStrategy.FROM_ENUMS, enums=["ENUM_1", "ENUM_2", "ENUM_3"]
+                            ),
+                        )
+                    ],
+                ),
+                ["ENUM_1", "ENUM_2", "ENUM_3"],
+            ),
+            # *str* type value with *format* (customize value with big decimal)
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="role",
+                            required=True,
+                            value_type="str",
+                            value_format=Format(
+                                strategy=FormatStrategy.CUSTOMIZE,
+                                customize="<price_value>",
+                                variables=[
+                                    Variable(
+                                        name="price_value",
+                                        value_format=ValueFormat.BigDecimal,
+                                        value=None,
+                                        range=None,
+                                        enum=None,
+                                    )
+                                ],
+                            ),
+                        )
+                    ],
+                ),
+                r"\d{0,64}(\.)\d{0,64}",
+            ),
+            # *str* type value with *format* (customize value with big decimal)
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="role",
+                            required=True,
+                            value_type="float",
+                            value_format=Format(
+                                strategy=FormatStrategy.CUSTOMIZE,
+                                customize="<price_value> <currency_code>",
+                                variables=[
+                                    Variable(
+                                        name="price_value",
+                                        value_format=ValueFormat.BigDecimal,
+                                        value=None,
+                                        range=None,
+                                        enum=None,
+                                    ),
+                                    Variable(
+                                        name="currency_code",
+                                        value_format=ValueFormat.Enum,
+                                        value=None,
+                                        range=None,
+                                        enum=["USD", "TWD"],
+                                    ),
+                                ],
+                            ),
+                        )
+                    ],
+                ),
+                r"\d{0,64}(\.)\d{0,64} \w{0,10}",
+            ),
+        ],
+    )
+    def test_response_with_object_with_format(
+        self, http_resp: Type[_HTTPResponse], mock_response_data: HTTPResponse, expect_result: Union[type, list, str]
+    ):
+        resp_data = http_resp.generate(data=mock_response_data)
+        assert resp_data is not None
+        resp_data_value = resp_data["role"]
+        if isinstance(expect_result, type):
+            assert isinstance(resp_data_value, expect_result)
+        elif isinstance(expect_result, list):
+            assert resp_data_value in expect_result
+        elif isinstance(expect_result, str):
+            assert re.search(expect_result, str(resp_data_value), re.IGNORECASE) is not None
+        else:
+            raise AssertionError(
+                f"Doesn't implement the verify logic at this test scenario (expect_result: '{expect_result}')."
+            )
 
     def test_response_with_invalid_strategy(self, http_resp: Type[_HTTPResponse]):
         with pytest.raises(TypeError) as exc_info:
