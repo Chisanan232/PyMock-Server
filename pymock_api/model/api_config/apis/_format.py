@@ -194,3 +194,10 @@ class _HasFormatPropConfig(_BaseConfig, _Checkable, ABC):
         if is_work is False:
             return False
         return True
+
+    def generate_value_by_format(self, default: str = "no default") -> Union[str, int, bool, Decimal]:
+        if self.value_format is not None:
+            value = self.value_format.generate_value()
+        else:
+            value = default
+        return value

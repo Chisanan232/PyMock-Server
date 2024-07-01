@@ -5,7 +5,8 @@ import re
 from abc import ABC, ABCMeta, abstractmethod
 from collections import namedtuple
 from copy import copy
-from typing import Callable, Dict, List, Optional, Type
+from decimal import Decimal
+from typing import Callable, Dict, List, Optional, Type, Union
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
@@ -23,6 +24,7 @@ from pymock_api.model.api_config import (
 )
 from pymock_api.model.api_config._base import _HasItemsPropConfig
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
+from pymock_api.model.api_config.apis._format import Format, _HasFormatPropConfig
 from pymock_api.model.api_config.template import (
     LoadConfig,
     TemplateApply,
@@ -31,7 +33,8 @@ from pymock_api.model.api_config.template import (
     TemplateConfigPathResponse,
     TemplateConfigPathValues,
 )
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.api_config.variable import Variable
+from pymock_api.model.enums import FormatStrategy, ResponseStrategy, ValueFormat
 
 from ...._values import (
     _Base_URL,
@@ -372,6 +375,103 @@ class HasItemsPropConfigTestSuite(ConfigTestSpec, ABC):
     @property
     @abstractmethod
     def _data_model_constructor(self) -> dict:
+        pass
+
+
+class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
+
+    @pytest.mark.parametrize(
+        ("value_format", "default", "expect_value"),
+        [
+            (None, None, "no default"),
+            (None, "some default", "some default"),
+            (Format(strategy=FormatStrategy.RANDOM_STRING), "", str),
+            (Format(strategy=FormatStrategy.RANDOM_INTEGER), "", int),
+            (Format(strategy=FormatStrategy.RANDOM_BIG_DECIMAL), "", Decimal),
+            (Format(strategy=FormatStrategy.RANDOM_BOOLEAN), "", bool),
+            (Format(strategy=FormatStrategy.FROM_ENUMS, enums=["ENUM_1", "ENUM_2"]), "", ["ENUM_1", "ENUM_2"]),
+            (
+                Format(
+                    strategy=FormatStrategy.CUSTOMIZE,
+                    customize="<test_var>",
+                    variables=[
+                        Variable(name="test_var", value_format=ValueFormat.String, value=None, range=None, enum=None)
+                    ],
+                ),
+                "",
+                str,
+            ),
+            (
+                Format(
+                    strategy=FormatStrategy.CUSTOMIZE,
+                    customize="<test_var>",
+                    variables=[
+                        Variable(name="test_var", value_format=ValueFormat.Integer, value=None, range=None, enum=None)
+                    ],
+                ),
+                "",
+                str,
+            ),
+            (
+                Format(
+                    strategy=FormatStrategy.CUSTOMIZE,
+                    customize="<test_var>",
+                    variables=[
+                        Variable(
+                            name="test_var", value_format=ValueFormat.BigDecimal, value=None, range=None, enum=None
+                        )
+                    ],
+                ),
+                "",
+                str,
+            ),
+            (
+                Format(
+                    strategy=FormatStrategy.CUSTOMIZE,
+                    customize="<test_var>",
+                    variables=[
+                        Variable(name="test_var", value_format=ValueFormat.Boolean, value=None, range=None, enum=None)
+                    ],
+                ),
+                "",
+                str,
+            ),
+            (
+                Format(
+                    strategy=FormatStrategy.CUSTOMIZE,
+                    customize="<test_var>",
+                    variables=[
+                        Variable(
+                            name="test_var",
+                            value_format=ValueFormat.Enum,
+                            value=None,
+                            range=None,
+                            enum=["VALUE_ENUM_1", "VALUE_ENUM_2"],
+                        )
+                    ],
+                ),
+                "",
+                ["VALUE_ENUM_1", "VALUE_ENUM_2"],
+            ),
+        ],
+    )
+    def test_generate_value_by_format(
+        self, value_format: Format, default: str, expect_value: Union[str, list, type]
+    ) -> None:
+        formatter = self._data_model_not_instantiate_yet()
+        formatter.value_format = value_format
+        kwarg = {"default": default} if default else {}
+        value = formatter.generate_value_by_format(**kwarg)
+        if isinstance(expect_value, str):
+            assert value == expect_value
+        elif isinstance(expect_value, list):
+            assert value in expect_value
+        else:
+            assert isinstance(value, expect_value)
+
+    @property
+    @abstractmethod
+    def _data_model_not_instantiate_yet(self) -> Type[_HasFormatPropConfig]:
         pass
 
 
