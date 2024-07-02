@@ -2,6 +2,7 @@ import random
 import string
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
+from decimal import Decimal
 from typing import Any
 
 
@@ -29,3 +30,13 @@ class RandomInteger(BaseRandomGenerator):
     @staticmethod
     def generate(value_range: ValueRange = ValueRange()) -> int:
         return random.randint(value_range.min, value_range.max)
+
+
+class RandomBigDecimal(BaseRandomGenerator):
+    @staticmethod
+    def generate(
+        integer_range: ValueRange = ValueRange(), decimal_range: ValueRange = ValueRange(min=0, max=128)
+    ) -> Decimal:
+        integer = RandomInteger.generate(value_range=integer_range)
+        decimal = RandomInteger.generate(value_range=decimal_range)
+        return Decimal(f"{integer}.{decimal}")
