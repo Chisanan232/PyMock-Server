@@ -40,3 +40,9 @@ class RandomBigDecimal(BaseRandomGenerator):
         integer = RandomInteger.generate(value_range=integer_range)
         decimal = RandomInteger.generate(value_range=decimal_range)
         return Decimal(f"{integer}.{decimal}")
+
+
+class RandomBoolean(BaseRandomGenerator):
+    @staticmethod
+    def generate() -> bool:
+        return random.choice([True, False])

@@ -6,7 +6,12 @@ from enum import Enum
 from pydoc import locate
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from pymock_api._utils.random import RandomBigDecimal, RandomInteger, RandomString
+from pymock_api._utils.random import (
+    RandomBigDecimal,
+    RandomBoolean,
+    RandomInteger,
+    RandomString,
+)
 from pymock_api.model.openapi._js_handlers import convert_js_type
 
 
@@ -708,7 +713,7 @@ class ValueFormat(Enum):
             # TODO: Add setting about the range?
             return RandomBigDecimal.generate()
         elif self is ValueFormat.Boolean:
-            return random.choice([True, False])
+            return RandomBoolean.generate()
         elif self is ValueFormat.Enum:
             return random.choice(enums)
         else:
@@ -757,7 +762,7 @@ class FormatStrategy(Enum):
             # TODO: Add setting about the range?
             return RandomBigDecimal.generate()
         elif self is FormatStrategy.RANDOM_BOOLEAN:
-            return random.choice([True, False])
+            return RandomBoolean.generate()
         elif self is FormatStrategy.FROM_ENUMS:
             return random.choice(enums)
         elif self is FormatStrategy.CUSTOMIZE:
