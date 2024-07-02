@@ -573,6 +573,365 @@ class TestInnerHTTPResponse:
                 f"Doesn't implement the verify logic at this test scenario (expect_result: '{expect_result}')."
             )
 
+    @pytest.mark.parametrize(
+        ("mock_response_data", "expect_result_data_type"),
+        [
+            # *dict* type value with more deeper nested data
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="details",
+                            required=True,
+                            value_type="dict",
+                            items=[
+                                IteratorItem(
+                                    name="name",
+                                    value_type="str",
+                                    required=True,
+                                    value_format=Format(strategy=FormatStrategy.RANDOM_STRING),
+                                ),
+                                IteratorItem(
+                                    name="id",
+                                    value_type="int",
+                                    required=True,
+                                    value_format=Format(strategy=FormatStrategy.RANDOM_INTEGER),
+                                ),
+                                IteratorItem(
+                                    name="projects",
+                                    value_type="list",
+                                    required=True,
+                                    items=[
+                                        IteratorItem(
+                                            name="name",
+                                            value_type="str",
+                                            required=True,
+                                            value_format=Format(strategy=FormatStrategy.RANDOM_STRING),
+                                        ),
+                                        IteratorItem(
+                                            name="description",
+                                            value_type="str",
+                                            required=True,
+                                            value_format=Format(strategy=FormatStrategy.RANDOM_STRING),
+                                        ),
+                                        IteratorItem(
+                                            name="author",
+                                            value_type="str",
+                                            required=True,
+                                            value_format=Format(strategy=FormatStrategy.RANDOM_STRING),
+                                        ),
+                                        IteratorItem(
+                                            name="languages",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(
+                                                    name="",
+                                                    value_type="str",
+                                                    required=True,
+                                                    value_format=Format(
+                                                        strategy=FormatStrategy.FROM_ENUMS,
+                                                        enums=["Python", "Scala", "Java", "JavaScript", "Kotlin"],
+                                                    ),
+                                                ),
+                                            ],
+                                        ),
+                                        IteratorItem(
+                                            name="url",
+                                            value_type="str",
+                                            required=True,
+                                            value_format=Format(
+                                                strategy=FormatStrategy.CUSTOMIZE,
+                                                customize="https://<random_string>.com",
+                                                variables=[
+                                                    Variable(name="random_string", value_format=ValueFormat.String)
+                                                ],
+                                            ),
+                                        ),
+                                        IteratorItem(
+                                            name="start",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(
+                                                    name="number",
+                                                    value_type="int",
+                                                    required=True,
+                                                    value_format=Format(strategy=FormatStrategy.RANDOM_INTEGER),
+                                                ),
+                                                IteratorItem(
+                                                    name="people",
+                                                    value_type="list",
+                                                    required=True,
+                                                    items=[
+                                                        IteratorItem(
+                                                            name="name",
+                                                            value_type="str",
+                                                            required=True,
+                                                            value_format=Format(strategy=FormatStrategy.RANDOM_STRING),
+                                                        ),
+                                                        IteratorItem(
+                                                            name="url",
+                                                            value_type="str",
+                                                            required=True,
+                                                            value_format=Format(
+                                                                strategy=FormatStrategy.CUSTOMIZE,
+                                                                customize="https://<random_string>.com",
+                                                                variables=[
+                                                                    Variable(
+                                                                        name="random_string",
+                                                                        value_format=ValueFormat.String,
+                                                                    )
+                                                                ],
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ],
+                                        ),
+                                        IteratorItem(
+                                            name="tags",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(
+                                                    name="",
+                                                    value_type="str",
+                                                    required=True,
+                                                    value_format=Format(strategy=FormatStrategy.RANDOM_STRING),
+                                                ),
+                                            ],
+                                        ),
+                                    ],
+                                ),
+                            ],
+                        )
+                    ],
+                ),
+                {
+                    "details": {
+                        "name": str,
+                        "id": int,
+                        "projects": [
+                            {
+                                "name": str,
+                                "description": str,
+                                "author": str,
+                                "languages": ["enum list", "Python", "Scala", "Java", "JavaScript", "Kotlin"],
+                                "url": r"https://[\w,.]{1,128}\.com",
+                                "start": [
+                                    {
+                                        "number": int,
+                                        "people": [{"name": str, "url": r"https://[\w,.]{1,128}\.com"}],
+                                    },
+                                ],
+                                "tags": [str],
+                            },
+                        ],
+                    }
+                },
+            ),
+            # *list* type value with deeper nested data
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="details",
+                            required=True,
+                            value_type="list",
+                            items=[
+                                IteratorItem(
+                                    name="name",
+                                    value_type="str",
+                                    required=True,
+                                    value_format=Format(strategy=FormatStrategy.RANDOM_STRING),
+                                ),
+                                IteratorItem(
+                                    name="id",
+                                    value_type="int",
+                                    required=True,
+                                    value_format=Format(strategy=FormatStrategy.RANDOM_INTEGER),
+                                ),
+                                IteratorItem(
+                                    name="projects",
+                                    value_type="list",
+                                    required=True,
+                                    items=[
+                                        IteratorItem(
+                                            name="name",
+                                            value_type="str",
+                                            required=True,
+                                            value_format=Format(strategy=FormatStrategy.RANDOM_STRING),
+                                        ),
+                                        IteratorItem(
+                                            name="description",
+                                            value_type="str",
+                                            required=True,
+                                            value_format=Format(strategy=FormatStrategy.RANDOM_STRING),
+                                        ),
+                                        IteratorItem(
+                                            name="author",
+                                            value_type="str",
+                                            required=True,
+                                            value_format=Format(strategy=FormatStrategy.RANDOM_STRING),
+                                        ),
+                                        IteratorItem(
+                                            name="languages",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(
+                                                    name="",
+                                                    value_type="str",
+                                                    required=True,
+                                                    value_format=Format(
+                                                        strategy=FormatStrategy.FROM_ENUMS, enums=["Python", "Scala"]
+                                                    ),
+                                                ),
+                                            ],
+                                        ),
+                                        IteratorItem(
+                                            name="url",
+                                            value_type="str",
+                                            required=True,
+                                            value_format=Format(
+                                                strategy=FormatStrategy.CUSTOMIZE,
+                                                customize="https://<random_string>.com",
+                                                variables=[
+                                                    Variable(name="random_string", value_format=ValueFormat.String)
+                                                ],
+                                            ),
+                                        ),
+                                        IteratorItem(
+                                            name="start",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(
+                                                    name="number",
+                                                    value_type="int",
+                                                    required=True,
+                                                    value_format=Format(strategy=FormatStrategy.RANDOM_INTEGER),
+                                                ),
+                                                IteratorItem(
+                                                    name="people",
+                                                    value_type="list",
+                                                    required=True,
+                                                    items=[
+                                                        IteratorItem(
+                                                            name="name",
+                                                            value_type="str",
+                                                            required=True,
+                                                            value_format=Format(strategy=FormatStrategy.RANDOM_STRING),
+                                                        ),
+                                                        IteratorItem(
+                                                            name="url",
+                                                            value_type="str",
+                                                            required=True,
+                                                            value_format=Format(
+                                                                strategy=FormatStrategy.CUSTOMIZE,
+                                                                customize="https://<random_string>.com",
+                                                                variables=[
+                                                                    Variable(
+                                                                        name="random_string",
+                                                                        value_format=ValueFormat.String,
+                                                                    )
+                                                                ],
+                                                            ),
+                                                        ),
+                                                    ],
+                                                ),
+                                            ],
+                                        ),
+                                        IteratorItem(
+                                            name="tags",
+                                            value_type="list",
+                                            required=True,
+                                            items=[
+                                                IteratorItem(
+                                                    name="",
+                                                    value_type="str",
+                                                    required=True,
+                                                    value_format=Format(strategy=FormatStrategy.RANDOM_STRING),
+                                                ),
+                                            ],
+                                        ),
+                                    ],
+                                ),
+                            ],
+                        )
+                    ],
+                ),
+                {
+                    "details": [
+                        {
+                            "name": str,
+                            "id": int,
+                            "projects": [
+                                {
+                                    "name": str,
+                                    "description": str,
+                                    "author": str,
+                                    "languages": ["enum list", "Python", "Scala"],
+                                    "url": r"https://[\w,.]{1,128}\.com",
+                                    "start": [
+                                        {
+                                            "number": int,
+                                            "people": [{"name": str, "url": r"https://[\w,.]{1,128}\.com"}],
+                                        },
+                                    ],
+                                    "tags": [str],
+                                },
+                            ],
+                        }
+                    ],
+                },
+            ),
+        ],
+    )
+    def test_response_with_nested_object_with_format(
+        self,
+        http_resp: Type[_HTTPResponse],
+        mock_response_data: HTTPResponse,
+        expect_result_data_type: Union[list, dict],
+    ):
+        resp_data = http_resp.generate(data=mock_response_data)
+        assert resp_data is not None
+        assert type(resp_data) == type(expect_result_data_type)
+        self._verify_response(resp_data, expect_result_data_type)
+
+    def _verify_response(self, http_resp: Union[list, dict], expect_value_data_type: Union[list, dict]) -> None:
+        if isinstance(http_resp, dict):
+            assert isinstance(expect_value_data_type, dict)
+            for k, v in http_resp.items():
+                assert k in expect_value_data_type.keys()
+                if isinstance(v, (str, int, float, bool, Decimal)):
+                    if isinstance(v, str) and expect_value_data_type[k] is not str:
+                        # Check by regular expression for the customize part
+                        assert re.search(expect_value_data_type[k], v) is not None
+                        continue
+                    assert isinstance(v, expect_value_data_type[k])
+                else:
+                    if isinstance(expect_value_data_type[k], list) and "enum list" in expect_value_data_type[k]:
+                        # Check for the enum part
+                        assert v[0] in expect_value_data_type[k]
+                        continue
+                    self._verify_response(v, expect_value_data_type[k])
+        else:
+            assert isinstance(http_resp, list)
+            assert isinstance(expect_value_data_type, list)
+            for v in http_resp:
+                if isinstance(v, (str, int, float, bool, Decimal)):
+                    if isinstance(v, str) and expect_value_data_type[0] is not str:
+                        # Check by regular expression for the customize part
+                        assert re.search(expect_value_data_type[0], v) is not None
+                        continue
+                    assert isinstance(v, expect_value_data_type[0])
+                else:
+                    self._verify_response(v, expect_value_data_type[0])
+
     def test_response_with_invalid_strategy(self, http_resp: Type[_HTTPResponse]):
         with pytest.raises(TypeError) as exc_info:
             http_resp.generate(data=_MockHTTPResponse.with_invalid_strategy())
