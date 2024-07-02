@@ -1,6 +1,7 @@
 import random
 import string
 from abc import ABCMeta, abstractmethod
+from collections import namedtuple
 from typing import Any
 
 
@@ -21,7 +22,10 @@ class RandomString(BaseRandomGenerator):
         return "".join([random.choice(string.ascii_letters) for _ in range(size)])
 
 
+ValueRange = namedtuple("ValueRange", ("min", "max"), defaults=(-127, 128))
+
+
 class RandomInteger(BaseRandomGenerator):
     @staticmethod
-    def generate(min_value: int = -127, max_value: int = 128) -> int:
-        return random.randint(min_value, max_value)
+    def generate(value_range: ValueRange = ValueRange()) -> int:
+        return random.randint(value_range.min, value_range.max)
