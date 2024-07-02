@@ -1,12 +1,12 @@
 import random
 import re
-import string
 from collections import namedtuple
 from decimal import Decimal
 from enum import Enum
 from pydoc import locate
 from typing import Any, Callable, Dict, List, Optional, Union
 
+from pymock_api._utils.random import RandomString
 from pymock_api.model.openapi._js_handlers import convert_js_type
 
 
@@ -700,7 +700,7 @@ class ValueFormat(Enum):
     def generate_value(self, enums: List[str] = []) -> Union[str, int, bool, Decimal]:
         if self is ValueFormat.String:
             # TODO: Add setting about the string size or string detail format, i.e., integer format string?
-            return "".join([random.choice(string.ascii_letters) for _ in range(10)])
+            return RandomString.generate()
         elif self is ValueFormat.Integer:
             # TODO: Add setting about the range?
             return random.randint(-127, 128)
@@ -752,7 +752,7 @@ class FormatStrategy(Enum):
     def generate_not_customize_value(self, enums: List[str] = []) -> Union[str, int, bool, Decimal]:
         if self is FormatStrategy.RANDOM_STRING:
             # TODO: Add setting about the string size or string detail format, i.e., integer format string?
-            return "".join([random.choice(string.ascii_letters) for _ in range(10)])
+            return RandomString.generate()
         elif self is FormatStrategy.RANDOM_INTEGER:
             # TODO: Add setting about the range?
             return random.randint(-127, 128)
