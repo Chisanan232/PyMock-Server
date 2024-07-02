@@ -1,4 +1,3 @@
-import random
 import re
 from collections import namedtuple
 from decimal import Decimal
@@ -9,6 +8,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from pymock_api._utils.random import (
     RandomBigDecimal,
     RandomBoolean,
+    RandomFromSequence,
     RandomInteger,
     RandomString,
 )
@@ -715,7 +715,7 @@ class ValueFormat(Enum):
         elif self is ValueFormat.Boolean:
             return RandomBoolean.generate()
         elif self is ValueFormat.Enum:
-            return random.choice(enums)
+            return RandomFromSequence.generate(enums)
         else:
             raise ValueError("This is program bug, please report this issue.")
 
@@ -764,7 +764,7 @@ class FormatStrategy(Enum):
         elif self is FormatStrategy.RANDOM_BOOLEAN:
             return RandomBoolean.generate()
         elif self is FormatStrategy.FROM_ENUMS:
-            return random.choice(enums)
+            return RandomFromSequence.generate(enums)
         elif self is FormatStrategy.CUSTOMIZE:
             raise ValueError("This function doesn't support *FormatStrategy.CUSTOMIZE*, please report this issue.")
         else:

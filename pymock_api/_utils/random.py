@@ -3,7 +3,7 @@ import string
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from decimal import Decimal
-from typing import Any
+from typing import Any, Sequence
 
 
 class BaseRandomGenerator(metaclass=ABCMeta):
@@ -46,3 +46,9 @@ class RandomBoolean(BaseRandomGenerator):
     @staticmethod
     def generate() -> bool:
         return random.choice([True, False])
+
+
+class RandomFromSequence(BaseRandomGenerator):
+    @staticmethod
+    def generate(sequence: Sequence) -> bool:
+        return random.choice(sequence)
