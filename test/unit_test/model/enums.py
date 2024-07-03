@@ -886,7 +886,7 @@ class TestFormatStrategy(EnumTestSuite):
             (FormatStrategy.BY_DATA_TYPE, int, [], int),
             (FormatStrategy.BY_DATA_TYPE, "big_decimal", [], Decimal),
             (FormatStrategy.BY_DATA_TYPE, bool, [], bool),
-            (FormatStrategy.FROM_ENUMS, None, ["ENUM_1", "ENUM_2", "ENUM_3"], str),
+            (FormatStrategy.FROM_ENUMS, str, ["ENUM_1", "ENUM_2", "ENUM_3"], str),
         ],
     )
     def test_generate_not_customize_value(
