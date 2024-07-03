@@ -381,15 +381,15 @@ class HasItemsPropConfigTestSuite(ConfigTestSpec, ABC):
 class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
 
     @pytest.mark.parametrize(
-        ("value_format", "default", "expect_value"),
+        ("value_format", "data_type", "default", "expect_value"),
         [
-            (None, None, "no default"),
-            (None, "some default", "some default"),
-            (Format(strategy=FormatStrategy.RANDOM_STRING), "", str),
-            (Format(strategy=FormatStrategy.RANDOM_INTEGER), "", int),
-            (Format(strategy=FormatStrategy.RANDOM_BIG_DECIMAL), "", Decimal),
-            (Format(strategy=FormatStrategy.RANDOM_BOOLEAN), "", bool),
-            (Format(strategy=FormatStrategy.FROM_ENUMS, enums=["ENUM_1", "ENUM_2"]), "", ["ENUM_1", "ENUM_2"]),
+            (None, None, None, "no default"),
+            (None, None, "some default", "some default"),
+            (Format(strategy=FormatStrategy.BY_DATA_TYPE), str, "", str),
+            (Format(strategy=FormatStrategy.BY_DATA_TYPE), int, "", int),
+            (Format(strategy=FormatStrategy.BY_DATA_TYPE), "big_decimal", "", Decimal),
+            (Format(strategy=FormatStrategy.BY_DATA_TYPE), bool, "", bool),
+            (Format(strategy=FormatStrategy.FROM_ENUMS, enums=["ENUM_1", "ENUM_2"]), str, "", ["ENUM_1", "ENUM_2"]),
             (
                 Format(
                     strategy=FormatStrategy.CUSTOMIZE,
@@ -398,6 +398,7 @@ class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
                         Variable(name="test_var", value_format=ValueFormat.String, value=None, range=None, enum=None)
                     ],
                 ),
+                str,
                 "",
                 str,
             ),
@@ -409,6 +410,7 @@ class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
                         Variable(name="test_var", value_format=ValueFormat.Integer, value=None, range=None, enum=None)
                     ],
                 ),
+                str,
                 "",
                 str,
             ),
@@ -422,6 +424,7 @@ class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
                         )
                     ],
                 ),
+                str,
                 "",
                 str,
             ),
@@ -433,6 +436,7 @@ class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
                         Variable(name="test_var", value_format=ValueFormat.Boolean, value=None, range=None, enum=None)
                     ],
                 ),
+                str,
                 "",
                 str,
             ),
@@ -450,17 +454,21 @@ class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
                         )
                     ],
                 ),
+                str,
                 "",
                 ["VALUE_ENUM_1", "VALUE_ENUM_2"],
             ),
         ],
     )
     def test_generate_value_by_format(
-        self, value_format: Format, default: str, expect_value: Union[str, list, type]
+        self, value_format: Format, data_type: Union[str, object], default: str, expect_value: Union[str, list, type]
     ) -> None:
         formatter = self._data_model_not_instantiate_yet()
+        assert hasattr(formatter, "value_type")
+        setattr(formatter, "value_type", data_type)
+        print(f"[DEBUG] formatter: {getattr(formatter, 'value_type')}")
         formatter.value_format = value_format
-        kwarg = {"default": default} if default else {}
+        kwarg = {"data_type": data_type, "default": default} if default else {"data_type": data_type}
         value = formatter.generate_value_by_format(**kwarg)
         if isinstance(expect_value, str):
             assert value == expect_value

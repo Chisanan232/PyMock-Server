@@ -689,16 +689,27 @@ class OpenAPIVersion(Enum):
 
 
 class ValueFormat(Enum):
-    String: str = "string"
-    Integer: str = "integer"
+    String: str = "str"
+    Integer: str = "int"
     BigDecimal: str = "big_decimal"
-    Boolean: str = "boolean"
+    Boolean: str = "bool"
     Enum: str = "enum"
 
     @staticmethod
-    def to_enum(v: Union[str, "ValueFormat"]) -> "ValueFormat":
+    def to_enum(v: Union[str, type, "ValueFormat"]) -> "ValueFormat":
         if isinstance(v, str):
             return ValueFormat(v.lower())
+        elif isinstance(v, type):
+            if v is str:
+                return ValueFormat.String
+            elif v is int:
+                return ValueFormat.Integer
+            elif v is float:
+                return ValueFormat.BigDecimal
+            elif v is bool:
+                return ValueFormat.Boolean
+            else:
+                raise ValueError(f"")
         else:
             return v
 
@@ -721,10 +732,7 @@ class ValueFormat(Enum):
 
 
 class FormatStrategy(Enum):
-    RANDOM_STRING: str = "random_string"
-    RANDOM_INTEGER: str = "random_integer"
-    RANDOM_BIG_DECIMAL: str = "random_big_decimal"
-    RANDOM_BOOLEAN: str = "random_boolean"
+    BY_DATA_TYPE: str = "by_data_type"
     FROM_ENUMS: str = "from_enums"
     CUSTOMIZE: str = "customize"
 
@@ -735,15 +743,18 @@ class FormatStrategy(Enum):
         else:
             return v
 
-    def chk_format_is_match(self, value: Any, enums: List[str] = [], customize: str = "") -> bool:
-        if self is FormatStrategy.RANDOM_STRING:
-            return isinstance(value, str)
-        elif self is FormatStrategy.RANDOM_INTEGER:
-            return isinstance(value, int)
-        elif self is FormatStrategy.RANDOM_BIG_DECIMAL:
-            return isinstance(value, (int, float))
-        elif self is FormatStrategy.RANDOM_BOOLEAN:
-            return isinstance(value, bool)
+    def to_value_format(self, data_type: Union[type, str]) -> ValueFormat:
+        if self is FormatStrategy.CUSTOMIZE:
+            raise RuntimeError("It should not convert *FormatStrategy.CUSTOMIZE* to enum object *ValueFormat*.")
+        return ValueFormat.to_enum(data_type)
+
+    def chk_format_is_match(
+        self, value: Any, data_type: Optional[type] = None, enums: List[str] = [], customize: str = ""
+    ) -> bool:
+        if self is FormatStrategy.BY_DATA_TYPE:
+            if (isinstance(data_type, str) and data_type.lower() == "big_decimal") or isinstance(data_type, float):
+                return isinstance(value, (int, float, Decimal))
+            return isinstance(value, data_type)  # type: ignore[arg-type]
         elif self is FormatStrategy.FROM_ENUMS:
             return isinstance(value, str) and value in enums
         elif self is FormatStrategy.CUSTOMIZE:
@@ -751,21 +762,12 @@ class FormatStrategy(Enum):
         else:
             raise ValueError("This is program bug, please report this issue.")
 
-    def generate_not_customize_value(self, enums: List[str] = []) -> Union[str, int, bool, Decimal]:
-        if self is FormatStrategy.RANDOM_STRING:
-            # TODO: Add setting about the string size or string detail format, i.e., integer format string?
-            return RandomString.generate()
-        elif self is FormatStrategy.RANDOM_INTEGER:
-            # TODO: Add setting about the range?
-            return RandomInteger.generate()
-        elif self is FormatStrategy.RANDOM_BIG_DECIMAL:
-            # TODO: Add setting about the range?
-            return RandomBigDecimal.generate()
-        elif self is FormatStrategy.RANDOM_BOOLEAN:
-            return RandomBoolean.generate()
-        elif self is FormatStrategy.FROM_ENUMS:
-            return RandomFromSequence.generate(enums)
-        elif self is FormatStrategy.CUSTOMIZE:
-            raise ValueError("This function doesn't support *FormatStrategy.CUSTOMIZE*, please report this issue.")
-        else:
-            raise ValueError("This is program bug, please report this issue.")
+    def generate_not_customize_value(
+        self, data_type: Optional[type] = None, enums: List[str] = []
+    ) -> Union[str, int, bool, Decimal]:
+        if self in [FormatStrategy.BY_DATA_TYPE, FormatStrategy.FROM_ENUMS]:
+            assert data_type is not None, "Format setting require *data_type* must not be empty."
+            if self is FormatStrategy.FROM_ENUMS:
+                data_type = "enum"  # type: ignore[assignment]
+            return self.to_value_format(data_type=data_type).generate_value(enums=enums)
+        raise ValueError(f"This function doesn't support *{self}* currently.")

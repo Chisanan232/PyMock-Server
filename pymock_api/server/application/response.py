@@ -82,14 +82,16 @@ class HTTPResponse:
 
         def _initial_resp_details(v: ResponseProperty) -> Union[str, int, Decimal, bool, list, dict]:
             assert v.value_type
+            data_type = locate(v.value_type)
+            assert isinstance(data_type, type)
             if locate(v.value_type) is str:
-                value = v.generate_value_by_format(default="random string")
+                value = v.generate_value_by_format(data_type=data_type, default="random string")
             elif locate(v.value_type) is int:
-                value = v.generate_value_by_format(default="random integer")
+                value = v.generate_value_by_format(data_type=data_type, default="random integer")
             elif locate(v.value_type) is float:
-                value = v.generate_value_by_format(default="random big decimal")
+                value = v.generate_value_by_format(data_type=data_type, default="random big decimal")
             elif locate(v.value_type) is bool:
-                value = v.generate_value_by_format(default="random boolean")
+                value = v.generate_value_by_format(data_type=data_type, default="random boolean")
             elif locate(v.value_type) in (list, dict):
                 value = [] if locate(v.value_type) is list else {}  # type: ignore[assignment]
                 item = {}  # type: ignore[var-annotated]

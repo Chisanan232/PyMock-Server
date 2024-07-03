@@ -1,6 +1,6 @@
 import re
 from decimal import Decimal
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 import pytest
 
@@ -70,7 +70,7 @@ class TestFormat(CheckableTestSuite):
     @pytest.mark.parametrize(
         ("ut_obj", "other_obj"),
         [
-            (Format(strategy=FormatStrategy.RANDOM_STRING), Format(strategy=FormatStrategy.CUSTOMIZE)),
+            (Format(strategy=FormatStrategy.BY_DATA_TYPE), Format(strategy=FormatStrategy.CUSTOMIZE)),
             (
                 Format(strategy=FormatStrategy.FROM_ENUMS, enums=["ENUM_1", "ENUM_2"]),
                 Format(strategy=FormatStrategy.FROM_ENUMS, enums=["ENUM_3"]),
@@ -109,47 +109,58 @@ class TestFormat(CheckableTestSuite):
         assert ut_obj != other_obj
 
     @pytest.mark.parametrize(
-        ("strategy", "value", "enums", "customize"),
+        ("strategy", "data_type", "value", "enums", "customize"),
         [
-            (FormatStrategy.RANDOM_STRING, "random_string", [], ""),
-            (FormatStrategy.RANDOM_INTEGER, 123, [], ""),
-            (FormatStrategy.RANDOM_BIG_DECIMAL, 123.123, [], ""),
-            (FormatStrategy.RANDOM_BOOLEAN, True, [], ""),
-            (FormatStrategy.RANDOM_BOOLEAN, False, [], ""),
-            (FormatStrategy.FROM_ENUMS, "ENUM_2", ["ENUM_1", "ENUM_2", "ENUM_3"], ""),
-            (FormatStrategy.CUSTOMIZE, "sample_format", [], "sample_format"),
+            (FormatStrategy.BY_DATA_TYPE, str, "random_string", [], ""),
+            (FormatStrategy.BY_DATA_TYPE, int, 123, [], ""),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, [], ""),
+            (FormatStrategy.BY_DATA_TYPE, bool, True, [], ""),
+            (FormatStrategy.BY_DATA_TYPE, bool, False, [], ""),
+            (FormatStrategy.FROM_ENUMS, str, "ENUM_2", ["ENUM_1", "ENUM_2", "ENUM_3"], ""),
+            (FormatStrategy.CUSTOMIZE, str, "sample_format", [], "sample_format"),
         ],
     )
-    def test_chk_format_is_match(self, strategy: FormatStrategy, value: Any, enums: List[str], customize: str):
+    def test_chk_format_is_match(
+        self, strategy: FormatStrategy, data_type: Union[str, object], value: Any, enums: List[str], customize: str
+    ):
         format_model = Format(strategy=strategy, enums=enums, customize=customize)
-        assert format_model.value_format_is_match(value=value, enums=enums, customize=customize) is True
+        assert (
+            format_model.value_format_is_match(data_type=data_type, value=value, enums=enums, customize=customize)
+            is True
+        )
 
     @pytest.mark.parametrize(
-        ("strategy", "value", "enums", "customize"),
+        ("strategy", "data_type", "value", "enums", "customize"),
         [
-            (FormatStrategy.RANDOM_STRING, 123, [], ""),
-            (FormatStrategy.RANDOM_INTEGER, "not int value", [], ""),
-            (FormatStrategy.RANDOM_BIG_DECIMAL, "not int or float value", [], ""),
-            (FormatStrategy.RANDOM_BOOLEAN, "not bool value", [], ""),
-            (FormatStrategy.RANDOM_BOOLEAN, "False", [], ""),
-            (FormatStrategy.FROM_ENUMS, "not in enums", ["ENUM_1", "ENUM_2", "ENUM_3"], ""),
-            (FormatStrategy.CUSTOMIZE, "different_format", [], "sample_format"),
+            (FormatStrategy.BY_DATA_TYPE, str, 123, [], ""),
+            (FormatStrategy.BY_DATA_TYPE, int, "not int value", [], ""),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", "not int or float value", [], ""),
+            (FormatStrategy.BY_DATA_TYPE, bool, "not bool value", [], ""),
+            (FormatStrategy.BY_DATA_TYPE, bool, "False", [], ""),
+            (FormatStrategy.FROM_ENUMS, str, "not in enums", ["ENUM_1", "ENUM_2", "ENUM_3"], ""),
+            (FormatStrategy.CUSTOMIZE, str, "different_format", [], "sample_format"),
         ],
     )
-    def test_failure_chk_format_is_match(self, strategy: FormatStrategy, value: Any, enums: List[str], customize: str):
+    def test_failure_chk_format_is_match(
+        self, strategy: FormatStrategy, data_type: Union[str, object], value: Any, enums: List[str], customize: str
+    ):
         format_model = Format(strategy=strategy, enums=enums, customize=customize)
-        assert format_model.value_format_is_match(value=value, enums=enums, customize=customize) is False
+        assert (
+            format_model.value_format_is_match(data_type=data_type, value=value, enums=enums, customize=customize)
+            is False
+        )
 
     @pytest.mark.parametrize(
-        ("strategy", "enums", "customize", "expect_type", "expect_value_format"),
+        ("strategy", "data_type", "enums", "customize", "expect_type", "expect_value_format"),
         [
-            (FormatStrategy.RANDOM_STRING, [], "", str, None),
-            (FormatStrategy.RANDOM_INTEGER, [], "", int, None),
-            (FormatStrategy.RANDOM_BIG_DECIMAL, [], "", Decimal, None),
-            (FormatStrategy.RANDOM_BOOLEAN, [], "", bool, None),
-            (FormatStrategy.FROM_ENUMS, ["ENUM_1", "ENUM_2", "ENUM_3"], "", str, None),
+            (FormatStrategy.BY_DATA_TYPE, str, [], "", str, None),
+            (FormatStrategy.BY_DATA_TYPE, int, [], "", int, None),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", [], "", Decimal, None),
+            (FormatStrategy.BY_DATA_TYPE, bool, [], "", bool, None),
+            (FormatStrategy.FROM_ENUMS, str, ["ENUM_1", "ENUM_2", "ENUM_3"], "", str, None),
             (
                 FormatStrategy.CUSTOMIZE,
+                str,
                 [],
                 "<big_decimal_price> <fiat_currency_code>",
                 str,
@@ -160,6 +171,7 @@ class TestFormat(CheckableTestSuite):
     def test_generate_not_customize_value(
         self,
         strategy: FormatStrategy,
+        data_type: Union[None, str, object],
         enums: List[str],
         customize: str,
         expect_type: type,
@@ -176,7 +188,7 @@ class TestFormat(CheckableTestSuite):
                 ),
             ],
         )
-        value = format_model.generate_value()
+        value = format_model.generate_value(data_type=data_type)
         assert value is not None
         assert isinstance(value, expect_type)
         if enums:

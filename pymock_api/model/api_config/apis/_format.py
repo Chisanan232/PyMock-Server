@@ -126,11 +126,11 @@ class Format(_Config, _Checkable):
             return False
         return True
 
-    def value_format_is_match(self, value: Any, enums: List[str] = [], customize: str = "") -> bool:
+    def value_format_is_match(self, data_type: type, value: Any, enums: List[str] = [], customize: str = "") -> bool:
         assert self.strategy
-        return self.strategy.chk_format_is_match(value=value, enums=enums, customize=customize)
+        return self.strategy.chk_format_is_match(data_type=data_type, value=value, enums=enums, customize=customize)
 
-    def generate_value(self) -> Union[str, int, bool, Decimal]:
+    def generate_value(self, data_type: type) -> Union[str, int, bool, Decimal]:
         assert self.strategy
         if self.strategy is FormatStrategy.CUSTOMIZE:
             all_vars_in_customize = re.findall(r"<\w{1,128}>", str(self.customize), re.IGNORECASE)
@@ -144,7 +144,7 @@ class Format(_Config, _Checkable):
                 value = value.replace(var, str(new_value))
             return value
         else:
-            return self.strategy.generate_not_customize_value(enums=self.enums)
+            return self.strategy.generate_not_customize_value(data_type=data_type, enums=self.enums)
 
 
 @dataclass(eq=False)
@@ -195,9 +195,12 @@ class _HasFormatPropConfig(_BaseConfig, _Checkable, ABC):
             return False
         return True
 
-    def generate_value_by_format(self, default: str = "no default") -> Union[str, int, bool, Decimal]:
+    def generate_value_by_format(
+        self, data_type: Optional[type] = None, default: str = "no default"
+    ) -> Union[str, int, bool, Decimal]:
         if self.value_format is not None:
-            value = self.value_format.generate_value()
+            assert data_type is not None, "Format setting require *data_type* must not be empty."
+            value = self.value_format.generate_value(data_type=data_type)
         else:
             value = default
         return value
