@@ -709,7 +709,7 @@ class ValueFormat(Enum):
             elif v is bool:
                 return ValueFormat.Boolean
             else:
-                raise ValueError(f"")
+                raise ValueError(f"For the native data type, it doesn't support {v} recently.")
         else:
             return v
 

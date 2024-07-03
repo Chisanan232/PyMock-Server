@@ -798,6 +798,12 @@ class TestValueFormat(EnumTestSuite):
     def test_to_enum(self, value: Any, enum_obj: Type[ValueFormat]):
         super().test_to_enum(value, enum_obj)
 
+    @pytest.mark.parametrize("invalid_data_type", [list, tuple, set, dict])
+    def test_to_enum_error(self, enum_obj: Type[ValueFormat], invalid_data_type: object):
+        with pytest.raises(ValueError) as exc_info:
+            enum_obj.to_enum(invalid_data_type)
+        assert re.search(r"doesn't support " + re.escape(str(invalid_data_type)), str(exc_info.value)) is not None
+
     @pytest.mark.parametrize(
         ("formatter", "enums", "expect_type"),
         [
