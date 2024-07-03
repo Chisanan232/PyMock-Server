@@ -842,6 +842,32 @@ class TestFormatStrategy(EnumTestSuite):
         super().test_to_enum(value, enum_obj)
 
     @pytest.mark.parametrize(
+        ("format_strategy", "data_type", "expect_value"),
+        [
+            (FormatStrategy.BY_DATA_TYPE, str, ValueFormat.String),
+            (FormatStrategy.BY_DATA_TYPE, int, ValueFormat.Integer),
+            (FormatStrategy.BY_DATA_TYPE, float, ValueFormat.BigDecimal),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", ValueFormat.BigDecimal),
+            (FormatStrategy.BY_DATA_TYPE, bool, ValueFormat.Boolean),
+            (FormatStrategy.BY_DATA_TYPE, "enum", ValueFormat.Enum),
+        ],
+    )
+    def test_to_value_format(
+        self, format_strategy: FormatStrategy, data_type: Union[str, object], expect_value: ValueFormat
+    ):
+        assert format_strategy.to_value_format(data_type=data_type) == expect_value
+
+    @pytest.mark.parametrize(
+        "format_strategy",
+        [
+            FormatStrategy.CUSTOMIZE,
+        ],
+    )
+    def test_to_value_format(self, format_strategy: FormatStrategy):
+        with pytest.raises(RuntimeError):
+            format_strategy.to_value_format(data_type="any data type")
+
+    @pytest.mark.parametrize(
         ("strategy", "value", "data_type", "enums", "customize"),
         [
             (FormatStrategy.BY_DATA_TYPE, "random_string", str, [], ""),
