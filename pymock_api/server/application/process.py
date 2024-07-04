@@ -115,8 +115,9 @@ class HTTPRequestProcess(BaseHTTPProcess):
                     data_type=data_type, value=one_req_param_value, enums=value_format.enums, customize=value_format.customize  # type: ignore[union-attr]
                 ):
                     return self._generate_http_response(
-                        f"The format of data from Font-End site (value: *{one_req_param_value}*) is incorrect. Its "
-                        f"format should be '{param_info.value_format}'.",
+                        f"The format of data from Font-End site (param: '{param_info.name}', "
+                        f"value: '{one_req_param_value}') is incorrect. Its format should be "
+                        f"{param_info.value_format.expect_format_log_msg(data_type=data_type)}.",
                         status_code=400,
                     )
         return self._generate_http_response(body="OK.", status_code=200)

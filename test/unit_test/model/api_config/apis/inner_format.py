@@ -195,3 +195,8 @@ class TestFormat(CheckableTestSuite):
             assert value in enums
         if expect_value_format:
             assert re.search(expect_value_format, str(value), re.IGNORECASE) is not None
+
+    def test_invalid_expect_format_log_msg(self):
+        non_strategy_format = Format(strategy=None)
+        with pytest.raises(ValueError):
+            non_strategy_format.expect_format_log_msg(data_type="any data type")

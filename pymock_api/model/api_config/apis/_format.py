@@ -146,6 +146,16 @@ class Format(_Config, _Checkable):
         else:
             return self.strategy.generate_not_customize_value(data_type=data_type, enums=self.enums)
 
+    def expect_format_log_msg(self, data_type: type) -> str:
+        if self.strategy is FormatStrategy.BY_DATA_TYPE:
+            return f"*{data_type}* type data"
+        elif self.strategy is FormatStrategy.FROM_ENUMS:
+            return f"oen of the enums value *{self.enums}*"
+        elif self.strategy is FormatStrategy.CUSTOMIZE:
+            return f"like format as *{self.customize}*. Please refer to the property *variables* to know the details of variable settings."
+        else:
+            raise ValueError("Unsupported FormatStrategy")
+
 
 @dataclass(eq=False)
 class _HasFormatPropConfig(_BaseConfig, _Checkable, ABC):
