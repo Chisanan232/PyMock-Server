@@ -126,9 +126,27 @@ class Format(_Config, _Checkable):
             return False
         return True
 
-    def value_format_is_match(self, data_type: type, value: Any, enums: List[str] = [], customize: str = "") -> bool:
+    def value_format_is_match(self, data_type: type, value: Any) -> bool:
         assert self.strategy
-        return self.strategy.chk_format_is_match(data_type=data_type, value=value, enums=enums, customize=customize)
+        if self.strategy is FormatStrategy.BY_DATA_TYPE:
+            if (isinstance(data_type, str) and data_type.lower() == "big_decimal") or isinstance(data_type, float):
+                return isinstance(value, (int, float, Decimal))
+            return isinstance(value, data_type)
+        elif self.strategy is FormatStrategy.FROM_ENUMS:
+            return isinstance(value, str) and value in self.enums
+        elif self.strategy is FormatStrategy.CUSTOMIZE:
+            all_vars_in_customize = re.findall(r"<\w{1,128}>", str(self.customize), re.IGNORECASE)
+            regex = re.escape(copy.copy(self.customize))
+            for var in all_vars_in_customize:
+                pure_var = var.replace("<", "").replace(">", "")
+                find_result: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
+                assert len(find_result) == 1, "Cannot find the mapping name of variable setting."
+                assert find_result[0].value_format
+                one_var_regex = find_result[0].value_format.generate_regex(enums=find_result[0].enum or [])
+                regex = value.replace(var, one_var_regex)
+            return re.search(re.escape(regex), str(value), re.IGNORECASE) is not None
+        else:
+            raise ValueError("This is program bug, please report this issue.")
 
     def generate_value(self, data_type: type) -> Union[str, int, bool, Decimal]:
         assert self.strategy

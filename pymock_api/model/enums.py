@@ -730,6 +730,24 @@ class ValueFormat(Enum):
         else:
             raise ValueError("This is program bug, please report this issue.")
 
+    def generate_regex(self, enums: List[str] = []) -> str:
+        if self is ValueFormat.String:
+            re.search(r"\d{1,128}", "")
+            # TODO: Set the string type value size?
+            return r"\w{1,128}"
+        elif self is ValueFormat.Integer:
+            # TODO: Add setting about the range?
+            return r"\d{1,128}"
+        elif self is ValueFormat.BigDecimal:
+            # TODO: Add setting about the range?
+            return r"\w{1,128}\.\w{1,128}"
+        elif self is ValueFormat.Boolean:
+            return r"true|false"
+        elif self is ValueFormat.Enum:
+            return r"|".join([re.escape(e) for e in enums])
+        else:
+            raise ValueError("This is program bug, please report this issue.")
+
 
 class FormatStrategy(Enum):
     BY_DATA_TYPE: str = "by_data_type"
@@ -747,20 +765,6 @@ class FormatStrategy(Enum):
         if self is FormatStrategy.CUSTOMIZE:
             raise RuntimeError("It should not convert *FormatStrategy.CUSTOMIZE* to enum object *ValueFormat*.")
         return ValueFormat.to_enum(data_type)
-
-    def chk_format_is_match(
-        self, value: Any, data_type: Optional[type] = None, enums: List[str] = [], customize: str = ""
-    ) -> bool:
-        if self is FormatStrategy.BY_DATA_TYPE:
-            if (isinstance(data_type, str) and data_type.lower() == "big_decimal") or isinstance(data_type, float):
-                return isinstance(value, (int, float, Decimal))
-            return isinstance(value, data_type)  # type: ignore[arg-type]
-        elif self is FormatStrategy.FROM_ENUMS:
-            return isinstance(value, str) and value in enums
-        elif self is FormatStrategy.CUSTOMIZE:
-            return re.search(re.escape(customize), str(value), re.IGNORECASE) is not None
-        else:
-            raise ValueError("This is program bug, please report this issue.")
 
     def generate_not_customize_value(
         self, data_type: Optional[type] = None, enums: List[str] = []
