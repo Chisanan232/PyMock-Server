@@ -734,17 +734,17 @@ class ValueFormat(Enum):
         if self is ValueFormat.String:
             re.search(r"\d{1,128}", "")
             # TODO: Set the string type value size?
-            return r"\w{1,128}"
+            return r"(\w|\s){1,128}"
         elif self is ValueFormat.Integer:
             # TODO: Add setting about the range?
             return r"\d{1,128}"
         elif self is ValueFormat.BigDecimal:
             # TODO: Add setting about the range?
-            return r"\w{1,128}\.\w{1,128}"
+            return r"\d{1,128}\.?\d{0,128}?"
         elif self is ValueFormat.Boolean:
-            return r"true|false"
+            return r"(true|false)"
         elif self is ValueFormat.Enum:
-            return r"|".join([re.escape(e) for e in enums])
+            return r"(" + r"|".join([re.escape(e) for e in enums]) + r")"
         else:
             raise ValueError("This is program bug, please report this issue.")
 

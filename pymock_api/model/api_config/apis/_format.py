@@ -143,8 +143,8 @@ class Format(_Config, _Checkable):
                 assert len(find_result) == 1, "Cannot find the mapping name of variable setting."
                 assert find_result[0].value_format
                 one_var_regex = find_result[0].value_format.generate_regex(enums=find_result[0].enum or [])
-                regex = value.replace(var, one_var_regex)
-            return re.search(re.escape(regex), str(value), re.IGNORECASE) is not None
+                regex = regex.replace(var, one_var_regex)
+            return re.search(regex, str(value), re.IGNORECASE) is not None
         else:
             raise ValueError("This is program bug, please report this issue.")
 
