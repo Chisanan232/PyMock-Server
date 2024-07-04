@@ -112,7 +112,7 @@ class HTTPRequestProcess(BaseHTTPProcess):
                 assert isinstance(data_type, type)
                 value_format = param_info.value_format
                 if param_info.value_format and not value_format.value_format_is_match(  # type: ignore[union-attr]
-                    data_type=data_type, value=one_req_param_value, enums=value_format.enums, customize=value_format.customize  # type: ignore[union-attr]
+                    data_type=data_type, value=one_req_param_value
                 ):
                     return self._generate_http_response(
                         f"The format of data from Font-End site (param: '{param_info.name}', "
