@@ -70,39 +70,60 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
         pass
 
     @pytest.mark.parametrize(
-        ("method", "api_params", "error_msg_like", "expected_status_code"),
+        ("path", "method", "api_params", "error_msg_like", "expected_status_code"),
         [
             # Valid request with *GET* HTTP method
-            ("GET", {"param1": "any_format", "single_iterable_param": ["param1", "param2", "param3"]}, None, 200),
-            # Invalid request with *GET* HTTP method
-            ("GET", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
-            ("GET", {"param1": None}, ["Miss required parameter"], 400),
-            ("GET", {"param1": 123}, ["type of data", "is different"], 400),
-            ("GET", {"param1": "any_format", "single_iterable_param": [123]}, ["type of data", "is different"], 400),
-            ("GET", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
-            # Valid request with *POST* HTTP method
-            ("POST", {"param1": "any_format", "iterable_param": [{"name": "param1", "value": "value1"}]}, None, 200),
-            # Invalid request with *POST* HTTP method
-            ("POST", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
-            ("POST", {"param1": None}, ["Miss required parameter"], 400),
-            ("POST", {"param1": 123}, ["type of data", "is different"], 400),
             (
+                "/test-api-path",
+                "GET",
+                {"param1": "any_format", "single_iterable_param": ["param1", "param2", "param3"]},
+                None,
+                200,
+            ),
+            # Invalid request with *GET* HTTP method
+            ("/test-api-path", "GET", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
+            ("/test-api-path", "GET", {"param1": None}, ["Miss required parameter"], 400),
+            ("/test-api-path", "GET", {"param1": 123}, ["type of data", "is different"], 400),
+            (
+                "/test-api-path",
+                "GET",
+                {"param1": "any_format", "single_iterable_param": [123]},
+                ["type of data", "is different"],
+                400,
+            ),
+            ("/test-api-path", "GET", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
+            # Valid request with *POST* HTTP method
+            (
+                "/test-api-path",
+                "POST",
+                {"param1": "any_format", "iterable_param": [{"name": "param1", "value": "value1"}]},
+                None,
+                200,
+            ),
+            # Invalid request with *POST* HTTP method
+            ("/test-api-path", "POST", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
+            ("/test-api-path", "POST", {"param1": None}, ["Miss required parameter"], 400),
+            ("/test-api-path", "POST", {"param1": 123}, ["type of data", "is different"], 400),
+            (
+                "/test-api-path",
                 "POST",
                 {"param1": "any_format", "iterable_param": [{"name": "param1", "miss_param": "miss_param"}]},
                 ["Miss required parameter"],
                 400,
             ),
             (
+                "/test-api-path",
                 "POST",
                 {"param1": "any_format", "iterable_param": [{"name": "param1", "value": 123}]},
                 ["type of data", "is different"],
                 400,
             ),
-            ("POST", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
+            ("/test-api-path", "POST", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
         ],
     )
     def test_invalid_request_process(
         self,
+        path: str,
         method: str,
         api_params: dict,
         error_msg_like: Optional[List[str]],
@@ -112,7 +133,7 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
         sut: Type[HTTPRequestProcess],
     ):
         # Mock request
-        current_request = self._mock_request(method=method, api_params=api_params)
+        current_request = self._mock_request(path=path, method=method, api_params=api_params)
 
         request_utils.request_instance = MagicMock(return_value=current_request)  # type: ignore[method-assign]
         sut_instance = sut(
@@ -142,7 +163,7 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
             assert re.search(regular, response_str, re.IGNORECASE)  # type: ignore[arg-type]
 
     @abstractmethod
-    def _mock_request(self, method: str, api_params: dict) -> Mock:
+    def _mock_request(self, path: str, method: str, api_params: dict) -> Mock:
         pass
 
     @abstractmethod
@@ -180,7 +201,7 @@ class TestHTTPRequestProcessWithFlask(HTTPProcessTestSpec):
     def mocker(self) -> MockerModule:
         return MockerModule(module_path="flask.Flask", return_value=FakeFlask("PyTest-Used"))
 
-    def _mock_request(self, method: str, api_params: dict) -> Mock:
+    def _mock_request(self, path: str, method: str, api_params: dict) -> Mock:
         def _get_list_param() -> str:
             has_single_iterable_param = api_params.get("single_iterable_param", None) is not None
             has_iterable_param = api_params.get("iterable_param", None) is not None
@@ -198,7 +219,7 @@ class TestHTTPRequestProcessWithFlask(HTTPProcessTestSpec):
         dd.update(**api_params)
 
         request = Mock()
-        request.path = "/test-api-path"
+        request.path = path
         request.method = method
         if method.upper() == "GET":
             request.args = dd
@@ -240,9 +261,9 @@ class TestHTTPRequestWithFastAPI(HTTPProcessTestSpec):
     def mocker(self) -> MockerModule:
         return MockerModule(module_path="fastapi.FastAPI", return_value=FakeFastAPI())
 
-    def _mock_request(self, method: str, api_params: dict) -> Mock:
+    def _mock_request(self, path: str, method: str, api_params: dict) -> Mock:
         route_prop = Mock()
-        route_prop.path = "/test-api-path"
+        route_prop.path = path
 
         request = Mock()
         request.scope = {
