@@ -173,11 +173,12 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
         response = self._run_request_process_func(sut_instance, request=current_request)
 
         # Verify
+        response_content = self._get_response_content(response)
+        response_str = response_content.decode("utf-8") if isinstance(response_content, bytes) else response_content
+        print(f"[DEBUG in test_invalid_request_process] response: {response_str}")
         assert isinstance(response, self._expected_response_type)
         assert response.status_code == expected_status_code
         if response.status_code != 200:
-            response_content = self._get_response_content(response)
-            response_str = response_content.decode("utf-8") if isinstance(response_content, bytes) else response_content
             regular = r""
             for er_msg_f in error_msg_like or []:
                 regular += r".{0,512}" + re.escape(er_msg_f)
