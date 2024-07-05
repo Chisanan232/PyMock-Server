@@ -219,8 +219,8 @@ _Test_API_Parameter_Without_Default: dict = {
     "type": "dict",
     "format": None,
 }
-_Test_API_Parameter_With_General_Format: dict = {
-    "name": "format_param",
+_Test_API_Parameter_With_General_Format_Str: dict = {
+    "name": "format_param_str",
     "required": True,
     "default": None,
     "type": "str",
@@ -520,7 +520,7 @@ _Test_Home_With_General_Format_Req_Param: dict = {
     "http": {
         "request": {
             "method": "GET",
-            "parameters": [_Test_API_Parameter_With_General_Format],
+            "parameters": [_Test_API_Parameter_With_General_Format_Str],
         },
         "response": {
             "strategy": "string",

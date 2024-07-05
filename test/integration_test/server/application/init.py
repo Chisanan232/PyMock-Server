@@ -110,7 +110,8 @@ class MockHTTPServerTestSpec:
             _test_api_attr(api=_Foo_With_Variable_In_Api, payload={"param1": "any_format"}),
             _test_api_attr(api=_Foo_With_Multiple_Variables_In_Api, payload={"param1": "any_format"}),
             _test_api_attr(
-                api=_Test_Home_With_General_Format_Req_Param, payload={"format_param": "string_value_with_any_format"}
+                api=_Test_Home_With_General_Format_Req_Param,
+                payload={"format_param_str": "string_value_with_any_format"},
             ),
             _test_api_attr(api=_Test_Home_With_Enums_Format_Req_Param, payload={"format_param": "ENUM2"}),
             _test_api_attr(
