@@ -24,7 +24,13 @@ from pymock_api.server.application.response import (
     FlaskResponse,
 )
 
-from ...._values import _Google_Home_Value, _Post_Google_Home_Value
+from ...._values import (
+    _Google_Home_Value,
+    _Post_Google_Home_Value,
+    _Test_Home_With_Customize_Format_Req_Param,
+    _Test_Home_With_Enums_Format_Req_Param,
+    _Test_Home_With_General_Format_Req_Param,
+)
 
 MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
 
@@ -119,6 +125,10 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
                 400,
             ),
             ("/test-api-path", "POST", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
+            # Valid request with general format strategy
+            ("/test-api-req-param-format", "GET", {"format_param": "string_value"}, None, 200),
+            ("/test-api-req-param-format", "POST", {"format_param": "ENUM2"}, None, 200),
+            ("/test-api-req-param-format", "PUT", {"format_param": "123.123 USD\n456 TWD"}, None, 200),
         ],
     )
     def test_invalid_request_process(
@@ -145,7 +155,18 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
             "/test-api-path": {
                 _Google_Home_Value["http"]["request"]["method"]: MockAPI().deserialize(_Google_Home_Value),
                 _Post_Google_Home_Value["http"]["request"]["method"]: MockAPI().deserialize(_Post_Google_Home_Value),
-            }
+            },
+            "/test-api-req-param-format": {
+                _Test_Home_With_General_Format_Req_Param["http"]["request"]["method"]: MockAPI().deserialize(
+                    _Test_Home_With_General_Format_Req_Param
+                ),
+                _Test_Home_With_Enums_Format_Req_Param["http"]["request"]["method"]: MockAPI().deserialize(
+                    _Test_Home_With_Enums_Format_Req_Param
+                ),
+                _Test_Home_With_Customize_Format_Req_Param["http"]["request"]["method"]: MockAPI().deserialize(
+                    _Test_Home_With_Customize_Format_Req_Param
+                ),
+            },
         }
 
         # Run target function
