@@ -519,7 +519,7 @@ _Test_Home_With_General_Format_Req_Param: dict = {
     "url": "/test/verify-general-format-req-param",
     "http": {
         "request": {
-            "method": "POST",
+            "method": "GET",
             "parameters": [_Test_API_Parameter_With_General_Format],
         },
         "response": {
@@ -551,7 +551,7 @@ _Test_Home_With_Customize_Format_Req_Param: dict = {
     "url": "/test/verify-customize-format-req-param",
     "http": {
         "request": {
-            "method": "POST",
+            "method": "PUT",
             "parameters": [_Test_API_Parameter_With_Customize_Format],
         },
         "response": {
