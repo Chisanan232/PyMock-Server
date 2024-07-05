@@ -733,7 +733,7 @@ class ValueFormat(Enum):
     def generate_regex(self, enums: List[str] = []) -> str:
         if self is ValueFormat.String:
             # TODO: Set the string type value size?
-            return r"[@_!#$%^&*()<>?/\\|}{~:\w\s]{1,128}"
+            return r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1,128}"
         elif self is ValueFormat.Integer:
             # TODO: Add setting about the range?
             return r"\d{1,128}"
