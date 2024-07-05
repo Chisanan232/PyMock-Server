@@ -732,7 +732,6 @@ class ValueFormat(Enum):
 
     def generate_regex(self, enums: List[str] = []) -> str:
         if self is ValueFormat.String:
-            re.search(r"\d{1,128}", "")
             # TODO: Set the string type value size?
             return r"(\w|\s){1,128}"
         elif self is ValueFormat.Integer:
