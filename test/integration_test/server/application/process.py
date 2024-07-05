@@ -131,7 +131,7 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
             ("/test-api-req-param-format", "PUT", {"format_param": "123.123 USD\n456 TWD"}, None, 200),
         ],
     )
-    def test_invalid_request_process(
+    def test_request_process(
         self,
         path: str,
         method: str,
@@ -175,7 +175,7 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
         # Verify
         response_content = self._get_response_content(response)
         response_str = response_content.decode("utf-8") if isinstance(response_content, bytes) else response_content
-        print(f"[DEBUG in test_invalid_request_process] response: {response_str}")
+        print(f"[DEBUG in test_request_process] response: {response_str}")
         assert isinstance(response, self._expected_response_type)
         assert response.status_code == expected_status_code
         if response.status_code != 200:
