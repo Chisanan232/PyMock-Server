@@ -127,8 +127,43 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
             ("/test-api-path", "POST", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
             # Valid request with general format strategy
             ("/test-api-req-param-format", "GET", {"format_param": "string_value"}, None, 200),
+            ("/test-api-req-param-format", "GET", {"format_param": "@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,."}, None, 200),
+            # Valid request with enum format strategy
             ("/test-api-req-param-format", "POST", {"format_param": "ENUM2"}, None, 200),
+            # Valid request with customize format strategy
             ("/test-api-req-param-format", "PUT", {"format_param": "123.123 USD\n456 TWD"}, None, 200),
+            # Invalid request with general format strategy
+            # ("/test-api-req-param-format", "GET", {"format_param": "\n"}, ["format should be", "type data"], 400),
+            # Invalid request with enum format strategy
+            (
+                "/test-api-req-param-format",
+                "POST",
+                {"format_param": "NOT_EXIST_ENUM"},
+                ["format should be", "oen of the enums value"],
+                400,
+            ),
+            # Invalid request with customize format strategy
+            (
+                "/test-api-req-param-format",
+                "PUT",
+                {"format_param": "123.123 USD"},
+                ["format should be", "like format as"],
+                400,
+            ),
+            (
+                "/test-api-req-param-format",
+                "PUT",
+                {"format_param": "not big decimal USD\n456 TWD"},
+                ["format should be", "like format as"],
+                400,
+            ),
+            (
+                "/test-api-req-param-format",
+                "PUT",
+                {"format_param": "123.123 NOT_EXIST_CURRENCY\n456 TWD"},
+                ["format should be", "like format as"],
+                400,
+            ),
         ],
     )
     def test_request_process(
