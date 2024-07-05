@@ -741,7 +741,7 @@ class ValueFormat(Enum):
             # TODO: Add setting about the range?
             return r"\d{1,128}\.?\d{0,128}?"
         elif self is ValueFormat.Boolean:
-            return r"(true|false)"
+            return r"(true|false|True|False)"
         elif self is ValueFormat.Enum:
             return r"(" + r"|".join([re.escape(e) for e in enums]) + r")"
         else:
