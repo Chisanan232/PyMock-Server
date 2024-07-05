@@ -3,6 +3,7 @@ import re
 from abc import ABC
 from dataclasses import dataclass, field
 from decimal import Decimal
+from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
 from ...enums import FormatStrategy
@@ -126,12 +127,13 @@ class Format(_Config, _Checkable):
             return False
         return True
 
-    def value_format_is_match(self, data_type: type, value: Any) -> bool:
+    def value_format_is_match(self, data_type: Union[str, type], value: Any) -> bool:
         assert self.strategy
         if self.strategy is FormatStrategy.BY_DATA_TYPE:
-            if (isinstance(data_type, str) and data_type.lower() == "big_decimal") or isinstance(data_type, float):
-                return isinstance(value, (int, float, Decimal))
-            return isinstance(value, data_type)
+            data_type = "big_decimal" if isinstance(data_type, float) else data_type
+            data_type = locate(data_type) if (data_type != "big_decimal" and isinstance(data_type, str)) else data_type  # type: ignore[assignment]
+            regex = self.strategy.to_value_format(data_type).generate_regex()
+            return re.search(regex, str(value)) is not None
         elif self.strategy is FormatStrategy.FROM_ENUMS:
             return isinstance(value, str) and value in self.enums
         elif self.strategy is FormatStrategy.CUSTOMIZE:

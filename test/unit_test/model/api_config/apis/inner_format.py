@@ -112,10 +112,13 @@ class TestFormat(CheckableTestSuite):
         ("strategy", "data_type", "value", "enums", "customize", "variables"),
         [
             (FormatStrategy.BY_DATA_TYPE, str, "random_string", [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, str, "123", [], "", []),
             (FormatStrategy.BY_DATA_TYPE, int, 123, [], "", []),
             (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, [], "", []),
             (FormatStrategy.BY_DATA_TYPE, bool, True, [], "", []),
             (FormatStrategy.BY_DATA_TYPE, bool, False, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, bool, "True", [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, bool, "False", [], "", []),
             (FormatStrategy.FROM_ENUMS, str, "ENUM_2", ["ENUM_1", "ENUM_2", "ENUM_3"], "", []),
             (FormatStrategy.CUSTOMIZE, str, "sample_format", [], "sample_format", []),
             (
@@ -199,11 +202,9 @@ class TestFormat(CheckableTestSuite):
     @pytest.mark.parametrize(
         ("strategy", "data_type", "value", "enums", "customize", "variables"),
         [
-            (FormatStrategy.BY_DATA_TYPE, str, 123, [], "", []),
             (FormatStrategy.BY_DATA_TYPE, int, "not int value", [], "", []),
             (FormatStrategy.BY_DATA_TYPE, "big_decimal", "not int or float value", [], "", []),
             (FormatStrategy.BY_DATA_TYPE, bool, "not bool value", [], "", []),
-            (FormatStrategy.BY_DATA_TYPE, bool, "False", [], "", []),
             (FormatStrategy.FROM_ENUMS, str, "not in enums", ["ENUM_1", "ENUM_2", "ENUM_3"], "", []),
             (FormatStrategy.CUSTOMIZE, str, "different_format", [], "sample_format", []),
             (
