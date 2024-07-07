@@ -15,7 +15,11 @@ from ..variable import Variable
 class Format(_Config, _Checkable):
 
     strategy: Optional[FormatStrategy] = None
+
+    # For enum strategy
     enums: List[str] = field(default_factory=list)
+
+    # For customize strategy
     customize: str = field(default_factory=str)
     variables: List[Variable] = field(default_factory=list)
 
