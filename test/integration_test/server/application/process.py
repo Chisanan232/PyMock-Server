@@ -134,12 +134,33 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
                 None,
                 200,
             ),
+            ("/test-api-req-param-format", "GET", {"format_param_float": 123.123}, None, 200),
+            (
+                "/test-api-req-param-format",
+                "GET",
+                {"format_param_str": "string_value", "format_param_float": 123.123},
+                None,
+                200,
+            ),
             # Valid request with enum format strategy
             ("/test-api-req-param-format", "POST", {"format_param": "ENUM2"}, None, 200),
             # Valid request with customize format strategy
             ("/test-api-req-param-format", "PUT", {"format_param": "123.123 USD\n456 TWD"}, None, 200),
             # Invalid request with general format strategy
-            # ("/test-api-req-param-format", "GET", {"format_param_str": "\n"}, ["format should be", "type data"], 400),
+            (
+                "/test-api-req-param-format",
+                "GET",
+                {"format_param_float": "not big decimal value"},
+                ["type of data", "is different"],
+                400,
+            ),
+            (
+                "/test-api-req-param-format",
+                "GET",
+                {"format_param_str": "string_value", "format_param_float": "not big decimal value"},
+                ["type of data", "is different"],
+                400,
+            ),
             # Invalid request with enum format strategy
             (
                 "/test-api-req-param-format",

@@ -113,6 +113,10 @@ class MockHTTPServerTestSpec:
                 api=_Test_Home_With_General_Format_Req_Param,
                 payload={"format_param_str": "string_value_with_any_format"},
             ),
+            _test_api_attr(
+                api=_Test_Home_With_General_Format_Req_Param,
+                payload={"format_param_float": 123.123},
+            ),
             _test_api_attr(api=_Test_Home_With_Enums_Format_Req_Param, payload={"format_param": "ENUM2"}),
             _test_api_attr(
                 api=_Test_Home_With_Customize_Format_Req_Param, payload={"format_param": "123.321 USD\n567 TWD"}

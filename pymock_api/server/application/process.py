@@ -1,3 +1,4 @@
+import re
 from abc import ABC, ABCMeta, abstractmethod
 from pydoc import locate
 from typing import Any, Dict, List, Union, cast
@@ -72,12 +73,21 @@ class HTTPRequestProcess(BaseHTTPProcess):
             if one_req_param_value:
                 # Check the data type of parameter
                 value_py_data_type = locate(param_info.value_type)  # type: ignore[arg-type]
-                if param_info.value_type and not isinstance(one_req_param_value, value_py_data_type):  # type: ignore[arg-type]
-                    return self._generate_http_response(
-                        f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different with the "
-                        f"implementation of Back-End site (*{value_py_data_type}*).",
-                        status_code=400,
-                    )
+                if value_py_data_type in [int, float, "big_decimal"] and self._request.int_type_value_is_string:
+                    # For the Flask part. It would always be string type of each API parameter.
+                    if re.search(r"\d{1,128}", str(one_req_param_value)) is None:
+                        return self._generate_http_response(
+                            f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different with the "
+                            f"implementation of Back-End site (*{value_py_data_type}*).",
+                            status_code=400,
+                        )
+                else:
+                    if param_info.value_type and not isinstance(one_req_param_value, value_py_data_type):  # type: ignore[arg-type]
+                        return self._generate_http_response(
+                            f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different with the "
+                            f"implementation of Back-End site (*{value_py_data_type}*).",
+                            status_code=400,
+                        )
                 # Check the element of list
                 if param_info.value_type and value_py_data_type is list and param_info.items:
                     assert isinstance(one_req_param_value, list)
