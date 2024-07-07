@@ -1,4 +1,6 @@
 name: big_decimal_sample
 value_format: big_decimal
-digit: 15:0
+digit:
+  integer: 15
+  decimal: 0
 range: 0-100

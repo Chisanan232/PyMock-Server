@@ -55,7 +55,7 @@ class TestDigit(CheckableTestSuite):
 
     def test_value_attributes(self, sut: Digit):
         assert sut.integer == _Test_Digit_In_Format["integer"], _assertion_msg
-        assert sut.decimal is _Test_Digit_In_Format["decimal"], _assertion_msg
+        assert sut.decimal == _Test_Digit_In_Format["decimal"], _assertion_msg
 
     def test_serialize_with_none(self, sut_with_nothing: Digit):
         assert sut_with_nothing.serialize() is not None
@@ -99,7 +99,7 @@ class TestVariable(CheckableTestSuite):
     def test_value_attributes(self, sut: Variable):
         assert sut.name == _Test_Variables_BigDecimal_USD["name"], _assertion_msg
         assert sut.value_format.value is _Test_Variables_BigDecimal_USD["value_format"], _assertion_msg
-        assert sut.digit == _Test_Variables_BigDecimal_USD["digit"], _assertion_msg
+        assert sut.digit.serialize() == _Test_Variables_BigDecimal_USD["digit"], _assertion_msg
         assert sut.range == _Test_Variables_BigDecimal_USD["range"], _assertion_msg
         assert sut.enum == _Test_Variables_BigDecimal_USD["enum"], _assertion_msg
 
@@ -110,7 +110,7 @@ class TestVariable(CheckableTestSuite):
         assert isinstance(obj, Variable)
         assert obj.name == _Test_Variables_BigDecimal_USD["name"]
         assert obj.value_format.value is _Test_Variables_BigDecimal_USD["value_format"]
-        assert obj.digit == _Test_Variables_BigDecimal_USD["digit"]
+        assert obj.digit.serialize() == _Test_Variables_BigDecimal_USD["digit"]
         assert obj.range == _Test_Variables_BigDecimal_USD["range"]
         assert obj.enum == _Test_Variables_BigDecimal_USD["enum"]
 

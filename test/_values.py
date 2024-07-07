@@ -95,7 +95,10 @@ _Test_Digit_In_Format: dict = {
 _Test_Variables_BigDecimal_USD: dict = {
     "name": "big_decimal_usd",
     "value_format": "big_decimal",
-    "digit": "30:3",
+    "digit": {
+        "integer": 30,
+        "decimal": 3,
+    },
     "range": None,
     "enum": None,
 }
@@ -103,7 +106,10 @@ _Test_Variables_BigDecimal_USD: dict = {
 _Test_Variables_BigDecimal_TWD: dict = {
     "name": "big_decimal_twd",
     "value_format": "big_decimal",
-    "digit": "30:0",
+    "digit": {
+        "integer": 30,
+        "decimal": 0,
+    },
     "range": None,
     "enum": None,
 }

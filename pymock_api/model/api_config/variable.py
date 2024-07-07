@@ -58,7 +58,7 @@ class Digit(_Config, _Checkable):
 class Variable(_Config, _Checkable):
     name: str = field(default_factory=str)
     value_format: Optional[ValueFormat] = None
-    digit: Optional[str] = None
+    digit: Optional[Digit] = None
     range: Optional[str] = None
     enum: Optional[List[str]] = None
 
@@ -67,10 +67,16 @@ class Variable(_Config, _Checkable):
     def __post_init__(self) -> None:
         if self.value_format is not None:
             self._convert_value_format()
+        if self.digit is not None:
+            self._convert_digit()
 
     def _convert_value_format(self) -> None:
         if isinstance(self.value_format, str):
             self.value_format = ValueFormat.to_enum(self.value_format)
+
+    def _convert_digit(self) -> None:
+        if isinstance(self.digit, dict):
+            self.digit = Digit().deserialize(self.digit)
 
     def _compare(self, other: "Variable") -> bool:
         return (
@@ -91,7 +97,9 @@ class Variable(_Config, _Checkable):
 
         value_format: ValueFormat = self.value_format or ValueFormat.to_enum(self._get_prop(data, prop="value_format"))
 
-        digit: str = self._get_prop(data, prop="digit")
+        digit_data_model: Digit = (self or data).digit  # type: ignore[union-attr,assignment]
+        digit: dict = digit_data_model.serialize() if digit_data_model else None  # type: ignore[assignment]
+
         range_value: str = self._get_prop(data, prop="range")
         enum: str = self._get_prop(data, prop="enum")
         if not name or not value_format:
@@ -116,7 +124,9 @@ class Variable(_Config, _Checkable):
         if self.value_format == ValueFormat.Enum:
             self.enum = data.get("enum", None)
         else:
-            self.digit = data.get("digit", None)
+            digit_data_model = Digit()
+            digit_data_model.absolute_model_key = self.key
+            self.digit = digit_data_model.deserialize(data=data.get("digit", None) or {})
 
         self.range = data.get("range", None)
         return self
@@ -137,5 +147,10 @@ class Variable(_Config, _Checkable):
             accept_empty=False,
         ):
             return False
+
+        if self.digit is not None:
+            self.digit.stop_if_fail = self.stop_if_fail
+            if self.digit.is_work() is False:
+                return False
 
         return True

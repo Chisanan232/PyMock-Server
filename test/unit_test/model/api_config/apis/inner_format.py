@@ -5,7 +5,7 @@ from typing import Any, List, Optional, Union
 import pytest
 
 from pymock_api.model.api_config.apis._format import Format
-from pymock_api.model.api_config.variable import Variable
+from pymock_api.model.api_config.variable import Digit, Variable
 from pymock_api.model.enums import FormatStrategy, ValueFormat
 
 from ....._values import _Customize_Format_With_Self_Vars
@@ -50,7 +50,9 @@ class TestFormat(CheckableTestSuite):
             assert expect_var_value and len(expect_var_value) == 1
             assert var.name == expect_var_value[0]["name"]
             assert var.value_format.value == expect_var_value[0]["value_format"]
-            assert var.digit == expect_var_value[0]["digit"]
+            if expect_var_value[0]["digit"]:
+                assert var.digit.integer == expect_var_value[0]["digit"]["integer"]
+                assert var.digit.decimal == expect_var_value[0]["digit"]["decimal"]
             assert var.range == expect_var_value[0]["range"]
             assert var.enum == expect_var_value[0]["enum"]
 
@@ -95,12 +97,12 @@ class TestFormat(CheckableTestSuite):
                 Format(
                     strategy=FormatStrategy.CUSTOMIZE,
                     customize="customize with var",
-                    variables=[Variable(name="sample var", digit="20")],
+                    variables=[Variable(name="sample var", digit=Digit(integer=20))],
                 ),
                 Format(
                     strategy=FormatStrategy.CUSTOMIZE,
                     customize="customize with var",
-                    variables=[Variable(name="sample var", digit="30:2")],
+                    variables=[Variable(name="sample var", digit=Digit(integer=30, decimal=2))],
                 ),
             ),
         ],
@@ -317,9 +319,15 @@ class TestFormat(CheckableTestSuite):
             enums=enums,
             customize=customize,
             variables=[
-                Variable(name="big_decimal_price", value_format=ValueFormat.BigDecimal, digit="", range="", enum=[]),
                 Variable(
-                    name="fiat_currency_code", value_format=ValueFormat.Enum, digit="", range="", enum=["USD", "TWD"]
+                    name="big_decimal_price", value_format=ValueFormat.BigDecimal, digit=Digit(), range="", enum=[]
+                ),
+                Variable(
+                    name="fiat_currency_code",
+                    value_format=ValueFormat.Enum,
+                    digit=Digit(),
+                    range="",
+                    enum=["USD", "TWD"],
                 ),
             ],
         )
