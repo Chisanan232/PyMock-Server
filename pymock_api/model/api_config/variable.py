@@ -6,6 +6,55 @@ from ._base import _Checkable, _Config
 
 
 @dataclass(eq=False)
+class Digit(_Config, _Checkable):
+    integer: int = field(default_factory=int)
+    decimal: int = field(default_factory=int)
+
+    _default_integer: int = 128
+    _default_decimal: int = 0
+
+    def _compare(self, other: "Digit") -> bool:
+        return self.integer == other.integer and self.decimal == other.decimal
+
+    @property
+    def key(self) -> str:
+        return "digit"
+
+    def serialize(self, data: Optional["Digit"] = None) -> Optional[Dict[str, Any]]:
+        integer: int = self._get_prop(data, prop="integer")
+        decimal: int = self._get_prop(data, prop="decimal")
+        serialized_data = {
+            "integer": (integer or self._default_integer),
+            "decimal": (decimal or self._default_decimal),
+        }
+        return serialized_data
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["Digit"]:
+        self.integer = data.get("integer", self._default_integer)
+        self.decimal = data.get("decimal", self._default_decimal)
+        return self
+
+    def is_work(self) -> bool:
+        under_check_props = {
+            f"{self.absolute_model_key}.integer": self.integer,
+            f"{self.absolute_model_key}.decimal": self.decimal,
+        }
+        if not self.props_should_not_be_none(
+            under_check=under_check_props,
+            accept_empty=False,
+        ):
+            return False
+        for prop_key, prop_val in under_check_props.items():
+            if not self.condition_should_be_true(
+                config_key=prop_key,
+                condition=(prop_val is not None and not isinstance(prop_val, int)),
+            ):
+                return False
+        return True
+
+
+@dataclass(eq=False)
 class Variable(_Config, _Checkable):
     name: str = field(default_factory=str)
     value_format: Optional[ValueFormat] = None

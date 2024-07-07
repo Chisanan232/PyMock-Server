@@ -86,6 +86,11 @@ _Mock_Templatable_Setting: dict = {
 }
 
 # Test variable
+_Test_Digit_In_Format: dict = {
+    "integer": 128,
+    "decimal": 0,
+}
+
 # The expect value it should generate: 123456.123
 _Test_Variables_BigDecimal_USD: dict = {
     "name": "big_decimal_usd",
