@@ -8,13 +8,17 @@ from typing import Any, Dict, List, Optional, Union
 
 from ...enums import FormatStrategy
 from .._base import _BaseConfig, _Checkable, _Config
-from ..variable import Variable
+from ..variable import Digit, Variable
 
 
 @dataclass(eq=False)
 class Format(_Config, _Checkable):
 
     strategy: Optional[FormatStrategy] = None
+
+    # For general --- by data type strategy
+    digit: Optional[Digit] = None
+    range: Optional[str] = None
 
     # For enum strategy
     enums: List[str] = field(default_factory=list)
@@ -26,12 +30,18 @@ class Format(_Config, _Checkable):
     def __post_init__(self) -> None:
         if self.strategy is not None:
             self._convert_strategy()
+        if self.digit is not None:
+            self._convert_digit()
         if self.variables is not None:
             self._convert_variables()
 
     def _convert_strategy(self) -> None:
         if isinstance(self.strategy, str):
             self.strategy = FormatStrategy.to_enum(self.strategy)
+
+    def _convert_digit(self) -> None:
+        if isinstance(self.digit, dict):
+            self.digit = Digit().deserialize(self.digit)
 
     def _convert_variables(self) -> None:
         if not isinstance(self.variables, list):
@@ -69,6 +79,8 @@ class Format(_Config, _Checkable):
 
         return (
             self.strategy == other.strategy
+            and self.digit == other.digit
+            and self.range == other.range
             and self.enums == other.enums
             and self.customize == other.customize
             and variables_prop_is_same
@@ -84,6 +96,11 @@ class Format(_Config, _Checkable):
     @_Config._clean_empty_value
     def serialize(self, data: Optional["Format"] = None) -> Optional[Dict[str, Any]]:
         strategy: FormatStrategy = self.strategy or FormatStrategy.to_enum(self._get_prop(data, prop="strategy"))
+
+        digit_data_model: Digit = (self or data).digit  # type: ignore[union-attr,assignment]
+        digit: dict = digit_data_model.serialize() if digit_data_model else None  # type: ignore[assignment]
+
+        range_value: str = self._get_prop(data, prop="range")
         enums: List[str] = self._get_prop(data, prop="enums")
         customize: str = self._get_prop(data, prop="customize")
         variables: List[Variable] = self._get_prop(data, prop="variables")
@@ -91,6 +108,8 @@ class Format(_Config, _Checkable):
             return None
         serialized_data = {
             "strategy": strategy.value,
+            "digit": digit,
+            "range": range_value,
             "enums": enums,
             "customize": customize,
             "variables": [var.serialize() if isinstance(var, Variable) else var for var in variables],
@@ -108,6 +127,13 @@ class Format(_Config, _Checkable):
         self.strategy = FormatStrategy.to_enum(data.get("strategy", None))
         if not self.strategy:
             raise ValueError("Schema key *strategy* cannot be empty.")
+
+        if data.get("digit", None):
+            digit_data_model = Digit()
+            digit_data_model.absolute_model_key = self.key
+            self.digit = digit_data_model.deserialize(data=data.get("digit", None) or {})
+
+        self.range = data.get("range", None)
         self.enums = data.get("enums", [])
         self.customize = data.get("customize", "")
         self.variables = [_deserialize_variable(var) for var in (data.get("variables", []) or [])]
@@ -129,6 +155,11 @@ class Format(_Config, _Checkable):
             accept_empty=False,
         ):
             return False
+
+        if self.digit is not None:
+            self.digit.stop_if_fail = self.stop_if_fail
+            if self.digit.is_work() is False:
+                return False
         return True
 
     def value_format_is_match(self, data_type: Union[str, type], value: Any) -> bool:
