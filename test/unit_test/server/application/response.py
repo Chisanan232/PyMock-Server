@@ -509,7 +509,7 @@ class TestInnerHTTPResponse:
                                     Variable(
                                         name="price_value",
                                         value_format=ValueFormat.BigDecimal,
-                                        value=None,
+                                        digit=None,
                                         range=None,
                                         enum=None,
                                     )
@@ -536,14 +536,14 @@ class TestInnerHTTPResponse:
                                     Variable(
                                         name="price_value",
                                         value_format=ValueFormat.BigDecimal,
-                                        value=None,
+                                        digit=None,
                                         range=None,
                                         enum=None,
                                     ),
                                     Variable(
                                         name="currency_code",
                                         value_format=ValueFormat.Enum,
-                                        value=None,
+                                        digit=None,
                                         range=None,
                                         enum=["USD", "TWD"],
                                     ),

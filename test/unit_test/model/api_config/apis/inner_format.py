@@ -50,7 +50,7 @@ class TestFormat(CheckableTestSuite):
             assert expect_var_value and len(expect_var_value) == 1
             assert var.name == expect_var_value[0]["name"]
             assert var.value_format.value == expect_var_value[0]["value_format"]
-            assert var.value == expect_var_value[0]["value"]
+            assert var.digit == expect_var_value[0]["digit"]
             assert var.range == expect_var_value[0]["range"]
             assert var.enum == expect_var_value[0]["enum"]
 
@@ -95,12 +95,12 @@ class TestFormat(CheckableTestSuite):
                 Format(
                     strategy=FormatStrategy.CUSTOMIZE,
                     customize="customize with var",
-                    variables=[Variable(name="sample var", value="20")],
+                    variables=[Variable(name="sample var", digit="20")],
                 ),
                 Format(
                     strategy=FormatStrategy.CUSTOMIZE,
                     customize="customize with var",
-                    variables=[Variable(name="sample var", value="30:2")],
+                    variables=[Variable(name="sample var", digit="30:2")],
                 ),
             ),
         ],
@@ -317,9 +317,9 @@ class TestFormat(CheckableTestSuite):
             enums=enums,
             customize=customize,
             variables=[
-                Variable(name="big_decimal_price", value_format=ValueFormat.BigDecimal, value="", range="", enum=[]),
+                Variable(name="big_decimal_price", value_format=ValueFormat.BigDecimal, digit="", range="", enum=[]),
                 Variable(
-                    name="fiat_currency_code", value_format=ValueFormat.Enum, value="", range="", enum=["USD", "TWD"]
+                    name="fiat_currency_code", value_format=ValueFormat.Enum, digit="", range="", enum=["USD", "TWD"]
                 ),
             ],
         )

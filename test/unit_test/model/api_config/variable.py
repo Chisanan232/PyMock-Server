@@ -18,7 +18,7 @@ class TestVariable(CheckableTestSuite):
         return Variable(
             name=_Test_Variables_BigDecimal_USD["name"],
             value_format=_Test_Variables_BigDecimal_USD["value_format"],
-            value=_Test_Variables_BigDecimal_USD["value"],
+            digit=_Test_Variables_BigDecimal_USD["digit"],
             range=_Test_Variables_BigDecimal_USD["range"],
             enum=_Test_Variables_BigDecimal_USD["enum"],
         )
@@ -30,7 +30,7 @@ class TestVariable(CheckableTestSuite):
     def test_value_attributes(self, sut: Variable):
         assert sut.name == _Test_Variables_BigDecimal_USD["name"], _assertion_msg
         assert sut.value_format.value is _Test_Variables_BigDecimal_USD["value_format"], _assertion_msg
-        assert sut.value == _Test_Variables_BigDecimal_USD["value"], _assertion_msg
+        assert sut.digit == _Test_Variables_BigDecimal_USD["digit"], _assertion_msg
         assert sut.range == _Test_Variables_BigDecimal_USD["range"], _assertion_msg
         assert sut.enum == _Test_Variables_BigDecimal_USD["enum"], _assertion_msg
 
@@ -41,7 +41,7 @@ class TestVariable(CheckableTestSuite):
         assert isinstance(obj, Variable)
         assert obj.name == _Test_Variables_BigDecimal_USD["name"]
         assert obj.value_format.value is _Test_Variables_BigDecimal_USD["value_format"]
-        assert obj.value == _Test_Variables_BigDecimal_USD["value"]
+        assert obj.digit == _Test_Variables_BigDecimal_USD["digit"]
         assert obj.range == _Test_Variables_BigDecimal_USD["range"]
         assert obj.enum == _Test_Variables_BigDecimal_USD["enum"]
 
@@ -55,7 +55,7 @@ class TestVariableWithEnumFormat(CheckableTestSuite):
         return Variable(
             name=_Test_Variables_Currency_Code["name"],
             value_format=_Test_Variables_Currency_Code["value_format"],
-            value=_Test_Variables_Currency_Code["value"],
+            digit=_Test_Variables_Currency_Code["digit"],
             range=_Test_Variables_Currency_Code["range"],
             enum=_Test_Variables_Currency_Code["enum"],
         )
@@ -67,7 +67,7 @@ class TestVariableWithEnumFormat(CheckableTestSuite):
     def test_value_attributes(self, sut: Variable):
         assert sut.name == _Test_Variables_Currency_Code["name"], _assertion_msg
         assert sut.value_format.value is _Test_Variables_Currency_Code["value_format"], _assertion_msg
-        assert sut.value == _Test_Variables_Currency_Code["value"], _assertion_msg
+        assert sut.digit == _Test_Variables_Currency_Code["digit"], _assertion_msg
         assert sut.range == _Test_Variables_Currency_Code["range"], _assertion_msg
         assert sut.enum == _Test_Variables_Currency_Code["enum"], _assertion_msg
 
@@ -78,7 +78,7 @@ class TestVariableWithEnumFormat(CheckableTestSuite):
         assert isinstance(obj, Variable)
         assert obj.name == _Test_Variables_Currency_Code["name"]
         assert obj.value_format.value is _Test_Variables_Currency_Code["value_format"]
-        assert obj.value == _Test_Variables_Currency_Code["value"]
+        assert obj.digit == _Test_Variables_Currency_Code["digit"]
         assert obj.range == _Test_Variables_Currency_Code["range"]
         assert obj.enum == _Test_Variables_Currency_Code["enum"]
 

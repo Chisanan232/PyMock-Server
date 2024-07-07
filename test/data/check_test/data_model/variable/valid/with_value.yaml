@@ -1,3 +1,3 @@
 name: big_decimal_sample
 value_format: big_decimal
-value: 30:3
+digit: 30:3

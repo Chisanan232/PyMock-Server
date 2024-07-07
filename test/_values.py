@@ -90,7 +90,7 @@ _Mock_Templatable_Setting: dict = {
 _Test_Variables_BigDecimal_USD: dict = {
     "name": "big_decimal_usd",
     "value_format": "big_decimal",
-    "value": "30:3",
+    "digit": "30:3",
     "range": None,
     "enum": None,
 }
@@ -98,7 +98,7 @@ _Test_Variables_BigDecimal_USD: dict = {
 _Test_Variables_BigDecimal_TWD: dict = {
     "name": "big_decimal_twd",
     "value_format": "big_decimal",
-    "value": "30:0",
+    "digit": "30:0",
     "range": None,
     "enum": None,
 }
@@ -107,7 +107,7 @@ _Test_Variables_BigDecimal_TWD: dict = {
 _Test_Variables_Currency_Code: dict = {
     "name": "currency_code",
     "value_format": "enum",
-    "value": None,
+    "digit": None,
     "range": None,
     "enum": ["TWD", "USD", "EUR"],
 }

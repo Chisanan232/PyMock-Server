@@ -9,7 +9,7 @@ from ._base import _Checkable, _Config
 class Variable(_Config, _Checkable):
     name: str = field(default_factory=str)
     value_format: Optional[ValueFormat] = None
-    value: Optional[str] = None
+    digit: Optional[str] = None
     range: Optional[str] = None
     enum: Optional[List[str]] = None
 
@@ -27,7 +27,7 @@ class Variable(_Config, _Checkable):
         return (
             self.name == other.name
             and self.value_format == other.value_format
-            and self.value == other.value
+            and self.digit == other.digit
             and self.range == other.range
             and self.enum == other.enum
         )
@@ -42,7 +42,7 @@ class Variable(_Config, _Checkable):
 
         value_format: ValueFormat = self.value_format or ValueFormat.to_enum(self._get_prop(data, prop="value_format"))
 
-        value: str = self._get_prop(data, prop="value")
+        digit: str = self._get_prop(data, prop="digit")
         range_value: str = self._get_prop(data, prop="range")
         enum: str = self._get_prop(data, prop="enum")
         if not name or not value_format:
@@ -50,7 +50,7 @@ class Variable(_Config, _Checkable):
         serialized_data = {
             "name": name,
             "value_format": value_format.value,
-            "value": value,
+            "digit": digit,
             "range": range_value,
             "enum": enum,
         }
@@ -67,7 +67,7 @@ class Variable(_Config, _Checkable):
         if self.value_format == ValueFormat.Enum:
             self.enum = data.get("enum", None)
         else:
-            self.value = data.get("value", None)
+            self.digit = data.get("digit", None)
 
         self.range = data.get("range", None)
         return self
