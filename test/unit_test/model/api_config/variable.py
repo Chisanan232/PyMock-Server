@@ -3,17 +3,29 @@ from typing import Any, List
 
 import pytest
 
-from pymock_api.model.api_config.variable import Digit, Variable
+from pymock_api.model.api_config.variable import Digit, Size, Variable
 
 from ...._values import (
     _Test_Digit_In_Format,
+    _Test_Size_In_Format,
     _Test_Variables_BigDecimal_USD,
     _Test_Variables_Currency_Code,
 )
 from ._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
 
+_Size_Test_Data: List[tuple] = []
 _Digit_Test_Data: List[tuple] = []
 _Variable_Test_Data: List[tuple] = []
+
+
+def reset_size_test_data() -> None:
+    global _Size_Test_Data
+    _Size_Test_Data.clear()
+
+
+def add_size_test_data(test_scenario: tuple) -> None:
+    global _Size_Test_Data
+    _Size_Test_Data.append(test_scenario)
 
 
 def reset_digit_test_data() -> None:
@@ -34,6 +46,47 @@ def reset_variable_test_data() -> None:
 def add_variable_test_data(test_scenario: tuple) -> None:
     global _Variable_Test_Data
     _Variable_Test_Data.append(test_scenario)
+
+
+class TestSize(CheckableTestSuite):
+    test_data_dir = "size"
+    set_checking_test_data(test_data_dir, reset_callback=reset_size_test_data, opt_globals_callback=add_size_test_data)
+
+    @pytest.fixture(scope="function")
+    def sut(self) -> Size:
+        return Size(
+            max_value=_Test_Size_In_Format["max"],
+            min_value=_Test_Size_In_Format["min"],
+            only_equal=_Test_Size_In_Format["only_equal"],
+        )
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> Size:
+        return Size()
+
+    def test_value_attributes(self, sut: Size):
+        assert sut.max_value == _Test_Size_In_Format["max"], _assertion_msg
+        assert sut.min_value == _Test_Size_In_Format["min"], _assertion_msg
+        assert sut.only_equal == _Test_Size_In_Format["only_equal"], _assertion_msg
+
+    def test_serialize_with_none(self, sut_with_nothing: Size):
+        assert sut_with_nothing.serialize() is not None
+
+    def _expected_serialize_value(self) -> Any:
+        return _Test_Size_In_Format
+
+    def _expected_deserialize_value(self, obj: Size) -> None:
+        assert isinstance(obj, Size)
+        assert obj.max_value == _Test_Size_In_Format["max"]
+        assert obj.min_value is _Test_Size_In_Format["min"]
+        assert obj.only_equal is _Test_Size_In_Format["only_equal"]
+
+    @pytest.mark.parametrize(
+        ("test_data_path", "criteria"),
+        _Size_Test_Data,
+    )
+    def test_is_work(self, sut_with_nothing: Size, test_data_path: str, criteria: bool):
+        super().test_is_work(sut_with_nothing, test_data_path, criteria)
 
 
 class TestDigit(CheckableTestSuite):

@@ -86,6 +86,12 @@ _Mock_Templatable_Setting: dict = {
 }
 
 # Test variable
+_Test_Size_In_Format: dict = {
+    "max": 8,
+    "min": 1,
+    "only_equal": None,
+}
+
 _Test_Digit_In_Format: dict = {
     "integer": 128,
     "decimal": 0,

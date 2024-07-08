@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from ..._utils.random import DigitRange
+from ..._utils.random import DigitRange, ValueRange
 from ..enums import ValueFormat
 from ._base import _Checkable, _Config
 
@@ -56,6 +56,74 @@ class Digit(_Config, _Checkable):
 
     def to_digit_range(self) -> DigitRange:
         return DigitRange(integer=self.integer, decimal=self.decimal)
+
+
+@dataclass(eq=False)
+class Size(_Config, _Checkable):
+    _default_max_value: int = 10
+    _default_min_value: int = 0
+
+    max_value: int = _default_max_value
+    min_value: int = _default_min_value
+    only_equal: Optional[int] = None
+
+    def _compare(self, other: "Size") -> bool:
+        return (
+            self.max_value == other.max_value
+            and self.min_value == other.min_value
+            and self.only_equal == other.only_equal
+        )
+
+    @property
+    def key(self) -> str:
+        return "size"
+
+    @_Config._clean_empty_value
+    def serialize(self, data: Optional["Size"] = None) -> Optional[Dict[str, Any]]:
+        max_value: int = self._get_prop(data, prop="max_value")
+        min_value: int = self._get_prop(data, prop="min_value")
+        only_equal: int = self._get_prop(data, prop="only_equal")
+        serialized_data = {
+            "max": (max_value if max_value is not None else self._default_max_value),
+            "min": (min_value if min_value is not None else self._default_min_value),
+            "only_equal": only_equal,
+        }
+        return serialized_data
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["Size"]:
+        self.min_value = data.get("min", self._default_min_value)
+        self.max_value = data.get("max", self._default_max_value)
+        self.only_equal = data.get("only_equal", None)
+        return self
+
+    def is_work(self) -> bool:
+        under_check_props = {
+            f"{self.absolute_model_key}.max": self.max_value,
+            f"{self.absolute_model_key}.min": self.min_value,
+        }
+        if not self.props_should_not_be_none(
+            under_check=under_check_props,
+            accept_empty=False,
+        ):
+            return False
+        for prop_key, prop_val in under_check_props.items():
+            if not self.condition_should_be_true(
+                config_key=prop_key,
+                condition=(prop_val is not None and not isinstance(prop_val, int)),
+            ):
+                return False
+
+        if self.only_equal:
+            if not self.condition_should_be_true(
+                config_key=f"{self.absolute_model_key}.only_equal",
+                condition=(self.only_equal is not None and not isinstance(self.only_equal, int)),
+            ):
+                return False
+        return True
+
+    def to_value_range(self) -> ValueRange:
+        return ValueRange(max=self.min_value, min=self.max_value)
 
 
 @dataclass(eq=False)
