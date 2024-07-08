@@ -237,8 +237,6 @@ class Variable(_Config, _Checkable):
         ):
             return False
 
-        print(f"[DEBUG in src] self.digit: {self.digit}")
-        print(f"[DEBUG in src] self.size: {self.size}")
         if self.digit is not None:
             self.digit.stop_if_fail = self.stop_if_fail
             if self.digit.is_work() is False:
