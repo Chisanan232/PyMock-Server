@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from ..._utils.random import DigitRange, ValueRange
+from ..._utils.random import DigitRange, ValueSize
 from ..enums import ValueFormat
 from ._base import _Checkable, _Config
 
@@ -122,8 +122,8 @@ class Size(_Config, _Checkable):
                 return False
         return True
 
-    def to_value_range(self) -> ValueRange:
-        return ValueRange(max=self.min_value, min=self.max_value)
+    def to_value_size(self) -> ValueSize:
+        return ValueSize(max=self.min_value, min=self.max_value)
 
 
 @dataclass(eq=False)

@@ -12,7 +12,7 @@ from pymock_api._utils.random import (
     RandomFromSequence,
     RandomInteger,
     RandomString,
-    ValueRange,
+    ValueSize,
 )
 from pymock_api.model.openapi._js_handlers import convert_js_type
 
@@ -730,13 +730,13 @@ class ValueFormat(Enum):
             return RandomString.generate()
         elif self is ValueFormat.Integer:
             max_value = _generate_max_value(digit.integer)
-            return RandomInteger.generate(value_range=ValueRange(min=0 - max_value, max=max_value))
+            return RandomInteger.generate(value_range=ValueSize(min=0 - max_value, max=max_value))
         elif self is ValueFormat.BigDecimal:
             max_integer_value = _generate_max_value(digit.integer)
             max_decimal_value = _generate_max_value(digit.decimal)
             return RandomBigDecimal.generate(
-                integer_range=ValueRange(min=0 - max_integer_value, max=max_integer_value),
-                decimal_range=ValueRange(min=0, max=max_decimal_value),
+                integer_range=ValueSize(min=0 - max_integer_value, max=max_integer_value),
+                decimal_range=ValueSize(min=0, max=max_decimal_value),
             )
         elif self is ValueFormat.Boolean:
             return RandomBoolean.generate()

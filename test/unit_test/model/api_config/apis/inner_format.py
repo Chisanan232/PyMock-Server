@@ -4,7 +4,7 @@ from typing import Any, List, Optional, Union
 
 import pytest
 
-from pymock_api._utils.random import ValueRange
+from pymock_api._utils.random import ValueSize
 from pymock_api.model.api_config.apis._format import Format
 from pymock_api.model.api_config.variable import Digit, Variable
 from pymock_api.model.enums import FormatStrategy, ValueFormat
@@ -397,58 +397,58 @@ class TestFormat(CheckableTestSuite):
     @pytest.mark.parametrize(
         ("strategy", "data_type", "digit", "expect_type", "expect_value_range"),
         [
-            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=1, decimal=0), int, ValueRange(min=-9, max=9)),
-            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=3, decimal=0), int, ValueRange(min=-999, max=999)),
-            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=1, decimal=2), int, ValueRange(min=-9, max=9)),
-            (FormatStrategy.BY_DATA_TYPE, float, Digit(integer=1, decimal=0), Decimal, ValueRange(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=1, decimal=0), int, ValueSize(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=3, decimal=0), int, ValueSize(min=-999, max=999)),
+            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=1, decimal=2), int, ValueSize(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, float, Digit(integer=1, decimal=0), Decimal, ValueSize(min=-9, max=9)),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 float,
                 Digit(integer=3, decimal=0),
                 Decimal,
-                ValueRange(min=-999, max=999),
+                ValueSize(min=-999, max=999),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 float,
                 Digit(integer=3, decimal=2),
                 Decimal,
-                ValueRange(min=-999.99, max=999.99),
+                ValueSize(min=-999.99, max=999.99),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 float,
                 Digit(integer=0, decimal=3),
                 Decimal,
-                ValueRange(min=-0.999, max=0.999),
+                ValueSize(min=-0.999, max=0.999),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 "big_decimal",
                 Digit(integer=1, decimal=0),
                 Decimal,
-                ValueRange(min=-9, max=9),
+                ValueSize(min=-9, max=9),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 "big_decimal",
                 Digit(integer=3, decimal=0),
                 Decimal,
-                ValueRange(min=-999, max=999),
+                ValueSize(min=-999, max=999),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 "big_decimal",
                 Digit(integer=3, decimal=2),
                 Decimal,
-                ValueRange(min=-999.99, max=999.99),
+                ValueSize(min=-999.99, max=999.99),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 "big_decimal",
                 Digit(integer=0, decimal=3),
                 Decimal,
-                ValueRange(min=-0.999, max=0.999),
+                ValueSize(min=-0.999, max=0.999),
             ),
         ],
     )
@@ -458,7 +458,7 @@ class TestFormat(CheckableTestSuite):
         data_type: Union[None, str, object],
         digit: Digit,
         expect_type: type,
-        expect_value_range: ValueRange,
+        expect_value_range: ValueSize,
     ):
         format_model = Format(
             strategy=strategy,

@@ -6,7 +6,7 @@ from typing import Any, List, Optional, Type, Union
 
 import pytest
 
-from pymock_api._utils.random import DigitRange, ValueRange
+from pymock_api._utils.random import DigitRange, ValueSize
 from pymock_api.model.enums import (
     ConfigLoadingOrder,
     FormatStrategy,
@@ -825,17 +825,17 @@ class TestValueFormat(EnumTestSuite):
     @pytest.mark.parametrize(
         ("formatter", "digit_range", "expect_type", "expect_range"),
         [
-            (ValueFormat.Integer, DigitRange(integer=1, decimal=0), int, ValueRange(min=-9, max=9)),
-            (ValueFormat.Integer, DigitRange(integer=3, decimal=0), int, ValueRange(min=-999, max=999)),
-            (ValueFormat.Integer, DigitRange(integer=1, decimal=2), int, ValueRange(min=-9, max=9)),
-            (ValueFormat.BigDecimal, DigitRange(integer=1, decimal=0), Decimal, ValueRange(min=-9, max=9)),
-            (ValueFormat.BigDecimal, DigitRange(integer=3, decimal=0), Decimal, ValueRange(min=-999, max=999)),
-            (ValueFormat.BigDecimal, DigitRange(integer=3, decimal=2), Decimal, ValueRange(min=-999.99, max=999.99)),
-            (ValueFormat.BigDecimal, DigitRange(integer=0, decimal=3), Decimal, ValueRange(min=-0.999, max=0.999)),
+            (ValueFormat.Integer, DigitRange(integer=1, decimal=0), int, ValueSize(min=-9, max=9)),
+            (ValueFormat.Integer, DigitRange(integer=3, decimal=0), int, ValueSize(min=-999, max=999)),
+            (ValueFormat.Integer, DigitRange(integer=1, decimal=2), int, ValueSize(min=-9, max=9)),
+            (ValueFormat.BigDecimal, DigitRange(integer=1, decimal=0), Decimal, ValueSize(min=-9, max=9)),
+            (ValueFormat.BigDecimal, DigitRange(integer=3, decimal=0), Decimal, ValueSize(min=-999, max=999)),
+            (ValueFormat.BigDecimal, DigitRange(integer=3, decimal=2), Decimal, ValueSize(min=-999.99, max=999.99)),
+            (ValueFormat.BigDecimal, DigitRange(integer=0, decimal=3), Decimal, ValueSize(min=-0.999, max=0.999)),
         ],
     )
     def test_generate_numerical_value(
-        self, formatter: ValueFormat, digit_range: DigitRange, expect_type: object, expect_range: ValueRange
+        self, formatter: ValueFormat, digit_range: DigitRange, expect_type: object, expect_range: ValueSize
     ):
         value = formatter.generate_value(digit=digit_range)
         assert value is not None
@@ -932,58 +932,58 @@ class TestFormatStrategy(EnumTestSuite):
     @pytest.mark.parametrize(
         ("strategy", "data_type", "digit_range", "expect_type", "expect_range"),
         [
-            (FormatStrategy.BY_DATA_TYPE, int, DigitRange(integer=1, decimal=0), int, ValueRange(min=-9, max=9)),
-            (FormatStrategy.BY_DATA_TYPE, int, DigitRange(integer=3, decimal=0), int, ValueRange(min=-999, max=999)),
-            (FormatStrategy.BY_DATA_TYPE, int, DigitRange(integer=1, decimal=2), int, ValueRange(min=-9, max=9)),
-            (FormatStrategy.BY_DATA_TYPE, float, DigitRange(integer=1, decimal=0), Decimal, ValueRange(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, int, DigitRange(integer=1, decimal=0), int, ValueSize(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, int, DigitRange(integer=3, decimal=0), int, ValueSize(min=-999, max=999)),
+            (FormatStrategy.BY_DATA_TYPE, int, DigitRange(integer=1, decimal=2), int, ValueSize(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, float, DigitRange(integer=1, decimal=0), Decimal, ValueSize(min=-9, max=9)),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 float,
                 DigitRange(integer=3, decimal=0),
                 Decimal,
-                ValueRange(min=-999, max=999),
+                ValueSize(min=-999, max=999),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 float,
                 DigitRange(integer=3, decimal=2),
                 Decimal,
-                ValueRange(min=-999.99, max=999.99),
+                ValueSize(min=-999.99, max=999.99),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 float,
                 DigitRange(integer=0, decimal=3),
                 Decimal,
-                ValueRange(min=-0.999, max=0.999),
+                ValueSize(min=-0.999, max=0.999),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 "big_decimal",
                 DigitRange(integer=1, decimal=0),
                 Decimal,
-                ValueRange(min=-9, max=9),
+                ValueSize(min=-9, max=9),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 "big_decimal",
                 DigitRange(integer=3, decimal=0),
                 Decimal,
-                ValueRange(min=-999, max=999),
+                ValueSize(min=-999, max=999),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 "big_decimal",
                 DigitRange(integer=3, decimal=2),
                 Decimal,
-                ValueRange(min=-999.99, max=999.99),
+                ValueSize(min=-999.99, max=999.99),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 "big_decimal",
                 DigitRange(integer=0, decimal=3),
                 Decimal,
-                ValueRange(min=-0.999, max=0.999),
+                ValueSize(min=-0.999, max=0.999),
             ),
         ],
     )
@@ -993,7 +993,7 @@ class TestFormatStrategy(EnumTestSuite):
         data_type: Union[None, str, object],
         digit_range: DigitRange,
         expect_type: object,
-        expect_range: ValueRange,
+        expect_range: ValueSize,
     ):
         value = strategy.generate_not_customize_value(data_type=data_type, digit=digit_range)
         assert value is not None
