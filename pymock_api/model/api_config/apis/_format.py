@@ -18,7 +18,7 @@ class Format(_Config, _Checkable):
 
     # For general --- by data type strategy
     digit: Optional[Digit] = None
-    range: Optional[str] = None
+    size: Optional[str] = None
 
     # For enum strategy
     enums: List[str] = field(default_factory=list)
@@ -80,7 +80,7 @@ class Format(_Config, _Checkable):
         return (
             self.strategy == other.strategy
             and self.digit == other.digit
-            and self.range == other.range
+            and self.size == other.size
             and self.enums == other.enums
             and self.customize == other.customize
             and variables_prop_is_same
@@ -100,7 +100,7 @@ class Format(_Config, _Checkable):
         digit_data_model: Digit = (self or data).digit  # type: ignore[union-attr,assignment]
         digit: dict = digit_data_model.serialize() if digit_data_model else None  # type: ignore[assignment]
 
-        range_value: str = self._get_prop(data, prop="range")
+        size_value: str = self._get_prop(data, prop="size")
         enums: List[str] = self._get_prop(data, prop="enums")
         customize: str = self._get_prop(data, prop="customize")
         variables: List[Variable] = self._get_prop(data, prop="variables")
@@ -109,7 +109,7 @@ class Format(_Config, _Checkable):
         serialized_data = {
             "strategy": strategy.value,
             "digit": digit,
-            "range": range_value,
+            "size": size_value,
             "enums": enums,
             "customize": customize,
             "variables": [var.serialize() if isinstance(var, Variable) else var for var in variables],
@@ -133,7 +133,7 @@ class Format(_Config, _Checkable):
             digit_data_model.absolute_model_key = self.key
             self.digit = digit_data_model.deserialize(data=data.get("digit", None) or {})
 
-        self.range = data.get("range", None)
+        self.size = data.get("size", None)
         self.enums = data.get("enums", [])
         self.customize = data.get("customize", "")
         self.variables = [_deserialize_variable(var) for var in (data.get("variables", []) or [])]
