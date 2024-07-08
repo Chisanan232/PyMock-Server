@@ -171,7 +171,11 @@ class Format(_Config, _Checkable):
             if digit is None:
                 digit = Digit(integer=128, decimal=128) if data_type == "big_decimal" else Digit()
             regex = self.strategy.to_value_format(data_type).generate_regex(digit=digit.to_digit_range())
-            return re.search(regex, str(value)) is not None
+            search_result = re.search(regex, str(value))
+            if search_result is None:
+                # Cannot find any mapping format string
+                return False
+            return len(str(value)) == len(search_result.group(0))
         elif self.strategy is FormatStrategy.FROM_ENUMS:
             return isinstance(value, str) and value in self.enums
         elif self.strategy is FormatStrategy.CUSTOMIZE:

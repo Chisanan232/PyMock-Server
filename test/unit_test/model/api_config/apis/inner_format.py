@@ -250,7 +250,10 @@ class TestFormat(CheckableTestSuite):
         ("strategy", "data_type", "value", "digit", "enums", "customize", "variables"),
         [
             (FormatStrategy.BY_DATA_TYPE, int, "not int value", None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, int, 123, Digit(integer=1, decimal=0), [], "", []),
             (FormatStrategy.BY_DATA_TYPE, "big_decimal", "not int or float value", None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, Digit(integer=2, decimal=3), [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, Digit(integer=3, decimal=1), [], "", []),
             (FormatStrategy.BY_DATA_TYPE, bool, "not bool value", None, [], "", []),
             (FormatStrategy.FROM_ENUMS, str, "not in enums", None, ["ENUM_1", "ENUM_2", "ENUM_3"], "", []),
             (FormatStrategy.CUSTOMIZE, str, "different_format", None, [], "sample_format", []),
