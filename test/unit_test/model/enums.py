@@ -6,6 +6,7 @@ from typing import Any, List, Type, Union
 
 import pytest
 
+from pymock_api._utils.random import DigitRange, ValueRange
 from pymock_api.model.enums import (
     ConfigLoadingOrder,
     FormatStrategy,
@@ -814,12 +815,36 @@ class TestValueFormat(EnumTestSuite):
             (ValueFormat.Enum, ["ENUM_1", "ENUM_2", "ENUM_3"], str),
         ],
     )
-    def test_generate_not_customize_value(self, formatter: ValueFormat, enums: List[str], expect_type: object):
+    def test_generate_value(self, formatter: ValueFormat, enums: List[str], expect_type: object):
         value = formatter.generate_value(enums=enums)
         assert value is not None
         assert isinstance(value, expect_type)
         if enums:
             assert value in enums
+
+    @pytest.mark.parametrize(
+        ("formatter", "digit_range", "expect_type", "expect_range"),
+        [
+            (ValueFormat.Integer, DigitRange(integer=1, decimal=0), int, ValueRange(min=-9, max=9)),
+            (ValueFormat.Integer, DigitRange(integer=3, decimal=0), int, ValueRange(min=-999, max=999)),
+            (ValueFormat.Integer, DigitRange(integer=1, decimal=2), int, ValueRange(min=-9, max=9)),
+            (ValueFormat.BigDecimal, DigitRange(integer=1, decimal=0), Decimal, ValueRange(min=-9, max=9)),
+            (ValueFormat.BigDecimal, DigitRange(integer=3, decimal=0), Decimal, ValueRange(min=-999, max=999)),
+            (ValueFormat.BigDecimal, DigitRange(integer=3, decimal=2), Decimal, ValueRange(min=-999.99, max=999.99)),
+            (ValueFormat.BigDecimal, DigitRange(integer=0, decimal=3), Decimal, ValueRange(min=-0.999, max=0.999)),
+        ],
+    )
+    def test_generate_numerical_value(
+        self, formatter: ValueFormat, digit_range: DigitRange, expect_type: object, expect_range: ValueRange
+    ):
+        value = formatter.generate_value(digit=digit_range)
+        assert value is not None
+        assert isinstance(value, expect_type)
+        if isinstance(value, Decimal):
+            assert value.compare(Decimal(expect_range.min)) == Decimal("1")
+            assert value.compare(Decimal(expect_range.max)) == Decimal("-1")
+        else:
+            assert expect_range.min < value < expect_range.max
 
 
 class TestFormatStrategy(EnumTestSuite):
