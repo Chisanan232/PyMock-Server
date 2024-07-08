@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from ..._utils.random import DigitRange
 from ..enums import ValueFormat
 from ._base import _Checkable, _Config
 
@@ -52,6 +53,9 @@ class Digit(_Config, _Checkable):
             ):
                 return False
         return True
+
+    def to_digit_range(self) -> DigitRange:
+        return DigitRange(integer=self.integer, decimal=self.decimal)
 
 
 @dataclass(eq=False)

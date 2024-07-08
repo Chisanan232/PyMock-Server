@@ -4,6 +4,7 @@ from typing import Any, List, Optional, Union
 
 import pytest
 
+from pymock_api._utils.random import ValueRange
 from pymock_api.model.api_config.apis._format import Format
 from pymock_api.model.api_config.variable import Digit, Variable
 from pymock_api.model.enums import FormatStrategy, ValueFormat
@@ -338,6 +339,85 @@ class TestFormat(CheckableTestSuite):
             assert value in enums
         if expect_value_format:
             assert re.search(expect_value_format, str(value), re.IGNORECASE) is not None
+
+    @pytest.mark.parametrize(
+        ("strategy", "data_type", "digit", "expect_type", "expect_value_range"),
+        [
+            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=1, decimal=0), int, ValueRange(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=3, decimal=0), int, ValueRange(min=-999, max=999)),
+            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=1, decimal=2), int, ValueRange(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, float, Digit(integer=1, decimal=0), Decimal, ValueRange(min=-9, max=9)),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                float,
+                Digit(integer=3, decimal=0),
+                Decimal,
+                ValueRange(min=-999, max=999),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                float,
+                Digit(integer=3, decimal=2),
+                Decimal,
+                ValueRange(min=-999.99, max=999.99),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                float,
+                Digit(integer=0, decimal=3),
+                Decimal,
+                ValueRange(min=-0.999, max=0.999),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                "big_decimal",
+                Digit(integer=1, decimal=0),
+                Decimal,
+                ValueRange(min=-9, max=9),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                "big_decimal",
+                Digit(integer=3, decimal=0),
+                Decimal,
+                ValueRange(min=-999, max=999),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                "big_decimal",
+                Digit(integer=3, decimal=2),
+                Decimal,
+                ValueRange(min=-999.99, max=999.99),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                "big_decimal",
+                Digit(integer=0, decimal=3),
+                Decimal,
+                ValueRange(min=-0.999, max=0.999),
+            ),
+        ],
+    )
+    def test_generate_numerical_value(
+        self,
+        strategy: FormatStrategy,
+        data_type: Union[None, str, object],
+        digit: Digit,
+        expect_type: type,
+        expect_value_range: ValueRange,
+    ):
+        format_model = Format(
+            strategy=strategy,
+            digit=digit,
+        )
+        value = format_model.generate_value(data_type=data_type)
+        assert value is not None
+        assert isinstance(value, expect_type)
+        if isinstance(value, Decimal):
+            assert value.compare(Decimal(expect_value_range.min)) == Decimal("1")
+            assert value.compare(Decimal(expect_value_range.max)) == Decimal("-1")
+        else:
+            assert expect_value_range.min < value < expect_value_range.max
 
     def test_invalid_expect_format_log_msg(self):
         non_strategy_format = Format(strategy=None)

@@ -195,11 +195,21 @@ class Format(_Config, _Checkable):
                 find_result: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
                 assert len(find_result) == 1, "Cannot find the mapping name of variable setting."
                 assert find_result[0].value_format
-                new_value = find_result[0].value_format.generate_value(enums=find_result[0].enum or [])
+                digit = find_result[0].digit
+                if digit is None:
+                    digit = Digit()
+                new_value = find_result[0].value_format.generate_value(
+                    enums=find_result[0].enum or [], digit=digit.to_digit_range()
+                )
                 value = value.replace(var, str(new_value))
             return value
         else:
-            return self.strategy.generate_not_customize_value(data_type=data_type, enums=self.enums)
+            digit = self.digit
+            if digit is None:
+                digit = Digit()
+            return self.strategy.generate_not_customize_value(
+                data_type=data_type, enums=self.enums, digit=digit.to_digit_range()
+            )
 
     def expect_format_log_msg(self, data_type: type) -> str:
         if self.strategy is FormatStrategy.BY_DATA_TYPE:
