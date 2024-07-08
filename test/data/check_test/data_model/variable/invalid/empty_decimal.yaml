@@ -1,0 +1,5 @@
+name: big_decimal_sample
+value_format: big_decimal
+digit:
+  integer: 4
+  decimal:
