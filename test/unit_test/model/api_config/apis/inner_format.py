@@ -116,8 +116,13 @@ class TestFormat(CheckableTestSuite):
         [
             (FormatStrategy.BY_DATA_TYPE, str, "random_string", None, [], "", []),
             (FormatStrategy.BY_DATA_TYPE, str, "123", None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, str, "@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.", None, [], "", []),
             (FormatStrategy.BY_DATA_TYPE, int, 123, None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, int, 123, Digit(integer=3, decimal=0), [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, int, 123, Digit(integer=5, decimal=2), [], "", []),
             (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, Digit(integer=3, decimal=3), [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, Digit(integer=5, decimal=4), [], "", []),
             (FormatStrategy.BY_DATA_TYPE, bool, True, None, [], "", []),
             (FormatStrategy.BY_DATA_TYPE, bool, False, None, [], "", []),
             (FormatStrategy.BY_DATA_TYPE, bool, "True", None, [], "", []),
@@ -172,12 +177,44 @@ class TestFormat(CheckableTestSuite):
             (
                 FormatStrategy.CUSTOMIZE,
                 str,
+                "123.123 USD",
+                None,
+                [],
+                "<decimal_price_with_digit> <fiat_currency_code>",
+                [
+                    Variable(
+                        name="decimal_price_with_digit",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(integer=3, decimal=3),
+                    ),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
                 "123.123 USD\n 135789 JPY",
                 None,
                 [],
                 "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>",
                 [
                     Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                "123.123 USD\n 135789 JPY",
+                None,
+                [],
+                "<decimal_price_with_digit> <fiat_currency_code>\n <decimal_price_with_digit> <fiat_currency_code>",
+                [
+                    Variable(
+                        name="decimal_price_with_digit",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(integer=10, decimal=4),
+                    ),
                     Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
                 ],
             ),
