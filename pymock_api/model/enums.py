@@ -750,9 +750,11 @@ class ValueFormat(Enum):
             # TODO: Set the string type value size?
             return r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1,128}"
         elif self is ValueFormat.Integer:
-            return r"\d{1," + re.escape(str(digit.integer)) + "}"
+            integer_digit = 1 if digit.integer <= 0 else digit.integer
+            return r"\d{1," + re.escape(str(integer_digit)) + "}"
         elif self is ValueFormat.BigDecimal:
-            return r"\d{1," + re.escape(str(digit.integer)) + "}\.?\d{0," + re.escape(str(digit.decimal)) + "}?"
+            integer_digit = 1 if digit.integer <= 0 else digit.integer
+            return r"\d{1," + re.escape(str(integer_digit)) + "}\.?\d{0," + re.escape(str(digit.decimal)) + "}?"
         elif self is ValueFormat.Boolean:
             return r"(true|false|True|False)"
         elif self is ValueFormat.Enum:
