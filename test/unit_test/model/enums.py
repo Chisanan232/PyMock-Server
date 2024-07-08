@@ -852,9 +852,9 @@ class TestValueFormat(EnumTestSuite):
             (ValueFormat.Integer, [], DigitRange(integer=3, decimal=0), r"\d{1,3}"),
             (ValueFormat.Integer, [], DigitRange(integer=3, decimal=2), r"\d{1,3}"),
             (ValueFormat.Integer, [], DigitRange(integer=10, decimal=2), r"\d{1,10}"),
-            (ValueFormat.BigDecimal, [], DigitRange(integer=4, decimal=0), r"\d{1,4}\.?\d{0,0}?"),
-            (ValueFormat.BigDecimal, [], DigitRange(integer=4, decimal=2), r"\d{1,4}\.?\d{0,2}?"),
-            (ValueFormat.BigDecimal, [], DigitRange(integer=10, decimal=3), r"\d{1,10}\.?\d{0,3}?"),
+            (ValueFormat.BigDecimal, [], DigitRange(integer=4, decimal=0), r"\d{1,4}\.?\d{0,0}"),
+            (ValueFormat.BigDecimal, [], DigitRange(integer=4, decimal=2), r"\d{1,4}\.?\d{0,2}"),
+            (ValueFormat.BigDecimal, [], DigitRange(integer=10, decimal=3), r"\d{1,10}\.?\d{0,3}"),
             (ValueFormat.Enum, ["ENUM_1", "ENUM_2", "ENUM_3"], None, r"(ENUM_1|ENUM_2|ENUM_3)"),
         ],
     )
