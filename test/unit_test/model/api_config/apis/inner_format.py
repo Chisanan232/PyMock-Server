@@ -6,7 +6,7 @@ import pytest
 
 from pymock_api._utils.random import ValueSize
 from pymock_api.model.api_config.apis._format import Format
-from pymock_api.model.api_config.variable import Digit, Variable
+from pymock_api.model.api_config.variable import Digit, Size, Variable
 from pymock_api.model.enums import FormatStrategy, ValueFormat
 
 from ....._values import _Customize_Format_With_Self_Vars
@@ -375,13 +375,13 @@ class TestFormat(CheckableTestSuite):
             customize=customize,
             variables=[
                 Variable(
-                    name="big_decimal_price", value_format=ValueFormat.BigDecimal, digit=Digit(), size="", enum=[]
+                    name="big_decimal_price", value_format=ValueFormat.BigDecimal, digit=Digit(), size=Size(), enum=[]
                 ),
                 Variable(
                     name="fiat_currency_code",
                     value_format=ValueFormat.Enum,
                     digit=Digit(),
-                    size="",
+                    size=Size(),
                     enum=["USD", "TWD"],
                 ),
             ],

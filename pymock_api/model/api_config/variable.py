@@ -134,7 +134,7 @@ class Variable(_Config, _Checkable):
     name: str = field(default_factory=str)
     value_format: Optional[ValueFormat] = None
     digit: Optional[Digit] = None
-    size: Optional[str] = None
+    size: Optional[Size] = None
     enum: Optional[List[str]] = None
 
     _absolute_key: str = field(init=False, repr=False)
@@ -144,6 +144,8 @@ class Variable(_Config, _Checkable):
             self._convert_value_format()
         if self.digit is not None:
             self._convert_digit()
+        if self.size is not None:
+            self._convert_size()
 
     def _convert_value_format(self) -> None:
         if isinstance(self.value_format, str):
@@ -152,6 +154,10 @@ class Variable(_Config, _Checkable):
     def _convert_digit(self) -> None:
         if isinstance(self.digit, dict):
             self.digit = Digit().deserialize(self.digit)
+
+    def _convert_size(self) -> None:
+        if isinstance(self.size, dict):
+            self.size = Size().deserialize(self.size)
 
     def _compare(self, other: "Variable") -> bool:
         return (
@@ -175,7 +181,9 @@ class Variable(_Config, _Checkable):
         digit_data_model: Digit = (self or data).digit  # type: ignore[union-attr,assignment]
         digit: dict = digit_data_model.serialize() if digit_data_model else None  # type: ignore[assignment]
 
-        size_value: str = self._get_prop(data, prop="size")
+        size_data_model: Size = (self or data).size  # type: ignore[union-attr,assignment]
+        size_value: dict = size_data_model.serialize() if size_data_model else None
+
         enum: str = self._get_prop(data, prop="enum")
         if not name or not value_format:
             return None
@@ -199,11 +207,17 @@ class Variable(_Config, _Checkable):
         if self.value_format == ValueFormat.Enum:
             self.enum = data.get("enum", None)
         else:
-            digit_data_model = Digit()
-            digit_data_model.absolute_model_key = self.key
-            self.digit = digit_data_model.deserialize(data=data.get("digit", None) or {})
+            digit_value = data.get("digit", None)
+            if digit_value:
+                digit_data_model = Digit()
+                digit_data_model.absolute_model_key = self.key
+                self.digit = digit_data_model.deserialize(data=digit_value or {})
 
-        self.size = data.get("size", None)
+        size_value = data.get("size", None)
+        if size_value:
+            size_data_model = Size()
+            size_data_model.absolute_model_key = self.key
+            self.size = size_data_model.deserialize(data=size_value or {})
         return self
 
     def is_work(self) -> bool:
@@ -223,9 +237,16 @@ class Variable(_Config, _Checkable):
         ):
             return False
 
+        print(f"[DEBUG in src] self.digit: {self.digit}")
+        print(f"[DEBUG in src] self.size: {self.size}")
         if self.digit is not None:
             self.digit.stop_if_fail = self.stop_if_fail
             if self.digit.is_work() is False:
+                return False
+
+        if self.size is not None:
+            self.size.stop_if_fail = self.stop_if_fail
+            if self.size.is_work() is False:
                 return False
 
         return True
