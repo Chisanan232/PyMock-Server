@@ -25,8 +25,8 @@ class Digit(_Config, _Checkable):
         integer: int = self._get_prop(data, prop="integer")
         decimal: int = self._get_prop(data, prop="decimal")
         serialized_data = {
-            "integer": (integer or self._default_integer),
-            "decimal": (decimal or self._default_decimal),
+            "integer": (integer if integer is not None else self._default_integer),
+            "decimal": (decimal if decimal is not None else self._default_decimal),
         }
         return serialized_data
 
