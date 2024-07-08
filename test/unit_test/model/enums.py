@@ -888,7 +888,7 @@ class TestFormatStrategy(EnumTestSuite):
             FormatStrategy.CUSTOMIZE,
         ],
     )
-    def test_to_value_format(self, format_strategy: FormatStrategy):
+    def test_failure_to_value_format(self, format_strategy: FormatStrategy):
         with pytest.raises(RuntimeError):
             format_strategy.to_value_format(data_type="any data type")
 
