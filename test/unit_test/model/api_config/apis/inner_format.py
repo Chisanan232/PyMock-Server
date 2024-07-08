@@ -306,7 +306,7 @@ class TestFormat(CheckableTestSuite):
             ),
         ],
     )
-    def test_generate_not_customize_value(
+    def test_generate_value(
         self,
         strategy: FormatStrategy,
         data_type: Union[None, str, object],
