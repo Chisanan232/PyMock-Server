@@ -123,7 +123,10 @@ class Size(_Config, _Checkable):
         return True
 
     def to_value_size(self) -> ValueSize:
-        return ValueSize(max=self.min_value, min=self.max_value)
+        if self.only_equal:
+            return ValueSize(max=self.only_equal, min=self.only_equal)
+        else:
+            return ValueSize(max=self.min_value, min=self.max_value)
 
 
 @dataclass(eq=False)
