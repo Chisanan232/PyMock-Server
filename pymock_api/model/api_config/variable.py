@@ -8,8 +8,8 @@ from ._base import _Checkable, _Config
 
 @dataclass(eq=False)
 class Digit(_Config, _Checkable):
-    _default_integer: int = 128
-    _default_decimal: int = 0
+    _default_integer: int = 8
+    _default_decimal: int = 4
 
     integer: int = _default_integer
     decimal: int = _default_decimal
