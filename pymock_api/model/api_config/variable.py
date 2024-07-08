@@ -8,11 +8,11 @@ from ._base import _Checkable, _Config
 
 @dataclass(eq=False)
 class Digit(_Config, _Checkable):
-    integer: int = field(default_factory=int)
-    decimal: int = field(default_factory=int)
-
     _default_integer: int = 128
     _default_decimal: int = 0
+
+    integer: int = _default_integer
+    decimal: int = _default_decimal
 
     def _compare(self, other: "Digit") -> bool:
         return self.integer == other.integer and self.decimal == other.decimal
