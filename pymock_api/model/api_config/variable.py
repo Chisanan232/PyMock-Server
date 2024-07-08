@@ -134,7 +134,7 @@ class Variable(_Config, _Checkable):
     name: str = field(default_factory=str)
     value_format: Optional[ValueFormat] = None
     digit: Optional[Digit] = None
-    range: Optional[str] = None
+    size: Optional[str] = None
     enum: Optional[List[str]] = None
 
     _absolute_key: str = field(init=False, repr=False)
@@ -158,7 +158,7 @@ class Variable(_Config, _Checkable):
             self.name == other.name
             and self.value_format == other.value_format
             and self.digit == other.digit
-            and self.range == other.range
+            and self.size == other.size
             and self.enum == other.enum
         )
 
@@ -175,7 +175,7 @@ class Variable(_Config, _Checkable):
         digit_data_model: Digit = (self or data).digit  # type: ignore[union-attr,assignment]
         digit: dict = digit_data_model.serialize() if digit_data_model else None  # type: ignore[assignment]
 
-        range_value: str = self._get_prop(data, prop="range")
+        size_value: str = self._get_prop(data, prop="size")
         enum: str = self._get_prop(data, prop="enum")
         if not name or not value_format:
             return None
@@ -183,7 +183,7 @@ class Variable(_Config, _Checkable):
             "name": name,
             "value_format": value_format.value,
             "digit": digit,
-            "range": range_value,
+            "size": size_value,
             "enum": enum,
         }
         return serialized_data
@@ -203,7 +203,7 @@ class Variable(_Config, _Checkable):
             digit_data_model.absolute_model_key = self.key
             self.digit = digit_data_model.deserialize(data=data.get("digit", None) or {})
 
-        self.range = data.get("range", None)
+        self.size = data.get("size", None)
         return self
 
     def is_work(self) -> bool:

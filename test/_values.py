@@ -105,7 +105,7 @@ _Test_Variables_BigDecimal_USD: dict = {
         "integer": 30,
         "decimal": 3,
     },
-    "range": None,
+    "size": None,
     "enum": None,
 }
 
@@ -116,7 +116,7 @@ _Test_Variables_BigDecimal_TWD: dict = {
         "integer": 30,
         "decimal": 0,
     },
-    "range": None,
+    "size": None,
     "enum": None,
 }
 
@@ -125,7 +125,7 @@ _Test_Variables_Currency_Code: dict = {
     "name": "currency_code",
     "value_format": "enum",
     "digit": None,
-    "range": None,
+    "size": None,
     "enum": ["TWD", "USD", "EUR"],
 }
 

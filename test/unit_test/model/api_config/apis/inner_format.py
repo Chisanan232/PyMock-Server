@@ -54,7 +54,7 @@ class TestFormat(CheckableTestSuite):
             if expect_var_value[0]["digit"]:
                 assert var.digit.integer == expect_var_value[0]["digit"]["integer"]
                 assert var.digit.decimal == expect_var_value[0]["digit"]["decimal"]
-            assert var.range == expect_var_value[0]["range"]
+            assert var.size == expect_var_value[0]["size"]
             assert var.enum == expect_var_value[0]["enum"]
 
     @pytest.mark.parametrize("invalid_data", ["invalid data type", ["invalid data type"]])
@@ -375,13 +375,13 @@ class TestFormat(CheckableTestSuite):
             customize=customize,
             variables=[
                 Variable(
-                    name="big_decimal_price", value_format=ValueFormat.BigDecimal, digit=Digit(), range="", enum=[]
+                    name="big_decimal_price", value_format=ValueFormat.BigDecimal, digit=Digit(), size="", enum=[]
                 ),
                 Variable(
                     name="fiat_currency_code",
                     value_format=ValueFormat.Enum,
                     digit=Digit(),
-                    range="",
+                    size="",
                     enum=["USD", "TWD"],
                 ),
             ],
