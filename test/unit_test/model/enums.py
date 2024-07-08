@@ -2,7 +2,7 @@ import re
 from abc import ABCMeta, abstractmethod
 from decimal import Decimal
 from enum import Enum
-from typing import Any, List, Type, Union
+from typing import Any, List, Optional, Type, Union
 
 import pytest
 
@@ -845,6 +845,24 @@ class TestValueFormat(EnumTestSuite):
             assert value.compare(Decimal(expect_range.max)) == Decimal("-1")
         else:
             assert expect_range.min < value < expect_range.max
+
+    @pytest.mark.parametrize(
+        ("formatter", "enums", "digit_range", "expect_regex"),
+        [
+            (ValueFormat.Integer, [], DigitRange(integer=3, decimal=0), r"\d{1,3}"),
+            (ValueFormat.Integer, [], DigitRange(integer=3, decimal=2), r"\d{1,3}"),
+            (ValueFormat.Integer, [], DigitRange(integer=10, decimal=2), r"\d{1,10}"),
+            (ValueFormat.BigDecimal, [], DigitRange(integer=4, decimal=0), r"\d{1,4}\.?\d{0,0}?"),
+            (ValueFormat.BigDecimal, [], DigitRange(integer=4, decimal=2), r"\d{1,4}\.?\d{0,2}?"),
+            (ValueFormat.BigDecimal, [], DigitRange(integer=10, decimal=3), r"\d{1,10}\.?\d{0,3}?"),
+            (ValueFormat.Enum, ["ENUM_1", "ENUM_2", "ENUM_3"], None, r"(ENUM_1|ENUM_2|ENUM_3)"),
+        ],
+    )
+    def test_generate_regex(
+        self, formatter: ValueFormat, enums: List[str], digit_range: Optional[DigitRange], expect_regex: str
+    ):
+        regex = formatter.generate_regex(enums=enums, digit=digit_range)
+        assert regex == expect_regex
 
 
 class TestFormatStrategy(EnumTestSuite):

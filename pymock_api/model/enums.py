@@ -745,16 +745,14 @@ class ValueFormat(Enum):
         else:
             raise ValueError("This is program bug, please report this issue.")
 
-    def generate_regex(self, enums: List[str] = []) -> str:
+    def generate_regex(self, enums: List[str] = [], digit: DigitRange = Default_Digit_Range) -> str:
         if self is ValueFormat.String:
             # TODO: Set the string type value size?
             return r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1,128}"
         elif self is ValueFormat.Integer:
-            # TODO: Add setting about the range?
-            return r"\d{1,128}"
+            return r"\d{1," + re.escape(str(digit.integer)) + "}"
         elif self is ValueFormat.BigDecimal:
-            # TODO: Add setting about the range?
-            return r"\d{1,128}\.?\d{0,128}?"
+            return r"\d{1," + re.escape(str(digit.integer)) + "}\.?\d{0," + re.escape(str(digit.decimal)) + "}?"
         elif self is ValueFormat.Boolean:
             return r"(true|false|True|False)"
         elif self is ValueFormat.Enum:
