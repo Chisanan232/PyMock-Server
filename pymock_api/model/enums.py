@@ -781,11 +781,11 @@ class FormatStrategy(Enum):
         return ValueFormat.to_enum(data_type)
 
     def generate_not_customize_value(
-        self, data_type: Optional[type] = None, enums: List[str] = []
+        self, data_type: Optional[type] = None, enums: List[str] = [], digit: DigitRange = Default_Digit_Range
     ) -> Union[str, int, bool, Decimal]:
         if self in [FormatStrategy.BY_DATA_TYPE, FormatStrategy.FROM_ENUMS]:
             assert data_type is not None, "Format setting require *data_type* must not be empty."
             if self is FormatStrategy.FROM_ENUMS:
                 data_type = "enum"  # type: ignore[assignment]
-            return self.to_value_format(data_type=data_type).generate_value(enums=enums)
+            return self.to_value_format(data_type=data_type).generate_value(enums=enums, digit=digit)
         raise ValueError(f"This function doesn't support *{self}* currently.")
