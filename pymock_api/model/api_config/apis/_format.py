@@ -6,7 +6,7 @@ from decimal import Decimal
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
-from ...enums import FormatStrategy
+from ...enums import FormatStrategy, ValueFormat
 from .._base import _BaseConfig, _Checkable, _Config
 from ..variable import Digit, Variable
 
@@ -167,7 +167,10 @@ class Format(_Config, _Checkable):
         if self.strategy is FormatStrategy.BY_DATA_TYPE:
             data_type = "big_decimal" if isinstance(data_type, float) else data_type
             data_type = locate(data_type) if (data_type != "big_decimal" and isinstance(data_type, str)) else data_type  # type: ignore[assignment]
-            regex = self.strategy.to_value_format(data_type).generate_regex()
+            digit = self.digit
+            if digit is None:
+                digit = Digit(integer=128, decimal=128) if data_type == "big_decimal" else Digit()
+            regex = self.strategy.to_value_format(data_type).generate_regex(digit=digit.to_digit_range())
             return re.search(regex, str(value)) is not None
         elif self.strategy is FormatStrategy.FROM_ENUMS:
             return isinstance(value, str) and value in self.enums
@@ -179,7 +182,16 @@ class Format(_Config, _Checkable):
                 find_result: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
                 assert len(find_result) == 1, "Cannot find the mapping name of variable setting."
                 assert find_result[0].value_format
-                one_var_regex = find_result[0].value_format.generate_regex(enums=find_result[0].enum or [])
+                digit = find_result[0].digit
+                if digit is None:
+                    digit = (
+                        Digit(integer=128, decimal=128)
+                        if find_result[0].value_format is ValueFormat.BigDecimal
+                        else Digit()
+                    )
+                one_var_regex = find_result[0].value_format.generate_regex(
+                    enums=find_result[0].enum or [], digit=digit.to_digit_range()
+                )
                 regex = regex.replace(var, one_var_regex)
             return re.search(regex, str(value), re.IGNORECASE) is not None
         else:
