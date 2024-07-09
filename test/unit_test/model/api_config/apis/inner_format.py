@@ -33,12 +33,21 @@ class TestFormatWithGeneralStrategy(ConfigTestSpec):
         return Format()
 
     def test_value_attributes(self, sut: Format):
-        self._verify_props_value(sut, _General_Format)
+        self._verify_props_value(sut, self._expected_serialize_value())
+
+    def _expected_serialize_value(self) -> dict:
+        return _General_Format
+
+    def _expected_deserialize_value(self, obj: Format) -> None:
+        assert isinstance(obj, Format)
+        self._verify_props_value(ut_obj=obj, expect_format=self._expected_serialize_value())
 
     def _verify_props_value(self, ut_obj: Format, expect_format: dict) -> None:
         assert ut_obj.strategy.value == expect_format["strategy"], _assertion_msg
-        assert ut_obj.digit.serialize() == expect_format.get("digit", None), _assertion_msg
-        assert ut_obj.size.serialize() == expect_format.get("size", None), _assertion_msg
+        if expect_format.get("digit", None):
+            assert ut_obj.digit.serialize() == expect_format.get("digit", None), _assertion_msg
+        if expect_format.get("size", None):
+            assert ut_obj.size.serialize() == expect_format.get("size", None), _assertion_msg
         assert ut_obj.enums == expect_format.get("enums", []), _assertion_msg
         assert ut_obj.customize == expect_format.get("customize", ""), _assertion_msg
         for var in ut_obj.variables:
@@ -54,15 +63,8 @@ class TestFormatWithGeneralStrategy(ConfigTestSpec):
                 assert var.size.min_value == expect_var_value[0]["size"]["min"]
             assert var.enum == expect_var_value[0]["enum"]
 
-    def _expected_serialize_value(self) -> dict:
-        return _General_Format
 
-    def _expected_deserialize_value(self, obj: Format) -> None:
-        assert isinstance(obj, Format)
-        self._verify_props_value(ut_obj=obj, expect_format=_General_Format)
-
-
-class TestFormat(CheckableTestSuite):
+class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTestSuite):
     test_data_dir = "format"
     set_checking_test_data(test_data_dir)
 
@@ -79,34 +81,8 @@ class TestFormat(CheckableTestSuite):
     def sut_with_nothing(self) -> Format:
         return Format()
 
-    def test_value_attributes(self, sut: Format):
-        self._verify_props_value(sut)
-
     def _expected_serialize_value(self) -> Any:
         return _Customize_Format_With_Self_Vars
-
-    def _expected_deserialize_value(self, obj: Format) -> None:
-        assert isinstance(obj, Format)
-        self._verify_props_value(ut_obj=obj)
-
-    def _verify_props_value(self, ut_obj: Format) -> None:
-        assert ut_obj.strategy.value == _Customize_Format_With_Self_Vars["strategy"], _assertion_msg
-        assert ut_obj.enums is _Customize_Format_With_Self_Vars["enums"], _assertion_msg
-        assert ut_obj.customize is _Customize_Format_With_Self_Vars["customize"], _assertion_msg
-        for var in ut_obj.variables:
-            expect_var_value = list(
-                filter(lambda v: v["name"] == var.name, _Customize_Format_With_Self_Vars["variables"])
-            )
-            assert expect_var_value and len(expect_var_value) == 1
-            assert var.name == expect_var_value[0]["name"]
-            assert var.value_format.value == expect_var_value[0]["value_format"]
-            if expect_var_value[0]["digit"]:
-                assert var.digit.integer == expect_var_value[0]["digit"]["integer"]
-                assert var.digit.decimal == expect_var_value[0]["digit"]["decimal"]
-            if expect_var_value[0]["size"]:
-                assert var.size.max_value == expect_var_value[0]["size"]["max"]
-                assert var.size.min_value == expect_var_value[0]["size"]["min"]
-            assert var.enum == expect_var_value[0]["enum"]
 
     @pytest.mark.parametrize("invalid_data", ["invalid data type", ["invalid data type"]])
     def test_invalid_data_at_prop_variables(self, invalid_data: Any):
