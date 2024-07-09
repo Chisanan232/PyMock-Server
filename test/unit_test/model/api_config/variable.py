@@ -153,7 +153,7 @@ class TestVariable(CheckableTestSuite):
         assert sut.name == _Test_Variables_BigDecimal_USD["name"], _assertion_msg
         assert sut.value_format.value is _Test_Variables_BigDecimal_USD["value_format"], _assertion_msg
         assert sut.digit.serialize() == _Test_Variables_BigDecimal_USD["digit"], _assertion_msg
-        assert sut.size == _Test_Variables_BigDecimal_USD["size"], _assertion_msg
+        assert sut.size.serialize() == _Test_Variables_BigDecimal_USD["size"], _assertion_msg
         assert sut.enum == _Test_Variables_BigDecimal_USD["enum"], _assertion_msg
 
     def _expected_serialize_value(self) -> Any:
@@ -164,7 +164,7 @@ class TestVariable(CheckableTestSuite):
         assert obj.name == _Test_Variables_BigDecimal_USD["name"]
         assert obj.value_format.value is _Test_Variables_BigDecimal_USD["value_format"]
         assert obj.digit.serialize() == _Test_Variables_BigDecimal_USD["digit"]
-        assert obj.size == _Test_Variables_BigDecimal_USD["size"]
+        assert obj.size.serialize() == _Test_Variables_BigDecimal_USD["size"]
         assert obj.enum == _Test_Variables_BigDecimal_USD["enum"]
 
 

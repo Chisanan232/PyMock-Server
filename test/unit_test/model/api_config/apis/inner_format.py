@@ -54,7 +54,9 @@ class TestFormat(CheckableTestSuite):
             if expect_var_value[0]["digit"]:
                 assert var.digit.integer == expect_var_value[0]["digit"]["integer"]
                 assert var.digit.decimal == expect_var_value[0]["digit"]["decimal"]
-            assert var.size == expect_var_value[0]["size"]
+            if expect_var_value[0]["size"]:
+                assert var.size.max_value == expect_var_value[0]["size"]["max"]
+                assert var.size.min_value == expect_var_value[0]["size"]["min"]
             assert var.enum == expect_var_value[0]["enum"]
 
     @pytest.mark.parametrize("invalid_data", ["invalid data type", ["invalid data type"]])

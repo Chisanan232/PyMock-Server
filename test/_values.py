@@ -105,7 +105,11 @@ _Test_Variables_BigDecimal_USD: dict = {
         "integer": 30,
         "decimal": 3,
     },
-    "size": None,
+    # Just for testing logic converts as *Size*
+    "size": {
+        "max": 8,
+        "min": 4,
+    },
     "enum": None,
 }
 
