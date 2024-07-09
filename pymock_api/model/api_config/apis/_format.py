@@ -188,7 +188,12 @@ class Format(_Config, _Checkable):
             digit = self.digit
             if digit is None:
                 digit = Digit(integer=128, decimal=128) if data_type == "big_decimal" else Digit()
-            regex = self.strategy.to_value_format(data_type).generate_regex(digit=digit.to_digit_range())
+            size = self.size
+            if size is None:
+                size = Size()
+            regex = self.strategy.to_value_format(data_type).generate_regex(
+                size=size.to_value_size(), digit=digit.to_digit_range()
+            )
             search_result = re.search(regex, str(value))
             if search_result is None:
                 # Cannot find any mapping format string
@@ -211,8 +216,11 @@ class Format(_Config, _Checkable):
                         if find_result[0].value_format is ValueFormat.BigDecimal
                         else Digit()
                     )
+                size = find_result[0].size
+                if size is None:
+                    size = Size()
                 one_var_regex = find_result[0].value_format.generate_regex(
-                    enums=find_result[0].enum or [], digit=digit.to_digit_range()
+                    enums=find_result[0].enum or [], size=size.to_value_size(), digit=digit.to_digit_range()
                 )
                 regex = regex.replace(var, one_var_regex)
             return re.search(regex, str(value), re.IGNORECASE) is not None
@@ -232,8 +240,11 @@ class Format(_Config, _Checkable):
                 digit = find_result[0].digit
                 if digit is None:
                     digit = Digit()
+                size = find_result[0].size
+                if size is None:
+                    size = Size()
                 new_value = find_result[0].value_format.generate_value(
-                    enums=find_result[0].enum or [], digit=digit.to_digit_range()
+                    enums=find_result[0].enum or [], size=size.to_value_size(), digit=digit.to_digit_range()
                 )
                 value = value.replace(var, str(new_value))
             return value
@@ -241,8 +252,11 @@ class Format(_Config, _Checkable):
             digit = self.digit
             if digit is None:
                 digit = Digit()
+            size = self.size
+            if size is None:
+                size = Size()
             return self.strategy.generate_not_customize_value(
-                data_type=data_type, enums=self.enums, digit=digit.to_digit_range()
+                data_type=data_type, enums=self.enums, size=size.to_value_size(), digit=digit.to_digit_range()
             )
 
     def expect_format_log_msg(self, data_type: type) -> str:

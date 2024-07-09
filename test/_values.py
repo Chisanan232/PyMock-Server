@@ -141,7 +141,7 @@ _General_Format: dict = {
         "decimal": 3,
     },
     "size": {
-        "max": 8,
+        "max": 64,
         "min": 2,
     },
 }

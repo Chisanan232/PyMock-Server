@@ -270,12 +270,20 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
         customize: str,
         variables: List[Variable],
     ):
-        format_model = Format(strategy=strategy, digit=digit, enums=enums, customize=customize, variables=variables)
+        format_model = Format(
+            strategy=strategy,
+            size=Size(max_value=64, min_value=0),
+            digit=digit,
+            enums=enums,
+            customize=customize,
+            variables=variables,
+        )
         assert format_model.value_format_is_match(data_type=data_type, value=value) is True
 
     @pytest.mark.parametrize(
         ("strategy", "data_type", "value", "digit", "enums", "customize", "variables"),
         [
+            (FormatStrategy.BY_DATA_TYPE, str, "".join(["a" for _ in range(6)]), None, [], "", []),
             (FormatStrategy.BY_DATA_TYPE, int, "not int value", None, [], "", []),
             (FormatStrategy.BY_DATA_TYPE, int, 123, Digit(integer=1, decimal=0), [], "", []),
             (FormatStrategy.BY_DATA_TYPE, "big_decimal", "not int or float value", None, [], "", []),
@@ -366,7 +374,14 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
         customize: str,
         variables: List[Variable],
     ):
-        format_model = Format(strategy=strategy, digit=digit, enums=enums, customize=customize, variables=variables)
+        format_model = Format(
+            strategy=strategy,
+            size=Size(max_value=5, min_value=0),
+            digit=digit,
+            enums=enums,
+            customize=customize,
+            variables=variables,
+        )
         assert format_model.value_format_is_match(data_type=data_type, value=value) is False
 
     @pytest.mark.parametrize(
@@ -420,6 +435,19 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
             assert value in enums
         if expect_value_format:
             assert re.search(expect_value_format, str(value), re.IGNORECASE) is not None
+
+    @pytest.mark.parametrize(
+        ("strategy", "data_type", "size"),
+        [
+            (FormatStrategy.BY_DATA_TYPE, str, Size(max_value=3, min_value=0)),
+            (FormatStrategy.BY_DATA_TYPE, str, Size(max_value=10, min_value=6)),
+        ],
+    )
+    def test_generate_string_value(self, strategy: FormatStrategy, data_type: object, size: Size):
+        format_data_model = Format(strategy=strategy, size=size)
+        value = format_data_model.generate_value(data_type=data_type)
+        assert isinstance(value, data_type)
+        assert size.min_value <= len(value) <= size.max_value
 
     @pytest.mark.parametrize(
         ("strategy", "data_type", "digit", "expect_type", "expect_value_range"),
