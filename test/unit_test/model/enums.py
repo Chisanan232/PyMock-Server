@@ -1006,6 +1006,21 @@ class TestFormatStrategy(EnumTestSuite):
             assert value in enums
 
     @pytest.mark.parametrize(
+        ("strategy", "data_type", "size", "expect_type"),
+        [
+            (FormatStrategy.BY_DATA_TYPE, str, 3, str),
+            (FormatStrategy.BY_DATA_TYPE, str, 128, str),
+        ],
+    )
+    def test_generate_string_value(
+        self, strategy: FormatStrategy, data_type: Union[None, str, object], size: int, expect_type: type
+    ):
+        value = strategy.generate_not_customize_value(data_type=data_type, size=size)
+        assert value is not None
+        assert isinstance(value, expect_type)
+        assert len(value) == size
+
+    @pytest.mark.parametrize(
         ("strategy", "data_type", "digit_range", "expect_type", "expect_range"),
         [
             (FormatStrategy.BY_DATA_TYPE, int, DigitRange(integer=1, decimal=0), int, ValueSize(min=-9, max=9)),
