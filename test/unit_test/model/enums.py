@@ -22,6 +22,7 @@ from pymock_api.model.openapi._schema_parser import (
     set_component_definition,
 )
 
+from ..._test_utils import Verify
 from ..model.openapi._test_case import DeserializeV2OpenAPIConfigTestCaseFactory
 
 DeserializeV2OpenAPIConfigTestCaseFactory.load()
@@ -840,11 +841,7 @@ class TestValueFormat(EnumTestSuite):
         value = formatter.generate_value(digit=digit_range)
         assert value is not None
         assert isinstance(value, expect_type)
-        if isinstance(value, Decimal):
-            assert value.compare(Decimal(expect_range.min)) == Decimal("1")
-            assert value.compare(Decimal(expect_range.max)) == Decimal("-1")
-        else:
-            assert expect_range.min < value < expect_range.max
+        Verify.numerical_value_should_be_in_range(value=value, expect_range=expect_range)
 
     @pytest.mark.parametrize(
         ("formatter", "enums", "digit_range", "expect_regex"),
@@ -998,11 +995,7 @@ class TestFormatStrategy(EnumTestSuite):
         value = strategy.generate_not_customize_value(data_type=data_type, digit=digit_range)
         assert value is not None
         assert isinstance(value, expect_type)
-        if isinstance(value, Decimal):
-            assert value.compare(Decimal(expect_range.min)) in [Decimal("1"), Decimal("0")]
-            assert value.compare(Decimal(expect_range.max)) in [Decimal("-1"), Decimal("0")]
-        else:
-            assert expect_range.min <= value <= expect_range.max
+        Verify.numerical_value_should_be_in_range(value=value, expect_range=expect_range)
 
     @pytest.mark.parametrize("strategy", [FormatStrategy.CUSTOMIZE])
     def test_failure_generate_not_customize_value(self, strategy: FormatStrategy):

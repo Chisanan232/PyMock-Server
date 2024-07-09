@@ -9,6 +9,7 @@ from pymock_api.model.api_config.apis._format import Format
 from pymock_api.model.api_config.variable import Digit, Size, Variable
 from pymock_api.model.enums import FormatStrategy, ValueFormat
 
+from ....._test_utils import Verify
 from ....._values import _Customize_Format_With_Self_Vars
 from .._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
 
@@ -469,11 +470,7 @@ class TestFormat(CheckableTestSuite):
         value = format_model.generate_value(data_type=data_type)
         assert value is not None
         assert isinstance(value, expect_type)
-        if isinstance(value, Decimal):
-            assert value.compare(Decimal(expect_value_range.min)) in [Decimal("1"), Decimal("0")]
-            assert value.compare(Decimal(expect_value_range.max)) in [Decimal("-1"), Decimal("0")]
-        else:
-            assert expect_value_range.min <= value <= expect_value_range.max
+        Verify.numerical_value_should_be_in_range(value=value, expect_range=expect_value_range)
 
     def test_invalid_expect_format_log_msg(self):
         non_strategy_format = Format(strategy=None)
