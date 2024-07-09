@@ -1,7 +1,7 @@
 strategy: 'by_data_type'
 digit:
-  integer: 'this is invalid data type'
+  integer: 8
   decimal: 3
 size:
-  max: 100
+  max: 'this is invalid data type'
   min: 0

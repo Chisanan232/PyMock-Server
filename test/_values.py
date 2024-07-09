@@ -136,6 +136,14 @@ _Test_Variables_Currency_Code: dict = {
 # The expect value it should generate: dgwretvgweg
 _General_Format: dict = {
     "strategy": "by_data_type",
+    "digit": {
+        "integer": 5,
+        "decimal": 3,
+    },
+    "size": {
+        "max": 8,
+        "min": 2,
+    },
 }
 _Test_Response_Property_General_Format: dict = {
     "name": "sample_name",
@@ -171,6 +179,7 @@ _Test_Response_Property_Customize_Format: dict = {
 _Customize_Format_With_Self_Vars: dict = {
     "strategy": "customize",
     "enums": None,
+    "size": None,
     "customize": "<big_decimal_usd> <currency_code>\n<big_decimal_twd> <currency_code>",
     "variables": [
         _Test_Variables_BigDecimal_USD,

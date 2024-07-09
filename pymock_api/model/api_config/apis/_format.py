@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from ...enums import FormatStrategy, ValueFormat
 from .._base import _BaseConfig, _Checkable, _Config
-from ..variable import Digit, Variable
+from ..variable import Digit, Size, Variable
 
 
 @dataclass(eq=False)
@@ -18,7 +18,7 @@ class Format(_Config, _Checkable):
 
     # For general --- by data type strategy
     digit: Optional[Digit] = None
-    size: Optional[str] = None
+    size: Optional[Size] = None
 
     # For enum strategy
     enums: List[str] = field(default_factory=list)
@@ -32,6 +32,8 @@ class Format(_Config, _Checkable):
             self._convert_strategy()
         if self.digit is not None:
             self._convert_digit()
+        if self.size is not None:
+            self._convert_size()
         if self.variables is not None:
             self._convert_variables()
 
@@ -42,6 +44,10 @@ class Format(_Config, _Checkable):
     def _convert_digit(self) -> None:
         if isinstance(self.digit, dict):
             self.digit = Digit().deserialize(self.digit)
+
+    def _convert_size(self) -> None:
+        if isinstance(self.size, dict):
+            self.size = Size().deserialize(self.size)
 
     def _convert_variables(self) -> None:
         if not isinstance(self.variables, list):
@@ -97,10 +103,12 @@ class Format(_Config, _Checkable):
     def serialize(self, data: Optional["Format"] = None) -> Optional[Dict[str, Any]]:
         strategy: FormatStrategy = self.strategy or FormatStrategy.to_enum(self._get_prop(data, prop="strategy"))
 
-        digit_data_model: Digit = (self or data).digit  # type: ignore[union-attr,assignment]
+        digit_data_model: Digit = self._get_prop(data, prop="digit")
         digit: dict = digit_data_model.serialize() if digit_data_model else None  # type: ignore[assignment]
 
-        size_value: str = self._get_prop(data, prop="size")
+        size_data_model: Size = self._get_prop(data, prop="size")
+        size_value: dict = size_data_model.serialize() if size_data_model else None
+
         enums: List[str] = self._get_prop(data, prop="enums")
         customize: str = self._get_prop(data, prop="customize")
         variables: List[Variable] = self._get_prop(data, prop="variables")
@@ -133,7 +141,11 @@ class Format(_Config, _Checkable):
             digit_data_model.absolute_model_key = self.key
             self.digit = digit_data_model.deserialize(data=data.get("digit", None) or {})
 
-        self.size = data.get("size", None)
+        size_value = data.get("size", None)
+        if size_value:
+            size_data_model = Size()
+            size_data_model.absolute_model_key = self.key
+            self.size = size_data_model.deserialize(data=size_value or {})
         self.enums = data.get("enums", [])
         self.customize = data.get("customize", "")
         self.variables = [_deserialize_variable(var) for var in (data.get("variables", []) or [])]
@@ -160,6 +172,12 @@ class Format(_Config, _Checkable):
             self.digit.stop_if_fail = self.stop_if_fail
             if self.digit.is_work() is False:
                 return False
+
+        if self.size is not None:
+            self.size.stop_if_fail = self.stop_if_fail
+            if self.size.is_work() is False:
+                return False
+
         return True
 
     def value_format_is_match(self, data_type: Union[str, type], value: Any) -> bool:
