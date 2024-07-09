@@ -725,7 +725,7 @@ class ValueFormat(Enum):
         def _generate_max_value(digit_number: int) -> int:
             return int("".join(["9" for _ in range(digit_number)])) if digit_number > 0 else 0
 
-        self._ensure_setting_value_is_valid(size=size, digit=digit)
+        self._ensure_setting_value_is_valid(enums=enums, size=size, digit=digit)
         if self is ValueFormat.String:
             return RandomString.generate(size=size)
         elif self is ValueFormat.Integer:
@@ -746,7 +746,7 @@ class ValueFormat(Enum):
             raise ValueError("This is program bug, please report this issue.")
 
     def generate_regex(self, enums: List[str] = [], size: int = 10, digit: DigitRange = Default_Digit_Range) -> str:
-        self._ensure_setting_value_is_valid(size=size, digit=digit)
+        self._ensure_setting_value_is_valid(enums=enums, size=size, digit=digit)
         if self is ValueFormat.String:
             return r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1," + re.escape(str(size)) + "}"
         elif self is ValueFormat.Integer:
@@ -762,7 +762,7 @@ class ValueFormat(Enum):
         else:
             raise ValueError("This is program bug, please report this issue.")
 
-    def _ensure_setting_value_is_valid(self, size: int, digit: DigitRange) -> None:
+    def _ensure_setting_value_is_valid(self, enums: List[str], size: int, digit: DigitRange) -> None:
         if self is ValueFormat.String:
             assert size is not None, "The size of string must not be empty."
             assert size > 0, f"The size of string must be greater than 0. size: {size}."
@@ -777,6 +777,11 @@ class ValueFormat(Enum):
             assert (
                 digit.decimal >= 0
             ), f"The digit number of decimal part must be greater or equal to 0. digit.decimal: {digit.decimal}."
+        elif self is ValueFormat.Enum:
+            assert enums is not None and len(enums) > 0, "The enums must not be empty."
+            assert (
+                len(list(filter(lambda e: not isinstance(e, str), enums))) == 0
+            ), "The data type of element in enums must not be string."
 
 
 class FormatStrategy(Enum):
