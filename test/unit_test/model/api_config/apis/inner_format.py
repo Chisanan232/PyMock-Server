@@ -33,16 +33,16 @@ class TestFormatWithGeneralStrategy(ConfigTestSpec):
         return Format()
 
     def test_value_attributes(self, sut: Format):
-        self._verify_props_value(sut)
+        self._verify_props_value(sut, _General_Format)
 
-    def _verify_props_value(self, ut_obj: Format) -> None:
-        assert ut_obj.strategy.value == _General_Format["strategy"], _assertion_msg
-        assert ut_obj.digit.serialize() == _General_Format.get("digit", None), _assertion_msg
-        assert ut_obj.size.serialize() == _General_Format.get("size", None), _assertion_msg
-        assert ut_obj.enums == _General_Format.get("enums", []), _assertion_msg
-        assert ut_obj.customize == _General_Format.get("customize", ""), _assertion_msg
+    def _verify_props_value(self, ut_obj: Format, expect_format: dict) -> None:
+        assert ut_obj.strategy.value == expect_format["strategy"], _assertion_msg
+        assert ut_obj.digit.serialize() == expect_format.get("digit", None), _assertion_msg
+        assert ut_obj.size.serialize() == expect_format.get("size", None), _assertion_msg
+        assert ut_obj.enums == expect_format.get("enums", []), _assertion_msg
+        assert ut_obj.customize == expect_format.get("customize", ""), _assertion_msg
         for var in ut_obj.variables:
-            expect_var_value = list(filter(lambda v: v["name"] == var.name, _General_Format["variables"]))
+            expect_var_value = list(filter(lambda v: v["name"] == var.name, expect_format["variables"]))
             assert expect_var_value and len(expect_var_value) == 1
             assert var.name == expect_var_value[0]["name"]
             assert var.value_format.value == expect_var_value[0]["value_format"]
@@ -59,7 +59,7 @@ class TestFormatWithGeneralStrategy(ConfigTestSpec):
 
     def _expected_deserialize_value(self, obj: Format) -> None:
         assert isinstance(obj, Format)
-        self._verify_props_value(ut_obj=obj)
+        self._verify_props_value(ut_obj=obj, expect_format=_General_Format)
 
 
 class TestFormat(CheckableTestSuite):
