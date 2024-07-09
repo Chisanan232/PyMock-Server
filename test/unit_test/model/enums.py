@@ -838,19 +838,6 @@ class TestValueFormat(EnumTestSuite):
         assert len(value) == size
 
     @pytest.mark.parametrize(
-        ("formatter", "invalid_size"),
-        [
-            (ValueFormat.String, 0),
-            (ValueFormat.String, -1),
-            (ValueFormat.String, -8),
-        ],
-    )
-    def test_failure_generate_string_value(self, formatter: ValueFormat, invalid_size: int):
-        with pytest.raises(AssertionError) as exc_info:
-            formatter.generate_value(size=invalid_size)
-        assert re.search(r"must be greater than 0", str(exc_info.value), re.IGNORECASE)
-
-    @pytest.mark.parametrize(
         ("formatter", "digit_range", "expect_type", "expect_range"),
         [
             (ValueFormat.Integer, DigitRange(integer=1, decimal=0), int, ValueSize(min=-9, max=9)),
@@ -871,17 +858,27 @@ class TestValueFormat(EnumTestSuite):
         Verify.numerical_value_should_be_in_range(value=value, expect_range=expect_range)
 
     @pytest.mark.parametrize(
-        ("formatter", "invalid_digit"),
+        ("formatter", "invalid_enums", "invalid_size", "invalid_digit", "expect_err_msg"),
         [
-            (ValueFormat.Integer, DigitRange(integer=-2, decimal=0)),
-            (ValueFormat.BigDecimal, DigitRange(integer=-2, decimal=0)),
-            (ValueFormat.BigDecimal, DigitRange(integer=1, decimal=-3)),
+            (ValueFormat.String, None, 0, None, r"must be greater than 0"),
+            (ValueFormat.String, None, -1, None, r"must be greater than 0"),
+            (ValueFormat.String, None, -8, None, r"must be greater than 0"),
+            (ValueFormat.Integer, None, None, DigitRange(integer=-2, decimal=0), r"must be greater than 0"),
+            (ValueFormat.BigDecimal, None, None, DigitRange(integer=-2, decimal=0), r"must be greater or equal to 0"),
+            (ValueFormat.BigDecimal, None, None, DigitRange(integer=1, decimal=-3), r"must be greater or equal to 0"),
         ],
     )
-    def test_failure_generate_string_value(self, formatter: ValueFormat, invalid_digit: DigitRange):
+    def test_failure_generate_value(
+        self,
+        formatter: ValueFormat,
+        invalid_enums: Optional[List[str]],
+        invalid_size: Optional[int],
+        invalid_digit: Optional[DigitRange],
+        expect_err_msg: str,
+    ):
         with pytest.raises(AssertionError) as exc_info:
-            formatter.generate_value(digit=invalid_digit)
-        assert re.search(r"must be greater (than|or equal to) 0", str(exc_info.value), re.IGNORECASE)
+            formatter.generate_value(enums=invalid_enums, size=invalid_size, digit=invalid_digit)
+        assert re.search(expect_err_msg, str(exc_info.value), re.IGNORECASE)
 
     @pytest.mark.parametrize(
         ("formatter", "enums", "size", "digit_range", "expect_regex"),
