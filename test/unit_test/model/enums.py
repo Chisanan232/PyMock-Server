@@ -860,12 +860,18 @@ class TestValueFormat(EnumTestSuite):
     @pytest.mark.parametrize(
         ("formatter", "invalid_enums", "invalid_size", "invalid_digit", "expect_err_msg"),
         [
+            (ValueFormat.String, None, None, None, r"must not be empty"),
             (ValueFormat.String, None, 0, None, r"must be greater than 0"),
             (ValueFormat.String, None, -1, None, r"must be greater than 0"),
             (ValueFormat.String, None, -8, None, r"must be greater than 0"),
+            (ValueFormat.Integer, None, None, None, r"must not be empty"),
             (ValueFormat.Integer, None, None, DigitRange(integer=-2, decimal=0), r"must be greater than 0"),
+            (ValueFormat.BigDecimal, None, None, None, r"must not be empty"),
             (ValueFormat.BigDecimal, None, None, DigitRange(integer=-2, decimal=0), r"must be greater or equal to 0"),
             (ValueFormat.BigDecimal, None, None, DigitRange(integer=1, decimal=-3), r"must be greater or equal to 0"),
+            (ValueFormat.Enum, None, None, None, r"must not be empty"),
+            (ValueFormat.Enum, [], None, None, r"must not be empty"),
+            (ValueFormat.Enum, [123], None, None, r"must be string"),
         ],
     )
     def test_failure_generate_value(

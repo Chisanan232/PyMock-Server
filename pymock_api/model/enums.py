@@ -781,7 +781,7 @@ class ValueFormat(Enum):
             assert enums is not None and len(enums) > 0, "The enums must not be empty."
             assert (
                 len(list(filter(lambda e: not isinstance(e, str), enums))) == 0
-            ), "The data type of element in enums must not be string."
+            ), "The data type of element in enums must be string."
 
 
 class FormatStrategy(Enum):
