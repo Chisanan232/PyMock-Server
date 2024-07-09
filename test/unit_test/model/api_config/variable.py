@@ -1,8 +1,9 @@
 import re
-from typing import Any, List
+from typing import Any, List, Optional
 
 import pytest
 
+from pymock_api._utils.random import ValueSize
 from pymock_api.model.api_config.variable import Digit, Size, Variable
 
 from ...._values import (
@@ -87,6 +88,20 @@ class TestSize(CheckableTestSuite):
     )
     def test_is_work(self, sut_with_nothing: Size, test_data_path: str, criteria: bool):
         super().test_is_work(sut_with_nothing, test_data_path, criteria)
+
+    @pytest.mark.parametrize(
+        ("max_val", "min_val", "only_equal", "expected_value_size"),
+        [
+            (10, 2, None, ValueSize(max=10, min=2)),
+            (1, 3, None, ValueSize(max=1, min=3)),
+            (1, 3, 6, ValueSize(max=6, min=6)),
+            (1, None, 6, ValueSize(max=6, min=6)),
+            (None, 3, 6, ValueSize(max=6, min=6)),
+        ],
+    )
+    def test_to_value_size(self, max_val: int, min_val: int, only_equal: Optional[int], expected_value_size: ValueSize):
+        size = Size(max_value=max_val, min_value=min_val, only_equal=only_equal)
+        assert size.to_value_size() == expected_value_size
 
 
 class TestDigit(CheckableTestSuite):

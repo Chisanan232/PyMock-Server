@@ -126,7 +126,7 @@ class Size(_Config, _Checkable):
         if self.only_equal:
             return ValueSize(max=self.only_equal, min=self.only_equal)
         else:
-            return ValueSize(max=self.min_value, min=self.max_value)
+            return ValueSize(max=self.max_value, min=self.min_value)
 
 
 @dataclass(eq=False)
