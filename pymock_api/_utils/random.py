@@ -5,6 +5,9 @@ from collections import namedtuple
 from decimal import Decimal
 from typing import Any, Sequence
 
+ValueSize = namedtuple("ValueSize", ("min", "max"), defaults=(-127, 128))
+DigitRange = namedtuple("DigitRange", ("integer", "decimal"))
+
 
 class BaseRandomGenerator(metaclass=ABCMeta):
 
@@ -19,12 +22,9 @@ class BaseRandomGenerator(metaclass=ABCMeta):
 
 class RandomString(BaseRandomGenerator):
     @staticmethod
-    def generate(size: int = 10) -> str:
-        return "".join([random.choice(string.ascii_letters) for _ in range(size)])
-
-
-ValueSize = namedtuple("ValueSize", ("min", "max"), defaults=(-127, 128))
-DigitRange = namedtuple("DigitRange", ("integer", "decimal"))
+    def generate(size: ValueSize = ValueSize()) -> str:
+        string_size = random.randint(size.min, size.max)
+        return "".join([random.choice(string.ascii_letters) for _ in range(string_size)])
 
 
 class RandomInteger(BaseRandomGenerator):

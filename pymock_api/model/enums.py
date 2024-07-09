@@ -690,6 +690,7 @@ class OpenAPIVersion(Enum):
             return v
 
 
+Default_Value_Size = ValueSize(max=10, min=1)
 Default_Digit_Range = DigitRange(integer=128, decimal=128)
 
 
@@ -719,7 +720,7 @@ class ValueFormat(Enum):
             return v
 
     def generate_value(
-        self, enums: List[str] = [], size: int = 10, digit: DigitRange = Default_Digit_Range
+        self, enums: List[str] = [], size: ValueSize = Default_Value_Size, digit: DigitRange = Default_Digit_Range
     ) -> Union[str, int, bool, Decimal]:
 
         def _generate_max_value(digit_number: int) -> int:
@@ -745,10 +746,18 @@ class ValueFormat(Enum):
         else:
             raise ValueError("This is program bug, please report this issue.")
 
-    def generate_regex(self, enums: List[str] = [], size: int = 10, digit: DigitRange = Default_Digit_Range) -> str:
+    def generate_regex(
+        self, enums: List[str] = [], size: ValueSize = Default_Value_Size, digit: DigitRange = Default_Digit_Range
+    ) -> str:
         self._ensure_setting_value_is_valid(enums=enums, size=size, digit=digit)
         if self is ValueFormat.String:
-            return r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1," + re.escape(str(size)) + "}"
+            return (
+                r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{"
+                + re.escape(str(size.min))
+                + ","
+                + re.escape(str(size.max))
+                + "}"
+            )
         elif self is ValueFormat.Integer:
             integer_digit = 1 if digit.integer <= 0 else digit.integer
             return r"\d{1," + re.escape(str(integer_digit)) + "}"
@@ -762,10 +771,11 @@ class ValueFormat(Enum):
         else:
             raise ValueError("This is program bug, please report this issue.")
 
-    def _ensure_setting_value_is_valid(self, enums: List[str], size: int, digit: DigitRange) -> None:
+    def _ensure_setting_value_is_valid(self, enums: List[str], size: ValueSize, digit: DigitRange) -> None:
         if self is ValueFormat.String:
             assert size is not None, "The size of string must not be empty."
-            assert size > 0, f"The size of string must be greater than 0. size: {size}."
+            assert size.max > 0, f"The maximum size of string must be greater than 0. size: {size}."
+            assert size.min >= 0, f"The minimum size of string must be greater or equal to 0. size: {size}."
         elif self is ValueFormat.Integer:
             assert digit is not None, "The digit must not be empty."
             assert digit.integer > 0, f"The digit number must be greater than 0. digit.integer: {digit.integer}."
@@ -805,7 +815,7 @@ class FormatStrategy(Enum):
         self,
         data_type: Optional[type] = None,
         enums: List[str] = [],
-        size: int = 10,
+        size: ValueSize = Default_Value_Size,
         digit: DigitRange = Default_Digit_Range,
     ) -> Union[str, int, bool, Decimal]:
         if self in [FormatStrategy.BY_DATA_TYPE, FormatStrategy.FROM_ENUMS]:

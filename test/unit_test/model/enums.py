@@ -826,16 +826,15 @@ class TestValueFormat(EnumTestSuite):
     @pytest.mark.parametrize(
         ("formatter", "size", "expect_type"),
         [
-            (ValueFormat.String, 3, str),
-            (ValueFormat.String, 8, str),
-            (ValueFormat.String, 8, str),
+            (ValueFormat.String, ValueSize(max=3, min=0), str),
+            (ValueFormat.String, ValueSize(max=8, min=5), str),
         ],
     )
-    def test_generate_string_value(self, formatter: ValueFormat, size: int, expect_type: object):
+    def test_generate_string_value(self, formatter: ValueFormat, size: ValueSize, expect_type: object):
         value = formatter.generate_value(size=size)
         assert value is not None
         assert isinstance(value, expect_type)
-        assert len(value) == size
+        assert size.min <= len(value) <= size.max
 
     @pytest.mark.parametrize(
         ("formatter", "digit_range", "expect_type", "expect_range"),
@@ -861,9 +860,9 @@ class TestValueFormat(EnumTestSuite):
         ("formatter", "invalid_enums", "invalid_size", "invalid_digit", "expect_err_msg"),
         [
             (ValueFormat.String, None, None, None, r"must not be empty"),
-            (ValueFormat.String, None, 0, None, r"must be greater than 0"),
-            (ValueFormat.String, None, -1, None, r"must be greater than 0"),
-            (ValueFormat.String, None, -8, None, r"must be greater than 0"),
+            (ValueFormat.String, None, ValueSize(max=0, min=0), None, r"must be greater than 0"),
+            (ValueFormat.String, None, ValueSize(max=-1, min=0), None, r"must be greater than 0"),
+            (ValueFormat.String, None, ValueSize(max=3, min=-1), None, r"must be greater or equal to 0"),
             (ValueFormat.Integer, None, None, None, r"must not be empty"),
             (ValueFormat.Integer, None, None, DigitRange(integer=-2, decimal=0), r"must be greater than 0"),
             (ValueFormat.BigDecimal, None, None, None, r"must not be empty"),
@@ -878,7 +877,7 @@ class TestValueFormat(EnumTestSuite):
         self,
         formatter: ValueFormat,
         invalid_enums: Optional[List[str]],
-        invalid_size: Optional[int],
+        invalid_size: Optional[ValueSize],
         invalid_digit: Optional[DigitRange],
         expect_err_msg: str,
     ):
@@ -889,8 +888,20 @@ class TestValueFormat(EnumTestSuite):
     @pytest.mark.parametrize(
         ("formatter", "enums", "size", "digit_range", "expect_regex"),
         [
-            (ValueFormat.String, [], 3, None, r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1,3}"),
-            (ValueFormat.String, [], 128, None, r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1,128}"),
+            (
+                ValueFormat.String,
+                [],
+                ValueSize(max=3, min=0),
+                None,
+                r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{0,3}",
+            ),
+            (
+                ValueFormat.String,
+                [],
+                ValueSize(max=128, min=5),
+                None,
+                r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{5,128}",
+            ),
             (ValueFormat.Integer, [], None, DigitRange(integer=3, decimal=0), r"\d{1,3}"),
             (ValueFormat.Integer, [], None, DigitRange(integer=3, decimal=2), r"\d{1,3}"),
             (ValueFormat.Integer, [], None, DigitRange(integer=10, decimal=2), r"\d{1,10}"),
@@ -904,7 +915,7 @@ class TestValueFormat(EnumTestSuite):
         self,
         formatter: ValueFormat,
         enums: List[str],
-        size: Optional[int],
+        size: Optional[ValueSize],
         digit_range: Optional[DigitRange],
         expect_regex: str,
     ):
@@ -915,9 +926,9 @@ class TestValueFormat(EnumTestSuite):
         ("formatter", "invalid_enums", "invalid_size", "invalid_digit", "expect_err_msg"),
         [
             (ValueFormat.String, None, None, None, r"must not be empty"),
-            (ValueFormat.String, None, 0, None, r"must be greater than 0"),
-            (ValueFormat.String, None, -1, None, r"must be greater than 0"),
-            (ValueFormat.String, None, -8, None, r"must be greater than 0"),
+            (ValueFormat.String, None, ValueSize(max=0, min=0), None, r"must be greater than 0"),
+            (ValueFormat.String, None, ValueSize(max=-1, min=0), None, r"must be greater than 0"),
+            (ValueFormat.String, None, ValueSize(max=3, min=-1), None, r"must be greater or equal to 0"),
             (ValueFormat.Integer, None, None, None, r"must not be empty"),
             (ValueFormat.Integer, None, None, DigitRange(integer=-2, decimal=0), r"must be greater than 0"),
             (ValueFormat.BigDecimal, None, None, None, r"must not be empty"),
@@ -932,7 +943,7 @@ class TestValueFormat(EnumTestSuite):
         self,
         formatter: ValueFormat,
         invalid_enums: Optional[List[str]],
-        invalid_size: Optional[int],
+        invalid_size: Optional[ValueSize],
         invalid_digit: Optional[DigitRange],
         expect_err_msg: str,
     ):
@@ -1008,17 +1019,17 @@ class TestFormatStrategy(EnumTestSuite):
     @pytest.mark.parametrize(
         ("strategy", "data_type", "size", "expect_type"),
         [
-            (FormatStrategy.BY_DATA_TYPE, str, 3, str),
-            (FormatStrategy.BY_DATA_TYPE, str, 128, str),
+            (FormatStrategy.BY_DATA_TYPE, str, ValueSize(max=5, min=2), str),
+            (FormatStrategy.BY_DATA_TYPE, str, ValueSize(max=128, min=10), str),
         ],
     )
     def test_generate_string_value(
-        self, strategy: FormatStrategy, data_type: Union[None, str, object], size: int, expect_type: type
+        self, strategy: FormatStrategy, data_type: Union[None, str, object], size: ValueSize, expect_type: type
     ):
         value = strategy.generate_not_customize_value(data_type=data_type, size=size)
         assert value is not None
         assert isinstance(value, expect_type)
-        assert len(value) == size
+        assert size.min <= len(value) <= size.max
 
     @pytest.mark.parametrize(
         ("strategy", "data_type", "digit_range", "expect_type", "expect_range"),
