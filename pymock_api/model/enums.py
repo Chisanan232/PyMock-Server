@@ -725,20 +725,13 @@ class ValueFormat(Enum):
         def _generate_max_value(digit_number: int) -> int:
             return int("".join(["9" for _ in range(digit_number)])) if digit_number > 0 else 0
 
+        self._ensure_setting_value_is_valid(size=size, digit=digit)
         if self is ValueFormat.String:
-            assert size > 0, f"The size of string must be greater than 0. size: {size}."
             return RandomString.generate(size=size)
         elif self is ValueFormat.Integer:
-            assert digit.integer > 0, f"The digit number must be greater than 0. digit.integer: {digit.integer}."
             max_value = _generate_max_value(digit.integer)
             return RandomInteger.generate(value_range=ValueSize(min=0 - max_value, max=max_value))
         elif self is ValueFormat.BigDecimal:
-            assert (
-                digit.integer >= 0
-            ), f"The digit number of integer part must be greater or equal to 0. digit.integer: {digit.integer}."
-            assert (
-                digit.decimal >= 0
-            ), f"The digit number of decimal part must be greater or equal to 0. digit.decimal: {digit.decimal}."
             max_integer_value = _generate_max_value(digit.integer)
             max_decimal_value = _generate_max_value(digit.decimal)
             return RandomBigDecimal.generate(
@@ -751,6 +744,22 @@ class ValueFormat(Enum):
             return RandomFromSequence.generate(enums)
         else:
             raise ValueError("This is program bug, please report this issue.")
+
+    def _ensure_setting_value_is_valid(self, size: int, digit: DigitRange) -> None:
+        if self is ValueFormat.String:
+            assert size is not None, "The size of string must not be empty."
+            assert size > 0, f"The size of string must be greater than 0. size: {size}."
+        elif self is ValueFormat.Integer:
+            assert digit is not None, "The digit must not be empty."
+            assert digit.integer > 0, f"The digit number must be greater than 0. digit.integer: {digit.integer}."
+        elif self is ValueFormat.BigDecimal:
+            assert digit is not None, "The digit must not be empty."
+            assert (
+                digit.integer >= 0
+            ), f"The digit number of integer part must be greater or equal to 0. digit.integer: {digit.integer}."
+            assert (
+                digit.decimal >= 0
+            ), f"The digit number of decimal part must be greater or equal to 0. digit.decimal: {digit.decimal}."
 
     def generate_regex(self, enums: List[str] = [], size: int = 10, digit: DigitRange = Default_Digit_Range) -> str:
         if self is ValueFormat.String:
