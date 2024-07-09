@@ -752,10 +752,9 @@ class ValueFormat(Enum):
         else:
             raise ValueError("This is program bug, please report this issue.")
 
-    def generate_regex(self, enums: List[str] = [], digit: DigitRange = Default_Digit_Range) -> str:
+    def generate_regex(self, enums: List[str] = [], size: int = 10, digit: DigitRange = Default_Digit_Range) -> str:
         if self is ValueFormat.String:
-            # TODO: Set the string type value size?
-            return r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1,128}"
+            return r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1," + re.escape(str(size)) + "}"
         elif self is ValueFormat.Integer:
             integer_digit = 1 if digit.integer <= 0 else digit.integer
             return r"\d{1," + re.escape(str(integer_digit)) + "}"

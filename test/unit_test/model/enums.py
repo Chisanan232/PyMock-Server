@@ -884,21 +884,28 @@ class TestValueFormat(EnumTestSuite):
         assert re.search(r"must be greater (than|or equal to) 0", str(exc_info.value), re.IGNORECASE)
 
     @pytest.mark.parametrize(
-        ("formatter", "enums", "digit_range", "expect_regex"),
+        ("formatter", "enums", "size", "digit_range", "expect_regex"),
         [
-            (ValueFormat.Integer, [], DigitRange(integer=3, decimal=0), r"\d{1,3}"),
-            (ValueFormat.Integer, [], DigitRange(integer=3, decimal=2), r"\d{1,3}"),
-            (ValueFormat.Integer, [], DigitRange(integer=10, decimal=2), r"\d{1,10}"),
-            (ValueFormat.BigDecimal, [], DigitRange(integer=4, decimal=0), r"\d{1,4}\.?\d{0,0}"),
-            (ValueFormat.BigDecimal, [], DigitRange(integer=4, decimal=2), r"\d{1,4}\.?\d{0,2}"),
-            (ValueFormat.BigDecimal, [], DigitRange(integer=10, decimal=3), r"\d{1,10}\.?\d{0,3}"),
-            (ValueFormat.Enum, ["ENUM_1", "ENUM_2", "ENUM_3"], None, r"(ENUM_1|ENUM_2|ENUM_3)"),
+            (ValueFormat.String, [], 3, None, r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1,3}"),
+            (ValueFormat.String, [], 128, None, r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1,128}"),
+            (ValueFormat.Integer, [], None, DigitRange(integer=3, decimal=0), r"\d{1,3}"),
+            (ValueFormat.Integer, [], None, DigitRange(integer=3, decimal=2), r"\d{1,3}"),
+            (ValueFormat.Integer, [], None, DigitRange(integer=10, decimal=2), r"\d{1,10}"),
+            (ValueFormat.BigDecimal, [], None, DigitRange(integer=4, decimal=0), r"\d{1,4}\.?\d{0,0}"),
+            (ValueFormat.BigDecimal, [], None, DigitRange(integer=4, decimal=2), r"\d{1,4}\.?\d{0,2}"),
+            (ValueFormat.BigDecimal, [], None, DigitRange(integer=10, decimal=3), r"\d{1,10}\.?\d{0,3}"),
+            (ValueFormat.Enum, ["ENUM_1", "ENUM_2", "ENUM_3"], None, None, r"(ENUM_1|ENUM_2|ENUM_3)"),
         ],
     )
     def test_generate_regex(
-        self, formatter: ValueFormat, enums: List[str], digit_range: Optional[DigitRange], expect_regex: str
+        self,
+        formatter: ValueFormat,
+        enums: List[str],
+        size: Optional[int],
+        digit_range: Optional[DigitRange],
+        expect_regex: str,
     ):
-        regex = formatter.generate_regex(enums=enums, digit=digit_range)
+        regex = formatter.generate_regex(enums=enums, size=size, digit=digit_range)
         assert regex == expect_regex
 
 
