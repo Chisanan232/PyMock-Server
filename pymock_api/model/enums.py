@@ -719,19 +719,26 @@ class ValueFormat(Enum):
             return v
 
     def generate_value(
-        self, enums: List[str] = [], digit: DigitRange = Default_Digit_Range
+        self, enums: List[str] = [], size: int = 10, digit: DigitRange = Default_Digit_Range
     ) -> Union[str, int, bool, Decimal]:
 
         def _generate_max_value(digit_number: int) -> int:
             return int("".join(["9" for _ in range(digit_number)])) if digit_number > 0 else 0
 
         if self is ValueFormat.String:
-            # TODO: Add setting about the string size or string detail format, i.e., integer format string?
-            return RandomString.generate()
+            assert size > 0, f"The size of string must be greater than 0. size: {size}."
+            return RandomString.generate(size=size)
         elif self is ValueFormat.Integer:
+            assert digit.integer > 0, f"The digit number must be greater than 0. digit.integer: {digit.integer}."
             max_value = _generate_max_value(digit.integer)
             return RandomInteger.generate(value_range=ValueSize(min=0 - max_value, max=max_value))
         elif self is ValueFormat.BigDecimal:
+            assert (
+                digit.integer >= 0
+            ), f"The digit number of integer part must be greater or equal to 0. digit.integer: {digit.integer}."
+            assert (
+                digit.decimal >= 0
+            ), f"The digit number of decimal part must be greater or equal to 0. digit.decimal: {digit.decimal}."
             max_integer_value = _generate_max_value(digit.integer)
             max_decimal_value = _generate_max_value(digit.decimal)
             return RandomBigDecimal.generate(
