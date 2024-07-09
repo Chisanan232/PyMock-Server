@@ -745,6 +745,23 @@ class ValueFormat(Enum):
         else:
             raise ValueError("This is program bug, please report this issue.")
 
+    def generate_regex(self, enums: List[str] = [], size: int = 10, digit: DigitRange = Default_Digit_Range) -> str:
+        self._ensure_setting_value_is_valid(size=size, digit=digit)
+        if self is ValueFormat.String:
+            return r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1," + re.escape(str(size)) + "}"
+        elif self is ValueFormat.Integer:
+            integer_digit = 1 if digit.integer <= 0 else digit.integer
+            return r"\d{1," + re.escape(str(integer_digit)) + "}"
+        elif self is ValueFormat.BigDecimal:
+            integer_digit = 1 if digit.integer <= 0 else digit.integer
+            return r"\d{1," + re.escape(str(integer_digit)) + "}\.?\d{0," + re.escape(str(digit.decimal)) + "}"
+        elif self is ValueFormat.Boolean:
+            return r"(true|false|True|False)"
+        elif self is ValueFormat.Enum:
+            return r"(" + r"|".join([re.escape(e) for e in enums]) + r")"
+        else:
+            raise ValueError("This is program bug, please report this issue.")
+
     def _ensure_setting_value_is_valid(self, size: int, digit: DigitRange) -> None:
         if self is ValueFormat.String:
             assert size is not None, "The size of string must not be empty."
@@ -760,22 +777,6 @@ class ValueFormat(Enum):
             assert (
                 digit.decimal >= 0
             ), f"The digit number of decimal part must be greater or equal to 0. digit.decimal: {digit.decimal}."
-
-    def generate_regex(self, enums: List[str] = [], size: int = 10, digit: DigitRange = Default_Digit_Range) -> str:
-        if self is ValueFormat.String:
-            return r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1," + re.escape(str(size)) + "}"
-        elif self is ValueFormat.Integer:
-            integer_digit = 1 if digit.integer <= 0 else digit.integer
-            return r"\d{1," + re.escape(str(integer_digit)) + "}"
-        elif self is ValueFormat.BigDecimal:
-            integer_digit = 1 if digit.integer <= 0 else digit.integer
-            return r"\d{1," + re.escape(str(integer_digit)) + "}\.?\d{0," + re.escape(str(digit.decimal)) + "}"
-        elif self is ValueFormat.Boolean:
-            return r"(true|false|True|False)"
-        elif self is ValueFormat.Enum:
-            return r"(" + r"|".join([re.escape(e) for e in enums]) + r")"
-        else:
-            raise ValueError("This is program bug, please report this issue.")
 
 
 class FormatStrategy(Enum):
