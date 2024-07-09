@@ -911,6 +911,35 @@ class TestValueFormat(EnumTestSuite):
         regex = formatter.generate_regex(enums=enums, size=size, digit=digit_range)
         assert regex == expect_regex
 
+    @pytest.mark.parametrize(
+        ("formatter", "invalid_enums", "invalid_size", "invalid_digit", "expect_err_msg"),
+        [
+            (ValueFormat.String, None, None, None, r"must not be empty"),
+            (ValueFormat.String, None, 0, None, r"must be greater than 0"),
+            (ValueFormat.String, None, -1, None, r"must be greater than 0"),
+            (ValueFormat.String, None, -8, None, r"must be greater than 0"),
+            (ValueFormat.Integer, None, None, None, r"must not be empty"),
+            (ValueFormat.Integer, None, None, DigitRange(integer=-2, decimal=0), r"must be greater than 0"),
+            (ValueFormat.BigDecimal, None, None, None, r"must not be empty"),
+            (ValueFormat.BigDecimal, None, None, DigitRange(integer=-2, decimal=0), r"must be greater or equal to 0"),
+            (ValueFormat.BigDecimal, None, None, DigitRange(integer=1, decimal=-3), r"must be greater or equal to 0"),
+            (ValueFormat.Enum, None, None, None, r"must not be empty"),
+            (ValueFormat.Enum, [], None, None, r"must not be empty"),
+            (ValueFormat.Enum, [123], None, None, r"must be string"),
+        ],
+    )
+    def test_failure_generate_regex(
+        self,
+        formatter: ValueFormat,
+        invalid_enums: Optional[List[str]],
+        invalid_size: Optional[int],
+        invalid_digit: Optional[DigitRange],
+        expect_err_msg: str,
+    ):
+        with pytest.raises(AssertionError) as exc_info:
+            formatter.generate_regex(enums=invalid_enums, size=invalid_size, digit=invalid_digit)
+        assert re.search(expect_err_msg, str(exc_info.value), re.IGNORECASE)
+
 
 class TestFormatStrategy(EnumTestSuite):
     @pytest.fixture(scope="function")
