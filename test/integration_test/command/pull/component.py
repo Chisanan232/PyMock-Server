@@ -11,7 +11,7 @@ from pymock_api.model import (
     deserialize_openapi_doc_config,
     load_config,
 )
-from pymock_api.model.api_config import DivideStrategy, TemplateConfig
+from pymock_api.model.api_config import DivideStrategy, TemplateFileConfig
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     set_component_definition,
@@ -323,7 +323,7 @@ class TestSubCmdPullComponent:
         with patch(
             "pymock_api.model.api_config.MockAPIs.template", new_callable=PropertyMock
         ) as mock_mock_apis_template:
-            template_config = TemplateConfig()
+            template_config = TemplateFileConfig()
             template_config.config_path_values.base_file_path = str(ut_dir)
             mock_mock_apis_template.return_value = template_config
 

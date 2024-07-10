@@ -7,7 +7,7 @@ from ...._utils import YAML
 from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Checkable, _Config
-from ..template import TemplateConfig, TemplateConfigPathAPI, TemplateConfigPathHTTP
+from ..template import TemplateConfigPathAPI, TemplateConfigPathHTTP, TemplateFileConfig
 from ..template._base import _BaseTemplatableConfig
 from ..template._base_wrapper import _GeneralTemplatableConfig
 from ..template._divide import BeDividedableAsTemplatableConfig
@@ -132,7 +132,7 @@ class HTTP(_GeneralTemplatableConfig, _Checkable):
         )
 
     @property
-    def _current_template_at_serialization(self) -> TemplateConfig:
+    def _current_template_at_serialization(self) -> TemplateFileConfig:
         return self._current_template
 
     def _set_serialized_data(
@@ -207,7 +207,7 @@ class HTTP(_GeneralTemplatableConfig, _Checkable):
         return self.request.is_work() and self.response.is_work()
 
     @property
-    def _template_config(self) -> TemplateConfig:
+    def _template_config(self) -> TemplateFileConfig:
         return self._current_template
 
     @property
@@ -342,7 +342,7 @@ class MockAPI(_GeneralTemplatableConfig, _Checkable):
         return serialized_data
 
     @property
-    def _current_template_at_serialization(self) -> TemplateConfig:
+    def _current_template_at_serialization(self) -> TemplateFileConfig:
         return self._current_template
 
     def _set_serialized_data(
@@ -484,7 +484,7 @@ class MockAPI(_GeneralTemplatableConfig, _Checkable):
             raise ValueError(f"Not support the format feature as {f}.")
 
     @property
-    def _template_config(self) -> TemplateConfig:
+    def _template_config(self) -> TemplateFileConfig:
         return self._current_template
 
     @property

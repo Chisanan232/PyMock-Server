@@ -10,7 +10,7 @@ from typing import Optional
 from .api_config import APIConfig, MockAPIs
 from .api_config.apis import HTTP, APIParameter, HTTPRequest, HTTPResponse, MockAPI
 from .api_config.base import BaseConfig
-from .api_config.template import TemplateConfig
+from .api_config.template import TemplateFileConfig
 from .cmd_args import (
     DeserializeParsedArgs,
     ParserArguments,
@@ -119,5 +119,7 @@ def load_config(path: str, is_pull: bool = False, base_file_path: str = "") -> O
 
 def generate_empty_config(name: str = "", description: str = "") -> APIConfig:
     return APIConfig(
-        name=name, description=description, apis=MockAPIs(template=TemplateConfig(), base=BaseConfig(url=""), apis={})
+        name=name,
+        description=description,
+        apis=MockAPIs(template=TemplateFileConfig(), base=BaseConfig(url=""), apis={}),
     )

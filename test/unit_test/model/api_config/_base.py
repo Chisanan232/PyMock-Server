@@ -18,7 +18,7 @@ from pymock_api.model.api_config import (
     BeDividedableAsTemplatableConfig,
     ResponseProperty,
     TemplatableConfigDividable,
-    TemplateConfig,
+    TemplateFileConfig,
     _Checkable,
     _Config,
 )
@@ -89,8 +89,8 @@ class MockModel:
         )
 
     @property
-    def template_config(self) -> TemplateConfig:
-        return TemplateConfig(
+    def template_config(self) -> TemplateFileConfig:
+        return TemplateFileConfig(
             activate=_Mock_Template_Config_Activate,
             load_config=self.template_load_config,
             config_path_values=self.template_values,

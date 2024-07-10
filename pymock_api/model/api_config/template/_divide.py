@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict, Optional, Union
 from ...._utils import YAML
 from ...._utils.file_opt import _BaseFileOperation
 from .._base import _Config
-from . import TemplateConfig
+from . import TemplateFileConfig
 from ._base import _BaseTemplatableConfig
 
 
@@ -79,7 +79,7 @@ class TemplatableConfigDividable(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def _current_template_at_serialization(self) -> TemplateConfig:
+    def _current_template_at_serialization(self) -> TemplateFileConfig:
         pass
 
     @abstractmethod

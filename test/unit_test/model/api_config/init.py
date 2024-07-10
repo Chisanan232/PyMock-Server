@@ -6,7 +6,7 @@ import pytest
 
 from pymock_api import APIConfig
 from pymock_api.model import BaseConfig, MockAPI, MockAPIs
-from pymock_api.model.api_config import TemplateConfig
+from pymock_api.model.api_config import TemplateFileConfig
 
 from ...._values import (
     _Base_URL,
@@ -188,14 +188,14 @@ class TestMockAPIs(CheckableTestSuite, DividableTestSuite):
         [
             ({}, True),
             ({"test": "test"}, True),
-            (TemplateConfig(), False),
+            (TemplateFileConfig(), False),
         ],
     )
-    @patch.object(TemplateConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
+    @patch.object(TemplateFileConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
     def test_prop_template_with_valid_obj(
         self,
         mock_deserialize: Mock,
-        setting_val: Union[dict, TemplateConfig],
+        setting_val: Union[dict, TemplateFileConfig],
         should_call_deserialize: bool,
         sut_with_nothing: MockAPIs,
     ):
@@ -207,9 +207,9 @@ class TestMockAPIs(CheckableTestSuite, DividableTestSuite):
             assert sut_with_nothing.template == MOCK_RETURN_VALUE
         else:
             mock_deserialize.assert_not_called()
-            assert sut_with_nothing.template == TemplateConfig()
+            assert sut_with_nothing.template == TemplateFileConfig()
 
-    @patch.object(TemplateConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
+    @patch.object(TemplateFileConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
     def test_prop_template_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: MockAPIs):
         with pytest.raises(TypeError) as exc_info:
             sut_with_nothing.template = "Invalid object"
@@ -309,7 +309,7 @@ class TestMockAPIs(CheckableTestSuite, DividableTestSuite):
     )
     @patch.object(MockAPI, "deserialize", return_value=None)
     @patch.object(BaseConfig, "deserialize", return_value=None)
-    @patch.object(TemplateConfig, "deserialize", return_value=None)
+    @patch.object(TemplateFileConfig, "deserialize", return_value=None)
     def test_deserialize_with_nonideal_value(
         self,
         mock_deserialize_template: Mock,

@@ -19,7 +19,7 @@ from .apis import (
 )
 from .base import BaseConfig
 from .item import IteratorItem
-from .template import TemplateConfig
+from .template import TemplateFileConfig
 from .template._base import _BaseTemplatableConfig
 from .template._base_wrapper import _OperatingTemplatableConfig
 from .template._divide import (
@@ -37,7 +37,7 @@ from .template._load import (
 class MockAPIs(_OperatingTemplatableConfig, _Checkable):
     """*The **mocked_apis** section*"""
 
-    _template: TemplateConfig
+    _template: TemplateFileConfig
     _base: Optional[BaseConfig]
     _apis: Dict[str, Optional[MockAPI]]
 
@@ -46,12 +46,12 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
 
     def __init__(
         self,
-        template: Optional[TemplateConfig] = None,
+        template: Optional[TemplateFileConfig] = None,
         base: Optional[BaseConfig] = None,
         apis: Dict[str, Optional[MockAPI]] = {},
     ):
         super().__init__()
-        self._template = template if template is not None else TemplateConfig()
+        self._template = template if template is not None else TemplateFileConfig()
         self._base = base
         self._apis = apis
 
@@ -81,15 +81,15 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
         self._base_file_path = p
 
     @property
-    def template(self) -> TemplateConfig:
+    def template(self) -> TemplateFileConfig:
         return self._template
 
     @template.setter
-    def template(self, template: Union[dict, TemplateConfig]) -> None:
+    def template(self, template: Union[dict, TemplateFileConfig]) -> None:
         if template is not None:
             if isinstance(template, dict):
-                self._template = TemplateConfig().deserialize(data=template)
-            elif isinstance(template, TemplateConfig):
+                self._template = TemplateFileConfig().deserialize(data=template)
+            elif isinstance(template, TemplateFileConfig):
                 self._template = template
             else:
                 raise TypeError("Setter *MockAPIs.template* only accepts dict or TemplateConfig type object.")
@@ -182,7 +182,7 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
         return not_empty_api_config
 
     @property
-    def _current_template_at_serialization(self) -> TemplateConfig:
+    def _current_template_at_serialization(self) -> TemplateFileConfig:
         return self.template
 
     def _set_serialized_data(
@@ -306,7 +306,7 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
             self.apis = {}
 
     @property
-    def _template_config(self) -> TemplateConfig:
+    def _template_config(self) -> TemplateFileConfig:
         return self.template
 
     @property

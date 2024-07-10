@@ -9,7 +9,7 @@ from ...._utils import YAML
 from ...._utils.file_opt import _BaseFileOperation
 from ...enums import ConfigLoadingOrder, ConfigLoadingOrderKey, set_loading_function
 from .._base import _Config
-from . import TemplateConfig
+from . import TemplateFileConfig
 from ._base import _BaseTemplatableConfig
 
 
@@ -29,7 +29,7 @@ class TemplateConfigOpts(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def _template_config(self) -> TemplateConfig:
+    def _template_config(self) -> TemplateFileConfig:
         pass
 
     @property

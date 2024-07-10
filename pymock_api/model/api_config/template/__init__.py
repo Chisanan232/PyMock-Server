@@ -247,7 +247,7 @@ class TemplateApply(_Config, _Checkable):
 
 
 @dataclass(eq=False)
-class TemplateConfig(_Config, _Checkable):
+class TemplateFileConfig(_Config, _Checkable):
     """The data model which could be set details attribute by section *template*."""
 
     activate: bool = field(default=False)
@@ -257,7 +257,7 @@ class TemplateConfig(_Config, _Checkable):
 
     _absolute_key: str = field(init=False, repr=False)
 
-    def _compare(self, other: "TemplateConfig") -> bool:
+    def _compare(self, other: "TemplateFileConfig") -> bool:
         return (
             self.activate == other.activate
             and self.load_config == other.load_config
@@ -269,7 +269,7 @@ class TemplateConfig(_Config, _Checkable):
     def key(self) -> str:
         return "template"
 
-    def serialize(self, data: Optional["TemplateConfig"] = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["TemplateFileConfig"] = None) -> Optional[Dict[str, Any]]:
         activate: bool = self.activate or self._get_prop(data, prop="activate")
         load_config: LoadConfig = self.load_config or self._get_prop(data, prop="load_config")
         config_path_values: TemplateConfigPathValues = self.config_path_values or self._get_prop(
@@ -287,7 +287,7 @@ class TemplateConfig(_Config, _Checkable):
         }
 
     @_Config._ensure_process_with_not_empty_value
-    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfig"]:
+    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateFileConfig"]:
         self.activate = data.get("activate", False)
 
         load_config = LoadConfig()
