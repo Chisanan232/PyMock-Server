@@ -197,7 +197,7 @@ class TestTemplateApply(ConfigTestSpec):
 
 
 class TestTemplateFileConfig(CheckableTestSuite):
-    test_data_dir = "template"
+    test_data_dir = "file"
     set_checking_test_data(test_data_dir)
 
     @pytest.fixture(scope="function")

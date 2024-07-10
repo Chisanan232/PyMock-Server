@@ -267,7 +267,7 @@ class TemplateFileConfig(_Config, _Checkable):
 
     @property
     def key(self) -> str:
-        return "template"
+        return "file"
 
     def serialize(self, data: Optional["TemplateFileConfig"] = None) -> Optional[Dict[str, Any]]:
         activate: bool = self.activate or self._get_prop(data, prop="activate")
