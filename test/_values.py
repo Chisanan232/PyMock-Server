@@ -81,6 +81,11 @@ _Mock_Template_File_Setting: dict = {
     "apply": _Mock_Template_Apply_Has_Tag_Setting,
 }
 
+_Mock_Template_Setting: dict = {
+    "activate": _Mock_Template_Config_Activate,
+    "file": _Mock_Template_File_Setting,
+}
+
 _Mock_Templatable_Setting: dict = {
     "apply_template_props": False,
 }
