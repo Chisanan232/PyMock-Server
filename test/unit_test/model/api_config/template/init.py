@@ -41,8 +41,8 @@ from ....._values import (
     _Mock_Template_API_Setting,
     _Mock_Template_Apply_Has_Tag_Setting,
     _Mock_Template_Config_Activate,
+    _Mock_Template_File_Setting,
     _Mock_Template_HTTP_Setting,
-    _Mock_Template_Setting,
     _Mock_Template_Values_Setting,
 )
 from .._base import (
@@ -230,13 +230,13 @@ class TestTemplateFileConfig(CheckableTestSuite):
         super().test_serialize_with_none(sut_with_nothing)
 
     def _expected_serialize_value(self) -> dict:
-        return _Mock_Template_Setting
+        return _Mock_Template_File_Setting
 
     def _expected_deserialize_value(self, obj: TemplateFileConfig) -> None:
         assert isinstance(obj, TemplateFileConfig)
-        assert obj.activate == _Mock_Template_Setting.get("activate")
-        assert obj.config_path_values.serialize() == _Mock_Template_Setting.get("config_path_values")
-        assert obj.apply.serialize() == _Mock_Template_Setting.get("apply")
+        assert obj.activate == _Mock_Template_File_Setting.get("activate")
+        assert obj.config_path_values.serialize() == _Mock_Template_File_Setting.get("config_path_values")
+        assert obj.apply.serialize() == _Mock_Template_File_Setting.get("apply")
 
 
 class DummyTemplateConfigLoaderWithAPIConfig(TemplateConfigLoaderWithAPIConfig):

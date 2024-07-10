@@ -74,7 +74,7 @@ _Mock_Load_Config: dict = {
     "order": ["apis", "file"],
 }
 
-_Mock_Template_Setting: dict = {
+_Mock_Template_File_Setting: dict = {
     "activate": _Mock_Template_Config_Activate,
     "load_config": _Mock_Load_Config,
     "config_path_values": _Mock_Template_Values_Setting,
@@ -601,7 +601,7 @@ _Test_Home_With_Customize_Format_Req_Param: dict = {
 
 
 _Mocked_APIs: dict = {
-    "template": _Mock_Template_Setting,
+    "template": _Mock_Template_File_Setting,
     "base": {"url": _Base_URL},
     "apis": {
         "google_home": _Google_Home_Value,
@@ -638,7 +638,7 @@ class _TestConfig:
     Mock_API: dict = {"url": _Test_URL, "http": Http, "tag": _Test_Tag}
     Base: dict = {"url": _Base_URL}
     Mock_APIs: dict = {
-        "template": _Mock_Template_Setting,
+        "template": _Mock_Template_File_Setting,
         "base": Base,
         "apis": {
             "test_config": Mock_API,

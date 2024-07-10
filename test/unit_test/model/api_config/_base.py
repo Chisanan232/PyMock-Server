@@ -28,6 +28,7 @@ from pymock_api.model.api_config.apis._format import Format, _HasFormatPropConfi
 from pymock_api.model.api_config.template import (
     LoadConfig,
     TemplateApply,
+    TemplateConfig,
     TemplateConfigPathAPI,
     TemplateConfigPathRequest,
     TemplateConfigPathResponse,
@@ -95,6 +96,13 @@ class MockModel:
             load_config=self.template_load_config,
             config_path_values=self.template_values,
             apply=self.template_apply,
+        )
+
+    @property
+    def template_config(self) -> TemplateConfig:
+        return TemplateConfig(
+            activate=_Mock_Template_Config_Activate,
+            file=self.template_file_config,
         )
 
     @property
