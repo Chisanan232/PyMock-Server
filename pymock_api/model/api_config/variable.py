@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from ..._utils.random import DigitRange, ValueSize
+from ..._utils.random import DigitRange, RandomInteger, ValueSize
 from ..enums import ValueFormat
 from ._base import _Checkable, _Config
 
@@ -127,6 +127,9 @@ class Size(_Config, _Checkable):
             return ValueSize(max=self.only_equal, min=self.only_equal)
         else:
             return ValueSize(max=self.max_value, min=self.min_value)
+
+    def generate_random_int(self) -> int:
+        return RandomInteger.generate(value_range=self.to_value_size())
 
 
 @dataclass(eq=False)

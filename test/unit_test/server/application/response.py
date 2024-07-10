@@ -11,7 +11,7 @@ from pymock_api.exceptions import FileFormatNotSupport
 from pymock_api.model.api_config import IteratorItem, ResponseProperty
 from pymock_api.model.api_config.apis import HTTPResponse
 from pymock_api.model.api_config.apis._format import Format
-from pymock_api.model.api_config.variable import Variable
+from pymock_api.model.api_config.variable import Size, Variable
 from pymock_api.model.enums import FormatStrategy, ResponseStrategy, ValueFormat
 from pymock_api.server.application.response import HTTPResponse as _HTTPResponse
 
@@ -416,6 +416,149 @@ class TestInnerHTTPResponse:
     @pytest.mark.parametrize(
         ("mock_response_data", "expect_result"),
         [
+            # # *list* type value only (only one data which has name and no nested data)
+            # size with max & min
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="white_list",
+                            required=True,
+                            value_type="list",
+                            value_format=Format(size=Size(max_value=4, min_value=1)),
+                            items=[
+                                IteratorItem(name="name", value_type="str", required=True),
+                            ],
+                        )
+                    ],
+                ),
+                {"white_list": [{"name": "random string"}]},
+            ),
+            # size with only_equal
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="white_list",
+                            required=True,
+                            value_type="list",
+                            value_format=Format(size=Size(only_equal=3)),
+                            items=[
+                                IteratorItem(name="name", value_type="str", required=True),
+                            ],
+                        )
+                    ],
+                ),
+                {"white_list": [{"name": "random string"}, {"name": "random string"}, {"name": "random string"}]},
+            ),
+            # # *list* type value only (only one data without name and no nested data)
+            # size with max & min
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="white_list",
+                            required=True,
+                            value_type="list",
+                            value_format=Format(size=Size(max_value=11, min_value=5)),
+                            items=[
+                                IteratorItem(name="", value_type="str", required=True),
+                            ],
+                        )
+                    ],
+                ),
+                {"white_list": ["random string"]},
+            ),
+            # size with only_equal
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="white_list",
+                            required=True,
+                            value_type="list",
+                            value_format=Format(size=Size(only_equal=2)),
+                            items=[
+                                IteratorItem(name="", value_type="str", required=True),
+                            ],
+                        )
+                    ],
+                ),
+                {"white_list": ["random string", "random string"]},
+            ),
+            # # *list* type value only (no nested data)
+            # size with max & min
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="details",
+                            required=True,
+                            value_type="list",
+                            value_format=Format(size=Size(max_value=20, min_value=10)),
+                            items=[
+                                IteratorItem(name="name", value_type="str", required=True),
+                                IteratorItem(name="id", value_type="int", required=True),
+                                IteratorItem(name="key", value_type="str", required=True),
+                            ],
+                        )
+                    ],
+                ),
+                {"details": [{"key": "random string", "id": "random integer", "name": "random string"}]},
+            ),
+            # size with only_equal
+            (
+                HTTPResponse(
+                    strategy=ResponseStrategy.OBJECT,
+                    properties=[
+                        ResponseProperty(
+                            name="details",
+                            required=True,
+                            value_type="list",
+                            value_format=Format(size=Size(only_equal=5)),
+                            items=[
+                                IteratorItem(name="name", value_type="str", required=True),
+                                IteratorItem(name="id", value_type="int", required=True),
+                                IteratorItem(name="key", value_type="str", required=True),
+                            ],
+                        )
+                    ],
+                ),
+                {
+                    "details": [
+                        {"key": "random string", "id": "random integer", "name": "random string"},
+                        {"key": "random string", "id": "random integer", "name": "random string"},
+                        {"key": "random string", "id": "random integer", "name": "random string"},
+                        {"key": "random string", "id": "random integer", "name": "random string"},
+                        {"key": "random string", "id": "random integer", "name": "random string"},
+                    ]
+                },
+            ),
+        ],
+    )
+    def test_response_with_object_with_format_and_size(
+        self, http_resp: Type[_HTTPResponse], mock_response_data: HTTPResponse, expect_result: dict
+    ):
+        resp_data = http_resp.generate(data=mock_response_data)
+        assert resp_data is not None
+        size_setting = mock_response_data.properties[0].value_format.size
+        if size_setting.only_equal:
+            assert resp_data == expect_result
+        else:
+            assert len(resp_data.values()) == 1
+            for k, v in resp_data.items():
+                chk_eles = list(map(lambda e: e == expect_result[k][0], v))
+                assert False not in chk_eles
+                assert size_setting.min_value <= len(v) <= size_setting.max_value
+
+    @pytest.mark.parametrize(
+        ("mock_response_data", "expect_result"),
+        [
             # *str* type value with *format* (random string)
             (
                 HTTPResponse(
@@ -645,7 +788,11 @@ class TestInnerHTTPResponse:
                                                 strategy=FormatStrategy.CUSTOMIZE,
                                                 customize="https://<random_string>.com",
                                                 variables=[
-                                                    Variable(name="random_string", value_format=ValueFormat.String)
+                                                    Variable(
+                                                        name="random_string",
+                                                        value_format=ValueFormat.String,
+                                                        size=Size(max_value=128, min_value=10),
+                                                    )
                                                 ],
                                             ),
                                         ),
@@ -682,6 +829,7 @@ class TestInnerHTTPResponse:
                                                                     Variable(
                                                                         name="random_string",
                                                                         value_format=ValueFormat.String,
+                                                                        size=Size(max_value=128, min_value=10),
                                                                     )
                                                                 ],
                                                             ),
@@ -719,11 +867,11 @@ class TestInnerHTTPResponse:
                                 "description": str,
                                 "author": str,
                                 "languages": ["enum list", "Python", "Scala", "Java", "JavaScript", "Kotlin"],
-                                "url": r"https://[\w,.]{1,128}\.com",
+                                "url": r"https://[\w,.]{10,128}\.com",
                                 "start": [
                                     {
                                         "number": int,
-                                        "people": [{"name": str, "url": r"https://[\w,.]{1,128}\.com"}],
+                                        "people": [{"name": str, "url": r"https://[\w,.]{10,128}\.com"}],
                                     },
                                 ],
                                 "tags": [str],
@@ -800,7 +948,11 @@ class TestInnerHTTPResponse:
                                                 strategy=FormatStrategy.CUSTOMIZE,
                                                 customize="https://<random_string>.com",
                                                 variables=[
-                                                    Variable(name="random_string", value_format=ValueFormat.String)
+                                                    Variable(
+                                                        name="random_string",
+                                                        value_format=ValueFormat.String,
+                                                        size=Size(max_value=64, min_value=32),
+                                                    )
                                                 ],
                                             ),
                                         ),
@@ -837,6 +989,7 @@ class TestInnerHTTPResponse:
                                                                     Variable(
                                                                         name="random_string",
                                                                         value_format=ValueFormat.String,
+                                                                        size=Size(max_value=64, min_value=32),
                                                                     )
                                                                 ],
                                                             ),
@@ -875,11 +1028,11 @@ class TestInnerHTTPResponse:
                                     "description": str,
                                     "author": str,
                                     "languages": ["enum list", "Python", "Scala"],
-                                    "url": r"https://[\w,.]{1,128}\.com",
+                                    "url": r"https://[\w,.]{32,64}\.com",
                                     "start": [
                                         {
                                             "number": int,
-                                            "people": [{"name": str, "url": r"https://[\w,.]{1,128}\.com"}],
+                                            "people": [{"name": str, "url": r"https://[\w,.]{32,64}\.com"}],
                                         },
                                     ],
                                     "tags": [str],
