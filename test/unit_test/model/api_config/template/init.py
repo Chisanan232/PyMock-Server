@@ -213,7 +213,7 @@ class TestTemplateFileConfig(CheckableTestSuite):
 
     def test_value_attributes(self, sut: TemplateFileConfig):
         # Verify properties of section *template*
-        assert sut.activate == MOCK_MODEL.template_config.activate
+        assert sut.activate == MOCK_MODEL.template_file_config.activate
 
         # Verify section *template.values*
         assert sut.config_path_values.api == MOCK_MODEL.template_values_api

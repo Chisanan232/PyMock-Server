@@ -166,7 +166,7 @@ class TestMockAPIs(CheckableTestSuite, DividableTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> MockAPIs:
         return MockAPIs(
-            template=MOCK_MODEL.template_config, base=self._Mock_Model.base_config, apis=self._Mock_Model.mock_api
+            template=MOCK_MODEL.template_file_config, base=self._Mock_Model.base_config, apis=self._Mock_Model.mock_api
         )
 
     @pytest.fixture(scope="function")
@@ -179,7 +179,7 @@ class TestMockAPIs(CheckableTestSuite, DividableTestSuite):
         ), f"The size of *MockAPIs* data object should be same as object '{self._Mock_Model.mock_api}'."
 
     def test_value_attributes(self, sut: MockAPIs):
-        assert sut.template == MOCK_MODEL.template_config, _assertion_msg
+        assert sut.template == MOCK_MODEL.template_file_config, _assertion_msg
         assert sut.base == self._Mock_Model.base_config, _assertion_msg
         assert sut.apis == self._Mock_Model.mock_api, _assertion_msg
 

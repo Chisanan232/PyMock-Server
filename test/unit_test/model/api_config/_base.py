@@ -55,7 +55,7 @@ MOCK_RETURN_VALUE: Mock = Mock()
 class MockModel:
     @property
     def mock_apis(self) -> MockAPIs:
-        return MockAPIs(template=self.template_config, base=self.base_config, apis=self.mock_api)
+        return MockAPIs(template=self.template_file_config, base=self.base_config, apis=self.mock_api)
 
     @property
     def template_values_api(self) -> TemplateConfigPathAPI:
@@ -89,7 +89,7 @@ class MockModel:
         )
 
     @property
-    def template_config(self) -> TemplateFileConfig:
+    def template_file_config(self) -> TemplateFileConfig:
         return TemplateFileConfig(
             activate=_Mock_Template_Config_Activate,
             load_config=self.template_load_config,
