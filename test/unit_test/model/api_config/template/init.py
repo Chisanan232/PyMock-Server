@@ -55,6 +55,29 @@ from .._base import (
 )
 from . import TemplateSettingTestSuite
 
+_Template_File_Config_Test_Data: List[tuple] = []
+_Template_Config_Test_Data: List[tuple] = []
+
+
+def reset_template_file_config_test_data() -> None:
+    global _Template_File_Config_Test_Data
+    _Template_File_Config_Test_Data.clear()
+
+
+def add_template_file_config_test_data(test_scenario: tuple) -> None:
+    global _Template_File_Config_Test_Data
+    _Template_File_Config_Test_Data.append(test_scenario)
+
+
+def reset_template_config_test_data() -> None:
+    global _Template_Config_Test_Data
+    _Template_Config_Test_Data.clear()
+
+
+def add_template_config_test_data(test_scenario: tuple) -> None:
+    global _Template_Config_Test_Data
+    _Template_Config_Test_Data.append(test_scenario)
+
 
 class TestLoadConfig(ConfigTestSpec):
     @pytest.fixture(scope="function")
@@ -198,7 +221,11 @@ class TestTemplateApply(ConfigTestSpec):
 
 class TestTemplateFileConfig(CheckableTestSuite):
     test_data_dir = "file"
-    set_checking_test_data(test_data_dir)
+    set_checking_test_data(
+        test_data_dir,
+        reset_callback=reset_template_file_config_test_data,
+        opt_globals_callback=add_template_file_config_test_data,
+    )
 
     @pytest.fixture(scope="function")
     def sut(self) -> TemplateFileConfig:
@@ -240,10 +267,21 @@ class TestTemplateFileConfig(CheckableTestSuite):
         assert obj.config_path_values.serialize() == _Mock_Template_File_Setting.get("config_path_values")
         assert obj.apply.serialize() == _Mock_Template_File_Setting.get("apply")
 
+    @pytest.mark.parametrize(
+        ("test_data_path", "criteria"),
+        _Template_File_Config_Test_Data,
+    )
+    def test_is_work(self, sut_with_nothing: TemplateFileConfig, test_data_path: str, criteria: bool):
+        super().test_is_work(sut_with_nothing, test_data_path, criteria)
+
 
 class TestTemplateConfig(CheckableTestSuite):
-    test_data_dir = "template_not_yet"
-    set_checking_test_data(test_data_dir)
+    test_data_dir = "template"
+    set_checking_test_data(
+        test_data_dir,
+        reset_callback=reset_template_config_test_data,
+        opt_globals_callback=add_template_config_test_data,
+    )
 
     @pytest.fixture(scope="function")
     def sut(self) -> TemplateConfig:
@@ -281,6 +319,13 @@ class TestTemplateConfig(CheckableTestSuite):
         assert isinstance(obj, TemplateConfig)
         assert obj.activate == _Mock_Template_Setting.get("activate")
         assert obj.file.serialize() == _Mock_Template_Setting.get("file")
+
+    @pytest.mark.parametrize(
+        ("test_data_path", "criteria"),
+        _Template_Config_Test_Data,
+    )
+    def test_is_work(self, sut_with_nothing: TemplateConfig, test_data_path: str, criteria: bool):
+        super().test_is_work(sut_with_nothing, test_data_path, criteria)
 
 
 class DummyTemplateConfigLoaderWithAPIConfig(TemplateConfigLoaderWithAPIConfig):
