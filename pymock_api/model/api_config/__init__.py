@@ -19,7 +19,7 @@ from .apis import (
 )
 from .base import BaseConfig
 from .item import IteratorItem
-from .template import TemplateFileConfig
+from .template import TemplateConfig
 from .template._base import _BaseTemplatableConfig
 from .template._base_wrapper import _OperatingTemplatableConfig
 from .template._divide import (
@@ -37,7 +37,7 @@ from .template._load import (
 class MockAPIs(_OperatingTemplatableConfig, _Checkable):
     """*The **mocked_apis** section*"""
 
-    _template: TemplateFileConfig
+    _template: TemplateConfig
     _base: Optional[BaseConfig]
     _apis: Dict[str, Optional[MockAPI]]
 
@@ -46,12 +46,12 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
 
     def __init__(
         self,
-        template: Optional[TemplateFileConfig] = None,
+        template: Optional[TemplateConfig] = None,
         base: Optional[BaseConfig] = None,
         apis: Dict[str, Optional[MockAPI]] = {},
     ):
         super().__init__()
-        self._template = template if template is not None else TemplateFileConfig()
+        self._template = template if template is not None else TemplateConfig()
         self._base = base
         self._apis = apis
 
@@ -81,15 +81,15 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
         self._base_file_path = p
 
     @property
-    def template(self) -> TemplateFileConfig:
+    def template(self) -> TemplateConfig:
         return self._template
 
     @template.setter
-    def template(self, template: Union[dict, TemplateFileConfig]) -> None:
+    def template(self, template: Union[dict, TemplateConfig]) -> None:
         if template is not None:
             if isinstance(template, dict):
-                self._template = TemplateFileConfig().deserialize(data=template)
-            elif isinstance(template, TemplateFileConfig):
+                self._template = TemplateConfig().deserialize(data=template)
+            elif isinstance(template, TemplateConfig):
                 self._template = template
             else:
                 raise TypeError("Setter *MockAPIs.template* only accepts dict or TemplateConfig type object.")
@@ -158,8 +158,9 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
         if self._need_template_in_config:
             if self.is_pull:
                 template.activate = True
+                template.file.activate = True
                 if self.base_file_path:
-                    template.config_path_values.base_file_path = self.base_file_path
+                    template.file.config_path_values.base_file_path = self.base_file_path
             api_info["template"] = template.serialize()
 
         # Process section *apis*
@@ -182,7 +183,7 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
         return not_empty_api_config
 
     @property
-    def _current_template_at_serialization(self) -> TemplateFileConfig:
+    def _current_template_at_serialization(self) -> TemplateConfig:
         return self.template
 
     def _set_serialized_data(
@@ -255,8 +256,9 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
         self.template.absolute_model_key = self.key
         if self.is_pull:
             self.template.activate = True
+            self.template.file.activate = True
             if self.base_file_path:
-                self.template.config_path_values.base_file_path = self.base_file_path
+                self.template.file.config_path_values.base_file_path = self.base_file_path
         self.template.deserialize(data=template_info)
 
         # Processing section *base*
@@ -306,13 +308,12 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
             self.apis = {}
 
     @property
-    def _template_config(self) -> TemplateFileConfig:
+    def _template_config(self) -> TemplateConfig:
         return self.template
 
     @property
     def _config_file_format(self) -> str:
-        print(f"[DEBUG in src] self.template.config_path_values: {self.template.config_path_values}")
-        return self.template.config_path_values.api.config_path_format
+        return self.template.file.config_path_values.api.config_path_format
 
     @property
     def _deserialize_as_template_config(self) -> MockAPI:

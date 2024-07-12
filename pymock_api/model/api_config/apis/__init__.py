@@ -7,7 +7,7 @@ from ...._utils import YAML
 from ...._utils.file_opt import JSON
 from ...enums import Format, ResponseStrategy
 from .._base import _Checkable, _Config
-from ..template import TemplateConfigPathAPI, TemplateConfigPathHTTP, TemplateFileConfig
+from ..template import TemplateConfig, TemplateConfigPathAPI, TemplateConfigPathHTTP
 from ..template._base import _BaseTemplatableConfig
 from ..template._base_wrapper import _GeneralTemplatableConfig
 from ..template._divide import BeDividedableAsTemplatableConfig
@@ -132,7 +132,7 @@ class HTTP(_GeneralTemplatableConfig, _Checkable):
         )
 
     @property
-    def _current_template_at_serialization(self) -> TemplateFileConfig:
+    def _current_template_at_serialization(self) -> TemplateConfig:
         return self._current_template
 
     def _set_serialized_data(
@@ -190,7 +190,7 @@ class HTTP(_GeneralTemplatableConfig, _Checkable):
 
     @property
     def _template_setting(self) -> TemplateConfigPathHTTP:
-        return self._current_template.config_path_values.http
+        return self._current_template.file.config_path_values.http
 
     def is_work(self) -> bool:
         if not self.props_should_not_be_none(
@@ -207,15 +207,15 @@ class HTTP(_GeneralTemplatableConfig, _Checkable):
         return self.request.is_work() and self.response.is_work()
 
     @property
-    def _template_config(self) -> TemplateFileConfig:
+    def _template_config(self) -> TemplateConfig:
         return self._current_template
 
     @property
     def _config_file_format(self) -> str:
         if self._current_section.lower() == "request":
-            return self._current_template.config_path_values.request.config_path_format
+            return self._current_template.file.config_path_values.request.config_path_format
         if self._current_section.lower() == "response":
-            return self._current_template.config_path_values.response.config_path_format
+            return self._current_template.file.config_path_values.response.config_path_format
         raise ValueError(
             "Inner property *HTTPRequest._current_section*, *HTTPResponse._current_section* value must to be *request*"
             " or *response*."
@@ -342,7 +342,7 @@ class MockAPI(_GeneralTemplatableConfig, _Checkable):
         return serialized_data
 
     @property
-    def _current_template_at_serialization(self) -> TemplateFileConfig:
+    def _current_template_at_serialization(self) -> TemplateConfig:
         return self._current_template
 
     def _set_serialized_data(
@@ -424,7 +424,7 @@ class MockAPI(_GeneralTemplatableConfig, _Checkable):
 
     @property
     def _template_setting(self) -> TemplateConfigPathAPI:
-        return self._current_template.config_path_values.api
+        return self._current_template.file.config_path_values.api
 
     def set_request(self, method: str = "GET", parameters: Optional[List[Union[dict, APIParameter]]] = None) -> None:
         def _convert(param: Union[dict, APIParameter]) -> APIParameter:
@@ -484,12 +484,12 @@ class MockAPI(_GeneralTemplatableConfig, _Checkable):
             raise ValueError(f"Not support the format feature as {f}.")
 
     @property
-    def _template_config(self) -> TemplateFileConfig:
+    def _template_config(self) -> TemplateConfig:
         return self._current_template
 
     @property
     def _config_file_format(self) -> str:
-        return self._current_template.config_path_values.http.config_path_format
+        return self._current_template.file.config_path_values.http.config_path_format
 
     @property
     def _deserialize_as_template_config(self) -> HTTP:

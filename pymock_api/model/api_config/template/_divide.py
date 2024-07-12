@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict, Optional, Union
 from ...._utils import YAML
 from ...._utils.file_opt import _BaseFileOperation
 from .._base import _Config
-from . import TemplateFileConfig
+from . import TemplateConfig
 from ._base import _BaseTemplatableConfig
 
 
@@ -79,7 +79,7 @@ class TemplatableConfigDividable(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def _current_template_at_serialization(self) -> TemplateFileConfig:
+    def _current_template_at_serialization(self) -> TemplateConfig:
         pass
 
     @abstractmethod
@@ -97,7 +97,7 @@ class TemplatableConfigDividable(metaclass=ABCMeta):
                 and isinstance(data, BeDividedableAsTemplatableConfig)
                 and isinstance(data, _BaseTemplatableConfig)
             )
-            config_base_path = data._current_template.config_path_values.base_file_path
+            config_base_path = data._current_template.file.config_path_values.base_file_path
             tag_dir = str(pathlib.Path(config_base_path, data.tag)) if data.tag else ""
             config_file = f"{data.api_name}-{data.key.replace('<mock API>', 'api')}.yaml"
             path = pathlib.Path(config_base_path, data.tag, config_file)

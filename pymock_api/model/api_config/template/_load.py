@@ -9,7 +9,7 @@ from ...._utils import YAML
 from ...._utils.file_opt import _BaseFileOperation
 from ...enums import ConfigLoadingOrder, ConfigLoadingOrderKey, set_loading_function
 from .._base import _Config
-from . import TemplateFileConfig
+from . import TemplateConfig
 from ._base import _BaseTemplatableConfig
 
 
@@ -29,7 +29,7 @@ class TemplateConfigOpts(metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def _template_config(self) -> TemplateFileConfig:
+    def _template_config(self) -> TemplateConfig:
         pass
 
     @property
@@ -113,7 +113,7 @@ class TemplateConfigLoaderByScanFile(_BaseTemplateConfigLoader):
     def load_config(self) -> None:
         customize_config_file_format = "**"
         config_file_format = f"[!_**]{customize_config_file_format}"
-        config_base_path = self._template_config_opts._template_config.config_path_values.base_file_path
+        config_base_path = self._template_config_opts._template_config.file.config_path_values.base_file_path
         all_paths = glob.glob(str(pathlib.Path(config_base_path, config_file_format)))
         api_config_path = str(pathlib.Path(config_base_path, self._template_config_opts.config_file_name))
         if os.path.exists(api_config_path):
@@ -165,11 +165,11 @@ class TemplateConfigLoaderByApply(_BaseTemplateConfigLoader):
         )
 
     def load_config(self) -> None:
-        if self._template_config_opts._template_config.apply:
-            apply_apis = self._template_config_opts._template_config.apply.api
+        if self._template_config_opts._template_config.file.apply:
+            apply_apis = self._template_config_opts._template_config.file.apply.api
             all_ele_is_dict = list(map(lambda e: isinstance(e, dict), apply_apis))
             config_path_format = self._template_config_opts._config_file_format
-            config_base_path = self._template_config_opts._template_config.config_path_values.base_file_path
+            config_base_path = self._template_config_opts._template_config.file.config_path_values.base_file_path
             if False in all_ele_is_dict:
                 # no tag API
                 for api in apply_apis:
@@ -207,15 +207,16 @@ class TemplateConfigLoader(_BaseTemplateConfigLoader):
             loader.register(template_config_ops)
 
     def load_config(self, mocked_apis_data: dict) -> None:
-        loading_order = self._template_config_opts._template_config.load_config.order
+        loading_order = self._template_config_opts._template_config.file.load_config.order
 
-        if self._template_config_opts._template_config.load_config.includes_apis:
+        if self._template_config_opts._template_config.file.load_config.includes_apis:
             if (ConfigLoadingOrder.APIs not in loading_order) or (
-                ConfigLoadingOrder.APIs in loading_order and not self._template_config_opts._template_config.activate
+                ConfigLoadingOrder.APIs in loading_order
+                and not self._template_config_opts._template_config.file.activate
             ):
                 self._loaders[ConfigLoadingOrderKey.APIs.value].load_config(mocked_apis_data)
 
-        if self._template_config_opts._template_config.activate:
+        if self._template_config_opts._template_config.file.activate:
             for load_config in loading_order:
                 args = (mocked_apis_data,)
                 args = load_config.get_loading_function_args(*args)  # type: ignore[assignment]
