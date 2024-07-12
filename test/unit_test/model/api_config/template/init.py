@@ -10,10 +10,16 @@ from pymock_api.model.api_config import (
     _BaseTemplateConfigLoader,
     _Config,
 )
-from pymock_api.model.api_config.template import (
+from pymock_api.model.api_config.template import TemplateConfig
+from pymock_api.model.api_config.template._load import (
+    TemplateConfigLoaderByApply,
+    TemplateConfigLoaderByScanFile,
+    TemplateConfigLoaderWithAPIConfig,
+    TemplateConfigOpts,
+)
+from pymock_api.model.api_config.template.file import (
     LoadConfig,
     TemplateApply,
-    TemplateConfig,
     TemplateConfigPathAPI,
     TemplateConfigPathHTTP,
     TemplateConfigPathRequest,
@@ -21,12 +27,6 @@ from pymock_api.model.api_config.template import (
     TemplateConfigPathSetting,
     TemplateConfigPathValues,
     TemplateFileConfig,
-)
-from pymock_api.model.api_config.template._load import (
-    TemplateConfigLoaderByApply,
-    TemplateConfigLoaderByScanFile,
-    TemplateConfigLoaderWithAPIConfig,
-    TemplateConfigOpts,
 )
 from pymock_api.model.enums import (
     ConfigLoadingOrder,

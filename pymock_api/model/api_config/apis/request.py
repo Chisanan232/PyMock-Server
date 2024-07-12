@@ -4,8 +4,8 @@ from typing import Any, Dict, List, Optional, Union
 
 from ...._utils.file_opt import YAML, _BaseFileOperation
 from .._base import _Checkable, _Config
-from ..template import TemplateConfigPathRequest
 from ..template._base_wrapper import _DividableOnlyTemplatableConfig
+from ..template.file import TemplateConfigPathRequest
 from ._property import BaseProperty
 
 

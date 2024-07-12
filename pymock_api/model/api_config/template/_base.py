@@ -7,7 +7,8 @@ from typing import Any, Dict, Optional, Type
 from ...._utils import YAML
 from ...._utils.file_opt import _BaseFileOperation
 from .._base import SelfType, _Config
-from . import TemplateConfig, TemplateConfigPathSetting
+from . import TemplateConfig
+from .file import TemplateConfigPathSetting
 
 
 @dataclass(eq=False)
