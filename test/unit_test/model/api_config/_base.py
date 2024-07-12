@@ -18,7 +18,6 @@ from pymock_api.model.api_config import (
     BeDividedableAsTemplatableConfig,
     ResponseProperty,
     TemplatableConfigDividable,
-    TemplateFileConfig,
     _Checkable,
     _Config,
 )
@@ -33,6 +32,7 @@ from pymock_api.model.api_config.template import (
     TemplateConfigPathRequest,
     TemplateConfigPathResponse,
     TemplateConfigPathValues,
+    TemplateFileConfig,
 )
 from pymock_api.model.api_config.variable import Variable
 from pymock_api.model.enums import FormatStrategy, ResponseStrategy, ValueFormat
@@ -56,7 +56,7 @@ MOCK_RETURN_VALUE: Mock = Mock()
 class MockModel:
     @property
     def mock_apis(self) -> MockAPIs:
-        return MockAPIs(template=self.template_file_config, base=self.base_config, apis=self.mock_api)
+        return MockAPIs(template=self.template_config, base=self.base_config, apis=self.mock_api)
 
     @property
     def template_values_api(self) -> TemplateConfigPathAPI:

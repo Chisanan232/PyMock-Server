@@ -8,7 +8,7 @@ from pymock_api.command.add.component import SubCmdAddComponent
 from pymock_api.command.options import SubCommand
 from pymock_api.model import (
     SubcmdAddArguments,
-    TemplateFileConfig,
+    TemplateConfig,
     deserialize_openapi_doc_config,
     load_config,
 )
@@ -352,8 +352,8 @@ class TestSubCmdAddComponent:
         with patch(
             "pymock_api.model.api_config.MockAPIs.template", new_callable=PropertyMock
         ) as mock_mock_apis_template:
-            template_config = TemplateFileConfig()
-            template_config.config_path_values.base_file_path = str(under_test_dir)
+            template_config = TemplateConfig()
+            template_config.file.config_path_values.base_file_path = str(under_test_dir)
             mock_mock_apis_template.return_value = template_config
 
             # Set the Swagger API reference data for testing

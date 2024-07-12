@@ -11,7 +11,7 @@ from pymock_api.model import (
     deserialize_openapi_doc_config,
     load_config,
 )
-from pymock_api.model.api_config import DivideStrategy, TemplateFileConfig
+from pymock_api.model.api_config import DivideStrategy, TemplateConfig
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     set_component_definition,
@@ -272,7 +272,7 @@ class TestSubCmdPullComponent:
                     # The property *base_file_path* in template section part
                     assert api_config.apis
                     assert api_config.apis.template
-                    api_config.apis.template.config_path_values.base_file_path = cmd_args.base_file_path
+                    api_config.apis.template.file.config_path_values.base_file_path = cmd_args.base_file_path
                     api_config_serialize_data = api_config.serialize()
                     if cmd_args.dry_run:
                         mock_dry_run_final_process.assert_called_once_with(api_config_serialize_data)
@@ -323,8 +323,8 @@ class TestSubCmdPullComponent:
         with patch(
             "pymock_api.model.api_config.MockAPIs.template", new_callable=PropertyMock
         ) as mock_mock_apis_template:
-            template_config = TemplateFileConfig()
-            template_config.config_path_values.base_file_path = str(ut_dir)
+            template_config = TemplateConfig()
+            template_config.file.config_path_values.base_file_path = str(ut_dir)
             mock_mock_apis_template.return_value = template_config
 
             # Set the Swagger API reference data for testing

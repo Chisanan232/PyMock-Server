@@ -6,7 +6,7 @@ import pytest
 
 from pymock_api import APIConfig
 from pymock_api.model import BaseConfig, MockAPI, MockAPIs
-from pymock_api.model.api_config import TemplateFileConfig
+from pymock_api.model.api_config import TemplateConfig
 
 from ...._values import (
     _Base_URL,
@@ -166,7 +166,7 @@ class TestMockAPIs(CheckableTestSuite, DividableTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> MockAPIs:
         return MockAPIs(
-            template=MOCK_MODEL.template_file_config, base=self._Mock_Model.base_config, apis=self._Mock_Model.mock_api
+            template=MOCK_MODEL.template_config, base=self._Mock_Model.base_config, apis=self._Mock_Model.mock_api
         )
 
     @pytest.fixture(scope="function")
@@ -179,7 +179,7 @@ class TestMockAPIs(CheckableTestSuite, DividableTestSuite):
         ), f"The size of *MockAPIs* data object should be same as object '{self._Mock_Model.mock_api}'."
 
     def test_value_attributes(self, sut: MockAPIs):
-        assert sut.template == MOCK_MODEL.template_file_config, _assertion_msg
+        assert sut.template == MOCK_MODEL.template_config, _assertion_msg
         assert sut.base == self._Mock_Model.base_config, _assertion_msg
         assert sut.apis == self._Mock_Model.mock_api, _assertion_msg
 
@@ -188,14 +188,14 @@ class TestMockAPIs(CheckableTestSuite, DividableTestSuite):
         [
             ({}, True),
             ({"test": "test"}, True),
-            (TemplateFileConfig(), False),
+            (TemplateConfig(), False),
         ],
     )
-    @patch.object(TemplateFileConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
+    @patch.object(TemplateConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
     def test_prop_template_with_valid_obj(
         self,
         mock_deserialize: Mock,
-        setting_val: Union[dict, TemplateFileConfig],
+        setting_val: Union[dict, TemplateConfig],
         should_call_deserialize: bool,
         sut_with_nothing: MockAPIs,
     ):
@@ -207,9 +207,9 @@ class TestMockAPIs(CheckableTestSuite, DividableTestSuite):
             assert sut_with_nothing.template == MOCK_RETURN_VALUE
         else:
             mock_deserialize.assert_not_called()
-            assert sut_with_nothing.template == TemplateFileConfig()
+            assert sut_with_nothing.template == TemplateConfig()
 
-    @patch.object(TemplateFileConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
+    @patch.object(TemplateConfig, "deserialize", return_value=MOCK_RETURN_VALUE)
     def test_prop_template_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: MockAPIs):
         with pytest.raises(TypeError) as exc_info:
             sut_with_nothing.template = "Invalid object"
@@ -309,7 +309,7 @@ class TestMockAPIs(CheckableTestSuite, DividableTestSuite):
     )
     @patch.object(MockAPI, "deserialize", return_value=None)
     @patch.object(BaseConfig, "deserialize", return_value=None)
-    @patch.object(TemplateFileConfig, "deserialize", return_value=None)
+    @patch.object(TemplateConfig, "deserialize", return_value=None)
     def test_deserialize_with_nonideal_value(
         self,
         mock_deserialize_template: Mock,

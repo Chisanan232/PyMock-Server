@@ -6,7 +6,6 @@ import pytest
 
 from pymock_api.model.api_config import (
     TemplateConfigLoader,
-    TemplateFileConfig,
     _BaseTemplatableConfig,
     _BaseTemplateConfigLoader,
     _Config,
@@ -21,6 +20,7 @@ from pymock_api.model.api_config.template import (
     TemplateConfigPathResponse,
     TemplateConfigPathSetting,
     TemplateConfigPathValues,
+    TemplateFileConfig,
 )
 from pymock_api.model.api_config.template._load import (
     TemplateConfigLoaderByApply,
@@ -296,7 +296,7 @@ class TestTemplateConfig(CheckableTestSuite):
 
     def test_value_attributes(self, sut: TemplateConfig):
         # Verify properties of section *template*
-        assert sut.activate == MOCK_MODEL.template_file_config.activate
+        assert sut.activate == MOCK_MODEL.template_config.activate
 
         # Verify section *template.values*
         assert sut.file.config_path_values.api == MOCK_MODEL.template_values_api
@@ -355,11 +355,11 @@ class MockTemplateConfigOpts(TemplateConfigOpts):
     __config_file_format_val = None
 
     @property
-    def _template_config(self) -> TemplateFileConfig:
+    def _template_config(self) -> TemplateConfig:
         return self._template_config_val
 
     @_template_config.setter
-    def _template_config(self, t: TemplateFileConfig) -> None:
+    def _template_config(self, t: TemplateConfig) -> None:
         self._template_config_val = t
 
     @property
@@ -449,9 +449,12 @@ class TestTemplateConfigLoadable:
 
         # Pre-process of setting loading function
         set_loading_function(data_model_key="data_modal", **mock_load_config_data)
-        template_config = TemplateFileConfig(
+        template_config = TemplateConfig(
             activate=True,
-            load_config=LoadConfig(includes_apis=True, order=load_order),
+            file=TemplateFileConfig(
+                activate=True,
+                load_config=LoadConfig(includes_apis=True, order=load_order),
+            ),
         )
         mock_template_config_opts_instance = MockTemplateConfigOpts()
         mock_template_config_opts_instance._template_config = template_config
