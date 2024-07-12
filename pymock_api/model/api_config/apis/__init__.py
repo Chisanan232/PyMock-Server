@@ -1,7 +1,7 @@
 import copy
 import re
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from ...._utils import YAML
 from ...._utils.file_opt import JSON
