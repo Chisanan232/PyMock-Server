@@ -606,7 +606,10 @@ _Test_Home_With_Customize_Format_Req_Param: dict = {
 
 
 _Mocked_APIs: dict = {
-    "template": _Mock_Template_File_Setting,
+    "template": {
+        "activate": _Mock_Template_Config_Activate,
+        "file": _Mock_Template_File_Setting,
+    },
     "base": {"url": _Base_URL},
     "apis": {
         "google_home": _Google_Home_Value,
@@ -643,7 +646,10 @@ class _TestConfig:
     Mock_API: dict = {"url": _Test_URL, "http": Http, "tag": _Test_Tag}
     Base: dict = {"url": _Base_URL}
     Mock_APIs: dict = {
-        "template": _Mock_Template_File_Setting,
+        "template": {
+            "activate": _Mock_Template_Config_Activate,
+            "file": _Mock_Template_File_Setting,
+        },
         "base": Base,
         "apis": {
             "test_config": Mock_API,
