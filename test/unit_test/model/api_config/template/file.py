@@ -208,7 +208,7 @@ class TestTemplateApply(ConfigTestSpec):
 
 
 class TestTemplateFileConfig(CheckableTestSuite):
-    test_data_dir = "file"
+    test_data_dir = ("template_sections", "template_file")
     set_checking_test_data(
         test_data_dir,
         reset_callback=reset_template_file_config_test_data,
