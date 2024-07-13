@@ -6,7 +6,7 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import namedtuple
 from copy import copy
 from decimal import Decimal
-from typing import Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Callable, Dict, List, Optional, Type, Union
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
@@ -223,7 +223,7 @@ _TEST_DATA: List[tuple] = []
 
 
 def _set_test_data(
-    is_valid: bool, data_model: Union[str, Tuple[str]], opt_globals_callback: Optional[Callable] = None
+    is_valid: bool, data_model: Union[str, tuple], opt_globals_callback: Optional[Callable] = None
 ) -> None:
     def _operate_default_global_var(test_scenario: tuple) -> None:
         global _TEST_DATA
@@ -260,7 +260,7 @@ def _set_test_data(
 
 
 def set_checking_test_data(
-    data_modal_dir: Union[str, Tuple[str]],
+    data_modal_dir: Union[str, tuple],
     reset: bool = True,
     reset_callback: Optional[Callable] = None,
     opt_globals_callback: Optional[Callable] = None,
@@ -270,9 +270,7 @@ def set_checking_test_data(
     init_checking_test_data(data_modal_dir, opt_globals_callback)
 
 
-def init_checking_test_data(
-    data_modal_dir: Union[str, Tuple[str]], opt_globals_callback: Optional[Callable] = None
-) -> None:
+def init_checking_test_data(data_modal_dir: Union[str, tuple], opt_globals_callback: Optional[Callable] = None) -> None:
     _set_test_data(is_valid=True, data_model=data_modal_dir, opt_globals_callback=opt_globals_callback)
     _set_test_data(is_valid=False, data_model=data_modal_dir, opt_globals_callback=opt_globals_callback)
 
