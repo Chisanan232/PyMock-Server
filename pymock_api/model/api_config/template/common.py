@@ -220,3 +220,69 @@ class TemplateFormatConfig(_Config, _Checkable):
                 return False
 
         return True
+
+
+@dataclass(eq=False)
+class TemplateCommonConfig(_Config, _Checkable):
+
+    activate: bool = field(default=False)
+    format: Optional[TemplateFormatConfig] = None
+
+    def __post_init__(self) -> None:
+        if self.format is not None:
+            self._convert_format()
+
+    def _convert_format(self) -> None:
+        if isinstance(self.format, dict):
+            self.format = TemplateFormatConfig().deserialize(self.format)
+
+    def _compare(self, other: "TemplateCommonConfig") -> bool:
+        return self.activate == other.activate and self.format == other.format
+
+    @property
+    def key(self) -> str:
+        return "common_config"
+
+    @_Config._clean_empty_value
+    def serialize(self, data: Optional["TemplateCommonConfig"] = None) -> Optional[Dict[str, Any]]:
+        activate: bool = self.activate or self._get_prop(data, prop="activate")
+        template_format: TemplateFormatConfig = self._get_prop(data, prop="format")
+        serialized_data: Dict[str, Any] = {
+            "activate": activate,
+        }
+        if template_format:
+            serialized_data["format"] = template_format.serialize()
+        return serialized_data
+
+    @_Config._ensure_process_with_not_empty_value
+    def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateCommonConfig"]:
+        self.activate = data.get("activate", False)
+
+        template_format_data = data.get("format", {})
+        if template_format_data:
+            template_format_config = TemplateFormatConfig()
+            template_format_config.absolute_model_key = self.key
+            self.format = template_format_config.deserialize(template_format_data)
+        return self
+
+    def is_work(self) -> bool:
+        # General checking
+        if not self.props_should_not_be_none(
+            under_check={
+                f"{self.absolute_model_key}.activate": self.activate,
+            },
+            accept_empty=False,
+        ):
+            return False
+        if not self.condition_should_be_true(
+            config_key=f"{self.absolute_model_key}.activate",
+            condition=(not isinstance(self.activate, bool)),
+        ):
+            return False
+
+        # Checking array type property *format*
+        if self.format:
+            self.format.stop_if_fail = self.stop_if_fail
+            if not self.format.is_work():
+                return False
+        return True

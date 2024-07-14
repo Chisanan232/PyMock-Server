@@ -5,6 +5,7 @@ from typing import Any, List, Union
 import pytest
 
 from pymock_api.model.api_config.template.common import (
+    TemplateCommonConfig,
     TemplateFormatConfig,
     TemplateFormatEntity,
 )
@@ -15,6 +16,7 @@ from ....._values import (
     _Customize_Format_With_Self_Vars,
     _General_Enum_Format,
     _General_Format,
+    _Mock_Template_Common_Config,
     _Mock_Template_Common_Config_Format_Config,
     _Mock_Template_Common_Config_Format_Entity,
     _Test_Variables_BigDecimal_TWD,
@@ -27,6 +29,29 @@ from .._base import (
     _assertion_msg,
     set_checking_test_data,
 )
+
+_Template_Format_Config_Test_Data: List[tuple] = []
+_Template_Common_Config_Test_Data: List[tuple] = []
+
+
+def reset_template_format_config_test_data() -> None:
+    global _Template_Format_Config_Test_Data
+    _Template_Format_Config_Test_Data.clear()
+
+
+def add_template_format_config_test_data(test_scenario: tuple) -> None:
+    global _Template_Format_Config_Test_Data
+    _Template_Format_Config_Test_Data.append(test_scenario)
+
+
+def reset_template_common_config_test_data() -> None:
+    global _Template_Common_Config_Test_Data
+    _Template_Common_Config_Test_Data.clear()
+
+
+def add_template_common_config_test_data(test_scenario: tuple) -> None:
+    global _Template_Common_Config_Test_Data
+    _Template_Common_Config_Test_Data.append(test_scenario)
 
 
 class TestTemplateFormatEntity(ConfigTestSpec):
@@ -66,7 +91,11 @@ class TestTemplateFormatEntity(ConfigTestSpec):
 
 class TestTemplateFormatConfig(CheckableTestSuite):
     test_data_dir = ("template_sections", "template_common_config", "template_format")
-    set_checking_test_data(test_data_dir)
+    set_checking_test_data(
+        test_data_dir,
+        reset_callback=reset_template_format_config_test_data,
+        opt_globals_callback=add_template_format_config_test_data,
+    )
 
     @pytest.fixture(scope="function")
     def sut(self) -> TemplateFormatConfig:
@@ -103,6 +132,13 @@ class TestTemplateFormatConfig(CheckableTestSuite):
             )
             assert expect
             assert ele.serialize() == self._clean_prop_with_empty_value(expect[0])
+
+    @pytest.mark.parametrize(
+        ("test_data_path", "criteria"),
+        _Template_Format_Config_Test_Data,
+    )
+    def test_is_work(self, sut_with_nothing: TemplateFormatConfig, test_data_path: str, criteria: bool):
+        super().test_is_work(sut_with_nothing, test_data_path, criteria)
 
     @pytest.mark.parametrize(
         ("entities_data", "variables_data"),
@@ -248,3 +284,47 @@ class TestTemplateFormatConfig(CheckableTestSuite):
             str(exc_info.value),
             re.IGNORECASE,
         )
+
+
+class TestTemplateCommonConfig(CheckableTestSuite):
+    test_data_dir = ("template_sections", "template_common_config")
+    set_checking_test_data(
+        test_data_dir,
+        reset_callback=reset_template_common_config_test_data,
+        opt_globals_callback=add_template_common_config_test_data,
+    )
+
+    @pytest.fixture(scope="function")
+    def sut(self) -> TemplateCommonConfig:
+        return TemplateCommonConfig(
+            activate=_Mock_Template_Common_Config["activate"],
+            format=_Mock_Template_Common_Config["format"],
+        )
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> TemplateCommonConfig:
+        return TemplateCommonConfig()
+
+    def test_value_attributes(self, sut: TemplateCommonConfig):
+        assert sut.activate == _Mock_Template_Common_Config["activate"], _assertion_msg
+        assert sut.format.serialize() == self._clean_prop_with_empty_value(
+            _Mock_Template_Common_Config["format"]
+        ), _assertion_msg
+
+    def test_serialize_with_none(self, sut_with_nothing: TemplateCommonConfig):
+        assert sut_with_nothing.serialize() is not None
+
+    def _expected_serialize_value(self) -> Any:
+        return _Mock_Template_Common_Config
+
+    def _expected_deserialize_value(self, obj: TemplateCommonConfig) -> None:
+        assert isinstance(obj, TemplateCommonConfig)
+        assert obj.activate == _Mock_Template_Common_Config["activate"]
+        assert obj.format.serialize() == self._clean_prop_with_empty_value(_Mock_Template_Common_Config["format"])
+
+    @pytest.mark.parametrize(
+        ("test_data_path", "criteria"),
+        _Template_Common_Config_Test_Data,
+    )
+    def test_is_work(self, sut_with_nothing: TemplateCommonConfig, test_data_path: str, criteria: bool):
+        super().test_is_work(sut_with_nothing, test_data_path, criteria)

@@ -618,6 +618,11 @@ _Mock_Template_Common_Config_Format_Config: dict = {
     ],
 }
 
+_Mock_Template_Common_Config: dict = {
+    "activate": _Mock_Template_Config_Activate,
+    "format": _Mock_Template_Common_Config_Format_Config,
+}
+
 _Mock_Template_Setting: dict = {
     "activate": _Mock_Template_Config_Activate,
     "file": _Mock_Template_File_Setting,
