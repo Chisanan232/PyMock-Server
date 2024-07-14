@@ -2,7 +2,7 @@ import sys
 from abc import ABC, ABCMeta, abstractmethod
 from copy import copy
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar
 
 # The truly semantically is more near like following:
 #
@@ -280,3 +280,13 @@ class _HasItemsPropConfig(_BaseConfig, _Checkable, ABC):
         if is_work is False:
             return False
         return True
+
+
+class _CheckableConfig(_Config, _Checkable):
+    pass
+
+
+_ConfigType = TypeVar("_ConfigType", bound=_Config)
+_CheckableType = TypeVar("_CheckableType", bound=_Checkable)
+_CheckableConfigType = TypeVar("_CheckableConfigType", bound=_CheckableConfig)
+_HasItemsPropConfigType = TypeVar("_HasItemsPropConfigType", bound=_HasItemsPropConfig)
