@@ -16,3 +16,8 @@ file:
       config_path_format: '**-request'
     response:
       config_path_format: '**-response'
+common_config:
+  activate: true
+  format:
+    entity: []
+    variables: []

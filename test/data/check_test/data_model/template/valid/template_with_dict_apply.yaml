@@ -1,5 +1,6 @@
 activate: true
 file:
+  activate: true
   load_config:
     includes_apis: True
     order:
@@ -22,3 +23,8 @@ file:
         - get_foo
       - foo-boo:
         - get_foo-boo_export
+common_config:
+  activate: true
+  format:
+    entity: []
+    variables: []

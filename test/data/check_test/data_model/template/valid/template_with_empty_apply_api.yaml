@@ -1,5 +1,6 @@
 activate: true
 file:
+  activate: true
   load_config:
     includes_apis: True
     order:
@@ -17,3 +18,8 @@ file:
       config_path_format: '**-response'
   apply:    # Which mocked APIs should apply template values
     api:    # Which mocked APIs should apply template values to its entire settings includes URL, request and response
+common_config:
+  activate: true
+  format:
+    entity: []
+    variables: []
