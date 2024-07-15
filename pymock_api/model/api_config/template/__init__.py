@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 
 from .._base import _Checkable, _Config
+from .common import TemplateCommonConfig
 from .file import TemplateFileConfig
 
 
@@ -10,9 +11,10 @@ class TemplateConfig(_Config, _Checkable):
 
     activate: bool = field(default=False)
     file: TemplateFileConfig = field(default_factory=TemplateFileConfig)
+    common_config: TemplateCommonConfig = field(default_factory=TemplateCommonConfig)
 
     def _compare(self, other: "TemplateConfig") -> bool:
-        return self.activate == other.activate and self.file == other.file
+        return self.activate == other.activate and self.file == other.file and self.common_config == other.common_config
 
     @property
     def key(self) -> str:
@@ -21,11 +23,13 @@ class TemplateConfig(_Config, _Checkable):
     def serialize(self, data: Optional["TemplateConfig"] = None) -> Optional[Dict[str, Any]]:
         activate: bool = self.activate or self._get_prop(data, prop="activate")
         template_file_config: TemplateFileConfig = self.file or self._get_prop(data, prop="file")
-        if not (template_file_config and activate is not None):
+        template_common_config: TemplateCommonConfig = self.common_config or self._get_prop(data, prop="common_config")
+        if not (activate is not None and template_file_config and template_common_config):
             return None
         serialized_data = {
             "activate": activate,
             "file": template_file_config.serialize(),
+            "common_config": template_common_config.serialize(),
         }
         return serialized_data
 
@@ -36,6 +40,10 @@ class TemplateConfig(_Config, _Checkable):
         template_file_config = TemplateFileConfig()
         template_file_config.absolute_model_key = self.key
         self.file = template_file_config.deserialize(data.get("file", {}))
+
+        template_common_config = TemplateCommonConfig()
+        template_common_config.absolute_model_key = self.key
+        self.common_config = template_common_config.deserialize(data.get("common_config", {}))
         return self
 
     def is_work(self) -> bool:
@@ -55,4 +63,5 @@ class TemplateConfig(_Config, _Checkable):
             return False
 
         self.file.stop_if_fail = self.stop_if_fail
-        return isinstance(self.activate, bool) and self.file.is_work()
+        self.common_config.stop_if_fail = self.stop_if_fail
+        return isinstance(self.activate, bool) and self.file.is_work() and self.common_config.is_work()
