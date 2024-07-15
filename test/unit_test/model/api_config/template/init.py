@@ -33,6 +33,7 @@ class TestTemplateConfig(CheckableTestSuite):
         return TemplateConfig(
             activate=_Mock_Template_Config_Activate,
             file=MOCK_MODEL.template_file_config,
+            common_config=MOCK_MODEL.template_common_config,
         )
 
     @pytest.fixture(scope="function")
@@ -53,8 +54,10 @@ class TestTemplateConfig(CheckableTestSuite):
 
     def test_serialize_with_none(self, sut_with_nothing: TemplateConfig):
         sut_with_nothing.activate = None
-        sut_with_nothing.config_path_values = None
-        sut_with_nothing.apply = None
+        sut_with_nothing.file.config_path_values = None
+        sut_with_nothing.file.apply = None
+        sut_with_nothing.common_config.activate = None
+        sut_with_nothing.common_config.format = None
         super().test_serialize_with_none(sut_with_nothing)
 
     def _expected_serialize_value(self) -> dict:

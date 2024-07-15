@@ -25,6 +25,10 @@ from pymock_api.model.api_config._base import _HasItemsPropConfig
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
 from pymock_api.model.api_config.apis._format import Format, _HasFormatPropConfig
 from pymock_api.model.api_config.template import TemplateConfig
+from pymock_api.model.api_config.template.common import (
+    TemplateCommonConfig,
+    TemplateFormatConfig,
+)
 from pymock_api.model.api_config.template.file import (
     LoadConfig,
     TemplateApply,
@@ -41,6 +45,7 @@ from ...._values import (
     _Base_URL,
     _Mock_Load_Config,
     _Mock_Template_Apply_Has_Tag_Setting,
+    _Mock_Template_Common_Config_Format_Config,
     _Mock_Template_Config_Activate,
     _Test_API_Parameter,
     _Test_HTTP_Resp,
@@ -99,10 +104,25 @@ class MockModel:
         )
 
     @property
+    def template_format_config(self) -> TemplateFormatConfig:
+        return TemplateFormatConfig(
+            entities=_Mock_Template_Common_Config_Format_Config["entities"],
+            variables=_Mock_Template_Common_Config_Format_Config["variables"],
+        )
+
+    @property
+    def template_common_config(self) -> TemplateCommonConfig:
+        return TemplateCommonConfig(
+            activate=_Mock_Template_Config_Activate,
+            format=self.template_format_config,
+        )
+
+    @property
     def template_config(self) -> TemplateConfig:
         return TemplateConfig(
             activate=_Mock_Template_Config_Activate,
             file=self.template_file_config,
+            common_config=self.template_common_config,
         )
 
     @property
