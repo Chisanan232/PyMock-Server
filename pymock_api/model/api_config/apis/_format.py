@@ -153,11 +153,9 @@ class Format(_Config, _Checkable):
 
     def is_work(self) -> bool:
         assert self.strategy
-        if self.strategy is FormatStrategy.FROM_ENUMS and not self.props_should_not_be_none(
-            under_check={
-                f"{self.absolute_model_key}.enums": self.enums,
-            },
-            accept_empty=False,
+        if self.strategy is FormatStrategy.FROM_ENUMS and not self.condition_should_be_true(
+            config_key=f"{self.absolute_model_key}.enums",
+            condition=(not isinstance(self.enums, list) or (self.enums is not None and len(self.enums) == 0)),
         ):
             return False
         if self.strategy is FormatStrategy.CUSTOMIZE and not self.props_should_not_be_none(
