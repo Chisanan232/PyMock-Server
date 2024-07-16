@@ -678,6 +678,7 @@ class _TestConfig:
         "template": {
             "activate": _Mock_Template_Config_Activate,
             "file": _Mock_Template_File_Setting,
+            "common_config": _Mock_Template_Common_Config,
         },
         "base": Base,
         "apis": {
