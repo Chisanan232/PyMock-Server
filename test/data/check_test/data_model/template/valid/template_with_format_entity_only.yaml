@@ -1,0 +1,43 @@
+activate: true
+file:
+  activate: true
+  load_config:
+    includes_apis: true
+    order:
+      - 'apply'
+      - 'file'
+  config_path_values:
+    base_file_path: './test/data/divide_test/has-base-info_and_tags_has_mocked_apis_with_divide_http_test/'    # Default value should be current path './'
+    api:
+      config_path_format: '**-api'    # ex. ./foo/get_foo.yaml
+    http:
+      config_path_format: '**-http'
+    request:
+      config_path_format: '**-request'
+    response:
+      config_path_format: '**-response'
+common_config:
+  activate: true
+  format:
+    entities:
+      - name: 'general_format'
+        config:
+          strategy: 'by_data_type'
+          digit:
+            integer: 5
+            decimal: 3
+          size:
+            max: 10
+            min: 2
+      - name: 'general_enum_format'
+        config:
+          strategy: 'from_enums'
+          enums:
+            - 'ENUM1'
+            - 'ENUM2'
+            - 'ENUM3'
+      - name: 'customize_format'
+        config:
+          strategy: 'customize'
+          customize: '<big_decimal_usd> <currency_code>\n<big_decimal_twd> <currency_code>'
+    variables: []
