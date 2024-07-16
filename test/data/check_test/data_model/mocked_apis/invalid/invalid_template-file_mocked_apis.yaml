@@ -1,0 +1,67 @@
+template:    # Optional
+  activate: 'invalid data type'
+  file:
+    activate: true
+    load_config:
+      includes_apis: True
+      order:
+        - 'apply'    # Load the setting by scanning files which naming be ruled by section *mocked_apis.template.apply*
+    config_path_values:
+      base_file_path: './test/data/divide_test_load/has-base-info_and_tags_apply_test/'    # Default value should be current path './'
+      api:
+        config_path_format: '**-api.yaml'    # ex. ./foo/get_foo.yaml
+      http:
+        config_path_format: '**-http.yaml'
+      request:
+        config_path_format: '**-request.yaml'
+      response:
+        config_path_format: '**-response.yaml'
+    apply:    # Which mocked APIs should apply template values
+      api:    # Which mocked APIs should apply template values to its entire settings includes URL, request and response
+        - foo:    # If it has tag, it could set the tag name as key and set the target APIs as list type value of the key
+          - get_foo
+        - foo-boo:
+          - get_foo-boo_export
+  common_config:
+    activate: true
+    format:
+      entities:
+        - name: 'general_format'
+          config:
+            strategy: 'by_data_type'
+            digit:
+              integer: 5
+              decimal: 3
+            size:
+              max: 10
+              min: 2
+        - name: 'general_enum_format'
+          config:
+            strategy: 'from_enums'
+            enums:
+              - 'ENUM1'
+              - 'ENUM2'
+              - 'ENUM3'
+        - name: 'customize_format'
+          config:
+            strategy: 'customize'
+            customize: '<big_decimal_usd> <currency_code>\n<big_decimal_twd> <currency_code>'
+      variables:
+        - name: 'big_decimal_usd'
+          value_format: 'big_decimal'
+          digit:
+            integer: 30
+            decimal: 3
+        - name: 'big_decimal_twd'
+          value_format: 'big_decimal'
+          digit:
+            integer: 30
+            decimal: 0
+        - name: 'currency_code'
+          value_format: 'enum'
+          enum:
+            - 'TWD'
+            - 'USD'
+            - 'EUR'
+base:
+  url: '/api/v1/test'
