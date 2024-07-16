@@ -61,7 +61,9 @@ class TemplateFormatEntity(_Config, _Checkable):
             condition=(self.name is not None and not isinstance(self.name, str)),
         ):
             return False
-        return True
+        assert self.config
+        self.config.stop_if_fail = self.stop_if_fail
+        return self.config.is_work()
 
 
 @dataclass(eq=False)
