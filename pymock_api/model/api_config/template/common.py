@@ -71,9 +71,9 @@ class TemplateFormatConfig(_Config, _Checkable):
     variables: List[Variable] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        if self.entities is not None:
+        if self.entities is not None and len(self.entities) != 0:
             self._convert_entities()
-        if self.variables is not None:
+        if self.variables is not None and len(self.variables) != 0:
             self._convert_variables()
 
     def _convert_entities(self):
