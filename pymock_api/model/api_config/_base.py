@@ -78,6 +78,14 @@ class _Config(metaclass=ABCMeta):
 
         return _
 
+    @staticmethod
+    def _ensure_process_with_not_none_value(function: Callable) -> Callable:
+        def _(self, data: Dict[str, Any]) -> Optional[SelfType]:
+            data = {} if data is None else data
+            return function(self, data)
+
+        return _
+
     @abstractmethod
     def deserialize(self, data: Dict[str, Any]) -> Optional[SelfType]:
         pass
