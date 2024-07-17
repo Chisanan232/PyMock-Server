@@ -52,7 +52,7 @@ from .._base import (
     ConfigTestSpec,
     set_checking_test_data,
 )
-from . import TemplateSettingTestSuite
+from . import HasDefaultValueTestSuite, TemplateSettingTestSuite
 
 _Template_File_Config_Test_Data: List[tuple] = []
 
@@ -67,7 +67,7 @@ def add_template_file_config_test_data(test_scenario: tuple) -> None:
     _Template_File_Config_Test_Data.append(test_scenario)
 
 
-class TestLoadConfig(ConfigTestSpec):
+class TestLoadConfig(HasDefaultValueTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> LoadConfig:
         return LoadConfig(
@@ -138,7 +138,7 @@ class TestTemplateConfigPathResponse(TemplateSettingTestSuite):
         return TemplateConfigPathResponse
 
 
-class TestTemplateConfigPathValues(ConfigTestSpec):
+class TestTemplateConfigPathValues(HasDefaultValueTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> TemplateConfigPathValues:
         return TemplateConfigPathValues(
@@ -207,7 +207,7 @@ class TestTemplateApply(ConfigTestSpec):
         assert obj.api == _Mock_Template_Apply_Has_Tag_Setting.get("api")
 
 
-class TestTemplateFileConfig(CheckableTestSuite):
+class TestTemplateFileConfig(HasDefaultValueTestSuite, CheckableTestSuite):
     test_data_dir = ("template_sections", "template_file")
     set_checking_test_data(
         test_data_dir,

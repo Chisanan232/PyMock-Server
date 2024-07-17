@@ -41,7 +41,7 @@ class LoadConfig(_Config, _Checkable):
             "order": [o.value if isinstance(o, ConfigLoadingOrder) else o for o in order],
         }
 
-    @_Config._ensure_process_with_not_empty_value
+    @_Config._ensure_process_with_not_none_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["LoadConfig"]:
         self.includes_apis = data.get("includes_apis", True)
         self.order = [ConfigLoadingOrder.to_enum(o) for o in (data.get("order", self._default_order) or [])]
@@ -84,7 +84,7 @@ class TemplateConfigPathSetting(_Config, _Checkable, ABC):
             "config_path_format": config_path_format,
         }
 
-    @_Config._ensure_process_with_not_empty_value
+    @_Config._ensure_process_with_not_none_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfigPathSetting"]:
         self.config_path_format = data.get("config_path_format", self._default_config_path_format)
         return self
@@ -179,7 +179,7 @@ class TemplateConfigPathValues(_Config, _Checkable):
             "response": response.serialize(),
         }
 
-    @_Config._ensure_process_with_not_empty_value
+    @_Config._ensure_process_with_not_none_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateConfigPathValues"]:
         self.base_file_path = data.get("base_file_path", "./")
 
@@ -286,7 +286,7 @@ class TemplateFileConfig(_Config, _Checkable):
             "apply": apply.serialize(),
         }
 
-    @_Config._ensure_process_with_not_empty_value
+    @_Config._ensure_process_with_not_none_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["TemplateFileConfig"]:
         self.activate = data.get("activate", False)
 
