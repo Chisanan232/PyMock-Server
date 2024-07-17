@@ -223,6 +223,12 @@ class TemplateFormatConfig(_Config, _Checkable):
 
         return True
 
+    def get_format(self, name: str) -> Optional[Format]:
+        find_result: List[TemplateFormatEntity] = list(filter(lambda e: e.name == name, self.entities))
+        if len(find_result) == 0:
+            return None
+        return find_result[0].config
+
 
 @dataclass(eq=False)
 class TemplateCommonConfig(_Config, _Checkable):

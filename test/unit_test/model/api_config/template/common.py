@@ -285,6 +285,24 @@ class TestTemplateFormatConfig(CheckableTestSuite):
             re.IGNORECASE,
         )
 
+    @pytest.mark.parametrize(
+        ("format_name", "expect_format_data"),
+        [
+            ("general_format", _General_Format),
+            ("general_enum_format", _General_Enum_Format),
+            ("customize_format", _Customize_Format),
+            ("customize_format_with_self_vars", _Customize_Format_With_Self_Vars),
+        ],
+    )
+    def test_get_format(self, sut: TemplateFormatConfig, format_name: str, expect_format_data: dict):
+        ut_format = sut.get_format(name=format_name)
+        assert ut_format is not None
+        assert ut_format.serialize() == self._clean_prop_with_empty_value(expect_format_data)
+
+    def test_get_format_with_not_exist_name(self, sut: TemplateFormatConfig):
+        ut_format = sut.get_format(name="not exist name")
+        assert ut_format is None
+
 
 class TestTemplateCommonConfig(CheckableTestSuite):
     test_data_dir = ("template_sections", "template_common_config")
