@@ -229,6 +229,12 @@ class TemplateFormatConfig(_Config, _Checkable):
             return None
         return find_result[0].config
 
+    def get_variable(self, name: str) -> Optional[Variable]:
+        find_result: List[Variable] = list(filter(lambda e: e.name == name, self.variables))
+        if len(find_result) == 0:
+            return None
+        return find_result[0]
+
 
 @dataclass(eq=False)
 class TemplateCommonConfig(_Config, _Checkable):

@@ -303,6 +303,23 @@ class TestTemplateFormatConfig(CheckableTestSuite):
         ut_format = sut.get_format(name="not exist name")
         assert ut_format is None
 
+    @pytest.mark.parametrize(
+        ("variable_name", "expect_variable_data"),
+        [
+            ("big_decimal_usd", _Test_Variables_BigDecimal_USD),
+            ("big_decimal_twd", _Test_Variables_BigDecimal_TWD),
+            ("currency_code", _Test_Variables_Currency_Code),
+        ],
+    )
+    def test_get_variable(self, sut: TemplateFormatConfig, variable_name: str, expect_variable_data: dict):
+        ut_variable = sut.get_variable(name=variable_name)
+        assert ut_variable is not None
+        assert ut_variable.serialize() == self._clean_prop_with_empty_value(expect_variable_data)
+
+    def test_get_variable_with_not_exist_name(self, sut: TemplateFormatConfig):
+        ut_variable = sut.get_variable(name="not exist name")
+        assert ut_variable is None
+
 
 class TestTemplateCommonConfig(CheckableTestSuite):
     test_data_dir = ("template_sections", "template_common_config")
