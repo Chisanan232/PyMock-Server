@@ -58,13 +58,6 @@ class TemplateConfig(_Config, _Checkable):
         ):
             return False
 
-        if not self.props_should_not_be_none(
-            under_check={
-                f"{self.absolute_model_key}.file": self.file,
-            },
-        ):
-            return False
-
         self.file.stop_if_fail = self.stop_if_fail
         if self.common_config:
             self.common_config.stop_if_fail = self.stop_if_fail

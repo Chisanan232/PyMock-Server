@@ -311,13 +311,6 @@ class TemplateFileConfig(_Config, _Checkable):
             accept_empty=False,
         ):
             return False
-        if not self.props_should_not_be_none(
-            under_check={
-                f"{self.absolute_model_key}.load_config": self.load_config,
-                f"{self.absolute_model_key}.config_path_values": self.config_path_values,
-            },
-        ):
-            return False
         self.load_config.stop_if_fail = self.stop_if_fail
         self.config_path_values.stop_if_fail = self.stop_if_fail
         if self.apply:
