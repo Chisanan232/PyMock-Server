@@ -56,8 +56,6 @@ class TestTemplateConfig(CheckableTestSuite):
         sut_with_nothing.activate = None
         sut_with_nothing.file.config_path_values = None
         sut_with_nothing.file.apply = None
-        sut_with_nothing.common_config.activate = None
-        sut_with_nothing.common_config.format = None
         super().test_serialize_with_none(sut_with_nothing)
 
     def _expected_serialize_value(self) -> dict:
