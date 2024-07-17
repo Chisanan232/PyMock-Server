@@ -19,7 +19,7 @@ SelfType = Any
 
 
 class _Config(metaclass=ABCMeta):
-    _absolute_key: str = field(init=False, repr=False)
+    _absolute_key: str = field(init=False, repr=False, default_factory=str)
 
     def __eq__(self, other: SelfType) -> bool:
         if other is None:
