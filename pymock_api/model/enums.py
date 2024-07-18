@@ -798,6 +798,7 @@ class FormatStrategy(Enum):
     BY_DATA_TYPE: str = "by_data_type"
     FROM_ENUMS: str = "from_enums"
     CUSTOMIZE: str = "customize"
+    FROM_TEMPLATE: str = "from_template"
 
     @staticmethod
     def to_enum(v: Union[str, "FormatStrategy"]) -> "FormatStrategy":
@@ -807,7 +808,7 @@ class FormatStrategy(Enum):
             return v
 
     def to_value_format(self, data_type: Union[type, str]) -> ValueFormat:
-        if self is FormatStrategy.CUSTOMIZE:
+        if self in [FormatStrategy.CUSTOMIZE, FormatStrategy.FROM_TEMPLATE]:
             raise RuntimeError("It should not convert *FormatStrategy.CUSTOMIZE* to enum object *ValueFormat*.")
         return ValueFormat.to_enum(data_type)
 
