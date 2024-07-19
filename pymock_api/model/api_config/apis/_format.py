@@ -27,6 +27,9 @@ class Format(_Config, _Checkable):
     customize: str = field(default_factory=str)
     variables: List[Variable] = field(default_factory=list)
 
+    # For from template strategy
+    use_name: str = field(default_factory=str)
+
     def __post_init__(self) -> None:
         if self.strategy is not None:
             self._convert_strategy()
@@ -112,6 +115,7 @@ class Format(_Config, _Checkable):
         enums: List[str] = self._get_prop(data, prop="enums")
         customize: str = self._get_prop(data, prop="customize")
         variables: List[Variable] = self._get_prop(data, prop="variables")
+        use_name: str = self._get_prop(data, prop="use_name")
         if not strategy:
             return None
         serialized_data = {
@@ -121,6 +125,7 @@ class Format(_Config, _Checkable):
             "enums": enums,
             "customize": customize,
             "variables": [var.serialize() if isinstance(var, Variable) else var for var in variables],
+            "use_name": use_name,
         }
         return serialized_data
 
@@ -149,6 +154,7 @@ class Format(_Config, _Checkable):
         self.enums = data.get("enums", [])
         self.customize = data.get("customize", "")
         self.variables = [_deserialize_variable(var) for var in (data.get("variables", []) or [])]
+        self.use_name = data.get("use_name", "")
         return self
 
     def is_work(self) -> bool:
@@ -163,6 +169,11 @@ class Format(_Config, _Checkable):
             condition=(
                 not isinstance(self.customize, str) or (self.customize is not None and len(self.customize) == 0)
             ),
+        ):
+            return False
+        if self.strategy is FormatStrategy.FROM_TEMPLATE and not self.condition_should_be_true(
+            config_key=f"{self.absolute_model_key}.use_name",
+            condition=(not isinstance(self.use_name, str) or (self.use_name is not None and len(self.use_name) == 0)),
         ):
             return False
 
