@@ -12,7 +12,12 @@ from .file import TemplateConfigPathSetting
 
 
 @dataclass(eq=False)
-class _BaseTemplatableConfig(_Config, ABC):
+class BaseTemplateGetter(_Config, ABC):
+    _current_template: TemplateConfig = field(default_factory=TemplateConfig)
+
+
+@dataclass(eq=False)
+class _BaseTemplatableConfig(BaseTemplateGetter, ABC):
     apply_template_props: bool = field(default=True)
 
     # The settings which could be set by section *template* or override the values
@@ -25,7 +30,6 @@ class _BaseTemplatableConfig(_Config, ABC):
     _absolute_key: str = field(init=False, repr=False)
 
     # Attributes for inner usage
-    _current_template: TemplateConfig = field(default_factory=TemplateConfig)
     _has_apply_template_props_in_config: bool = field(default=False)
 
     # Component for inner usage
