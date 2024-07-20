@@ -1,3 +1,4 @@
+from abc import ABCMeta
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 
@@ -64,3 +65,8 @@ class TemplateConfig(_Config, _Checkable):
             if not self.common_config.is_work():
                 return False
         return isinstance(self.activate, bool) and self.file.is_work()
+
+
+@dataclass(eq=False)
+class BaseTemplateGetter(metaclass=ABCMeta):
+    _current_template: TemplateConfig = field(default_factory=TemplateConfig)
