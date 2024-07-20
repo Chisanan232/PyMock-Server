@@ -7,12 +7,12 @@ from typing import Any, Dict, Optional, Type
 from ...._utils import YAML
 from ...._utils.file_opt import _BaseFileOperation
 from .._base import SelfType, _Config
-from . import BaseTemplateGetter
+from . import _BaseTemplateAccessable
 from .file import TemplateConfigPathSetting
 
 
 @dataclass(eq=False)
-class _BaseTemplatableConfig(_Config, BaseTemplateGetter, ABC):
+class _BaseTemplatableConfig(_Config, _BaseTemplateAccessable, ABC):
     apply_template_props: bool = field(default=True)
 
     # The settings which could be set by section *template* or override the values
