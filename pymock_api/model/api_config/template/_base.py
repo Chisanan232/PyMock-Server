@@ -12,12 +12,12 @@ from .file import TemplateConfigPathSetting
 
 
 @dataclass(eq=False)
-class BaseTemplateGetter(_Config, ABC):
+class BaseTemplateGetter:
     _current_template: TemplateConfig = field(default_factory=TemplateConfig)
 
 
 @dataclass(eq=False)
-class _BaseTemplatableConfig(BaseTemplateGetter, ABC):
+class _BaseTemplatableConfig(_Config, BaseTemplateGetter, ABC):
     apply_template_props: bool = field(default=True)
 
     # The settings which could be set by section *template* or override the values
