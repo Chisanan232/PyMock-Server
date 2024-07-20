@@ -5,10 +5,11 @@ from typing import Any, Dict, List, Optional, Type
 from .._base import _Config, _HasItemsPropConfig
 from ..format import _HasFormatPropConfig
 from ..item import IteratorItem
+from ..template import _BaseTemplateAccessable
 
 
 @dataclass(eq=False)
-class BaseProperty(_HasItemsPropConfig, _HasFormatPropConfig, ABC):
+class BaseProperty(_HasItemsPropConfig, _HasFormatPropConfig, _BaseTemplateAccessable, ABC):
     name: str = field(default_factory=str)
     required: Optional[bool] = None
     value_type: Optional[str] = None  # A type value as string

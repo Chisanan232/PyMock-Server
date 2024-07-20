@@ -29,6 +29,7 @@ class Format(_Config, _Checkable):
 
     # For from template strategy
     use_name: str = field(default_factory=str)
+    _current_template: Any = None  # Type is *TemplateConfig*, but it has circular import issue currently.
 
     def __post_init__(self) -> None:
         if self.strategy is not None:
@@ -314,6 +315,10 @@ class _HasFormatPropConfig(_BaseConfig, _Checkable, ABC):
         self.value_format = col_format
 
         super().deserialize(data)  # type: ignore[safe-super]
+
+        # Set section *template* configuration for format feature
+        if self.value_format and hasattr(self, "_current_template"):
+            self.value_format._current_template = self._current_template
         return self
 
     def is_work(self) -> bool:
