@@ -6,9 +6,9 @@ from decimal import Decimal
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
-from ...enums import FormatStrategy, ValueFormat
-from .._base import _BaseConfig, _Checkable, _Config
-from ..variable import Digit, Size, Variable
+from ..enums import FormatStrategy, ValueFormat
+from ._base import _BaseConfig, _Checkable, _Config
+from .variable import Digit, Size, Variable
 
 
 @dataclass(eq=False)

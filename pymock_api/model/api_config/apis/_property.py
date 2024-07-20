@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Type
 
 from .._base import _Config, _HasItemsPropConfig
+from ..format import _HasFormatPropConfig
 from ..item import IteratorItem
-from ._format import _HasFormatPropConfig
 
 
 @dataclass(eq=False)

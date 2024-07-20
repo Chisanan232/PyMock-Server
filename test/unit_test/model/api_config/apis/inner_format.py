@@ -5,7 +5,7 @@ from typing import Any, List, Optional, Union
 import pytest
 
 from pymock_api._utils.random import ValueSize
-from pymock_api.model.api_config.apis._format import Format
+from pymock_api.model.api_config.format import Format
 from pymock_api.model.api_config.variable import Digit, Size, Variable
 from pymock_api.model.enums import FormatStrategy, ValueFormat
 

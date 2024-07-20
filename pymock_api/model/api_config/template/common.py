@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional
 
 from .._base import _Checkable, _CheckableConfigType, _Config, _ConfigType
-from ..apis._format import Format
+from ..format import Format
 from ..variable import Variable
 
 
