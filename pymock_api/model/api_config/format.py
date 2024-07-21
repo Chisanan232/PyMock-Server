@@ -247,8 +247,7 @@ class Format(_Config, _Checkable):
             value = copy.copy(self.customize)
             for var in all_vars_in_customize:
                 pure_var = var.replace("<", "").replace(">", "")
-                find_result: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
-                assert len(find_result) == 1, "Cannot find the mapping name of variable setting."
+                find_result = self._get_format_config(pure_var)
                 assert find_result[0].value_format
                 digit = find_result[0].digit
                 if digit is None:
@@ -261,6 +260,10 @@ class Format(_Config, _Checkable):
                 )
                 value = value.replace(var, str(new_value))
             return value
+        elif self.strategy is FormatStrategy.FROM_TEMPLATE:
+            format_config: Format = self._current_template.common_config.format.get_format(self.use_name)
+            format_config._current_template = self._current_template
+            return format_config.generate_value(data_type=data_type)
         else:
             digit = self.digit
             if digit is None:
