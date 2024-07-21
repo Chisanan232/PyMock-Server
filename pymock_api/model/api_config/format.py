@@ -216,8 +216,14 @@ class Format(_Config, _Checkable):
             regex = re.escape(copy.copy(self.customize))
             for var in all_vars_in_customize:
                 pure_var = var.replace("<", "").replace(">", "")
-                find_result: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
-                assert len(find_result) == 1, "Cannot find the mapping name of variable setting."
+                format_config_in_template: Optional[Variable] = None
+                if self._current_template and self._current_template.common_config:
+                    format_config_in_template = self._current_template.common_config.format.get_variable(pure_var)
+                find_result_in_format: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
+                find_result = find_result_in_format if find_result_in_format else [format_config_in_template]  # type: ignore[list-item]
+                assert (
+                    len(find_result) == 1 and None not in find_result
+                ), "Cannot find the mapping name of variable setting."
                 assert find_result[0].value_format
                 digit = find_result[0].digit
                 if digit is None:
@@ -234,6 +240,10 @@ class Format(_Config, _Checkable):
                 )
                 regex = regex.replace(var, one_var_regex)
             return re.search(regex, str(value), re.IGNORECASE) is not None
+        elif self.strategy is FormatStrategy.FROM_TEMPLATE:
+            format_config: Format = self._current_template.common_config.format.get_format(self.use_name)
+            format_config._current_template = self._current_template
+            return format_config.value_format_is_match(data_type=data_type, value=value)
         else:
             raise ValueError("This is program bug, please report this issue.")
 
