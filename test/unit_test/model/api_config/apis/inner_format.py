@@ -540,6 +540,25 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
         variables_in_format: List[Variable],
         variables_in_template: List[Variable],
     ):
+        format_model = self._given_template_format_setting(
+            customize=customize,
+            strategy=strategy,
+            use_name=use_name,
+            variables_in_template=variables_in_template,
+            variables_in_format=variables_in_format,
+        )
+
+        assert format_model.value_format_is_match(data_type=data_type, value=value) is True
+
+    def _given_template_format_setting(
+        self,
+        strategy: FormatStrategy,
+        use_name: str,
+        customize: str,
+        variables_in_format: List[Variable],
+        variables_in_template: List[Variable],
+    ) -> Format:
+        # Given under test format
         format_model = Format(
             strategy=strategy,
             size=Size(max_value=64, min_value=0),
@@ -548,10 +567,12 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
             use_name=use_name,
         )
 
+        # Given the format instance will be saved in *template.common_config.format.entities*
         format_model_in_template = copy.copy(format_model)
         format_model_in_template.strategy = FormatStrategy.CUSTOMIZE
         format_model_in_template.customize = customize
 
+        # Given the template configuration
         format_model._current_template = TemplateConfig(
             activate=True,
             common_config=TemplateCommonConfig(
@@ -562,8 +583,7 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
                 ),
             ),
         )
-
-        assert format_model.value_format_is_match(data_type=data_type, value=value) is True
+        return format_model
 
     @pytest.mark.parametrize(
         ("strategy", "data_type", "value", "digit", "enums", "customize", "variables"),
