@@ -926,6 +926,115 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
                 str,
                 r"\d{0,64}(\.)\d{0,64} \w{0,10}",
             ),
+            # General from_template (format case)
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                str,
+                [],
+                "<big_decimal_price> <fiat_currency_code>",
+                "sample_customize",
+                [],
+                [
+                    Variable(
+                        name="big_decimal_price",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=[],
+                    ),
+                    Variable(
+                        name="fiat_currency_code",
+                        value_format=ValueFormat.Enum,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=["USD", "TWD"],
+                    ),
+                ],
+                str,
+                r"\d{0,64}(\.)\d{0,64} \w{0,10}",
+            ),
+            # General from_template (variable case)
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                str,
+                [],
+                "<big_decimal_price> <fiat_currency_code>",
+                "",
+                [],
+                [
+                    Variable(
+                        name="big_decimal_price",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=[],
+                    ),
+                    Variable(
+                        name="fiat_currency_code",
+                        value_format=ValueFormat.Enum,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=["USD", "TWD"],
+                    ),
+                ],
+                str,
+                r"\d{0,64}(\.)\d{0,64} \w{0,10}",
+            ),
+            # General customize with template configuration
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                [],
+                "<big_decimal_price> <fiat_currency_code>",
+                "",
+                [],
+                [
+                    Variable(
+                        name="big_decimal_price",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=[],
+                    ),
+                    Variable(
+                        name="fiat_currency_code",
+                        value_format=ValueFormat.Enum,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=["USD", "TWD"],
+                    ),
+                ],
+                str,
+                r"\d{0,64}(\.)\d{0,64} \w{0,10}",
+            ),
+            # General customize with partial template configuration
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                [],
+                "<big_decimal_price> <fiat_currency_code>",
+                "",
+                [
+                    Variable(
+                        name="big_decimal_price",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=[],
+                    ),
+                ],
+                [
+                    Variable(
+                        name="fiat_currency_code",
+                        value_format=ValueFormat.Enum,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=["USD", "TWD"],
+                    ),
+                ],
+                str,
+                r"\d{0,64}(\.)\d{0,64} \w{0,10}",
+            ),
         ],
     )
     def test_generate_value(
