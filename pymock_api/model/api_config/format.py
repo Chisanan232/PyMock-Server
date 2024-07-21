@@ -216,14 +216,7 @@ class Format(_Config, _Checkable):
             regex = re.escape(copy.copy(self.customize))
             for var in all_vars_in_customize:
                 pure_var = var.replace("<", "").replace(">", "")
-                format_config_in_template: Optional[Variable] = None
-                if self._current_template and self._current_template.common_config:
-                    format_config_in_template = self._current_template.common_config.format.get_variable(pure_var)
-                find_result_in_format: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
-                find_result = find_result_in_format if find_result_in_format else [format_config_in_template]  # type: ignore[list-item]
-                assert (
-                    len(find_result) == 1 and None not in find_result
-                ), "Cannot find the mapping name of variable setting."
+                find_result = self._get_format_config(pure_var)
                 assert find_result[0].value_format
                 digit = find_result[0].digit
                 if digit is None:
@@ -278,6 +271,15 @@ class Format(_Config, _Checkable):
             return self.strategy.generate_not_customize_value(
                 data_type=data_type, enums=self.enums, size=size.to_value_size(), digit=digit.to_digit_range()
             )
+
+    def _get_format_config(self, pure_var: str) -> List[Variable]:
+        format_config_in_template: Optional[Variable] = None
+        if self._current_template and self._current_template.common_config:
+            format_config_in_template = self._current_template.common_config.format.get_variable(pure_var)
+        find_result_in_format: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
+        find_result = find_result_in_format if find_result_in_format else [format_config_in_template]  # type: ignore[list-item]
+        assert len(find_result) == 1 and None not in find_result, "Cannot find the mapping name of variable setting."
+        return find_result
 
     def expect_format_log_msg(self, data_type: type) -> str:
         if self.strategy is FormatStrategy.BY_DATA_TYPE:
