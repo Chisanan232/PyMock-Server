@@ -845,11 +845,12 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
         assert format_model.value_format_is_match(data_type=data_type, value=value) is False
 
     def _given_format_config(
-        self, customize: str, strategy: FormatStrategy, use_name: str, variables: List[Variable]
+        self, strategy: FormatStrategy, customize: str, variables: List[Variable], use_name: str, enums: List[str] = []
     ) -> Format:
         return Format(
             strategy=strategy,
             size=Size(max_value=64, min_value=0),
+            enums=enums,
             customize=customize if strategy is FormatStrategy.CUSTOMIZE else "",
             variables=variables,
             use_name=use_name,
@@ -898,6 +899,7 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
             (FormatStrategy.BY_DATA_TYPE, "big_decimal", [], "", "", [], [], Decimal, None),
             (FormatStrategy.BY_DATA_TYPE, bool, [], "", "", [], [], bool, None),
             (FormatStrategy.FROM_ENUMS, str, ["ENUM_1", "ENUM_2", "ENUM_3"], "", "", [], [], str, None),
+            # General customize
             (
                 FormatStrategy.CUSTOMIZE,
                 str,
@@ -938,12 +940,23 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
         expect_type: type,
         expect_value_format: Optional[str],
     ):
-        format_model = Format(
+        # Given under test format
+        format_model = self._given_format_config(
             strategy=strategy,
             enums=enums,
             customize=customize,
+            use_name=use_name,
             variables=variables_in_format,
         )
+
+        # Given under test template
+        format_model = self._given_template_format_setting(
+            format_model=format_model,
+            customize=customize,
+            use_name=use_name,
+            variables_in_template=variables_in_template,
+        )
+
         value = format_model.generate_value(data_type=data_type)
         assert value is not None
         assert isinstance(value, expect_type)
