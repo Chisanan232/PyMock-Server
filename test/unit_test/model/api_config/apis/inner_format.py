@@ -881,18 +881,46 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
         return format_model
 
     @pytest.mark.parametrize(
-        ("strategy", "data_type", "enums", "customize", "expect_type", "expect_value_format"),
+        (
+            "strategy",
+            "data_type",
+            "enums",
+            "customize",
+            "use_name",
+            "variables_in_format",
+            "variables_in_template",
+            "expect_type",
+            "expect_value_format",
+        ),
         [
-            (FormatStrategy.BY_DATA_TYPE, str, [], "", str, None),
-            (FormatStrategy.BY_DATA_TYPE, int, [], "", int, None),
-            (FormatStrategy.BY_DATA_TYPE, "big_decimal", [], "", Decimal, None),
-            (FormatStrategy.BY_DATA_TYPE, bool, [], "", bool, None),
-            (FormatStrategy.FROM_ENUMS, str, ["ENUM_1", "ENUM_2", "ENUM_3"], "", str, None),
+            (FormatStrategy.BY_DATA_TYPE, str, [], "", "", [], [], str, None),
+            (FormatStrategy.BY_DATA_TYPE, int, [], "", "", [], [], int, None),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", [], "", "", [], [], Decimal, None),
+            (FormatStrategy.BY_DATA_TYPE, bool, [], "", "", [], [], bool, None),
+            (FormatStrategy.FROM_ENUMS, str, ["ENUM_1", "ENUM_2", "ENUM_3"], "", "", [], [], str, None),
             (
                 FormatStrategy.CUSTOMIZE,
                 str,
                 [],
                 "<big_decimal_price> <fiat_currency_code>",
+                "",
+                [
+                    Variable(
+                        name="big_decimal_price",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=[],
+                    ),
+                    Variable(
+                        name="fiat_currency_code",
+                        value_format=ValueFormat.Enum,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=["USD", "TWD"],
+                    ),
+                ],
+                [],
                 str,
                 r"\d{0,64}(\.)\d{0,64} \w{0,10}",
             ),
@@ -904,6 +932,9 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
         data_type: Union[None, str, object],
         enums: List[str],
         customize: str,
+        use_name: str,
+        variables_in_format: List[Variable],
+        variables_in_template: List[Variable],
         expect_type: type,
         expect_value_format: Optional[str],
     ):
@@ -911,18 +942,7 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
             strategy=strategy,
             enums=enums,
             customize=customize,
-            variables=[
-                Variable(
-                    name="big_decimal_price", value_format=ValueFormat.BigDecimal, digit=Digit(), size=Size(), enum=[]
-                ),
-                Variable(
-                    name="fiat_currency_code",
-                    value_format=ValueFormat.Enum,
-                    digit=Digit(),
-                    size=Size(),
-                    enum=["USD", "TWD"],
-                ),
-            ],
+            variables=variables_in_format,
         )
         value = format_model.generate_value(data_type=data_type)
         assert value is not None
