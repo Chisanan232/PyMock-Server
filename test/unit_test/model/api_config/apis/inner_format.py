@@ -837,12 +837,11 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
         variables_in_template: List[Variable],
     ) -> Format:
         # Given under test format
-        format_model = Format(
+        format_model = self._given_format_config(
+            customize=customize,
             strategy=strategy,
-            size=Size(max_value=64, min_value=0),
-            customize=customize if strategy is FormatStrategy.CUSTOMIZE else "",
-            variables=variables_in_format,
             use_name=use_name,
+            variables=variables_in_format,
         )
 
         # Given the format instance will be saved in *template.common_config.format.entities*
@@ -862,6 +861,15 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
             ),
         )
         return format_model
+
+    def _given_format_config(self, customize: str, strategy: FormatStrategy, use_name: str, variables: List[Variable]):
+        return Format(
+            strategy=strategy,
+            size=Size(max_value=64, min_value=0),
+            customize=customize if strategy is FormatStrategy.CUSTOMIZE else "",
+            variables=variables,
+            use_name=use_name,
+        )
 
     @pytest.mark.parametrize(
         ("strategy", "data_type", "enums", "customize", "expect_type", "expect_value_format"),
