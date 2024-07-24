@@ -70,7 +70,9 @@ class TestAPIParser:
         set_parser_factory(get_schema_parser_factory_with_openapi_version())
 
         # Run target function
-        parameters = parser_instance.process_api_parameters(data_modal=APIParameter, http_method="HTTP method")
+        parameters = [
+            APIParameter.generate(pd) for pd in parser_instance.process_api_parameters(http_method="HTTP method")
+        ]
 
         # Verify
         assert parameters and isinstance(parameters, list)

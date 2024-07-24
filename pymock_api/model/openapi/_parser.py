@@ -82,9 +82,7 @@ class APIParser(BaseParser):
     def parser(self) -> BaseOpenAPIPathSchemaParser:
         return cast(BaseOpenAPIPathSchemaParser, super().parser)
 
-    def process_api_parameters(
-        self, data_modal: Type[BaseOpenAPIDataModel], http_method: str
-    ) -> List[BaseOpenAPIDataModel]:
+    def process_api_parameters(self, http_method: str) -> List[dict]:
 
         def _initial_non_ref_parameters_value(_params: List[dict]) -> List[dict]:
             for param in _params:
@@ -94,7 +92,7 @@ class APIParser(BaseParser):
                     param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
             return _params
 
-        def _initial_request_parameters_model() -> List[BaseOpenAPIDataModel]:
+        def _initial_request_parameters_model() -> List[dict]:
             params_data: List[dict] = self.parser.get_request_parameters()
             print(f"[DEBUG] params_data: {params_data}")
             has_ref_in_schema_param = list(filter(lambda p: _ReferenceObjectParser.has_ref(p) != "", params_data))
@@ -108,7 +106,7 @@ class APIParser(BaseParser):
             else:
                 # TODO: Parsing the data type of key *items* should be valid type of Python realm
                 handled_parameters = _initial_non_ref_parameters_value(params_data)
-            return list(map(lambda p: data_modal.generate(detail=p), handled_parameters))
+            return handled_parameters
 
         if get_openapi_version() is OpenAPIVersion.V2:
             return _initial_request_parameters_model()
@@ -131,7 +129,7 @@ class APIParser(BaseParser):
                 else:
                     # TODO: Parsing the data type of key *items* should be valid type of Python realm
                     handled_parameters = _initial_non_ref_parameters_value(params_in_path_data)
-                return list(map(lambda p: data_modal.generate(detail=p), handled_parameters))
+                return handled_parameters
 
     def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
         request_body_params = _ReferenceObjectParser.get_schema_ref(data)

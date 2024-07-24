@@ -91,9 +91,9 @@ class API(Transferable):
             raise ValueError("Please set the strategy how it should process HTTP response.")
         parser = APIParser(parser=self.schema_parser_factory.path(data=data))
 
-        self.parameters = cast(
-            List[APIParameter], parser.process_api_parameters(data_modal=APIParameter, http_method=self.http_method)
-        )
+        self.parameters = [
+            APIParameter.generate(pd) for pd in parser.process_api_parameters(http_method=self.http_method)
+        ]
         self.response = parser.process_responses(strategy=self.process_response_strategy)
         self.tags = parser.process_tags()
 
