@@ -1,3 +1,4 @@
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, cast
 
 from .. import APIConfig, MockAPI, MockAPIs
@@ -10,11 +11,10 @@ from ._parser import APIParameterParser, APIParser, OpenAPIDocumentConfigParser
 from ._schema_parser import set_component_definition
 
 
+@dataclass
 class Tag(BaseOpenAPIDataModel):
-    def __init__(self):
-        super().__init__()
-        self.name: str = ""
-        self.description: str = ""
+    name: str = field(default_factory=str)
+    description: str = field(default_factory=str)
 
     @classmethod
     def generate(cls, detail: dict) -> "Tag":
@@ -27,14 +27,13 @@ class Tag(BaseOpenAPIDataModel):
         return self
 
 
+@dataclass
 class APIParameter(Transferable):
-    def __init__(self):
-        super().__init__()
-        self.name: str = ""
-        self.required: bool = False
-        self.value_type: str = ""
-        self.default: Any = None
-        self.items: Optional[list] = None
+    name: str = field(default_factory=str)
+    required: bool = False
+    value_type: str = field(default_factory=str)
+    default: Any = None
+    items: Optional[list] = None
 
     @classmethod
     def generate(cls, detail: dict) -> "APIParameter":
@@ -63,16 +62,15 @@ class APIParameter(Transferable):
         )
 
 
+@dataclass
 class API(Transferable):
-    def __init__(self):
-        super().__init__()
-        self.path: str = ""
-        self.http_method: str = ""
-        self.parameters: List[APIParameter] = []
-        self.response: Dict = {}
-        self.tags: List[str] = []
+    path: str = field(default_factory=str)
+    http_method: str = field(default_factory=str)
+    parameters: List[APIParameter] = field(default_factory=list)
+    response: Dict = field(default_factory=dict)
+    tags: List[str] = field(default_factory=list)
 
-        self.process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
+    process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
 
     @classmethod
     def generate(cls, api_path: str, http_method: str, detail: dict) -> "API":
@@ -115,11 +113,10 @@ class API(Transferable):
         return mock_api
 
 
+@dataclass
 class OpenAPIDocumentConfig(Transferable):
-    def __init__(self):
-        super().__init__()
-        self.paths: List[API] = []
-        self.tags: List[Tag] = []
+    paths: List[API] = field(default_factory=list)
+    tags: List[Tag] = field(default_factory=list)
 
     def deserialize(self, data: Dict) -> "OpenAPIDocumentConfig":
         self._chk_version_and_load_parser(data)

@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass
 from typing import Any, Dict, Union
 
 from ..api_config import _Config
@@ -39,6 +40,7 @@ def get_schema_parser_factory_with_openapi_version() -> BaseOpenAPISchemaParserF
     return get_schema_parser_factory(version=OpenAPI_Document_Version)
 
 
+@dataclass
 class BaseOpenAPIDataModel(metaclass=ABCMeta):
 
     @property
@@ -63,6 +65,7 @@ class BaseOpenAPIDataModel(metaclass=ABCMeta):
         pass
 
 
+@dataclass
 class Transferable(BaseOpenAPIDataModel):
     @abstractmethod
     def to_api_config(self, **kwargs) -> _Config:
