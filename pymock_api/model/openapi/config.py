@@ -1,3 +1,4 @@
+from abc import ABC
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, cast
 
@@ -28,12 +29,16 @@ class Tag(BaseOpenAPIDataModel):
 
 
 @dataclass
-class APIParameter(Transferable):
+class BaseProperty(BaseOpenAPIDataModel, ABC):
     name: str = field(default_factory=str)
     required: bool = False
     value_type: str = field(default_factory=str)
     default: Any = None
     items: Optional[list] = None
+
+
+@dataclass
+class APIParameter(BaseProperty, Transferable):
 
     @classmethod
     def generate(cls, detail: dict) -> "APIParameter":
