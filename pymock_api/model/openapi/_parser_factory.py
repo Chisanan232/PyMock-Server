@@ -5,11 +5,13 @@ from ..enums import OpenAPIVersion
 from ._schema_parser import (
     BaseOpenAPIObjectSchemaParser,
     BaseOpenAPIPathSchemaParser,
+    BaseOpenAPIRequestParameterItemSchemaParser,
     BaseOpenAPIRequestParametersSchemaParser,
     BaseOpenAPIResponseSchemaParser,
     BaseOpenAPISchemaParser,
     BaseOpenAPITagSchemaParser,
     OpenAPIObjectSchemaParser,
+    OpenAPIRequestParameterItemSchemaParser,
     OpenAPIRequestParametersSchemaParser,
     OpenAPIResponseSchemaParser,
     OpenAPITagSchemaParser,
@@ -42,6 +44,10 @@ class BaseOpenAPISchemaParserFactory(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    def request_parameter_items(self, data: Dict) -> BaseOpenAPIRequestParameterItemSchemaParser:
+        pass
+
+    @abstractmethod
     def response(self, data: Dict) -> BaseOpenAPIResponseSchemaParser:
         pass
 
@@ -69,6 +75,9 @@ class OpenAPIV2SchemaParserFactory(BaseOpenAPISchemaParserFactory):
     def request_parameters(self, data: Dict) -> OpenAPIRequestParametersSchemaParser:
         return OpenAPIRequestParametersSchemaParser(data=data)
 
+    def request_parameter_items(self, data: Dict) -> BaseOpenAPIRequestParameterItemSchemaParser:
+        return OpenAPIRequestParameterItemSchemaParser(data=data)
+
     def response(self, data: Dict) -> OpenAPIResponseSchemaParser:
         return OpenAPIResponseSchemaParser(data=data)
 
@@ -88,6 +97,9 @@ class OpenAPIV3SchemaParserFactory(BaseOpenAPISchemaParserFactory):
 
     def request_parameters(self, data: Dict) -> OpenAPIRequestParametersSchemaParser:
         return OpenAPIRequestParametersSchemaParser(data=data)
+
+    def request_parameter_items(self, data: Dict) -> BaseOpenAPIRequestParameterItemSchemaParser:
+        return OpenAPIRequestParameterItemSchemaParser(data=data)
 
     def response(self, data: Dict) -> OpenAPIResponseSchemaParser:
         return OpenAPIResponseSchemaParser(data=data)

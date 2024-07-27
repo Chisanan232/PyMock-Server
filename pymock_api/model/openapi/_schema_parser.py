@@ -1,3 +1,4 @@
+import copy
 import json
 import pathlib
 from abc import ABCMeta, abstractmethod
@@ -6,7 +7,11 @@ from typing import Any, Dict, List, Optional
 
 class BaseSchemaParser(metaclass=ABCMeta):
     def __init__(self, data: dict):
-        self._data = data
+        self._data = copy.copy(data)
+
+    @property
+    def current_data(self) -> dict:
+        return self._data
 
 
 class BaseOpenAPIObjectSchemaParser(BaseSchemaParser):
@@ -76,6 +81,26 @@ class BaseOpenAPIRequestParametersSchemaParser(BaseSchemaParser):
     @abstractmethod
     def get_items(self):
         pass
+
+
+class BaseOpenAPIRequestParameterItemSchemaParser(BaseSchemaParser):
+
+    @abstractmethod
+    def get_items_type(self) -> Optional[str]:
+        pass
+
+    @abstractmethod
+    def set_items_type(self, value_type: str) -> None:
+        pass
+
+
+class OpenAPIRequestParameterItemSchemaParser(BaseOpenAPIRequestParameterItemSchemaParser):
+
+    def get_items_type(self) -> Optional[str]:
+        return self._data.get("type", None)
+
+    def set_items_type(self, value_type: str) -> None:
+        self._data["type"] = value_type
 
 
 class OpenAPIRequestParametersSchemaParser(BaseOpenAPIRequestParametersSchemaParser):
