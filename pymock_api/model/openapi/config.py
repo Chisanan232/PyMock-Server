@@ -194,7 +194,7 @@ class API(Transferable):
             items_props = []
             print(f"[DEBUG in APIParser._process_has_ref_parameters] items: {items}")
             if items:
-                if items and _ReferenceObjectParser.has_ref(items):
+                if _ReferenceObjectParser.has_ref(items):
                     items = _ReferenceObjectParser.get_schema_ref(items)
                     # Sample data:
                     # {
