@@ -129,60 +129,35 @@ class API(Transferable):
         return self
 
     def process_api_parameters(self, parser: APIParser, http_method: str) -> List[TmpAPIParameterModel]:
-        #
-        # def _initial_non_ref_parameters_value(_params: List[dict]) -> List[dict]:
-        #     for param in _params:
-        #         _parser = self.schema_parser_factory.request_parameters(param)
-        #         items = _parser.get_items()
-        #         if items is not None:
-        #             param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
-        #     return _params
 
-        def _deserialize_as_tmp_model(data: dict) -> TmpAPIParameterModel:
-            return APIParameterParser(self.schema_parser_factory.request_parameters(data)).process_parameter(data)
+        def _deserialize_as_tmp_model(_data: dict) -> TmpAPIParameterModel:
+            return APIParameterParser(self.schema_parser_factory.request_parameters(_data)).process_parameter(_data)
 
-        def _initial_request_parameters_model() -> List[TmpAPIParameterModel]:
-            params_data: List[dict] = parser.parser.get_request_parameters()
-            print(f"[DEBUG] params_data: {params_data}")
-            has_ref_in_schema_param = list(filter(lambda p: _ReferenceObjectParser.has_ref(p) != "", params_data))
-            print(f"[DEBUG in src] has_ref_in_schema_param: {has_ref_in_schema_param}")
+        def _initial_request_parameters_model(
+            _data: List[dict], not_ref_data: List[dict]
+        ) -> List[TmpAPIParameterModel]:
+            has_ref_in_schema_param = list(filter(lambda p: _ReferenceObjectParser.has_ref(p) != "", _data))
             if has_ref_in_schema_param:
                 # TODO: Ensure the value maps this condition is really only one
                 handled_parameters = []
-                for param in params_data:
-                    one_handled_parameters = self._process_has_ref_parameters(param)
-                    handled_parameters.extend(one_handled_parameters)
+                for d in _data:
+                    handled_parameters.extend(self._process_has_ref_parameters(d))
             else:
                 # TODO: Parsing the data type of key *items* should be valid type of Python realm
-                # handled_parameters = _initial_non_ref_parameters_value(params_data)
-                # handled_parameters = params_data
-                handled_parameters = [_deserialize_as_tmp_model(p) for p in params_data]
+                handled_parameters = [_deserialize_as_tmp_model(p) for p in not_ref_data]
             return handled_parameters
 
         if get_openapi_version() is OpenAPIVersion.V2:
-            return _initial_request_parameters_model()
+            v2_params_data: List[dict] = parser.parser.get_request_parameters()
+            return _initial_request_parameters_model(v2_params_data, v2_params_data)
         else:
             if http_method.upper() == "GET":
-                return _initial_request_parameters_model()
+                get_method_params_data: List[dict] = parser.parser.get_request_parameters()
+                return _initial_request_parameters_model(get_method_params_data, get_method_params_data)
             else:
-                print(f"[DEBUG in src] get_method_callback(): {http_method}")
-                print(f"[DEBUG in src] parser.parser._data: {parser.parser._data}")
                 params_in_path_data: List[dict] = parser.parser.get_request_parameters()
                 params_data: dict = parser.parser.get_request_body()
-                print(f"[DEBUG] params_data: {params_data}")
-                has_ref_in_schema_param = list(filter(lambda p: _ReferenceObjectParser.has_ref(p) != "", [params_data]))
-                print(f"[DEBUG in src] has_ref_in_schema_param: {has_ref_in_schema_param}")
-                if has_ref_in_schema_param:
-                    # TODO: Ensure the value maps this condition is really only one
-                    handled_parameters = []
-                    one_handled_parameters = self._process_has_ref_parameters(params_data)
-                    handled_parameters.extend(one_handled_parameters)
-                else:
-                    # TODO: Parsing the data type of key *items* should be valid type of Python realm
-                    # handled_parameters = _initial_non_ref_parameters_value(params_in_path_data)
-                    # handled_parameters = params_in_path_data
-                    handled_parameters = [_deserialize_as_tmp_model(p) for p in params_in_path_data]
-                return handled_parameters
+                return _initial_request_parameters_model([params_data], params_in_path_data)
 
     def _process_has_ref_parameters(self, data: Dict) -> List[TmpAPIParameterModel]:
         request_body_params = _ReferenceObjectParser.get_schema_ref(data)
@@ -193,7 +168,6 @@ class API(Transferable):
             props_parser = self.schema_parser_factory.request_parameters(param_props)
             items: Optional[dict] = props_parser.get_items()
             items_props = []
-            print(f"[DEBUG in APIParser._process_has_ref_parameters] items: {items}")
             if items:
                 if _ReferenceObjectParser.has_ref(items):
                     # Sample data:
