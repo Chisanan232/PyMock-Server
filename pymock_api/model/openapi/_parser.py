@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
-from typing import Dict, List, Optional, Type, cast
+from typing import Any, Dict, List, Optional, Type, Union, cast
 
 from ..enums import OpenAPIVersion, ResponseStrategy
 from ._base import (
@@ -59,19 +59,60 @@ class APIParameterParser(BaseParser):
         return OpenAPIAPIParameterConfig(  # type: ignore[call-arg]
             name=data["name"],
             required=data["required"],
-            type=data["type"],
+            type=ensure_type_is_python_type(data["type"]),
             default=data.get("default", None),
-            items=data.get("items", None),
+            items=self._ensure_data_type_is_pythonic_type_in_items(data.get("items", None)),
         )
 
     def _convert_from_parser(self) -> OpenAPIAPIParameterConfig:
         return OpenAPIAPIParameterConfig(  # type: ignore[call-arg]
             name=self.parser.get_name(),
             required=self.parser.get_required(),
-            type=self.parser.get_type(),
+            type=ensure_type_is_python_type(self.parser.get_type()),
             default=self.parser.get_default(),
-            items=self.parser.get_items(),
+            items=self._ensure_data_type_is_pythonic_type_in_items(self.parser.get_items()),
         )
+
+    def _ensure_data_type_is_pythonic_type_in_items(
+        self, params: Optional[Union[List[dict], Dict[str, Any]]]
+    ) -> Optional[List[dict]]:
+        new_params = params
+        if params:
+            # # NOTE: It may get 2 types data:
+            # 1.list type:
+            # [
+            #     {
+            #         "name": "value",
+            #         "required": true,
+            #         "type": "number",
+            #         "default": "None"
+            #     },
+            #     {
+            #         "name": "id",
+            #         "required": true,
+            #         "type": "integer",
+            #         "default": "None"
+            #     }
+            # ]
+            # 2. dict type:
+            # {
+            #     "type": "string",
+            #     "enum": [
+            #         "ENUM1",
+            #         "ENUM2"
+            #     ]
+            # }
+            params = params if isinstance(params, list) else [params]
+            new_params: List[dict] = []  # type: ignore[no-redef]
+            for param in params:
+                assert isinstance(param, dict)
+                parser = self.schema_parser_factory.request_parameter_items(param)
+                item_data_type = parser.get_items_type()
+                if item_data_type:
+                    parser.set_items_type(ensure_type_is_python_type(item_data_type))
+                param = parser.current_data
+                new_params.append(param)  # type: ignore[union-attr]
+        return new_params  # type: ignore[return-value]
 
 
 class APIParser(BaseParser):
@@ -84,13 +125,13 @@ class APIParser(BaseParser):
 
     def process_api_parameters(self, http_method: str) -> List[dict]:
 
-        def _initial_non_ref_parameters_value(_params: List[dict]) -> List[dict]:
-            for param in _params:
-                parser = self.schema_parser_factory.request_parameters(param)
-                items = parser.get_items()
-                if items is not None:
-                    param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
-            return _params
+        # def _initial_non_ref_parameters_value(_params: List[dict]) -> List[dict]:
+        #     for param in _params:
+        #         parser = self.schema_parser_factory.request_parameters(param)
+        #         items = parser.get_items()
+        #         if items is not None:
+        #             param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
+        #     return _params
 
         def _initial_request_parameters_model() -> List[dict]:
             params_data: List[dict] = self.parser.get_request_parameters()
@@ -105,7 +146,8 @@ class APIParser(BaseParser):
                     handled_parameters.extend(one_handled_parameters)
             else:
                 # TODO: Parsing the data type of key *items* should be valid type of Python realm
-                handled_parameters = _initial_non_ref_parameters_value(params_data)
+                # handled_parameters = _initial_non_ref_parameters_value(params_data)
+                handled_parameters = params_data
             return handled_parameters
 
         if get_openapi_version() is OpenAPIVersion.V2:
@@ -128,7 +170,8 @@ class APIParser(BaseParser):
                     handled_parameters.extend(one_handled_parameters)
                 else:
                     # TODO: Parsing the data type of key *items* should be valid type of Python realm
-                    handled_parameters = _initial_non_ref_parameters_value(params_in_path_data)
+                    # handled_parameters = _initial_non_ref_parameters_value(params_in_path_data)
+                    handled_parameters = params_in_path_data
                 return handled_parameters
 
     def _process_has_ref_parameters(self, data: Dict) -> List[dict]:

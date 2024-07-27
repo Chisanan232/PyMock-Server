@@ -5,11 +5,15 @@ from typing import Any, Dict, List, Optional, cast
 from .. import APIConfig, MockAPI, MockAPIs
 from ..api_config import BaseConfig
 from ..api_config.apis import APIParameter as PyMockAPIParameter
-from ..enums import ResponseStrategy
-from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
-from ._js_handlers import convert_js_type
+from ..enums import OpenAPIVersion, ResponseStrategy
+from ._base import (
+    BaseOpenAPIDataModel,
+    Transferable,
+    get_openapi_version,
+    set_openapi_version,
+)
 from ._parser import APIParameterParser, APIParser, OpenAPIDocumentConfigParser
-from ._schema_parser import set_component_definition
+from ._schema_parser import _ReferenceObjectParser, set_component_definition
 
 
 @dataclass
@@ -49,7 +53,7 @@ class APIParameter(BaseProperty, Transferable):
         handled_data = parser.process_parameter(data)
         self.name = handled_data.name  # type: ignore[attr-defined]
         self.required = handled_data.required  # type: ignore[attr-defined]
-        self.value_type = convert_js_type(handled_data.type)  # type: ignore[attr-defined]
+        self.value_type = handled_data.type  # type: ignore[attr-defined]
         self.default = handled_data.default  # type: ignore[attr-defined]
         items = handled_data.items  # type: ignore[attr-defined]
         if items is not None:
@@ -92,12 +96,119 @@ class API(Transferable):
         parser = APIParser(parser=self.schema_parser_factory.path(data=data))
 
         self.parameters = [
-            APIParameter.generate(pd) for pd in parser.process_api_parameters(http_method=self.http_method)
+            APIParameter.generate(pd) for pd in self.process_api_parameters(parser, http_method=self.http_method)
         ]
         self.response = parser.process_responses(strategy=self.process_response_strategy)
         self.tags = parser.process_tags()
 
         return self
+
+    def process_api_parameters(self, parser: APIParser, http_method: str) -> List[dict]:
+        #
+        # def _initial_non_ref_parameters_value(_params: List[dict]) -> List[dict]:
+        #     for param in _params:
+        #         _parser = self.schema_parser_factory.request_parameters(param)
+        #         items = _parser.get_items()
+        #         if items is not None:
+        #             param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
+        #     return _params
+
+        def _initial_request_parameters_model() -> List[dict]:
+            params_data: List[dict] = parser.parser.get_request_parameters()
+            print(f"[DEBUG] params_data: {params_data}")
+            has_ref_in_schema_param = list(filter(lambda p: _ReferenceObjectParser.has_ref(p) != "", params_data))
+            print(f"[DEBUG in src] has_ref_in_schema_param: {has_ref_in_schema_param}")
+            if has_ref_in_schema_param:
+                # TODO: Ensure the value maps this condition is really only one
+                handled_parameters = []
+                for param in params_data:
+                    one_handled_parameters = self._process_has_ref_parameters(param)
+                    handled_parameters.extend(one_handled_parameters)
+            else:
+                # TODO: Parsing the data type of key *items* should be valid type of Python realm
+                # handled_parameters = _initial_non_ref_parameters_value(params_data)
+                handled_parameters = params_data
+            return handled_parameters
+
+        if get_openapi_version() is OpenAPIVersion.V2:
+            return _initial_request_parameters_model()
+        else:
+            if http_method.upper() == "GET":
+                return _initial_request_parameters_model()
+            else:
+                print(f"[DEBUG in src] get_method_callback(): {http_method}")
+                print(f"[DEBUG in src] parser.parser._data: {parser.parser._data}")
+                params_in_path_data: List[dict] = parser.parser.get_request_parameters()
+                params_data: dict = parser.parser.get_request_body()
+                print(f"[DEBUG] params_data: {params_data}")
+                has_ref_in_schema_param = list(filter(lambda p: _ReferenceObjectParser.has_ref(p) != "", [params_data]))
+                print(f"[DEBUG in src] has_ref_in_schema_param: {has_ref_in_schema_param}")
+                if has_ref_in_schema_param:
+                    # TODO: Ensure the value maps this condition is really only one
+                    handled_parameters = []
+                    one_handled_parameters = self._process_has_ref_parameters(params_data)
+                    handled_parameters.extend(one_handled_parameters)
+                else:
+                    # TODO: Parsing the data type of key *items* should be valid type of Python realm
+                    # handled_parameters = _initial_non_ref_parameters_value(params_in_path_data)
+                    handled_parameters = params_in_path_data
+                return handled_parameters
+
+    def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
+        request_body_params = _ReferenceObjectParser.get_schema_ref(data)
+        # TODO: Should use the reference to get the details of parameters.
+        parameters: List[dict] = []
+        parser = self.schema_parser_factory.object(request_body_params)
+        for param_name, param_props in parser.get_properties().items():
+            items: Optional[dict] = param_props.get("items", None)
+            items_props = []
+            print(f"[DEBUG in APIParser._process_has_ref_parameters] items: {items}")
+            if items:
+                if items and _ReferenceObjectParser.has_ref(items):
+                    items = _ReferenceObjectParser.get_schema_ref(items)
+                    # Sample data:
+                    # {
+                    #     'type': 'object',
+                    #     'required': ['values', 'id'],
+                    #     'properties': {
+                    #         'values': {'type': 'number', 'example': 23434, 'description': 'value'},
+                    #         'id': {'type': 'integer', 'format': 'int64', 'example': 1, 'description': 'ID'}
+                    #     },
+                    #     'title': 'UpdateOneFooDto'
+                    # }
+                    items_parser = self.schema_parser_factory.object(items)
+                    for item_name, item_prop in items_parser.get_properties(default={}).items():
+                        items_props.append(
+                            {
+                                "name": item_name,
+                                "required": item_name in items_parser.get_required(),
+                                # "type": convert_js_type(item_prop["type"]),
+                                "type": item_prop["type"],
+                                "default": item_prop.get("default", None),
+                            }
+                        )
+                else:
+                    items_props.append(
+                        {
+                            "name": "",
+                            "required": True,
+                            # "type": convert_js_type(items["type"]),
+                            "type": items["type"],
+                            "default": items.get("default", None),
+                        }
+                    )
+
+            parameters.append(
+                {
+                    "name": param_name,
+                    "required": param_name in parser.get_required(),
+                    "type": param_props["type"],
+                    "default": param_props.get("default", None),
+                    "items": items_props if items is not None else items,
+                }
+            )
+        print(f"[DEBUG in APIParser._process_has_ref_parameters] parameters: {parameters}")
+        return parameters
 
     def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
         mock_api = MockAPI(url=self.path.replace(base_url, ""), tag=self.tags[0] if self.tags else "")

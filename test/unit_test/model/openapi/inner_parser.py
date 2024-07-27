@@ -1,5 +1,5 @@
 import re
-from typing import List, Type
+from typing import List, Type, Union
 
 import pytest
 
@@ -48,6 +48,65 @@ class TestAPIParameterParser:
             parser_instance = parser(DummyPathSchemaParser({}))
             parser_instance.process_parameter(invalid_values, accept_no_schema=False)
         assert re.search(r".{0,64}doesn't have key 'schema'.{0,64}", str(exc_info.value), re.IGNORECASE)
+
+    @pytest.mark.parametrize(
+        ("ut_data", "expect_data"),
+        [
+            # General case (list type value)
+            (
+                [
+                    {
+                        "name": "value",
+                        "required": True,
+                        "type": "number",
+                        "default": "None",
+                    },
+                    {
+                        "name": "id",
+                        "required": True,
+                        "type": "integer",
+                        "default": "None",
+                    },
+                ],
+                [
+                    {
+                        "name": "value",
+                        "required": True,
+                        "type": "int",
+                        "default": "None",
+                    },
+                    {
+                        "name": "id",
+                        "required": True,
+                        "type": "int",
+                        "default": "None",
+                    },
+                ],
+            ),
+            # General case (dict type value)
+            (
+                {
+                    "type": "string",
+                    "enum": [
+                        "ENUM1",
+                        "ENUM2",
+                    ],
+                },
+                [
+                    {
+                        "type": "str",
+                        "enum": [
+                            "ENUM1",
+                            "ENUM2",
+                        ],
+                    },
+                ],
+            ),
+        ],
+    )
+    def test__ensure_data_type_is_pythonic_type_in_items(self, ut_data: Union[list, dict], expect_data: List[dict]):
+        parser = APIParameterParser(parser="Dummy parser")
+        assert parser._ensure_data_type_is_pythonic_type_in_items(ut_data) == expect_data
 
 
 class TestAPIParser:
