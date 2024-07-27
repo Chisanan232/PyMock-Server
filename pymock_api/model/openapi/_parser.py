@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from collections import namedtuple
 from typing import Any, Dict, List, Optional, Type, Union, cast
 
 from ..enums import OpenAPIVersion, ResponseStrategy
@@ -17,12 +16,13 @@ from ._schema_parser import (
     BaseSchemaParser,
     _ReferenceObjectParser,
 )
+from ._tmp_data_model import TmpAPIParameterModel, TmpItemModel
 
-OpenAPIAPIParameterConfig = namedtuple(  # type: ignore[misc]
-    typename="OpenAPIAPIParameterConfig",
-    field_names=("name", "required", "type", "default", "items"),
-    defaults={"default": None, "items": None},  # type: ignore[misc]
-)
+# OpenAPIAPIParameterConfig = namedtuple(  # type: ignore[misc]
+#     typename="OpenAPIAPIParameterConfig",
+#     field_names=("name", "required", "type", "default", "items"),
+#     defaults={"default": None, "items": None},  # type: ignore[misc]
+# )
 
 
 class BaseParser(metaclass=ABCMeta):
@@ -44,7 +44,7 @@ class APIParameterParser(BaseParser):
     def parser(self) -> BaseOpenAPIRequestParametersSchemaParser:
         return cast(BaseOpenAPIRequestParametersSchemaParser, super().parser)
 
-    def process_parameter(self, data: Dict, accept_no_schema: bool = True) -> OpenAPIAPIParameterConfig:
+    def process_parameter(self, data: Dict, accept_no_schema: bool = True) -> TmpAPIParameterModel:
         if not _ReferenceObjectParser.has_schema(data):
             if accept_no_schema:
                 return self._convert_from_data(data)
@@ -55,22 +55,28 @@ class APIParameterParser(BaseParser):
         else:
             return self._convert_from_parser()
 
-    def _convert_from_data(self, data: dict) -> OpenAPIAPIParameterConfig:
-        return OpenAPIAPIParameterConfig(  # type: ignore[call-arg]
+    def _convert_from_data(self, data: dict) -> TmpAPIParameterModel:
+        return TmpAPIParameterModel(
             name=data["name"],
             required=data["required"],
-            type=ensure_type_is_python_type(data["type"]),
+            value_type=ensure_type_is_python_type(data["type"]),
             default=data.get("default", None),
-            items=self._ensure_data_type_is_pythonic_type_in_items(data.get("items", None)),
+            items=[
+                TmpItemModel.deserialize(i)
+                for i in (self._ensure_data_type_is_pythonic_type_in_items(data.get("items", None)) or [])
+            ],
         )
 
-    def _convert_from_parser(self) -> OpenAPIAPIParameterConfig:
-        return OpenAPIAPIParameterConfig(  # type: ignore[call-arg]
+    def _convert_from_parser(self) -> TmpAPIParameterModel:
+        return TmpAPIParameterModel(
             name=self.parser.get_name(),
-            required=self.parser.get_required(),
-            type=ensure_type_is_python_type(self.parser.get_type()),
+            required=(self.parser.get_required() or False),  # type: ignore[arg-type]
+            value_type=ensure_type_is_python_type(self.parser.get_type()),
             default=self.parser.get_default(),
-            items=self._ensure_data_type_is_pythonic_type_in_items(self.parser.get_items()),
+            items=[
+                TmpItemModel().deserialize(i)
+                for i in (self._ensure_data_type_is_pythonic_type_in_items(self.parser.get_items()) or [])
+            ],
         )
 
     def _ensure_data_type_is_pythonic_type_in_items(

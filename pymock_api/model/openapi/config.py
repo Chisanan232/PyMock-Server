@@ -1,9 +1,9 @@
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 from .. import APIConfig, MockAPI, MockAPIs
-from ..api_config import BaseConfig
+from ..api_config import BaseConfig, IteratorItem
 from ..api_config.apis import APIParameter as PyMockAPIParameter
 from ..enums import OpenAPIVersion, ResponseStrategy
 from ._base import (
@@ -14,6 +14,7 @@ from ._base import (
 )
 from ._parser import APIParameterParser, APIParser, OpenAPIDocumentConfigParser
 from ._schema_parser import _ReferenceObjectParser, set_component_definition
+from ._tmp_data_model import TmpAPIParameterModel, TmpItemModel
 
 
 @dataclass
@@ -38,36 +39,60 @@ class BaseProperty(BaseOpenAPIDataModel, ABC):
     required: bool = False
     value_type: str = field(default_factory=str)
     default: Any = None
-    items: Optional[list] = None
+    items: Optional[List[Union[TmpAPIParameterModel, TmpItemModel]]] = None
 
 
 @dataclass
 class APIParameter(BaseProperty, Transferable):
 
     @classmethod
-    def generate(cls, detail: dict) -> "APIParameter":
+    def generate(cls, detail: Union[dict, TmpAPIParameterModel]) -> "APIParameter":
         return APIParameter().deserialize(data=detail)
 
-    def deserialize(self, data: Dict) -> "APIParameter":
-        parser = APIParameterParser(self.schema_parser_factory.request_parameters(data))
-        handled_data = parser.process_parameter(data)
-        self.name = handled_data.name  # type: ignore[attr-defined]
-        self.required = handled_data.required  # type: ignore[attr-defined]
-        self.value_type = handled_data.type  # type: ignore[attr-defined]
-        self.default = handled_data.default  # type: ignore[attr-defined]
-        items = handled_data.items  # type: ignore[attr-defined]
+    def deserialize(self, data: Union[Dict, TmpAPIParameterModel]) -> "APIParameter":
+        if isinstance(data, dict):
+            parser = APIParameterParser(self.schema_parser_factory.request_parameters(data))
+            handled_data = parser.process_parameter(data)
+        else:
+            handled_data = data
+        self.name = handled_data.name
+        self.required = handled_data.required
+        self.value_type = handled_data.value_type
+        self.default = handled_data.default
+        items = handled_data.items
         if items is not None:
-            self.items = items if isinstance(items, list) else [items]
+            self.items = items if isinstance(items, list) else [items]  # type: ignore[list-item]
         return self
 
     def to_api_config(self) -> PyMockAPIParameter:  # type: ignore[override]
+
+        def to_items(item_data: Union[TmpAPIParameterModel, TmpItemModel]) -> IteratorItem:
+            if isinstance(item_data, TmpAPIParameterModel):
+                return IteratorItem(
+                    name=item_data.name,
+                    required=item_data.required,
+                    value_type=item_data.value_type,
+                    items=[to_items(i) for i in (item_data.items or [])],
+                )
+            elif isinstance(item_data, TmpItemModel):
+                return IteratorItem(
+                    name="",
+                    required=True,
+                    value_type=item_data.value_type,
+                    items=[],
+                )
+            else:
+                raise TypeError(
+                    f"The data model must be *TmpAPIParameterModel* or *TmpItemModel*. But it get *{item_data}*. Please check it."
+                )
+
         return PyMockAPIParameter(
             name=self.name,
             required=self.required,
             value_type=self.value_type,
             default=self.default,
             value_format=None,
-            items=self.items,
+            items=[to_items(i) for i in (self.items or [])],
         )
 
 
@@ -103,7 +128,7 @@ class API(Transferable):
 
         return self
 
-    def process_api_parameters(self, parser: APIParser, http_method: str) -> List[dict]:
+    def process_api_parameters(self, parser: APIParser, http_method: str) -> List[TmpAPIParameterModel]:
         #
         # def _initial_non_ref_parameters_value(_params: List[dict]) -> List[dict]:
         #     for param in _params:
@@ -113,7 +138,10 @@ class API(Transferable):
         #             param["items"]["type"] = ensure_type_is_python_type(param["items"]["type"])
         #     return _params
 
-        def _initial_request_parameters_model() -> List[dict]:
+        def _deserialize_as_tmp_model(data: dict) -> TmpAPIParameterModel:
+            return APIParameterParser(self.schema_parser_factory.request_parameters(data)).process_parameter(data)
+
+        def _initial_request_parameters_model() -> List[TmpAPIParameterModel]:
             params_data: List[dict] = parser.parser.get_request_parameters()
             print(f"[DEBUG] params_data: {params_data}")
             has_ref_in_schema_param = list(filter(lambda p: _ReferenceObjectParser.has_ref(p) != "", params_data))
@@ -127,7 +155,8 @@ class API(Transferable):
             else:
                 # TODO: Parsing the data type of key *items* should be valid type of Python realm
                 # handled_parameters = _initial_non_ref_parameters_value(params_data)
-                handled_parameters = params_data
+                # handled_parameters = params_data
+                handled_parameters = [_deserialize_as_tmp_model(p) for p in params_data]
             return handled_parameters
 
         if get_openapi_version() is OpenAPIVersion.V2:
@@ -151,13 +180,14 @@ class API(Transferable):
                 else:
                     # TODO: Parsing the data type of key *items* should be valid type of Python realm
                     # handled_parameters = _initial_non_ref_parameters_value(params_in_path_data)
-                    handled_parameters = params_in_path_data
+                    # handled_parameters = params_in_path_data
+                    handled_parameters = [_deserialize_as_tmp_model(p) for p in params_in_path_data]
                 return handled_parameters
 
-    def _process_has_ref_parameters(self, data: Dict) -> List[dict]:
+    def _process_has_ref_parameters(self, data: Dict) -> List[TmpAPIParameterModel]:
         request_body_params = _ReferenceObjectParser.get_schema_ref(data)
         # TODO: Should use the reference to get the details of parameters.
-        parameters: List[dict] = []
+        parameters: List[TmpAPIParameterModel] = []
         parser = self.schema_parser_factory.object(request_body_params)
         for param_name, param_props in parser.get_properties().items():
             items: Optional[dict] = param_props.get("items", None)
@@ -179,33 +209,35 @@ class API(Transferable):
                     items_parser = self.schema_parser_factory.object(items)
                     for item_name, item_prop in items_parser.get_properties(default={}).items():
                         items_props.append(
-                            {
-                                "name": item_name,
-                                "required": item_name in items_parser.get_required(),
+                            TmpAPIParameterModel(
+                                name=item_name,
+                                required=item_name in items_parser.get_required(),
                                 # "type": convert_js_type(item_prop["type"]),
-                                "type": item_prop["type"],
-                                "default": item_prop.get("default", None),
-                            }
+                                value_type=item_prop["type"],
+                                default=item_prop.get("default", None),
+                                items=[],
+                            ),
                         )
                 else:
                     items_props.append(
-                        {
-                            "name": "",
-                            "required": True,
+                        TmpAPIParameterModel(
+                            name="",
+                            required=True,
                             # "type": convert_js_type(items["type"]),
-                            "type": items["type"],
-                            "default": items.get("default", None),
-                        }
+                            value_type=items["type"],
+                            default=items.get("default", None),
+                            items=[],
+                        ),
                     )
 
             parameters.append(
-                {
-                    "name": param_name,
-                    "required": param_name in parser.get_required(),
-                    "type": param_props["type"],
-                    "default": param_props.get("default", None),
-                    "items": items_props if items is not None else items,
-                }
+                TmpAPIParameterModel(
+                    name=param_name,
+                    required=param_name in parser.get_required(),
+                    value_type=param_props["type"],
+                    default=param_props.get("default", None),
+                    items=items_props if items is not None else items,  # type: ignore[arg-type]
+                ),
             )
         print(f"[DEBUG in APIParser._process_has_ref_parameters] parameters: {parameters}")
         return parameters
