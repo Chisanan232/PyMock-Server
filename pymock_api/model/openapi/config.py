@@ -190,7 +190,8 @@ class API(Transferable):
         parameters: List[TmpAPIParameterModel] = []
         parser = self.schema_parser_factory.object(request_body_params)
         for param_name, param_props in parser.get_properties().items():
-            items: Optional[dict] = param_props.get("items", None)
+            props_parser = self.schema_parser_factory.request_parameters(param_props)
+            items: Optional[dict] = props_parser.get_items()
             items_props = []
             print(f"[DEBUG in APIParser._process_has_ref_parameters] items: {items}")
             if items:
@@ -208,12 +209,15 @@ class API(Transferable):
                     item = self._process_has_ref_parameters(data=items)
                     items_props.extend(item)
                 else:
+                    props_items_parser = self.schema_parser_factory.request_parameter_items(items)
+                    item_type = props_items_parser.get_items_type()
+                    assert item_type
                     items_props.append(
                         TmpAPIParameterModel(
                             name="",
                             required=True,
                             # "type": convert_js_type(items["type"]),
-                            value_type=items["type"],
+                            value_type=item_type,
                             default=items.get("default", None),
                             items=[],
                         ),
