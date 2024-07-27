@@ -195,7 +195,6 @@ class API(Transferable):
             print(f"[DEBUG in APIParser._process_has_ref_parameters] items: {items}")
             if items:
                 if _ReferenceObjectParser.has_ref(items):
-                    items = _ReferenceObjectParser.get_schema_ref(items)
                     # Sample data:
                     # {
                     #     'type': 'object',
@@ -206,18 +205,8 @@ class API(Transferable):
                     #     },
                     #     'title': 'UpdateOneFooDto'
                     # }
-                    items_parser = self.schema_parser_factory.object(items)
-                    for item_name, item_prop in items_parser.get_properties(default={}).items():
-                        items_props.append(
-                            TmpAPIParameterModel(
-                                name=item_name,
-                                required=item_name in items_parser.get_required(),
-                                # "type": convert_js_type(item_prop["type"]),
-                                value_type=item_prop["type"],
-                                default=item_prop.get("default", None),
-                                items=[],
-                            ),
-                        )
+                    item = self._process_has_ref_parameters(data=items)
+                    items_props.extend(item)
                 else:
                     items_props.append(
                         TmpAPIParameterModel(
