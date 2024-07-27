@@ -5,15 +5,10 @@ from typing import Any, Dict, List, Optional, Union, cast
 from .. import APIConfig, MockAPI, MockAPIs
 from ..api_config import BaseConfig, IteratorItem
 from ..api_config.apis import APIParameter as PyMockAPIParameter
-from ..enums import OpenAPIVersion, ResponseStrategy
-from ._base import (
-    BaseOpenAPIDataModel,
-    Transferable,
-    get_openapi_version,
-    set_openapi_version,
-)
+from ..enums import ResponseStrategy
+from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
 from ._parser import APIParameterParser, APIParser, OpenAPIDocumentConfigParser
-from ._schema_parser import _ReferenceObjectParser, set_component_definition
+from ._schema_parser import set_component_definition
 from ._tmp_data_model import TmpAPIParameterModel, TmpItemModel
 
 
@@ -120,94 +115,13 @@ class API(Transferable):
             raise ValueError("Please set the strategy how it should process HTTP response.")
         parser = APIParser(parser=self.schema_parser_factory.path(data=data))
 
-        self.parameters = [
-            APIParameter.generate(pd) for pd in self.process_api_parameters(parser, http_method=self.http_method)
-        ]
+        self.parameters = list(
+            map(lambda pd: APIParameter.generate(pd), parser.process_api_parameters(http_method=self.http_method))
+        )
         self.response = parser.process_responses(strategy=self.process_response_strategy)
         self.tags = parser.process_tags()
 
         return self
-
-    def process_api_parameters(self, parser: APIParser, http_method: str) -> List[TmpAPIParameterModel]:
-
-        def _deserialize_as_tmp_model(_data: dict) -> TmpAPIParameterModel:
-            return APIParameterParser(self.schema_parser_factory.request_parameters(_data)).process_parameter(_data)
-
-        def _initial_request_parameters_model(
-            _data: List[dict], not_ref_data: List[dict]
-        ) -> List[TmpAPIParameterModel]:
-            has_ref_in_schema_param = list(filter(lambda p: _ReferenceObjectParser.has_ref(p) != "", _data))
-            if has_ref_in_schema_param:
-                # TODO: Ensure the value maps this condition is really only one
-                handled_parameters = []
-                for d in _data:
-                    handled_parameters.extend(self._process_has_ref_parameters(d))
-            else:
-                # TODO: Parsing the data type of key *items* should be valid type of Python realm
-                handled_parameters = [_deserialize_as_tmp_model(p) for p in not_ref_data]
-            return handled_parameters
-
-        if get_openapi_version() is OpenAPIVersion.V2:
-            v2_params_data: List[dict] = parser.parser.get_request_parameters()
-            return _initial_request_parameters_model(v2_params_data, v2_params_data)
-        else:
-            if http_method.upper() == "GET":
-                get_method_params_data: List[dict] = parser.parser.get_request_parameters()
-                return _initial_request_parameters_model(get_method_params_data, get_method_params_data)
-            else:
-                params_in_path_data: List[dict] = parser.parser.get_request_parameters()
-                params_data: dict = parser.parser.get_request_body()
-                return _initial_request_parameters_model([params_data], params_in_path_data)
-
-    def _process_has_ref_parameters(self, data: Dict) -> List[TmpAPIParameterModel]:
-        request_body_params = _ReferenceObjectParser.get_schema_ref(data)
-        # TODO: Should use the reference to get the details of parameters.
-        parameters: List[TmpAPIParameterModel] = []
-        parser = self.schema_parser_factory.object(request_body_params)
-        for param_name, param_props in parser.get_properties().items():
-            props_parser = self.schema_parser_factory.request_parameters(param_props)
-            items: Optional[dict] = props_parser.get_items()
-            items_props = []
-            if items:
-                if _ReferenceObjectParser.has_ref(items):
-                    # Sample data:
-                    # {
-                    #     'type': 'object',
-                    #     'required': ['values', 'id'],
-                    #     'properties': {
-                    #         'values': {'type': 'number', 'example': 23434, 'description': 'value'},
-                    #         'id': {'type': 'integer', 'format': 'int64', 'example': 1, 'description': 'ID'}
-                    #     },
-                    #     'title': 'UpdateOneFooDto'
-                    # }
-                    item = self._process_has_ref_parameters(data=items)
-                    items_props.extend(item)
-                else:
-                    props_items_parser = self.schema_parser_factory.request_parameter_items(items)
-                    item_type = props_items_parser.get_items_type()
-                    assert item_type
-                    items_props.append(
-                        TmpAPIParameterModel(
-                            name="",
-                            required=True,
-                            # "type": convert_js_type(items["type"]),
-                            value_type=item_type,
-                            default=items.get("default", None),
-                            items=[],
-                        ),
-                    )
-
-            parameters.append(
-                TmpAPIParameterModel(
-                    name=param_name,
-                    required=param_name in parser.get_required(),
-                    value_type=param_props["type"],
-                    default=param_props.get("default", None),
-                    items=items_props if items is not None else items,  # type: ignore[arg-type]
-                ),
-            )
-        print(f"[DEBUG in APIParser._process_has_ref_parameters] parameters: {parameters}")
-        return parameters
 
     def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
         mock_api = MockAPI(url=self.path.replace(base_url, ""), tag=self.tags[0] if self.tags else "")
