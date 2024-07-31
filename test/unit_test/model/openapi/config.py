@@ -173,11 +173,11 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         set_openapi_version(OpenAPIVersion.V3)
         data_model.reload_schema_parser_factory()
 
-    def test_invalid_deserialize(self, data_model: API):
-        data_model.process_response_strategy = None
-        with pytest.raises(ValueError) as exc_info:
-            data_model.deserialize(data={})
-        assert re.search(r".{0,32}strategy.{0,32}", str(exc_info.value), re.IGNORECASE)
+    # def test_invalid_deserialize(self, data_model: API):
+    #     data_model.process_response_strategy = None
+    #     with pytest.raises(ValueError) as exc_info:
+    #         data_model.deserialize(data={})
+    #     assert re.search(r".{0,32}strategy.{0,32}", str(exc_info.value), re.IGNORECASE)
 
     def _initial(self, data: API) -> None:
         data.path = ""
@@ -220,7 +220,10 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         data_model.path = "/test/v1/foo-home"
         data_model.http_method = "POST"
         data_model.parameters = [params]
-        data_model.response = {"strategy": ResponseStrategy.STRING, "data": "OK"}
+        data_model.response = {
+            "strategy": ResponseStrategy.OBJECT,
+            "data": [{"name": "key1", "type": "str", "required": True}],
+        }
         data_model.tags = ["first tag", "second tag"]
 
     def _verify_api_config_model(self, under_test: MockAPI, data_from: API) -> None:
@@ -237,6 +240,10 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
             assert p.default == param_data_from.default
             assert p.value_format is None
         assert under_test.tag == data_from.tags[0]
+        assert under_test.http.response.strategy == data_from.response["strategy"]
+        assert under_test.http.response.value == ""
+        assert len(under_test.http.response.properties) == 1
+        assert under_test.http.response.properties[0].serialize() == data_from.response["data"][0]
 
 
 class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
@@ -287,7 +294,10 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
         api.path = "/test/v1/foo-home"
         api.http_method = "POST"
         api.parameters = [params]
-        api.response = {"strategy": ResponseStrategy.STRING, "data": "OK"}
+        api.response = {
+            "strategy": ResponseStrategy.OBJECT,
+            "data": [{"name": "key1", "type": "str", "required": True}],
+        }
 
         data_model.paths = [api]
 
@@ -314,7 +324,9 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                 assert api_param.value_type == param_data_from.value_type
                 assert api_param.default == param_data_from.default
             assert api_details.http.response.strategy == expect_api.response["strategy"]
-            assert api_details.http.response.value == expect_api.response["data"]
+            assert api_details.http.response.value == ""
+            assert len(api_details.http.response.properties) == 1
+            assert api_details.http.response.properties[0].serialize() == expect_api.response["data"][0]
 
     @pytest.mark.parametrize(
         ("base_url", "api_path"),

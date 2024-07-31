@@ -99,7 +99,7 @@ class API(Transferable):
     response: Dict = field(default_factory=dict)
     tags: List[str] = field(default_factory=list)
 
-    process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
+    # process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
 
     @classmethod
     def generate(cls, api_path: str, http_method: str, detail: dict) -> "API":
@@ -111,14 +111,14 @@ class API(Transferable):
 
     def deserialize(self, data: Dict) -> "API":
         # FIXME: Does it have better way to set the HTTP response strategy?
-        if not self.process_response_strategy:
-            raise ValueError("Please set the strategy how it should process HTTP response.")
+        # if not self.process_response_strategy:
+        #     raise ValueError("Please set the strategy how it should process HTTP response.")
         parser = APIParser(parser=self.schema_parser_factory.path(data=data))
 
         self.parameters = list(
             map(lambda pd: APIParameter.generate(pd), parser.process_api_parameters(http_method=self.http_method))
         )
-        self.response = parser.process_responses(strategy=self.process_response_strategy)
+        self.response = parser.process_responses(strategy=ResponseStrategy.OBJECT)
         self.tags = parser.process_tags()
 
         return self
@@ -129,16 +129,16 @@ class API(Transferable):
             method=self.http_method.upper(),
             parameters=list(map(lambda p: p.to_api_config(), self.parameters)),
         )
-        resp_strategy = self.response["strategy"]
-        if resp_strategy is ResponseStrategy.OBJECT:
-            if list(filter(lambda p: p["name"] == "", self.response["data"])):
-                values = []
-            else:
-                values = self.response["data"]
-            print(f"[DEBUG in to_api_config] values: {values}")
-            mock_api.set_response(strategy=resp_strategy, iterable_value=values)
+        # resp_strategy = self.response["strategy"]
+        # if resp_strategy is ResponseStrategy.OBJECT:
+        if list(filter(lambda p: p["name"] == "", self.response["data"])):
+            values = []
         else:
-            mock_api.set_response(strategy=resp_strategy, value=self.response["data"])
+            values = self.response["data"]
+        print(f"[DEBUG in to_api_config] values: {values}")
+        mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=values)
+        # else:
+        #     mock_api.set_response(strategy=resp_strategy, value=self.response["data"])
         return mock_api
 
 

@@ -46,16 +46,12 @@ class ResponseStrategy(Enum):
         else:
             return v
 
-    def initial_response_data(self) -> Dict[str, Union["ResponseStrategy", list, dict]]:
-        response_data: Dict[str, Union["ResponseStrategy", list, dict]] = {
+    def initial_response_data(self) -> Dict[str, Union["ResponseStrategy", list]]:
+        assert self is ResponseStrategy.OBJECT
+        return {
             "strategy": self,
-            # "data": None,
+            "data": [],
         }
-        if self is ResponseStrategy.OBJECT:
-            response_data["data"] = []
-        else:
-            response_data["data"] = {}
-        return response_data
 
     def process_response_from_reference(
         self,
@@ -63,6 +59,7 @@ class ResponseStrategy(Enum):
         data: dict,
         get_schema_parser_factory: Callable,
     ) -> dict:
+        assert self is ResponseStrategy.OBJECT
         response = self._process_reference_object(
             init_response=init_response,
             response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(data, accept_no_ref=True),
@@ -71,14 +68,14 @@ class ResponseStrategy(Enum):
 
         # Handle the collection data which has empty body
         new_response = response.copy()
-        if self is ResponseStrategy.OBJECT:
-            response_columns_setting = response.get("data", [])
-            new_response["data"] = self._process_empty_body_response(response_columns_setting=response_columns_setting)
-        else:
-            response_columns_setting = response.get("data", {})
-            new_response["data"] = self._process_empty_body_response_by_string_strategy(
-                response_columns_setting=response_columns_setting
-            )
+        # if self is ResponseStrategy.OBJECT:
+        response_columns_setting = response.get("data", [])
+        new_response["data"] = self._process_empty_body_response(response_columns_setting=response_columns_setting)
+        # else:
+        #     response_columns_setting = response.get("data", {})
+        #     new_response["data"] = self._process_empty_body_response_by_string_strategy(
+        #         response_columns_setting=response_columns_setting
+        #     )
         response = new_response
 
         return response
@@ -151,80 +148,74 @@ class ResponseStrategy(Enum):
                         get_schema_parser_factory=get_schema_parser_factory,
                         empty_body_key=k,
                     )
-                    if self is ResponseStrategy.OBJECT:
-                        print(
-                            f"[DEBUG in process_response_from_reference] before asserion, response_config: {response_config}"
-                        )
-                        # TODO: It should have better way to handle output streaming
-                        if len(list(filter(lambda d: d["type"] == "file", response_config["data"]))) != 0:
-                            # It's file inputStream
-                            response_config = response_config["data"][0]
-                        else:
-                            response_config = {
-                                "name": "",
-                                "required": _Default_Required.empty,
-                                "type": "dict",
-                                "format": None,
-                                "items": response_config["data"],
-                            }
+                    # if self is ResponseStrategy.OBJECT:
+                    print(
+                        f"[DEBUG in process_response_from_reference] before asserion, response_config: {response_config}"
+                    )
+                    # TODO: It should have better way to handle output streaming
+                    if len(list(filter(lambda d: d["type"] == "file", response_config["data"]))) != 0:
+                        # It's file inputStream
+                        response_config = response_config["data"][0]
                     else:
-                        response_config = response_config["data"][k]
+                        response_config = {
+                            "name": "",
+                            "required": _Default_Required.empty,
+                            "type": "dict",
+                            "format": None,
+                            "items": response_config["data"],
+                        }
+                    # else:
+                    #     response_config = response_config["data"][k]
                 else:
-                    response_config = self._generate_response(  # type: ignore[assignment]
+                    response_config = self._generate_response(
                         init_response=init_response,
                         property_value=v,
                         get_schema_parser_factory=get_schema_parser_factory,
                     )
                 print(f"[DEBUG in process_response_from_reference] response_config: {response_config}")
-                if self is ResponseStrategy.OBJECT:
-                    response_data_prop = self._ensure_data_structure_when_object_strategy(
-                        init_response, response_config
-                    )
-                    print(
-                        f"[DEBUG in process_response_from_reference] has properties, response_data_prop: {response_data_prop}"
-                    )
-                    response_data_prop["name"] = k
-                    response_data_prop["required"] = k in parser.get_required(default=[k])
-                    init_response["data"].append(response_data_prop)
-                else:
-                    self._ensure_data_structure_when_non_object_strategy(init_response)
-                    init_response["data"][k] = response_config
+                # if self is ResponseStrategy.OBJECT:
+                response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
+                print(
+                    f"[DEBUG in process_response_from_reference] has properties, response_data_prop: {response_data_prop}"
+                )
+                response_data_prop["name"] = k
+                response_data_prop["required"] = k in parser.get_required(default=[k])
+                init_response["data"].append(response_data_prop)
+                # else:
+                #     self._ensure_data_structure_when_non_object_strategy(init_response)
+                #     init_response["data"][k] = response_config
             print(f"[DEBUG in process_response_from_reference] parse with body, init_response: {init_response}")
         else:
             # The section which doesn't have setting body
-            response_config = self._generate_empty_response()  # type: ignore[assignment]
+            response_config = self._generate_empty_response()
             if "title" in response_schema_ref.keys() and response_schema_ref["title"] == "InputStream":
-                if self is ResponseStrategy.OBJECT:
-                    response_config["type"] = "file"
+                # if self is ResponseStrategy.OBJECT:
+                response_config["type"] = "file"
 
-                    response_data_prop = self._ensure_data_structure_when_object_strategy(
-                        init_response, response_config
-                    )
-                    print(
-                        f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
-                    )
-                    response_data_prop["name"] = empty_body_key
-                    response_data_prop["required"] = empty_body_key in parser.get_required(default=[empty_body_key])
-                    init_response["data"].append(response_data_prop)
-                else:
-                    response_config = "random file output stream"  # type: ignore[assignment]
-
-                    self._ensure_data_structure_when_non_object_strategy(init_response)
-                    init_response["data"][empty_body_key] = response_config
+                response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
+                print(
+                    f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
+                )
+                response_data_prop["name"] = empty_body_key
+                response_data_prop["required"] = empty_body_key in parser.get_required(default=[empty_body_key])
+                init_response["data"].append(response_data_prop)
+                # else:
+                #     response_config = "random file output stream"  # type: ignore[assignment]
+                #
+                #     self._ensure_data_structure_when_non_object_strategy(init_response)
+                #     init_response["data"][empty_body_key] = response_config
             else:
-                if self is ResponseStrategy.OBJECT:
-                    response_data_prop = self._ensure_data_structure_when_object_strategy(
-                        init_response, response_config
-                    )
-                    print(
-                        f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
-                    )
-                    response_data_prop["name"] = "THIS_IS_EMPTY"
-                    response_data_prop["required"] = False
-                    init_response["data"].append(response_data_prop)
-                else:
-                    self._ensure_data_structure_when_non_object_strategy(init_response)
-                    init_response["data"]["THIS_IS_EMPTY"] = response_config
+                # if self is ResponseStrategy.OBJECT:
+                response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
+                print(
+                    f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
+                )
+                response_data_prop["name"] = "THIS_IS_EMPTY"
+                response_data_prop["required"] = False
+                init_response["data"].append(response_data_prop)
+                # else:
+                #     self._ensure_data_structure_when_non_object_strategy(init_response)
+                #     init_response["data"]["THIS_IS_EMPTY"] = response_config
                 print(f"[DEBUG in process_response_from_reference] empty_body_key: {empty_body_key}")
                 print(
                     f"[DEBUG in process_response_from_reference] parse with empty body, init_response: {init_response}"
@@ -237,17 +228,18 @@ class ResponseStrategy(Enum):
         data: dict,
         get_schema_parser_factory: Callable,
     ) -> dict:
+        assert self is ResponseStrategy.OBJECT
         response_config = self._generate_response(
             init_response=init_response,
             property_value=data,
             get_schema_parser_factory=get_schema_parser_factory,
         )
-        if self is ResponseStrategy.OBJECT:
-            response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
-            init_response["data"].append(response_data_prop)
-        else:
-            self._ensure_data_structure_when_non_object_strategy(init_response)
-            init_response["data"][0] = response_config
+        # if self is ResponseStrategy.OBJECT:
+        response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
+        init_response["data"].append(response_data_prop)
+        # else:
+        #     self._ensure_data_structure_when_non_object_strategy(init_response)
+        #     init_response["data"][0] = response_config
         return init_response
 
     def _ensure_data_structure_when_object_strategy(
@@ -272,7 +264,7 @@ class ResponseStrategy(Enum):
         init_response: dict,
         property_value: dict,
         get_schema_parser_factory: Callable,
-    ) -> Union[str, list, dict]:
+    ) -> dict:
         if not property_value:
             return self._generate_empty_response()
         print(f"[DEBUG in _generate_response] property_value: {property_value}")
@@ -287,24 +279,24 @@ class ResponseStrategy(Enum):
             get_schema_parser_factory=get_schema_parser_factory,
         )
 
-    def _generate_empty_response(self) -> Union[str, Dict[str, Any]]:
-        if self is ResponseStrategy.OBJECT:
-            return {
-                "name": "",
-                "required": _Default_Required.empty,
-                "type": None,
-                "format": None,
-                "items": [],
-            }
-        else:
-            return "empty value"
+    def _generate_empty_response(self) -> Dict[str, Any]:
+        # if self is ResponseStrategy.OBJECT:
+        return {
+            "name": "",
+            "required": _Default_Required.empty,
+            "type": None,
+            "format": None,
+            "items": [],
+        }
+        # else:
+        #     return "empty value"
 
     def _generate_response_from_data(
         self,
         init_response: dict,
         resp_prop_data: dict,
         get_schema_parser_factory: Callable,
-    ) -> Union[str, list, dict]:
+    ) -> dict:
 
         def _handle_list_type_data(
             data: dict, noref_val_process_callback: Callable, ref_val_process_callback: Callable, response: dict = {}
@@ -323,16 +315,16 @@ class ResponseStrategy(Enum):
                     get_schema_parser_factory=get_schema_parser_factory,
                 )
                 print(f"[DEBUG in _handle_list_type_data] response_item_value: {response_item_value}")
-                if isinstance(response_item_value, list):
-                    # TODO: Need to check whether here logic is valid or not
-                    response_item = response_item_value
-                elif isinstance(response_item_value, dict):
-                    # TODO: Need to check whether here logic is valid or not
-                    response_item = response_item_value  # type: ignore[assignment]
-                else:
-                    assert isinstance(response_item_value, str)
-                    response_item = response_item_value  # type: ignore[assignment]
-                print(f"[DEBUG in _handle_list_type_data] response_item: {response_item}")
+                # if isinstance(response_item_value, list):
+                #     # TODO: Need to check whether here logic is valid or not
+                #     response_item = response_item_value
+                # elif isinstance(response_item_value, dict):
+                #     # TODO: Need to check whether here logic is valid or not
+                #     response_item = response_item_value
+                # else:
+                #     assert isinstance(response_item_value, str)
+                #     response_item = response_item_value
+                # print(f"[DEBUG in _handle_list_type_data] response_item: {response_item}")
                 if self is ResponseStrategy.OBJECT:
                     response = {
                         "name": "",
@@ -340,10 +332,10 @@ class ResponseStrategy(Enum):
                         "type": "list",
                         # TODO: Set the *format* property correctly
                         "format": None,
-                        "items": [response_item],
+                        "items": [response_item_value],
                     }
                 else:
-                    response = response_item  # type: ignore[assignment]
+                    response = response_item_value
                 print(f"[DEBUG in _handle_list_type_data] response: {response}")
             return response
 
@@ -505,54 +497,54 @@ class ResponseStrategy(Enum):
                 "items": None,
             }
 
-        def _handle_list_type_value_with_non_object_strategy(data: dict) -> list:
-
-            def _ref_process_callback(
-                item_k: str, item_v: dict, response: dict, parser, noref_val_process_callback: Callable
-            ) -> dict:
-                ref_item_v_response = _handle_reference_object(
-                    items_data=item_v,
-                    noref_val_process_callback=noref_val_process_callback,
-                    ref_val_process_callback=_ref_process_callback,
-                    response={},
-                )
-                response[item_k] = ref_item_v_response
-                print(
-                    f"[DEBUG in nested data issue at _handle_list_type_data] ref_item_v_response from data which has reference object: {ref_item_v_response}"
-                )
-                print(
-                    f"[DEBUG in nested data issue at _handle_list_type_data] response from data which has reference object: {response}"
-                )
-                return response
-
-            def _noref_process_callback(item_k: str, item_v: dict, item: dict) -> dict:
-                item_type = convert_js_type(item_v["type"])
-                print(
-                    f"[DEBUG in src] _handle_list_type_value_with_non_object_strategy._noref_process_callback item_type: {item_type}"
-                )
-                if locate(item_type) is str:
-                    # lowercase_letters = string.ascii_lowercase
-                    # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                    random_value = "random string value"
-                elif locate(item_type) is int:
-                    # random_value = int(
-                    #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                    random_value = "random integer value"
-                elif locate(item_type) == bool:
-                    random_value = "random boolean value"
-                else:
-                    raise NotImplementedError
-                item[item_k] = random_value
-                return item
-
-            item_info: dict = {}
-            item_info = _handle_list_type_data(
-                data=data,
-                noref_val_process_callback=_noref_process_callback,
-                ref_val_process_callback=_ref_process_callback,
-                response=item_info,
-            )
-            return [item_info]
+        # def _handle_list_type_value_with_non_object_strategy(data: dict) -> list:
+        #
+        #     def _ref_process_callback(
+        #         item_k: str, item_v: dict, response: dict, parser, noref_val_process_callback: Callable
+        #     ) -> dict:
+        #         ref_item_v_response = _handle_reference_object(
+        #             items_data=item_v,
+        #             noref_val_process_callback=noref_val_process_callback,
+        #             ref_val_process_callback=_ref_process_callback,
+        #             response={},
+        #         )
+        #         response[item_k] = ref_item_v_response
+        #         print(
+        #             f"[DEBUG in nested data issue at _handle_list_type_data] ref_item_v_response from data which has reference object: {ref_item_v_response}"
+        #         )
+        #         print(
+        #             f"[DEBUG in nested data issue at _handle_list_type_data] response from data which has reference object: {response}"
+        #         )
+        #         return response
+        #
+        #     def _noref_process_callback(item_k: str, item_v: dict, item: dict) -> dict:
+        #         item_type = convert_js_type(item_v["type"])
+        #         print(
+        #             f"[DEBUG in src] _handle_list_type_value_with_non_object_strategy._noref_process_callback item_type: {item_type}"
+        #         )
+        #         if locate(item_type) is str:
+        #             # lowercase_letters = string.ascii_lowercase
+        #             # random_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+        #             random_value = "random string value"
+        #         elif locate(item_type) is int:
+        #             # random_value = int(
+        #             #     "".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+        #             random_value = "random integer value"
+        #         elif locate(item_type) == bool:
+        #             random_value = "random boolean value"
+        #         else:
+        #             raise NotImplementedError
+        #         item[item_k] = random_value
+        #         return item
+        #
+        #     item_info: dict = {}
+        #     item_info = _handle_list_type_data(
+        #         data=data,
+        #         noref_val_process_callback=_noref_process_callback,
+        #         ref_val_process_callback=_ref_process_callback,
+        #         response=item_info,
+        #     )
+        #     return [item_info]
 
         def _handle_each_data_types_response_with_object_strategy(data: dict, v_type: str) -> dict:
             if locate(v_type) == list:
@@ -562,59 +554,59 @@ class ResponseStrategy(Enum):
             else:
                 return _handle_other_types_value_with_object_strategy(v_type)
 
-        def _handle_each_data_types_response_with_non_object_strategy(
-            resp_prop_data: dict, v_type: str
-        ) -> Union[str, list, dict]:
-            if locate(v_type) == list:
-                return _handle_list_type_value_with_non_object_strategy(resp_prop_data)
-            elif locate(v_type) == dict:
-                data_title = resp_prop_data.get("title", "")
-                if data_title:
-                    # TODO: It should also consider the scenario about input stream part (download file)
-                    # Example data: {'type': 'object', 'title': 'InputStream'}
-                    if re.search(data_title, "InputStream", re.IGNORECASE):
-                        return "random file output stream"
-                    else:
-                        raise NotImplementedError
-
-                additional_properties = resp_prop_data["additionalProperties"]
-                if get_schema_parser_factory().reference_object().has_ref(additional_properties):
-                    response_details = self.process_response_from_reference(
-                        init_response=init_response,
-                        data=additional_properties,
-                        get_schema_parser_factory=get_schema_parser_factory,
-                    )["data"]
-                else:
-                    response_details = self.process_response_from_data(
-                        init_response=init_response,
-                        data=additional_properties,
-                        get_schema_parser_factory=get_schema_parser_factory,
-                    )["data"][0]
-                return {"additionalKey": response_details}
-            elif locate(v_type) == str:
-                # lowercase_letters = string.ascii_lowercase
-                # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                return "random string value"
-            elif locate(v_type) == int:
-                # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                return "random integer value"
-            elif locate(v_type) == bool:
-                return "random boolean value"
-            elif v_type == "file":
-                # TODO: Handle the file download feature
-                return "random file output stream"
-            else:
-                raise NotImplementedError
+        # def _handle_each_data_types_response_with_non_object_strategy(
+        #     resp_prop_data: dict, v_type: str
+        # ) -> Union[str, list, dict]:
+        #     if locate(v_type) == list:
+        #         return _handle_list_type_value_with_non_object_strategy(resp_prop_data)
+        #     elif locate(v_type) == dict:
+        #         data_title = resp_prop_data.get("title", "")
+        #         if data_title:
+        #             # TODO: It should also consider the scenario about input stream part (download file)
+        #             # Example data: {'type': 'object', 'title': 'InputStream'}
+        #             if re.search(data_title, "InputStream", re.IGNORECASE):
+        #                 return "random file output stream"
+        #             else:
+        #                 raise NotImplementedError
+        #
+        #         additional_properties = resp_prop_data["additionalProperties"]
+        #         if get_schema_parser_factory().reference_object().has_ref(additional_properties):
+        #             response_details = self.process_response_from_reference(
+        #                 init_response=init_response,
+        #                 data=additional_properties,
+        #                 get_schema_parser_factory=get_schema_parser_factory,
+        #             )["data"]
+        #         else:
+        #             response_details = self.process_response_from_data(
+        #                 init_response=init_response,
+        #                 data=additional_properties,
+        #                 get_schema_parser_factory=get_schema_parser_factory,
+        #             )["data"][0]
+        #         return {"additionalKey": response_details}
+        #     elif locate(v_type) == str:
+        #         # lowercase_letters = string.ascii_lowercase
+        #         # k_value = "".join([random.choice(lowercase_letters) for _ in range(5)])
+        #         return "random string value"
+        #     elif locate(v_type) == int:
+        #         # k_value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
+        #         return "random integer value"
+        #     elif locate(v_type) == bool:
+        #         return "random boolean value"
+        #     elif v_type == "file":
+        #         # TODO: Handle the file download feature
+        #         return "random file output stream"
+        #     else:
+        #         raise NotImplementedError
 
         print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
         if not resp_prop_data.get("type", None):
             assert get_schema_parser_factory().reference_object().has_ref(resp_prop_data)
             return _handle_each_data_types_response_with_object_strategy(resp_prop_data, "dict")
         v_type = convert_js_type(resp_prop_data["type"])
-        if self is ResponseStrategy.OBJECT:
-            return _handle_each_data_types_response_with_object_strategy(resp_prop_data, v_type)
-        else:
-            return _handle_each_data_types_response_with_non_object_strategy(resp_prop_data, v_type)
+        # if self is ResponseStrategy.OBJECT:
+        return _handle_each_data_types_response_with_object_strategy(resp_prop_data, v_type)
+        # else:
+        #     return _handle_each_data_types_response_with_non_object_strategy(resp_prop_data, v_type)
 
 
 class ConfigLoadingOrderKey(Enum):

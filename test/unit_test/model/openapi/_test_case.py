@@ -75,8 +75,8 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                         OPENAPI_ONE_API_JSON.append((api_detail, openapi_api_docs))
 
                         # For testing API response
-                        for strategy in ResponseStrategy:
-                            OPENAPI_API_RESPONSES_FOR_API.append((strategy, api_detail, openapi_api_docs))
+                        # for strategy in ResponseStrategy:
+                        OPENAPI_API_RESPONSES_FOR_API.append((ResponseStrategy.OBJECT, api_detail, openapi_api_docs))
 
                         # For testing API response properties
                         status_200_response = api_detail.get("responses", {}).get("200", {})
@@ -86,8 +86,10 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                             response_schema_properties = response_schema.get("properties", None)
                             if response_schema_properties:
                                 for k, v in response_schema_properties.items():
-                                    for strategy in ResponseStrategy:
-                                        OPENAPI_API_RESPONSES_PROPERTY_FOR_API.append((strategy, v, openapi_api_docs))
+                                    # for strategy in ResponseStrategy:
+                                    OPENAPI_API_RESPONSES_PROPERTY_FOR_API.append(
+                                        (ResponseStrategy.OBJECT, v, openapi_api_docs)
+                                    )
 
                         # For testing API request parameters
                         OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API.append((api_detail["parameters"], openapi_api_docs))

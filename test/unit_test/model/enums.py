@@ -105,8 +105,8 @@ class TestResponseStrategy(EnumTestSuite):
     @pytest.mark.parametrize(
         ("ut_enum", "expected_type"),
         [
-            (ResponseStrategy.STRING, str),
-            (ResponseStrategy.FILE, str),
+            # (ResponseStrategy.STRING, str),
+            # (ResponseStrategy.FILE, str),
             (ResponseStrategy.OBJECT, dict),
         ],
     )
@@ -117,33 +117,33 @@ class TestResponseStrategy(EnumTestSuite):
     @pytest.mark.parametrize(
         ("ut_enum", "test_response_data", "expected_value"),
         [
-            # # General data
-            (ResponseStrategy.STRING, {"type": "string"}, "random string value"),
-            (ResponseStrategy.FILE, {"type": "string"}, "random string value"),
-            (
-                ResponseStrategy.OBJECT,
-                {"type": "string"},
-                {"name": "", "required": True, "type": "str", "format": None, "items": None},
-            ),
-            # # Each different type as general data
-            # For string strategy (the process details of string and file are the same, so it only test one of them)
-            (ResponseStrategy.STRING, {"type": "integer"}, "random integer value"),
-            (ResponseStrategy.STRING, {"type": "number"}, "random integer value"),
-            (ResponseStrategy.STRING, {"type": "boolean"}, "random boolean value"),
-            (ResponseStrategy.STRING, {"type": "array", "items": {"type": "integer"}}, ["random integer value"]),
-            (
-                ResponseStrategy.STRING,
-                {"type": "array", "items": {"$ref": "#/components/schemas/FooResponse"}},
-                [
-                    {
-                        "id": "random integer value",
-                        "name": "random string value",
-                        "value1": "random string value",
-                        "value2": "random string value",
-                    }
-                ],
-            ),
-            (ResponseStrategy.STRING, {"type": "file"}, "random file output stream"),
+            # # # General data
+            # (ResponseStrategy.STRING, {"type": "string"}, "random string value"),
+            # (ResponseStrategy.FILE, {"type": "string"}, "random string value"),
+            # (
+            #     ResponseStrategy.OBJECT,
+            #     {"type": "string"},
+            #     {"name": "", "required": True, "type": "str", "format": None, "items": None},
+            # ),
+            # # # Each different type as general data
+            # # For string strategy (the process details of string and file are the same, so it only test one of them)
+            # (ResponseStrategy.STRING, {"type": "integer"}, "random integer value"),
+            # (ResponseStrategy.STRING, {"type": "number"}, "random integer value"),
+            # (ResponseStrategy.STRING, {"type": "boolean"}, "random boolean value"),
+            # (ResponseStrategy.STRING, {"type": "array", "items": {"type": "integer"}}, ["random integer value"]),
+            # (
+            #     ResponseStrategy.STRING,
+            #     {"type": "array", "items": {"$ref": "#/components/schemas/FooResponse"}},
+            #     [
+            #         {
+            #             "id": "random integer value",
+            #             "name": "random string value",
+            #             "value1": "random string value",
+            #             "value2": "random string value",
+            #         }
+            #     ],
+            # ),
+            # (ResponseStrategy.STRING, {"type": "file"}, "random file output stream"),
             # For object strategy
             (
                 ResponseStrategy.OBJECT,
@@ -193,44 +193,44 @@ class TestResponseStrategy(EnumTestSuite):
                 {"name": "", "required": True, "type": "file", "format": None, "items": None},
             ),
             # # Special data
-            (
-                ResponseStrategy.STRING,
-                {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string",
-                    },
-                },
-                {"additionalKey": "random string value"},
-            ),
-            (
-                ResponseStrategy.STRING,
-                {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "array",
-                        "items": {"type": "string", "enum": ["TYPE_1", "TYPE_2"]},
-                    },
-                },
-                {"additionalKey": ["random string value"]},
-            ),
-            (
-                ResponseStrategy.STRING,
-                {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/components/schemas/FooResponse",
-                    },
-                },
-                {
-                    "additionalKey": {
-                        "id": "random integer value",
-                        "name": "random string value",
-                        "value1": "random string value",
-                        "value2": "random string value",
-                    },
-                },
-            ),
+            # (
+            #     ResponseStrategy.STRING,
+            #     {
+            #         "type": "object",
+            #         "additionalProperties": {
+            #             "type": "string",
+            #         },
+            #     },
+            #     {"additionalKey": "random string value"},
+            # ),
+            # (
+            #     ResponseStrategy.STRING,
+            #     {
+            #         "type": "object",
+            #         "additionalProperties": {
+            #             "type": "array",
+            #             "items": {"type": "string", "enum": ["TYPE_1", "TYPE_2"]},
+            #         },
+            #     },
+            #     {"additionalKey": ["random string value"]},
+            # ),
+            # (
+            #     ResponseStrategy.STRING,
+            #     {
+            #         "type": "object",
+            #         "additionalProperties": {
+            #             "$ref": "#/components/schemas/FooResponse",
+            #         },
+            #     },
+            #     {
+            #         "additionalKey": {
+            #             "id": "random integer value",
+            #             "name": "random string value",
+            #             "value1": "random string value",
+            #             "value2": "random string value",
+            #         },
+            #     },
+            # ),
             (
                 ResponseStrategy.OBJECT,
                 {
@@ -290,65 +290,65 @@ class TestResponseStrategy(EnumTestSuite):
                 },
             ),
             # # Special data about nested config
-            (
-                ResponseStrategy.STRING,
-                {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/components/schemas/NestedFooResponse",
-                    },
-                },
-                {
-                    "additionalKey": {
-                        "id": "random integer value",
-                        "name": "random string value",
-                        "data": [
-                            {
-                                "id": "random integer value",
-                                "value": "random string value",
-                                "url": "random string value",
-                                "urlProperties": {
-                                    "homePage": {
-                                        "domain": "random string value",
-                                        "needAuth": "random boolean value",
-                                    },
-                                    "detailInfo": {
-                                        "domain": "random string value",
-                                        "needAuth": "random boolean value",
-                                    },
-                                },
-                            },
-                        ],
-                    }
-                },
-            ),
-            (
-                ResponseStrategy.STRING,
-                {
-                    "$ref": "#/components/schemas/NestedFooResponse",
-                },
-                {
-                    "id": "random integer value",
-                    "name": "random string value",
-                    "data": [
-                        {
-                            "id": "random integer value",
-                            "value": "random string value",
-                            "url": "random string value",
-                            "urlProperties": {
-                                "homePage": {
-                                    "domain": "random string value",
-                                    "needAuth": "random boolean value",
-                                },
-                                "detailInfo": {
-                                    "domain": "random string value",
-                                    "needAuth": "random boolean value",
-                                },
-                            },
-                        },
-                    ],
-                },
-            ),
+            # (
+            #     ResponseStrategy.STRING,
+            #     {
+            #         "type": "object",
+            #         "additionalProperties": {
+            #             "$ref": "#/components/schemas/NestedFooResponse",
+            #         },
+            #     },
+            #     {
+            #         "additionalKey": {
+            #             "id": "random integer value",
+            #             "name": "random string value",
+            #             "data": [
+            #                 {
+            #                     "id": "random integer value",
+            #                     "value": "random string value",
+            #                     "url": "random string value",
+            #                     "urlProperties": {
+            #                         "homePage": {
+            #                             "domain": "random string value",
+            #                             "needAuth": "random boolean value",
+            #                         },
+            #                         "detailInfo": {
+            #                             "domain": "random string value",
+            #                             "needAuth": "random boolean value",
+            #                         },
+            #                     },
+            #                 },
+            #             ],
+            #         }
+            #     },
+            # ),
+            # (
+            #     ResponseStrategy.STRING,
+            #     {
+            #         "$ref": "#/components/schemas/NestedFooResponse",
+            #     },
+            #     {
+            #         "id": "random integer value",
+            #         "name": "random string value",
+            #         "data": [
+            #             {
+            #                 "id": "random integer value",
+            #                 "value": "random string value",
+            #                 "url": "random string value",
+            #                 "urlProperties": {
+            #                     "homePage": {
+            #                         "domain": "random string value",
+            #                         "needAuth": "random boolean value",
+            #                     },
+            #                     "detailInfo": {
+            #                         "domain": "random string value",
+            #                         "needAuth": "random boolean value",
+            #                     },
+            #                 },
+            #             },
+            #         ],
+            #     },
+            # ),
             (
                 ResponseStrategy.OBJECT,
                 {
@@ -540,11 +540,11 @@ class TestResponseStrategy(EnumTestSuite):
     @pytest.mark.parametrize(
         ("ut_enum", "test_response_data", "expected_value"),
         [
-            (
-                ResponseStrategy.STRING,
-                {"type": "object"},
-                {"strategy": ResponseStrategy.STRING, "data": {"THIS_IS_EMPTY": "empty value"}},
-            ),
+            # (
+            #     ResponseStrategy.STRING,
+            #     {"type": "object"},
+            #     {"strategy": ResponseStrategy.STRING, "data": {"THIS_IS_EMPTY": "empty value"}},
+            # ),
             (
                 ResponseStrategy.OBJECT,
                 {"type": "object"},
