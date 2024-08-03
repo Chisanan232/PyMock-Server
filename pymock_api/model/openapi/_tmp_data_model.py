@@ -80,29 +80,6 @@ class TmpResponseModel(BaseTmpDataModel):
 
 
 @dataclass
-class BasePropertyDetail:
-    name: str = field(default_factory=str)
-    required: bool = False
-    type: str = field(default_factory=str)
-    format: Optional[dict] = None
-    items: Optional[List["BasePropertyDetail"]] = None
-
-    def serialize(self) -> dict:
-        data = {
-            "name": self.name,
-            "required": self.required,
-            "type": self.type,
-            "format": self.format,
-            "items": [item.serialize() for item in self.items] if self.items else None,
-        }
-        new_data = {}
-        for k, v in data.items():
-            if v is not None:
-                new_data[k] = v
-        return new_data
-
-
-@dataclass
 class PropertyDetail:
     name: str = field(default_factory=str)
     required: bool = False
