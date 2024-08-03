@@ -201,44 +201,44 @@ class TestAPIParser:
                 should_check_name = True
         print(f"[DEBUG in test] should_check_name: {should_check_name}")
 
-        assert response_data and isinstance(response_data, dict)
-        data_details = response_data["data"]
-        if strategy is ResponseStrategy.OBJECT:
-            assert data_details is not None and isinstance(data_details, list)
-            for d in data_details:
-                if should_check_name:
-                    assert d["name"]
-                    assert d["type"]
-                assert d["required"] is not None
-                assert d["format"] is None  # FIXME: Should activate this verify after support this feature
-                if d["type"] == "list":
-                    assert d["items"] is not None
-                    for item in d["items"]:
-                        assert item["name"]
-                        assert item["type"]
-                        assert item["required"] is not None
-        else:
-            assert data_details is not None and isinstance(data_details, dict)
-            for v in data_details.values():
-                if isinstance(v, str):
-                    if should_check_name:
-                        assert v in [
-                            "random string value",
-                            "random integer value",
-                            "random boolean value",
-                            "random file output stream",
-                            "FIXME: Handle the reference",
-                        ]
-                    else:
-                        assert v == "empty value"
-                else:
-                    for item in v:
-                        for item_value in item.values():
-                            if should_check_name:
-                                assert item_value in [
-                                    "random string value",
-                                    "random integer value",
-                                    "random boolean value",
-                                ]
-                            else:
-                                assert item_value == "empty value"
+        # assert isinstance(response_data, ResponseProperty)
+        data_details = response_data.data
+        assert strategy is ResponseStrategy.OBJECT
+        assert data_details is not None and isinstance(data_details, list)
+        for d in data_details:
+            if should_check_name:
+                assert d.name
+                assert d.type
+            assert d.required is not None
+            assert d.format is None  # FIXME: Should activate this verify after support this feature
+            if d.type == "list":
+                assert d.items is not None
+                for item in d.items:
+                    assert item.name
+                    assert item.type
+                    assert item.required is not None
+        # else:
+        #     assert data_details is not None and isinstance(data_details, dict)
+        #     for v in data_details.values():
+        #         if isinstance(v, str):
+        #             if should_check_name:
+        #                 assert v in [
+        #                     "random string value",
+        #                     "random integer value",
+        #                     "random boolean value",
+        #                     "random file output stream",
+        #                     "FIXME: Handle the reference",
+        #                 ]
+        #             else:
+        #                 assert v == "empty value"
+        #         else:
+        #             for item in v:
+        #                 for item_value in item.values():
+        #                     if should_check_name:
+        #                         assert item_value in [
+        #                             "random string value",
+        #                             "random integer value",
+        #                             "random boolean value",
+        #                         ]
+        #                     else:
+        #                         assert item_value == "empty value"

@@ -16,7 +16,7 @@ from ._schema_parser import (
     BaseSchemaParser,
     _ReferenceObjectParser,
 )
-from ._tmp_data_model import TmpAPIParameterModel, TmpItemModel
+from ._tmp_data_model import ResponseProperty, TmpAPIParameterModel, TmpItemModel
 
 
 class BaseParser(metaclass=ABCMeta):
@@ -204,7 +204,7 @@ class APIParser(BaseParser):
         print(f"[DEBUG in APIParser._process_has_ref_parameters] parameters: {parameters}")
         return parameters
 
-    def process_responses(self, strategy: ResponseStrategy) -> dict:
+    def process_responses(self, strategy: ResponseStrategy) -> ResponseProperty:
         assert self.parser.exist_in_response(status_code="200") is True
         status_200_response = self.parser.get_response(status_code="200")
         response_data = strategy.initial_response_data()

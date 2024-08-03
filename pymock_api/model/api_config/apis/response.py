@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from ...enums import ResponseStrategy
+from ...openapi._tmp_data_model import PropertyDetail
 from .._base import _Checkable, _Config
 from ..template._base_wrapper import _DividableOnlyTemplatableConfig
 from ..template.file import TemplateConfigPathResponse
@@ -125,6 +126,11 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
             self.strategy = ResponseStrategy.to_enum(self.strategy)
 
     def _convert_properties(self):
+        print(f"[DEBUG in HTTPResponse._convert_properties] self.properties: {self.properties}")
+        if True in list(map(lambda i: isinstance(i, PropertyDetail), self.properties)):
+            print(f"[DEBUG in HTTPResponse._convert_properties] it has PropertyDetail object, parse it.")
+            self.properties = [p.serialize() for p in self.properties]
+        print(f"[DEBUG in HTTPResponse._convert_properties] new self.properties: {self.properties}")
         if False in list(map(lambda i: isinstance(i, (dict, ResponseProperty)), self.properties)):
             raise TypeError("The data type of key *properties* must be dict or ResponseProperty.")
         self.properties = [ResponseProperty().deserialize(i) if isinstance(i, dict) else i for i in self.properties]

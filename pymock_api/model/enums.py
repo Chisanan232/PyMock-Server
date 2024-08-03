@@ -1,3 +1,4 @@
+import copy
 import re
 from collections import namedtuple
 from decimal import Decimal
@@ -15,6 +16,7 @@ from pymock_api._utils.random import (
     ValueSize,
 )
 from pymock_api.model.openapi._js_handlers import convert_js_type
+from pymock_api.model.openapi._tmp_data_model import PropertyDetail, ResponseProperty
 
 
 class Format(Enum):
@@ -46,19 +48,16 @@ class ResponseStrategy(Enum):
         else:
             return v
 
-    def initial_response_data(self) -> Dict[str, Union["ResponseStrategy", list]]:
+    def initial_response_data(self) -> ResponseProperty:
         assert self is ResponseStrategy.OBJECT
-        return {
-            "strategy": self,
-            "data": [],
-        }
+        return ResponseProperty(data=[])
 
     def process_response_from_reference(
         self,
-        init_response: dict,
+        init_response: ResponseProperty,
         data: dict,
         get_schema_parser_factory: Callable,
-    ) -> dict:
+    ) -> ResponseProperty:
         assert self is ResponseStrategy.OBJECT
         response = self._process_reference_object(
             init_response=init_response,
@@ -67,10 +66,10 @@ class ResponseStrategy(Enum):
         )
 
         # Handle the collection data which has empty body
-        new_response = response.copy()
+        new_response = copy.copy(response)
         # if self is ResponseStrategy.OBJECT:
-        response_columns_setting = response.get("data", [])
-        new_response["data"] = self._process_empty_body_response(response_columns_setting=response_columns_setting)
+        response_columns_setting = response.data or []
+        new_response.data = self._process_empty_body_response(response_columns_setting=response_columns_setting)
         # else:
         #     response_columns_setting = response.get("data", {})
         #     new_response["data"] = self._process_empty_body_response_by_string_strategy(
@@ -80,22 +79,22 @@ class ResponseStrategy(Enum):
 
         return response
 
-    def _process_empty_body_response(self, response_columns_setting: List[dict]) -> List[dict]:
+    def _process_empty_body_response(self, response_columns_setting: List[PropertyDetail]) -> List[PropertyDetail]:
         new_response_columns_setting = []
         for resp_column in response_columns_setting:
             # element self
-            if resp_column["name"] == "THIS_IS_EMPTY":
-                resp_column["name"] = ""
-                resp_column["is_empty"] = True
+            if resp_column.name == "THIS_IS_EMPTY":
+                resp_column.name = ""
+                resp_column.is_empty = True
             else:
                 # element's property *items*
-                response_data_prop_items = resp_column.get("items", [])
+                response_data_prop_items = resp_column.items or []
                 if response_data_prop_items and len(response_data_prop_items) != 0:
-                    if response_data_prop_items[0].get("name", "") == "THIS_IS_EMPTY":
-                        resp_column["is_empty"] = True
-                        resp_column["items"] = []
+                    if response_data_prop_items[0].name == "THIS_IS_EMPTY":
+                        resp_column.is_empty = True
+                        resp_column.items = []
                     else:
-                        resp_column["items"] = self._process_empty_body_response(
+                        resp_column.items = self._process_empty_body_response(
                             response_columns_setting=response_data_prop_items
                         )
             new_response_columns_setting.append(resp_column)
@@ -127,11 +126,11 @@ class ResponseStrategy(Enum):
 
     def _process_reference_object(
         self,
-        init_response: dict,
+        init_response: ResponseProperty,
         response_schema_ref: dict,
         get_schema_parser_factory: Callable,
         empty_body_key: str = "",
-    ) -> dict:
+    ) -> ResponseProperty:
         parser = get_schema_parser_factory().object(response_schema_ref)
         response_schema_properties: Optional[dict] = parser.get_properties(default={})
         print(f"[DEBUG in process_response_from_reference] response_schema_ref: {response_schema_ref}")
@@ -142,32 +141,30 @@ class ResponseStrategy(Enum):
                 print(f"[DEBUG in process_response_from_reference] v: {v}")
                 # Check reference again
                 if get_schema_parser_factory().reference_object().has_ref(v):
-                    response_config = self._process_reference_object(
+                    response_prop = self._process_reference_object(
                         init_response=self.initial_response_data(),
                         response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(v),
                         get_schema_parser_factory=get_schema_parser_factory,
                         empty_body_key=k,
                     )
                     # if self is ResponseStrategy.OBJECT:
-                    print(
-                        f"[DEBUG in process_response_from_reference] before asserion, response_config: {response_config}"
-                    )
+                    print(f"[DEBUG in process_response_from_reference] before asserion, response_prop: {response_prop}")
                     # TODO: It should have better way to handle output streaming
-                    if len(list(filter(lambda d: d["type"] == "file", response_config["data"]))) != 0:
+                    if len(list(filter(lambda d: d.type == "file", response_prop.data))) != 0:
                         # It's file inputStream
-                        response_config = response_config["data"][0]
+                        response_config = response_prop.data[0]
                     else:
-                        response_config = {
-                            "name": "",
-                            "required": _Default_Required.empty,
-                            "type": "dict",
-                            "format": None,
-                            "items": response_config["data"],
-                        }
+                        response_config = PropertyDetail(
+                            name="",
+                            required=_Default_Required.empty,
+                            type="dict",
+                            format=None,
+                            items=response_prop.data,
+                        )
                     # else:
                     #     response_config = response_config["data"][k]
                 else:
-                    response_config = self._generate_response(
+                    response_config = self._generate_response(  # type: ignore[assignment]
                         init_response=init_response,
                         property_value=v,
                         get_schema_parser_factory=get_schema_parser_factory,
@@ -178,9 +175,9 @@ class ResponseStrategy(Enum):
                 print(
                     f"[DEBUG in process_response_from_reference] has properties, response_data_prop: {response_data_prop}"
                 )
-                response_data_prop["name"] = k
-                response_data_prop["required"] = k in parser.get_required(default=[k])
-                init_response["data"].append(response_data_prop)
+                response_data_prop.name = k
+                response_data_prop.required = k in parser.get_required(default=[k])
+                init_response.data.append(response_data_prop)
                 # else:
                 #     self._ensure_data_structure_when_non_object_strategy(init_response)
                 #     init_response["data"][k] = response_config
@@ -190,15 +187,15 @@ class ResponseStrategy(Enum):
             response_config = self._generate_empty_response()
             if "title" in response_schema_ref.keys() and response_schema_ref["title"] == "InputStream":
                 # if self is ResponseStrategy.OBJECT:
-                response_config["type"] = "file"
+                response_config.type = "file"
 
                 response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
                 print(
                     f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
                 )
-                response_data_prop["name"] = empty_body_key
-                response_data_prop["required"] = empty_body_key in parser.get_required(default=[empty_body_key])
-                init_response["data"].append(response_data_prop)
+                response_data_prop.name = empty_body_key
+                response_data_prop.required = empty_body_key in parser.get_required(default=[empty_body_key])
+                init_response.data.append(response_data_prop)
                 # else:
                 #     response_config = "random file output stream"  # type: ignore[assignment]
                 #
@@ -210,9 +207,9 @@ class ResponseStrategy(Enum):
                 print(
                     f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
                 )
-                response_data_prop["name"] = "THIS_IS_EMPTY"
-                response_data_prop["required"] = False
-                init_response["data"].append(response_data_prop)
+                response_data_prop.name = "THIS_IS_EMPTY"
+                response_data_prop.required = False
+                init_response.data.append(response_data_prop)
                 # else:
                 #     self._ensure_data_structure_when_non_object_strategy(init_response)
                 #     init_response["data"]["THIS_IS_EMPTY"] = response_config
@@ -224,10 +221,10 @@ class ResponseStrategy(Enum):
 
     def process_response_from_data(
         self,
-        init_response: dict,
+        init_response: ResponseProperty,
         data: dict,
         get_schema_parser_factory: Callable,
-    ) -> dict:
+    ) -> ResponseProperty:
         assert self is ResponseStrategy.OBJECT
         response_config = self._generate_response(
             init_response=init_response,
@@ -236,35 +233,36 @@ class ResponseStrategy(Enum):
         )
         # if self is ResponseStrategy.OBJECT:
         response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
-        init_response["data"].append(response_data_prop)
+        init_response.data.append(response_data_prop)
         # else:
         #     self._ensure_data_structure_when_non_object_strategy(init_response)
         #     init_response["data"][0] = response_config
         return init_response
 
     def _ensure_data_structure_when_object_strategy(
-        self, init_response: dict, response_data_prop: Union[str, dict, list]
-    ) -> dict:
-        assert isinstance(response_data_prop, dict)
+        self, init_response: ResponseProperty, response_data_prop: Union[PropertyDetail, List[PropertyDetail]]
+    ) -> PropertyDetail:
+        print(f"[DEBUG in _ensure_data_structure_when_object_strategy] response_data_prop: {response_data_prop}")
+        assert isinstance(response_data_prop, PropertyDetail)
         assert isinstance(
-            init_response["data"], list
+            init_response.data, list
         ), "The response data type must be *list* if its HTTP response strategy is object."
         assert (
-            len(list(filter(lambda d: not isinstance(d, dict), init_response["data"]))) == 0
+            len(list(filter(lambda d: not isinstance(d, PropertyDetail), init_response.data))) == 0
         ), "Each column detail must be *dict* if its HTTP response strategy is object."
         return response_data_prop
 
-    def _ensure_data_structure_when_non_object_strategy(self, init_response: dict) -> None:
-        assert isinstance(
-            init_response["data"], dict
-        ), "The response data type must be *dict* if its HTTP response strategy is not object."
+    # def _ensure_data_structure_when_non_object_strategy(self, init_response: dict) -> None:
+    #     assert isinstance(
+    #         init_response["data"], dict
+    #     ), "The response data type must be *dict* if its HTTP response strategy is not object."
 
     def _generate_response(
         self,
-        init_response: dict,
+        init_response: ResponseProperty,
         property_value: dict,
         get_schema_parser_factory: Callable,
-    ) -> dict:
+    ) -> Union[PropertyDetail, List[PropertyDetail]]:
         if not property_value:
             return self._generate_empty_response()
         print(f"[DEBUG in _generate_response] property_value: {property_value}")
@@ -279,28 +277,38 @@ class ResponseStrategy(Enum):
             get_schema_parser_factory=get_schema_parser_factory,
         )
 
-    def _generate_empty_response(self) -> Dict[str, Any]:
+    def _generate_empty_response(self) -> PropertyDetail:
         # if self is ResponseStrategy.OBJECT:
-        return {
-            "name": "",
-            "required": _Default_Required.empty,
-            "type": None,
-            "format": None,
-            "items": [],
-        }
+        return PropertyDetail(
+            name="",
+            required=_Default_Required.empty,
+            type=None,
+            format=None,
+            items=[],
+        )
+        # {
+        #     "name": "",
+        #     "required": _Default_Required.empty,
+        #     "type": None,
+        #     "format": None,
+        #     "items": [],
+        # }
         # else:
         #     return "empty value"
 
     def _generate_response_from_data(
         self,
-        init_response: dict,
+        init_response: ResponseProperty,
         resp_prop_data: dict,
         get_schema_parser_factory: Callable,
-    ) -> dict:
+    ) -> Union[PropertyDetail, List[PropertyDetail]]:
 
         def _handle_list_type_data(
-            data: dict, noref_val_process_callback: Callable, ref_val_process_callback: Callable, response: dict = {}
-        ) -> dict:
+            data: dict,
+            noref_val_process_callback: Callable,
+            ref_val_process_callback: Callable,
+            response: PropertyDetail = PropertyDetail(),
+        ) -> PropertyDetail:
             items_data = data["items"]
             if get_schema_parser_factory().reference_object().has_ref(items_data):
                 response = _handle_reference_object(
@@ -325,23 +333,37 @@ class ResponseStrategy(Enum):
                 #     assert isinstance(response_item_value, str)
                 #     response_item = response_item_value
                 # print(f"[DEBUG in _handle_list_type_data] response_item: {response_item}")
-                if self is ResponseStrategy.OBJECT:
-                    response = {
-                        "name": "",
-                        "required": _Default_Required.general,
-                        "type": "list",
-                        # TODO: Set the *format* property correctly
-                        "format": None,
-                        "items": [response_item_value],
-                    }
-                else:
-                    response = response_item_value
+                # if self is ResponseStrategy.OBJECT:
+                items = None
+                if response_item_value:
+                    items = response_item_value if isinstance(response_item_value, list) else [response_item_value]
+                response = PropertyDetail(
+                    name="",
+                    required=_Default_Required.general,
+                    type="list",
+                    # TODO: Set the *format* property correctly
+                    format=None,
+                    items=items,
+                )
+                # {
+                #     "name": "",
+                #     "required": _Default_Required.general,
+                #     "type": "list",
+                #     # TODO: Set the *format* property correctly
+                #     "format": None,
+                #     "items": [response_item_value],
+                # }
+                # else:
+                #     response = response_item_value
                 print(f"[DEBUG in _handle_list_type_data] response: {response}")
             return response
 
         def _handle_reference_object(
-            response: dict, items_data: dict, noref_val_process_callback: Callable, ref_val_process_callback: Callable
-        ) -> dict:
+            response: PropertyDetail,
+            items_data: dict,
+            noref_val_process_callback: Callable,
+            ref_val_process_callback: Callable,
+        ) -> PropertyDetail:
             single_response = get_schema_parser_factory().reference_object().get_schema_ref(items_data)
             parser = get_schema_parser_factory().object(single_response)
             for item_k, item_v in parser.get_properties(default={}).items():
@@ -356,19 +378,27 @@ class ResponseStrategy(Enum):
                     response = noref_val_process_callback(item_k, item_v, response)
             return response
 
-        def _handle_list_type_value_with_object_strategy(data: dict) -> dict:
+        def _handle_list_type_value_with_object_strategy(data: dict) -> PropertyDetail:
 
             def _ref_process_callback(
-                item_k: str, item_v: dict, response: dict, parser, noref_val_process_callback: Callable
-            ) -> dict:
-                item_k_data_prop = {
-                    "name": item_k,
-                    "required": item_k in parser.get_required(),
-                    "type": convert_js_type(item_v.get("type", "object")),
+                item_k: str, item_v: dict, response: PropertyDetail, parser, noref_val_process_callback: Callable
+            ) -> PropertyDetail:
+                item_k_data_prop = PropertyDetail(
+                    name=item_k,
+                    required=item_k in parser.get_required(),
+                    type=convert_js_type(item_v.get("type", "object")),
                     # TODO: Set the *format* property correctly
-                    "format": None,
-                    "items": [],
-                }
+                    format=None,
+                    items=[],
+                )
+                # {
+                #     "name": item_k,
+                #     "required": item_k in parser.get_required(),
+                #     "type": convert_js_type(item_v.get("type", "object")),
+                #     # TODO: Set the *format* property correctly
+                #     "format": None,
+                #     "items": [],
+                # }
                 ref_item_v_response = _handle_reference_object(
                     items_data=item_v,
                     noref_val_process_callback=noref_val_process_callback,
@@ -381,34 +411,51 @@ class ResponseStrategy(Enum):
                 print(
                     f"[DEBUG in nested data issue at _handle_list_type_data] response from data which has reference object: {response}"
                 )
-                print(f"[DEBUG in _handle_list_type_data] check whether the itme is empty or not: {response['items']}")
-                if response["items"]:
+                print(f"[DEBUG in _handle_list_type_data] check whether the itme is empty or not: {response.items}")
+                if response.items:
                     print("[DEBUG in _handle_list_type_data] the response item has data")
-                    response["items"].append(ref_item_v_response)
+                    response.items.append(ref_item_v_response)
                 else:
                     print("[DEBUG in _handle_list_type_data] the response item doesn't have data")
-                    response["items"] = (
+                    response.items = (
                         [ref_item_v_response] if not isinstance(ref_item_v_response, list) else ref_item_v_response
                     )
                 return response
 
-            def _noref_process_callback(item_k: str, item_v: dict, response_data_prop: dict) -> dict:
+            def _noref_process_callback(
+                item_k: str, item_v: dict, response_data_prop: PropertyDetail
+            ) -> PropertyDetail:
                 item_type = convert_js_type(item_v["type"])
-                item = {"name": item_k, "required": _Default_Required.general, "type": item_type}
-                assert isinstance(
-                    response_data_prop["items"], list
-                ), "The data type of property *items* must be *list*."
-                response_data_prop["items"].append(item)
+                item = PropertyDetail(
+                    name=item_k,
+                    required=_Default_Required.general,
+                    type=item_type,
+                )
+                # {
+                #     "name": item_k,
+                #     "required": _Default_Required.general,
+                #     "type": item_type,
+                # }
+                assert isinstance(response_data_prop.items, list), "The data type of property *items* must be *list*."
+                response_data_prop.items.append(item)
                 return response_data_prop
 
-            response_data_prop = {
-                "name": "",
-                "required": _Default_Required.general,
-                "type": v_type,
+            response_data_prop = PropertyDetail(
+                name="",
+                required=_Default_Required.general,
+                type=v_type,
                 # TODO: Set the *format* property correctly
-                "format": None,
-                "items": [],
-            }
+                format=None,
+                items=[],
+            )
+            # {
+            #     "name": "",
+            #     "required": _Default_Required.general,
+            #     "type": v_type,
+            #     # TODO: Set the *format* property correctly
+            #     "format": None,
+            #     "items": [],
+            # }
             response_data_prop = _handle_list_type_data(
                 data=data,
                 noref_val_process_callback=_noref_process_callback,
@@ -417,21 +464,29 @@ class ResponseStrategy(Enum):
             )
             return response_data_prop
 
-        def _handle_object_type_value_with_object_strategy(data: dict) -> dict:
+        def _handle_object_type_value_with_object_strategy(data: dict) -> Union[PropertyDetail, List[PropertyDetail]]:
             print(f"[DEBUG in _handle_object_type_value_with_object_strategy] data: {data}")
             data_title = data.get("title", "")
             if data_title:
                 # TODO: It should also consider the scenario about input stream part (download file)
                 # Example data: {'type': 'object', 'title': 'InputStream'}
                 if re.search(data_title, "InputStream", re.IGNORECASE):
-                    return {
-                        "name": "",
-                        "required": _Default_Required.general,
-                        "type": "file",
+                    return PropertyDetail(
+                        name="",
+                        required=_Default_Required.general,
+                        type="file",
                         # TODO: Set the *format* property correctly
-                        "format": None,
-                        "items": None,
-                    }
+                        format=None,
+                        items=None,
+                    )
+                    # {
+                    #     "name": "",
+                    #     "required": _Default_Required.general,
+                    #     "type": "file",
+                    #     # TODO: Set the *format* property correctly
+                    #     "format": None,
+                    #     "items": None,
+                    # }
                 else:
                     raise NotImplementedError
 
@@ -447,15 +502,23 @@ class ResponseStrategy(Enum):
                 print("[DEBUG in _handle_object_type_value_with_object_strategy] has reference schema")
                 print(f"[DEBUG in _handle_object_type_value_with_object_strategy] resp: {resp}")
                 if has_ref == "additionalProperties":
-                    return {
-                        "name": "additionalKey",
-                        "required": _Default_Required.general,
-                        "type": "dict",
+                    return PropertyDetail(
+                        name="additionalKey",
+                        required=_Default_Required.general,
+                        type="dict",
                         # TODO: Set the *format* property correctly
-                        "format": None,
-                        "items": resp["data"],
-                    }
-                return resp["data"]
+                        format=None,
+                        items=resp.data,
+                    )
+                    # {
+                    #     "name": "additionalKey",
+                    #     "required": _Default_Required.general,
+                    #     "type": "dict",
+                    #     # TODO: Set the *format* property correctly
+                    #     "format": None,
+                    #     "items": resp["data"],
+                    # }
+                return resp.data
             else:
                 # Handle the schema *additionalProperties*
                 additional_properties = data["additionalProperties"]
@@ -469,33 +532,58 @@ class ResponseStrategy(Enum):
                     # it again.
                     return items_config_data
                 else:
-                    return {
-                        "name": "",
-                        "required": _Default_Required.general,
-                        "type": "dict",
+                    return PropertyDetail(
+                        name="",
+                        required=_Default_Required.general,
+                        type="dict",
                         # TODO: Set the *format* property correctly
-                        "format": None,
-                        "items": [
-                            {
-                                "name": "additionalKey",
-                                "required": _Default_Required.general,
-                                "type": additional_properties_type,
+                        format=None,
+                        items=[
+                            PropertyDetail(
+                                name="additionalKey",
+                                required=_Default_Required.general,
+                                type=additional_properties_type,
                                 # TODO: Set the *format* property correctly
-                                "format": None,
-                                "items": None,
-                            }
+                                format=None,
+                                items=None,
+                            ),
                         ],
-                    }
+                    )
+                    # {
+                    #     "name": "",
+                    #     "required": _Default_Required.general,
+                    #     "type": "dict",
+                    #     # TODO: Set the *format* property correctly
+                    #     "format": None,
+                    #     "items": [
+                    #         {
+                    #             "name": "additionalKey",
+                    #             "required": _Default_Required.general,
+                    #             "type": additional_properties_type,
+                    #             # TODO: Set the *format* property correctly
+                    #             "format": None,
+                    #             "items": None,
+                    #         }
+                    #     ],
+                    # }
 
-        def _handle_other_types_value_with_object_strategy(v_type: str) -> dict:
-            return {
-                "name": "",
-                "required": _Default_Required.general,
-                "type": v_type,
+        def _handle_other_types_value_with_object_strategy(v_type: str) -> PropertyDetail:
+            return PropertyDetail(
+                name="",
+                required=_Default_Required.general,
+                type=v_type,
                 # TODO: Set the *format* property correctly
-                "format": None,
-                "items": None,
-            }
+                format=None,
+                items=None,
+            )
+            # {
+            #     "name": "",
+            #     "required": _Default_Required.general,
+            #     "type": v_type,
+            #     # TODO: Set the *format* property correctly
+            #     "format": None,
+            #     "items": None,
+            # }
 
         # def _handle_list_type_value_with_non_object_strategy(data: dict) -> list:
         #
@@ -546,7 +634,9 @@ class ResponseStrategy(Enum):
         #     )
         #     return [item_info]
 
-        def _handle_each_data_types_response_with_object_strategy(data: dict, v_type: str) -> dict:
+        def _handle_each_data_types_response_with_object_strategy(
+            data: dict, v_type: str
+        ) -> Union[PropertyDetail, List[PropertyDetail]]:
             if locate(v_type) == list:
                 return _handle_list_type_value_with_object_strategy(data)
             elif locate(v_type) == dict:

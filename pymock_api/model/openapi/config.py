@@ -9,7 +9,7 @@ from ..enums import ResponseStrategy
 from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
 from ._parser import APIParameterParser, APIParser, OpenAPIDocumentConfigParser
 from ._schema_parser import set_component_definition
-from ._tmp_data_model import TmpAPIParameterModel, TmpItemModel
+from ._tmp_data_model import ResponseProperty, TmpAPIParameterModel, TmpItemModel
 
 
 @dataclass
@@ -96,7 +96,7 @@ class API(Transferable):
     path: str = field(default_factory=str)
     http_method: str = field(default_factory=str)
     parameters: List[APIParameter] = field(default_factory=list)
-    response: Dict = field(default_factory=dict)
+    response: ResponseProperty = field(default_factory=ResponseProperty)
     tags: List[str] = field(default_factory=list)
 
     # process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
@@ -131,10 +131,11 @@ class API(Transferable):
         )
         # resp_strategy = self.response["strategy"]
         # if resp_strategy is ResponseStrategy.OBJECT:
-        if list(filter(lambda p: p["name"] == "", self.response["data"])):
+        print(f"[DEBUG in src] self.response: {self.response}")
+        if list(filter(lambda p: p.name == "", self.response.data)):
             values = []
         else:
-            values = self.response["data"]
+            values = self.response.data
         print(f"[DEBUG in to_api_config] values: {values}")
         mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=values)
         # else:

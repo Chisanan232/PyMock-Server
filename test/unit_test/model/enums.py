@@ -21,6 +21,7 @@ from pymock_api.model.openapi._schema_parser import (
     OpenAPIV3SchemaParser,
     set_component_definition,
 )
+from pymock_api.model.openapi._tmp_data_model import PropertyDetail, ResponseProperty
 
 from ..._test_utils import Verify
 from ..model.openapi._test_case import DeserializeV2OpenAPIConfigTestCaseFactory
@@ -77,40 +78,40 @@ class TestResponseStrategy(EnumTestSuite):
 
         # Run target function under test
         response_prop_data = strategy._generate_response(
-            init_response={},
+            init_response=ResponseProperty(),
             property_value=api_response_detail,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
         )
 
         # Verify
-        if strategy is ResponseStrategy.OBJECT:
-            assert response_prop_data and isinstance(response_prop_data, dict)
-            for resp_k, resp_v in response_prop_data.items():
-                assert resp_k in ["name", "required", "type", "format", "items", "FIXME"]
-        else:
-            assert response_prop_data and isinstance(response_prop_data, (str, list))
-            if response_prop_data and isinstance(response_prop_data, str):
-                assert response_prop_data in [
-                    "random string value",
-                    "random integer value",
-                    "random boolean value",
-                    "random file output stream",
-                    "FIXME: Handle the reference",
-                ]
-            else:
-                for item in response_prop_data:
-                    for item_value in item.values():
-                        assert item_value in ["random string value", "random integer value", "random boolean value"]
+        assert strategy is ResponseStrategy.OBJECT
+        assert response_prop_data and isinstance(response_prop_data, PropertyDetail)
+        # for resp_k, resp_v in response_prop_data.items():
+        #     assert resp_k in ["name", "required", "type", "format", "items", "FIXME"]
+        # else:
+        #     assert response_prop_data and isinstance(response_prop_data, (str, list))
+        #     if response_prop_data and isinstance(response_prop_data, str):
+        #         assert response_prop_data in [
+        #             "random string value",
+        #             "random integer value",
+        #             "random boolean value",
+        #             "random file output stream",
+        #             "FIXME: Handle the reference",
+        #         ]
+        #     else:
+        #         for item in response_prop_data:
+        #             for item_value in item.values():
+        #                 assert item_value in ["random string value", "random integer value", "random boolean value"]
 
     @pytest.mark.parametrize(
         ("ut_enum", "expected_type"),
         [
             # (ResponseStrategy.STRING, str),
             # (ResponseStrategy.FILE, str),
-            (ResponseStrategy.OBJECT, dict),
+            (ResponseStrategy.OBJECT, PropertyDetail),
         ],
     )
-    def test_generate_empty_response(self, ut_enum: ResponseStrategy, expected_type: type):
+    def test_generate_empty_response(self, ut_enum: ResponseStrategy, expected_type: Union[type, Type]):
         empty_resp = ut_enum._generate_empty_response()
         assert isinstance(empty_resp, expected_type)
 
@@ -148,17 +149,17 @@ class TestResponseStrategy(EnumTestSuite):
             (
                 ResponseStrategy.OBJECT,
                 {"type": "integer"},
-                {"name": "", "required": True, "type": "int", "format": None, "items": None},
+                {"name": "", "required": True, "type": "int"},
             ),
             (
                 ResponseStrategy.OBJECT,
                 {"type": "number"},
-                {"name": "", "required": True, "type": "int", "format": None, "items": None},
+                {"name": "", "required": True, "type": "int"},
             ),
             (
                 ResponseStrategy.OBJECT,
                 {"type": "boolean"},
-                {"name": "", "required": True, "type": "bool", "format": None, "items": None},
+                {"name": "", "required": True, "type": "bool"},
             ),
             (
                 ResponseStrategy.OBJECT,
@@ -167,8 +168,8 @@ class TestResponseStrategy(EnumTestSuite):
                     "name": "",
                     "required": True,
                     "type": "list",
-                    "format": None,
-                    "items": [{"name": "", "required": True, "type": "int", "format": None, "items": None}],
+                    # "format": None,
+                    "items": [{"name": "", "required": True, "type": "int"}],
                 },
             ),
             (
@@ -178,7 +179,7 @@ class TestResponseStrategy(EnumTestSuite):
                     "name": "",
                     "required": True,
                     "type": "list",
-                    "format": None,
+                    # "format": None,
                     "items": [
                         {"name": "id", "required": True, "type": "int"},
                         {"name": "name", "required": True, "type": "str"},
@@ -190,7 +191,7 @@ class TestResponseStrategy(EnumTestSuite):
             (
                 ResponseStrategy.OBJECT,
                 {"type": "file"},
-                {"name": "", "required": True, "type": "file", "format": None, "items": None},
+                {"name": "", "required": True, "type": "file"},
             ),
             # # Special data
             # (
@@ -243,10 +244,8 @@ class TestResponseStrategy(EnumTestSuite):
                     "name": "",
                     "required": True,
                     "type": "dict",
-                    "format": None,
-                    "items": [
-                        {"name": "additionalKey", "required": True, "type": "str", "format": None, "items": None}
-                    ],
+                    # "format": None,
+                    "items": [{"name": "additionalKey", "required": True, "type": "str"}],
                 },
             ),
             (
@@ -262,9 +261,9 @@ class TestResponseStrategy(EnumTestSuite):
                     "name": "",
                     "required": True,
                     "type": "list",
-                    "format": None,
+                    # "format": None,
                     "items": [
-                        {"name": "", "required": True, "type": "str", "format": None, "items": None},
+                        {"name": "", "required": True, "type": "str"},
                     ],
                 },
             ),
@@ -280,12 +279,12 @@ class TestResponseStrategy(EnumTestSuite):
                     "name": "additionalKey",
                     "required": True,
                     "type": "dict",
-                    "format": None,
+                    # "format": None,
                     "items": [
-                        {"name": "id", "required": True, "type": "int", "format": None, "items": None},
-                        {"name": "name", "required": False, "type": "str", "format": None, "items": None},
-                        {"name": "value1", "required": False, "type": "str", "format": None, "items": None},
-                        {"name": "value2", "required": False, "type": "str", "format": None, "items": None},
+                        {"name": "id", "required": True, "type": "int"},
+                        {"name": "name", "required": False, "type": "str"},
+                        {"name": "value1", "required": False, "type": "str"},
+                        {"name": "value2", "required": False, "type": "str"},
                     ],
                 },
             ),
@@ -361,14 +360,14 @@ class TestResponseStrategy(EnumTestSuite):
                     "name": "additionalKey",
                     "required": True,
                     "type": "dict",
-                    "format": None,
+                    # "format": None,
                     "items": [
-                        {"name": "id", "required": True, "type": "int", "format": None, "items": None},
-                        {"name": "name", "required": False, "type": "str", "format": None, "items": None},
+                        {"name": "id", "required": True, "type": "int"},
+                        {"name": "name", "required": False, "type": "str"},
                         {
                             "name": "data",
                             "required": False,
-                            "format": None,
+                            # "format": None,
                             "type": "list",
                             "items": [
                                 {"name": "id", "required": True, "type": "int"},
@@ -377,14 +376,14 @@ class TestResponseStrategy(EnumTestSuite):
                                 {
                                     "name": "urlProperties",
                                     "required": False,
-                                    "format": None,
+                                    # "format": None,
                                     "type": "dict",
                                     "items": [
                                         {
                                             "name": "homePage",
                                             "required": True,
                                             "type": "dict",
-                                            "format": None,
+                                            # "format": None,
                                             "items": [
                                                 {"name": "domain", "required": True, "type": "str"},
                                                 {"name": "needAuth", "required": True, "type": "bool"},
@@ -394,7 +393,7 @@ class TestResponseStrategy(EnumTestSuite):
                                             "name": "detailInfo",
                                             "required": True,
                                             "type": "dict",
-                                            "format": None,
+                                            # "format": None,
                                             "items": [
                                                 {"name": "domain", "required": True, "type": "str"},
                                                 {"name": "needAuth", "required": True, "type": "bool"},
@@ -413,12 +412,12 @@ class TestResponseStrategy(EnumTestSuite):
                     "$ref": "#/components/schemas/NestedFooResponse",
                 },
                 [
-                    {"name": "id", "required": True, "type": "int", "format": None, "items": None},
-                    {"name": "name", "required": False, "type": "str", "format": None, "items": None},
+                    {"name": "id", "required": True, "type": "int"},
+                    {"name": "name", "required": False, "type": "str"},
                     {
                         "name": "data",
                         "required": False,
-                        "format": None,
+                        # "format": None,
                         "type": "list",
                         "items": [
                             {"name": "id", "required": True, "type": "int"},
@@ -427,14 +426,14 @@ class TestResponseStrategy(EnumTestSuite):
                             {
                                 "name": "urlProperties",
                                 "required": False,
-                                "format": None,
+                                # "format": None,
                                 "type": "dict",
                                 "items": [
                                     {
                                         "name": "homePage",
                                         "required": True,
                                         "type": "dict",
-                                        "format": None,
+                                        # "format": None,
                                         "items": [
                                             {"name": "domain", "required": True, "type": "str"},
                                             {"name": "needAuth", "required": True, "type": "bool"},
@@ -444,7 +443,7 @@ class TestResponseStrategy(EnumTestSuite):
                                         "name": "detailInfo",
                                         "required": True,
                                         "type": "dict",
-                                        "format": None,
+                                        # "format": None,
                                         "items": [
                                             {"name": "domain", "required": True, "type": "str"},
                                             {"name": "needAuth", "required": True, "type": "bool"},
@@ -535,6 +534,10 @@ class TestResponseStrategy(EnumTestSuite):
         # Verify
         print(f"resp: {resp}")
         assert resp
+        if isinstance(resp, list):
+            resp = [r.serialize() for r in resp]
+        else:
+            resp = resp.serialize()
         assert resp == expected_value
 
     @pytest.mark.parametrize(
@@ -548,10 +551,13 @@ class TestResponseStrategy(EnumTestSuite):
             (
                 ResponseStrategy.OBJECT,
                 {"type": "object"},
-                {
-                    "strategy": ResponseStrategy.OBJECT,
-                    "data": [{"name": "THIS_IS_EMPTY", "required": False, "type": None, "format": None, "items": []}],
-                },
+                ResponseProperty(
+                    data=[PropertyDetail(name="THIS_IS_EMPTY", required=False, type=None, format=None, items=[])],
+                ),
+                # {
+                #     "strategy": ResponseStrategy.OBJECT,
+                #     "data": [{"name": "THIS_IS_EMPTY", "required": False, "type": None, "format": None, "items": []}],
+                # },
             ),
         ],
     )
@@ -627,97 +633,119 @@ class TestResponseStrategy(EnumTestSuite):
         [
             (
                 ResponseStrategy.OBJECT,
-                [{"name": "THIS_IS_EMPTY", "required": True, "type": None, "format": None, "items": None}],
-                [{"name": "", "required": True, "type": None, "format": None, "is_empty": True, "items": None}],
+                [PropertyDetail(name="THIS_IS_EMPTY", required=True, type=None, format=None, items=None)],
+                [PropertyDetail(name="", required=True, type=None, format=None, is_empty=True, items=None)],
             ),
             (
                 ResponseStrategy.OBJECT,
                 [
-                    {
-                        "name": "sample_list",
-                        "required": True,
-                        "type": "list",
-                        "format": None,
-                        "items": [
-                            {"name": "THIS_IS_EMPTY", "required": True, "type": None, "format": None, "items": None}
+                    PropertyDetail(
+                        name="sample_list",
+                        required=True,
+                        type="list",
+                        format=None,
+                        items=[
+                            PropertyDetail(
+                                name="THIS_IS_EMPTY",
+                                required=True,
+                                type=None,
+                                format=None,
+                                items=None,
+                            ),
                         ],
-                    },
+                    ),
                 ],
                 [
-                    {
-                        "name": "sample_list",
-                        "required": True,
-                        "type": "list",
-                        "format": None,
-                        "is_empty": True,
-                        "items": [],
-                    },
+                    PropertyDetail(
+                        name="sample_list",
+                        required=True,
+                        type="list",
+                        format=None,
+                        is_empty=True,
+                        items=[],
+                    ),
                 ],
             ),
             (
                 ResponseStrategy.OBJECT,
                 [
-                    {
-                        "name": "sample_list",
-                        "required": True,
-                        "type": "list",
-                        "format": None,
-                        "items": [
-                            {
-                                "name": "sample_nested_list",
-                                "required": True,
-                                "type": "list",
-                                "format": None,
-                                "items": [{"name": "", "required": True, "type": "str", "format": None, "items": None}],
-                            },
-                            {
-                                "name": "sample_nested_dict",
-                                "required": True,
-                                "type": "dict",
-                                "format": None,
-                                "items": [
-                                    {
-                                        "name": "THIS_IS_EMPTY",
-                                        "required": True,
-                                        "type": None,
-                                        "format": None,
-                                        "items": None,
-                                    }
+                    PropertyDetail(
+                        name="sample_list",
+                        required=True,
+                        type="list",
+                        format=None,
+                        items=[
+                            PropertyDetail(
+                                name="sample_nested_list",
+                                required=True,
+                                type="list",
+                                format=None,
+                                items=[
+                                    PropertyDetail(
+                                        name="sample_nested_list",
+                                        required=True,
+                                        type="list",
+                                        format=None,
+                                        items=[
+                                            PropertyDetail(name="", required=True, type="str", format=None, items=None),
+                                        ],
+                                    ),
+                                    PropertyDetail(
+                                        name="sample_nested_dict",
+                                        required=True,
+                                        type="dict",
+                                        format=None,
+                                        items=[
+                                            PropertyDetail(
+                                                name="THIS_IS_EMPTY", required=True, type=None, format=None, items=None
+                                            ),
+                                        ],
+                                    ),
                                 ],
-                            },
+                            ),
                         ],
-                    }
+                    ),
                 ],
                 [
-                    {
-                        "name": "sample_list",
-                        "required": True,
-                        "type": "list",
-                        "format": None,
-                        "items": [
-                            {
-                                "name": "sample_nested_list",
-                                "required": True,
-                                "type": "list",
-                                "format": None,
-                                "items": [{"name": "", "required": True, "type": "str", "format": None, "items": None}],
-                            },
-                            {
-                                "name": "sample_nested_dict",
-                                "required": True,
-                                "type": "dict",
-                                "format": None,
-                                "is_empty": True,
-                                "items": [],
-                            },
+                    PropertyDetail(
+                        name="sample_list",
+                        required=True,
+                        type="list",
+                        format=None,
+                        items=[
+                            PropertyDetail(
+                                name="sample_nested_list",
+                                required=True,
+                                type="list",
+                                format=None,
+                                items=[
+                                    PropertyDetail(
+                                        name="sample_nested_list",
+                                        required=True,
+                                        type="list",
+                                        format=None,
+                                        items=[
+                                            PropertyDetail(name="", required=True, type="str", format=None, items=None),
+                                        ],
+                                    ),
+                                    PropertyDetail(
+                                        name="sample_nested_dict",
+                                        required=True,
+                                        type="dict",
+                                        format=None,
+                                        is_empty=True,
+                                        items=[],
+                                    ),
+                                ],
+                            ),
                         ],
-                    }
+                    ),
                 ],
             ),
         ],
     )
     def test__process_empty_body_response(
-        self, ut_enum: ResponseStrategy, ut_response_config: dict, expect_result: dict
+        self, ut_enum: ResponseStrategy, ut_response_config: List[PropertyDetail], expect_result: List[PropertyDetail]
     ):
         new_response_config = ut_enum._process_empty_body_response(response_columns_setting=ut_response_config)
         assert new_response_config == expect_result

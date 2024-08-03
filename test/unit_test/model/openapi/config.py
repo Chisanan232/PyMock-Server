@@ -8,7 +8,7 @@ from pymock_api import APIConfig
 from pymock_api.model import MockAPI
 from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
-from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
+from pymock_api.model.enums import OpenAPIVersion
 from pymock_api.model.openapi._base import Transferable, set_openapi_version
 from pymock_api.model.openapi._js_handlers import convert_js_type
 from pymock_api.model.openapi._parser_factory import (
@@ -22,6 +22,7 @@ from pymock_api.model.openapi._schema_parser import (
     _ReferenceObjectParser,
     set_component_definition,
 )
+from pymock_api.model.openapi._tmp_data_model import PropertyDetail, ResponseProperty
 from pymock_api.model.openapi.config import API, APIParameter, OpenAPIDocumentConfig
 
 from ._test_case import (
@@ -220,10 +221,11 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         data_model.path = "/test/v1/foo-home"
         data_model.http_method = "POST"
         data_model.parameters = [params]
-        data_model.response = {
-            "strategy": ResponseStrategy.OBJECT,
-            "data": [{"name": "key1", "type": "str", "required": True}],
-        }
+        data_model.response = ResponseProperty(
+            data=[
+                PropertyDetail(name="key1", type="str", required=True),
+            ],
+        )
         data_model.tags = ["first tag", "second tag"]
 
     def _verify_api_config_model(self, under_test: MockAPI, data_from: API) -> None:
@@ -240,10 +242,9 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
             assert p.default == param_data_from.default
             assert p.value_format is None
         assert under_test.tag == data_from.tags[0]
-        assert under_test.http.response.strategy == data_from.response["strategy"]
         assert under_test.http.response.value == ""
         assert len(under_test.http.response.properties) == 1
-        assert under_test.http.response.properties[0].serialize() == data_from.response["data"][0]
+        assert under_test.http.response.properties[0].serialize() == data_from.response.data[0].serialize()
 
 
 class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
@@ -294,10 +295,11 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
         api.path = "/test/v1/foo-home"
         api.http_method = "POST"
         api.parameters = [params]
-        api.response = {
-            "strategy": ResponseStrategy.OBJECT,
-            "data": [{"name": "key1", "type": "str", "required": True}],
-        }
+        api.response = ResponseProperty(
+            data=[
+                PropertyDetail(name="key1", type="str", required=True),
+            ],
+        )
 
         data_model.paths = [api]
 
@@ -323,10 +325,9 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                 assert api_param.required == param_data_from.required
                 assert api_param.value_type == param_data_from.value_type
                 assert api_param.default == param_data_from.default
-            assert api_details.http.response.strategy == expect_api.response["strategy"]
             assert api_details.http.response.value == ""
             assert len(api_details.http.response.properties) == 1
-            assert api_details.http.response.properties[0].serialize() == expect_api.response["data"][0]
+            assert api_details.http.response.properties[0].serialize() == expect_api.response.data[0].serialize()
 
     @pytest.mark.parametrize(
         ("base_url", "api_path"),
