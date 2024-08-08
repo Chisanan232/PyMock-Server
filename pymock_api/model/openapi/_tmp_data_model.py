@@ -11,6 +11,7 @@ class BaseTmpDataModel:
 
 @dataclass
 class TmpItemModel(BaseTmpDataModel):
+    title: Optional[str] = None
     value_type: str = field(default_factory=str)
     format: Optional[str] = None
     enums: List[str] = field(default_factory=list)
@@ -20,6 +21,7 @@ class TmpItemModel(BaseTmpDataModel):
     def deserialize(cls, data: Dict) -> "TmpItemModel":
         print(f"[DEBUG in TmpItemModel.deserialize] data: {data}")
         return TmpItemModel(
+            title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]),
             format="",  # TODO: Support in next PR
             enums=[],  # TODO: Support in next PR
@@ -57,6 +59,7 @@ class TmpAPIParameterModel(BaseTmpDataModel):
 
 @dataclass
 class TmpResponsePropertyModel(BaseTmpDataModel):
+    title: Optional[str] = None
     value_type: Optional[str] = None
     format: Optional[str] = None  # For OpenAPI v3
     enums: List[str] = field(default_factory=list)
@@ -67,6 +70,7 @@ class TmpResponsePropertyModel(BaseTmpDataModel):
     def deserialize(cls, data: Dict) -> "TmpResponsePropertyModel":
         print(f"[DEBUG in TmpItemModel.deserialize] data: {data}")
         return TmpResponsePropertyModel(
+            title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else None,
             format="",  # TODO: Support in next PR
             enums=[],  # TODO: Support in next PR
