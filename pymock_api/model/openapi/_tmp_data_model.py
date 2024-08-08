@@ -74,6 +74,9 @@ class TmpResponsePropertyModel(BaseTmpDataModel):
     def has_ref(self) -> bool:
         return True if self.ref else False
 
+    def is_empty(self) -> bool:
+        return not (self.value_type or self.ref)
+
 
 @dataclass
 class TmpResponseModel(BaseTmpDataModel):
