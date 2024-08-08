@@ -54,7 +54,7 @@ class TmpAPIParameterModel(BaseTmpDataModel):
 
 @dataclass
 class TmpResponsePropertyModel(BaseTmpDataModel):
-    value_type: str = field(default_factory=str)
+    value_type: Optional[str] = None
     format: Optional[str] = None  # For OpenAPI v3
     enums: List[str] = field(default_factory=list)
     ref: str = field(default_factory=str)
@@ -64,7 +64,7 @@ class TmpResponsePropertyModel(BaseTmpDataModel):
     def deserialize(cls, data: Dict) -> "TmpResponsePropertyModel":
         print(f"[DEBUG in TmpItemModel.deserialize] data: {data}")
         return TmpResponsePropertyModel(
-            value_type=ensure_type_is_python_type(data["type"]),
+            value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else None,
             format="",  # TODO: Support in next PR
             enums=[],  # TODO: Support in next PR
             ref="",  # TODO: Support in next PR
@@ -77,6 +77,17 @@ class TmpResponseModel(BaseTmpDataModel):
     value_type: str = field(default_factory=str)  # unused
     required: list[str] = field(default_factory=list)
     properties: dict[str, TmpResponsePropertyModel] = field(default_factory=dict)
+
+
+@dataclass
+class TmpResponseSchema(BaseTmpDataModel):
+    schema: Optional[TmpResponsePropertyModel] = None
+
+    @classmethod
+    def deserialize(cls, data: dict) -> "TmpResponseSchema":
+        if data:
+            return TmpResponseSchema(schema=TmpResponsePropertyModel.deserialize(data.get("schema", {})))
+        return TmpResponseSchema()
 
 
 @dataclass
