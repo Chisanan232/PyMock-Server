@@ -77,6 +77,7 @@ class TmpResponsePropertyModel(BaseTmpDataModel):
 
 @dataclass
 class TmpResponseModel(BaseTmpDataModel):
+    title: Optional[str] = None
     value_type: str = field(default_factory=str)  # unused
     required: list[str] = field(default_factory=list)
     properties: Dict[str, TmpResponsePropertyModel] = field(default_factory=dict)
@@ -90,6 +91,7 @@ class TmpResponseModel(BaseTmpDataModel):
             for k, v in properties_config.items():
                 properties[k] = TmpResponsePropertyModel.deserialize(v)
         return TmpResponseModel(
+            title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else "",
             required=data.get("required", []),
             properties=properties,
