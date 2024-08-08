@@ -26,6 +26,9 @@ class TmpItemModel(BaseTmpDataModel):
             ref="",  # TODO: Support in next PR
         )
 
+    def has_ref(self) -> bool:
+        return True if self.ref else False
+
 
 @dataclass
 class TmpAPIParameterModel(BaseTmpDataModel):
