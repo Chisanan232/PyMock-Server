@@ -79,7 +79,21 @@ class TmpResponsePropertyModel(BaseTmpDataModel):
 class TmpResponseModel(BaseTmpDataModel):
     value_type: str = field(default_factory=str)  # unused
     required: list[str] = field(default_factory=list)
-    properties: dict[str, TmpResponsePropertyModel] = field(default_factory=dict)
+    properties: Dict[str, TmpResponsePropertyModel] = field(default_factory=dict)
+
+    @classmethod
+    def deserialize(cls, data: Dict) -> "TmpResponseModel":
+        print(f"[DEBUG in TmpResponseModel.deserialize] data: {data}")
+        properties = {}
+        properties_config: dict = data.get("properties", {})
+        if properties_config:
+            for k, v in properties_config.items():
+                properties[k] = TmpResponsePropertyModel.deserialize(v)
+        return TmpResponseModel(
+            value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else "",
+            required=data.get("required", []),
+            properties=properties,
+        )
 
 
 @dataclass
