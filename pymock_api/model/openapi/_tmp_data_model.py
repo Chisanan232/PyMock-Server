@@ -57,7 +57,7 @@ class TmpResponsePropertyModel(BaseTmpDataModel):
     value_type: Optional[str] = None
     format: Optional[str] = None  # For OpenAPI v3
     enums: List[str] = field(default_factory=list)
-    ref: str = field(default_factory=str)
+    ref: Optional[str] = None
     items: Optional[TmpItemModel] = None
 
     @classmethod
@@ -67,9 +67,12 @@ class TmpResponsePropertyModel(BaseTmpDataModel):
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else None,
             format="",  # TODO: Support in next PR
             enums=[],  # TODO: Support in next PR
-            ref="",  # TODO: Support in next PR
+            ref=data.get("$ref", None),
             items=None,
         )
+
+    def has_ref(self) -> bool:
+        return True if self.ref else False
 
 
 @dataclass
@@ -88,6 +91,9 @@ class TmpResponseSchema(BaseTmpDataModel):
         if data:
             return TmpResponseSchema(schema=TmpResponsePropertyModel.deserialize(data.get("schema", {})))
         return TmpResponseSchema()
+
+    def has_ref(self) -> bool:
+        return True if self.schema and self.schema.has_ref else False  # type: ignore[truthy-function]
 
 
 @dataclass
