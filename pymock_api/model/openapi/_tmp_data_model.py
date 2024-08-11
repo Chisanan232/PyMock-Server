@@ -64,22 +64,22 @@ class TmpResponsePropertyModel(BaseTmpDataModel):
     format: Optional[str] = None  # For OpenAPI v3
     enums: List[str] = field(default_factory=list)
     ref: Optional[str] = None
-    items: Optional[TmpItemModel] = None
+    items: Optional["TmpResponsePropertyModel"] = None
 
     @classmethod
     def deserialize(cls, data: Dict) -> "TmpResponsePropertyModel":
-        print(f"[DEBUG in TmpItemModel.deserialize] data: {data}")
+        print(f"[DEBUG in TmpResponsePropertyModel.deserialize] data: {data}")
         return TmpResponsePropertyModel(
             title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else None,
             format="",  # TODO: Support in next PR
             enums=[],  # TODO: Support in next PR
             ref=data.get("$ref", None),
-            items=None,
+            items=TmpResponsePropertyModel.deserialize(data["items"]) if data.get("items", None) else None,
         )
 
     def has_ref(self) -> bool:
-        return True if self.ref else False
+        return True if (self.ref or (self.items and self.items.has_ref())) else False
 
     def is_empty(self) -> bool:
         return not (self.value_type or self.ref)
