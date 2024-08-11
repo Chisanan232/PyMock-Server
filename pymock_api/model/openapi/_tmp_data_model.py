@@ -15,7 +15,7 @@ class TmpItemModel(BaseTmpDataModel):
     value_type: str = field(default_factory=str)
     format: Optional[str] = None
     enums: List[str] = field(default_factory=list)
-    ref: str = field(default_factory=str)
+    ref: Optional[str] = None
 
     @classmethod
     def deserialize(cls, data: Dict) -> "TmpItemModel":
@@ -25,7 +25,7 @@ class TmpItemModel(BaseTmpDataModel):
             value_type=ensure_type_is_python_type(data["type"]),
             format="",  # TODO: Support in next PR
             enums=[],  # TODO: Support in next PR
-            ref="",  # TODO: Support in next PR
+            ref=data.get("$ref", None),
         )
 
     def has_ref(self) -> bool:
