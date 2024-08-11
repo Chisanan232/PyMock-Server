@@ -12,7 +12,7 @@ class BaseTmpDataModel:
 @dataclass
 class TmpItemModel(BaseTmpDataModel):
     title: Optional[str] = None
-    value_type: str = field(default_factory=str)
+    value_type: Optional[str] = None
     format: Optional[str] = None
     enums: List[str] = field(default_factory=list)
     ref: Optional[str] = None
@@ -22,7 +22,7 @@ class TmpItemModel(BaseTmpDataModel):
         print(f"[DEBUG in TmpItemModel.deserialize] data: {data}")
         return TmpItemModel(
             title=data.get("title", None),
-            value_type=ensure_type_is_python_type(data["type"]),
+            value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else None,
             format="",  # TODO: Support in next PR
             enums=[],  # TODO: Support in next PR
             ref=data.get("$ref", None),
