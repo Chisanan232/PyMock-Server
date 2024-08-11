@@ -8,8 +8,11 @@ from pymock_api.model.openapi._js_handlers import convert_js_type
     [
         ("string", "str"),
         ("integer", "int"),
+        ("number", "int"),
         ("boolean", "bool"),
         ("array", "list"),
+        ("object", "dict"),
+        ("file", "file"),
     ],
 )
 def test_convert_js_type(js_type: str, py_type: str):
