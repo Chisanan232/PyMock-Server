@@ -103,7 +103,7 @@ class TmpResponsePropertyModel(BaseTmpDataModel):
 class TmpResponseModel(BaseTmpDataModel):
     title: Optional[str] = None
     value_type: str = field(default_factory=str)  # unused
-    required: list[str] = field(default_factory=list)
+    required: Optional[list[str]] = None
     properties: Dict[str, TmpResponsePropertyModel] = field(default_factory=dict)
 
     @classmethod
@@ -117,7 +117,7 @@ class TmpResponseModel(BaseTmpDataModel):
         return TmpResponseModel(
             title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else "",
-            required=data.get("required", []),
+            required=data.get("required", None),
             properties=properties,
         )
 
