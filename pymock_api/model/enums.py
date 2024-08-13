@@ -15,8 +15,17 @@ from pymock_api._utils.random import (
     RandomString,
     ValueSize,
 )
-from pymock_api.model.openapi._js_handlers import convert_js_type
-from pymock_api.model.openapi._tmp_data_model import PropertyDetail, ResponseProperty
+from pymock_api.model.openapi._schema_parser import (
+    _ReferenceObjectParserWithTmpDataModel,
+)
+from pymock_api.model.openapi._tmp_data_model import (
+    PropertyDetail,
+    ResponseProperty,
+    TmpItemModel,
+    TmpResponseModel,
+    TmpResponsePropertyModel,
+    TmpResponseSchema,
+)
 
 
 class Format(Enum):
@@ -55,13 +64,13 @@ class ResponseStrategy(Enum):
     def process_response_from_reference(
         self,
         init_response: ResponseProperty,
-        data: dict,
+        data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpItemModel],
         get_schema_parser_factory: Callable,
     ) -> ResponseProperty:
         assert self is ResponseStrategy.OBJECT
         response = self._process_reference_object(
             init_response=init_response,
-            response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(data, accept_no_ref=True),
+            response_schema_ref=_ReferenceObjectParserWithTmpDataModel.get_schema_ref(data, accept_no_ref=True),
             get_schema_parser_factory=get_schema_parser_factory,
         )
 
@@ -127,12 +136,14 @@ class ResponseStrategy(Enum):
     def _process_reference_object(
         self,
         init_response: ResponseProperty,
-        response_schema_ref: dict,
+        response_schema_ref: Optional[TmpResponseModel],
         get_schema_parser_factory: Callable,
         empty_body_key: str = "",
     ) -> ResponseProperty:
-        parser = get_schema_parser_factory().object(response_schema_ref)
-        response_schema_properties: Optional[dict] = parser.get_properties(default={})
+        # parser = get_schema_parser_factory().object(response_schema_ref)
+        # response_schema_properties: Optional[dict] = parser.get_properties(default={})
+        assert response_schema_ref
+        response_schema_properties: Dict[str, TmpResponsePropertyModel] = response_schema_ref.properties or {}
         print(f"[DEBUG in process_response_from_reference] response_schema_ref: {response_schema_ref}")
         print(f"[DEBUG in process_response_from_reference] response_schema_properties: {response_schema_properties}")
         if response_schema_properties:
@@ -140,10 +151,10 @@ class ResponseStrategy(Enum):
                 print(f"[DEBUG in process_response_from_reference] k: {k}")
                 print(f"[DEBUG in process_response_from_reference] v: {v}")
                 # Check reference again
-                if get_schema_parser_factory().reference_object().has_ref(v):
+                if _ReferenceObjectParserWithTmpDataModel.has_ref(v):
                     response_prop = self._process_reference_object(
                         init_response=self.initial_response_data(),
-                        response_schema_ref=get_schema_parser_factory().reference_object().get_schema_ref(v),
+                        response_schema_ref=_ReferenceObjectParserWithTmpDataModel.get_schema_ref(v),
                         get_schema_parser_factory=get_schema_parser_factory,
                         empty_body_key=k,
                     )
@@ -176,7 +187,8 @@ class ResponseStrategy(Enum):
                     f"[DEBUG in process_response_from_reference] has properties, response_data_prop: {response_data_prop}"
                 )
                 response_data_prop.name = k
-                response_data_prop.required = k in parser.get_required(default=[k])
+                # response_data_prop.required = k in parser.get_required(default=[k])
+                response_data_prop.required = k in (response_schema_ref.required or [k])
                 init_response.data.append(response_data_prop)
                 # else:
                 #     self._ensure_data_structure_when_non_object_strategy(init_response)
@@ -185,7 +197,7 @@ class ResponseStrategy(Enum):
         else:
             # The section which doesn't have setting body
             response_config = self._generate_empty_response()
-            if "title" in response_schema_ref.keys() and response_schema_ref["title"] == "InputStream":
+            if response_schema_ref.title == "InputStream":
                 # if self is ResponseStrategy.OBJECT:
                 response_config.type = "file"
 
@@ -194,7 +206,8 @@ class ResponseStrategy(Enum):
                     f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
                 )
                 response_data_prop.name = empty_body_key
-                response_data_prop.required = empty_body_key in parser.get_required(default=[empty_body_key])
+                # response_data_prop.required = empty_body_key in parser.get_required(default=[empty_body_key])
+                response_data_prop.required = empty_body_key in (response_schema_ref.required or [empty_body_key])
                 init_response.data.append(response_data_prop)
                 # else:
                 #     response_config = "random file output stream"  # type: ignore[assignment]
@@ -222,7 +235,7 @@ class ResponseStrategy(Enum):
     def process_response_from_data(
         self,
         init_response: ResponseProperty,
-        data: dict,
+        data: TmpResponsePropertyModel,
         get_schema_parser_factory: Callable,
     ) -> ResponseProperty:
         assert self is ResponseStrategy.OBJECT
@@ -260,17 +273,18 @@ class ResponseStrategy(Enum):
     def _generate_response(
         self,
         init_response: ResponseProperty,
-        property_value: dict,
+        property_value: TmpResponsePropertyModel,
         get_schema_parser_factory: Callable,
     ) -> Union[PropertyDetail, List[PropertyDetail]]:
-        if not property_value:
+        if property_value.is_empty():
             return self._generate_empty_response()
         print(f"[DEBUG in _generate_response] property_value: {property_value}")
         print(f"[DEBUG in _generate_response] before it have init_response: {init_response}")
-        if get_schema_parser_factory().reference_object().has_ref(property_value):
-            resp_prop_data = get_schema_parser_factory().reference_object().get_schema_ref(property_value)
+        if _ReferenceObjectParserWithTmpDataModel.has_ref(property_value):
+            resp_prop_data = _ReferenceObjectParserWithTmpDataModel.get_schema_ref(property_value)
         else:
-            resp_prop_data = property_value
+            resp_prop_data = property_value  # type: ignore[assignment]
+        assert resp_prop_data
         return self._generate_response_from_data(
             init_response=init_response,
             resp_prop_data=resp_prop_data,
@@ -299,18 +313,19 @@ class ResponseStrategy(Enum):
     def _generate_response_from_data(
         self,
         init_response: ResponseProperty,
-        resp_prop_data: dict,
+        resp_prop_data: Union[TmpResponsePropertyModel, TmpResponseModel, TmpItemModel],
         get_schema_parser_factory: Callable,
     ) -> Union[PropertyDetail, List[PropertyDetail]]:
 
         def _handle_list_type_data(
-            data: dict,
+            data: TmpResponsePropertyModel,
             noref_val_process_callback: Callable,
             ref_val_process_callback: Callable,
             response: PropertyDetail = PropertyDetail(),
         ) -> PropertyDetail:
-            items_data = data["items"]
-            if get_schema_parser_factory().reference_object().has_ref(items_data):
+            items_data = data.items
+            assert items_data
+            if _ReferenceObjectParserWithTmpDataModel.has_ref(items_data):
                 response = _handle_reference_object(
                     response, items_data, noref_val_process_callback, ref_val_process_callback
                 )
@@ -360,33 +375,61 @@ class ResponseStrategy(Enum):
 
         def _handle_reference_object(
             response: PropertyDetail,
-            items_data: dict,
-            noref_val_process_callback: Callable,
-            ref_val_process_callback: Callable,
+            items_data: TmpResponsePropertyModel,
+            noref_val_process_callback: Callable[
+                # item_k, item_v, response
+                [str, TmpResponsePropertyModel, PropertyDetail],
+                PropertyDetail,
+            ],
+            ref_val_process_callback: Callable[
+                [
+                    # item_k, item_v, response, single_response, noref_val_process_callback
+                    str,
+                    TmpResponsePropertyModel,
+                    PropertyDetail,
+                    TmpResponseModel,
+                    Callable[
+                        [str, TmpResponsePropertyModel, PropertyDetail],
+                        PropertyDetail,
+                    ],
+                ],
+                PropertyDetail,
+            ],
         ) -> PropertyDetail:
-            single_response = get_schema_parser_factory().reference_object().get_schema_ref(items_data)
-            parser = get_schema_parser_factory().object(single_response)
-            for item_k, item_v in parser.get_properties(default={}).items():
+            single_response: Optional[TmpResponseModel] = _ReferenceObjectParserWithTmpDataModel.get_schema_ref(
+                items_data
+            )
+            # parser = get_schema_parser_factory().object(single_response)
+            assert single_response
+            # new_response: Optional[PropertyDetail] = None
+            for item_k, item_v in (single_response.properties or {}).items():
                 print(f"[DEBUG in nested data issue at _handle_list_type_data] item_v: {item_v}")
                 print(f"[DEBUG in nested data issue at _handle_list_type_data] response: {response}")
-                print(
-                    f"[DEBUG in nested data issue at _handle_list_type_data] parser.get_required(): {parser.get_required()}"
-                )
-                if get_schema_parser_factory().reference_object().has_ref(item_v):
-                    response = ref_val_process_callback(item_k, item_v, response, parser, noref_val_process_callback)
+                if _ReferenceObjectParserWithTmpDataModel.has_ref(item_v):
+                    response = ref_val_process_callback(
+                        item_k, item_v, response, single_response, noref_val_process_callback
+                    )
                 else:
                     response = noref_val_process_callback(item_k, item_v, response)
             return response
 
-        def _handle_list_type_value_with_object_strategy(data: dict) -> PropertyDetail:
+        def _handle_list_type_value_with_object_strategy(
+            # data: Union[TmpResponsePropertyModel, TmpItemModel]
+            data: TmpResponsePropertyModel,
+        ) -> PropertyDetail:
 
             def _ref_process_callback(
-                item_k: str, item_v: dict, response: PropertyDetail, parser, noref_val_process_callback: Callable
+                item_k: str,
+                item_v: TmpResponsePropertyModel,
+                response: PropertyDetail,
+                ref_single_response: TmpResponseModel,
+                noref_val_process_callback: Callable[[str, TmpResponsePropertyModel, PropertyDetail], PropertyDetail],
             ) -> PropertyDetail:
+                assert ref_single_response.required
                 item_k_data_prop = PropertyDetail(
                     name=item_k,
-                    required=item_k in parser.get_required(),
-                    type=convert_js_type(item_v.get("type", "object")),
+                    required=item_k in ref_single_response.required,
+                    type=item_v.value_type or "dict",
                     # TODO: Set the *format* property correctly
                     format=None,
                     items=[],
@@ -405,6 +448,8 @@ class ResponseStrategy(Enum):
                     ref_val_process_callback=_ref_process_callback,
                     response=item_k_data_prop,
                 )
+                # Callable[[str, TmpResponsePropertyModel, PropertyDetail | TmpResponsePropertyModel, TmpResponseModel, Callable[[str, TmpResponsePropertyModel, PropertyDetail | TmpResponsePropertyModel], PropertyDetail]], PropertyDetail | TmpResponsePropertyModel]
+                # Callable[[str, TmpResponsePropertyModel, PropertyDetail | TmpResponsePropertyModel, TmpResponseModel, Callable[[str, TmpResponsePropertyModel, PropertyDetail | TmpResponsePropertyModel], PropertyDetail]], PropertyDetail]
                 print(
                     f"[DEBUG in nested data issue at _handle_list_type_data] ref_item_v_response from data which has reference object: {ref_item_v_response}"
                 )
@@ -414,6 +459,7 @@ class ResponseStrategy(Enum):
                 print(f"[DEBUG in _handle_list_type_data] check whether the itme is empty or not: {response.items}")
                 if response.items:
                     print("[DEBUG in _handle_list_type_data] the response item has data")
+                    assert response.items and isinstance(response.items, list)
                     response.items.append(ref_item_v_response)
                 else:
                     print("[DEBUG in _handle_list_type_data] the response item doesn't have data")
@@ -423,9 +469,11 @@ class ResponseStrategy(Enum):
                 return response
 
             def _noref_process_callback(
-                item_k: str, item_v: dict, response_data_prop: PropertyDetail
+                item_k: str,
+                item_v: TmpResponsePropertyModel,
+                response_data_prop: PropertyDetail,
             ) -> PropertyDetail:
-                item_type = convert_js_type(item_v["type"])
+                item_type = item_v.value_type
                 item = PropertyDetail(
                     name=item_k,
                     required=_Default_Required.general,
@@ -464,9 +512,11 @@ class ResponseStrategy(Enum):
             )
             return response_data_prop
 
-        def _handle_object_type_value_with_object_strategy(data: dict) -> Union[PropertyDetail, List[PropertyDetail]]:
+        def _handle_object_type_value_with_object_strategy(
+            data: Union[TmpResponsePropertyModel, TmpResponseModel, TmpItemModel]
+        ) -> Union[PropertyDetail, List[PropertyDetail]]:
             print(f"[DEBUG in _handle_object_type_value_with_object_strategy] data: {data}")
-            data_title = data.get("title", "")
+            data_title = data.title
             if data_title:
                 # TODO: It should also consider the scenario about input stream part (download file)
                 # Example data: {'type': 'object', 'title': 'InputStream'}
@@ -487,11 +537,12 @@ class ResponseStrategy(Enum):
                     #     "format": None,
                     #     "items": None,
                     # }
-                else:
-                    raise NotImplementedError
+                # else:
+                #     raise NotImplementedError
 
             # Check reference first
-            has_ref = get_schema_parser_factory().reference_object().has_ref(data)
+            assert not isinstance(data, TmpResponseModel)
+            has_ref = _ReferenceObjectParserWithTmpDataModel.has_ref(data)
             if has_ref:
                 # Process reference
                 resp = self.process_response_from_reference(
@@ -521,8 +572,11 @@ class ResponseStrategy(Enum):
                 return resp.data
             else:
                 # Handle the schema *additionalProperties*
-                additional_properties = data["additionalProperties"]
-                additional_properties_type = convert_js_type(additional_properties["type"])
+                assert isinstance(data, TmpResponsePropertyModel)
+                additional_properties = data.additionalProperties
+                assert additional_properties
+                additional_properties_type = additional_properties.value_type
+                assert additional_properties_type
                 if locate(additional_properties_type) in [list, dict, "file"]:
                     items_config_data = _handle_list_type_value_with_object_strategy(additional_properties)
                     print(
@@ -635,13 +689,16 @@ class ResponseStrategy(Enum):
         #     return [item_info]
 
         def _handle_each_data_types_response_with_object_strategy(
-            data: dict, v_type: str
+            data: Union[TmpResponsePropertyModel, TmpResponseModel, TmpItemModel], v_type: str
         ) -> Union[PropertyDetail, List[PropertyDetail]]:
             if locate(v_type) == list:
+                assert isinstance(data, TmpResponsePropertyModel)
                 return _handle_list_type_value_with_object_strategy(data)
             elif locate(v_type) == dict:
                 return _handle_object_type_value_with_object_strategy(data)
             else:
+                print(f"[DEBUG in src._handle_each_data_types_response_with_object_strategy] v_type: {v_type}")
+                print(f"[DEBUG in src._handle_each_data_types_response_with_object_strategy] data: {data}")
                 return _handle_other_types_value_with_object_strategy(v_type)
 
         # def _handle_each_data_types_response_with_non_object_strategy(
@@ -689,10 +746,11 @@ class ResponseStrategy(Enum):
         #         raise NotImplementedError
 
         print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
-        if not resp_prop_data.get("type", None):
-            assert get_schema_parser_factory().reference_object().has_ref(resp_prop_data)
+        if not resp_prop_data.value_type:
+            assert not isinstance(resp_prop_data, TmpResponseModel)
+            assert _ReferenceObjectParserWithTmpDataModel.has_ref(resp_prop_data)
             return _handle_each_data_types_response_with_object_strategy(resp_prop_data, "dict")
-        v_type = convert_js_type(resp_prop_data["type"])
+        v_type = resp_prop_data.value_type
         # if self is ResponseStrategy.OBJECT:
         return _handle_each_data_types_response_with_object_strategy(resp_prop_data, v_type)
         # else:

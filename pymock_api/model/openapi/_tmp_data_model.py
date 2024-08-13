@@ -135,6 +135,9 @@ class TmpResponseSchema(BaseTmpDataModel):
     def has_ref(self) -> bool:
         return True if self.schema and self.schema.has_ref else False  # type: ignore[truthy-function]
 
+    def is_empty(self) -> bool:
+        return not self.schema or self.schema.is_empty()
+
 
 @dataclass
 class PropertyDetail:

@@ -217,6 +217,7 @@ class TestAPIParser:
                     assert item.name
                     assert item.type
                     assert item.required is not None
+        # assert False
         # else:
         #     assert data_details is not None and isinstance(data_details, dict)
         #     for v in data_details.values():

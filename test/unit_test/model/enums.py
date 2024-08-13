@@ -21,7 +21,12 @@ from pymock_api.model.openapi._schema_parser import (
     OpenAPIV3SchemaParser,
     set_component_definition,
 )
-from pymock_api.model.openapi._tmp_data_model import PropertyDetail, ResponseProperty
+from pymock_api.model.openapi._tmp_data_model import (
+    PropertyDetail,
+    ResponseProperty,
+    TmpResponseModel,
+    TmpResponsePropertyModel,
+)
 
 from ..._test_utils import Verify
 from ..model.openapi._test_case import DeserializeV2OpenAPIConfigTestCaseFactory
@@ -75,11 +80,12 @@ class TestResponseStrategy(EnumTestSuite):
     def test_generate_response(self, strategy: ResponseStrategy, api_response_detail: dict, entire_config: dict):
         # Pre-process
         set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
+        tmp_data_model = TmpResponsePropertyModel.deserialize(api_response_detail)
 
         # Run target function under test
         response_prop_data = strategy._generate_response(
             init_response=ResponseProperty(),
-            property_value=api_response_detail,
+            property_value=tmp_data_model,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
         )
 
@@ -147,21 +153,25 @@ class TestResponseStrategy(EnumTestSuite):
             # (ResponseStrategy.STRING, {"type": "file"}, "random file output stream"),
             # For object strategy
             (
+                # 1
                 ResponseStrategy.OBJECT,
                 {"type": "integer"},
                 {"name": "", "required": True, "type": "int"},
             ),
             (
+                # 2
                 ResponseStrategy.OBJECT,
                 {"type": "number"},
                 {"name": "", "required": True, "type": "int"},
             ),
             (
+                # 3
                 ResponseStrategy.OBJECT,
                 {"type": "boolean"},
                 {"name": "", "required": True, "type": "bool"},
             ),
             (
+                # 4
                 ResponseStrategy.OBJECT,
                 {"type": "array", "items": {"type": "integer"}},
                 {
@@ -173,6 +183,7 @@ class TestResponseStrategy(EnumTestSuite):
                 },
             ),
             (
+                # 5
                 ResponseStrategy.OBJECT,
                 {"type": "array", "items": {"$ref": "#/components/schemas/FooResponse"}},
                 {
@@ -189,6 +200,7 @@ class TestResponseStrategy(EnumTestSuite):
                 },
             ),
             (
+                # 6
                 ResponseStrategy.OBJECT,
                 {"type": "file"},
                 {"name": "", "required": True, "type": "file"},
@@ -233,6 +245,7 @@ class TestResponseStrategy(EnumTestSuite):
             #     },
             # ),
             (
+                # 7
                 ResponseStrategy.OBJECT,
                 {
                     "type": "object",
@@ -249,6 +262,7 @@ class TestResponseStrategy(EnumTestSuite):
                 },
             ),
             (
+                # 8
                 ResponseStrategy.OBJECT,
                 {
                     "type": "object",
@@ -268,6 +282,7 @@ class TestResponseStrategy(EnumTestSuite):
                 },
             ),
             (
+                # 9
                 ResponseStrategy.OBJECT,
                 {
                     "type": "object",
@@ -349,6 +364,7 @@ class TestResponseStrategy(EnumTestSuite):
             #     },
             # ),
             (
+                # 10
                 ResponseStrategy.OBJECT,
                 {
                     "type": "object",
@@ -407,6 +423,7 @@ class TestResponseStrategy(EnumTestSuite):
                 },
             ),
             (
+                # 11
                 ResponseStrategy.OBJECT,
                 {
                     "$ref": "#/components/schemas/NestedFooResponse",
@@ -523,11 +540,12 @@ class TestResponseStrategy(EnumTestSuite):
                     }
                 )
             )
+        test_response_data_model = TmpResponsePropertyModel.deserialize(test_response_data)
 
         # Run target
         resp = ut_enum._generate_response_from_data(
             init_response=ut_enum.initial_response_data(),
-            resp_prop_data=test_response_data,
+            resp_prop_data=test_response_data_model,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
         )
 
@@ -550,7 +568,8 @@ class TestResponseStrategy(EnumTestSuite):
             # ),
             (
                 ResponseStrategy.OBJECT,
-                {"type": "object"},
+                TmpResponseModel(value_type="object"),
+                # {"type": "object"},
                 ResponseProperty(
                     data=[PropertyDetail(name="THIS_IS_EMPTY", required=False, type=None, format=None, items=[])],
                 ),
