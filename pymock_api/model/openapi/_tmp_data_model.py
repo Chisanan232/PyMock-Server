@@ -1,3 +1,4 @@
+from abc import ABCMeta
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Union
 
@@ -5,7 +6,7 @@ from ._js_handlers import ensure_type_is_python_type
 
 
 @dataclass
-class BaseTmpDataModel:
+class BaseTmpDataModel(metaclass=ABCMeta):
     pass
 
 
