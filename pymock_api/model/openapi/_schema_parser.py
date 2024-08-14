@@ -7,8 +7,8 @@ from typing import Any, Dict, List, Optional, Union
 from pymock_api.model.openapi._tmp_data_model import (
     BaseTmpDataModel,
     TmpItemModel,
-    TmpResponseModel,
     TmpResponsePropertyModel,
+    TmpResponseRefModel,
     TmpResponseSchema,
 )
 
@@ -368,7 +368,7 @@ class _ReferenceObjectParserWithTmpDataModel(_BaseReferenceObjectParser):
     @classmethod
     def get_schema_ref(  # type: ignore[override]
         cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpItemModel], accept_no_ref: bool = False  # type: ignore[override]
-    ) -> Optional[TmpResponseModel]:
+    ) -> Optional[TmpResponseRefModel]:
         def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
             if i == len(paths) - 1:
                 return component_def_data[paths[i]]
@@ -385,4 +385,4 @@ class _ReferenceObjectParserWithTmpDataModel(_BaseReferenceObjectParser):
         schema_path = cls.get_ref(data).replace("#/", "").split("/")[1:]
         print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")
         # Operate the component definition object
-        return TmpResponseModel.deserialize(_get_schema(get_component_definition(), schema_path, 0))
+        return TmpResponseRefModel.deserialize(_get_schema(get_component_definition(), schema_path, 0))

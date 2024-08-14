@@ -22,8 +22,8 @@ from pymock_api.model.openapi._tmp_data_model import (
     PropertyDetail,
     ResponseProperty,
     TmpItemModel,
-    TmpResponseModel,
     TmpResponsePropertyModel,
+    TmpResponseRefModel,
     TmpResponseSchema,
 )
 
@@ -136,7 +136,7 @@ class ResponseStrategy(Enum):
     def _process_reference_object(
         self,
         init_response: ResponseProperty,
-        response_schema_ref: Optional[TmpResponseModel],
+        response_schema_ref: Optional[TmpResponseRefModel],
         get_schema_parser_factory: Callable,
         empty_body_key: str = "",
     ) -> ResponseProperty:
@@ -313,7 +313,7 @@ class ResponseStrategy(Enum):
     def _generate_response_from_data(
         self,
         init_response: ResponseProperty,
-        resp_prop_data: Union[TmpResponsePropertyModel, TmpResponseModel, TmpItemModel],
+        resp_prop_data: Union[TmpResponsePropertyModel, TmpResponseRefModel, TmpItemModel],
         get_schema_parser_factory: Callable,
     ) -> Union[PropertyDetail, List[PropertyDetail]]:
 
@@ -387,7 +387,7 @@ class ResponseStrategy(Enum):
                     str,
                     TmpResponsePropertyModel,
                     PropertyDetail,
-                    TmpResponseModel,
+                    TmpResponseRefModel,
                     Callable[
                         [str, TmpResponsePropertyModel, PropertyDetail],
                         PropertyDetail,
@@ -396,7 +396,7 @@ class ResponseStrategy(Enum):
                 PropertyDetail,
             ],
         ) -> PropertyDetail:
-            single_response: Optional[TmpResponseModel] = _ReferenceObjectParserWithTmpDataModel.get_schema_ref(
+            single_response: Optional[TmpResponseRefModel] = _ReferenceObjectParserWithTmpDataModel.get_schema_ref(
                 items_data
             )
             # parser = get_schema_parser_factory().object(single_response)
@@ -422,7 +422,7 @@ class ResponseStrategy(Enum):
                 item_k: str,
                 item_v: TmpResponsePropertyModel,
                 response: PropertyDetail,
-                ref_single_response: TmpResponseModel,
+                ref_single_response: TmpResponseRefModel,
                 noref_val_process_callback: Callable[[str, TmpResponsePropertyModel, PropertyDetail], PropertyDetail],
             ) -> PropertyDetail:
                 assert ref_single_response.required
@@ -513,7 +513,7 @@ class ResponseStrategy(Enum):
             return response_data_prop
 
         def _handle_object_type_value_with_object_strategy(
-            data: Union[TmpResponsePropertyModel, TmpResponseModel, TmpItemModel]
+            data: Union[TmpResponsePropertyModel, TmpResponseRefModel, TmpItemModel]
         ) -> Union[PropertyDetail, List[PropertyDetail]]:
             print(f"[DEBUG in _handle_object_type_value_with_object_strategy] data: {data}")
             data_title = data.title
@@ -541,7 +541,7 @@ class ResponseStrategy(Enum):
                 #     raise NotImplementedError
 
             # Check reference first
-            assert not isinstance(data, TmpResponseModel)
+            assert not isinstance(data, TmpResponseRefModel)
             has_ref = _ReferenceObjectParserWithTmpDataModel.has_ref(data)
             if has_ref:
                 # Process reference
@@ -689,7 +689,7 @@ class ResponseStrategy(Enum):
         #     return [item_info]
 
         def _handle_each_data_types_response_with_object_strategy(
-            data: Union[TmpResponsePropertyModel, TmpResponseModel, TmpItemModel], v_type: str
+            data: Union[TmpResponsePropertyModel, TmpResponseRefModel, TmpItemModel], v_type: str
         ) -> Union[PropertyDetail, List[PropertyDetail]]:
             if locate(v_type) == list:
                 assert isinstance(data, TmpResponsePropertyModel)
@@ -747,7 +747,7 @@ class ResponseStrategy(Enum):
 
         print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
         if not resp_prop_data.value_type:
-            assert not isinstance(resp_prop_data, TmpResponseModel)
+            assert not isinstance(resp_prop_data, TmpResponseRefModel)
             assert _ReferenceObjectParserWithTmpDataModel.has_ref(resp_prop_data)
             return _handle_each_data_types_response_with_object_strategy(resp_prop_data, "dict")
         v_type = resp_prop_data.value_type

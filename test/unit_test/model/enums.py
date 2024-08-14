@@ -24,8 +24,8 @@ from pymock_api.model.openapi._schema_parser import (
 from pymock_api.model.openapi._tmp_data_model import (
     PropertyDetail,
     ResponseProperty,
-    TmpResponseModel,
     TmpResponsePropertyModel,
+    TmpResponseRefModel,
 )
 
 from ..._test_utils import Verify
@@ -568,7 +568,7 @@ class TestResponseStrategy(EnumTestSuite):
             # ),
             (
                 ResponseStrategy.OBJECT,
-                TmpResponseModel(value_type="object"),
+                TmpResponseRefModel(value_type="object"),
                 # {"type": "object"},
                 ResponseProperty(
                     data=[PropertyDetail(name="THIS_IS_EMPTY", required=False, type=None, format=None, items=[])],
