@@ -139,6 +139,7 @@ class TmpResponseSchema(BaseTmpDataModel):
         return not self.schema or self.schema.is_empty()
 
 
+# The data models for final result which would be converted as the data models of PyMock-API configuration
 @dataclass
 class PropertyDetail:
     name: str = field(default_factory=str)
