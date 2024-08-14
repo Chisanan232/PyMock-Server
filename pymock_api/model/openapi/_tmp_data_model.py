@@ -19,7 +19,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
 
 
 @dataclass
-class TmpItemModel(BaseTmpRefDataModel):
+class TmpRequestItemModel(BaseTmpRefDataModel):
     title: Optional[str] = None
     value_type: Optional[str] = None
     format: Optional[str] = None
@@ -27,9 +27,9 @@ class TmpItemModel(BaseTmpRefDataModel):
     ref: Optional[str] = None
 
     @classmethod
-    def deserialize(cls, data: Dict) -> "TmpItemModel":
-        print(f"[DEBUG in TmpItemModel.deserialize] data: {data}")
-        return TmpItemModel(
+    def deserialize(cls, data: Dict) -> "TmpRequestItemModel":
+        print(f"[DEBUG in TmpRequestItemModel.deserialize] data: {data}")
+        return TmpRequestItemModel(
             title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else None,
             format="",  # TODO: Support in next PR
@@ -47,7 +47,7 @@ class TmpAPIParameterModel(BaseTmpDataModel):
     required: bool = False
     value_type: str = field(default_factory=str)
     default: Optional[str] = None
-    items: Optional[List[Union["TmpAPIParameterModel", TmpItemModel]]] = None
+    items: Optional[List[Union["TmpAPIParameterModel", TmpRequestItemModel]]] = None
 
     def __post_init__(self) -> None:
         if self.items is not None:
@@ -55,10 +55,10 @@ class TmpAPIParameterModel(BaseTmpDataModel):
         if self.value_type:
             self.value_type = self._convert_value_type()
 
-    def _convert_items(self) -> List[Union["TmpAPIParameterModel", TmpItemModel]]:
-        items: List[Union[TmpAPIParameterModel, TmpItemModel]] = []
+    def _convert_items(self) -> List[Union["TmpAPIParameterModel", TmpRequestItemModel]]:
+        items: List[Union[TmpAPIParameterModel, TmpRequestItemModel]] = []
         for item in self.items or []:
-            assert isinstance(item, (TmpAPIParameterModel, TmpItemModel))
+            assert isinstance(item, (TmpAPIParameterModel, TmpRequestItemModel))
             items.append(item)
         return items
 

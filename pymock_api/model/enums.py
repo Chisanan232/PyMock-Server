@@ -21,7 +21,7 @@ from pymock_api.model.openapi._schema_parser import (
 from pymock_api.model.openapi._tmp_data_model import (
     PropertyDetail,
     ResponseProperty,
-    TmpItemModel,
+    TmpRequestItemModel,
     TmpResponsePropertyModel,
     TmpResponseRefModel,
     TmpResponseSchema,
@@ -64,7 +64,7 @@ class ResponseStrategy(Enum):
     def process_response_from_reference(
         self,
         init_response: ResponseProperty,
-        data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpItemModel],
+        data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel],
         get_schema_parser_factory: Callable,
     ) -> ResponseProperty:
         assert self is ResponseStrategy.OBJECT
@@ -313,7 +313,7 @@ class ResponseStrategy(Enum):
     def _generate_response_from_data(
         self,
         init_response: ResponseProperty,
-        resp_prop_data: Union[TmpResponsePropertyModel, TmpResponseRefModel, TmpItemModel],
+        resp_prop_data: Union[TmpResponsePropertyModel, TmpResponseRefModel, TmpRequestItemModel],
         get_schema_parser_factory: Callable,
     ) -> Union[PropertyDetail, List[PropertyDetail]]:
 
@@ -414,7 +414,7 @@ class ResponseStrategy(Enum):
             return response
 
         def _handle_list_type_value_with_object_strategy(
-            # data: Union[TmpResponsePropertyModel, TmpItemModel]
+            # data: Union[TmpResponsePropertyModel, TmpRequestItemModel]
             data: TmpResponsePropertyModel,
         ) -> PropertyDetail:
 
@@ -513,7 +513,7 @@ class ResponseStrategy(Enum):
             return response_data_prop
 
         def _handle_object_type_value_with_object_strategy(
-            data: Union[TmpResponsePropertyModel, TmpResponseRefModel, TmpItemModel]
+            data: Union[TmpResponsePropertyModel, TmpResponseRefModel, TmpRequestItemModel]
         ) -> Union[PropertyDetail, List[PropertyDetail]]:
             print(f"[DEBUG in _handle_object_type_value_with_object_strategy] data: {data}")
             data_title = data.title
@@ -689,7 +689,7 @@ class ResponseStrategy(Enum):
         #     return [item_info]
 
         def _handle_each_data_types_response_with_object_strategy(
-            data: Union[TmpResponsePropertyModel, TmpResponseRefModel, TmpItemModel], v_type: str
+            data: Union[TmpResponsePropertyModel, TmpResponseRefModel, TmpRequestItemModel], v_type: str
         ) -> Union[PropertyDetail, List[PropertyDetail]]:
             if locate(v_type) == list:
                 assert isinstance(data, TmpResponsePropertyModel)

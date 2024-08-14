@@ -9,7 +9,7 @@ from ..enums import ResponseStrategy
 from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
 from ._parser import APIParameterParser, APIParser, OpenAPIDocumentConfigParser
 from ._schema_parser import set_component_definition
-from ._tmp_data_model import ResponseProperty, TmpAPIParameterModel, TmpItemModel
+from ._tmp_data_model import ResponseProperty, TmpAPIParameterModel, TmpRequestItemModel
 
 
 @dataclass
@@ -34,7 +34,7 @@ class BaseProperty(BaseOpenAPIDataModel, ABC):
     required: bool = False
     value_type: str = field(default_factory=str)
     default: Any = None
-    items: Optional[List[Union[TmpAPIParameterModel, TmpItemModel]]] = None
+    items: Optional[List[Union[TmpAPIParameterModel, TmpRequestItemModel]]] = None
 
 
 @dataclass
@@ -61,7 +61,7 @@ class APIParameter(BaseProperty, Transferable):
 
     def to_api_config(self) -> PyMockAPIParameter:  # type: ignore[override]
 
-        def to_items(item_data: Union[TmpAPIParameterModel, TmpItemModel]) -> IteratorItem:
+        def to_items(item_data: Union[TmpAPIParameterModel, TmpRequestItemModel]) -> IteratorItem:
             if isinstance(item_data, TmpAPIParameterModel):
                 return IteratorItem(
                     name=item_data.name,
@@ -69,7 +69,7 @@ class APIParameter(BaseProperty, Transferable):
                     value_type=item_data.value_type,
                     items=[to_items(i) for i in (item_data.items or [])],
                 )
-            elif isinstance(item_data, TmpItemModel):
+            elif isinstance(item_data, TmpRequestItemModel):
                 return IteratorItem(
                     name="",
                     required=True,

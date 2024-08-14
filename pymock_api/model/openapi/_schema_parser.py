@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from pymock_api.model.openapi._tmp_data_model import (
     BaseTmpDataModel,
-    TmpItemModel,
+    TmpRequestItemModel,
     TmpResponsePropertyModel,
     TmpResponseRefModel,
     TmpResponseSchema,
@@ -338,15 +338,15 @@ class _ReferenceObjectParser(_BaseReferenceObjectParser):
 
 class _ReferenceObjectParserWithTmpDataModel(_BaseReferenceObjectParser):
     @classmethod
-    def has_schema(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpItemModel]) -> bool:  # type: ignore[override]
+    def has_schema(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> bool:  # type: ignore[override]
         return hasattr(data, "schema") and getattr(data, "schema") is not None
 
     @classmethod
-    def has_additional_properties(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpItemModel]) -> bool:  # type: ignore[override]
+    def has_additional_properties(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> bool:  # type: ignore[override]
         return hasattr(data, "additionalProperties") and getattr(data, "additionalProperties") is not None
 
     @classmethod
-    def has_ref(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpItemModel]) -> str:  # type: ignore[override]
+    def has_ref(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> str:  # type: ignore[override]
         if cls.has_schema(data):
             return "schema" if data.schema.ref is not None else ""  # type: ignore[union-attr]
         elif cls.has_additional_properties(data):
@@ -355,7 +355,7 @@ class _ReferenceObjectParserWithTmpDataModel(_BaseReferenceObjectParser):
             return "ref" if hasattr(data, "ref") and getattr(data, "ref") is not None else ""
 
     @classmethod
-    def get_ref(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpItemModel]) -> str:
+    def get_ref(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> str:
         ref = cls.has_ref(data)
         if ref == "schema":
             assert data.schema.ref  # type: ignore[union-attr]
@@ -367,7 +367,7 @@ class _ReferenceObjectParserWithTmpDataModel(_BaseReferenceObjectParser):
 
     @classmethod
     def get_schema_ref(  # type: ignore[override]
-        cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpItemModel], accept_no_ref: bool = False  # type: ignore[override]
+        cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel], accept_no_ref: bool = False  # type: ignore[override]
     ) -> Optional[TmpResponseRefModel]:
         def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
             if i == len(paths) - 1:
