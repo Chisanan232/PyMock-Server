@@ -1,4 +1,4 @@
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Union
 
@@ -11,7 +11,15 @@ class BaseTmpDataModel(metaclass=ABCMeta):
 
 
 @dataclass
-class TmpItemModel(BaseTmpDataModel):
+class BaseTmpRefDataModel(BaseTmpDataModel):
+
+    @abstractmethod
+    def has_ref(self) -> bool:
+        pass
+
+
+@dataclass
+class TmpItemModel(BaseTmpRefDataModel):
     title: Optional[str] = None
     value_type: Optional[str] = None
     format: Optional[str] = None
@@ -59,7 +67,7 @@ class TmpAPIParameterModel(BaseTmpDataModel):
 
 
 @dataclass
-class TmpResponsePropertyModel(BaseTmpDataModel):
+class TmpResponsePropertyModel(BaseTmpRefDataModel):
     title: Optional[str] = None
     value_type: Optional[str] = None
     format: Optional[str] = None  # For OpenAPI v3
@@ -124,7 +132,7 @@ class TmpResponseRefModel(BaseTmpDataModel):
 
 
 @dataclass
-class TmpResponseSchema(BaseTmpDataModel):
+class TmpResponseSchema(BaseTmpRefDataModel):
     schema: Optional[TmpResponsePropertyModel] = None
 
     @classmethod
