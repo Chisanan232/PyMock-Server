@@ -15,9 +15,6 @@ from pymock_api._utils.random import (
     RandomString,
     ValueSize,
 )
-from pymock_api.model.openapi._schema_parser import (
-    _ReferenceObjectParserWithTmpDataModel,
-)
 from pymock_api.model.openapi._tmp_data_model import (
     PropertyDetail,
     ResponseProperty,
@@ -70,7 +67,7 @@ class ResponseStrategy(Enum):
         assert self is ResponseStrategy.OBJECT
         response = self._process_reference_object(
             init_response=init_response,
-            response_schema_ref=_ReferenceObjectParserWithTmpDataModel.get_schema_ref(data, accept_no_ref=True),
+            response_schema_ref=data.get_schema_ref(accept_no_ref=True),
             get_schema_parser_factory=get_schema_parser_factory,
         )
 
@@ -154,7 +151,7 @@ class ResponseStrategy(Enum):
                 if v.has_ref():
                     response_prop = self._process_reference_object(
                         init_response=self.initial_response_data(),
-                        response_schema_ref=_ReferenceObjectParserWithTmpDataModel.get_schema_ref(v),
+                        response_schema_ref=v.get_schema_ref(),
                         get_schema_parser_factory=get_schema_parser_factory,
                         empty_body_key=k,
                     )
@@ -281,7 +278,7 @@ class ResponseStrategy(Enum):
         print(f"[DEBUG in _generate_response] property_value: {property_value}")
         print(f"[DEBUG in _generate_response] before it have init_response: {init_response}")
         if property_value.has_ref():
-            resp_prop_data = _ReferenceObjectParserWithTmpDataModel.get_schema_ref(property_value)
+            resp_prop_data = property_value.get_schema_ref()
         else:
             resp_prop_data = property_value  # type: ignore[assignment]
         assert resp_prop_data
@@ -396,9 +393,7 @@ class ResponseStrategy(Enum):
                 PropertyDetail,
             ],
         ) -> PropertyDetail:
-            single_response: Optional[TmpResponseRefModel] = _ReferenceObjectParserWithTmpDataModel.get_schema_ref(
-                items_data
-            )
+            single_response: Optional[TmpResponseRefModel] = items_data.get_schema_ref()
             # parser = get_schema_parser_factory().object(single_response)
             assert single_response
             # new_response: Optional[PropertyDetail] = None

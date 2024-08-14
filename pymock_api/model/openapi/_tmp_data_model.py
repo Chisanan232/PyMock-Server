@@ -2,7 +2,20 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Union
 
+from ._base_schema_parser import BaseOpenAPISchemaParser
 from ._js_handlers import ensure_type_is_python_type
+
+ComponentDefinition: Dict[str, dict] = {}
+
+
+def get_component_definition() -> Dict:
+    global ComponentDefinition
+    return ComponentDefinition
+
+
+def set_component_definition(openapi_parser: BaseOpenAPISchemaParser) -> None:
+    global ComponentDefinition
+    ComponentDefinition = openapi_parser.get_objects()
 
 
 @dataclass
@@ -16,6 +29,29 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
     @abstractmethod
     def has_ref(self) -> str:
         pass
+
+    @abstractmethod
+    def get_ref(self) -> str:
+        pass
+
+    def get_schema_ref(self, accept_no_ref: bool = False) -> Optional["TmpResponseRefModel"]:
+        def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
+            if i == len(paths) - 1:
+                return component_def_data[paths[i]]
+            else:
+                return _get_schema(component_def_data[paths[i]], paths, i + 1)
+
+        print(f"[DEBUG in get_schema_ref] self: {self}")
+        _has_ref = self.has_ref()
+        print(f"[DEBUG in get_schema_ref] _has_ref: {_has_ref}")
+        if not _has_ref:
+            if accept_no_ref:
+                return None
+            raise ValueError("This parameter has no ref in schema.")
+        schema_path = self.get_ref().replace("#/", "").split("/")[1:]
+        print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")
+        # Operate the component definition object
+        return TmpResponseRefModel.deserialize(_get_schema(get_component_definition(), schema_path, 0))
 
 
 @dataclass
@@ -39,6 +75,11 @@ class TmpRequestItemModel(BaseTmpRefDataModel):
 
     def has_ref(self) -> str:
         return "ref" if self.ref else ""
+
+    def get_ref(self) -> str:
+        assert self.has_ref()
+        assert self.ref
+        return self.ref
 
 
 @dataclass
@@ -104,6 +145,13 @@ class TmpResponsePropertyModel(BaseTmpRefDataModel):
         else:
             return ""
 
+    def get_ref(self) -> str:
+        ref = self.has_ref()
+        if ref == "additionalProperties":
+            assert self.additionalProperties.ref  # type: ignore[union-attr]
+            return self.additionalProperties.ref  # type: ignore[union-attr]
+        return self.ref  # type: ignore[return-value]
+
     def is_empty(self) -> bool:
         return not (self.value_type or self.ref)
 
@@ -143,6 +191,11 @@ class TmpResponseSchema(BaseTmpRefDataModel):
 
     def has_ref(self) -> str:
         return "schema" if self.schema and self.schema.has_ref else ""  # type: ignore[truthy-function]
+
+    def get_ref(self) -> str:
+        assert self.has_ref()
+        assert self.schema.ref  # type: ignore[union-attr]
+        return self.schema.ref  # type: ignore[union-attr]
 
     def is_empty(self) -> bool:
         return not self.schema or self.schema.is_empty()

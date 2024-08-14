@@ -20,9 +20,12 @@ from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     OpenAPIV3SchemaParser,
     _ReferenceObjectParser,
+)
+from pymock_api.model.openapi._tmp_data_model import (
+    PropertyDetail,
+    ResponseProperty,
     set_component_definition,
 )
-from pymock_api.model.openapi._tmp_data_model import PropertyDetail, ResponseProperty
 from pymock_api.model.openapi.config import API, APIParameter, OpenAPIDocumentConfig
 
 from ._test_case import (

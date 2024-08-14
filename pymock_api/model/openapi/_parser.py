@@ -7,15 +7,14 @@ from ._base import (
     ensure_get_schema_parser_factory,
     get_openapi_version,
 )
+from ._base_schema_parser import BaseSchemaParser
 from ._js_handlers import ensure_type_is_python_type
 from ._parser_factory import BaseOpenAPISchemaParserFactory
 from ._schema_parser import (
     BaseOpenAPIPathSchemaParser,
     BaseOpenAPIRequestParametersSchemaParser,
     BaseOpenAPISchemaParser,
-    BaseSchemaParser,
     _ReferenceObjectParser,
-    _ReferenceObjectParserWithTmpDataModel,
 )
 from ._tmp_data_model import (
     ResponseProperty,
@@ -220,7 +219,7 @@ class APIParser(BaseParser):
         print(f"[DEBUG] status_200_response: {status_200_response}")
         tmp_resp_config = TmpResponseSchema.deserialize(status_200_response)
         print(f"[DEBUG] tmp_resp_config: {tmp_resp_config}")
-        if _ReferenceObjectParserWithTmpDataModel.has_ref(tmp_resp_config):
+        if not tmp_resp_config.is_empty():
             # NOTE: This parsing way for Swagger API (OpenAPI version 2)
             response_data = strategy.process_response_from_reference(
                 init_response=response_data,
@@ -232,6 +231,7 @@ class APIParser(BaseParser):
             if get_openapi_version() is OpenAPIVersion.V2:
                 response_schema = status_200_response.get("schema", {})
                 tmp_resp_config = TmpResponseSchema.deserialize(status_200_response)
+                has_ref = not tmp_resp_config.is_empty()
             else:
                 # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
                 resp_parser = self.schema_parser_factory.response(status_200_response)
@@ -242,9 +242,10 @@ class APIParser(BaseParser):
                 response_schema = resp_parser.get_content(value_format=resp_value_format[0])
                 print(f"[DEBUG] has content, response_schema: {response_schema}")
                 tmp_resp_config = TmpResponsePropertyModel.deserialize(response_schema)  # type: ignore[assignment]
+                has_ref = True if tmp_resp_config.has_ref() else False
             print(f"[DEBUG] has content, tmp_resp_config: {tmp_resp_config}")
             print(f"[DEBUG] response_schema: {response_schema}")
-            if _ReferenceObjectParserWithTmpDataModel.has_ref(tmp_resp_config):
+            if has_ref:
                 response_data = strategy.process_response_from_reference(
                     init_response=response_data,
                     data=tmp_resp_config,

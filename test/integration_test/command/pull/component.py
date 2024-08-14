@@ -12,10 +12,8 @@ from pymock_api.model import (
     load_config,
 )
 from pymock_api.model.api_config import DivideStrategy, TemplateConfig
-from pymock_api.model.openapi._schema_parser import (
-    OpenAPIV2SchemaParser,
-    set_component_definition,
-)
+from pymock_api.model.openapi._schema_parser import OpenAPIV2SchemaParser
+from pymock_api.model.openapi._tmp_data_model import set_component_definition
 
 from ...._values import _API_Doc_Source, _API_Doc_Source_File, _Test_Request_With_Https
 from ._test_case import (

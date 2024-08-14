@@ -12,10 +12,8 @@ import pytest
 from yaml import load as yaml_load
 
 from pymock_api.command._common.component import SavingConfigComponent
-from pymock_api.model.openapi._schema_parser import (
-    OpenAPIV2SchemaParser,
-    set_component_definition,
-)
+from pymock_api.model.openapi._schema_parser import OpenAPIV2SchemaParser
+from pymock_api.model.openapi._tmp_data_model import set_component_definition
 
 from ._test_case import SubCmdGetTestCaseFactory, SubCmdPullTestCaseFactory
 

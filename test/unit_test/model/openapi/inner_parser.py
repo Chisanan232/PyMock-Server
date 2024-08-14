@@ -14,9 +14,11 @@ from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2PathSchemaParser,
     OpenAPIV2SchemaParser,
     _ReferenceObjectParser,
+)
+from pymock_api.model.openapi._tmp_data_model import (
+    TmpAPIParameterModel,
     set_component_definition,
 )
-from pymock_api.model.openapi._tmp_data_model import TmpAPIParameterModel
 from pymock_api.model.openapi.config import APIParameter
 
 from ._test_case import DeserializeV2OpenAPIConfigTestCaseFactory

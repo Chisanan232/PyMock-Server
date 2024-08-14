@@ -6,8 +6,8 @@ from pymock_api.model.enums import ResponseStrategy
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     _ReferenceObjectParser,
-    set_component_definition,
 )
+from pymock_api.model.openapi._tmp_data_model import set_component_definition
 
 from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 

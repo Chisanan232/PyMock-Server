@@ -1,36 +1,19 @@
-import copy
-import json
-import pathlib
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
+from pymock_api.model.openapi._base_schema_parser import (
+    BaseOpenAPIObjectSchemaParser,
+    BaseOpenAPIPathSchemaParser,
+    BaseOpenAPIRequestParameterItemSchemaParser,
+    BaseOpenAPIRequestParametersSchemaParser,
+    BaseOpenAPIResponseSchemaParser,
+    BaseOpenAPISchemaParser,
+    BaseOpenAPITagSchemaParser,
+)
 from pymock_api.model.openapi._tmp_data_model import (
     BaseTmpDataModel,
-    TmpRequestItemModel,
-    TmpResponsePropertyModel,
-    TmpResponseRefModel,
-    TmpResponseSchema,
+    get_component_definition,
 )
-
-
-class BaseSchemaParser(metaclass=ABCMeta):
-    def __init__(self, data: dict):
-        self._data = copy.copy(data)
-
-    @property
-    def current_data(self) -> dict:
-        return self._data
-
-
-class BaseOpenAPIObjectSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_required(self, default: Any = None) -> List[str]:
-        pass
-
-    @abstractmethod
-    def get_properties(self, default: Any = None) -> Dict[str, dict]:
-        pass
 
 
 class OpenAPIObjectSchemaParser(BaseOpenAPIObjectSchemaParser):
@@ -48,17 +31,6 @@ class OpenAPIObjectSchemaParser(BaseOpenAPIObjectSchemaParser):
             return self._data["properties"]
 
 
-class BaseOpenAPIResponseSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_content(self, value_format: str) -> Dict[str, dict]:
-        pass
-
-    @abstractmethod
-    def exist_in_content(self, value_format: str) -> bool:
-        pass
-
-
 class OpenAPIResponseSchemaParser(BaseOpenAPIResponseSchemaParser):
 
     def get_content(self, value_format: str) -> Dict[str, dict]:
@@ -66,40 +38,6 @@ class OpenAPIResponseSchemaParser(BaseOpenAPIResponseSchemaParser):
 
     def exist_in_content(self, value_format: str) -> bool:
         return value_format in self._data["content"].keys()
-
-
-class BaseOpenAPIRequestParametersSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_name(self) -> str:
-        pass
-
-    @abstractmethod
-    def get_required(self) -> str:
-        pass
-
-    @abstractmethod
-    def get_type(self) -> str:
-        pass
-
-    @abstractmethod
-    def get_default(self) -> Optional[str]:
-        pass
-
-    @abstractmethod
-    def get_items(self):
-        pass
-
-
-class BaseOpenAPIRequestParameterItemSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_items_type(self) -> Optional[str]:
-        pass
-
-    @abstractmethod
-    def set_items_type(self, value_type: str) -> None:
-        pass
 
 
 class OpenAPIRequestParameterItemSchemaParser(BaseOpenAPIRequestParameterItemSchemaParser):
@@ -127,28 +65,6 @@ class OpenAPIRequestParametersSchemaParser(BaseOpenAPIRequestParametersSchemaPar
 
     def get_items(self):
         return self._data.get("items", None)
-
-
-class BaseOpenAPIPathSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_request_parameters(self) -> List[dict]:
-        pass
-
-    def get_request_body(self, value_format: str = "application/json") -> dict:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_response(self, status_code: str) -> dict:
-        pass
-
-    @abstractmethod
-    def exist_in_response(self, status_code: str) -> bool:
-        pass
-
-    @abstractmethod
-    def get_all_tags(self) -> List[str]:
-        pass
 
 
 class OpenAPIV2PathSchemaParser(BaseOpenAPIPathSchemaParser):
@@ -186,17 +102,6 @@ class OpenAPIV3PathSchemaParser(BaseOpenAPIPathSchemaParser):
         return self._data.get("tags", [])
 
 
-class BaseOpenAPITagSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_name(self):
-        pass
-
-    @abstractmethod
-    def get_description(self):
-        pass
-
-
 class OpenAPITagSchemaParser(BaseOpenAPITagSchemaParser):
 
     def get_name(self):
@@ -204,33 +109,6 @@ class OpenAPITagSchemaParser(BaseOpenAPITagSchemaParser):
 
     def get_description(self):
         return self._data["description"]
-
-
-class BaseOpenAPISchemaParser(BaseSchemaParser):
-
-    def __init__(self, file: str = "", data: Dict = {}):
-        super().__init__(data=data)
-
-        if file:
-            file_path = pathlib.Path(file)
-            if not file_path.exists():
-                raise FileNotFoundError(f"Cannot find the OpenAPI format configuration at file path *{file_path}*.")
-            with open(str(file_path), "r", encoding="utf-8") as io_stream:
-                self._data = json.load(io_stream)
-
-        assert self._data, "No any data. Parse OpenAPI config fail."
-
-    @abstractmethod
-    def get_paths(self) -> Dict[str, Dict]:
-        pass
-
-    @abstractmethod
-    def get_tags(self) -> List[dict]:
-        pass
-
-    @abstractmethod
-    def get_objects(self) -> Dict[str, dict]:
-        pass
 
 
 class OpenAPIV2SchemaParser(BaseOpenAPISchemaParser):
@@ -256,19 +134,6 @@ class OpenAPIV3SchemaParser(BaseOpenAPISchemaParser):
 
     def get_objects(self) -> Dict[str, dict]:
         return self._data.get("components", {})
-
-
-ComponentDefinition: Dict[str, dict] = {}
-
-
-def get_component_definition() -> Dict:
-    global ComponentDefinition
-    return ComponentDefinition
-
-
-def set_component_definition(openapi_parser: BaseOpenAPISchemaParser) -> None:
-    global ComponentDefinition
-    ComponentDefinition = openapi_parser.get_objects()
 
 
 class _BaseReferenceObjectParser(metaclass=ABCMeta):
@@ -336,53 +201,53 @@ class _ReferenceObjectParser(_BaseReferenceObjectParser):
         return _get_schema(get_component_definition(), schema_path, 0)
 
 
-class _ReferenceObjectParserWithTmpDataModel(_BaseReferenceObjectParser):
-    @classmethod
-    def has_schema(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> bool:  # type: ignore[override]
-        return hasattr(data, "schema") and getattr(data, "schema") is not None
-
-    @classmethod
-    def has_additional_properties(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> bool:  # type: ignore[override]
-        return hasattr(data, "additionalProperties") and getattr(data, "additionalProperties") is not None
-
-    @classmethod
-    def has_ref(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> str:  # type: ignore[override]
-        if cls.has_schema(data):
-            return "schema" if data.schema.ref is not None else ""  # type: ignore[union-attr]
-        elif cls.has_additional_properties(data):
-            return "additionalProperties" if data.additionalProperties.ref is not None else ""  # type: ignore[union-attr]
-        else:
-            return "ref" if hasattr(data, "ref") and getattr(data, "ref") is not None else ""
-
-    @classmethod
-    def get_ref(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> str:
-        ref = cls.has_ref(data)
-        if ref == "schema":
-            assert data.schema.ref  # type: ignore[union-attr]
-            return data.schema.ref  # type: ignore[union-attr]
-        elif ref == "additionalProperties":
-            assert data.additionalProperties.ref  # type: ignore[union-attr]
-            return data.additionalProperties.ref  # type: ignore[union-attr]
-        return data.ref  # type: ignore[union-attr, return-value]
-
-    @classmethod
-    def get_schema_ref(  # type: ignore[override]
-        cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel], accept_no_ref: bool = False  # type: ignore[override]
-    ) -> Optional[TmpResponseRefModel]:
-        def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
-            if i == len(paths) - 1:
-                return component_def_data[paths[i]]
-            else:
-                return _get_schema(component_def_data[paths[i]], paths, i + 1)
-
-        print(f"[DEBUG in get_schema_ref] data: {data}")
-        _has_ref = cls.has_ref(data)
-        print(f"[DEBUG in get_schema_ref] _has_ref: {_has_ref}")
-        if not _has_ref:
-            if accept_no_ref:
-                return None
-            raise ValueError("This parameter has no ref in schema.")
-        schema_path = cls.get_ref(data).replace("#/", "").split("/")[1:]
-        print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")
-        # Operate the component definition object
-        return TmpResponseRefModel.deserialize(_get_schema(get_component_definition(), schema_path, 0))
+# class _ReferenceObjectParserWithTmpDataModel(_BaseReferenceObjectParser):
+#     @classmethod
+#     def has_schema(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> bool:  # type: ignore[override]
+#         return hasattr(data, "schema") and getattr(data, "schema") is not None
+#
+#     @classmethod
+#     def has_additional_properties(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> bool:  # type: ignore[override]
+#         return hasattr(data, "additionalProperties") and getattr(data, "additionalProperties") is not None
+#
+#     @classmethod
+#     def has_ref(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> str:  # type: ignore[override]
+#         if cls.has_schema(data):
+#             return "schema" if data.schema.ref is not None else ""  # type: ignore[union-attr]
+#         elif cls.has_additional_properties(data):
+#             return "additionalProperties" if data.additionalProperties.ref is not None else ""  # type: ignore[union-attr]
+#         else:
+#             return "ref" if hasattr(data, "ref") and getattr(data, "ref") is not None else ""
+#
+#     @classmethod
+#     def get_ref(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> str:
+#         ref = cls.has_ref(data)
+#         if ref == "schema":
+#             assert data.schema.ref  # type: ignore[union-attr]
+#             return data.schema.ref  # type: ignore[union-attr]
+#         elif ref == "additionalProperties":
+#             assert data.additionalProperties.ref  # type: ignore[union-attr]
+#             return data.additionalProperties.ref  # type: ignore[union-attr]
+#         return data.ref  # type: ignore[union-attr, return-value]
+#
+#     @classmethod
+#     def get_schema_ref(  # type: ignore[override]
+#         cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel], accept_no_ref: bool = False  # type: ignore[override]
+#     ) -> Optional[TmpResponseRefModel]:
+#         def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
+#             if i == len(paths) - 1:
+#                 return component_def_data[paths[i]]
+#             else:
+#                 return _get_schema(component_def_data[paths[i]], paths, i + 1)
+#
+#         print(f"[DEBUG in get_schema_ref] data: {data}")
+#         _has_ref = cls.has_ref(data)
+#         print(f"[DEBUG in get_schema_ref] _has_ref: {_has_ref}")
+#         if not _has_ref:
+#             if accept_no_ref:
+#                 return None
+#             raise ValueError("This parameter has no ref in schema.")
+#         schema_path = cls.get_ref(data).replace("#/", "").split("/")[1:]
+#         print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")
+#         # Operate the component definition object
+#         return TmpResponseRefModel.deserialize(_get_schema(get_component_definition(), schema_path, 0))

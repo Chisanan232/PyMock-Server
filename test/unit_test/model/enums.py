@@ -19,13 +19,13 @@ from pymock_api.model.openapi._base import ensure_get_schema_parser_factory
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     OpenAPIV3SchemaParser,
-    set_component_definition,
 )
 from pymock_api.model.openapi._tmp_data_model import (
     PropertyDetail,
     ResponseProperty,
     TmpResponsePropertyModel,
     TmpResponseRefModel,
+    set_component_definition,
 )
 
 from ..._test_utils import Verify
