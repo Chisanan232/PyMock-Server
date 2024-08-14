@@ -14,7 +14,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
 class BaseTmpRefDataModel(BaseTmpDataModel):
 
     @abstractmethod
-    def has_ref(self) -> bool:
+    def has_ref(self) -> str:
         pass
 
 
@@ -37,8 +37,8 @@ class TmpRequestItemModel(BaseTmpRefDataModel):
             ref=data.get("$ref", None),
         )
 
-    def has_ref(self) -> bool:
-        return True if self.ref else False
+    def has_ref(self) -> str:
+        return "ref" if self.ref else ""
 
 
 @dataclass
@@ -93,16 +93,16 @@ class TmpResponsePropertyModel(BaseTmpRefDataModel):
             ),
         )
 
-    def has_ref(self) -> bool:
-        return (
-            True
-            if (
-                self.ref
-                or (self.items and self.items.has_ref())
-                or (self.additionalProperties and self.additionalProperties.has_ref())
-            )
-            else False
-        )
+    def has_ref(self) -> str:
+        if self.ref:
+            return "ref"
+        # TODO: It should also integration *items* into this utility function
+        # elif self.items and self.items.has_ref():
+        #     return "items"
+        elif self.additionalProperties and self.additionalProperties.has_ref():
+            return "additionalProperties"
+        else:
+            return ""
 
     def is_empty(self) -> bool:
         return not (self.value_type or self.ref)
@@ -141,8 +141,8 @@ class TmpResponseSchema(BaseTmpRefDataModel):
             return TmpResponseSchema(schema=TmpResponsePropertyModel.deserialize(data.get("schema", {})))
         return TmpResponseSchema()
 
-    def has_ref(self) -> bool:
-        return True if self.schema and self.schema.has_ref else False  # type: ignore[truthy-function]
+    def has_ref(self) -> str:
+        return "schema" if self.schema and self.schema.has_ref else ""  # type: ignore[truthy-function]
 
     def is_empty(self) -> bool:
         return not self.schema or self.schema.is_empty()

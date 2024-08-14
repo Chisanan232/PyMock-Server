@@ -151,7 +151,7 @@ class ResponseStrategy(Enum):
                 print(f"[DEBUG in process_response_from_reference] k: {k}")
                 print(f"[DEBUG in process_response_from_reference] v: {v}")
                 # Check reference again
-                if _ReferenceObjectParserWithTmpDataModel.has_ref(v):
+                if v.has_ref():
                     response_prop = self._process_reference_object(
                         init_response=self.initial_response_data(),
                         response_schema_ref=_ReferenceObjectParserWithTmpDataModel.get_schema_ref(v),
@@ -280,7 +280,7 @@ class ResponseStrategy(Enum):
             return self._generate_empty_response()
         print(f"[DEBUG in _generate_response] property_value: {property_value}")
         print(f"[DEBUG in _generate_response] before it have init_response: {init_response}")
-        if _ReferenceObjectParserWithTmpDataModel.has_ref(property_value):
+        if property_value.has_ref():
             resp_prop_data = _ReferenceObjectParserWithTmpDataModel.get_schema_ref(property_value)
         else:
             resp_prop_data = property_value  # type: ignore[assignment]
@@ -325,7 +325,7 @@ class ResponseStrategy(Enum):
         ) -> PropertyDetail:
             items_data = data.items
             assert items_data
-            if _ReferenceObjectParserWithTmpDataModel.has_ref(items_data):
+            if items_data.has_ref():
                 response = _handle_reference_object(
                     response, items_data, noref_val_process_callback, ref_val_process_callback
                 )
@@ -405,7 +405,7 @@ class ResponseStrategy(Enum):
             for item_k, item_v in (single_response.properties or {}).items():
                 print(f"[DEBUG in nested data issue at _handle_list_type_data] item_v: {item_v}")
                 print(f"[DEBUG in nested data issue at _handle_list_type_data] response: {response}")
-                if _ReferenceObjectParserWithTmpDataModel.has_ref(item_v):
+                if item_v.has_ref():
                     response = ref_val_process_callback(
                         item_k, item_v, response, single_response, noref_val_process_callback
                     )
@@ -542,7 +542,7 @@ class ResponseStrategy(Enum):
 
             # Check reference first
             assert not isinstance(data, TmpResponseRefModel)
-            has_ref = _ReferenceObjectParserWithTmpDataModel.has_ref(data)
+            has_ref = data.has_ref()
             if has_ref:
                 # Process reference
                 resp = self.process_response_from_reference(
@@ -748,7 +748,7 @@ class ResponseStrategy(Enum):
         print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
         if not resp_prop_data.value_type:
             assert not isinstance(resp_prop_data, TmpResponseRefModel)
-            assert _ReferenceObjectParserWithTmpDataModel.has_ref(resp_prop_data)
+            assert resp_prop_data.has_ref()
             return _handle_each_data_types_response_with_object_strategy(resp_prop_data, "dict")
         v_type = resp_prop_data.value_type
         # if self is ResponseStrategy.OBJECT:
