@@ -184,7 +184,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
             print(f"[DEBUG in process_response_from_reference] parse with body, init_response: {init_response}")
         else:
             # The section which doesn't have setting body
-            response_config = self._generate_empty_response()
+            response_config = PropertyDetail.generate_empty_response()
             if response_schema_ref.title == "InputStream":
                 response_config.type = "file"
 
@@ -229,7 +229,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
         get_schema_parser_factory: Callable,
     ) -> Union["PropertyDetail", List["PropertyDetail"]]:
         if property_value.is_empty():
-            return self._generate_empty_response()
+            return PropertyDetail.generate_empty_response()
         print(f"[DEBUG in _generate_response] property_value: {property_value}")
         print(f"[DEBUG in _generate_response] before it have init_response: {init_response}")
         if property_value.has_ref():
@@ -241,16 +241,6 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
             init_response=init_response,
             resp_prop_data=resp_prop_data,
             get_schema_parser_factory=get_schema_parser_factory,
-        )
-
-    def _generate_empty_response(self) -> "PropertyDetail":
-        # if self is ResponseStrategy.OBJECT:
-        return PropertyDetail(
-            name="",
-            required=_Default_Required.empty,
-            type=None,
-            format=None,
-            items=[],
         )
 
     def _generate_response_from_data(
@@ -790,6 +780,17 @@ class PropertyDetail:
             if v is not None:
                 new_data[k] = v
         return new_data
+
+    @staticmethod
+    def generate_empty_response() -> "PropertyDetail":
+        # if self is ResponseStrategy.OBJECT:
+        return PropertyDetail(
+            name="",
+            required=_Default_Required.empty,
+            type=None,
+            format=None,
+            items=[],
+        )
 
 
 # Just for temporarily use in data process
