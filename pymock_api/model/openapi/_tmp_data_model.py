@@ -61,8 +61,8 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
         # Operate the component definition object
         return TmpResponseRefModel.deserialize(_get_schema(get_component_definition(), schema_path, 0))
 
-    def initial_response_data(self) -> "ResponseProperty":
-        return ResponseProperty(data=[])
+    # def initial_response_data(self) -> "ResponseProperty":
+    #     return ResponseProperty(data=[])
 
     def process_response_from_reference(
         self,
@@ -71,7 +71,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
         init_response: Optional["ResponseProperty"] = None,
     ) -> "ResponseProperty":
         if not init_response:
-            init_response = self.initial_response_data()
+            init_response = ResponseProperty.initial_response_data()
         response = self._process_reference_object(
             init_response=init_response,
             response_schema_ref=data.get_schema_ref(accept_no_ref=True),
@@ -149,7 +149,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
                 # Check reference again
                 if v.has_ref():
                     response_prop = self._process_reference_object(
-                        init_response=self.initial_response_data(),
+                        init_response=ResponseProperty.initial_response_data(),
                         response_schema_ref=v.get_schema_ref(),
                         get_schema_parser_factory=get_schema_parser_factory,
                         empty_body_key=k,
@@ -710,7 +710,7 @@ class TmpResponsePropertyModel(BaseTmpRefDataModel):
         init_response: Optional["ResponseProperty"] = None,
     ) -> "ResponseProperty":
         if not init_response:
-            init_response = self.initial_response_data()
+            init_response = ResponseProperty.initial_response_data()
         response_config = self._generate_response(
             init_response=init_response,
             property_value=self,
@@ -803,3 +803,7 @@ class ResponseProperty:
         return ResponseProperty(
             data=data["data"],
         )
+
+    @staticmethod
+    def initial_response_data() -> "ResponseProperty":
+        return ResponseProperty(data=[])
