@@ -53,6 +53,10 @@ class ResponseStrategy(Enum):
         else:
             return v
 
+    # Has ref
+    # TmpResponsePropertyModel(BaseTmpRefDataModel)
+    # TmpResponseSchema
+    # TmpRequestItemModel
     # def initial_response_data(self) -> ResponseProperty:
     #     assert self is ResponseStrategy.OBJECT
     #     return ResponseProperty(data=[])

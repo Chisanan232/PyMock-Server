@@ -223,7 +223,7 @@ class APIParser(BaseParser):
             # NOTE: This parsing way for Swagger API (OpenAPI version 2)
             response_data = tmp_resp_config.process_response_from_reference(
                 # init_response=response_data,
-                data=tmp_resp_config,
+                # data=tmp_resp_config,
                 get_schema_parser_factory=ensure_get_schema_parser_factory,
             )
             # response_data = strategy.process_response_from_reference(
@@ -253,7 +253,7 @@ class APIParser(BaseParser):
             if has_ref:
                 response_data = tmp_resp_config.process_response_from_reference(
                     # init_response=response_data,
-                    data=tmp_resp_config,
+                    # data=tmp_resp_config,
                     get_schema_parser_factory=ensure_get_schema_parser_factory,
                 )
                 # response_data = strategy.process_response_from_reference(

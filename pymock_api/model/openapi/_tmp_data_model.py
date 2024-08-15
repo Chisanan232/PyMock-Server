@@ -66,7 +66,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
 
     def process_response_from_reference(
         self,
-        data: Union["TmpResponseSchema", "TmpResponsePropertyModel", "TmpRequestItemModel"],
+        # data: Union["TmpResponseSchema", "TmpResponsePropertyModel", "TmpRequestItemModel"],
         get_schema_parser_factory: Callable,
         init_response: Optional["ResponseProperty"] = None,
     ) -> "ResponseProperty":
@@ -74,7 +74,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
             init_response = ResponseProperty.initial_response_data()
         response = self._process_reference_object(
             init_response=init_response,
-            response_schema_ref=data.get_schema_ref(accept_no_ref=True),
+            response_schema_ref=self.get_schema_ref(accept_no_ref=True),
             get_schema_parser_factory=get_schema_parser_factory,
         )
 
@@ -458,9 +458,9 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
             has_ref = data.has_ref()
             if has_ref:
                 # Process reference
-                resp = self.process_response_from_reference(
+                resp = data.process_response_from_reference(
                     init_response=init_response,
-                    data=data,
+                    # data=data,
                     get_schema_parser_factory=get_schema_parser_factory,
                 )
                 print("[DEBUG in _handle_object_type_value_with_object_strategy] has reference schema")
