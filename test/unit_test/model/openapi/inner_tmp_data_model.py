@@ -512,7 +512,7 @@ class BaseTmpRefDataModelTestSuite(metaclass=ABCMeta):
 
         # Run target
         resp = under_test._generate_response_from_data(
-            init_response=under_test.initial_response_data(),
+            init_response=ResponseProperty.initial_response_data(),
             resp_prop_data=test_response_data_model,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
         )
@@ -552,7 +552,7 @@ class BaseTmpRefDataModelTestSuite(metaclass=ABCMeta):
         self, under_test: BaseTmpRefDataModel, strategy: ResponseStrategy, test_response_data: dict, expected_value: str
     ):
         response_config = under_test._process_reference_object(
-            init_response=under_test.initial_response_data(),
+            init_response=ResponseProperty.initial_response_data(),
             response_schema_ref=test_response_data,
             get_schema_parser_factory=ensure_get_schema_parser_factory,
         )
