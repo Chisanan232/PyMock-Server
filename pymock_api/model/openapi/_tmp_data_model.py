@@ -1257,13 +1257,6 @@ class PropertyDetail:
 class ResponseProperty:
     data: List[PropertyDetail] = field(default_factory=list)
 
-    @classmethod
-    def deserialize(cls, data: Dict) -> "ResponseProperty":
-        print(f"[DEBUG in ResponseProperty.deserialize] data: {data}")
-        return ResponseProperty(
-            data=data["data"],
-        )
-
     @staticmethod
     def initial_response_data() -> "ResponseProperty":
         return ResponseProperty(data=[])
