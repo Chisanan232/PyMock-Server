@@ -327,7 +327,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
     def get_ref(self) -> str:
         pass
 
-    def get_schema_ref(self) -> Optional["TmpResponseRefModel"]:
+    def get_schema_ref(self) -> "TmpResponseRefModel":
         def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
             if i == len(paths) - 1:
                 return component_def_data[paths[i]]
@@ -350,9 +350,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
     ) -> "ResponseProperty":
         if not init_response:
             init_response = ResponseProperty.initial_response_data()
-        response = self.get_schema_ref().process_reference_object(  # type: ignore[union-attr]
-            init_response=init_response,
-        )
+        response = self.get_schema_ref().process_reference_object(init_response=init_response)
 
         # Handle the collection data which has empty body
         new_response = copy.copy(response)
@@ -537,7 +535,7 @@ class TmpResponseRefModel(BaseTmpDataModel):
                 print(f"[DEBUG in process_response_from_reference] v: {v}")
                 # Check reference again
                 if v.has_ref():
-                    response_prop = v.get_schema_ref().process_reference_object(  # type: ignore[union-attr]
+                    response_prop = v.get_schema_ref().process_reference_object(
                         init_response=ResponseProperty.initial_response_data(),
                         empty_body_key=k,
                     )
@@ -555,7 +553,7 @@ class TmpResponseRefModel(BaseTmpDataModel):
                             items=response_prop.data,
                         )
                 else:
-                    response_config = self._generate_response(
+                    response_config = self._generate_response(  # type: ignore[assignment]
                         init_response=init_response,
                         property_value=v,
                     )
