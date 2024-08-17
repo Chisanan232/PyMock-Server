@@ -5,7 +5,6 @@ from typing import List, Type, Union
 import pytest
 
 from pymock_api.model.enums import ResponseStrategy
-from pymock_api.model.openapi._base import ensure_get_schema_parser_factory
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     OpenAPIV3SchemaParser,
@@ -51,7 +50,6 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
         response_prop_data = under_test._generate_response(
             init_response=ResponseProperty(),
             property_value=tmp_data_model,
-            get_schema_parser_factory=ensure_get_schema_parser_factory,
         )
 
         # Verify
@@ -363,7 +361,6 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
         resp = under_test._generate_response_from_data(
             init_response=ResponseProperty.initial_response_data(),
             resp_prop_data=test_response_data_model,
-            get_schema_parser_factory=ensure_get_schema_parser_factory,
         )
 
         # Verify
@@ -606,7 +603,6 @@ class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
     ):
         response_config = test_response_data.process_reference_object(
             init_response=ResponseProperty.initial_response_data(),
-            get_schema_parser_factory=ensure_get_schema_parser_factory,
         )
         assert response_config == expected_value
 

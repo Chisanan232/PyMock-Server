@@ -219,9 +219,7 @@ class APIParser(BaseParser):
         print(f"[DEBUG] tmp_resp_config: {tmp_resp_config}")
         if not tmp_resp_config.is_empty():
             # NOTE: This parsing way for Swagger API (OpenAPI version 2)
-            response_data = tmp_resp_config.process_response_from_reference(
-                get_schema_parser_factory=ensure_get_schema_parser_factory,
-            )
+            response_data = tmp_resp_config.process_response_from_reference()
         else:
             # FIXME: New implementation to parse configuration will let v2 OpenAPI config come here
             if get_openapi_version() is OpenAPIVersion.V2:
@@ -242,15 +240,11 @@ class APIParser(BaseParser):
             print(f"[DEBUG] has content, tmp_resp_config: {tmp_resp_config}")
             print(f"[DEBUG] response_schema: {response_schema}")
             if has_ref:
-                response_data = tmp_resp_config.process_response_from_reference(
-                    get_schema_parser_factory=ensure_get_schema_parser_factory,
-                )
+                response_data = tmp_resp_config.process_response_from_reference()
             else:
                 # Data may '{}' or '{ "type": "integer", "title": "Id" }'
                 tmp_resp_model = TmpResponsePropertyModel.deserialize(response_schema)
-                response_data = tmp_resp_model.process_response_from_data(
-                    get_schema_parser_factory=ensure_get_schema_parser_factory,
-                )
+                response_data = tmp_resp_model.process_response_from_data()
                 print(f"[DEBUG] response_data: {response_data}")
         return response_data
 

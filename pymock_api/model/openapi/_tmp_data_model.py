@@ -46,7 +46,6 @@ class BaseTmpDataModel(metaclass=ABCMeta):
         self,
         init_response: "ResponseProperty",
         property_value: "TmpResponsePropertyModel",
-        get_schema_parser_factory: Callable,
     ) -> Union["PropertyDetail", List["PropertyDetail"]]:
         if property_value.is_empty():
             return PropertyDetail.generate_empty_response()
@@ -60,14 +59,12 @@ class BaseTmpDataModel(metaclass=ABCMeta):
         return self._generate_response_from_data(
             init_response=init_response,
             resp_prop_data=resp_prop_data,
-            get_schema_parser_factory=get_schema_parser_factory,
         )
 
     def _generate_response_from_data(
         self,
         init_response: "ResponseProperty",
         resp_prop_data: Union["TmpResponsePropertyModel", "TmpResponseRefModel", "TmpRequestItemModel"],
-        get_schema_parser_factory: Callable,
     ) -> Union["PropertyDetail", List["PropertyDetail"]]:
 
         def _handle_list_type_data(
@@ -88,7 +85,6 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                 response_item_value = self._generate_response_from_data(
                     init_response=init_response,
                     resp_prop_data=items_data,
-                    get_schema_parser_factory=get_schema_parser_factory,
                 )
                 print(f"[DEBUG in _handle_list_type_data] response_item_value: {response_item_value}")
                 items = None
@@ -241,7 +237,6 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                 # Process reference
                 resp = data.process_response_from_reference(
                     init_response=init_response,
-                    get_schema_parser_factory=get_schema_parser_factory,
                 )
                 print("[DEBUG in _handle_object_type_value_with_object_strategy] has reference schema")
                 print(f"[DEBUG in _handle_object_type_value_with_object_strategy] resp: {resp}")
@@ -351,14 +346,12 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
 
     def process_response_from_reference(
         self,
-        get_schema_parser_factory: Callable,
         init_response: Optional["ResponseProperty"] = None,
     ) -> "ResponseProperty":
         if not init_response:
             init_response = ResponseProperty.initial_response_data()
         response = self.get_schema_ref().process_reference_object(  # type: ignore[union-attr]
             init_response=init_response,
-            get_schema_parser_factory=get_schema_parser_factory,
         )
 
         # Handle the collection data which has empty body
@@ -494,7 +487,6 @@ class TmpResponsePropertyModel(BaseTmpRefDataModel):
 
     def process_response_from_data(
         self,
-        get_schema_parser_factory: Callable,
         init_response: Optional["ResponseProperty"] = None,
     ) -> "ResponseProperty":
         if not init_response:
@@ -502,7 +494,6 @@ class TmpResponsePropertyModel(BaseTmpRefDataModel):
         response_config = self._generate_response(
             init_response=init_response,
             property_value=self,
-            get_schema_parser_factory=get_schema_parser_factory,
         )
         response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
         init_response.data.append(response_data_prop)
@@ -534,7 +525,6 @@ class TmpResponseRefModel(BaseTmpDataModel):
     def process_reference_object(
         self,
         init_response: "ResponseProperty",
-        get_schema_parser_factory: Callable,
         empty_body_key: str = "",
     ) -> "ResponseProperty":
         # assert response_schema_ref
@@ -549,7 +539,6 @@ class TmpResponseRefModel(BaseTmpDataModel):
                 if v.has_ref():
                     response_prop = v.get_schema_ref().process_reference_object(  # type: ignore[union-attr]
                         init_response=ResponseProperty.initial_response_data(),
-                        get_schema_parser_factory=get_schema_parser_factory,
                         empty_body_key=k,
                     )
                     print(f"[DEBUG in process_response_from_reference] before asserion, response_prop: {response_prop}")
@@ -569,7 +558,6 @@ class TmpResponseRefModel(BaseTmpDataModel):
                     response_config = self._generate_response(
                         init_response=init_response,
                         property_value=v,
-                        get_schema_parser_factory=get_schema_parser_factory,
                     )
                 print(f"[DEBUG in process_response_from_reference] response_config: {response_config}")
                 response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
