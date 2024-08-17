@@ -24,9 +24,7 @@ from ...model.openapi._test_case import DeserializeV2OpenAPIConfigTestCaseFactor
 
 DeserializeV2OpenAPIConfigTestCaseFactory.load()
 DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE = DeserializeV2OpenAPIConfigTestCaseFactory.get_test_case()
-GENERATE_RESPONSE_CONFIG_FROM_V2_OPENAPI_CONFIG_TEST_CASE = (
-    DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.each_api_http_response_with_strategy
-)
+GENERATE_RESPONSE_CONFIG_FROM_V2_OPENAPI_CONFIG_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.each_api_http_response
 
 
 class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
@@ -37,12 +35,11 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
         pass
 
     @pytest.mark.parametrize(
-        ("strategy", "api_response_detail", "entire_config"), GENERATE_RESPONSE_CONFIG_FROM_V2_OPENAPI_CONFIG_TEST_CASE
+        ("api_response_detail", "entire_config"), GENERATE_RESPONSE_CONFIG_FROM_V2_OPENAPI_CONFIG_TEST_CASE
     )
     def test_generate_response(
         self,
         under_test: BaseTmpRefDataModel,
-        strategy: ResponseStrategy,
         api_response_detail: dict,
         entire_config: dict,
     ):
@@ -58,7 +55,6 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
         )
 
         # Verify
-        assert strategy is ResponseStrategy.OBJECT
         assert response_prop_data and isinstance(response_prop_data, PropertyDetail)
         # for resp_k, resp_v in response_prop_data.items():
         #     assert resp_k in ["name", "required", "type", "format", "items", "FIXME"]

@@ -2,7 +2,6 @@ import json
 from collections import namedtuple
 from typing import List, Tuple
 
-from pymock_api.model.enums import ResponseStrategy
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     _ReferenceObjectParser,
@@ -18,7 +17,7 @@ OPENAPI_API_PARAMETERS_JSON: List[tuple] = []
 OPENAPI_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
 OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
 OPENAPI_API_RESPONSES_FOR_API: List[Tuple[dict, dict]] = []
-OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
+OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[dict, dict]] = []
 
 # For version 3 OpenAPI
 OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON: List[tuple] = []
@@ -33,7 +32,7 @@ V2OpenAPIDocConfigTestCase = namedtuple(
         "general_api_http_request_parameters",
         "reference_api_http_request_parameters",
         "entire_api_http_response",
-        "each_api_http_response_with_strategy",
+        "each_api_http_response",
     ),
 )
 
@@ -53,7 +52,7 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
             general_api_http_request_parameters=OPENAPI_API_PARAMETERS_JSON_FOR_API,
             reference_api_http_request_parameters=OPENAPI_API_PARAMETERS_JSON,
             entire_api_http_response=OPENAPI_API_RESPONSES_FOR_API,
-            each_api_http_response_with_strategy=OPENAPI_API_RESPONSES_PROPERTY_FOR_API,
+            each_api_http_response=OPENAPI_API_RESPONSES_PROPERTY_FOR_API,
         )
 
     @classmethod
@@ -87,9 +86,7 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                             if response_schema_properties:
                                 for k, v in response_schema_properties.items():
                                     # for strategy in ResponseStrategy:
-                                    OPENAPI_API_RESPONSES_PROPERTY_FOR_API.append(
-                                        (ResponseStrategy.OBJECT, v, openapi_api_docs)
-                                    )
+                                    OPENAPI_API_RESPONSES_PROPERTY_FOR_API.append((v, openapi_api_docs))
 
                         # For testing API request parameters
                         OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API.append((api_detail["parameters"], openapi_api_docs))
