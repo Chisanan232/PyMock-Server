@@ -191,7 +191,6 @@ class APIParser(BaseParser):
                         TmpAPIParameterModel(
                             name="",
                             required=True,
-                            # "type": convert_js_type(items["type"]),
                             value_type=item_type,
                             default=items.get("default", None),
                             items=[],
@@ -215,22 +214,14 @@ class APIParser(BaseParser):
         # TODO: Replace all *dict* type as tmp object *TmpResponseModel*
         assert self.parser.exist_in_response(status_code="200") is True
         status_200_response = self.parser.get_response(status_code="200")
-        # response_data = strategy.initial_response_data()
         print(f"[DEBUG] status_200_response: {status_200_response}")
         tmp_resp_config = TmpResponseSchema.deserialize(status_200_response)
         print(f"[DEBUG] tmp_resp_config: {tmp_resp_config}")
         if not tmp_resp_config.is_empty():
             # NOTE: This parsing way for Swagger API (OpenAPI version 2)
             response_data = tmp_resp_config.process_response_from_reference(
-                # init_response=response_data,
-                # data=tmp_resp_config,
                 get_schema_parser_factory=ensure_get_schema_parser_factory,
             )
-            # response_data = strategy.process_response_from_reference(
-            #     init_response=response_data,
-            #     data=tmp_resp_config,
-            #     get_schema_parser_factory=ensure_get_schema_parser_factory,
-            # )
         else:
             # FIXME: New implementation to parse configuration will let v2 OpenAPI config come here
             if get_openapi_version() is OpenAPIVersion.V2:
@@ -252,28 +243,14 @@ class APIParser(BaseParser):
             print(f"[DEBUG] response_schema: {response_schema}")
             if has_ref:
                 response_data = tmp_resp_config.process_response_from_reference(
-                    # init_response=response_data,
-                    # data=tmp_resp_config,
                     get_schema_parser_factory=ensure_get_schema_parser_factory,
                 )
-                # response_data = strategy.process_response_from_reference(
-                #     init_response=response_data,
-                #     data=tmp_resp_config,
-                #     get_schema_parser_factory=ensure_get_schema_parser_factory,
-                # )
             else:
                 # Data may '{}' or '{ "type": "integer", "title": "Id" }'
                 tmp_resp_model = TmpResponsePropertyModel.deserialize(response_schema)
                 response_data = tmp_resp_model.process_response_from_data(
-                    # init_response=response_data,
-                    # data=tmp_resp_model,
                     get_schema_parser_factory=ensure_get_schema_parser_factory,
                 )
-                # response_data = strategy.process_response_from_data(
-                #     init_response=response_data,
-                #     data=tmp_resp_model,
-                #     get_schema_parser_factory=ensure_get_schema_parser_factory,
-                # )
                 print(f"[DEBUG] response_data: {response_data}")
         return response_data
 
