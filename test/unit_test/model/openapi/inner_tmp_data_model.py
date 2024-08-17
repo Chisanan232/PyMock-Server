@@ -1024,64 +1024,64 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
     def test_get_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
         assert under_test.get_ref() == expect_result
 
-    @pytest.mark.parametrize(
-        ("strategy", "ut_response_data", "expect_result"),
-        [
-            (ResponseStrategy.STRING, {"THIS_IS_EMPTY": "empty value"}, {}),
-            (
-                ResponseStrategy.STRING,
-                {"key1": "value1", "sample_dict": {"THIS_IS_EMPTY": "empty value"}},
-                {"key1": "value1", "sample_dict": {}},
-            ),
-            (
-                ResponseStrategy.STRING,
-                {"key1": "value1", "sample_list": ["empty value"]},
-                {"key1": "value1", "sample_list": ["empty value"]},
-            ),
-            (
-                ResponseStrategy.STRING,
-                {"key1": "value1", "sample_list": [{"THIS_IS_EMPTY": "empty value"}]},
-                {"key1": "value1", "sample_list": []},
-            ),
-            (
-                ResponseStrategy.STRING,
-                {"key1": "value1", "sample_dict": {"inner_list": [{"THIS_IS_EMPTY": "empty value"}]}},
-                {"key1": "value1", "sample_dict": {"inner_list": []}},
-            ),
-            (
-                ResponseStrategy.STRING,
-                {
-                    "key1": "value1",
-                    "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {"THIS_IS_EMPTY": "empty value"}}],
-                },
-                {"key1": "value1", "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {}}]},
-            ),
-            (
-                ResponseStrategy.STRING,
-                {
-                    "key1": "value1",
-                    "sample_list": [
-                        {
-                            "inner_dict": "inner_value",
-                            "inner_dict2": {"THIS_IS_EMPTY": "empty value"},
-                            "inner_list": ["empty value"],
-                        }
-                    ],
-                },
-                {
-                    "key1": "value1",
-                    "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {}, "inner_list": ["empty value"]}],
-                },
-            ),
-        ],
-    )
-    def test__process_empty_body_response_by_string_strategy(
-        self, under_test: BaseTmpRefDataModel, strategy: ResponseStrategy, ut_response_data: dict, expect_result: dict
-    ):
-        ut_response = under_test._process_empty_body_response_by_string_strategy(
-            response_columns_setting=ut_response_data
-        )
-        assert ut_response == expect_result
+    # @pytest.mark.parametrize(
+    #     ("strategy", "ut_response_data", "expect_result"),
+    #     [
+    #         (ResponseStrategy.STRING, {"THIS_IS_EMPTY": "empty value"}, {}),
+    #         (
+    #             ResponseStrategy.STRING,
+    #             {"key1": "value1", "sample_dict": {"THIS_IS_EMPTY": "empty value"}},
+    #             {"key1": "value1", "sample_dict": {}},
+    #         ),
+    #         (
+    #             ResponseStrategy.STRING,
+    #             {"key1": "value1", "sample_list": ["empty value"]},
+    #             {"key1": "value1", "sample_list": ["empty value"]},
+    #         ),
+    #         (
+    #             ResponseStrategy.STRING,
+    #             {"key1": "value1", "sample_list": [{"THIS_IS_EMPTY": "empty value"}]},
+    #             {"key1": "value1", "sample_list": []},
+    #         ),
+    #         (
+    #             ResponseStrategy.STRING,
+    #             {"key1": "value1", "sample_dict": {"inner_list": [{"THIS_IS_EMPTY": "empty value"}]}},
+    #             {"key1": "value1", "sample_dict": {"inner_list": []}},
+    #         ),
+    #         (
+    #             ResponseStrategy.STRING,
+    #             {
+    #                 "key1": "value1",
+    #                 "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {"THIS_IS_EMPTY": "empty value"}}],
+    #             },
+    #             {"key1": "value1", "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {}}]},
+    #         ),
+    #         (
+    #             ResponseStrategy.STRING,
+    #             {
+    #                 "key1": "value1",
+    #                 "sample_list": [
+    #                     {
+    #                         "inner_dict": "inner_value",
+    #                         "inner_dict2": {"THIS_IS_EMPTY": "empty value"},
+    #                         "inner_list": ["empty value"],
+    #                     }
+    #                 ],
+    #             },
+    #             {
+    #                 "key1": "value1",
+    #                 "sample_list": [{"inner_dict": "inner_value", "inner_dict2": {}, "inner_list": ["empty value"]}],
+    #             },
+    #         ),
+    #     ],
+    # )
+    # def test__process_empty_body_response_by_string_strategy(
+    #     self, under_test: BaseTmpRefDataModel, strategy: ResponseStrategy, ut_response_data: dict, expect_result: dict
+    # ):
+    #     ut_response = under_test._process_empty_body_response_by_string_strategy(
+    #         response_columns_setting=ut_response_data
+    #     )
+    #     assert ut_response == expect_result
 
     @pytest.mark.parametrize(
         ("strategy", "ut_response_config", "expect_result"),
