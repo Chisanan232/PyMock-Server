@@ -1,3 +1,4 @@
+import re
 from abc import ABCMeta, abstractmethod
 from typing import List, Type, Union
 
@@ -1023,6 +1024,11 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
     @abstractmethod
     def test_get_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
         assert under_test.get_ref() == expect_result
+
+    def test_get_schema_ref_with_not_exist_ref(self, under_test: BaseTmpRefDataModel):
+        with pytest.raises(ValueError) as exc_info:
+            under_test.get_schema_ref()
+        assert re.search(r"no ref", str(exc_info.value), re.IGNORECASE)
 
     # @pytest.mark.parametrize(
     #     ("strategy", "ut_response_data", "expect_result"),
