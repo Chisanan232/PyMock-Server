@@ -424,7 +424,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
     def get_ref(self) -> str:
         pass
 
-    def get_schema_ref(self, accept_no_ref: bool = False) -> Optional["TmpResponseRefModel"]:
+    def get_schema_ref(self) -> Optional["TmpResponseRefModel"]:
         def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
             if i == len(paths) - 1:
                 return component_def_data[paths[i]]
@@ -435,8 +435,6 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
         _has_ref = self.has_ref()
         print(f"[DEBUG in get_schema_ref] _has_ref: {_has_ref}")
         if not _has_ref:
-            if accept_no_ref:
-                return None
             raise ValueError("This parameter has no ref in schema.")
         schema_path = self.get_ref().replace("#/", "").split("/")[1:]
         print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")
@@ -454,7 +452,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
     ) -> "ResponseProperty":
         if not init_response:
             init_response = ResponseProperty.initial_response_data()
-        response = self.get_schema_ref(accept_no_ref=True).process_reference_object(  # type: ignore[union-attr]
+        response = self.get_schema_ref().process_reference_object(  # type: ignore[union-attr]
             init_response=init_response,
             # response_schema_ref=self.get_schema_ref(accept_no_ref=True),
             get_schema_parser_factory=get_schema_parser_factory,
