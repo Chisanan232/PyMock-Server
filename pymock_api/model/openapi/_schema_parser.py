@@ -1,5 +1,4 @@
-from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from ._base_schema_parser import (
     BaseOpenAPIObjectSchemaParser,
@@ -10,7 +9,7 @@ from ._base_schema_parser import (
     BaseOpenAPISchemaParser,
     BaseOpenAPITagSchemaParser,
 )
-from ._tmp_data_model import BaseTmpDataModel, get_component_definition
+from ._tmp_data_model import get_component_definition
 
 
 class OpenAPIObjectSchemaParser(BaseOpenAPIObjectSchemaParser):
@@ -133,41 +132,17 @@ class OpenAPIV3SchemaParser(BaseOpenAPISchemaParser):
         return self._data.get("components", {})
 
 
-class _BaseReferenceObjectParser(metaclass=ABCMeta):
+class _ReferenceObjectParser:
     @classmethod
-    @abstractmethod
-    def has_schema(cls, data: Union[Dict, BaseTmpDataModel]) -> bool:
-        pass
-
-    @classmethod
-    @abstractmethod
-    def has_additional_properties(cls, data: Union[Dict, BaseTmpDataModel]) -> bool:
-        pass
-
-    @classmethod
-    @abstractmethod
-    def has_ref(cls, data: Union[Dict, BaseTmpDataModel]) -> str:
-        pass
-
-    @classmethod
-    @abstractmethod
-    def get_schema_ref(
-        cls, data: Union[Dict, BaseTmpDataModel], accept_no_ref: bool = False
-    ) -> Union[Dict, BaseTmpDataModel]:
-        pass
-
-
-class _ReferenceObjectParser(_BaseReferenceObjectParser):
-    @classmethod
-    def has_schema(cls, data: Dict) -> bool:  # type: ignore[override]
+    def has_schema(cls, data: Dict) -> bool:
         return data.get("schema", None) is not None
 
     @classmethod
-    def has_additional_properties(cls, data: Dict) -> bool:  # type: ignore[override]
+    def has_additional_properties(cls, data: Dict) -> bool:
         return data.get("additionalProperties", None) is not None
 
     @classmethod
-    def has_ref(cls, data: Dict) -> str:  # type: ignore[override]
+    def has_ref(cls, data: Dict) -> str:
         if cls.has_schema(data):
             has_schema_ref = data["schema"].get("$ref", None) is not None
             return "schema" if has_schema_ref else ""
@@ -179,7 +154,7 @@ class _ReferenceObjectParser(_BaseReferenceObjectParser):
             return "ref" if _has_ref else ""
 
     @classmethod
-    def get_schema_ref(cls, data: dict, accept_no_ref: bool = False) -> dict:  # type: ignore[override]
+    def get_schema_ref(cls, data: dict, accept_no_ref: bool = False) -> dict:
         def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
             if i == len(paths) - 1:
                 return component_def_data[paths[i]]
@@ -196,55 +171,3 @@ class _ReferenceObjectParser(_BaseReferenceObjectParser):
         print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")
         # Operate the component definition object
         return _get_schema(get_component_definition(), schema_path, 0)
-
-
-# class _ReferenceObjectParserWithTmpDataModel(_BaseReferenceObjectParser):
-#     @classmethod
-#     def has_schema(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> bool:  # type: ignore[override]
-#         return hasattr(data, "schema") and getattr(data, "schema") is not None
-#
-#     @classmethod
-#     def has_additional_properties(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> bool:  # type: ignore[override]
-#         return hasattr(data, "additionalProperties") and getattr(data, "additionalProperties") is not None
-#
-#     @classmethod
-#     def has_ref(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> str:  # type: ignore[override]
-#         if cls.has_schema(data):
-#             return "schema" if data.schema.ref is not None else ""  # type: ignore[union-attr]
-#         elif cls.has_additional_properties(data):
-#             return "additionalProperties" if data.additionalProperties.ref is not None else ""  # type: ignore[union-attr]
-#         else:
-#             return "ref" if hasattr(data, "ref") and getattr(data, "ref") is not None else ""
-#
-#     @classmethod
-#     def get_ref(cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel]) -> str:
-#         ref = cls.has_ref(data)
-#         if ref == "schema":
-#             assert data.schema.ref  # type: ignore[union-attr]
-#             return data.schema.ref  # type: ignore[union-attr]
-#         elif ref == "additionalProperties":
-#             assert data.additionalProperties.ref  # type: ignore[union-attr]
-#             return data.additionalProperties.ref  # type: ignore[union-attr]
-#         return data.ref  # type: ignore[union-attr, return-value]
-#
-#     @classmethod
-#     def get_schema_ref(  # type: ignore[override]
-#         cls, data: Union[TmpResponseSchema, TmpResponsePropertyModel, TmpRequestItemModel], accept_no_ref: bool = False  # type: ignore[override]
-#     ) -> Optional[TmpResponseRefModel]:
-#         def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
-#             if i == len(paths) - 1:
-#                 return component_def_data[paths[i]]
-#             else:
-#                 return _get_schema(component_def_data[paths[i]], paths, i + 1)
-#
-#         print(f"[DEBUG in get_schema_ref] data: {data}")
-#         _has_ref = cls.has_ref(data)
-#         print(f"[DEBUG in get_schema_ref] _has_ref: {_has_ref}")
-#         if not _has_ref:
-#             if accept_no_ref:
-#                 return None
-#             raise ValueError("This parameter has no ref in schema.")
-#         schema_path = cls.get_ref(data).replace("#/", "").split("/")[1:]
-#         print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")
-#         # Operate the component definition object
-#         return TmpResponseRefModel.deserialize(_get_schema(get_component_definition(), schema_path, 0))
