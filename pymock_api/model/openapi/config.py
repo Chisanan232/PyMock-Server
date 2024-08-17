@@ -128,8 +128,6 @@ class API(Transferable):
             method=self.http_method.upper(),
             parameters=list(map(lambda p: p.to_api_config(), self.parameters)),
         )
-        # resp_strategy = self.response["strategy"]
-        # if resp_strategy is ResponseStrategy.OBJECT:
         print(f"[DEBUG in src] self.response: {self.response}")
         if list(filter(lambda p: p.name == "", self.response.data)):
             values = []
@@ -137,8 +135,6 @@ class API(Transferable):
             values = self.response.data
         print(f"[DEBUG in to_api_config] values: {values}")
         mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=values)
-        # else:
-        #     mock_api.set_response(strategy=resp_strategy, value=self.response["data"])
         return mock_api
 
 
