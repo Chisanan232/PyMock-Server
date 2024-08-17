@@ -103,8 +103,6 @@ class API(Transferable):
     response: ResponseProperty = field(default_factory=ResponseProperty)
     tags: List[str] = field(default_factory=list)
 
-    # process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
-
     @classmethod
     def generate(cls, api_path: str, http_method: str, detail: dict) -> "API":
         api = API()
@@ -114,15 +112,12 @@ class API(Transferable):
         return api
 
     def deserialize(self, data: Dict) -> "API":
-        # FIXME: Does it have better way to set the HTTP response strategy?
-        # if not self.process_response_strategy:
-        #     raise ValueError("Please set the strategy how it should process HTTP response.")
         parser = APIParser(parser=self.schema_parser_factory.path(data=data))
 
         self.parameters = list(
             map(lambda pd: APIParameter.generate(pd), parser.process_api_parameters(http_method=self.http_method))
         )
-        self.response = parser.process_responses(strategy=ResponseStrategy.OBJECT)
+        self.response = parser.process_responses()
         self.tags = parser.process_tags()
 
         return self

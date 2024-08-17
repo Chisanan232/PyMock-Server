@@ -177,12 +177,6 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         set_openapi_version(OpenAPIVersion.V3)
         data_model.reload_schema_parser_factory()
 
-    # def test_invalid_deserialize(self, data_model: API):
-    #     data_model.process_response_strategy = None
-    #     with pytest.raises(ValueError) as exc_info:
-    #         data_model.deserialize(data={})
-    #     assert re.search(r".{0,32}strategy.{0,32}", str(exc_info.value), re.IGNORECASE)
-
     def _initial(self, data: API) -> None:
         data.path = ""
         data.http_method = ""

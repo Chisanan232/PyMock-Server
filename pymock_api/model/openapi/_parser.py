@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional, Type, Union, cast
 
-from ..enums import OpenAPIVersion, ResponseStrategy
+from ..enums import OpenAPIVersion
 from ._base import (
     BaseOpenAPIDataModel,
     ensure_get_schema_parser_factory,
@@ -209,7 +209,7 @@ class APIParser(BaseParser):
         print(f"[DEBUG in APIParser._process_has_ref_parameters] parameters: {parameters}")
         return parameters
 
-    def process_responses(self, strategy: ResponseStrategy) -> ResponseProperty:
+    def process_responses(self) -> ResponseProperty:
         # TODO: It may need to add one more data object about outside reference
         # TODO: Replace all *dict* type as tmp object *TmpResponseModel*
         assert self.parser.exist_in_response(status_code="200") is True
