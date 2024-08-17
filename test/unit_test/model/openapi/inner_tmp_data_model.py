@@ -1014,6 +1014,16 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
     #         resp = resp.serialize()
     #     assert resp == expected_value
 
+    @pytest.mark.parametrize(("under_test", "expect_result"), [])
+    @abstractmethod
+    def test_has_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+        assert under_test.has_ref() == expect_result
+
+    @pytest.mark.parametrize(("under_test", "expect_result"), [])
+    @abstractmethod
+    def test_get_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+        assert under_test.get_ref() == expect_result
+
     @pytest.mark.parametrize(
         ("strategy", "ut_response_data", "expect_result"),
         [
@@ -1205,6 +1215,51 @@ class TestTmpResponsePropertyModel(BaseTmpRefDataModelTestSuite):
     @pytest.fixture(scope="function")
     def under_test(self) -> TmpResponsePropertyModel:
         return TmpResponsePropertyModel()
+
+    @pytest.mark.parametrize(
+        ("under_test", "expect_result"),
+        [
+            (TmpResponsePropertyModel(ref=None), ""),
+            (TmpResponsePropertyModel(ref=""), ""),
+            (TmpResponsePropertyModel(ref="reference value"), "ref"),
+            (TmpResponsePropertyModel(additionalProperties=TmpResponsePropertyModel(ref=None)), ""),
+            (TmpResponsePropertyModel(additionalProperties=TmpResponsePropertyModel(ref="")), ""),
+            (
+                TmpResponsePropertyModel(additionalProperties=TmpResponsePropertyModel(ref="reference value")),
+                "additionalProperties",
+            ),
+        ],
+    )
+    def test_has_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+        super().test_has_ref(under_test, expect_result)
+
+    @pytest.mark.parametrize(
+        ("under_test", "expect_result"),
+        [
+            (TmpResponsePropertyModel(ref="reference value"), "reference value"),
+            (
+                TmpResponsePropertyModel(additionalProperties=TmpResponsePropertyModel(ref="reference value")),
+                "reference value",
+            ),
+        ],
+    )
+    def test_get_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+        super().test_get_ref(under_test, expect_result)
+
+    @pytest.mark.parametrize(
+        ("under_test", "expect_result"),
+        [
+            (TmpResponsePropertyModel(), True),
+            (TmpResponsePropertyModel(value_type=None), True),
+            (TmpResponsePropertyModel(ref=None), True),
+            (TmpResponsePropertyModel(value_type=""), True),
+            (TmpResponsePropertyModel(ref=""), True),
+            (TmpResponsePropertyModel(value_type="data type", ref=""), False),
+            (TmpResponsePropertyModel(value_type=None, ref="reference value"), False),
+        ],
+    )
+    def test_is_empty(self, under_test: TmpResponsePropertyModel, expect_result: str):
+        assert under_test.is_empty() == expect_result
 
 
 class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
