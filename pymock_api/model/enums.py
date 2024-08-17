@@ -4,7 +4,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import Callable, Dict, List, Optional, Union
 
-from pymock_api._utils.random import (
+from .._utils.random import (
     DigitRange,
     RandomBigDecimal,
     RandomBoolean,

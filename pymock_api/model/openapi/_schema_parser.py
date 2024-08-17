@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
-from pymock_api.model.openapi._base_schema_parser import (
+from ._base_schema_parser import (
     BaseOpenAPIObjectSchemaParser,
     BaseOpenAPIPathSchemaParser,
     BaseOpenAPIRequestParameterItemSchemaParser,
@@ -10,10 +10,7 @@ from pymock_api.model.openapi._base_schema_parser import (
     BaseOpenAPISchemaParser,
     BaseOpenAPITagSchemaParser,
 )
-from pymock_api.model.openapi._tmp_data_model import (
-    BaseTmpDataModel,
-    get_component_definition,
-)
+from ._tmp_data_model import BaseTmpDataModel, get_component_definition
 
 
 class OpenAPIObjectSchemaParser(BaseOpenAPIObjectSchemaParser):
