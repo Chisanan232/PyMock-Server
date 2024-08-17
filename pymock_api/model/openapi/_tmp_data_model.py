@@ -1200,9 +1200,8 @@ class TmpResponseSchema(BaseTmpRefDataModel):
 
     @classmethod
     def deserialize(cls, data: dict) -> "TmpResponseSchema":
-        if data:
-            return TmpResponseSchema(schema=TmpResponsePropertyModel.deserialize(data.get("schema", {})))
-        return TmpResponseSchema()
+        assert data is not None and isinstance(data, dict)
+        return TmpResponseSchema(schema=TmpResponsePropertyModel.deserialize(data.get("schema", {})))
 
     def has_ref(self) -> str:
         return "schema" if self.schema and self.schema.has_ref else ""  # type: ignore[truthy-function]
