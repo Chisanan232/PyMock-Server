@@ -4,8 +4,10 @@ from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from dataclasses import dataclass, field
 from pydoc import locate
-from typing import Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
+from .. import APIParameter
+from ..api_config import IteratorItem
 from ..api_config import ResponseProperty as PyMockResponseProperty
 from ._base_schema_parser import BaseOpenAPISchemaParser
 from ._js_handlers import ensure_type_is_python_type
@@ -415,9 +417,10 @@ class TmpRequestItemModel(BaseTmpRefDataModel):
 class TmpAPIParameterModel(BaseTmpDataModel):
     name: str = field(default_factory=str)
     required: bool = False
-    value_type: str = field(default_factory=str)
-    default: Optional[str] = None
+    value_type: Optional[str] = None
+    default: Optional[Any] = None
     items: Optional[List[Union["TmpAPIParameterModel", TmpRequestItemModel]]] = None
+    ref: Optional[str] = None
 
     def __post_init__(self) -> None:
         if self.items is not None:
@@ -433,7 +436,61 @@ class TmpAPIParameterModel(BaseTmpDataModel):
         return items
 
     def _convert_value_type(self) -> str:
+        assert self.value_type
         return ensure_type_is_python_type(self.value_type)
+
+    def deserialize(self, data: Dict) -> "TmpAPIParameterModel":
+        self.name = data.get("name", "")
+        self.required = data.get("required", True)
+        self.value_type = data.get("type", "")
+        self.default = data.get("default", None)
+        items = data.get("items", [])
+        if items is not None:
+            self.items = items if isinstance(items, list) else [items]
+        return self
+
+    @classmethod
+    def deserialize_by_prps(
+        cls, name: str = "", required: bool = True, value_type: str = "", default: Any = None, items: List = []
+    ) -> "TmpAPIParameterModel":
+        return TmpAPIParameterModel(
+            name=name,
+            required=required,
+            value_type=ensure_type_is_python_type(value_type) if value_type else None,
+            default=default,
+            items=items,
+        )
+
+    def to_api_config(self) -> APIParameter:
+
+        def to_items(item_data: Union[TmpAPIParameterModel, TmpRequestItemModel]) -> IteratorItem:
+            if isinstance(item_data, TmpAPIParameterModel):
+                return IteratorItem(
+                    name=item_data.name,
+                    required=item_data.required,
+                    value_type=item_data.value_type,
+                    items=[to_items(i) for i in (item_data.items or [])],
+                )
+            elif isinstance(item_data, TmpRequestItemModel):
+                return IteratorItem(
+                    name="",
+                    required=True,
+                    value_type=item_data.value_type,
+                    items=[],
+                )
+            else:
+                raise TypeError(
+                    f"The data model must be *TmpAPIParameterModel* or *TmpItemModel*. But it get *{item_data}*. Please check it."
+                )
+
+        return APIParameter(
+            name=self.name,
+            required=self.required,
+            value_type=self.value_type,
+            default=self.default,
+            value_format=None,
+            items=[to_items(i) for i in (self.items or [])],
+        )
 
 
 @dataclass

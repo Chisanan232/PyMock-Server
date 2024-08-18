@@ -188,7 +188,7 @@ class APIParser(BaseParser):
                     item_type = props_items_parser.get_items_type()
                     assert item_type
                     items_props.append(
-                        TmpAPIParameterModel(
+                        TmpAPIParameterModel.deserialize_by_prps(
                             name="",
                             required=True,
                             value_type=item_type,
@@ -198,7 +198,7 @@ class APIParser(BaseParser):
                     )
 
             parameters.append(
-                TmpAPIParameterModel(
+                TmpAPIParameterModel.deserialize_by_prps(
                     name=param_name,
                     required=param_name in parser.get_required(),
                     value_type=param_props["type"],

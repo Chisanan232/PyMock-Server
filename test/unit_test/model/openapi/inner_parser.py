@@ -19,7 +19,6 @@ from pymock_api.model.openapi._tmp_data_model import (
     TmpAPIParameterModel,
     set_component_definition,
 )
-from pymock_api.model.openapi.config import APIParameter
 
 from ._test_case import DeserializeV2OpenAPIConfigTestCaseFactory
 
@@ -132,14 +131,12 @@ class TestAPIParser:
         set_parser_factory(get_schema_parser_factory_with_openapi_version())
 
         # Run target function
-        parameters = [
-            APIParameter.generate(pd) for pd in parser_instance.process_api_parameters(http_method="HTTP method")
-        ]
+        parameters = parser_instance.process_api_parameters(http_method="HTTP method")
 
         # Verify
         assert parameters and isinstance(parameters, list)
         assert len(parameters) == len(openapi_doc_data)
-        type_checksum = list(map(lambda p: isinstance(p, APIParameter), parameters))
+        type_checksum = list(map(lambda p: isinstance(p, TmpAPIParameterModel), parameters))
         assert False not in type_checksum
 
         # Finally

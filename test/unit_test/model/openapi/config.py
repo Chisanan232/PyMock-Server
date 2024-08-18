@@ -7,10 +7,8 @@ import pytest
 from pymock_api import APIConfig
 from pymock_api.model import MockAPI
 from pymock_api.model.api_config import _Config
-from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import OpenAPIVersion
 from pymock_api.model.openapi._base import Transferable, set_openapi_version
-from pymock_api.model.openapi._js_handlers import convert_js_type
 from pymock_api.model.openapi._parser_factory import (
     BaseOpenAPISchemaParserFactory,
     OpenAPIV2SchemaParserFactory,
@@ -24,9 +22,10 @@ from pymock_api.model.openapi._schema_parser import (
 from pymock_api.model.openapi._tmp_data_model import (
     PropertyDetail,
     ResponseProperty,
+    TmpAPIParameterModel,
     set_component_definition,
 )
-from pymock_api.model.openapi.config import API, APIParameter, OpenAPIDocumentConfig
+from pymock_api.model.openapi.config import API, OpenAPIDocumentConfig
 
 from ._test_case import (
     DeserializeV2OpenAPIConfigTestCaseFactory,
@@ -119,45 +118,6 @@ class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
         assert isinstance(data_model.schema_parser_factory, expected_parser_factory)
 
 
-class TestAPIParameters(_OpenAPIDocumentDataModelTestSuite):
-    @pytest.fixture(scope="function")
-    def data_model(self) -> APIParameter:
-        return APIParameter()
-
-    @pytest.mark.parametrize("openapi_doc_data", DESERIALIZE_V2_OPENAPI_API_REQUEST_PARAMETERS_TEST_CASE)
-    def test_deserialize(self, openapi_doc_data: dict, data_model: Transferable):
-        super().test_deserialize(openapi_doc_data, data_model)
-
-    def _initial(self, data: APIParameter) -> None:
-        data.name = ""
-        data.required = False
-        data.value_type = ""
-        data.default = None
-
-    def _verify_result(self, data: APIParameter, og_data: dict) -> None:
-        assert data is not None
-        assert data.required == og_data["required"]
-        if "schema" in og_data.keys():
-            assert data.value_type == convert_js_type(og_data["schema"]["type"])
-            assert data.default == og_data["schema"]["default"]
-        else:
-            assert data.value_type == convert_js_type(og_data["type"])
-            assert data.default == og_data.get("default", None)
-
-    def _given_props(self, data_model: APIParameter) -> None:
-        data_model.name = "arg1"
-        data_model.required = False
-        data_model.value_type = "string"
-        data_model.default = "default_value_pytest"
-
-    def _verify_api_config_model(self, under_test: PyMockAPIParameter, data_from: APIParameter) -> None:
-        assert under_test.name == data_from.name
-        assert under_test.required == data_from.required
-        assert under_test.value_type == data_from.value_type
-        assert under_test.default == data_from.default
-        assert under_test.value_format is None
-
-
 class TestAPI(_OpenAPIDocumentDataModelTestSuite):
     @pytest.fixture(scope="function")
     def data_model(self) -> API:
@@ -209,7 +169,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         #         assert api_param.default == one_swagger_api_param.get("default", None)
 
     def _given_props(self, data_model: API) -> None:
-        params = APIParameter()
+        params = TmpAPIParameterModel()
         params.name = "arg1"
         params.required = False
         params.value_type = "string"
@@ -282,7 +242,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             #     assert api_param.default == one_swagger_api_param["schema"]["default"]
 
     def _given_props(self, data_model: OpenAPIDocumentConfig) -> None:
-        params = APIParameter()
+        params = TmpAPIParameterModel()
         params.name = "arg1"
         params.required = False
         params.value_type = "string"
