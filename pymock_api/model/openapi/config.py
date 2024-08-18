@@ -1,6 +1,5 @@
-from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Dict, List, Optional, cast
 
 from .. import APIConfig, MockAPI, MockAPIs
 from ..api_config import BaseConfig
@@ -12,7 +11,6 @@ from ._parser import APIParser, OpenAPIDocumentConfigParser
 from ._tmp_data_model import (
     ResponseProperty,
     TmpAPIParameterModel,
-    TmpRequestItemModel,
     set_component_definition,
 )
 
@@ -31,15 +29,6 @@ class Tag(BaseOpenAPIDataModel):
         self.name = parser.get_name()
         self.description = parser.get_description()
         return self
-
-
-@dataclass
-class BaseProperty(BaseOpenAPIDataModel, ABC):
-    name: str = field(default_factory=str)
-    required: bool = False
-    value_type: str = field(default_factory=str)
-    default: Any = None
-    items: Optional[List[Union[TmpAPIParameterModel, TmpRequestItemModel]]] = None
 
 
 @dataclass
