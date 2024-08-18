@@ -124,17 +124,22 @@ class API(Transferable):
 
     def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
         mock_api = MockAPI(url=self.path.replace(base_url, ""), tag=self.tags[0] if self.tags else "")
+
+        # Handle request config
         mock_api.set_request(
             method=self.http_method.upper(),
             parameters=list(map(lambda p: p.to_api_config(), self.parameters)),
         )
+
+        # Handle response config
         print(f"[DEBUG in src] self.response: {self.response}")
         if list(filter(lambda p: p.name == "", self.response.data)):
             values = []
         else:
             values = self.response.data
         print(f"[DEBUG in to_api_config] values: {values}")
-        mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=values)
+        resp_props_values = [p.to_pymock_api_config() for p in values] if values else values
+        mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=resp_props_values)  # type: ignore[arg-type]
         return mock_api
 
 

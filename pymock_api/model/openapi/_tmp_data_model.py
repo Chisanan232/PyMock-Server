@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from pydoc import locate
 from typing import Callable, Dict, List, Optional, Union
 
+from ..api_config import ResponseProperty as PyMockResponseProperty
 from ._base_schema_parser import BaseOpenAPISchemaParser
 from ._js_handlers import ensure_type_is_python_type
 
@@ -650,6 +651,9 @@ class PropertyDetail:
             format=None,
             items=[],
         )
+
+    def to_pymock_api_config(self) -> PyMockResponseProperty:
+        return PyMockResponseProperty().deserialize(self.serialize())
 
 
 # Just for temporarily use in data process
