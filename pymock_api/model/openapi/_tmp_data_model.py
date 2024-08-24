@@ -413,6 +413,7 @@ class TmpRequestItemModel(BaseTmpRefDataModel):
         return self.ref
 
 
+# The tmp data model for final result to convert as PyMock-API
 @dataclass
 class TmpAPIParameterModel(BaseTmpDataModel):
     name: str = field(default_factory=str)
