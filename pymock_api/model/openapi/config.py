@@ -9,8 +9,8 @@ from ..enums import ResponseStrategy
 from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
 from ._parser import APIParser, OpenAPIDocumentConfigParser
 from ._tmp_data_model import (
+    RequestParameter,
     ResponseProperty,
-    TmpAPIParameterModel,
     set_component_definition,
 )
 
@@ -35,7 +35,7 @@ class Tag(BaseOpenAPIDataModel):
 class API(Transferable):
     path: str = field(default_factory=str)
     http_method: str = field(default_factory=str)
-    parameters: List[TmpAPIParameterModel] = field(default_factory=list)
+    parameters: List[RequestParameter] = field(default_factory=list)
     response: ResponseProperty = field(default_factory=ResponseProperty)
     tags: List[str] = field(default_factory=list)
 

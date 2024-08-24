@@ -21,8 +21,8 @@ from pymock_api.model.openapi._schema_parser import (
 )
 from pymock_api.model.openapi._tmp_data_model import (
     PropertyDetail,
+    RequestParameter,
     ResponseProperty,
-    TmpAPIParameterModel,
     set_component_definition,
 )
 from pymock_api.model.openapi.config import API, OpenAPIDocumentConfig
@@ -169,7 +169,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         #         assert api_param.default == one_swagger_api_param.get("default", None)
 
     def _given_props(self, data_model: API) -> None:
-        params = TmpAPIParameterModel()
+        params = RequestParameter()
         params.name = "arg1"
         params.required = False
         params.value_type = "string"
@@ -242,7 +242,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             #     assert api_param.default == one_swagger_api_param["schema"]["default"]
 
     def _given_props(self, data_model: OpenAPIDocumentConfig) -> None:
-        params = TmpAPIParameterModel()
+        params = RequestParameter()
         params.name = "arg1"
         params.required = False
         params.value_type = "string"

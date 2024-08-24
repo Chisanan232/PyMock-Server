@@ -17,8 +17,8 @@ from ._schema_parser import (
     _ReferenceObjectParser,
 )
 from ._tmp_data_model import (
+    RequestParameter,
     ResponseProperty,
-    TmpAPIParameterModel,
     TmpRequestItemModel,
     TmpResponsePropertyModel,
     TmpResponseSchema,
@@ -44,7 +44,7 @@ class APIParameterParser(BaseParser):
     def parser(self) -> BaseOpenAPIRequestParametersSchemaParser:
         return cast(BaseOpenAPIRequestParametersSchemaParser, super().parser)
 
-    def process_parameter(self, data: Dict, accept_no_schema: bool = True) -> TmpAPIParameterModel:
+    def process_parameter(self, data: Dict, accept_no_schema: bool = True) -> RequestParameter:
         if not _ReferenceObjectParser.has_schema(data):
             if accept_no_schema:
                 return self._convert_from_data(data)
@@ -55,8 +55,8 @@ class APIParameterParser(BaseParser):
         else:
             return self._convert_from_parser()
 
-    def _convert_from_data(self, data: dict) -> TmpAPIParameterModel:
-        return TmpAPIParameterModel(
+    def _convert_from_data(self, data: dict) -> RequestParameter:
+        return RequestParameter(
             name=data["name"],
             required=data["required"],
             value_type=ensure_type_is_python_type(data["type"]),
@@ -67,8 +67,8 @@ class APIParameterParser(BaseParser):
             ],
         )
 
-    def _convert_from_parser(self) -> TmpAPIParameterModel:
-        return TmpAPIParameterModel(
+    def _convert_from_parser(self) -> RequestParameter:
+        return RequestParameter(
             name=self.parser.get_name(),
             required=(self.parser.get_required() or False),  # type: ignore[arg-type]
             value_type=ensure_type_is_python_type(self.parser.get_type()),
@@ -129,14 +129,12 @@ class APIParser(BaseParser):
     def parser(self) -> BaseOpenAPIPathSchemaParser:
         return cast(BaseOpenAPIPathSchemaParser, super().parser)
 
-    def process_api_parameters(self, http_method: str) -> List[TmpAPIParameterModel]:
+    def process_api_parameters(self, http_method: str) -> List[RequestParameter]:
 
-        def _deserialize_as_tmp_model(_data: dict) -> TmpAPIParameterModel:
+        def _deserialize_as_tmp_model(_data: dict) -> RequestParameter:
             return APIParameterParser(self.schema_parser_factory.request_parameters(_data)).process_parameter(_data)
 
-        def _initial_request_parameters_model(
-            _data: List[dict], not_ref_data: List[dict]
-        ) -> List[TmpAPIParameterModel]:
+        def _initial_request_parameters_model(_data: List[dict], not_ref_data: List[dict]) -> List[RequestParameter]:
             has_ref_in_schema_param = list(filter(lambda p: _ReferenceObjectParser.has_ref(p) != "", _data))
             if has_ref_in_schema_param:
                 # TODO: Ensure the value maps this condition is really only one
@@ -160,10 +158,10 @@ class APIParser(BaseParser):
                 params_data: dict = self.parser.get_request_body()
                 return _initial_request_parameters_model([params_data], params_in_path_data)
 
-    def _process_has_ref_parameters(self, data: Dict) -> List[TmpAPIParameterModel]:
+    def _process_has_ref_parameters(self, data: Dict) -> List[RequestParameter]:
         request_body_params = _ReferenceObjectParser.get_schema_ref(data)
         # TODO: Should use the reference to get the details of parameters.
-        parameters: List[TmpAPIParameterModel] = []
+        parameters: List[RequestParameter] = []
         parser = self.schema_parser_factory.object(request_body_params)
         for param_name, param_props in parser.get_properties().items():
             props_parser = self.schema_parser_factory.request_parameters(param_props)
@@ -188,7 +186,7 @@ class APIParser(BaseParser):
                     item_type = props_items_parser.get_items_type()
                     assert item_type
                     items_props.append(
-                        TmpAPIParameterModel.deserialize_by_prps(
+                        RequestParameter.deserialize_by_prps(
                             name="",
                             required=True,
                             value_type=item_type,
@@ -198,7 +196,7 @@ class APIParser(BaseParser):
                     )
 
             parameters.append(
-                TmpAPIParameterModel.deserialize_by_prps(
+                RequestParameter.deserialize_by_prps(
                     name=param_name,
                     required=param_name in parser.get_required(),
                     value_type=param_props["type"],

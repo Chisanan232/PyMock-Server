@@ -16,7 +16,7 @@ from pymock_api.model.openapi._schema_parser import (
     _ReferenceObjectParser,
 )
 from pymock_api.model.openapi._tmp_data_model import (
-    TmpAPIParameterModel,
+    RequestParameter,
     set_component_definition,
 )
 
@@ -136,7 +136,7 @@ class TestAPIParser:
         # Verify
         assert parameters and isinstance(parameters, list)
         assert len(parameters) == len(openapi_doc_data)
-        type_checksum = list(map(lambda p: isinstance(p, TmpAPIParameterModel), parameters))
+        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
         assert False not in type_checksum
 
         # Finally
@@ -160,7 +160,7 @@ class TestAPIParser:
         # Verify
         assert parameters and isinstance(parameters, list)
         assert len(parameters) == len(entire_openapi_config["definitions"]["UpdateFooRequest"]["properties"].keys())
-        type_checksum = list(map(lambda p: isinstance(p, TmpAPIParameterModel), parameters))
+        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
         assert False not in type_checksum
 
     @pytest.mark.parametrize("openapi_doc_data", PARSE_FAIL_V2_OPENAPI_REQUEST_PARAMETERS_NO_REFERENCE_INFO_TEST_CASE)

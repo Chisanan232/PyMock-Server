@@ -413,87 +413,6 @@ class TmpRequestItemModel(BaseTmpRefDataModel):
         return self.ref
 
 
-# The tmp data model for final result to convert as PyMock-API
-@dataclass
-class TmpAPIParameterModel(BaseTmpDataModel):
-    name: str = field(default_factory=str)
-    required: bool = False
-    value_type: Optional[str] = None
-    default: Optional[Any] = None
-    items: Optional[List[Union["TmpAPIParameterModel", TmpRequestItemModel]]] = None
-    ref: Optional[str] = None
-
-    def __post_init__(self) -> None:
-        if self.items is not None:
-            self.items = self._convert_items()
-        if self.value_type:
-            self.value_type = self._convert_value_type()
-
-    def _convert_items(self) -> List[Union["TmpAPIParameterModel", TmpRequestItemModel]]:
-        items: List[Union[TmpAPIParameterModel, TmpRequestItemModel]] = []
-        for item in self.items or []:
-            assert isinstance(item, (TmpAPIParameterModel, TmpRequestItemModel))
-            items.append(item)
-        return items
-
-    def _convert_value_type(self) -> str:
-        assert self.value_type
-        return ensure_type_is_python_type(self.value_type)
-
-    def deserialize(self, data: Dict) -> "TmpAPIParameterModel":
-        self.name = data.get("name", "")
-        self.required = data.get("required", True)
-        self.value_type = data.get("type", "")
-        self.default = data.get("default", None)
-        items = data.get("items", [])
-        if items is not None:
-            self.items = items if isinstance(items, list) else [items]
-        return self
-
-    @classmethod
-    def deserialize_by_prps(
-        cls, name: str = "", required: bool = True, value_type: str = "", default: Any = None, items: List = []
-    ) -> "TmpAPIParameterModel":
-        return TmpAPIParameterModel(
-            name=name,
-            required=required,
-            value_type=ensure_type_is_python_type(value_type) if value_type else None,
-            default=default,
-            items=items,
-        )
-
-    def to_api_config(self) -> APIParameter:
-
-        def to_items(item_data: Union[TmpAPIParameterModel, TmpRequestItemModel]) -> IteratorItem:
-            if isinstance(item_data, TmpAPIParameterModel):
-                return IteratorItem(
-                    name=item_data.name,
-                    required=item_data.required,
-                    value_type=item_data.value_type,
-                    items=[to_items(i) for i in (item_data.items or [])],
-                )
-            elif isinstance(item_data, TmpRequestItemModel):
-                return IteratorItem(
-                    name="",
-                    required=True,
-                    value_type=item_data.value_type,
-                    items=[],
-                )
-            else:
-                raise TypeError(
-                    f"The data model must be *TmpAPIParameterModel* or *TmpItemModel*. But it get *{item_data}*. Please check it."
-                )
-
-        return APIParameter(
-            name=self.name,
-            required=self.required,
-            value_type=self.value_type,
-            default=self.default,
-            value_format=None,
-            items=[to_items(i) for i in (self.items or [])],
-        )
-
-
 @dataclass
 class TmpResponsePropertyModel(BaseTmpRefDataModel):
     title: Optional[str] = None
@@ -712,6 +631,87 @@ class PropertyDetail:
 
     def to_pymock_api_config(self) -> PyMockResponseProperty:
         return PyMockResponseProperty().deserialize(self.serialize())
+
+
+# The tmp data model for final result to convert as PyMock-API
+@dataclass
+class RequestParameter(BaseTmpDataModel):
+    name: str = field(default_factory=str)
+    required: bool = False
+    value_type: Optional[str] = None
+    default: Optional[Any] = None
+    items: Optional[List[Union["RequestParameter", TmpRequestItemModel]]] = None
+    ref: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        if self.items is not None:
+            self.items = self._convert_items()
+        if self.value_type:
+            self.value_type = self._convert_value_type()
+
+    def _convert_items(self) -> List[Union["RequestParameter", TmpRequestItemModel]]:
+        items: List[Union[RequestParameter, TmpRequestItemModel]] = []
+        for item in self.items or []:
+            assert isinstance(item, (RequestParameter, TmpRequestItemModel))
+            items.append(item)
+        return items
+
+    def _convert_value_type(self) -> str:
+        assert self.value_type
+        return ensure_type_is_python_type(self.value_type)
+
+    def deserialize(self, data: Dict) -> "RequestParameter":
+        self.name = data.get("name", "")
+        self.required = data.get("required", True)
+        self.value_type = data.get("type", "")
+        self.default = data.get("default", None)
+        items = data.get("items", [])
+        if items is not None:
+            self.items = items if isinstance(items, list) else [items]
+        return self
+
+    @classmethod
+    def deserialize_by_prps(
+        cls, name: str = "", required: bool = True, value_type: str = "", default: Any = None, items: List = []
+    ) -> "RequestParameter":
+        return RequestParameter(
+            name=name,
+            required=required,
+            value_type=ensure_type_is_python_type(value_type) if value_type else None,
+            default=default,
+            items=items,
+        )
+
+    def to_api_config(self) -> APIParameter:
+
+        def to_items(item_data: Union[RequestParameter, TmpRequestItemModel]) -> IteratorItem:
+            if isinstance(item_data, RequestParameter):
+                return IteratorItem(
+                    name=item_data.name,
+                    required=item_data.required,
+                    value_type=item_data.value_type,
+                    items=[to_items(i) for i in (item_data.items or [])],
+                )
+            elif isinstance(item_data, TmpRequestItemModel):
+                return IteratorItem(
+                    name="",
+                    required=True,
+                    value_type=item_data.value_type,
+                    items=[],
+                )
+            else:
+                raise TypeError(
+                    f"The data model must be *TmpAPIParameterModel* or *TmpItemModel*. But it get *{item_data}*. Please check it."
+                )
+
+        return APIParameter(
+            name=self.name,
+            required=self.required,
+            value_type=self.value_type,
+            default=self.default,
+            value_format=None,
+            items=[to_items(i) for i in (self.items or [])],
+        )
 
 
 # Just for temporarily use in data process
