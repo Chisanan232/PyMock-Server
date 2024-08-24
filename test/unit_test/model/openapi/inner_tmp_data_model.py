@@ -399,21 +399,21 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
         ("ut_response_config", "expect_result"),
         [
             (
-                [PropertyDetail(name="THIS_IS_EMPTY", required=True, type=None, format=None, items=None)],
-                [PropertyDetail(name="", required=True, type=None, format=None, is_empty=True, items=None)],
+                [PropertyDetail(name="THIS_IS_EMPTY", required=True, value_type=None, format=None, items=None)],
+                [PropertyDetail(name="", required=True, value_type=None, format=None, is_empty=True, items=None)],
             ),
             (
                 [
                     PropertyDetail(
                         name="sample_list",
                         required=True,
-                        type="list",
+                        value_type="list",
                         format=None,
                         items=[
                             PropertyDetail(
                                 name="THIS_IS_EMPTY",
                                 required=True,
-                                type=None,
+                                value_type=None,
                                 format=None,
                                 items=None,
                             ),
@@ -424,7 +424,7 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
                     PropertyDetail(
                         name="sample_list",
                         required=True,
-                        type="list",
+                        value_type="list",
                         format=None,
                         is_empty=True,
                         items=[],
@@ -436,32 +436,38 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
                     PropertyDetail(
                         name="sample_list",
                         required=True,
-                        type="list",
+                        value_type="list",
                         format=None,
                         items=[
                             PropertyDetail(
                                 name="sample_nested_list",
                                 required=True,
-                                type="list",
+                                value_type="list",
                                 format=None,
                                 items=[
                                     PropertyDetail(
                                         name="sample_nested_list",
                                         required=True,
-                                        type="list",
+                                        value_type="list",
                                         format=None,
                                         items=[
-                                            PropertyDetail(name="", required=True, type="str", format=None, items=None),
+                                            PropertyDetail(
+                                                name="", required=True, value_type="str", format=None, items=None
+                                            ),
                                         ],
                                     ),
                                     PropertyDetail(
                                         name="sample_nested_dict",
                                         required=True,
-                                        type="dict",
+                                        value_type="dict",
                                         format=None,
                                         items=[
                                             PropertyDetail(
-                                                name="THIS_IS_EMPTY", required=True, type=None, format=None, items=None
+                                                name="THIS_IS_EMPTY",
+                                                required=True,
+                                                value_type=None,
+                                                format=None,
+                                                items=None,
                                             ),
                                         ],
                                     ),
@@ -474,28 +480,30 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
                     PropertyDetail(
                         name="sample_list",
                         required=True,
-                        type="list",
+                        value_type="list",
                         format=None,
                         items=[
                             PropertyDetail(
                                 name="sample_nested_list",
                                 required=True,
-                                type="list",
+                                value_type="list",
                                 format=None,
                                 items=[
                                     PropertyDetail(
                                         name="sample_nested_list",
                                         required=True,
-                                        type="list",
+                                        value_type="list",
                                         format=None,
                                         items=[
-                                            PropertyDetail(name="", required=True, type="str", format=None, items=None),
+                                            PropertyDetail(
+                                                name="", required=True, value_type="str", format=None, items=None
+                                            ),
                                         ],
                                     ),
                                     PropertyDetail(
                                         name="sample_nested_dict",
                                         required=True,
-                                        type="dict",
+                                        value_type="dict",
                                         format=None,
                                         is_empty=True,
                                         items=[],
@@ -589,7 +597,7 @@ class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
                 TmpResponseRefModel(value_type="object"),
                 # {"type": "object"},
                 ResponseProperty(
-                    data=[PropertyDetail(name="THIS_IS_EMPTY", required=False, type=None, format=None, items=[])],
+                    data=[PropertyDetail(name="THIS_IS_EMPTY", required=False, value_type=None, format=None, items=[])],
                 ),
                 # {
                 #     "strategy": ResponseStrategy.OBJECT,

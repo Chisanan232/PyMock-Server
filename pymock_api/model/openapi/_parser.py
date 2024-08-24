@@ -19,7 +19,6 @@ from ._schema_parser import (
 from ._tmp_data_model import (
     RequestParameter,
     ResponseProperty,
-    TmpRequestItemModel,
     TmpResponsePropertyModel,
     TmpResponseSchema,
 )
@@ -62,7 +61,7 @@ class APIParameterParser(BaseParser):
             value_type=ensure_type_is_python_type(data["type"]),
             default=data.get("default", None),
             items=[
-                TmpRequestItemModel.deserialize(i)
+                RequestParameter().deserialize(i)
                 for i in (self._ensure_data_type_is_pythonic_type_in_items(data.get("items", None)) or [])
             ],
         )
@@ -74,7 +73,7 @@ class APIParameterParser(BaseParser):
             value_type=ensure_type_is_python_type(self.parser.get_type()),
             default=self.parser.get_default(),
             items=[
-                TmpRequestItemModel().deserialize(i)
+                RequestParameter().deserialize(i)
                 for i in (self._ensure_data_type_is_pythonic_type_in_items(self.parser.get_items()) or [])
             ],
         )

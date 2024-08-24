@@ -62,7 +62,7 @@ class API(Transferable):
         # Handle request config
         mock_api.set_request(
             method=self.http_method.upper(),
-            parameters=list(map(lambda p: p.to_api_config(), self.parameters)),
+            parameters=list(map(lambda p: p.to_pymock_api_config(), self.parameters)),
         )
 
         # Handle response config

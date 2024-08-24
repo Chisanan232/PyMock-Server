@@ -180,7 +180,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         data_model.parameters = [params]
         data_model.response = ResponseProperty(
             data=[
-                PropertyDetail(name="key1", type="str", required=True),
+                PropertyDetail(name="key1", value_type="str", required=True),
             ],
         )
         data_model.tags = ["first tag", "second tag"]
@@ -254,7 +254,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
         api.parameters = [params]
         api.response = ResponseProperty(
             data=[
-                PropertyDetail(name="key1", type="str", required=True),
+                PropertyDetail(name="key1", value_type="str", required=True),
             ],
         )
 

@@ -204,14 +204,14 @@ class TestAPIParser:
         for d in data_details:
             if should_check_name:
                 assert d.name
-                assert d.type
+                assert d.value_type
             assert d.required is not None
             assert d.format is None  # FIXME: Should activate this verify after support this feature
-            if d.type == "list":
+            if d.value_type == "list":
                 assert d.items is not None
                 for item in d.items:
                     assert item.name
-                    assert item.type
+                    assert item.value_type
                     assert item.required is not None
         # assert False
         # else:

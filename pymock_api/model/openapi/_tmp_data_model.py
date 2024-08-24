@@ -6,9 +6,9 @@ from dataclasses import dataclass, field
 from pydoc import locate
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from .. import APIParameter
 from ..api_config import IteratorItem
-from ..api_config import ResponseProperty as PyMockResponseProperty
+from ..api_config.apis.request import APIParameter as PyMockRequestProperty
+from ..api_config.apis.response import ResponseProperty as PyMockResponseProperty
 from ._base_schema_parser import BaseOpenAPISchemaParser
 from ._js_handlers import ensure_type_is_python_type
 
@@ -96,7 +96,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                 response = PropertyDetail(
                     name="",
                     required=_Default_Required.general,
-                    type="list",
+                    value_type="list",
                     # TODO: Set the *format* property correctly
                     format=None,
                     items=items,
@@ -155,7 +155,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                 item_k_data_prop = PropertyDetail(
                     name=item_k,
                     required=item_k in ref_single_response.required,
-                    type=item_v.value_type or "dict",
+                    value_type=item_v.value_type or "dict",
                     # TODO: Set the *format* property correctly
                     format=None,
                     items=[],
@@ -193,7 +193,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                 item = PropertyDetail(
                     name=item_k,
                     required=_Default_Required.general,
-                    type=item_type,
+                    value_type=item_type,
                 )
                 assert isinstance(response_data_prop.items, list), "The data type of property *items* must be *list*."
                 response_data_prop.items.append(item)
@@ -202,7 +202,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
             response_data_prop = PropertyDetail(
                 name="",
                 required=_Default_Required.general,
-                type=v_type,
+                value_type=v_type,
                 # TODO: Set the *format* property correctly
                 format=None,
                 items=[],
@@ -227,7 +227,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                     return PropertyDetail(
                         name="",
                         required=_Default_Required.general,
-                        type="file",
+                        value_type="file",
                         # TODO: Set the *format* property correctly
                         format=None,
                         items=None,
@@ -247,7 +247,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                     return PropertyDetail(
                         name="additionalKey",
                         required=_Default_Required.general,
-                        type="dict",
+                        value_type="dict",
                         # TODO: Set the *format* property correctly
                         format=None,
                         items=resp.data,
@@ -272,14 +272,14 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                     return PropertyDetail(
                         name="",
                         required=_Default_Required.general,
-                        type="dict",
+                        value_type="dict",
                         # TODO: Set the *format* property correctly
                         format=None,
                         items=[
                             PropertyDetail(
                                 name="additionalKey",
                                 required=_Default_Required.general,
-                                type=additional_properties_type,
+                                value_type=additional_properties_type,
                                 # TODO: Set the *format* property correctly
                                 format=None,
                                 items=None,
@@ -291,7 +291,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
             return PropertyDetail(
                 name="",
                 required=_Default_Required.general,
-                type=v_type,
+                value_type=v_type,
                 # TODO: Set the *format* property correctly
                 format=None,
                 items=None,
@@ -519,14 +519,14 @@ class TmpResponseRefModel(BaseTmpDataModel):
                     )
                     print(f"[DEBUG in process_response_from_reference] before asserion, response_prop: {response_prop}")
                     # TODO: It should have better way to handle output streaming
-                    if len(list(filter(lambda d: d.type == "file", response_prop.data))) != 0:
+                    if len(list(filter(lambda d: d.value_type == "file", response_prop.data))) != 0:
                         # It's file inputStream
                         response_config = response_prop.data[0]
                     else:
                         response_config = PropertyDetail(
                             name="",
                             required=_Default_Required.empty,
-                            type="dict",
+                            value_type="dict",
                             format=None,
                             items=response_prop.data,
                         )
@@ -548,7 +548,7 @@ class TmpResponseRefModel(BaseTmpDataModel):
             # The section which doesn't have setting body
             response_config = PropertyDetail.generate_empty_response()
             if self.title == "InputStream":
-                response_config.type = "file"
+                response_config.value_type = "file"
 
                 response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
                 print(
@@ -593,30 +593,47 @@ class TmpResponseSchema(BaseTmpRefDataModel):
         return not self.schema or self.schema.is_empty()
 
 
-# The data models for final result which would be converted as the data models of PyMock-API configuration
+# The base data model for request and response
 @dataclass
-class PropertyDetail:
+class BasePropertyDetail(metaclass=ABCMeta):
     name: str = field(default_factory=str)
     required: bool = False
-    type: Optional[str] = None
+    value_type: Optional[str] = None
     format: Optional[dict] = None
-    items: Optional[List["PropertyDetail"]] = None
-    is_empty: Optional[bool] = None
+    items: Optional[List["BasePropertyDetail"]] = None
 
     def serialize(self) -> dict:
         data = {
             "name": self.name,
             "required": self.required,
-            "type": self.type,
+            "type": self.value_type,
             "format": self.format,
-            "is_empty": self.is_empty,
             "items": [item.serialize() for item in self.items] if self.items else None,
         }
+        return self._clear_empty_values(data)
+
+    def _clear_empty_values(self, data):
         new_data = {}
         for k, v in data.items():
             if v is not None:
                 new_data[k] = v
         return new_data
+
+    @abstractmethod
+    def to_pymock_api_config(self) -> Union[PyMockRequestProperty, PyMockResponseProperty]:
+        pass
+
+
+# The data models for final result which would be converted as the data models of PyMock-API configuration
+@dataclass
+class PropertyDetail(BasePropertyDetail):
+    items: Optional[List["PropertyDetail"]] = None  # type: ignore[assignment]
+    is_empty: Optional[bool] = None
+
+    def serialize(self) -> dict:
+        data = super().serialize()
+        data["is_empty"] = self.is_empty
+        return self._clear_empty_values(data)
 
     @staticmethod
     def generate_empty_response() -> "PropertyDetail":
@@ -624,7 +641,7 @@ class PropertyDetail:
         return PropertyDetail(
             name="",
             required=_Default_Required.empty,
-            type=None,
+            value_type=None,
             format=None,
             items=[],
         )
@@ -635,17 +652,13 @@ class PropertyDetail:
 
 # The tmp data model for final result to convert as PyMock-API
 @dataclass
-class RequestParameter(BaseTmpDataModel):
-    name: str = field(default_factory=str)
-    required: bool = False
-    value_type: Optional[str] = None
+class RequestParameter(BasePropertyDetail):
+    items: Optional[List["RequestParameter"]] = None  # type: ignore[assignment]
     default: Optional[Any] = None
-    items: Optional[List[Union["RequestParameter", TmpRequestItemModel]]] = None
-    ref: Optional[str] = None
 
     def __post_init__(self) -> None:
         if self.items is not None:
-            self.items = self._convert_items()
+            self.items = self._convert_items()  # type: ignore[assignment]
         if self.value_type:
             self.value_type = self._convert_value_type()
 
@@ -682,7 +695,7 @@ class RequestParameter(BaseTmpDataModel):
             items=items,
         )
 
-    def to_api_config(self) -> APIParameter:
+    def to_pymock_api_config(self) -> PyMockRequestProperty:
 
         def to_items(item_data: Union[RequestParameter, TmpRequestItemModel]) -> IteratorItem:
             if isinstance(item_data, RequestParameter):
@@ -704,7 +717,7 @@ class RequestParameter(BaseTmpDataModel):
                     f"The data model must be *TmpAPIParameterModel* or *TmpItemModel*. But it get *{item_data}*. Please check it."
                 )
 
-        return APIParameter(
+        return PyMockRequestProperty(
             name=self.name,
             required=self.required,
             value_type=self.value_type,
