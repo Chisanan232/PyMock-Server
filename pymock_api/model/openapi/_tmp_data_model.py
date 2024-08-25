@@ -699,7 +699,7 @@ class TmpResponseSchema(BaseTmpRefDataModel):
         return TmpResponseSchema(schema=TmpResponsePropertyModel.deserialize(data.get("schema", {})))
 
     def has_ref(self) -> str:
-        return "schema" if self.schema and self.schema.has_ref else ""  # type: ignore[truthy-function]
+        return "schema" if self.schema and self.schema.has_ref() else ""
 
     def get_ref(self) -> str:
         assert self.has_ref()
