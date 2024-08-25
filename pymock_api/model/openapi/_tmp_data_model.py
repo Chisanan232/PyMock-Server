@@ -692,11 +692,15 @@ class TmpResponseRefModel(BaseTmpDataModel):
 @dataclass
 class TmpResponseSchema(BaseTmpRefDataModel):
     schema: Optional[TmpResponsePropertyModel] = None
+    content: Optional[dict] = None
 
     @classmethod
     def deserialize(cls, data: dict) -> "TmpResponseSchema":
         assert data is not None and isinstance(data, dict)
-        return TmpResponseSchema(schema=TmpResponsePropertyModel.deserialize(data.get("schema", {})))
+        return TmpResponseSchema(
+            schema=TmpResponsePropertyModel.deserialize(data.get("schema", {})),
+            content=data.get("content", None),
+        )
 
     def has_ref(self) -> str:
         return "schema" if self.schema and self.schema.has_ref() else ""

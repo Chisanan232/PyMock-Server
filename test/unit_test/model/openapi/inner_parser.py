@@ -13,11 +13,11 @@ from pymock_api.model.openapi._parser import APIParser
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2PathSchemaParser,
     OpenAPIV2SchemaParser,
-    _ReferenceObjectParser,
 )
 from pymock_api.model.openapi._tmp_data_model import (
     RequestParameter,
     TmpRequestParameterModel,
+    TmpResponseSchema,
     set_component_definition,
 )
 
@@ -116,10 +116,11 @@ class TestAPIParser:
 
         # Verify
         resp_200 = api_detail["responses"]["200"]
-        if _ReferenceObjectParser.has_schema(resp_200):
+        resp_200_model = TmpResponseSchema.deserialize(resp_200)
+        if resp_200_model.has_ref():
             should_check_name = True
         else:
-            response_content = resp_200["content"]
+            response_content = resp_200_model.content
             resp_val_format = list(filter(lambda f: f in response_content.keys(), ["application/json", "*/*"]))
             response_detail = response_content[resp_val_format[0]]["schema"]
             if not response_detail:
