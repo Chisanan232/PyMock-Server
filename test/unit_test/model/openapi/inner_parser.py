@@ -17,6 +17,7 @@ from pymock_api.model.openapi._schema_parser import (
 )
 from pymock_api.model.openapi._tmp_data_model import (
     RequestParameter,
+    TmpRequestParameterModel,
     set_component_definition,
 )
 
@@ -155,7 +156,8 @@ class TestAPIParser:
 
         # Run target function
         parser_instance = parser(parser=OpenAPIV2PathSchemaParser(openapi_doc_data))
-        parameters = parser_instance._process_has_ref_parameters(openapi_doc_data)
+        openapi_doc_data_model = TmpRequestParameterModel().deserialize(openapi_doc_data)
+        parameters = parser_instance._process_has_ref_parameters(openapi_doc_data_model)
 
         # Verify
         assert parameters and isinstance(parameters, list)
@@ -168,7 +170,8 @@ class TestAPIParser:
         with pytest.raises(ValueError) as exc_info:
             # Run target function
             parser_instance = parser(parser=OpenAPIV2PathSchemaParser(openapi_doc_data))
-            parser_instance._process_has_ref_parameters(openapi_doc_data)
+            openapi_doc_data_model = TmpRequestParameterModel().deserialize(openapi_doc_data)
+            parser_instance._process_has_ref_parameters(openapi_doc_data_model)
 
         # Verify
         assert re.search(r".{1,64}no ref.{1,64}", str(exc_info.value), re.IGNORECASE)

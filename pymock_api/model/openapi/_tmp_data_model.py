@@ -414,10 +414,154 @@ class TmpRequestItemModel(BaseTmpRefDataModel):
 
 
 @dataclass
+class TmpRequestSchemaModel(BaseTmpRefDataModel):
+    title: Optional[str] = None
+    value_type: Optional[str] = None
+    default: Optional[Any] = None
+    ref: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        if self.value_type:
+            self.value_type = self._convert_value_type()
+
+    def _convert_value_type(self) -> str:
+        assert self.value_type
+        return ensure_type_is_python_type(self.value_type)
+
+    def deserialize(self, data: dict) -> "TmpRequestSchemaModel":
+        self.title = data.get("title", None)
+        self.value_type = ensure_type_is_python_type(data["type"]) if data.get("type", None) else None
+        self.default = data.get("default", None)
+        self.ref = data.get("$ref", None)
+        return self
+
+    def has_ref(self) -> str:
+        return "ref" if self.ref else ""
+
+    def get_ref(self) -> str:
+        assert self.ref
+        return self.ref
+
+
+@dataclass
+class TmpRequestParameterModel(BaseTmpRefDataModel):
+    name: str = field(default_factory=str)
+    required: bool = False
+    value_type: Optional[str] = None
+    format: Optional[dict] = None
+    default: Optional[Any] = None
+    items: Optional[List["TmpRequestParameterModel"]] = None
+    schema: Optional["TmpRequestSchemaModel"] = None
+
+    def __post_init__(self) -> None:
+        if self.items is not None:
+            self.items = self._convert_items()
+        if self.value_type:
+            self.value_type = self._convert_value_type()
+
+    def _convert_items(self) -> List[Union["TmpRequestParameterModel"]]:
+        assert self.items
+        if True in list(  # type: ignore[comparison-overlap]
+            filter(lambda e: not isinstance(e, (dict, TmpRequestParameterModel)), self.items)
+        ):
+            raise ValueError(
+                f"There are some invalid data type item in the property *items*. Current *items*: {self.items}"
+            )
+        return [TmpRequestParameterModel().deserialize(i) if isinstance(i, dict) else i for i in (self.items or [])]  # type: ignore[arg-type]
+
+    def _convert_value_type(self) -> str:
+        assert self.value_type
+        return ensure_type_is_python_type(self.value_type)
+
+    # def _ensure_data_type_is_pythonic_type_in_items(
+    #     self, params: Optional[Union[List[dict], Dict[str, Any]]]
+    # ) -> Optional[List[dict]]:
+    #     new_params = params
+    #     if params:
+    #         # # NOTE: It may get 2 types data:
+    #         # 1.list type:
+    #         # [
+    #         #     {
+    #         #         "name": "value",
+    #         #         "required": true,
+    #         #         "type": "number",
+    #         #         "default": "None"
+    #         #     },
+    #         #     {
+    #         #         "name": "id",
+    #         #         "required": true,
+    #         #         "type": "integer",
+    #         #         "default": "None"
+    #         #     }
+    #         # ]
+    #         # 2. dict type:
+    #         # {
+    #         #     "type": "string",
+    #         #     "enum": [
+    #         #         "ENUM1",
+    #         #         "ENUM2"
+    #         #     ]
+    #         # }
+    #         params = params if isinstance(params, list) else [params]
+    #         new_params: List[dict] = []  # type: ignore[no-redef]
+    #         for param in params:
+    #             assert isinstance(param, dict)
+    #             parser = self.schema_parser_factory.request_parameter_items(param)
+    #             item_data_type = parser.get_items_type()
+    #             if item_data_type:
+    #                 parser.set_items_type(ensure_type_is_python_type(item_data_type))
+    #             param = parser.current_data
+    #             new_params.append(param)  # type: ignore[union-attr]
+    #     return new_params  # type: ignore[return-value]
+
+    def deserialize(self, data: dict) -> "TmpRequestParameterModel":
+        print(f"[DEBUG in TmpRequestParameterModel.deserialize] data: {data}")
+        self.name = data.get("name", "")
+        self.required = data.get("required", True)
+
+        items = data.get("items", [])
+        if items:
+            self.items = items if isinstance(items, list) else [items]
+            self.items = self._convert_items()
+
+        schema = data.get("schema", {})
+        if schema:
+            self.schema = TmpRequestSchemaModel().deserialize(schema)
+
+        print(f"[DEBUG in TmpRequestParameterModel.deserialize] self.schema: {self.schema}")
+        self.value_type = ensure_type_is_python_type(data.get("type", "")) or (
+            self.schema.value_type if self.schema else ""
+        )
+        self.default = data.get("default", None) or (self.schema.default if self.schema else None)
+        print(f"[DEBUG in TmpRequestParameterModel.deserialize] self: {self}")
+        return self
+
+    @classmethod
+    def deserialize_by_prps(
+        cls, name: str = "", required: bool = True, value_type: str = "", default: Any = None, items: List = []
+    ) -> "TmpRequestParameterModel":
+        return TmpRequestParameterModel(
+            name=name,
+            required=required,
+            value_type=ensure_type_is_python_type(value_type) if value_type else None,
+            default=default,
+            items=items,
+        )
+
+    def has_ref(self) -> str:
+        return "schema" if self.schema and self.schema.has_ref() else ""
+
+    def get_ref(self) -> str:
+        assert self.schema
+        return self.schema.get_ref()
+
+
+@dataclass
 class TmpResponsePropertyModel(BaseTmpRefDataModel):
     title: Optional[str] = None
     value_type: Optional[str] = None
     format: Optional[str] = None  # For OpenAPI v3
+    default: Optional[str] = None  # For OpenAPI v3 request part
     enums: List[str] = field(default_factory=list)
     ref: Optional[str] = None
     items: Optional["TmpResponsePropertyModel"] = None
@@ -430,6 +574,7 @@ class TmpResponsePropertyModel(BaseTmpRefDataModel):
             title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else None,
             format="",  # TODO: Support in next PR
+            default=data.get("default", None),
             enums=[],  # TODO: Support in next PR
             ref=data.get("$ref", None),
             items=TmpResponsePropertyModel.deserialize(data["items"]) if data.get("items", None) else None,
@@ -653,19 +798,21 @@ class PropertyDetail(BasePropertyDetail):
 # The tmp data model for final result to convert as PyMock-API
 @dataclass
 class RequestParameter(BasePropertyDetail):
-    items: Optional[List["RequestParameter"]] = None  # type: ignore[assignment]
+    items: Optional[List[Union[RequestParameter, TmpRequestParameterModel, TmpRequestItemModel]]] = None  # type: ignore[assignment]
     default: Optional[Any] = None
 
     def __post_init__(self) -> None:
         if self.items is not None:
-            self.items = self._convert_items()  # type: ignore[assignment]
+            self.items = self._convert_items()
         if self.value_type:
             self.value_type = self._convert_value_type()
 
-    def _convert_items(self) -> List[Union["RequestParameter", TmpRequestItemModel]]:
-        items: List[Union[RequestParameter, TmpRequestItemModel]] = []
+    def _convert_items(self) -> List[Union["RequestParameter", TmpRequestParameterModel, TmpRequestItemModel]]:
+        items: List[Union[RequestParameter, TmpRequestParameterModel, TmpRequestItemModel]] = []
+        print(f"[DEBUG in RequestParameter._convert_items] items: {items}")
         for item in self.items or []:
-            assert isinstance(item, (RequestParameter, TmpRequestItemModel))
+            print(f"[DEBUG in RequestParameter._convert_items] item: {item}")
+            assert isinstance(item, (RequestParameter, TmpRequestParameterModel, TmpRequestItemModel))
             items.append(item)
         return items
 
@@ -697,7 +844,7 @@ class RequestParameter(BasePropertyDetail):
 
     def to_pymock_api_config(self) -> PyMockRequestProperty:
 
-        def to_items(item_data: Union[RequestParameter, TmpRequestItemModel]) -> IteratorItem:
+        def to_items(item_data: Union[RequestParameter, TmpRequestParameterModel, TmpRequestItemModel]) -> IteratorItem:
             if isinstance(item_data, RequestParameter):
                 return IteratorItem(
                     name=item_data.name,
@@ -711,6 +858,13 @@ class RequestParameter(BasePropertyDetail):
                     required=True,
                     value_type=item_data.value_type,
                     items=[],
+                )
+            elif isinstance(item_data, TmpRequestParameterModel):
+                return IteratorItem(
+                    name=item_data.name,
+                    required=item_data.required,
+                    value_type=item_data.value_type,
+                    items=[to_items(i) for i in (item_data.items or [])],
                 )
             else:
                 raise TypeError(
