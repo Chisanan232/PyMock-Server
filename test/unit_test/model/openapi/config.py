@@ -17,12 +17,12 @@ from pymock_api.model.openapi._parser_factory import (
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     OpenAPIV3SchemaParser,
-    _ReferenceObjectParser,
 )
 from pymock_api.model.openapi._tmp_data_model import (
     PropertyDetail,
     RequestParameter,
     ResponseProperty,
+    TmpRequestParameterModel,
     set_component_definition,
 )
 from pymock_api.model.openapi.config import API, OpenAPIDocumentConfig
@@ -343,9 +343,12 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             api_http_details = og_data["paths"][api.path][api.http_method]
             if api.http_method.upper() == "GET":
                 expected_parameters = 0
-                for param in api_http_details.get("parameters", []):
-                    if _ReferenceObjectParser.has_ref(param):
-                        expected_parameters += len(_ReferenceObjectParser.get_schema_ref(param)["properties"].keys())
+                api_req_params_data_model = list(
+                    map(lambda e: TmpRequestParameterModel().deserialize(e), api_http_details.get("parameters", []))
+                )
+                for param in api_req_params_data_model:
+                    if param.has_ref():
+                        expected_parameters += len(param.get_schema_ref().properties.keys())
                     else:
                         expected_parameters += 1
                 assert len(api.parameters) == expected_parameters
@@ -356,18 +359,16 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                         filter(lambda b: b in request_body["content"].keys(), ["application/json", "*/*"])
                     )
                     assert len(data_format) == 1
-                    assert len(api.parameters) == len(
-                        _ReferenceObjectParser.get_schema_ref(request_body["content"][data_format[0]])[
-                            "properties"
-                        ].keys()
-                    )
+                    req_body_model = TmpRequestParameterModel().deserialize(request_body["content"][data_format[0]])
+                    assert len(api.parameters) == len(req_body_model.get_schema_ref().properties.keys())
                 else:
                     expected_parameters = 0
-                    for param in api_http_details["parameters"]:
-                        if _ReferenceObjectParser.has_ref(param):
-                            expected_parameters += len(
-                                _ReferenceObjectParser.get_schema_ref(param)["properties"].keys()
-                            )
+                    api_req_params_data_model = list(
+                        map(lambda e: TmpRequestParameterModel().deserialize(e), api_http_details["parameters"])
+                    )
+                    for param in api_req_params_data_model:
+                        if param.has_ref():
+                            expected_parameters += len(param.get_schema_ref().properties.keys())
                         else:
                             expected_parameters += 1
                     assert len(api.parameters) == expected_parameters
