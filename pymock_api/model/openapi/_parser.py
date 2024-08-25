@@ -68,7 +68,6 @@ class APIParser(BaseParser):
 
         if get_openapi_version() is OpenAPIVersion.V2:
             v2_params_data: List[dict] = self.parser.get_request_parameters()
-            # return _initial_request_parameters_model(v2_params_data, v2_params_data)
             v2_params_data_model = list(map(lambda e: TmpRequestParameterModel().deserialize(e), v2_params_data))
             return _initial_request_parameters_model(v2_params_data_model, v2_params_data_model)
         else:
@@ -93,9 +92,7 @@ class APIParser(BaseParser):
         request_body_params = data.get_schema_ref()
         # TODO: Should use the reference to get the details of parameters.
         parameters: List[RequestParameter] = []
-        # parser = self.schema_parser_factory.object(request_body_params)
         for param_name, param_props in request_body_params.properties.items():
-            # props_parser = self.schema_parser_factory.request_parameters(param_props)
             items: Optional[TmpResponsePropertyModel] = param_props.items
             items_props = []
             if items:
@@ -113,8 +110,6 @@ class APIParser(BaseParser):
                     item = self._process_has_ref_parameters(data=items)
                     items_props.extend(item)
                 else:
-                    # props_items_parser = self.schema_parser_factory.request_parameter_items(items)
-                    # item_type = props_items_parser.get_items_type()
                     assert items.value_type
                     items_props.append(
                         RequestParameter.deserialize_by_prps(
