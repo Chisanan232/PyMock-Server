@@ -427,47 +427,6 @@ class TmpRequestParameterModel(BaseTmpRefDataModel):
             )
         return [TmpRequestParameterModel().deserialize(i) if isinstance(i, dict) else i for i in (self.items or [])]  # type: ignore[arg-type]
 
-    # def _ensure_data_type_is_pythonic_type_in_items(
-    #     self, params: Optional[Union[List[dict], Dict[str, Any]]]
-    # ) -> Optional[List[dict]]:
-    #     new_params = params
-    #     if params:
-    #         # # NOTE: It may get 2 types data:
-    #         # 1.list type:
-    #         # [
-    #         #     {
-    #         #         "name": "value",
-    #         #         "required": true,
-    #         #         "type": "number",
-    #         #         "default": "None"
-    #         #     },
-    #         #     {
-    #         #         "name": "id",
-    #         #         "required": true,
-    #         #         "type": "integer",
-    #         #         "default": "None"
-    #         #     }
-    #         # ]
-    #         # 2. dict type:
-    #         # {
-    #         #     "type": "string",
-    #         #     "enum": [
-    #         #         "ENUM1",
-    #         #         "ENUM2"
-    #         #     ]
-    #         # }
-    #         params = params if isinstance(params, list) else [params]
-    #         new_params: List[dict] = []  # type: ignore[no-redef]
-    #         for param in params:
-    #             assert isinstance(param, dict)
-    #             parser = self.schema_parser_factory.request_parameter_items(param)
-    #             item_data_type = parser.get_items_type()
-    #             if item_data_type:
-    #                 parser.set_items_type(ensure_type_is_python_type(item_data_type))
-    #             param = parser.current_data
-    #             new_params.append(param)  # type: ignore[union-attr]
-    #     return new_params  # type: ignore[return-value]
-
     def deserialize(self, data: dict) -> "TmpRequestParameterModel":
         print(f"[DEBUG in TmpRequestParameterModel.deserialize] data: {data}")
         self.name = data.get("name", "")
