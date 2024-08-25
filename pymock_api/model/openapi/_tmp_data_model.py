@@ -798,7 +798,7 @@ class PropertyDetail(BasePropertyDetail):
 # The tmp data model for final result to convert as PyMock-API
 @dataclass
 class RequestParameter(BasePropertyDetail):
-    items: Optional[List[Union[RequestParameter, TmpRequestParameterModel, TmpRequestItemModel]]] = None  # type: ignore[assignment]
+    items: Optional[List[Union["RequestParameter", TmpRequestParameterModel, TmpRequestItemModel]]] = None  # type: ignore[assignment]
     default: Optional[Any] = None
 
     def __post_init__(self) -> None:
@@ -808,7 +808,7 @@ class RequestParameter(BasePropertyDetail):
             self.value_type = self._convert_value_type()
 
     def _convert_items(self) -> List[Union["RequestParameter", TmpRequestParameterModel, TmpRequestItemModel]]:
-        items: List[Union[RequestParameter, TmpRequestParameterModel, TmpRequestItemModel]] = []
+        items: List[Union["RequestParameter", TmpRequestParameterModel, TmpRequestItemModel]] = []
         print(f"[DEBUG in RequestParameter._convert_items] items: {items}")
         for item in self.items or []:
             print(f"[DEBUG in RequestParameter._convert_items] item: {item}")
