@@ -1,5 +1,5 @@
 import re
-from typing import List, Type, Union
+from typing import List, Type
 
 import pytest
 
@@ -9,7 +9,7 @@ from pymock_api.model.openapi._base import (
     set_openapi_version,
     set_parser_factory,
 )
-from pymock_api.model.openapi._parser import APIParameterParser, APIParser
+from pymock_api.model.openapi._parser import APIParser
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2PathSchemaParser,
     OpenAPIV2SchemaParser,
@@ -37,79 +37,6 @@ PARSE_V2_OPENAPI_RESPONSES_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.enti
 
 class DummyPathSchemaParser(OpenAPIV2PathSchemaParser):
     pass
-
-
-class TestAPIParameterParser:
-
-    @pytest.fixture(scope="function")
-    def parser(self) -> Type[APIParameterParser]:
-        return APIParameterParser
-
-    def test_parse_schema_with_invalid_value(self, parser: Type[APIParameterParser]):
-        invalid_values = {}
-        with pytest.raises(ValueError) as exc_info:
-            parser_instance = parser(DummyPathSchemaParser({}))
-            parser_instance.process_parameter(invalid_values, accept_no_schema=False)
-        assert re.search(r".{0,64}doesn't have key 'schema'.{0,64}", str(exc_info.value), re.IGNORECASE)
-
-    @pytest.mark.parametrize(
-        ("ut_data", "expect_data"),
-        [
-            # General case (list type value)
-            (
-                [
-                    {
-                        "name": "value",
-                        "required": True,
-                        "type": "number",
-                        "default": "None",
-                    },
-                    {
-                        "name": "id",
-                        "required": True,
-                        "type": "integer",
-                        "default": "None",
-                    },
-                ],
-                [
-                    {
-                        "name": "value",
-                        "required": True,
-                        "type": "int",
-                        "default": "None",
-                    },
-                    {
-                        "name": "id",
-                        "required": True,
-                        "type": "int",
-                        "default": "None",
-                    },
-                ],
-            ),
-            # General case (dict type value)
-            (
-                {
-                    "type": "string",
-                    "enum": [
-                        "ENUM1",
-                        "ENUM2",
-                    ],
-                },
-                [
-                    {
-                        "type": "str",
-                        "enum": [
-                            "ENUM1",
-                            "ENUM2",
-                        ],
-                    },
-                ],
-            ),
-        ],
-    )
-    def test__ensure_data_type_is_pythonic_type_in_items(self, ut_data: Union[list, dict], expect_data: List[dict]):
-        parser = APIParameterParser(parser="Dummy parser")
-        assert parser._ensure_data_type_is_pythonic_type_in_items(ut_data) == expect_data
 
 
 class TestAPIParser:

@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List, Optional, Type, Union, cast
+from typing import List, Optional, Type, Union, cast
 
 from ..enums import OpenAPIVersion
 from ._base import (
@@ -8,14 +8,8 @@ from ._base import (
     get_openapi_version,
 )
 from ._base_schema_parser import BaseSchemaParser
-from ._js_handlers import ensure_type_is_python_type
 from ._parser_factory import BaseOpenAPISchemaParserFactory
-from ._schema_parser import (
-    BaseOpenAPIPathSchemaParser,
-    BaseOpenAPIRequestParametersSchemaParser,
-    BaseOpenAPISchemaParser,
-    _ReferenceObjectParser,
-)
+from ._schema_parser import BaseOpenAPIPathSchemaParser, BaseOpenAPISchemaParser
 from ._tmp_data_model import (
     RequestParameter,
     ResponseProperty,
@@ -37,88 +31,6 @@ class BaseParser(metaclass=ABCMeta):
     @property
     def schema_parser_factory(self) -> BaseOpenAPISchemaParserFactory:
         return ensure_get_schema_parser_factory()
-
-
-class APIParameterParser(BaseParser):
-    @property
-    def parser(self) -> BaseOpenAPIRequestParametersSchemaParser:
-        return cast(BaseOpenAPIRequestParametersSchemaParser, super().parser)
-
-    def process_parameter(self, data: Dict, accept_no_schema: bool = True) -> RequestParameter:
-        if not _ReferenceObjectParser.has_schema(data):
-            if accept_no_schema:
-                return self._convert_from_data(data)
-            raise ValueError(f"This data '{data}' doesn't have key 'schema'.")
-
-        if _ReferenceObjectParser.has_ref(data):
-            raise NotImplementedError
-        else:
-            return self._convert_from_parser()
-
-    def _convert_from_data(self, data: dict) -> RequestParameter:
-        return RequestParameter(
-            name=data["name"],
-            required=data["required"],
-            value_type=ensure_type_is_python_type(data["type"]),
-            default=data.get("default", None),
-            items=[
-                RequestParameter().deserialize(i)
-                for i in (self._ensure_data_type_is_pythonic_type_in_items(data.get("items", None)) or [])
-            ],
-        )
-
-    def _convert_from_parser(self) -> RequestParameter:
-        return RequestParameter(
-            name=self.parser.get_name(),
-            required=(self.parser.get_required() or False),  # type: ignore[arg-type]
-            value_type=ensure_type_is_python_type(self.parser.get_type()),
-            default=self.parser.get_default(),
-            items=[
-                RequestParameter().deserialize(i)
-                for i in (self._ensure_data_type_is_pythonic_type_in_items(self.parser.get_items()) or [])
-            ],
-        )
-
-    def _ensure_data_type_is_pythonic_type_in_items(
-        self, params: Optional[Union[List[dict], Dict[str, Any]]]
-    ) -> Optional[List[dict]]:
-        new_params = params
-        if params:
-            # # NOTE: It may get 2 types data:
-            # 1.list type:
-            # [
-            #     {
-            #         "name": "value",
-            #         "required": true,
-            #         "type": "number",
-            #         "default": "None"
-            #     },
-            #     {
-            #         "name": "id",
-            #         "required": true,
-            #         "type": "integer",
-            #         "default": "None"
-            #     }
-            # ]
-            # 2. dict type:
-            # {
-            #     "type": "string",
-            #     "enum": [
-            #         "ENUM1",
-            #         "ENUM2"
-            #     ]
-            # }
-            params = params if isinstance(params, list) else [params]
-            new_params: List[dict] = []  # type: ignore[no-redef]
-            for param in params:
-                assert isinstance(param, dict)
-                parser = self.schema_parser_factory.request_parameter_items(param)
-                item_data_type = parser.get_items_type()
-                if item_data_type:
-                    parser.set_items_type(ensure_type_is_python_type(item_data_type))
-                param = parser.current_data
-                new_params.append(param)  # type: ignore[union-attr]
-        return new_params  # type: ignore[return-value]
 
 
 class APIParser(BaseParser):
