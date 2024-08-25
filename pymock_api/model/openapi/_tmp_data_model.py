@@ -392,14 +392,6 @@ class TmpRequestSchemaModel(BaseTmpRefDataModel):
     default: Optional[Any] = None
     ref: Optional[str] = None
 
-    def __post_init__(self) -> None:
-        if self.value_type:
-            self.value_type = self._convert_value_type()
-
-    def _convert_value_type(self) -> str:
-        assert self.value_type
-        return ensure_type_is_python_type(self.value_type)
-
     def deserialize(self, data: dict) -> "TmpRequestSchemaModel":
         self.title = data.get("title", None)
         self.value_type = ensure_type_is_python_type(data["type"]) if data.get("type", None) else None
@@ -425,12 +417,6 @@ class TmpRequestParameterModel(BaseTmpRefDataModel):
     items: Optional[List["TmpRequestParameterModel"]] = None
     schema: Optional["TmpRequestSchemaModel"] = None
 
-    def __post_init__(self) -> None:
-        if self.items is not None:
-            self.items = self._convert_items()
-        if self.value_type:
-            self.value_type = self._convert_value_type()
-
     def _convert_items(self) -> List[Union["TmpRequestParameterModel"]]:
         assert self.items
         if True in list(  # type: ignore[comparison-overlap]
@@ -440,10 +426,6 @@ class TmpRequestParameterModel(BaseTmpRefDataModel):
                 f"There are some invalid data type item in the property *items*. Current *items*: {self.items}"
             )
         return [TmpRequestParameterModel().deserialize(i) if isinstance(i, dict) else i for i in (self.items or [])]  # type: ignore[arg-type]
-
-    def _convert_value_type(self) -> str:
-        assert self.value_type
-        return ensure_type_is_python_type(self.value_type)
 
     # def _ensure_data_type_is_pythonic_type_in_items(
     #     self, params: Optional[Union[List[dict], Dict[str, Any]]]
@@ -507,18 +489,6 @@ class TmpRequestParameterModel(BaseTmpRefDataModel):
         self.default = data.get("default", None) or (self.schema.default if self.schema else None)
         print(f"[DEBUG in TmpRequestParameterModel.deserialize] self: {self}")
         return self
-
-    @classmethod
-    def deserialize_by_prps(
-        cls, name: str = "", required: bool = True, value_type: str = "", default: Any = None, items: List = []
-    ) -> "TmpRequestParameterModel":
-        return TmpRequestParameterModel(
-            name=name,
-            required=required,
-            value_type=ensure_type_is_python_type(value_type) if value_type else None,
-            default=default,
-            items=items,
-        )
 
     def has_ref(self) -> str:
         return "schema" if self.schema and self.schema.has_ref() else ""
@@ -795,16 +765,6 @@ class RequestParameter(BasePropertyDetail):
     def _convert_value_type(self) -> str:
         assert self.value_type
         return ensure_type_is_python_type(self.value_type)
-
-    def deserialize(self, data: Dict) -> "RequestParameter":
-        self.name = data.get("name", "")
-        self.required = data.get("required", True)
-        self.value_type = data.get("type", "")
-        self.default = data.get("default", None)
-        items = data.get("items", [])
-        if items is not None:
-            self.items = items if isinstance(items, list) else [items]
-        return self
 
     @classmethod
     def deserialize_by_prps(
