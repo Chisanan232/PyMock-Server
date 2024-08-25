@@ -39,17 +39,16 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
     def test_generate_response(
         self,
         under_test: BaseTmpRefDataModel,
-        api_response_detail: dict,
+        api_response_detail: TmpResponsePropertyModel,
         entire_config: dict,
     ):
         # Pre-process
         set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
-        tmp_data_model = TmpResponsePropertyModel.deserialize(api_response_detail)
 
         # Run target function under test
         response_prop_data = under_test._generate_response(
             init_response=ResponseProperty(),
-            property_value=tmp_data_model,
+            property_value=api_response_detail,
         )
 
         # Verify
