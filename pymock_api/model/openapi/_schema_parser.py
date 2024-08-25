@@ -1,8 +1,7 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from ._base_schema_parser import (
     BaseOpenAPIPathSchemaParser,
-    BaseOpenAPIRequestParameterItemSchemaParser,
     BaseOpenAPIResponseSchemaParser,
     BaseOpenAPISchemaParser,
     BaseOpenAPITagSchemaParser,
@@ -16,15 +15,6 @@ class OpenAPIResponseSchemaParser(BaseOpenAPIResponseSchemaParser):
 
     def exist_in_content(self, value_format: str) -> bool:
         return value_format in self._data["content"].keys()
-
-
-class OpenAPIRequestParameterItemSchemaParser(BaseOpenAPIRequestParameterItemSchemaParser):
-
-    def get_items_type(self) -> Optional[str]:
-        return self._data.get("type", None)
-
-    def set_items_type(self, value_type: str) -> None:
-        self._data["type"] = value_type
 
 
 class OpenAPIV2PathSchemaParser(BaseOpenAPIPathSchemaParser):
