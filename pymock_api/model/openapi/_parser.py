@@ -13,9 +13,9 @@ from ._schema_parser import BaseOpenAPIPathSchemaParser, BaseOpenAPISchemaParser
 from ._tmp_data_model import (
     RequestParameter,
     ResponseProperty,
+    TmpHttpConfig,
+    TmpReferenceConfigPropertyModel,
     TmpRequestParameterModel,
-    TmpResponsePropertyModel,
-    TmpResponseSchema,
 )
 
 
@@ -87,13 +87,13 @@ class APIParser(BaseParser):
                 return _initial_request_parameters_model([params_data_model], params_in_path_data_model)
 
     def _process_has_ref_parameters(
-        self, data: Union[TmpRequestParameterModel, TmpResponsePropertyModel]
+        self, data: Union[TmpRequestParameterModel, TmpReferenceConfigPropertyModel]
     ) -> List[RequestParameter]:
         request_body_params = data.get_schema_ref()
         # TODO: Should use the reference to get the details of parameters.
         parameters: List[RequestParameter] = []
         for param_name, param_props in request_body_params.properties.items():
-            items: Optional[TmpResponsePropertyModel] = param_props.items
+            items: Optional[TmpReferenceConfigPropertyModel] = param_props.items
             items_props = []
             if items:
                 if items.has_ref():
@@ -139,7 +139,7 @@ class APIParser(BaseParser):
         assert self.parser.exist_in_response(status_code="200") is True
         status_200_response = self.parser.get_response(status_code="200")
         print(f"[DEBUG] status_200_response: {status_200_response}")
-        tmp_resp_config = TmpResponseSchema.deserialize(status_200_response)
+        tmp_resp_config = TmpHttpConfig.deserialize(status_200_response)
         print(f"[DEBUG] tmp_resp_config: {tmp_resp_config}")
         if not tmp_resp_config.is_empty():
             # NOTE: This parsing way for Swagger API (OpenAPI version 2)
@@ -148,7 +148,7 @@ class APIParser(BaseParser):
             # FIXME: New implementation to parse configuration will let v2 OpenAPI config come here
             if get_openapi_version() is OpenAPIVersion.V2:
                 response_schema = status_200_response.get("schema", {})
-                tmp_resp_config = TmpResponseSchema.deserialize(status_200_response)
+                tmp_resp_config = TmpHttpConfig.deserialize(status_200_response)
                 has_ref = not tmp_resp_config.is_empty()
             else:
                 # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
@@ -159,7 +159,7 @@ class APIParser(BaseParser):
                 print(f"[DEBUG] has content, resp_value_format: {resp_value_format}")
                 response_schema = resp_parser.get_content(value_format=resp_value_format[0])
                 print(f"[DEBUG] has content, response_schema: {response_schema}")
-                tmp_resp_config = TmpResponsePropertyModel.deserialize(response_schema)  # type: ignore[assignment]
+                tmp_resp_config = TmpReferenceConfigPropertyModel.deserialize(response_schema)  # type: ignore[assignment]
                 has_ref = True if tmp_resp_config.has_ref() else False
             print(f"[DEBUG] has content, tmp_resp_config: {tmp_resp_config}")
             print(f"[DEBUG] response_schema: {response_schema}")
@@ -167,7 +167,7 @@ class APIParser(BaseParser):
                 response_data = tmp_resp_config.process_response_from_reference()
             else:
                 # Data may '{}' or '{ "type": "integer", "title": "Id" }'
-                tmp_resp_model = TmpResponsePropertyModel.deserialize(response_schema)
+                tmp_resp_model = TmpReferenceConfigPropertyModel.deserialize(response_schema)
                 response_data = tmp_resp_model.process_response_from_data()
                 print(f"[DEBUG] response_data: {response_data}")
         return response_data

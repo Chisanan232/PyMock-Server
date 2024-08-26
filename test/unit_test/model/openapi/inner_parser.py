@@ -16,8 +16,8 @@ from pymock_api.model.openapi._schema_parser import (
 )
 from pymock_api.model.openapi._tmp_data_model import (
     RequestParameter,
+    TmpHttpConfig,
     TmpRequestParameterModel,
-    TmpResponseSchema,
     set_component_definition,
 )
 
@@ -116,7 +116,7 @@ class TestAPIParser:
 
         # Verify
         resp_200 = api_detail["responses"]["200"]
-        resp_200_model = TmpResponseSchema.deserialize(resp_200)
+        resp_200_model = TmpHttpConfig.deserialize(resp_200)
         if resp_200_model.has_ref():
             should_check_name = True
         else:
