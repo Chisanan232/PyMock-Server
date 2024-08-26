@@ -621,14 +621,14 @@ class TmpConfigReferenceModel(BaseTmpDataModel):
 
 
 @dataclass
-class TmpHttpConfig(BaseTmpRefDataModel):
+class TmpHttpConfigV2(BaseTmpRefDataModel):
     schema: Optional[TmpReferenceConfigPropertyModel] = None
     content: Optional[dict] = None
 
     @classmethod
-    def deserialize(cls, data: dict) -> "TmpHttpConfig":
+    def deserialize(cls, data: dict) -> "TmpHttpConfigV2":
         assert data is not None and isinstance(data, dict)
-        return TmpHttpConfig(
+        return TmpHttpConfigV2(
             schema=TmpReferenceConfigPropertyModel.deserialize(data.get("schema", {})),
             content=data.get("content", None),
         )

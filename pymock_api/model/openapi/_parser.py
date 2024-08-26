@@ -13,7 +13,7 @@ from ._schema_parser import BaseOpenAPIPathSchemaParser, BaseOpenAPISchemaParser
 from ._tmp_data_model import (
     RequestParameter,
     ResponseProperty,
-    TmpHttpConfig,
+    TmpHttpConfigV2,
     TmpReferenceConfigPropertyModel,
     TmpRequestParameterModel,
 )
@@ -139,7 +139,7 @@ class APIParser(BaseParser):
         assert self.parser.exist_in_response(status_code="200") is True
         status_200_response = self.parser.get_response(status_code="200")
         print(f"[DEBUG] status_200_response: {status_200_response}")
-        tmp_resp_config = TmpHttpConfig.deserialize(status_200_response)
+        tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
         print(f"[DEBUG] tmp_resp_config: {tmp_resp_config}")
         if not tmp_resp_config.is_empty():
             # NOTE: This parsing way for Swagger API (OpenAPI version 2)
@@ -148,7 +148,7 @@ class APIParser(BaseParser):
             # FIXME: New implementation to parse configuration will let v2 OpenAPI config come here
             if get_openapi_version() is OpenAPIVersion.V2:
                 response_schema = status_200_response.get("schema", {})
-                tmp_resp_config = TmpHttpConfig.deserialize(status_200_response)
+                tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
                 has_ref = not tmp_resp_config.is_empty()
             else:
                 # NOTE: This parsing way for OpenAPI (OpenAPI version 3)

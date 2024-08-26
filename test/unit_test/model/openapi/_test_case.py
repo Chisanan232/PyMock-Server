@@ -4,7 +4,7 @@ from typing import List, Tuple
 
 from pymock_api.model.openapi._schema_parser import OpenAPIV2SchemaParser
 from pymock_api.model.openapi._tmp_data_model import (
-    TmpHttpConfig,
+    TmpHttpConfigV2,
     TmpReferenceConfigPropertyModel,
     set_component_definition,
 )
@@ -82,7 +82,7 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                         # For testing API response properties
                         status_200_response = api_detail.get("responses", {}).get("200", {})
                         set_component_definition(OpenAPIV2SchemaParser(data=openapi_api_docs))
-                        status_200_response_model = TmpHttpConfig.deserialize(status_200_response)
+                        status_200_response_model = TmpHttpConfigV2.deserialize(status_200_response)
                         if status_200_response_model.has_ref():
                             response_schema = status_200_response_model.get_schema_ref()
                             response_schema_properties = response_schema.properties
