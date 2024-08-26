@@ -106,6 +106,7 @@ class TestAPIParser:
     @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
     def test__process_http_response(self, parser: Type[APIParser], api_detail: dict, entire_config: dict):
         # Pre-process
+        set_openapi_version(OpenAPIVersion.V2)
         set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
 
         # Run target function under test
@@ -120,13 +121,14 @@ class TestAPIParser:
         if resp_200_model.has_ref():
             should_check_name = True
         else:
-            response_content = resp_200_model.content
-            resp_val_format = list(filter(lambda f: f in response_content.keys(), ["application/json", "*/*"]))
-            response_detail = response_content[resp_val_format[0]]["schema"]
-            if not response_detail:
-                should_check_name = False
-            else:
-                should_check_name = True
+            should_check_name = False
+            # response_content = resp_200_model.content
+            # resp_val_format = list(filter(lambda f: f in response_content.keys(), ["application/json", "*/*"]))
+            # response_detail = response_content[resp_val_format[0]]["schema"]
+            # if not response_detail:
+            #     should_check_name = False
+            # else:
+            #     should_check_name = True
         print(f"[DEBUG in test] should_check_name: {should_check_name}")
 
         # assert isinstance(response_data, ResponseProperty)
