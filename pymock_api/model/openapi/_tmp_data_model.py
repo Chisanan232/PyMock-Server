@@ -11,6 +11,7 @@ from ..api_config.apis.request import APIParameter as PyMockRequestProperty
 from ..api_config.apis.response import ResponseProperty as PyMockResponseProperty
 from ._base_schema_parser import BaseOpenAPISchemaParser
 from ._js_handlers import ensure_type_is_python_type
+from .content_type import ContentType
 
 ComponentDefinition: Dict[str, dict] = {}
 
@@ -623,14 +624,14 @@ class TmpConfigReferenceModel(BaseTmpDataModel):
 @dataclass
 class TmpHttpConfigV2(BaseTmpRefDataModel):
     schema: Optional[TmpReferenceConfigPropertyModel] = None
-    content: Optional[dict] = None
 
     @classmethod
     def deserialize(cls, data: dict) -> "TmpHttpConfigV2":
+        print(f"[DEBUG in TmpHttpConfigV2.deserialize] data: {data}")
         assert data is not None and isinstance(data, dict)
         return TmpHttpConfigV2(
             schema=TmpReferenceConfigPropertyModel.deserialize(data.get("schema", {})),
-            content=data.get("content", None),
+            # content=data.get("content", None),
         )
 
     def has_ref(self) -> str:
@@ -643,6 +644,58 @@ class TmpHttpConfigV2(BaseTmpRefDataModel):
 
     def is_empty(self) -> bool:
         return not self.schema or self.schema.is_empty()
+
+
+_RefInfo = namedtuple("_RefInfo", ("has_ref", "ref_path"))
+
+
+@dataclass
+class TmpHttpConfigV3(BaseTmpRefDataModel):
+    content: Optional[Dict[ContentType, TmpHttpConfigV2]] = None
+
+    _ref_info: _RefInfo = _RefInfo(has_ref=False, ref_path=None)
+
+    @classmethod
+    def deserialize(cls, data: dict) -> "TmpHttpConfigV3":
+        print(f"[DEBUG in TmpHttpConfigV3.deserialize] data: {data}")
+        assert data is not None and isinstance(data, dict)
+        content_config: Dict[ContentType, TmpHttpConfigV2] = {}
+        for content_type, config in data.get("content", {}).items() or {}:
+            content_config[ContentType.to_enum(content_type)] = TmpHttpConfigV2.deserialize(config)
+        return TmpHttpConfigV3(content=content_config)
+
+    def has_ref(self) -> str:
+        has_ref = ""
+        for content_type, config in (self.content or {}).items():
+            has_ref = config.has_ref()
+            if has_ref:
+                self._ref_info.has_ref = True  # type: ignore[misc]
+                self._ref_info.ref_path = config.get_ref()  # type: ignore[misc]
+                break
+        return has_ref
+
+    def get_ref(self) -> str:
+        assert self._ref_info.has_ref
+        assert self._ref_info.ref_path
+        return self._ref_info.ref_path
+
+    def is_empty(self) -> bool:
+        is_not_empty = False in list(filter(lambda e: e.is_empty(), (self.content or {}).values()))  # type: ignore[comparison-overlap]
+        return not self.content or not is_not_empty
+
+    def exist_setting(self, content_type: Union[str, ContentType]) -> Optional[ContentType]:
+        content_type = ContentType.to_enum(content_type) if isinstance(content_type, str) else content_type
+        if content_type in (self.content or {}).keys():
+            return content_type
+        else:
+            return None
+
+    def get_setting(self, content_type: Union[str, ContentType]) -> TmpHttpConfigV2:
+        content_type = self.exist_setting(content_type=content_type)  # type: ignore[assignment]
+        assert content_type is not None
+        if self.content and len(self.content.values()) > 0:
+            return self.content[content_type]  # type: ignore[index]
+        raise ValueError("Cannot find the mapping setting of content type.")
 
 
 # The base data model for request and response
