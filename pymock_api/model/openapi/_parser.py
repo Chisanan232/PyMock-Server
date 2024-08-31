@@ -37,8 +37,6 @@ class BaseParser(metaclass=ABCMeta):
 
 class APIParser(BaseParser):
 
-    Response_Content_Type: List[str] = ["application/json", "application/octet-stream", "*/*"]
-
     @property
     def parser(self) -> BaseOpenAPIPathSchemaParser:
         return cast(BaseOpenAPIPathSchemaParser, super().parser)
@@ -158,8 +156,8 @@ class APIParser(BaseParser):
                 # resp_parser = self.schema_parser_factory.response(status_200_response)
                 resp_value_format: List[ContentType] = list(
                     filter(
-                        lambda ct: status_200_response_model.exist_setting(content_type=ct) is not None,  # type: ignore[arg-type]
-                        self.Response_Content_Type,
+                        lambda ct: status_200_response_model.exist_setting(content_type=ct) is not None,
+                        ContentType,
                     )
                 )
                 print(f"[DEBUG] has content, resp_value_format: {resp_value_format}")
