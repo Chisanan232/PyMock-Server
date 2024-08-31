@@ -135,34 +135,25 @@ class APIParser(BaseParser):
         assert self.parser.exist_in_response(status_code="200") is True
         status_200_response = self.parser.get_response(status_code="200")
         print(f"[DEBUG] status_200_response: {status_200_response}")
-        tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
-        print(f"[DEBUG] tmp_resp_config: {tmp_resp_config}")
-        if not tmp_resp_config.is_empty():
-            # NOTE: This parsing way for Swagger API (OpenAPI version 2)
+        if get_openapi_version() is OpenAPIVersion.V2:
+            tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
+            has_ref = not tmp_resp_config.is_empty()
+        else:
+            # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
+            status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
+            resp_value_format: List[ContentType] = list(
+                filter(lambda ct: status_200_response_model.exist_setting(content_type=ct) is not None, ContentType)
+            )
+            print(f"[DEBUG] has content, resp_value_format: {resp_value_format}")
+            tmp_resp_config = status_200_response_model.get_setting(content_type=resp_value_format[0])
+            has_ref = True if tmp_resp_config.has_ref() else False
+        print(f"[DEBUG] has content, tmp_resp_config: {tmp_resp_config}")
+        if has_ref:
             response_data = tmp_resp_config.process_response_from_reference()
         else:
-            if get_openapi_version() is OpenAPIVersion.V2:
-                tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
-                has_ref = not tmp_resp_config.is_empty()
-            else:
-                # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
-                status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
-                resp_value_format: List[ContentType] = list(
-                    filter(
-                        lambda ct: status_200_response_model.exist_setting(content_type=ct) is not None,
-                        ContentType,
-                    )
-                )
-                print(f"[DEBUG] has content, resp_value_format: {resp_value_format}")
-                tmp_resp_config = status_200_response_model.get_setting(content_type=resp_value_format[0])
-                has_ref = True if tmp_resp_config.has_ref() else False
-            print(f"[DEBUG] has content, tmp_resp_config: {tmp_resp_config}")
-            if has_ref:
-                response_data = tmp_resp_config.process_response_from_reference()
-            else:
-                # Data may '{}' or '{ "type": "integer", "title": "Id" }'
-                tmp_resp_model = TmpReferenceConfigPropertyModel.deserialize({})
-                response_data = tmp_resp_model.process_response_from_data()
+            # Data may '{}' or '{ "type": "integer", "title": "Id" }'
+            tmp_resp_model = TmpReferenceConfigPropertyModel.deserialize({})
+            response_data = tmp_resp_model.process_response_from_data()
         return response_data
 
     def process_tags(self) -> List[str]:
