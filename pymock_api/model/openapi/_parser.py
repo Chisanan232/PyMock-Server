@@ -147,13 +147,11 @@ class APIParser(BaseParser):
         else:
             # FIXME: New implementation to parse configuration will let v2 OpenAPI config come here
             if get_openapi_version() is OpenAPIVersion.V2:
-                # response_schema = status_200_response.get("schema", {})
                 tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
                 has_ref = not tmp_resp_config.is_empty()
             else:
                 # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
                 status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
-                # resp_parser = self.schema_parser_factory.response(status_200_response)
                 resp_value_format: List[ContentType] = list(
                     filter(
                         lambda ct: status_200_response_model.exist_setting(content_type=ct) is not None,
@@ -161,22 +159,15 @@ class APIParser(BaseParser):
                     )
                 )
                 print(f"[DEBUG] has content, resp_value_format: {resp_value_format}")
-                # response_schema = resp_parser.get_content(value_format=resp_value_format[0])
                 tmp_resp_config = status_200_response_model.get_setting(content_type=resp_value_format[0])
-                # print(f"[DEBUG] has content, response_schema: {response_schema}")
-                # tmp_resp_config = TmpReferenceConfigPropertyModel.deserialize(response_schema)  # type: ignore[assignment]
                 has_ref = True if tmp_resp_config.has_ref() else False
             print(f"[DEBUG] has content, tmp_resp_config: {tmp_resp_config}")
-            # print(f"[DEBUG] response_schema: {response_schema}")
             if has_ref:
                 response_data = tmp_resp_config.process_response_from_reference()
             else:
                 # Data may '{}' or '{ "type": "integer", "title": "Id" }'
                 tmp_resp_model = TmpReferenceConfigPropertyModel.deserialize({})
                 response_data = tmp_resp_model.process_response_from_data()
-                # print(f"[DEBUG] response_data: {response_data}")
-                # response_data = ResponseProperty.initial_response_data()
-                # assert False, "It cannot parse non-reference data."
         return response_data
 
     def process_tags(self) -> List[str]:
