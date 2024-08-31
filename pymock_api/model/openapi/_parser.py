@@ -137,7 +137,7 @@ class APIParser(BaseParser):
         print(f"[DEBUG] status_200_response: {status_200_response}")
         if get_openapi_version() is OpenAPIVersion.V2:
             tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
-            has_ref = not tmp_resp_config.is_empty()
+            has_ref = True if tmp_resp_config.has_ref() else False
         else:
             # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
             status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
