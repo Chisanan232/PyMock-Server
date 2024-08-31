@@ -3,9 +3,9 @@ from typing import Union
 
 
 class ContentType(Enum):
-    application_json: str = "application/json"
-    application_octet_stream: str = "application/octet-stream"
-    all: str = "*/*"
+    APPLICATION_JSON: str = "application/json"
+    APPLICATION_OCTET_STREAM: str = "application/octet-stream"
+    ALL: str = "*/*"
 
     @staticmethod
     def to_enum(v: Union[str, "ContentType"]) -> "ContentType":

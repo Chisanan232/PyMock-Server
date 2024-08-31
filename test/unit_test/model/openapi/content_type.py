@@ -15,9 +15,9 @@ class TestContentType(EnumTestSuite):
     @pytest.mark.parametrize(
         "value",
         [
-            ContentType.application_json,
-            ContentType.application_octet_stream,
-            ContentType.all,
+            ContentType.APPLICATION_JSON,
+            ContentType.APPLICATION_OCTET_STREAM,
+            ContentType.ALL,
             "application/json",
             "application/octet-stream",
             "*/*",
