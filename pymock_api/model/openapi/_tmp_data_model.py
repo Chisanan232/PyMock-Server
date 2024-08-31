@@ -224,7 +224,6 @@ class BaseTmpDataModel(metaclass=ABCMeta):
             print(f"[DEBUG in _handle_object_type_value_with_object_strategy] data: {data}")
             data_title = data.title
             if data_title:
-                # TODO: It should also consider the scenario about input stream part (download file)
                 # Example data: {'type': 'object', 'title': 'InputStream'}
                 if re.search(data_title, "InputStream", re.IGNORECASE):
                     return PropertyDetail(
