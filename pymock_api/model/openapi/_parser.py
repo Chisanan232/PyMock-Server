@@ -62,7 +62,6 @@ class APIParser(BaseParser):
                 for d in _data:
                     handled_parameters.extend(self._process_has_ref_parameters(d))
             else:
-                # TODO: Parsing the data type of key *items* should be valid type of Python realm
                 handled_parameters = [_deserialize_as_tmp_model(p) for p in not_ref_data]
             return handled_parameters
 
@@ -90,7 +89,6 @@ class APIParser(BaseParser):
         self, data: Union[TmpRequestParameterModel, TmpReferenceConfigPropertyModel]
     ) -> List[RequestParameter]:
         request_body_params = data.get_schema_ref()
-        # TODO: Should use the reference to get the details of parameters.
         parameters: List[RequestParameter] = []
         for param_name, param_props in request_body_params.properties.items():
             items: Optional[TmpReferenceConfigPropertyModel] = param_props.items
@@ -134,8 +132,6 @@ class APIParser(BaseParser):
         return parameters
 
     def process_responses(self) -> ResponseProperty:
-        # TODO: It may need to add one more data object about outside reference
-        # TODO: Replace all *dict* type as tmp object *TmpResponseModel*
         assert self.parser.exist_in_response(status_code="200") is True
         status_200_response = self.parser.get_response(status_code="200")
         print(f"[DEBUG] status_200_response: {status_200_response}")
@@ -145,7 +141,6 @@ class APIParser(BaseParser):
             # NOTE: This parsing way for Swagger API (OpenAPI version 2)
             response_data = tmp_resp_config.process_response_from_reference()
         else:
-            # FIXME: New implementation to parse configuration will let v2 OpenAPI config come here
             if get_openapi_version() is OpenAPIVersion.V2:
                 tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
                 has_ref = not tmp_resp_config.is_empty()
