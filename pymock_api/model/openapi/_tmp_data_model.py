@@ -641,9 +641,6 @@ class TmpHttpConfigV2(BaseTmpRefDataModel):
         assert self.schema.ref  # type: ignore[union-attr]
         return self.schema.ref  # type: ignore[union-attr]
 
-    def is_empty(self) -> bool:
-        return not self.schema or self.schema.is_empty()
-
 
 @dataclass
 class TmpHttpConfigV3(BaseTmpDataModel):
