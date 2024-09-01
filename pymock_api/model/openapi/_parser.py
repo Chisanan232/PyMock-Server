@@ -43,15 +43,6 @@ class APIParser(BaseParser):
 
     def process_api_parameters(self, http_method: str) -> List[RequestParameter]:
 
-        def _deserialize_as_tmp_model(_data: TmpRequestParameterModel) -> RequestParameter:
-            return RequestParameter(
-                name=_data.name,
-                required=(_data.required or False),
-                value_type=_data.value_type,
-                default=_data.default,
-                items=_data.items,  # type: ignore[arg-type]
-            )
-
         def _initial_request_parameters_model(
             _data: List[TmpRequestParameterModel], not_ref_data: List[TmpRequestParameterModel]
         ) -> List[RequestParameter]:
@@ -62,7 +53,7 @@ class APIParser(BaseParser):
                 for d in _data:
                     handled_parameters.extend(self._process_has_ref_parameters(d))
             else:
-                handled_parameters = [_deserialize_as_tmp_model(p) for p in not_ref_data]
+                handled_parameters = [p.to_adapter_data_model() for p in not_ref_data]
             return handled_parameters
 
         if get_openapi_version() is OpenAPIVersion.V2:

@@ -459,6 +459,15 @@ class TmpRequestParameterModel(BaseTmpRefDataModel):
         assert self.schema
         return self.schema.get_ref()
 
+    def to_adapter_data_model(self) -> "RequestParameter":
+        return RequestParameter(
+            name=self.name,
+            required=(self.required or False),
+            value_type=self.value_type,
+            default=self.default,
+            items=self.items,  # type: ignore[arg-type]
+        )
+
 
 @dataclass
 class TmpReferenceConfigPropertyModel(BaseTmpRefDataModel):
