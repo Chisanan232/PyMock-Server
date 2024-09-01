@@ -726,7 +726,16 @@ class TmpAPIConfigV2(_BaseTmpAPIConfig):
 
 @dataclass
 class TmpAPIConfigV3(_BaseTmpAPIConfig):
+    request_body: Optional[TmpRequestParameterModel] = None
     responses: Dict[HTTPStatus, TmpHttpConfigV3] = field(default_factory=dict)  # type: ignore[assignment]
+
+    @classmethod
+    def deserialize(cls, data: dict) -> "TmpAPIConfigV3":
+        deserialized_data = cast(TmpAPIConfigV3, super().deserialize(data))
+        deserialized_data.request_body = (
+            TmpRequestParameterModel().deserialize(data["requestBody"]) if data.get("requestBody", {}) else None
+        )
+        return deserialized_data
 
     @staticmethod
     def _deserialize_response(data: dict) -> TmpHttpConfigV3:
