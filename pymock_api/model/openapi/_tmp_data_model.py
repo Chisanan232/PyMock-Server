@@ -645,14 +645,9 @@ class TmpHttpConfigV2(BaseTmpRefDataModel):
         return not self.schema or self.schema.is_empty()
 
 
-_RefInfo = namedtuple("_RefInfo", ("has_ref", "ref_path"))
-
-
 @dataclass
-class TmpHttpConfigV3(BaseTmpRefDataModel):
+class TmpHttpConfigV3(BaseTmpDataModel):
     content: Optional[Dict[ContentType, TmpHttpConfigV2]] = None
-
-    _ref_info: _RefInfo = _RefInfo(has_ref=False, ref_path=None)
 
     @classmethod
     def deserialize(cls, data: dict) -> "TmpHttpConfigV3":
@@ -662,25 +657,6 @@ class TmpHttpConfigV3(BaseTmpRefDataModel):
         for content_type, config in data.get("content", {}).items() or {}:
             content_config[ContentType.to_enum(content_type)] = TmpHttpConfigV2.deserialize(config)
         return TmpHttpConfigV3(content=content_config)
-
-    def has_ref(self) -> str:
-        has_ref = ""
-        for content_type, config in (self.content or {}).items():
-            has_ref = config.has_ref()
-            if has_ref:
-                self._ref_info.has_ref = True  # type: ignore[misc]
-                self._ref_info.ref_path = config.get_ref()  # type: ignore[misc]
-                break
-        return has_ref
-
-    def get_ref(self) -> str:
-        assert self._ref_info.has_ref
-        assert self._ref_info.ref_path
-        return self._ref_info.ref_path
-
-    def is_empty(self) -> bool:
-        is_not_empty = False in list(filter(lambda e: e.is_empty(), (self.content or {}).values()))  # type: ignore[comparison-overlap]
-        return not self.content or not is_not_empty
 
     def exist_setting(self, content_type: Union[str, ContentType]) -> Optional[ContentType]:
         content_type = ContentType.to_enum(content_type) if isinstance(content_type, str) else content_type
