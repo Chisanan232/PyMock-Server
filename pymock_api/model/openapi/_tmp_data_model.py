@@ -1,10 +1,11 @@
 import copy
 import re
-from abc import ABCMeta, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from collections import namedtuple
 from dataclasses import dataclass, field
+from http import HTTPStatus
 from pydoc import locate
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 from ..api_config import IteratorItem
 from ..api_config.apis.request import APIParameter as PyMockRequestProperty
@@ -668,6 +669,68 @@ class TmpHttpConfigV3(BaseTmpDataModel):
         if self.content and len(self.content.values()) > 0:
             return self.content[content_type]  # type: ignore[index]
         raise ValueError("Cannot find the mapping setting of content type.")
+
+
+@dataclass
+class _BaseTmpAPIConfig(BaseTmpDataModel, ABC):
+    tags: Optional[List[str]] = None
+    summary: Optional[str] = None
+    description: Optional[str] = None
+    operationId: str = field(default_factory=str)
+    parameters: List[TmpRequestParameterModel] = field(default_factory=list)
+    responses: Dict[HTTPStatus, BaseTmpDataModel] = field(default_factory=dict)
+
+    @classmethod
+    def deserialize(cls, data: dict) -> "_BaseTmpAPIConfig":
+        request_config = [cls._deserialize_request(param) for param in data.get("parameters", [])]
+
+        response = data.get("responses", {})
+        response_config: Dict[HTTPStatus, BaseTmpDataModel] = {}
+        for status_code, resp_config in response.items():
+            response_config[HTTPStatus(int(status_code))] = cls._deserialize_response(resp_config)
+
+        return cls(
+            tags=data.get("tags", []),
+            summary=data.get("summary", ""),
+            description=data.get("description", ""),
+            operationId=data.get("operationId", ""),
+            parameters=request_config,
+            responses=response_config,
+        )
+
+    @staticmethod
+    def _deserialize_request(data: dict) -> TmpRequestParameterModel:
+        return TmpRequestParameterModel().deserialize(data)
+
+    @staticmethod
+    @abstractmethod
+    def _deserialize_response(data: dict) -> BaseTmpDataModel:
+        pass
+
+
+@dataclass
+class TmpAPIConfigV2(_BaseTmpAPIConfig):
+    produces: List[str] = field(default_factory=list)
+    responses: Dict[HTTPStatus, TmpHttpConfigV2] = field(default_factory=dict)  # type: ignore[assignment]
+
+    @classmethod
+    def deserialize(cls, data: dict) -> "TmpAPIConfigV2":
+        deserialized_data = cast(TmpAPIConfigV2, super().deserialize(data))
+        deserialized_data.produces = data.get("produces", [])
+        return deserialized_data
+
+    @staticmethod
+    def _deserialize_response(data: dict) -> TmpHttpConfigV2:
+        return TmpHttpConfigV2.deserialize(data)
+
+
+@dataclass
+class TmpAPIConfigV3(_BaseTmpAPIConfig):
+    responses: Dict[HTTPStatus, TmpHttpConfigV3] = field(default_factory=dict)  # type: ignore[assignment]
+
+    @staticmethod
+    def _deserialize_response(data: dict) -> TmpHttpConfigV3:
+        return TmpHttpConfigV3.deserialize(data)
 
 
 # The base data model for request and response
