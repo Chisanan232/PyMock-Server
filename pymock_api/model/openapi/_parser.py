@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional, Type, Union, cast
+from typing import List, Type, cast
 
 from ..enums import OpenAPIVersion
 from ._base import (
@@ -51,7 +51,7 @@ class APIParser(BaseParser):
                 # TODO: Ensure the value maps this condition is really only one
                 handled_parameters = []
                 for d in _data:
-                    handled_parameters.extend(self._process_has_ref_parameters(d))
+                    handled_parameters.extend(d.process_has_ref_request_parameters())
             else:
                 handled_parameters = [p.to_adapter_data_model() for p in not_ref_data]
             return handled_parameters
@@ -75,52 +75,6 @@ class APIParser(BaseParser):
                 )
                 params_data_model = TmpRequestParameterModel().deserialize(params_data)
                 return _initial_request_parameters_model([params_data_model], params_in_path_data_model)
-
-    def _process_has_ref_parameters(
-        self, data: Union[TmpRequestParameterModel, TmpReferenceConfigPropertyModel]
-    ) -> List[RequestParameter]:
-        request_body_params = data.get_schema_ref()
-        parameters: List[RequestParameter] = []
-        for param_name, param_props in request_body_params.properties.items():
-            items: Optional[TmpReferenceConfigPropertyModel] = param_props.items
-            items_props = []
-            if items:
-                if items.has_ref():
-                    # Sample data:
-                    # {
-                    #     'type': 'object',
-                    #     'required': ['values', 'id'],
-                    #     'properties': {
-                    #         'values': {'type': 'number', 'example': 23434, 'description': 'value'},
-                    #         'id': {'type': 'integer', 'format': 'int64', 'example': 1, 'description': 'ID'}
-                    #     },
-                    #     'title': 'UpdateOneFooDto'
-                    # }
-                    item = self._process_has_ref_parameters(data=items)
-                    items_props.extend(item)
-                else:
-                    assert items.value_type
-                    items_props.append(
-                        RequestParameter.deserialize_by_prps(
-                            name="",
-                            required=True,
-                            value_type=items.value_type,
-                            default=items.default,
-                            items=[],
-                        ),
-                    )
-
-            parameters.append(
-                RequestParameter.deserialize_by_prps(
-                    name=param_name,
-                    required=param_name in (request_body_params.required or []),
-                    value_type=param_props.value_type or "",
-                    default=param_props.default,
-                    items=items_props if items is not None else items,  # type: ignore[arg-type]
-                ),
-            )
-        print(f"[DEBUG in APIParser._process_has_ref_parameters] parameters: {parameters}")
-        return parameters
 
     def process_responses(self) -> ResponseProperty:
         assert self.parser.exist_in_response(status_code="200") is True

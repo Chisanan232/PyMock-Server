@@ -13,9 +13,12 @@ from pymock_api.model.openapi._tmp_data_model import (
     BaseTmpDataModel,
     BaseTmpRefDataModel,
     PropertyDetail,
+    RequestParameter,
     ResponseProperty,
     TmpConfigReferenceModel,
     TmpReferenceConfigPropertyModel,
+    TmpRequestParameterModel,
+    TmpRequestSchemaModel,
     set_component_definition,
 )
 
@@ -24,6 +27,13 @@ from ...model.openapi._test_case import DeserializeV2OpenAPIConfigTestCaseFactor
 DeserializeV2OpenAPIConfigTestCaseFactory.load()
 DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE = DeserializeV2OpenAPIConfigTestCaseFactory.get_test_case()
 GENERATE_RESPONSE_CONFIG_FROM_V2_OPENAPI_CONFIG_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.each_api_http_response
+
+PARSE_FAIL_V2_OPENAPI_REQUEST_PARAMETERS_NO_REFERENCE_INFO_TEST_CASE = (
+    DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.reference_api_http_request_parameters
+)
+PARSE_V2_OPENAPI_REQUEST_PARAMETERS_WITH_REFERENCE_INFO_TEST_CASE = (
+    DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.general_api_http_request_parameters
+)
 
 
 class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
@@ -579,6 +589,65 @@ class TestTmpResponsePropertyModel(BaseTmpRefDataModelTestSuite):
     )
     def test_is_empty(self, under_test: TmpReferenceConfigPropertyModel, expect_result: str):
         assert under_test.is_empty() == expect_result
+
+
+class TestTmpRequestParameterModel(BaseTmpRefDataModelTestSuite):
+
+    @pytest.fixture(scope="function")
+    def under_test(self) -> TmpRequestParameterModel:
+        return TmpRequestParameterModel()
+
+    @pytest.mark.parametrize(
+        ("under_test", "expect_result"),
+        [
+            (TmpRequestParameterModel(schema=None), ""),
+            (TmpRequestParameterModel(schema=TmpRequestSchemaModel(ref=None)), ""),
+            (TmpRequestParameterModel(schema=TmpRequestSchemaModel(ref="")), ""),
+            (TmpRequestParameterModel(schema=TmpRequestSchemaModel(ref="reference value")), "schema"),
+        ],
+    )
+    def test_has_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+        super().test_has_ref(under_test, expect_result)
+
+    @pytest.mark.parametrize(
+        ("under_test", "expect_result"),
+        [
+            (TmpRequestParameterModel(schema=TmpRequestSchemaModel(ref="reference value")), "reference value"),
+        ],
+    )
+    def test_get_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+        super().test_get_ref(under_test, expect_result)
+
+    @pytest.mark.parametrize(
+        ("openapi_doc_data", "entire_openapi_config"), PARSE_V2_OPENAPI_REQUEST_PARAMETERS_WITH_REFERENCE_INFO_TEST_CASE
+    )
+    def test_process_has_ref_request_parameters_with_valid_value(
+        self, under_test: TmpRequestParameterModel, openapi_doc_data: dict, entire_openapi_config: dict
+    ):
+        # Pre-process
+        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
+
+        # Run target function
+        openapi_doc_data_model = under_test.deserialize(openapi_doc_data)
+        parameters = openapi_doc_data_model.process_has_ref_request_parameters()
+
+        # Verify
+        assert parameters and isinstance(parameters, list)
+        assert len(parameters) == len(entire_openapi_config["definitions"]["UpdateFooRequest"]["properties"].keys())
+        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
+        assert False not in type_checksum
+
+    @pytest.mark.parametrize("openapi_doc_data", PARSE_FAIL_V2_OPENAPI_REQUEST_PARAMETERS_NO_REFERENCE_INFO_TEST_CASE)
+    def test_process_has_ref_request_parameters_with_invalid_value(
+        self, under_test: TmpRequestParameterModel, openapi_doc_data: dict
+    ):
+        with pytest.raises(ValueError) as exc_info:
+            # Run target function
+            openapi_doc_data_model = under_test.deserialize(openapi_doc_data)
+            openapi_doc_data_model.process_has_ref_request_parameters()
+
+        # Verify
+        assert re.search(r".{1,64}no ref.{1,64}", str(exc_info.value), re.IGNORECASE)
 
 
 class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):

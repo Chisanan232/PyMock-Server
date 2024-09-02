@@ -350,6 +350,50 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
         # Operate the component definition object
         return TmpConfigReferenceModel.deserialize(_get_schema(get_component_definition(), schema_path, 0))
 
+    def process_has_ref_request_parameters(self) -> List["RequestParameter"]:
+        request_body_params = self.get_schema_ref()
+        parameters: List[RequestParameter] = []
+        for param_name, param_props in request_body_params.properties.items():
+            items: Optional[TmpReferenceConfigPropertyModel] = param_props.items
+            items_props = []
+            if items:
+                if items.has_ref():
+                    # Sample data:
+                    # {
+                    #     'type': 'object',
+                    #     'required': ['values', 'id'],
+                    #     'properties': {
+                    #         'values': {'type': 'number', 'example': 23434, 'description': 'value'},
+                    #         'id': {'type': 'integer', 'format': 'int64', 'example': 1, 'description': 'ID'}
+                    #     },
+                    #     'title': 'UpdateOneFooDto'
+                    # }
+                    item = items.process_has_ref_request_parameters()
+                    items_props.extend(item)
+                else:
+                    assert items.value_type
+                    items_props.append(
+                        RequestParameter.deserialize_by_prps(
+                            name="",
+                            required=True,
+                            value_type=items.value_type,
+                            default=items.default,
+                            items=[],
+                        ),
+                    )
+
+            parameters.append(
+                RequestParameter.deserialize_by_prps(
+                    name=param_name,
+                    required=param_name in (request_body_params.required or []),
+                    value_type=param_props.value_type or "",
+                    default=param_props.default,
+                    items=items_props if items is not None else items,  # type: ignore[arg-type]
+                ),
+            )
+        print(f"[DEBUG in APIParser._process_has_ref_parameters] parameters: {parameters}")
+        return parameters
+
     def process_response_from_reference(
         self,
         init_response: Optional["ResponseProperty"] = None,
