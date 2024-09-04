@@ -1,20 +1,15 @@
-from typing import List, Type
+from typing import Type
 
 import pytest
 
 from pymock_api.model.enums import OpenAPIVersion
-from pymock_api.model.openapi._base import (
-    get_schema_parser_factory_with_openapi_version,
-    set_openapi_version,
-    set_parser_factory,
-)
+from pymock_api.model.openapi._base import set_openapi_version
 from pymock_api.model.openapi._parser import APIParser
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2PathSchemaParser,
     OpenAPIV2SchemaParser,
 )
 from pymock_api.model.openapi._tmp_data_model import (
-    RequestParameter,
     TmpHttpConfigV2,
     set_component_definition,
 )
@@ -36,33 +31,6 @@ class TestAPIParser:
     @pytest.fixture(scope="function")
     def parser(self) -> Type[APIParser]:
         return APIParser
-
-    @pytest.mark.parametrize(
-        ("openapi_doc_data", "entire_openapi_config"), PARSE_V2_OPENAPI_REQUEST_PARAMETERS_TEST_CASE
-    )
-    def test__process_api_params(
-        self, parser: Type[APIParser], openapi_doc_data: List[dict], entire_openapi_config: dict
-    ):
-        # Pre-process
-        set_openapi_version(OpenAPIVersion.V2)
-        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
-        parser_instance = parser(parser=OpenAPIV2PathSchemaParser({"parameters": openapi_doc_data}))
-        # Reload schema parser factory
-        set_parser_factory(get_schema_parser_factory_with_openapi_version())
-
-        # Run target function
-        parameters = parser_instance.process_api_parameters(http_method="HTTP method")
-
-        # Verify
-        assert parameters and isinstance(parameters, list)
-        assert len(parameters) == len(openapi_doc_data)
-        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
-        assert False not in type_checksum
-
-        # Finally
-        set_openapi_version(OpenAPIVersion.V3)
-        # Reload schema parser factory
-        set_parser_factory(get_schema_parser_factory_with_openapi_version())
 
     @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
     def test__process_http_response(self, parser: Type[APIParser], api_detail: dict, entire_config: dict):

@@ -5,12 +5,20 @@ from .. import APIConfig, MockAPI, MockAPIs
 from ..api_config import BaseConfig
 
 # from ..api_config.apis import APIParameter as PyMockAPIParameter
-from ..enums import ResponseStrategy
-from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
+from ..enums import OpenAPIVersion, ResponseStrategy
+from ._base import (
+    BaseOpenAPIDataModel,
+    Transferable,
+    get_openapi_version,
+    set_openapi_version,
+)
 from ._parser import APIParser, OpenAPIDocumentConfigParser
 from ._tmp_data_model import (
     RequestParameter,
     ResponseProperty,
+    TmpAPIConfigV2,
+    TmpAPIConfigV3,
+    _BaseTmpAPIConfig,
     set_component_definition,
 )
 
@@ -49,8 +57,13 @@ class API(Transferable):
 
     def deserialize(self, data: Dict) -> "API":
         parser = APIParser(parser=self.schema_parser_factory.path(data=data))
+        api_config: _BaseTmpAPIConfig
+        if get_openapi_version() is OpenAPIVersion.V2:
+            api_config = TmpAPIConfigV2.deserialize(data)
+        else:
+            api_config = TmpAPIConfigV3.deserialize(data)
 
-        self.parameters = parser.process_api_parameters(http_method=self.http_method)
+        self.parameters = api_config.process_api_parameters(http_method=self.http_method)
         self.response = parser.process_responses()
         self.tags = parser.process_tags()
 

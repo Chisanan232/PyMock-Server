@@ -1,10 +1,11 @@
 import re
-from abc import ABCMeta, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from typing import List, Type, Union
 
 import pytest
 
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
+from pymock_api.model.openapi._base import set_openapi_version
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     OpenAPIV3SchemaParser,
@@ -15,10 +16,12 @@ from pymock_api.model.openapi._tmp_data_model import (
     PropertyDetail,
     RequestParameter,
     ResponseProperty,
+    TmpAPIConfigV2,
     TmpConfigReferenceModel,
     TmpReferenceConfigPropertyModel,
     TmpRequestParameterModel,
     TmpRequestSchemaModel,
+    _BaseTmpAPIConfig,
     set_component_definition,
 )
 
@@ -27,6 +30,8 @@ from ...model.openapi._test_case import DeserializeV2OpenAPIConfigTestCaseFactor
 DeserializeV2OpenAPIConfigTestCaseFactory.load()
 DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE = DeserializeV2OpenAPIConfigTestCaseFactory.get_test_case()
 GENERATE_RESPONSE_CONFIG_FROM_V2_OPENAPI_CONFIG_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.each_api_http_response
+
+PARSE_V2_OPENAPI_ENTIRE_APIS_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.each_apis
 
 PARSE_FAIL_V2_OPENAPI_REQUEST_PARAMETERS_NO_REFERENCE_INFO_TEST_CASE = (
     DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.reference_api_http_request_parameters
@@ -685,6 +690,39 @@ class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
             init_response=ResponseProperty.initial_response_data(),
         )
         assert response_config == expected_value
+
+
+class BaseTmpAPIConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
+
+    @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), PARSE_V2_OPENAPI_ENTIRE_APIS_TEST_CASE)
+    def test_process_api_parameters(
+        self, under_test: _BaseTmpAPIConfig, openapi_doc_data: dict, entire_openapi_config: dict
+    ):
+        print(f"[DEBUG in test__process_api_params] ")
+        # Pre-process
+        set_openapi_version(OpenAPIVersion.V2)
+        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
+
+        under_test = under_test.deserialize(openapi_doc_data)
+
+        # Run target function
+        parameters = under_test.process_api_parameters(http_method="HTTP method")
+
+        # Verify
+        assert parameters and isinstance(parameters, list)
+        assert len(parameters) == len(openapi_doc_data["parameters"])
+        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
+        assert False not in type_checksum
+
+        # Finally
+        set_openapi_version(OpenAPIVersion.V3)
+
+
+class TestTmpAPIConfigV2(BaseTmpAPIConfigTestSuite):
+
+    @pytest.fixture(scope="function")
+    def under_test(self) -> TmpAPIConfigV2:
+        return TmpAPIConfigV2()
 
 
 class TestPropertyDetail:

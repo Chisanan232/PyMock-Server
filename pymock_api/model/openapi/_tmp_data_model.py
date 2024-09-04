@@ -760,6 +760,25 @@ class _BaseTmpAPIConfig(BaseTmpDataModel, ABC):
     def _deserialize_response(data: dict) -> BaseTmpDataModel:
         pass
 
+    @abstractmethod
+    def process_api_parameters(self, http_method: str) -> List["RequestParameter"]:
+        pass
+
+    def _initial_request_parameters_model(
+        self,
+        _data: List[Union[TmpRequestParameterModel, TmpHttpConfigV2]],
+        not_ref_data: List[TmpRequestParameterModel],
+    ) -> List["RequestParameter"]:
+        has_ref_in_schema_param = list(filter(lambda p: p.has_ref() != "", _data))
+        if has_ref_in_schema_param:
+            # TODO: Ensure the value maps this condition is really only one
+            handled_parameters = []
+            for d in _data:
+                handled_parameters.extend(d.process_has_ref_request_parameters())
+        else:
+            handled_parameters = [p.to_adapter_data_model() for p in not_ref_data]
+        return handled_parameters
+
 
 @dataclass
 class TmpAPIConfigV2(_BaseTmpAPIConfig):
@@ -776,23 +795,40 @@ class TmpAPIConfigV2(_BaseTmpAPIConfig):
     def _deserialize_response(data: dict) -> TmpHttpConfigV2:
         return TmpHttpConfigV2.deserialize(data)
 
+    def process_api_parameters(self, http_method: str) -> List["RequestParameter"]:
+        return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type]
+
 
 @dataclass
 class TmpAPIConfigV3(_BaseTmpAPIConfig):
-    request_body: Optional[TmpRequestParameterModel] = None
+    request_body: Optional[TmpHttpConfigV3] = None
     responses: Dict[HTTPStatus, TmpHttpConfigV3] = field(default_factory=dict)  # type: ignore[assignment]
 
     @classmethod
     def deserialize(cls, data: dict) -> "TmpAPIConfigV3":
         deserialized_data = cast(TmpAPIConfigV3, super().deserialize(data))
         deserialized_data.request_body = (
-            TmpRequestParameterModel().deserialize(data["requestBody"]) if data.get("requestBody", {}) else None
+            TmpHttpConfigV3().deserialize(data["requestBody"]) if data.get("requestBody", {}) else None
         )
         return deserialized_data
 
     @staticmethod
     def _deserialize_response(data: dict) -> TmpHttpConfigV3:
         return TmpHttpConfigV3.deserialize(data)
+
+    def process_api_parameters(self, http_method: str) -> List["RequestParameter"]:
+        if http_method.upper() == "GET":
+            return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type]
+        else:
+            if self.request_body:
+                req_body_content_type: List[ContentType] = list(
+                    filter(lambda ct: self.request_body.exist_setting(content_type=ct) is not None, ContentType)  # type: ignore[arg-type]
+                )
+                print(f"[DEBUG] has content, req_body_content_type: {req_body_content_type}")
+                req_body_config = self.request_body.get_setting(content_type=req_body_content_type[0])
+                return self._initial_request_parameters_model([req_body_config], self.parameters)
+            else:
+                return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type]
 
 
 # The base data model for request and response

@@ -11,12 +11,10 @@ from ._base_schema_parser import BaseSchemaParser
 from ._parser_factory import BaseOpenAPISchemaParserFactory
 from ._schema_parser import BaseOpenAPIPathSchemaParser, BaseOpenAPISchemaParser
 from ._tmp_data_model import (
-    RequestParameter,
     ResponseProperty,
     TmpHttpConfigV2,
     TmpHttpConfigV3,
     TmpReferenceConfigPropertyModel,
-    TmpRequestParameterModel,
 )
 from .content_type import ContentType
 
@@ -40,41 +38,6 @@ class APIParser(BaseParser):
     @property
     def parser(self) -> BaseOpenAPIPathSchemaParser:
         return cast(BaseOpenAPIPathSchemaParser, super().parser)
-
-    def process_api_parameters(self, http_method: str) -> List[RequestParameter]:
-
-        def _initial_request_parameters_model(
-            _data: List[TmpRequestParameterModel], not_ref_data: List[TmpRequestParameterModel]
-        ) -> List[RequestParameter]:
-            has_ref_in_schema_param = list(filter(lambda p: p.has_ref() != "", _data))
-            if has_ref_in_schema_param:
-                # TODO: Ensure the value maps this condition is really only one
-                handled_parameters = []
-                for d in _data:
-                    handled_parameters.extend(d.process_has_ref_request_parameters())
-            else:
-                handled_parameters = [p.to_adapter_data_model() for p in not_ref_data]
-            return handled_parameters
-
-        if get_openapi_version() is OpenAPIVersion.V2:
-            v2_params_data: List[dict] = self.parser.get_request_parameters()
-            v2_params_data_model = list(map(lambda e: TmpRequestParameterModel().deserialize(e), v2_params_data))
-            return _initial_request_parameters_model(v2_params_data_model, v2_params_data_model)
-        else:
-            if http_method.upper() == "GET":
-                get_method_params_data: List[dict] = self.parser.get_request_parameters()
-                get_method_params_data_model = list(
-                    map(lambda e: TmpRequestParameterModel().deserialize(e), get_method_params_data)
-                )
-                return _initial_request_parameters_model(get_method_params_data_model, get_method_params_data_model)
-            else:
-                params_in_path_data: List[dict] = self.parser.get_request_parameters()
-                params_data: dict = self.parser.get_request_body()
-                params_in_path_data_model = list(
-                    map(lambda e: TmpRequestParameterModel().deserialize(e), params_in_path_data)
-                )
-                params_data_model = TmpRequestParameterModel().deserialize(params_data)
-                return _initial_request_parameters_model([params_data_model], params_in_path_data_model)
 
     def process_responses(self) -> ResponseProperty:
         assert self.parser.exist_in_response(status_code="200") is True
