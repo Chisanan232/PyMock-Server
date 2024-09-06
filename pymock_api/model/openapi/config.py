@@ -16,9 +16,9 @@ from ._parser import APIParser, OpenAPIDocumentConfigParser
 from ._tmp_data_model import (
     RequestParameter,
     ResponseProperty,
-    TmpAPIConfigV2,
-    TmpAPIConfigV3,
-    _BaseTmpAPIConfig,
+    TmpAPIDtailConfigV2,
+    TmpAPIDtailConfigV3,
+    _BaseTmpAPIDtailConfig,
     set_component_definition,
 )
 
@@ -57,11 +57,11 @@ class API(Transferable):
 
     def deserialize(self, data: Dict) -> "API":
         parser = APIParser(parser=self.schema_parser_factory.path(data=data))
-        api_config: _BaseTmpAPIConfig
+        api_config: _BaseTmpAPIDtailConfig
         if get_openapi_version() is OpenAPIVersion.V2:
-            api_config = TmpAPIConfigV2.deserialize(data)
+            api_config = TmpAPIDtailConfigV2.deserialize(data)
         else:
-            api_config = TmpAPIConfigV3.deserialize(data)
+            api_config = TmpAPIDtailConfigV3.deserialize(data)
 
         self.parameters = api_config.process_api_parameters(http_method=self.http_method)
         self.response = api_config.process_responses()

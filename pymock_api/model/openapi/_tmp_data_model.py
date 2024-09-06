@@ -725,7 +725,7 @@ class TmpHttpConfigV3(BaseTmpDataModel):
 
 
 @dataclass
-class _BaseTmpAPIConfig(BaseTmpDataModel, ABC):
+class _BaseTmpAPIDtailConfig(BaseTmpDataModel, ABC):
     tags: Optional[List[str]] = None
     summary: Optional[str] = None
     description: Optional[str] = None
@@ -734,7 +734,7 @@ class _BaseTmpAPIConfig(BaseTmpDataModel, ABC):
     responses: Dict[HTTPStatus, BaseTmpDataModel] = field(default_factory=dict)
 
     @classmethod
-    def deserialize(cls, data: dict) -> "_BaseTmpAPIConfig":
+    def deserialize(cls, data: dict) -> "_BaseTmpAPIDtailConfig":
         request_config = [cls._deserialize_request(param) for param in data.get("parameters", [])]
 
         response = data.get("responses", {})
@@ -812,13 +812,13 @@ class _BaseTmpAPIConfig(BaseTmpDataModel, ABC):
 
 
 @dataclass
-class TmpAPIConfigV2(_BaseTmpAPIConfig):
+class TmpAPIDtailConfigV2(_BaseTmpAPIDtailConfig):
     produces: List[str] = field(default_factory=list)
     responses: Dict[HTTPStatus, TmpHttpConfigV2] = field(default_factory=dict)  # type: ignore[assignment]
 
     @classmethod
-    def deserialize(cls, data: dict) -> "TmpAPIConfigV2":
-        deserialized_data = cast(TmpAPIConfigV2, super().deserialize(data))
+    def deserialize(cls, data: dict) -> "TmpAPIDtailConfigV2":
+        deserialized_data = cast(TmpAPIDtailConfigV2, super().deserialize(data))
         deserialized_data.produces = data.get("produces", [])
         return deserialized_data
 
@@ -836,13 +836,13 @@ class TmpAPIConfigV2(_BaseTmpAPIConfig):
 
 
 @dataclass
-class TmpAPIConfigV3(_BaseTmpAPIConfig):
+class TmpAPIDtailConfigV3(_BaseTmpAPIDtailConfig):
     request_body: Optional[TmpHttpConfigV3] = None
     responses: Dict[HTTPStatus, TmpHttpConfigV3] = field(default_factory=dict)  # type: ignore[assignment]
 
     @classmethod
-    def deserialize(cls, data: dict) -> "TmpAPIConfigV3":
-        deserialized_data = cast(TmpAPIConfigV3, super().deserialize(data))
+    def deserialize(cls, data: dict) -> "TmpAPIDtailConfigV3":
+        deserialized_data = cast(TmpAPIDtailConfigV3, super().deserialize(data))
         deserialized_data.request_body = (
             TmpHttpConfigV3().deserialize(data["requestBody"]) if data.get("requestBody", {}) else None
         )

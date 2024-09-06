@@ -16,13 +16,13 @@ from pymock_api.model.openapi._tmp_data_model import (
     PropertyDetail,
     RequestParameter,
     ResponseProperty,
-    TmpAPIConfigV2,
+    TmpAPIDtailConfigV2,
     TmpConfigReferenceModel,
     TmpHttpConfigV2,
     TmpReferenceConfigPropertyModel,
     TmpRequestParameterModel,
     TmpRequestSchemaModel,
-    _BaseTmpAPIConfig,
+    _BaseTmpAPIDtailConfig,
     set_component_definition,
 )
 
@@ -694,11 +694,11 @@ class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
         assert response_config == expected_value
 
 
-class BaseTmpAPIConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
+class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
 
     @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), PARSE_V2_OPENAPI_ENTIRE_APIS_TEST_CASE)
     def test_process_api_parameters(
-        self, under_test: _BaseTmpAPIConfig, openapi_doc_data: dict, entire_openapi_config: dict
+        self, under_test: _BaseTmpAPIDtailConfig, openapi_doc_data: dict, entire_openapi_config: dict
     ):
         print(f"[DEBUG in test__process_api_params] ")
         # Pre-process
@@ -720,7 +720,7 @@ class BaseTmpAPIConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
         set_openapi_version(OpenAPIVersion.V3)
 
     @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
-    def test_process_responses(self, under_test: _BaseTmpAPIConfig, api_detail: dict, entire_config: dict):
+    def test_process_responses(self, under_test: _BaseTmpAPIDtailConfig, api_detail: dict, entire_config: dict):
         # Pre-process
         set_openapi_version(OpenAPIVersion.V2)
         set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
@@ -791,11 +791,11 @@ class BaseTmpAPIConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
         #                         assert item_value == "empty value"
 
 
-class TestTmpAPIConfigV2(BaseTmpAPIConfigTestSuite):
+class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
 
     @pytest.fixture(scope="function")
-    def under_test(self) -> TmpAPIConfigV2:
-        return TmpAPIConfigV2()
+    def under_test(self) -> TmpAPIDtailConfigV2:
+        return TmpAPIDtailConfigV2()
 
 
 class TestPropertyDetail:
