@@ -64,7 +64,7 @@ class API(Transferable):
             api_config = TmpAPIConfigV3.deserialize(data)
 
         self.parameters = api_config.process_api_parameters(http_method=self.http_method)
-        self.response = parser.process_responses()
+        self.response = api_config.process_responses()
         self.tags = parser.process_tags()
 
         return self
