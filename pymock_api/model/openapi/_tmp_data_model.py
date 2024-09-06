@@ -10,8 +10,6 @@ from typing import Any, Callable, Dict, List, Optional, Union, cast
 from ..api_config import IteratorItem
 from ..api_config.apis.request import APIParameter as PyMockRequestProperty
 from ..api_config.apis.response import ResponseProperty as PyMockResponseProperty
-from ..enums import OpenAPIVersion
-from ._base import get_openapi_version
 from ._base_schema_parser import BaseOpenAPISchemaParser
 from ._js_handlers import ensure_type_is_python_type
 from .content_type import ContentType
@@ -788,22 +786,9 @@ class _BaseTmpAPIConfig(BaseTmpDataModel, ABC):
         assert self.exist_in_response(status_code=200) is True
         status_200_response = self.get_response(status_code=200)
         print(f"[DEBUG] status_200_response: {status_200_response}")
-        if get_openapi_version() is OpenAPIVersion.V2:
-            # tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
-            assert isinstance(status_200_response, TmpHttpConfigV2)
-            tmp_resp_config = status_200_response
-        else:
-            # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
-            # status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
-            assert isinstance(status_200_response, TmpHttpConfigV3)
-            status_200_response_model = status_200_response
-            resp_value_format: List[ContentType] = list(
-                filter(lambda ct: status_200_response_model.exist_setting(content_type=ct) is not None, ContentType)
-            )
-            print(f"[DEBUG] has content, resp_value_format: {resp_value_format}")
-            tmp_resp_config = status_200_response_model.get_setting(content_type=resp_value_format[0])
-
+        tmp_resp_config = self._get_http_config(status_200_response)
         print(f"[DEBUG] has content, tmp_resp_config: {tmp_resp_config}")
+        # Handle response config
         if tmp_resp_config.has_ref():
             response_data = tmp_resp_config.process_response_from_reference()
         else:
@@ -820,6 +805,10 @@ class _BaseTmpAPIConfig(BaseTmpDataModel, ABC):
 
     def _get_http_status(self, status_code: Union[int, HTTPStatus]) -> HTTPStatus:
         return HTTPStatus(status_code) if isinstance(status_code, int) else status_code
+
+    @abstractmethod
+    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> BaseTmpRefDataModel:
+        pass
 
 
 @dataclass
@@ -839,6 +828,11 @@ class TmpAPIConfigV2(_BaseTmpAPIConfig):
 
     def process_api_parameters(self, http_method: str) -> List["RequestParameter"]:
         return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type]
+
+    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> TmpHttpConfigV2:
+        # tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
+        assert isinstance(status_200_response, TmpHttpConfigV2)
+        return status_200_response
 
 
 @dataclass
@@ -871,6 +865,17 @@ class TmpAPIConfigV3(_BaseTmpAPIConfig):
                 return self._initial_request_parameters_model([req_body_config], self.parameters)
             else:
                 return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type]
+
+    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> TmpHttpConfigV2:
+        # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
+        # status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
+        assert isinstance(status_200_response, TmpHttpConfigV3)
+        status_200_response_model = status_200_response
+        resp_value_format: List[ContentType] = list(
+            filter(lambda ct: status_200_response_model.exist_setting(content_type=ct) is not None, ContentType)
+        )
+        print(f"[DEBUG] has content, resp_value_format: {resp_value_format}")
+        return status_200_response_model.get_setting(content_type=resp_value_format[0])
 
 
 # The base data model for request and response
