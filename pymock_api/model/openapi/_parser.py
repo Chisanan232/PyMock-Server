@@ -4,7 +4,7 @@ from typing import List, Type, cast
 from ._base import BaseOpenAPIDataModel, ensure_get_schema_parser_factory
 from ._base_schema_parser import BaseSchemaParser
 from ._parser_factory import BaseOpenAPISchemaParserFactory
-from ._schema_parser import BaseOpenAPIPathSchemaParser, BaseOpenAPISchemaParser
+from ._schema_parser import BaseOpenAPISchemaParser
 
 
 class BaseParser(metaclass=ABCMeta):
@@ -19,16 +19,6 @@ class BaseParser(metaclass=ABCMeta):
     @property
     def schema_parser_factory(self) -> BaseOpenAPISchemaParserFactory:
         return ensure_get_schema_parser_factory()
-
-
-class APIParser(BaseParser):
-
-    @property
-    def parser(self) -> BaseOpenAPIPathSchemaParser:
-        return cast(BaseOpenAPIPathSchemaParser, super().parser)
-
-    def process_tags(self) -> List[str]:
-        return self.parser.get_all_tags()
 
 
 class OpenAPIDocumentConfigParser(BaseParser):

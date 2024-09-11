@@ -14,39 +14,6 @@ class BaseSchemaParser(metaclass=ABCMeta):
         return self._data
 
 
-class BaseOpenAPIResponseSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_content(self, value_format: str) -> Dict[str, dict]:
-        pass
-
-    @abstractmethod
-    def exist_in_content(self, value_format: str) -> bool:
-        pass
-
-
-class BaseOpenAPIPathSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_request_parameters(self) -> List[dict]:
-        pass
-
-    def get_request_body(self, value_format: str = "application/json") -> dict:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_response(self, status_code: str) -> dict:
-        pass
-
-    @abstractmethod
-    def exist_in_response(self, status_code: str) -> bool:
-        pass
-
-    @abstractmethod
-    def get_all_tags(self) -> List[str]:
-        pass
-
-
 class BaseOpenAPITagSchemaParser(BaseSchemaParser):
 
     @abstractmethod

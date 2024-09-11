@@ -1,55 +1,6 @@
 from typing import Dict, List
 
-from ._base_schema_parser import (
-    BaseOpenAPIPathSchemaParser,
-    BaseOpenAPIResponseSchemaParser,
-    BaseOpenAPISchemaParser,
-    BaseOpenAPITagSchemaParser,
-)
-
-
-class OpenAPIResponseSchemaParser(BaseOpenAPIResponseSchemaParser):
-
-    def get_content(self, value_format: str) -> Dict[str, dict]:
-        return self._data["content"][value_format]["schema"]
-
-    def exist_in_content(self, value_format: str) -> bool:
-        return value_format in self._data["content"].keys()
-
-
-class OpenAPIV2PathSchemaParser(BaseOpenAPIPathSchemaParser):
-
-    def get_request_parameters(self) -> List[dict]:
-        return self._data.get("parameters", [])
-
-    def get_response(self, status_code: str) -> dict:
-        return self._data["responses"][status_code]
-
-    def exist_in_response(self, status_code: str) -> bool:
-        return status_code in self._data["responses"].keys()
-
-    def get_all_tags(self) -> List[str]:
-        return self._data.get("tags", [])
-
-
-class OpenAPIV3PathSchemaParser(BaseOpenAPIPathSchemaParser):
-
-    def get_request_parameters(self) -> List[dict]:
-        return self._data.get("parameters", [])
-
-    def get_request_body(self, value_format: str = "application/json") -> dict:
-        if "requestBody" in self._data.keys():
-            return self._data["requestBody"]["content"][value_format]
-        return {}
-
-    def get_response(self, status_code: str) -> dict:
-        return self._data["responses"][status_code]
-
-    def exist_in_response(self, status_code: str) -> bool:
-        return status_code in self._data["responses"].keys()
-
-    def get_all_tags(self) -> List[str]:
-        return self._data.get("tags", [])
+from ._base_schema_parser import BaseOpenAPISchemaParser, BaseOpenAPITagSchemaParser
 
 
 class OpenAPITagSchemaParser(BaseOpenAPITagSchemaParser):
