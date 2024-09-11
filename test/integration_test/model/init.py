@@ -108,4 +108,5 @@ class TestInitFunctions:
         paths: Dict[str, dict] = openapi_config_json["paths"]
         for p in paths.keys():
             total_apis_cnt += len(paths[p].keys())
-        assert len(openapi_config.paths) == total_apis_cnt
+        openapi_api_size = [len(path_config) for path_config in openapi_config.paths.values()]
+        assert sum(openapi_api_size) == total_apis_cnt

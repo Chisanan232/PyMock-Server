@@ -3,13 +3,16 @@ import re
 from abc import ABC, ABCMeta, abstractmethod
 from collections import namedtuple
 from dataclasses import dataclass, field
-from http import HTTPStatus
+from http import HTTPMethod, HTTPStatus
 from pydoc import locate
 from typing import Any, Callable, Dict, List, Optional, Union, cast
 
+from .. import MockAPI
 from ..api_config import IteratorItem
 from ..api_config.apis.request import APIParameter as PyMockRequestProperty
 from ..api_config.apis.response import ResponseProperty as PyMockResponseProperty
+from ..enums import OpenAPIVersion, ResponseStrategy
+from ._base import Transferable, get_openapi_version
 from ._base_schema_parser import BaseOpenAPISchemaParser
 from ._js_handlers import ensure_type_is_python_type
 from .content_type import ContentType
@@ -878,6 +881,34 @@ class TmpAPIDtailConfigV3(_BaseTmpAPIDtailConfig):
         return status_200_response_model.get_setting(content_type=resp_value_format[0])
 
 
+@dataclass
+class TmpAPIConfig(BaseTmpDataModel):
+    api: Dict[HTTPMethod, _BaseTmpAPIDtailConfig] = field(default_factory=dict)
+
+    def __len__(self):
+        return len(self.api.keys())
+
+    def deserialize(self, data: dict) -> "TmpAPIConfig":
+        initial_api_config: _BaseTmpAPIDtailConfig
+        if get_openapi_version() is OpenAPIVersion.V2:
+            initial_api_config = TmpAPIDtailConfigV2()
+        else:
+            initial_api_config = TmpAPIDtailConfigV3()
+
+        for http_method, config in data.items():
+            assert http_method.upper() in HTTPMethod
+            self.api[HTTPMethod(http_method.upper())] = initial_api_config.deserialize(config)
+
+        return self
+
+    def to_adapter_api(self, path: str) -> List["API"]:
+        apis: List[API] = []
+        for http_method, http_config in self.api.items():
+            api = API.generate(api_path=path, http_method=http_method.name, detail=http_config)
+            apis.append(api)
+        return apis
+
+
 # The base data model for request and response
 @dataclass
 class BasePropertyDetail(metaclass=ABCMeta):
@@ -1012,3 +1043,50 @@ class ResponseProperty:
     @staticmethod
     def initial_response_data() -> "ResponseProperty":
         return ResponseProperty(data=[])
+
+
+# The tmp data model for final result to convert as PyMock-API
+@dataclass
+class API(Transferable):
+    path: str = field(default_factory=str)
+    http_method: str = field(default_factory=str)
+    parameters: List[RequestParameter] = field(default_factory=list)
+    response: ResponseProperty = field(default_factory=ResponseProperty)
+    tags: Optional[List[str]] = None
+
+    @classmethod
+    def generate(cls, api_path: str, http_method: str, detail: _BaseTmpAPIDtailConfig) -> "API":
+        api = API()
+        api.path = api_path
+        api.http_method = http_method
+        api.deserialize(data=detail)
+        return api
+
+    def deserialize(self, data: _BaseTmpAPIDtailConfig) -> "API":  # type: ignore[override]
+        api_config: _BaseTmpAPIDtailConfig
+        api_config = data
+        self.parameters = api_config.process_api_parameters(http_method=self.http_method)
+        self.response = api_config.process_responses()
+        self.tags = api_config.tags
+
+        return self
+
+    def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
+        mock_api = MockAPI(url=self.path.replace(base_url, ""), tag=self.tags[0] if self.tags else "")
+
+        # Handle request config
+        mock_api.set_request(
+            method=self.http_method.upper(),
+            parameters=list(map(lambda p: p.to_pymock_api_config(), self.parameters)),
+        )
+
+        # Handle response config
+        print(f"[DEBUG in src] self.response: {self.response}")
+        if list(filter(lambda p: p.name == "", self.response.data or [])):
+            values = []
+        else:
+            values = self.response.data
+        print(f"[DEBUG in to_api_config] values: {values}")
+        resp_props_values = [p.to_pymock_api_config() for p in values] if values else values
+        mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=resp_props_values)  # type: ignore[arg-type]
+        return mock_api

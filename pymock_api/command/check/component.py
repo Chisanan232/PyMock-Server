@@ -13,8 +13,8 @@ from ...model import (
 )
 from ...model.api_config.apis import APIParameter as MockedAPIParameter
 from ...model.enums import ResponseStrategy
+from ...model.openapi._tmp_data_model import API as SwaggerAPI
 from ...model.openapi._tmp_data_model import RequestParameter as SwaggerAPIParameter
-from ...model.openapi.config import API as SwaggerAPI
 from ..component import BaseSubCmdComponent
 
 
@@ -150,70 +150,72 @@ class SwaggerDiffChecking(_BaseChecking):
         else:
             mocked_apis_path = list(map(lambda p: p.url, mocked_apis_info.values()))
         swagger_api_doc_model = self._get_swagger_config(swagger_url=args.swagger_doc_url)
-        for swagger_api_config in swagger_api_doc_model.paths:
-            # Check API path
-            if args.check_api_path and swagger_api_config.path not in mocked_apis_path:
-                self._chk_fail_error_log(
-                    f"⚠️  Miss API. Path: {swagger_api_config.path}",
-                    stop_if_fail=args.stop_if_fail,
-                )
-                continue
-
-            mocked_api_config = mocked_apis_config.get_api_config_by_url(  # type: ignore[union-attr]
-                swagger_api_config.path, base=base_info
-            )
-            api_http_config = mocked_api_config.http  # type: ignore[union-attr]
-
-            if (
-                args.check_api_http_method
-                and str(swagger_api_config.http_method).upper() != api_http_config.request.method.upper()  # type: ignore[union-attr]
-            ):
-                self._chk_fail_error_log(
-                    f"⚠️  Miss the API {swagger_api_config.path} with HTTP method {swagger_api_config.http_method}.",
-                    stop_if_fail=args.stop_if_fail,
-                )
-
-            # Check API parameters
-            if args.check_api_parameters:
-                # FIXME: target configuration may have redunden settings.
-                for swagger_one_api_param in swagger_api_config.parameters:
-                    api_param_config = api_http_config.request.get_one_param_by_name(  # type: ignore[union-attr]
-                        swagger_one_api_param.name
+        for path, swagger_api_config in swagger_api_doc_model.paths.items():
+            apis = swagger_api_config.to_adapter_api(path)
+            for one_swagger_api_config in apis:
+                # Check API path
+                if args.check_api_path and one_swagger_api_config.path not in mocked_apis_path:
+                    self._chk_fail_error_log(
+                        f"⚠️  Miss API. Path: {one_swagger_api_config.path}",
+                        stop_if_fail=args.stop_if_fail,
                     )
-                    if api_param_config is None:
-                        self._chk_fail_error_log(
-                            f"⚠️  Miss the API parameter {swagger_one_api_param.name}.",
-                            stop_if_fail=args.stop_if_fail,
-                        )
-                        continue
-                    if swagger_one_api_param.required is not api_param_config.required:
-                        self._chk_api_params_error_log(
-                            api_config=api_param_config,
-                            param="required",
-                            swagger_api_config=swagger_api_config,
-                            swagger_api_param=swagger_one_api_param,
-                            stop_if_fail=args.stop_if_fail,
-                        )
-                    if swagger_one_api_param.value_type != api_param_config.value_type:
-                        self._chk_api_params_error_log(
-                            api_config=api_param_config,
-                            param="value_type",
-                            swagger_api_config=swagger_api_config,
-                            swagger_api_param=swagger_one_api_param,
-                            stop_if_fail=args.stop_if_fail,
-                        )
-                    if swagger_one_api_param.default != api_param_config.default:
-                        self._chk_api_params_error_log(
-                            api_config=api_param_config,
-                            param="default",
-                            swagger_api_config=swagger_api_config,
-                            swagger_api_param=swagger_one_api_param,
-                            stop_if_fail=args.stop_if_fail,
-                        )
+                    continue
 
-            # TODO: Implement the checking detail of HTTP response
-            # Check API response
-            api_resp = swagger_api_config.response
+                mocked_api_config = mocked_apis_config.get_api_config_by_url(  # type: ignore[union-attr]
+                    one_swagger_api_config.path, base=base_info
+                )
+                api_http_config = mocked_api_config.http  # type: ignore[union-attr]
+
+                if (
+                    args.check_api_http_method
+                    and str(one_swagger_api_config.http_method).upper() != api_http_config.request.method.upper()  # type: ignore[union-attr]
+                ):
+                    self._chk_fail_error_log(
+                        f"⚠️  Miss the API {one_swagger_api_config.path} with HTTP method {one_swagger_api_config.http_method}.",
+                        stop_if_fail=args.stop_if_fail,
+                    )
+
+                # Check API parameters
+                if args.check_api_parameters:
+                    # FIXME: target configuration may have redunden settings.
+                    for swagger_one_api_param in one_swagger_api_config.parameters:
+                        api_param_config = api_http_config.request.get_one_param_by_name(  # type: ignore[union-attr]
+                            swagger_one_api_param.name
+                        )
+                        if api_param_config is None:
+                            self._chk_fail_error_log(
+                                f"⚠️  Miss the API parameter {swagger_one_api_param.name}.",
+                                stop_if_fail=args.stop_if_fail,
+                            )
+                            continue
+                        if swagger_one_api_param.required is not api_param_config.required:
+                            self._chk_api_params_error_log(
+                                api_config=api_param_config,
+                                param="required",
+                                swagger_api_config=one_swagger_api_config,
+                                swagger_api_param=swagger_one_api_param,
+                                stop_if_fail=args.stop_if_fail,
+                            )
+                        if swagger_one_api_param.value_type != api_param_config.value_type:
+                            self._chk_api_params_error_log(
+                                api_config=api_param_config,
+                                param="value_type",
+                                swagger_api_config=one_swagger_api_config,
+                                swagger_api_param=swagger_one_api_param,
+                                stop_if_fail=args.stop_if_fail,
+                            )
+                        if swagger_one_api_param.default != api_param_config.default:
+                            self._chk_api_params_error_log(
+                                api_config=api_param_config,
+                                param="default",
+                                swagger_api_config=one_swagger_api_config,
+                                swagger_api_param=swagger_one_api_param,
+                                stop_if_fail=args.stop_if_fail,
+                            )
+
+                # TODO: Implement the checking detail of HTTP response
+                # Check API response
+                api_resp = one_swagger_api_config.response
 
         return api_config
 
