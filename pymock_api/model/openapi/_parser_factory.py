@@ -4,8 +4,6 @@ from typing import Dict, Union
 from ..enums import OpenAPIVersion
 from ._schema_parser import (
     BaseOpenAPISchemaParser,
-    BaseOpenAPITagSchemaParser,
-    OpenAPITagSchemaParser,
     OpenAPIV2SchemaParser,
     OpenAPIV3SchemaParser,
 )
@@ -20,9 +18,6 @@ class BaseOpenAPISchemaParserFactory(metaclass=ABCMeta):
     def entire_config(self, file: str = "", data: Dict = {}) -> BaseOpenAPISchemaParser:
         pass
 
-    def tag(self, data: Dict) -> BaseOpenAPITagSchemaParser:
-        raise NotImplementedError
-
 
 class OpenAPIV2SchemaParserFactory(BaseOpenAPISchemaParserFactory):
     def chk_version(self, version: OpenAPIVersion) -> bool:
@@ -30,9 +25,6 @@ class OpenAPIV2SchemaParserFactory(BaseOpenAPISchemaParserFactory):
 
     def entire_config(self, file: str = "", data: Dict = {}) -> OpenAPIV2SchemaParser:
         return OpenAPIV2SchemaParser(file=file, data=data)
-
-    def tag(self, data: Dict) -> OpenAPITagSchemaParser:
-        return OpenAPITagSchemaParser(data=data)
 
 
 class OpenAPIV3SchemaParserFactory(BaseOpenAPISchemaParserFactory):

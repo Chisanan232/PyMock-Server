@@ -2,7 +2,7 @@ import copy
 import json
 import pathlib
 from abc import ABCMeta, abstractmethod
-from typing import Dict, List
+from typing import Dict
 
 
 class BaseSchemaParser(metaclass=ABCMeta):
@@ -12,17 +12,6 @@ class BaseSchemaParser(metaclass=ABCMeta):
     @property
     def current_data(self) -> dict:
         return self._data
-
-
-class BaseOpenAPITagSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_name(self):
-        pass
-
-    @abstractmethod
-    def get_description(self):
-        pass
 
 
 class BaseOpenAPISchemaParser(BaseSchemaParser):
@@ -41,10 +30,6 @@ class BaseOpenAPISchemaParser(BaseSchemaParser):
 
     @abstractmethod
     def get_paths(self) -> Dict[str, Dict]:
-        pass
-
-    @abstractmethod
-    def get_tags(self) -> List[dict]:
         pass
 
     @abstractmethod

@@ -1,10 +1,9 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional
 
 from .. import APIConfig, MockAPIs
 from ..api_config import BaseConfig
 from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
-from ._parser import OpenAPIDocumentConfigParser
 from ._tmp_data_model import TmpAPIConfig, set_component_definition
 
 
@@ -18,9 +17,8 @@ class Tag(BaseOpenAPIDataModel):
         return Tag().deserialize(data=detail)
 
     def deserialize(self, data: Dict) -> "Tag":
-        parser = self.schema_parser_factory.tag(data)
-        self.name = parser.get_name()
-        self.description = parser.get_description()
+        self.name = data["name"]
+        self.description = data["description"]
         return self
 
 
@@ -34,10 +32,9 @@ class OpenAPIDocumentConfig(Transferable):
 
         openapi_schema_parser = self.schema_parser_factory.entire_config(data=data)
         set_component_definition(openapi_schema_parser)
-        parser = OpenAPIDocumentConfigParser(parser=openapi_schema_parser)
         for path, config in data.get("paths", {}).items():
             self.paths[path] = TmpAPIConfig().deserialize(config)
-        self.tags = cast(List[Tag], parser.process_tags(data_modal=Tag))
+        self.tags = list(map(lambda t: Tag.generate(t), data.get("tags", [])))
 
         return self
 
