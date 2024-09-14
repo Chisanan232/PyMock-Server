@@ -6,10 +6,6 @@ import pytest
 
 from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
 from pymock_api.model.openapi._base import set_openapi_version
-from pymock_api.model.openapi._schema_parser import (
-    OpenAPIV2SchemaParser,
-    OpenAPIV3SchemaParser,
-)
 from pymock_api.model.openapi._tmp_data_model import (
     BaseTmpDataModel,
     BaseTmpRefDataModel,
@@ -60,7 +56,7 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
         entire_config: dict,
     ):
         # Pre-process
-        set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
+        set_component_definition(entire_config.get("definitions", {}))
 
         # Run target function under test
         response_prop_data = under_test._generate_response(
@@ -311,65 +307,61 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
         # Pre-process
         if test_response_data.get("type", "array") == "array":
             set_component_definition(
-                OpenAPIV3SchemaParser(
-                    data={
-                        "components": {
-                            "schemas": {
-                                # For general test
-                                "FooResponse": {
-                                    "type": "object",
-                                    "required": ["id"],
-                                    "properties": {
-                                        "id": {"type": "integer", "format": "int64"},
-                                        "name": {"type": "string"},
-                                        "value1": {"type": "string"},
-                                        "value2": {"type": "string"},
-                                    },
-                                    "title": "FooResponse",
-                                },
-                                # For special case test about nested detail data
-                                "NestedFooResponse": {
-                                    "type": "object",
-                                    "required": ["id"],
-                                    "properties": {
-                                        "id": {"type": "integer", "format": "int64"},
-                                        "name": {"type": "string"},
-                                        "data": {
-                                            "type": "array",
-                                            "items": {"$ref": "#/components/schemas/FooDetailResponse"},
-                                        },
-                                    },
-                                },
-                                "FooDetailResponse": {
-                                    "type": "object",
-                                    "required": ["id"],
-                                    "properties": {
-                                        "id": {"type": "integer", "format": "int64"},
-                                        "value": {"type": "string"},
-                                        "url": {"type": "string", "format": "uri"},
-                                        "urlProperties": {"$ref": "#/components/schemas/UrlProperties"},
-                                    },
-                                },
-                                "UrlProperties": {
-                                    "type": "object",
-                                    "required": ["homePage", "detailInfo"],
-                                    "properties": {
-                                        "homePage": {"$ref": "#/components/schemas/DomainProperty"},
-                                        "detailInfo": {"$ref": "#/components/schemas/DomainProperty"},
-                                    },
-                                },
-                                "DomainProperty": {
-                                    "type": "object",
-                                    "required": ["homePage", "needAuth"],
-                                    "properties": {
-                                        "domain": {"type": "string"},
-                                        "needAuth": {"type": "boolean"},
-                                    },
+                {
+                    "schemas": {
+                        # For general test
+                        "FooResponse": {
+                            "type": "object",
+                            "required": ["id"],
+                            "properties": {
+                                "id": {"type": "integer", "format": "int64"},
+                                "name": {"type": "string"},
+                                "value1": {"type": "string"},
+                                "value2": {"type": "string"},
+                            },
+                            "title": "FooResponse",
+                        },
+                        # For special case test about nested detail data
+                        "NestedFooResponse": {
+                            "type": "object",
+                            "required": ["id"],
+                            "properties": {
+                                "id": {"type": "integer", "format": "int64"},
+                                "name": {"type": "string"},
+                                "data": {
+                                    "type": "array",
+                                    "items": {"$ref": "#/components/schemas/FooDetailResponse"},
                                 },
                             },
                         },
-                    }
-                )
+                        "FooDetailResponse": {
+                            "type": "object",
+                            "required": ["id"],
+                            "properties": {
+                                "id": {"type": "integer", "format": "int64"},
+                                "value": {"type": "string"},
+                                "url": {"type": "string", "format": "uri"},
+                                "urlProperties": {"$ref": "#/components/schemas/UrlProperties"},
+                            },
+                        },
+                        "UrlProperties": {
+                            "type": "object",
+                            "required": ["homePage", "detailInfo"],
+                            "properties": {
+                                "homePage": {"$ref": "#/components/schemas/DomainProperty"},
+                                "detailInfo": {"$ref": "#/components/schemas/DomainProperty"},
+                            },
+                        },
+                        "DomainProperty": {
+                            "type": "object",
+                            "required": ["homePage", "needAuth"],
+                            "properties": {
+                                "domain": {"type": "string"},
+                                "needAuth": {"type": "boolean"},
+                            },
+                        },
+                    },
+                }
             )
         test_response_data_model = TmpReferenceConfigPropertyModel.deserialize(test_response_data)
 
@@ -632,7 +624,7 @@ class TestTmpRequestParameterModel(BaseTmpRefDataModelTestSuite):
         self, under_test: TmpRequestParameterModel, openapi_doc_data: dict, entire_openapi_config: dict
     ):
         # Pre-process
-        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
+        set_component_definition(entire_openapi_config.get("definitions", {}))
 
         # Run target function
         openapi_doc_data_model = under_test.deserialize(openapi_doc_data)
@@ -703,7 +695,7 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
         print(f"[DEBUG in test__process_api_params] ")
         # Pre-process
         set_openapi_version(OpenAPIVersion.V2)
-        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
+        set_component_definition(entire_openapi_config.get("definitions", {}))
 
         under_test = under_test.deserialize(openapi_doc_data)
 
@@ -723,7 +715,7 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
     def test_process_responses(self, under_test: _BaseTmpAPIDtailConfig, api_detail: dict, entire_config: dict):
         # Pre-process
         set_openapi_version(OpenAPIVersion.V2)
-        set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
+        set_component_definition(entire_config.get("definitions", {}))
 
         # Run target function under test
         print(f"[DEBUG in test] api_detail: {api_detail}")

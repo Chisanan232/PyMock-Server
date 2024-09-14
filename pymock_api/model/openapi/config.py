@@ -3,7 +3,13 @@ from typing import Dict, List, Optional
 
 from .. import APIConfig, MockAPIs
 from ..api_config import BaseConfig
-from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
+from ..enums import OpenAPIVersion
+from ._base import (
+    BaseOpenAPIDataModel,
+    Transferable,
+    get_openapi_version,
+    set_openapi_version,
+)
 from ._tmp_data_model import TmpAPIConfig, set_component_definition
 
 
@@ -30,8 +36,10 @@ class OpenAPIDocumentConfig(Transferable):
     def deserialize(self, data: Dict) -> "OpenAPIDocumentConfig":
         self._chk_version_and_load_parser(data)
 
-        openapi_schema_parser = self.schema_parser_factory.entire_config(data=data)
-        set_component_definition(openapi_schema_parser)
+        if get_openapi_version() is OpenAPIVersion.V2:
+            set_component_definition(data.get("definitions", {}))
+        else:
+            set_component_definition(data.get("components", {}))
         for path, config in data.get("paths", {}).items():
             self.paths[path] = TmpAPIConfig().deserialize(config)
         self.tags = list(map(lambda t: Tag.generate(t), data.get("tags", [])))
