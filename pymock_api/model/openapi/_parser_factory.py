@@ -1,12 +1,7 @@
 from abc import ABCMeta, abstractmethod
-from typing import Dict, Union
+from typing import Union
 
 from ..enums import OpenAPIVersion
-from ._schema_parser import (
-    BaseOpenAPISchemaParser,
-    OpenAPIV2SchemaParser,
-    OpenAPIV3SchemaParser,
-)
 
 
 class BaseOpenAPISchemaParserFactory(metaclass=ABCMeta):
@@ -14,25 +9,15 @@ class BaseOpenAPISchemaParserFactory(metaclass=ABCMeta):
     def chk_version(self, version: OpenAPIVersion) -> bool:
         pass
 
-    @abstractmethod
-    def entire_config(self, file: str = "", data: Dict = {}) -> BaseOpenAPISchemaParser:
-        pass
-
 
 class OpenAPIV2SchemaParserFactory(BaseOpenAPISchemaParserFactory):
     def chk_version(self, version: OpenAPIVersion) -> bool:
         return version is OpenAPIVersion.V2
 
-    def entire_config(self, file: str = "", data: Dict = {}) -> OpenAPIV2SchemaParser:
-        return OpenAPIV2SchemaParser(file=file, data=data)
-
 
 class OpenAPIV3SchemaParserFactory(BaseOpenAPISchemaParserFactory):
     def chk_version(self, version: OpenAPIVersion) -> bool:
         return version is OpenAPIVersion.V3
-
-    def entire_config(self, file: str = "", data: Dict = {}) -> OpenAPIV3SchemaParser:
-        return OpenAPIV3SchemaParser(file=file, data=data)
 
 
 def get_schema_parser_factory(version: Union[str, OpenAPIVersion]) -> BaseOpenAPISchemaParserFactory:
