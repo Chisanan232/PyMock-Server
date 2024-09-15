@@ -1,7 +1,7 @@
 import re
 from abc import ABCMeta, abstractmethod
 from http import HTTPMethod, HTTPStatus
-from typing import Type, Union
+from typing import Union
 
 import pytest
 
@@ -10,11 +10,6 @@ from pymock_api.model import MockAPI
 from pymock_api.model.api_config import _Config
 from pymock_api.model.enums import OpenAPIVersion
 from pymock_api.model.openapi._base import Transferable, set_openapi_version
-from pymock_api.model.openapi._parser_factory import (
-    BaseOpenAPISchemaParserFactory,
-    OpenAPIV2SchemaParserFactory,
-    OpenAPIV3SchemaParserFactory,
-)
 from pymock_api.model.openapi._tmp_data_model import (
     API,
     BaseTmpDataModel,
@@ -81,45 +76,6 @@ class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
     def _verify_api_config_model(self, under_test: _Config, data_from: Transferable) -> None:
         pass
 
-    @pytest.mark.parametrize(
-        ("openapi_version", "expected_parser_factory"),
-        [
-            (OpenAPIVersion.V3, OpenAPIV3SchemaParserFactory),
-        ],
-    )
-    def test_load_parser_factory_at_instantiate(
-        self,
-        data_model: Transferable,
-        openapi_version: OpenAPIVersion,
-        expected_parser_factory: Type[BaseOpenAPISchemaParserFactory],
-    ):
-        from pymock_api.model.openapi._base import OpenAPI_Document_Version
-
-        assert OpenAPI_Document_Version is openapi_version
-        assert isinstance(data_model.schema_parser_factory, expected_parser_factory)
-
-    @pytest.mark.parametrize(
-        ("openapi_version", "expected_parser_factory"),
-        [
-            # Enum type
-            (OpenAPIVersion.V2, OpenAPIV2SchemaParserFactory),
-            (OpenAPIVersion.V3, OpenAPIV3SchemaParserFactory),
-            # str type
-            ("2.0", OpenAPIV2SchemaParserFactory),
-            ("2.0.6", OpenAPIV2SchemaParserFactory),
-            ("3.0.1", OpenAPIV3SchemaParserFactory),
-        ],
-    )
-    def test_reload_parser_factory(
-        self,
-        data_model: Transferable,
-        openapi_version: OpenAPIVersion,
-        expected_parser_factory: Type[BaseOpenAPISchemaParserFactory],
-    ):
-        set_openapi_version(openapi_version)
-        data_model.reload_schema_parser_factory()
-        assert isinstance(data_model.schema_parser_factory, expected_parser_factory)
-
 
 class TestAPI(_OpenAPIDocumentDataModelTestSuite):
     @pytest.fixture(scope="function")
@@ -131,7 +87,6 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         # Previous process
         set_openapi_version(OpenAPIVersion.V2)
         set_component_definition(entire_openapi_config.get("definitions", {}))
-        data_model.reload_schema_parser_factory()
 
         # Run test
         openapi_doc_data = TmpAPIDtailConfigV2.deserialize(openapi_doc_data)
@@ -139,7 +94,6 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
 
         # Finally
         set_openapi_version(OpenAPIVersion.V3)
-        data_model.reload_schema_parser_factory()
 
     def _initial(self, data: API) -> None:
         data.path = ""
@@ -323,28 +277,6 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
     def test__align_url_format(self, path: str, data_model: OpenAPIDocumentConfig):
         handled_url = OpenAPIDocumentConfig()._align_url_format(path=path)
         assert re.search(r"/.{1,32}/.{1,32}/.{1,32}", handled_url)
-
-    @pytest.mark.parametrize(
-        ("data", "expected_openapi_version", "expected_parser_factory"),
-        [
-            ({"swagger": "2.0"}, OpenAPIVersion.V2, OpenAPIV2SchemaParserFactory),
-            ({"swagger": "2.6.0"}, OpenAPIVersion.V2, OpenAPIV2SchemaParserFactory),
-            ({"swagger": "3.0"}, OpenAPIVersion.V3, OpenAPIV3SchemaParserFactory),
-            ({"swagger": "3.1.0"}, OpenAPIVersion.V3, OpenAPIV3SchemaParserFactory),
-        ],
-    )
-    def test__chk_version_and_load_parser(
-        self,
-        data_model: OpenAPIDocumentConfig,
-        data: dict,
-        expected_openapi_version: OpenAPIVersion,
-        expected_parser_factory: Type[BaseOpenAPISchemaParserFactory],
-    ):
-        data_model._chk_version_and_load_parser(data)
-        from pymock_api.model.openapi._base import OpenAPI_Document_Version
-
-        assert OpenAPI_Document_Version is expected_openapi_version
-        assert isinstance(data_model.schema_parser_factory, expected_parser_factory)
 
     @pytest.mark.parametrize("openapi_doc_data", V3_OPENAPI_API_DOC_CONFIG_TEST_CASE)
     def test_deserialize_with_openapi_v3(self, openapi_doc_data: dict, data_model: OpenAPIDocumentConfig):

@@ -53,7 +53,6 @@ class OpenAPIDocumentConfig(Transferable):
         assert doc_config_version is not None, "PyMock-API cannot get the OpenAPI document version."
         assert isinstance(doc_config_version, str)
         set_openapi_version(doc_config_version)
-        self.reload_schema_parser_factory()
 
     def to_api_config(self, base_url: str = "") -> APIConfig:  # type: ignore[override]
         api_config = APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=base_url), apis={}))
