@@ -6,7 +6,7 @@ from typing import Any, Optional
 from ... import APIConfig
 from ..._utils.api_client import URLLibHTTPClient
 from ...model import (
-    OpenAPIDocumentConfig,
+    BaseOpenAPIDocumentConfig,
     SubcmdCheckArguments,
     deserialize_openapi_doc_config,
     load_config,
@@ -219,7 +219,7 @@ class SwaggerDiffChecking(_BaseChecking):
 
         return api_config
 
-    def _get_swagger_config(self, swagger_url: str) -> OpenAPIDocumentConfig:
+    def _get_swagger_config(self, swagger_url: str) -> BaseOpenAPIDocumentConfig:
         swagger_api_doc: dict = self._api_client.request(method="GET", url=swagger_url)
         return deserialize_openapi_doc_config(data=swagger_api_doc)
 

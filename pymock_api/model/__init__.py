@@ -21,7 +21,13 @@ from .cmd_args import (
     SubcmdRunArguments,
     SubcmdSampleArguments,
 )
-from .openapi.config import OpenAPIDocumentConfig
+from .enums import OpenAPIVersion
+from .openapi.config import (
+    BaseOpenAPIDocumentConfig,
+    OpenAPIDocumentConfig,
+    SwaggerAPIDocumentConfig,
+    get_api_doc_version,
+)
 
 
 class deserialize_args:
@@ -104,8 +110,11 @@ class deserialize_args:
         return DeserializeParsedArgs.subcommand_pull(args)
 
 
-def deserialize_openapi_doc_config(data: dict) -> OpenAPIDocumentConfig:
-    return OpenAPIDocumentConfig().deserialize(data=data)
+def deserialize_openapi_doc_config(data: dict) -> BaseOpenAPIDocumentConfig:
+    if get_api_doc_version(data) is OpenAPIVersion.V2:
+        return SwaggerAPIDocumentConfig().deserialize(data)
+    else:
+        return OpenAPIDocumentConfig().deserialize(data)
 
 
 def load_config(path: str, is_pull: bool = False, base_file_path: str = "") -> Optional[APIConfig]:
