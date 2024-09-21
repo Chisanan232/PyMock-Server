@@ -43,6 +43,7 @@ DESERIALIZE_V2_OPENAPI_API_REQUEST_PARAMETERS_TEST_CASE = (
 
 DeserializeV3OpenAPIConfigTestCaseFactory.load()
 V3_OPENAPI_API_DOC_CONFIG_TEST_CASE = DeserializeV3OpenAPIConfigTestCaseFactory.get_test_case()
+DESERIALIZE_V3_OPENAPI_ENTIRE_CONFIG_TEST_CASE = V3_OPENAPI_API_DOC_CONFIG_TEST_CASE.entire_config
 
 
 class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
@@ -287,7 +288,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
     def data_model(self) -> OpenAPIDocumentConfig:
         return OpenAPIDocumentConfig()
 
-    @pytest.mark.parametrize("openapi_doc_data", [])
+    @pytest.mark.parametrize("openapi_doc_data", DESERIALIZE_V3_OPENAPI_ENTIRE_CONFIG_TEST_CASE)
     def test_deserialize(self, openapi_doc_data: dict, data_model: Transferable):
         """
         modify the test data at this test
@@ -299,31 +300,47 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
         data.paths = {}
 
     def _verify_result(self, data: OpenAPIDocumentConfig, og_data: dict) -> None:
-        # TODO: Remove this deprecated test criteria if it ensure
-        # def _get_api_param(name: str) -> Optional[dict]:
-        #     swagger_api_params = og_data["paths"][api.path][api.http_method]["parameters"]
-        #     for param in swagger_api_params:
-        #         if param["name"] == name:
-        #             return param
-        #     return None
-
         path_with_method_number = [len(v.keys()) for v in og_data["paths"].values()]
         data_model_apis = [len(v) for v in data.paths.values()]
         assert sum(data_model_apis) == sum(path_with_method_number)
-        for path, api_config in data.paths.items():
-            apis = api_config.to_adapter_api(path)
+        for api_path, api_config in data.paths.items():
+            assert api_path in og_data["paths"].keys()
+            apis = api_config.to_adapter_api(api_path)
             for api in apis:
-                assert api.path in og_data["paths"].keys()
                 assert api.http_method.lower() in og_data["paths"][api.path].keys()
 
-                assert len(api.parameters) == len(og_data["paths"][api.path][api.http_method.lower()]["parameters"])
-                # TODO: Remove this deprecated test criteria if it ensure
-                # for api_param in api.parameters:
-                #     one_swagger_api_param = _get_api_param(api_param.name)
-                #     assert one_swagger_api_param is not None
-                #     assert api_param.required == one_swagger_api_param["required"]
-                #     assert api_param.value_type == convert_js_type(one_swagger_api_param["schema"]["type"])
-                #     assert api_param.default == one_swagger_api_param["schema"]["default"]
+                api_http_details = og_data["paths"][api.path][api.http_method.lower()]
+                if api.http_method.upper() == "GET":
+                    expected_parameters = 0
+                    api_req_params_data_model = list(
+                        map(lambda e: TmpRequestParameterModel().deserialize(e), api_http_details.get("parameters", []))
+                    )
+                    for param in api_req_params_data_model:
+                        if param.has_ref():
+                            expected_parameters += len(param.get_schema_ref().properties.keys())
+                        else:
+                            expected_parameters += 1
+                    assert len(api.parameters) == expected_parameters
+                else:
+                    request_body = api_http_details.get("requestBody", {})
+                    if request_body:
+                        data_format = list(
+                            filter(lambda b: b in request_body["content"].keys(), ["application/json", "*/*"])
+                        )
+                        assert len(data_format) == 1
+                        req_body_model = TmpRequestParameterModel().deserialize(request_body["content"][data_format[0]])
+                        assert len(api.parameters) == len(req_body_model.get_schema_ref().properties.keys())
+                    else:
+                        expected_parameters = 0
+                        api_req_params_data_model = list(
+                            map(lambda e: TmpRequestParameterModel().deserialize(e), api_http_details["parameters"])
+                        )
+                        for param in api_req_params_data_model:
+                            if param.has_ref():
+                                expected_parameters += len(param.get_schema_ref().properties.keys())
+                            else:
+                                expected_parameters += 1
+                        assert len(api.parameters) == expected_parameters
 
     def _given_props(self, data_model: OpenAPIDocumentConfig) -> None:
         params = TmpRequestParameterModel()
@@ -400,15 +417,6 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
     def test__align_url_format(self, path: str, data_model: OpenAPIDocumentConfig):
         handled_url = OpenAPIDocumentConfig()._align_url_format(path=path)
         assert re.search(r"/.{1,32}/.{1,32}/.{1,32}", handled_url)
-
-    @pytest.mark.parametrize("openapi_doc_data", V3_OPENAPI_API_DOC_CONFIG_TEST_CASE)
-    def test_deserialize_with_openapi_v3(self, openapi_doc_data: dict, data_model: OpenAPIDocumentConfig):
-        set_component_definition(openapi_doc_data.get("components", {}))
-
-        self._initial(data=data_model)
-        deserialized_data = data_model.deserialize(data=openapi_doc_data)
-        assert deserialized_data
-        self._verify_result_with_openapi_v3(data=deserialized_data, og_data=openapi_doc_data)
 
     def _verify_result_with_openapi_v3(self, data: OpenAPIDocumentConfig, og_data: dict) -> None:
         path_with_method_number = [len(v.keys()) for v in og_data["paths"].values()]
