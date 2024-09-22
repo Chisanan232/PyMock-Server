@@ -1,7 +1,7 @@
 import re
 from abc import ABCMeta, abstractmethod
 from http import HTTPMethod, HTTPStatus
-from typing import Union
+from typing import List, Union
 
 import pytest
 
@@ -18,15 +18,18 @@ from pymock_api.model.openapi._tmp_data_model import (
     ResponseProperty,
     TmpAPIConfig,
     TmpAPIDtailConfigV2,
+    TmpAPIDtailConfigV3,
     TmpHttpConfigV2,
     TmpReferenceConfigPropertyModel,
     TmpRequestParameterModel,
+    _BaseTmpAPIDtailConfig,
     set_component_definition,
 )
 from pymock_api.model.openapi.config import (
     OpenAPIDocumentConfig,
     SwaggerAPIDocumentConfig,
 )
+from pymock_api.model.openapi.content_type import ContentType
 
 from ._test_case import (
     DeserializeV2OpenAPIConfigTestCaseFactory,
@@ -44,6 +47,7 @@ DESERIALIZE_V2_OPENAPI_API_REQUEST_PARAMETERS_TEST_CASE = (
 DeserializeV3OpenAPIConfigTestCaseFactory.load()
 V3_OPENAPI_API_DOC_CONFIG_TEST_CASE = DeserializeV3OpenAPIConfigTestCaseFactory.get_test_case()
 DESERIALIZE_V3_OPENAPI_ENTIRE_CONFIG_TEST_CASE = V3_OPENAPI_API_DOC_CONFIG_TEST_CASE.entire_config
+DESERIALIZE_V3_OPENAPI_ENTIRE_API_TEST_CASE = V3_OPENAPI_API_DOC_CONFIG_TEST_CASE.each_apis
 
 
 class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
@@ -86,14 +90,25 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
     def data_model(self) -> API:
         return API()
 
-    @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), DESERIALIZE_V2_OPENAPI_ENTIRE_API_TEST_CASE)
-    def test_deserialize(self, openapi_doc_data: dict, entire_openapi_config: dict, data_model: Transferable):
+    @pytest.mark.parametrize(
+        ("openapi_doc_data", "entire_openapi_config", "doc_version", "schema_key", "api_data_model"),
+        DESERIALIZE_V2_OPENAPI_ENTIRE_API_TEST_CASE + DESERIALIZE_V3_OPENAPI_ENTIRE_API_TEST_CASE,
+    )
+    def test_deserialize(
+        self,
+        data_model: Transferable,
+        openapi_doc_data: dict,
+        entire_openapi_config: dict,
+        doc_version: OpenAPIVersion,
+        schema_key: str,
+        api_data_model: _BaseTmpAPIDtailConfig,
+    ):
         # Previous process
-        set_openapi_version(OpenAPIVersion.V2)
-        set_component_definition(entire_openapi_config.get("definitions", {}))
+        set_openapi_version(doc_version)
+        set_component_definition(entire_openapi_config.get(schema_key, {}))
 
         # Run test
-        openapi_doc_data = TmpAPIDtailConfigV2.deserialize(openapi_doc_data)
+        openapi_doc_data = api_data_model.deserialize(openapi_doc_data)
         super().test_deserialize(openapi_doc_data, data_model)
 
         # Finally
@@ -105,7 +120,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         data.parameters = []
         data.response = {}
 
-    def _verify_result(self, data: API, og_data: TmpAPIDtailConfigV2) -> None:
+    def _verify_result(self, data: API, og_data: _BaseTmpAPIDtailConfig) -> None:
         # TODO: Remove this deprecated test criteria if it ensure
         # def _get_api_param(name: str) -> Optional[dict]:
         #     swagger_api_params = og_data["parameters"]
@@ -117,7 +132,37 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         assert data is not None
         assert data.path == ""
         assert data.http_method == ""
-        assert len(data.parameters) == len(og_data.parameters)
+
+        # param: List[TmpRequestParameterModel] = list(filter(lambda e: e.has_ref(), og_data.parameters))
+        # if param is not None:
+        #     print(f"[DEBUG in test] param: {param}")
+        #     assert len(data.parameters) == len(param[0].get_schema_ref().properties)
+        # else:
+        if isinstance(og_data, TmpAPIDtailConfigV3):
+            request_body = og_data.request_body
+            has_ref_params: List[TmpRequestParameterModel] = (
+                list(filter(lambda p: p.has_ref(), og_data.parameters)) if og_data.parameters else None
+            )
+            if request_body:
+                req_param_format: List[ContentType] = list(
+                    filter(
+                        lambda ct: request_body.exist_setting(content_type=ct) is not None,
+                        ContentType,
+                    )
+                )
+                print(f"[DEBUG] has content, req_param_format: {req_param_format}")
+                req_param_setting = request_body.get_setting(content_type=req_param_format[0])
+                req_param_data_model = req_param_setting.get_schema_ref()
+                assert len(data.parameters) == len(req_param_data_model.properties)
+            elif has_ref_params:
+                all_params = []
+                for param in has_ref_params:
+                    all_params.extend(list(param.get_schema_ref().properties.keys()))
+                assert len(data.parameters) == len(all_params)
+            else:
+                assert len(data.parameters) == len(og_data.parameters)
+        else:
+            assert len(data.parameters) == len(og_data.parameters)
         # TODO: Remove this deprecated test criteria if it ensure
         # for api_param in data.parameters:
         #     one_swagger_api_param = _get_api_param(api_param.name)

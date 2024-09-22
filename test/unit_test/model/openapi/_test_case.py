@@ -2,7 +2,10 @@ import json
 from collections import namedtuple
 from typing import List, Tuple
 
+from pymock_api.model import OpenAPIVersion
 from pymock_api.model.openapi._tmp_data_model import (
+    TmpAPIDtailConfigV2,
+    TmpAPIDtailConfigV3,
     TmpHttpConfigV2,
     TmpHttpConfigV3,
     TmpReferenceConfigPropertyModel,
@@ -14,7 +17,9 @@ from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 
 # For version 2 OpenAPI
 OPENAPI_API_DOC_JSON: List[tuple] = []
-OPENAPI_ONE_API_JSON: List[tuple] = []
+OPENAPI_ONE_API_JSON: List[tuple] = (
+    []
+)  # (<api setting>, <entire api doc config>, <doc version>, <common object schema key>, <api data model>)
 OPENAPI_API_PARAMETERS_JSON: List[tuple] = []
 OPENAPI_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
 OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
@@ -23,7 +28,9 @@ OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[TmpReferenceConfigPropertyMod
 
 # For version 3 OpenAPI
 OPENAPI_V3_API_DOC_JSON: List[tuple] = []
-OPENAPI_V3_ONE_API_JSON: List[tuple] = []
+OPENAPI_V3_ONE_API_JSON: List[tuple] = (
+    []
+)  # (<api setting>, <entire api doc config>, <doc version>, <common object schema key>, <api data model>)
 OPENAPI_V3_API_PARAMETERS_JSON: List[tuple] = []
 OPENAPI_V3_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
 OPENAPI_V3_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
@@ -94,7 +101,9 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                 for api_path, api_props in apis.items():
                     for api_detail in api_props.values():
                         # For testing API details
-                        OPENAPI_ONE_API_JSON.append((api_detail, openapi_api_docs))
+                        OPENAPI_ONE_API_JSON.append(
+                            (api_detail, openapi_api_docs, OpenAPIVersion.V2, "definitions", TmpAPIDtailConfigV2)
+                        )
 
                         # For testing API response
                         # for strategy in ResponseStrategy:
@@ -168,7 +177,9 @@ class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                 for api_path, api_props in apis.items():
                     for api_detail in api_props.values():
                         # For testing API details
-                        OPENAPI_V3_ONE_API_JSON.append((api_detail, openapi_api_docs))
+                        OPENAPI_V3_ONE_API_JSON.append(
+                            (api_detail, openapi_api_docs, OpenAPIVersion.V3, "components", TmpAPIDtailConfigV3)
+                        )
 
                         # For testing API response
                         # for strategy in ResponseStrategy:
