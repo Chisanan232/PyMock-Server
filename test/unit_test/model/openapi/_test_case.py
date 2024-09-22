@@ -16,26 +16,26 @@ from pymock_api.model.openapi.content_type import ContentType
 from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 
 # For version 2 OpenAPI
-OPENAPI_API_DOC_JSON: List[tuple] = []
-OPENAPI_ONE_API_JSON: List[tuple] = (
+V2_SWAGGER_API_DOC_JSON: List[tuple] = []
+V2_SWAGGER_API_ONE_API_JSON: List[tuple] = (
     []
 )  # (<api setting>, <entire api doc config>, <doc version>, <common object schema key>, <api data model>)
-OPENAPI_API_PARAMETERS_JSON: List[tuple] = []
-OPENAPI_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
-OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
-OPENAPI_API_RESPONSES_FOR_API: List[Tuple[dict, dict]] = []
-OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[TmpReferenceConfigPropertyModel, dict]] = []
+V2_SWAGGER_API_PARAMETERS_JSON: List[tuple] = []
+V2_SWAGGER_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
+V2_SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
+V2_SWAGGER_API_RESPONSES_FOR_API: List[Tuple[dict, dict]] = []
+V2_SWAGGER_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[TmpReferenceConfigPropertyModel, dict]] = []
 
 # For version 3 OpenAPI
-OPENAPI_V3_API_DOC_JSON: List[tuple] = []
-OPENAPI_V3_ONE_API_JSON: List[tuple] = (
+V3_OPENAPI_API_DOC_JSON: List[tuple] = []
+V3_OPENAPI_ONE_API_JSON: List[tuple] = (
     []
 )  # (<api setting>, <entire api doc config>, <doc version>, <common object schema key>, <api data model>)
-OPENAPI_V3_API_PARAMETERS_JSON: List[tuple] = []
-OPENAPI_V3_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
-OPENAPI_V3_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
-OPENAPI_V3_API_RESPONSES_FOR_API: List[Tuple[dict, dict]] = []
-OPENAPI_V3_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[TmpReferenceConfigPropertyModel, dict]] = []
+V3_OPENAPI_API_PARAMETERS_JSON: List[tuple] = []
+V3_OPENAPI_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
+V3_OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
+V3_OPENAPI_API_RESPONSES_FOR_API: List[Tuple[dict, dict]] = []
+V3_OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[TmpReferenceConfigPropertyModel, dict]] = []
 
 
 V2OpenAPIDocConfigTestCase = namedtuple(
@@ -75,18 +75,18 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
     @classmethod
     def get_test_case(cls) -> V2OpenAPIDocConfigTestCase:
         return V2OpenAPIDocConfigTestCase(
-            entire_config=OPENAPI_API_DOC_JSON,
-            each_apis=OPENAPI_ONE_API_JSON,
-            entire_api_http_request_parameters=OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API,
-            general_api_http_request_parameters=OPENAPI_API_PARAMETERS_JSON_FOR_API,
-            reference_api_http_request_parameters=OPENAPI_API_PARAMETERS_JSON,
-            entire_api_http_response=OPENAPI_API_RESPONSES_FOR_API,
-            each_api_http_response=OPENAPI_API_RESPONSES_PROPERTY_FOR_API,
+            entire_config=V2_SWAGGER_API_DOC_JSON,
+            each_apis=V2_SWAGGER_API_ONE_API_JSON,
+            entire_api_http_request_parameters=V2_SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API,
+            general_api_http_request_parameters=V2_SWAGGER_API_PARAMETERS_JSON_FOR_API,
+            reference_api_http_request_parameters=V2_SWAGGER_API_PARAMETERS_JSON,
+            entire_api_http_response=V2_SWAGGER_API_RESPONSES_FOR_API,
+            each_api_http_response=V2_SWAGGER_API_RESPONSES_PROPERTY_FOR_API,
         )
 
     @classmethod
     def load(cls) -> None:
-        if not OPENAPI_API_DOC_JSON:
+        if not V2_SWAGGER_API_DOC_JSON:
             cls._load_all_openapi_api_doc()
 
     @classmethod
@@ -96,18 +96,18 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
             print(f"[DEBUG] file_path: {file_path}")
             with open(file_path, "r", encoding="utf-8") as file_stream:
                 openapi_api_docs = json.loads(file_stream.read())
-                OPENAPI_API_DOC_JSON.append(openapi_api_docs)
+                V2_SWAGGER_API_DOC_JSON.append(openapi_api_docs)
                 apis: dict = openapi_api_docs["paths"]
                 for api_path, api_props in apis.items():
                     for api_detail in api_props.values():
                         # For testing API details
-                        OPENAPI_ONE_API_JSON.append(
+                        V2_SWAGGER_API_ONE_API_JSON.append(
                             (api_detail, openapi_api_docs, OpenAPIVersion.V2, "definitions", TmpAPIDtailConfigV2)
                         )
 
                         # For testing API response
                         # for strategy in ResponseStrategy:
-                        OPENAPI_API_RESPONSES_FOR_API.append((api_detail, openapi_api_docs))
+                        V2_SWAGGER_API_RESPONSES_FOR_API.append((api_detail, openapi_api_docs))
 
                         # For testing API response properties
                         status_200_response = api_detail.get("responses", {}).get("200", {})
@@ -119,17 +119,17 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                             if response_schema_properties:
                                 for k, v in response_schema_properties.items():
                                     # for strategy in ResponseStrategy:
-                                    OPENAPI_API_RESPONSES_PROPERTY_FOR_API.append((v, openapi_api_docs))
+                                    V2_SWAGGER_API_RESPONSES_PROPERTY_FOR_API.append((v, openapi_api_docs))
 
                         # For testing API request parameters
-                        OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API.append((api_detail["parameters"], openapi_api_docs))
+                        V2_SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API.append((api_detail["parameters"], openapi_api_docs))
 
                         # For testing API request parameters
                         for param in api_detail["parameters"]:
                             if param.get("schema", {}).get("$ref", None) is None:
-                                OPENAPI_API_PARAMETERS_JSON.append(param)
+                                V2_SWAGGER_API_PARAMETERS_JSON.append(param)
                             else:
-                                OPENAPI_API_PARAMETERS_JSON_FOR_API.append((param, openapi_api_docs))
+                                V2_SWAGGER_API_PARAMETERS_JSON_FOR_API.append((param, openapi_api_docs))
 
         cls._iterate_files_by_path(
             path=cls.test_data_dir().generate_path_with_base_prefix_path(
@@ -151,18 +151,18 @@ class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
     @classmethod
     def get_test_case(cls) -> V3OpenAPIDocConfigTestCase:
         return V3OpenAPIDocConfigTestCase(
-            entire_config=OPENAPI_V3_API_DOC_JSON,
-            each_apis=OPENAPI_V3_ONE_API_JSON,
-            entire_api_http_request_parameters=OPENAPI_V3_API_PARAMETERS_LIST_JSON_FOR_API,
-            general_api_http_request_parameters=OPENAPI_V3_API_PARAMETERS_JSON_FOR_API,
-            reference_api_http_request_parameters=OPENAPI_V3_API_PARAMETERS_JSON,
-            entire_api_http_response=OPENAPI_V3_API_RESPONSES_FOR_API,
-            each_api_http_response=OPENAPI_V3_API_RESPONSES_PROPERTY_FOR_API,
+            entire_config=V3_OPENAPI_API_DOC_JSON,
+            each_apis=V3_OPENAPI_ONE_API_JSON,
+            entire_api_http_request_parameters=V3_OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API,
+            general_api_http_request_parameters=V3_OPENAPI_API_PARAMETERS_JSON_FOR_API,
+            reference_api_http_request_parameters=V3_OPENAPI_API_PARAMETERS_JSON,
+            entire_api_http_response=V3_OPENAPI_API_RESPONSES_FOR_API,
+            each_api_http_response=V3_OPENAPI_API_RESPONSES_PROPERTY_FOR_API,
         )
 
     @classmethod
     def load(cls) -> None:
-        if not OPENAPI_V3_API_DOC_JSON:
+        if not V3_OPENAPI_API_DOC_JSON:
             cls._load_all_openapi_api_doc()
 
     @classmethod
@@ -172,18 +172,18 @@ class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
             print(f"[DEBUG] file_path: {file_path}")
             with open(file_path, "r", encoding="utf-8") as file_stream:
                 openapi_api_docs = json.loads(file_stream.read())
-                OPENAPI_V3_API_DOC_JSON.append(openapi_api_docs)
+                V3_OPENAPI_API_DOC_JSON.append(openapi_api_docs)
                 apis: dict = openapi_api_docs["paths"]
                 for api_path, api_props in apis.items():
                     for api_detail in api_props.values():
                         # For testing API details
-                        OPENAPI_V3_ONE_API_JSON.append(
+                        V3_OPENAPI_ONE_API_JSON.append(
                             (api_detail, openapi_api_docs, OpenAPIVersion.V3, "components", TmpAPIDtailConfigV3)
                         )
 
                         # For testing API response
                         # for strategy in ResponseStrategy:
-                        OPENAPI_V3_API_RESPONSES_FOR_API.append((api_detail, openapi_api_docs))
+                        V3_OPENAPI_API_RESPONSES_FOR_API.append((api_detail, openapi_api_docs))
 
                         # For testing API response properties
                         set_component_definition(openapi_api_docs.get("components", {}))
@@ -207,27 +207,27 @@ class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                             if response_schema_properties:
                                 for k, v in response_schema_properties.items():
                                     # for strategy in ResponseStrategy:
-                                    OPENAPI_V3_API_RESPONSES_PROPERTY_FOR_API.append((v, openapi_api_docs))
+                                    V3_OPENAPI_API_RESPONSES_PROPERTY_FOR_API.append((v, openapi_api_docs))
 
                         # For testing API request parameters
                         if api_detail.get("parameters", None):
-                            OPENAPI_V3_API_PARAMETERS_LIST_JSON_FOR_API.append(
+                            V3_OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API.append(
                                 (api_detail["parameters"], openapi_api_docs)
                             )
 
                             # For testing API request parameters
                             for param in api_detail["parameters"]:
                                 if param.get("schema", {}).get("$ref", None) is None:
-                                    OPENAPI_V3_API_PARAMETERS_JSON.append(param)
+                                    V3_OPENAPI_API_PARAMETERS_JSON.append(param)
                                 else:
-                                    OPENAPI_V3_API_PARAMETERS_JSON_FOR_API.append((param, openapi_api_docs))
+                                    V3_OPENAPI_API_PARAMETERS_JSON_FOR_API.append((param, openapi_api_docs))
                         elif api_detail.get("requestBody", None):
                             json_params = api_detail["requestBody"].get("content", {}).get("application/json", {})
                             all_params = api_detail["requestBody"].get("content", {}).get("*/*", {})
                             if json_params.get("schema", {}).get("$ref", None):
-                                OPENAPI_V3_API_PARAMETERS_JSON.append(param)
+                                V3_OPENAPI_API_PARAMETERS_JSON.append(param)
                             elif all_params.get("schema", {}).get("$ref", None) is None:
-                                OPENAPI_V3_API_PARAMETERS_JSON.append(param)
+                                V3_OPENAPI_API_PARAMETERS_JSON.append(param)
                             else:
                                 raise ValueError("This is empty API parameter body.")
 
