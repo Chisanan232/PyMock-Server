@@ -16,12 +16,14 @@ from pymock_api.model.openapi._tmp_data_model import (
     TmpAPIDtailConfigV3,
     TmpConfigReferenceModel,
     TmpHttpConfigV2,
+    TmpHttpConfigV3,
     TmpReferenceConfigPropertyModel,
     TmpRequestParameterModel,
     TmpRequestSchemaModel,
     _BaseTmpAPIDtailConfig,
     set_component_definition,
 )
+from pymock_api.model.openapi.content_type import ContentType
 
 from ...model.openapi._test_case import (
     DeserializeV2OpenAPIConfigTestCaseFactory,
@@ -46,6 +48,7 @@ DeserializeV3OpenAPIConfigTestCaseFactory.load()
 V3_OPENAPI_API_DOC_CONFIG_TEST_CASE = DeserializeV3OpenAPIConfigTestCaseFactory.get_test_case()
 DESERIALIZE_V3_OPENAPI_ENTIRE_CONFIG_TEST_CASE = V3_OPENAPI_API_DOC_CONFIG_TEST_CASE.entire_config
 PARSE_V3_OPENAPI_ENTIRE_APIS_TEST_CASE = V3_OPENAPI_API_DOC_CONFIG_TEST_CASE.each_apis
+PARSE_V3_OPENAPI_RESPONSES_TEST_CASE = V3_OPENAPI_API_DOC_CONFIG_TEST_CASE.entire_api_http_response
 
 
 class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
@@ -731,46 +734,11 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
     def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameter]) -> None:
         pass
 
-
-class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
-
-    @pytest.fixture(scope="function")
-    def under_test(self) -> TmpAPIDtailConfigV2:
-        return TmpAPIDtailConfigV2()
-
-    @pytest.mark.parametrize(
-        ("openapi_doc_data", "entire_openapi_config", "doc_version", "schema_key", "api_data_model"),
-        PARSE_V2_OPENAPI_ENTIRE_APIS_TEST_CASE,
-    )
-    def test_process_api_parameters(
-        self,
-        under_test: TmpAPIDtailConfigV2,
-        openapi_doc_data: dict,
-        entire_openapi_config: dict,
-        doc_version: OpenAPIVersion,
-        schema_key: str,
-        api_data_model: TmpAPIDtailConfigV2,
-    ):
-        super().test_process_api_parameters(
-            under_test=under_test,
-            openapi_doc_data=openapi_doc_data,
-            entire_openapi_config=entire_openapi_config,
-            doc_version=doc_version,
-            schema_key=schema_key,
-            api_data_model=api_data_model,
-        )
-
-    def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameter]) -> None:
-        assert parameters and isinstance(parameters, list)
-        assert len(parameters) == len(openapi_doc_data["parameters"])
-        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
-        assert False not in type_checksum
-
-    @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
+    @pytest.mark.parametrize(("api_detail", "entire_config"), [])
     def test_process_responses(self, under_test: _BaseTmpAPIDtailConfig, api_detail: dict, entire_config: dict):
         # Pre-process
-        set_openapi_version(OpenAPIVersion.V2)
-        set_component_definition(entire_config.get("definitions", {}))
+        set_openapi_version(self._api_doc_version)
+        set_component_definition(entire_config.get(self._common_objects_yaml_schema, {}))
 
         # Run target function under test
         print(f"[DEBUG in test] api_detail: {api_detail}")
@@ -781,8 +749,8 @@ class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
 
         # Verify
         resp_200 = api_detail["responses"]["200"]
-        resp_200_model = TmpHttpConfigV2.deserialize(resp_200)
-        if hasattr(resp_200_model, "has_ref") and resp_200_model.has_ref():
+        resp_200_model = self._deserialize_as_response_model(resp_200)
+        if resp_200_model.has_ref():
             should_check_name = True
         else:
             should_check_name = False
@@ -837,6 +805,74 @@ class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
         #                     else:
         #                         assert item_value == "empty value"
 
+    @abstractmethod
+    def _deserialize_as_response_model(self, resp_200: dict) -> TmpHttpConfigV2:
+        pass
+
+    @property
+    @abstractmethod
+    def _common_objects_yaml_schema(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def _api_doc_version(self) -> OpenAPIVersion:
+        pass
+
+
+class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
+
+    @pytest.fixture(scope="function")
+    def under_test(self) -> TmpAPIDtailConfigV2:
+        return TmpAPIDtailConfigV2()
+
+    @pytest.mark.parametrize(
+        ("openapi_doc_data", "entire_openapi_config", "doc_version", "schema_key", "api_data_model"),
+        PARSE_V2_OPENAPI_ENTIRE_APIS_TEST_CASE,
+    )
+    def test_process_api_parameters(
+        self,
+        under_test: TmpAPIDtailConfigV2,
+        openapi_doc_data: dict,
+        entire_openapi_config: dict,
+        doc_version: OpenAPIVersion,
+        schema_key: str,
+        api_data_model: TmpAPIDtailConfigV2,
+    ):
+        super().test_process_api_parameters(
+            under_test=under_test,
+            openapi_doc_data=openapi_doc_data,
+            entire_openapi_config=entire_openapi_config,
+            doc_version=doc_version,
+            schema_key=schema_key,
+            api_data_model=api_data_model,
+        )
+
+    def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameter]) -> None:
+        assert parameters and isinstance(parameters, list)
+        assert len(parameters) == len(openapi_doc_data["parameters"])
+        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
+        assert False not in type_checksum
+
+    @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
+    def test_process_responses(self, under_test: _BaseTmpAPIDtailConfig, api_detail: dict, entire_config: dict):
+        super().test_process_responses(
+            under_test=under_test,
+            api_detail=api_detail,
+            entire_config=entire_config,
+        )
+
+    @property
+    def _api_doc_version(self) -> OpenAPIVersion:
+        return OpenAPIVersion.V2
+
+    @property
+    def _common_objects_yaml_schema(self) -> str:
+        return "definitions"
+
+    def _deserialize_as_response_model(self, resp_200: dict) -> TmpHttpConfigV2:
+        return TmpHttpConfigV2.deserialize(resp_200)
+
 
 class TestTmpAPIDetailConfigV3(BaseTmpAPIDetailConfigTestSuite):
 
@@ -889,6 +925,34 @@ class TestTmpAPIDetailConfigV3(BaseTmpAPIDetailConfigTestSuite):
                 raise ValueError("")
             type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
             assert False not in type_checksum
+
+    @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V3_OPENAPI_RESPONSES_TEST_CASE)
+    def test_process_responses(self, under_test: _BaseTmpAPIDtailConfig, api_detail: dict, entire_config: dict):
+        super().test_process_responses(
+            under_test=under_test,
+            api_detail=api_detail,
+            entire_config=entire_config,
+        )
+
+    @property
+    def _api_doc_version(self) -> OpenAPIVersion:
+        return OpenAPIVersion.V3
+
+    @property
+    def _common_objects_yaml_schema(self) -> str:
+        return "components"
+
+    def _deserialize_as_response_model(self, resp_200: dict) -> TmpHttpConfigV2:
+        v3_http_config = TmpHttpConfigV3.deserialize(resp_200)
+        resp_format: List[ContentType] = list(
+            filter(
+                lambda ct: v3_http_config.exist_setting(content_type=ct) is not None,
+                ContentType,
+            )
+        )
+        print(f"[DEBUG] has content, resp_format: {resp_format}")
+        status_200_response_setting = v3_http_config.get_setting(content_type=resp_format[0])
+        return status_200_response_setting
 
 
 class TestPropertyDetail:
