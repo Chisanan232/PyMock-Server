@@ -55,7 +55,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
     def _generate_response_from_data(
         self,
         init_response: "ResponseProperty",
-        resp_prop_data: Union["TmpReferenceConfigPropertyModelInterface", "TmpConfigReferenceModel"],
+        resp_prop_data: Union["TmpReferenceConfigPropertyModelInterface", "TmpConfigReferenceModelInterface"],
     ) -> Union["PropertyDetail", List["PropertyDetail"]]:
 
         def _handle_list_type_data(
@@ -106,7 +106,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                     str,
                     TmpReferenceConfigPropertyModelInterface,
                     PropertyDetail,
-                    TmpConfigReferenceModel,
+                    TmpConfigReferenceModelInterface,
                     Callable[
                         [str, TmpReferenceConfigPropertyModelInterface, PropertyDetail],
                         PropertyDetail,
@@ -115,7 +115,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                 PropertyDetail,
             ],
         ) -> PropertyDetail:
-            single_response: Optional[TmpConfigReferenceModel] = items_data.get_schema_ref()
+            single_response: Optional[TmpConfigReferenceModelInterface] = items_data.get_schema_ref()
             assert single_response
             for item_k, item_v in (single_response.properties or {}).items():
                 print(f"[DEBUG in nested data issue at _handle_list_type_data] item_v: {item_v}")
@@ -136,7 +136,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                 item_k: str,
                 item_v: TmpReferenceConfigPropertyModelInterface,
                 response: PropertyDetail,
-                ref_single_response: TmpConfigReferenceModel,
+                ref_single_response: TmpConfigReferenceModelInterface,
                 noref_val_process_callback: Callable[
                     [str, TmpReferenceConfigPropertyModelInterface, PropertyDetail], PropertyDetail
                 ],
@@ -206,7 +206,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
             return response_data_prop
 
         def _handle_object_type_value_with_object_strategy(
-            data: Union[TmpReferenceConfigPropertyModelInterface, TmpConfigReferenceModel]
+            data: Union[TmpReferenceConfigPropertyModelInterface, TmpConfigReferenceModelInterface]
         ) -> Union[PropertyDetail, List[PropertyDetail]]:
             print(f"[DEBUG in _handle_object_type_value_with_object_strategy] data: {data}")
             data_title = data.title
@@ -223,7 +223,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                     )
 
             # Check reference first
-            assert not isinstance(data, TmpConfigReferenceModel)
+            assert not isinstance(data, TmpConfigReferenceModelInterface)
             has_ref = data.has_ref()
             if has_ref:
                 # Process reference
@@ -287,7 +287,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
             )
 
         def _handle_each_data_types_response_with_object_strategy(
-            data: Union[TmpReferenceConfigPropertyModelInterface, TmpConfigReferenceModel], v_type: str
+            data: Union[TmpReferenceConfigPropertyModelInterface, TmpConfigReferenceModelInterface], v_type: str
         ) -> Union[PropertyDetail, List[PropertyDetail]]:
             if locate(v_type) == list:
                 assert isinstance(data, TmpReferenceConfigPropertyModelInterface)
@@ -301,7 +301,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
 
         print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
         if not resp_prop_data.value_type:
-            assert not isinstance(resp_prop_data, TmpConfigReferenceModel)
+            assert not isinstance(resp_prop_data, TmpConfigReferenceModelInterface)
             assert resp_prop_data.has_ref()
             return _handle_each_data_types_response_with_object_strategy(resp_prop_data, "dict")
         v_type = resp_prop_data.value_type
@@ -319,7 +319,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
     def get_ref(self) -> str:
         pass
 
-    def get_schema_ref(self) -> "TmpConfigReferenceModel":
+    def get_schema_ref(self) -> "TmpConfigReferenceModelInterface":
         def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
             if i == len(paths) - 1:
                 return component_def_data[paths[i]]
@@ -623,7 +623,28 @@ class TmpReferenceConfigPropertyModel(TmpReferenceConfigPropertyModelInterface):
 
 
 @dataclass
-class TmpConfigReferenceModel(BaseTmpDataModel):
+class TmpConfigReferenceModelInterface(BaseTmpDataModel):
+    title: Optional[str] = None
+    value_type: str = field(default_factory=str)  # unused
+    required: Optional[list[str]] = None
+    properties: Dict[str, TmpReferenceConfigPropertyModelInterface] = field(default_factory=dict)
+
+    @classmethod
+    @abstractmethod
+    def deserialize(cls, data: Dict) -> "TmpConfigReferenceModelInterface":
+        pass
+
+    @abstractmethod
+    def process_reference_object(
+        self,
+        init_response: "ResponseProperty",
+        empty_body_key: str = "",
+    ) -> "ResponseProperty":
+        pass
+
+
+@dataclass
+class TmpConfigReferenceModel(TmpConfigReferenceModelInterface):
     title: Optional[str] = None
     value_type: str = field(default_factory=str)  # unused
     required: Optional[list[str]] = None
