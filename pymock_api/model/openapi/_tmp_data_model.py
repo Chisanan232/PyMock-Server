@@ -740,7 +740,17 @@ class TmpConfigReferenceModel(TmpConfigReferenceModelInterface):
 
 
 @dataclass
-class TmpHttpConfigV2(BaseTmpRefDataModel):
+class TmpHttpConfigV2Interface(BaseTmpRefDataModel):
+    schema: Optional[TmpReferenceConfigPropertyModelInterface] = None
+
+    @classmethod
+    @abstractmethod
+    def deserialize(cls, data: dict) -> "TmpHttpConfigV2Interface":
+        pass
+
+
+@dataclass
+class TmpHttpConfigV2(TmpHttpConfigV2Interface):
     schema: Optional[TmpReferenceConfigPropertyModelInterface] = None
 
     @classmethod
@@ -763,13 +773,13 @@ class TmpHttpConfigV2(BaseTmpRefDataModel):
 
 @dataclass
 class TmpHttpConfigV3(BaseTmpDataModel):
-    content: Optional[Dict[ContentType, TmpHttpConfigV2]] = None
+    content: Optional[Dict[ContentType, TmpHttpConfigV2Interface]] = None
 
     @classmethod
     def deserialize(cls, data: dict) -> "TmpHttpConfigV3":
         print(f"[DEBUG in TmpHttpConfigV3.deserialize] data: {data}")
         assert data is not None and isinstance(data, dict)
-        content_config: Dict[ContentType, TmpHttpConfigV2] = {}
+        content_config: Dict[ContentType, TmpHttpConfigV2Interface] = {}
         for content_type, config in data.get("content", {}).items() or {}:
             content_config[ContentType.to_enum(content_type)] = TmpHttpConfigV2.deserialize(config)
         return TmpHttpConfigV3(content=content_config)
@@ -785,7 +795,7 @@ class TmpHttpConfigV3(BaseTmpDataModel):
         content_type = self.exist_setting(content_type=content_type)  # type: ignore[assignment]
         assert content_type is not None
         if self.content and len(self.content.values()) > 0:
-            return self.content[content_type]  # type: ignore[index]
+            return self.content[content_type]  # type: ignore[index, return-value]
         raise ValueError("Cannot find the mapping setting of content type.")
 
 
@@ -833,7 +843,7 @@ class _BaseTmpAPIDtailConfig(BaseTmpDataModel, ABC):
 
     def _initial_request_parameters_model(
         self,
-        _data: List[Union[_BaseTmpRequestParameterModel, TmpHttpConfigV2]],
+        _data: List[Union[_BaseTmpRequestParameterModel, TmpHttpConfigV2Interface]],
         not_ref_data: List[_BaseTmpRequestParameterModel],
     ) -> List["RequestParameter"]:
         has_ref_in_schema_param = list(filter(lambda p: p.has_ref() != "", _data))
@@ -879,7 +889,7 @@ class _BaseTmpAPIDtailConfig(BaseTmpDataModel, ABC):
 @dataclass
 class TmpAPIDtailConfigV2(_BaseTmpAPIDtailConfig):
     produces: List[str] = field(default_factory=list)
-    responses: Dict[HTTPStatus, TmpHttpConfigV2] = field(default_factory=dict)  # type: ignore[assignment]
+    responses: Dict[HTTPStatus, TmpHttpConfigV2Interface] = field(default_factory=dict)  # type: ignore[assignment]
 
     @classmethod
     def deserialize(cls, data: dict) -> "TmpAPIDtailConfigV2":
@@ -888,15 +898,15 @@ class TmpAPIDtailConfigV2(_BaseTmpAPIDtailConfig):
         return deserialized_data
 
     @staticmethod
-    def _deserialize_response(data: dict) -> TmpHttpConfigV2:
+    def _deserialize_response(data: dict) -> TmpHttpConfigV2Interface:
         return TmpHttpConfigV2.deserialize(data)
 
     def process_api_parameters(self, http_method: str) -> List["RequestParameter"]:
         return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type]
 
-    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> TmpHttpConfigV2:
+    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> TmpHttpConfigV2Interface:
         # tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
-        assert isinstance(status_200_response, TmpHttpConfigV2)
+        assert isinstance(status_200_response, TmpHttpConfigV2Interface)
         return status_200_response
 
 
@@ -931,7 +941,7 @@ class TmpAPIDtailConfigV3(_BaseTmpAPIDtailConfig):
             else:
                 return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type]
 
-    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> TmpHttpConfigV2:
+    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> TmpHttpConfigV2Interface:
         # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
         # status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
         assert isinstance(status_200_response, TmpHttpConfigV3)
