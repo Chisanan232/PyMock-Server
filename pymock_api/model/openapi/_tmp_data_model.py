@@ -935,9 +935,15 @@ class TmpAPIDtailConfigV2(TmpAPIDtailConfigV2Interface):
 
 
 @dataclass
-class TmpAPIDtailConfigV3(_BaseTmpAPIDtailConfig):
+class TmpAPIDtailConfigV3Interface(_BaseTmpAPIDtailConfig, ABC):
     request_body: Optional[TmpHttpConfigV3Interface] = None
     responses: Dict[HTTPStatus, TmpHttpConfigV3Interface] = field(default_factory=dict)  # type: ignore[assignment]
+
+
+@dataclass
+class TmpAPIDtailConfigV3(TmpAPIDtailConfigV3Interface):
+    request_body: Optional[TmpHttpConfigV3Interface] = None
+    responses: Dict[HTTPStatus, TmpHttpConfigV3Interface] = field(default_factory=dict)
 
     @classmethod
     def deserialize(cls, data: dict) -> "TmpAPIDtailConfigV3":
