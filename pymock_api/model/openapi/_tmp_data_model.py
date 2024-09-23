@@ -36,7 +36,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
     def _generate_response(
         self,
         init_response: "ResponseProperty",
-        property_value: "TmpReferenceConfigPropertyModel",
+        property_value: "TmpReferenceConfigPropertyModelInterface",
     ) -> Union["PropertyDetail", List["PropertyDetail"]]:
         if property_value.is_empty():
             return PropertyDetail.generate_empty_response()
@@ -55,11 +55,11 @@ class BaseTmpDataModel(metaclass=ABCMeta):
     def _generate_response_from_data(
         self,
         init_response: "ResponseProperty",
-        resp_prop_data: Union["TmpReferenceConfigPropertyModel", "TmpConfigReferenceModel"],
+        resp_prop_data: Union["TmpReferenceConfigPropertyModelInterface", "TmpConfigReferenceModel"],
     ) -> Union["PropertyDetail", List["PropertyDetail"]]:
 
         def _handle_list_type_data(
-            data: TmpReferenceConfigPropertyModel,
+            data: TmpReferenceConfigPropertyModelInterface,
             noref_val_process_callback: Callable,
             ref_val_process_callback: Callable,
             response: PropertyDetail = PropertyDetail(),
@@ -94,21 +94,21 @@ class BaseTmpDataModel(metaclass=ABCMeta):
 
         def _handle_reference_object(
             response: PropertyDetail,
-            items_data: TmpReferenceConfigPropertyModel,
+            items_data: TmpReferenceConfigPropertyModelInterface,
             noref_val_process_callback: Callable[
                 # item_k, item_v, response
-                [str, TmpReferenceConfigPropertyModel, PropertyDetail],
+                [str, TmpReferenceConfigPropertyModelInterface, PropertyDetail],
                 PropertyDetail,
             ],
             ref_val_process_callback: Callable[
                 [
                     # item_k, item_v, response, single_response, noref_val_process_callback
                     str,
-                    TmpReferenceConfigPropertyModel,
+                    TmpReferenceConfigPropertyModelInterface,
                     PropertyDetail,
                     TmpConfigReferenceModel,
                     Callable[
-                        [str, TmpReferenceConfigPropertyModel, PropertyDetail],
+                        [str, TmpReferenceConfigPropertyModelInterface, PropertyDetail],
                         PropertyDetail,
                     ],
                 ],
@@ -129,16 +129,16 @@ class BaseTmpDataModel(metaclass=ABCMeta):
             return response
 
         def _handle_list_type_value_with_object_strategy(
-            data: TmpReferenceConfigPropertyModel,
+            data: TmpReferenceConfigPropertyModelInterface,
         ) -> PropertyDetail:
 
             def _ref_process_callback(
                 item_k: str,
-                item_v: TmpReferenceConfigPropertyModel,
+                item_v: TmpReferenceConfigPropertyModelInterface,
                 response: PropertyDetail,
                 ref_single_response: TmpConfigReferenceModel,
                 noref_val_process_callback: Callable[
-                    [str, TmpReferenceConfigPropertyModel, PropertyDetail], PropertyDetail
+                    [str, TmpReferenceConfigPropertyModelInterface, PropertyDetail], PropertyDetail
                 ],
             ) -> PropertyDetail:
                 assert ref_single_response.required
@@ -176,7 +176,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
 
             def _noref_process_callback(
                 item_k: str,
-                item_v: TmpReferenceConfigPropertyModel,
+                item_v: TmpReferenceConfigPropertyModelInterface,
                 response_data_prop: PropertyDetail,
             ) -> PropertyDetail:
                 item_type = item_v.value_type
@@ -206,7 +206,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
             return response_data_prop
 
         def _handle_object_type_value_with_object_strategy(
-            data: Union[TmpReferenceConfigPropertyModel, TmpConfigReferenceModel]
+            data: Union[TmpReferenceConfigPropertyModelInterface, TmpConfigReferenceModel]
         ) -> Union[PropertyDetail, List[PropertyDetail]]:
             print(f"[DEBUG in _handle_object_type_value_with_object_strategy] data: {data}")
             data_title = data.title
@@ -244,7 +244,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                 return resp.data
             else:
                 # Handle the schema *additionalProperties*
-                assert isinstance(data, TmpReferenceConfigPropertyModel)
+                assert isinstance(data, TmpReferenceConfigPropertyModelInterface)
                 additional_properties = data.additionalProperties
                 assert additional_properties
                 additional_properties_type = additional_properties.value_type
@@ -287,10 +287,10 @@ class BaseTmpDataModel(metaclass=ABCMeta):
             )
 
         def _handle_each_data_types_response_with_object_strategy(
-            data: Union[TmpReferenceConfigPropertyModel, TmpConfigReferenceModel], v_type: str
+            data: Union[TmpReferenceConfigPropertyModelInterface, TmpConfigReferenceModel], v_type: str
         ) -> Union[PropertyDetail, List[PropertyDetail]]:
             if locate(v_type) == list:
-                assert isinstance(data, TmpReferenceConfigPropertyModel)
+                assert isinstance(data, TmpReferenceConfigPropertyModelInterface)
                 return _handle_list_type_value_with_object_strategy(data)
             elif locate(v_type) == dict:
                 return _handle_object_type_value_with_object_strategy(data)
@@ -340,7 +340,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
         request_body_params = self.get_schema_ref()
         parameters: List[RequestParameter] = []
         for param_name, param_props in request_body_params.properties.items():
-            items: Optional[TmpReferenceConfigPropertyModel] = param_props.items
+            items: Optional[TmpReferenceConfigPropertyModelInterface] = param_props.items
             items_props = []
             if items:
                 if items.has_ref():
@@ -531,7 +531,34 @@ class TmpRequestParameterModel(_BaseTmpRequestParameterModel):
 
 
 @dataclass
-class TmpReferenceConfigPropertyModel(BaseTmpRefDataModel):
+class TmpReferenceConfigPropertyModelInterface(BaseTmpRefDataModel):
+    title: Optional[str] = None
+    value_type: Optional[str] = None
+    format: Optional[str] = None  # For OpenAPI v3
+    default: Optional[str] = None  # For OpenAPI v3 request part
+    enums: List[str] = field(default_factory=list)
+    ref: Optional[str] = None
+    items: Optional["TmpReferenceConfigPropertyModelInterface"] = None
+    additionalProperties: Optional["TmpReferenceConfigPropertyModelInterface"] = None
+
+    @classmethod
+    @abstractmethod
+    def deserialize(cls, data: Dict) -> "TmpReferenceConfigPropertyModelInterface":
+        pass
+
+    def is_empty(self) -> bool:
+        return not (self.value_type or self.ref)
+
+    @abstractmethod
+    def process_response_from_data(
+        self,
+        init_response: Optional["ResponseProperty"] = None,
+    ) -> "ResponseProperty":
+        pass
+
+
+@dataclass
+class TmpReferenceConfigPropertyModel(TmpReferenceConfigPropertyModelInterface):
     title: Optional[str] = None
     value_type: Optional[str] = None
     format: Optional[str] = None  # For OpenAPI v3
@@ -600,7 +627,7 @@ class TmpConfigReferenceModel(BaseTmpDataModel):
     title: Optional[str] = None
     value_type: str = field(default_factory=str)  # unused
     required: Optional[list[str]] = None
-    properties: Dict[str, TmpReferenceConfigPropertyModel] = field(default_factory=dict)
+    properties: Dict[str, TmpReferenceConfigPropertyModelInterface] = field(default_factory=dict)
 
     @classmethod
     def deserialize(cls, data: Dict) -> "TmpConfigReferenceModel":
@@ -614,7 +641,7 @@ class TmpConfigReferenceModel(BaseTmpDataModel):
             title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else "",
             required=data.get("required", None),
-            properties=properties,
+            properties=properties,  # type: ignore[arg-type]
         )
 
     def process_reference_object(
@@ -623,7 +650,7 @@ class TmpConfigReferenceModel(BaseTmpDataModel):
         empty_body_key: str = "",
     ) -> "ResponseProperty":
         # assert response_schema_ref
-        response_schema_properties: Dict[str, TmpReferenceConfigPropertyModel] = self.properties or {}
+        response_schema_properties: Dict[str, TmpReferenceConfigPropertyModelInterface] = self.properties or {}
         print(f"[DEBUG in process_response_from_reference] response_schema_ref: {self}")
         print(f"[DEBUG in process_response_from_reference] response_schema_properties: {response_schema_properties}")
         if response_schema_properties:
@@ -693,7 +720,7 @@ class TmpConfigReferenceModel(BaseTmpDataModel):
 
 @dataclass
 class TmpHttpConfigV2(BaseTmpRefDataModel):
-    schema: Optional[TmpReferenceConfigPropertyModel] = None
+    schema: Optional[TmpReferenceConfigPropertyModelInterface] = None
 
     @classmethod
     def deserialize(cls, data: dict) -> "TmpHttpConfigV2":
