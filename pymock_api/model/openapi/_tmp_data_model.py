@@ -419,7 +419,19 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
 
 
 @dataclass
-class TmpRequestSchemaModel(BaseTmpRefDataModel):
+class TmpRequestSchemaModelInterface(BaseTmpRefDataModel):
+    title: Optional[str] = None
+    value_type: Optional[str] = None
+    default: Optional[Any] = None
+    ref: Optional[str] = None
+
+    @abstractmethod
+    def deserialize(self, data: dict) -> "TmpRequestSchemaModelInterface":
+        pass
+
+
+@dataclass
+class TmpRequestSchemaModel(TmpRequestSchemaModelInterface):
     title: Optional[str] = None
     value_type: Optional[str] = None
     default: Optional[Any] = None
