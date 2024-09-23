@@ -772,7 +772,25 @@ class TmpHttpConfigV2(TmpHttpConfigV2Interface):
 
 
 @dataclass
-class TmpHttpConfigV3(BaseTmpDataModel):
+class TmpHttpConfigV3Interface(BaseTmpDataModel):
+    content: Optional[Dict[ContentType, TmpHttpConfigV2Interface]] = None
+
+    @classmethod
+    @abstractmethod
+    def deserialize(cls, data: dict) -> "TmpHttpConfigV3Interface":
+        pass
+
+    @abstractmethod
+    def exist_setting(self, content_type: Union[str, ContentType]) -> Optional[ContentType]:
+        pass
+
+    @abstractmethod
+    def get_setting(self, content_type: Union[str, ContentType]) -> TmpHttpConfigV2Interface:
+        pass
+
+
+@dataclass
+class TmpHttpConfigV3(TmpHttpConfigV3Interface):
     content: Optional[Dict[ContentType, TmpHttpConfigV2Interface]] = None
 
     @classmethod
@@ -912,8 +930,8 @@ class TmpAPIDtailConfigV2(_BaseTmpAPIDtailConfig):
 
 @dataclass
 class TmpAPIDtailConfigV3(_BaseTmpAPIDtailConfig):
-    request_body: Optional[TmpHttpConfigV3] = None
-    responses: Dict[HTTPStatus, TmpHttpConfigV3] = field(default_factory=dict)  # type: ignore[assignment]
+    request_body: Optional[TmpHttpConfigV3Interface] = None
+    responses: Dict[HTTPStatus, TmpHttpConfigV3Interface] = field(default_factory=dict)  # type: ignore[assignment]
 
     @classmethod
     def deserialize(cls, data: dict) -> "TmpAPIDtailConfigV3":
@@ -944,7 +962,7 @@ class TmpAPIDtailConfigV3(_BaseTmpAPIDtailConfig):
     def _get_http_config(self, status_200_response: BaseTmpDataModel) -> TmpHttpConfigV2Interface:
         # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
         # status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
-        assert isinstance(status_200_response, TmpHttpConfigV3)
+        assert isinstance(status_200_response, TmpHttpConfigV3Interface)
         status_200_response_model = status_200_response
         resp_value_format: List[ContentType] = list(
             filter(lambda ct: status_200_response_model.exist_setting(content_type=ct) is not None, ContentType)
