@@ -457,14 +457,33 @@ class TmpRequestSchemaModel(BaseTmpRefDataModel):
 
 
 @dataclass
-class TmpRequestParameterModel(BaseTmpRefDataModel):
+class _BaseTmpRequestParameterModel(BaseTmpRefDataModel):
     name: str = field(default_factory=str)
     required: bool = False
     value_type: Optional[str] = None
     format: Optional[dict] = None
     default: Optional[Any] = None
-    items: Optional[List["TmpRequestParameterModel"]] = None
-    schema: Optional["TmpRequestSchemaModel"] = None
+    items: Optional[List["_BaseTmpRequestParameterModel"]] = None
+    schema: Optional["_BaseTmpRequestParameterModel"] = None
+
+    @abstractmethod
+    def deserialize(self, data: dict) -> "_BaseTmpRequestParameterModel":
+        pass
+
+    @abstractmethod
+    def to_adapter_data_model(self) -> "RequestParameter":
+        pass
+
+
+@dataclass
+class TmpRequestParameterModel(_BaseTmpRequestParameterModel):
+    name: str = field(default_factory=str)
+    required: bool = False
+    value_type: Optional[str] = None
+    format: Optional[dict] = None
+    default: Optional[Any] = None
+    items: Optional[List["TmpRequestParameterModel"]] = None  # type: ignore[assignment]
+    schema: Optional["TmpRequestSchemaModel"] = None  # type: ignore[assignment]
 
     def _convert_items(self) -> List[Union["TmpRequestParameterModel"]]:
         assert self.items
@@ -732,7 +751,7 @@ class _BaseTmpAPIDtailConfig(BaseTmpDataModel, ABC):
     summary: Optional[str] = None
     description: Optional[str] = None
     operationId: str = field(default_factory=str)
-    parameters: List[TmpRequestParameterModel] = field(default_factory=list)
+    parameters: List[_BaseTmpRequestParameterModel] = field(default_factory=list)
     responses: Dict[HTTPStatus, BaseTmpDataModel] = field(default_factory=dict)
 
     @classmethod
@@ -751,7 +770,7 @@ class _BaseTmpAPIDtailConfig(BaseTmpDataModel, ABC):
             summary=data.get("summary", ""),
             description=data.get("description", ""),
             operationId=data.get("operationId", ""),
-            parameters=request_config,
+            parameters=request_config,  # type: ignore[arg-type]
             responses=response_config,
         )
 
@@ -770,8 +789,8 @@ class _BaseTmpAPIDtailConfig(BaseTmpDataModel, ABC):
 
     def _initial_request_parameters_model(
         self,
-        _data: List[Union[TmpRequestParameterModel, TmpHttpConfigV2]],
-        not_ref_data: List[TmpRequestParameterModel],
+        _data: List[Union[_BaseTmpRequestParameterModel, TmpHttpConfigV2]],
+        not_ref_data: List[_BaseTmpRequestParameterModel],
     ) -> List["RequestParameter"]:
         has_ref_in_schema_param = list(filter(lambda p: p.has_ref() != "", _data))
         if has_ref_in_schema_param:
@@ -968,7 +987,7 @@ class PropertyDetail(BasePropertyDetail):
 # The tmp data model for final result to convert as PyMock-API
 @dataclass
 class RequestParameter(BasePropertyDetail):
-    items: Optional[List[Union["RequestParameter", TmpRequestParameterModel]]] = None  # type: ignore[assignment]
+    items: Optional[List[Union["RequestParameter", _BaseTmpRequestParameterModel]]] = None  # type: ignore[assignment]
     default: Optional[Any] = None
 
     def __post_init__(self) -> None:
@@ -977,12 +996,12 @@ class RequestParameter(BasePropertyDetail):
         if self.value_type:
             self.value_type = self._convert_value_type()
 
-    def _convert_items(self) -> List[Union["RequestParameter", TmpRequestParameterModel]]:
-        items: List[Union["RequestParameter", TmpRequestParameterModel]] = []
+    def _convert_items(self) -> List[Union["RequestParameter", _BaseTmpRequestParameterModel]]:
+        items: List[Union["RequestParameter", _BaseTmpRequestParameterModel]] = []
         print(f"[DEBUG in RequestParameter._convert_items] items: {items}")
         for item in self.items or []:
             print(f"[DEBUG in RequestParameter._convert_items] item: {item}")
-            assert isinstance(item, (RequestParameter, TmpRequestParameterModel))
+            assert isinstance(item, (RequestParameter, _BaseTmpRequestParameterModel))
             items.append(item)
         return items
 
@@ -1004,7 +1023,7 @@ class RequestParameter(BasePropertyDetail):
 
     def to_pymock_api_config(self) -> PyMockRequestProperty:
 
-        def to_items(item_data: Union[RequestParameter, TmpRequestParameterModel]) -> IteratorItem:
+        def to_items(item_data: Union[RequestParameter, _BaseTmpRequestParameterModel]) -> IteratorItem:
             if isinstance(item_data, RequestParameter):
                 return IteratorItem(
                     name=item_data.name,
@@ -1012,7 +1031,7 @@ class RequestParameter(BasePropertyDetail):
                     value_type=item_data.value_type,
                     items=[to_items(i) for i in (item_data.items or [])],
                 )
-            elif isinstance(item_data, TmpRequestParameterModel):
+            elif isinstance(item_data, _BaseTmpRequestParameterModel):
                 return IteratorItem(
                     name=item_data.name,
                     required=item_data.required,
