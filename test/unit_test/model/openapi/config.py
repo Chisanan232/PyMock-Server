@@ -23,8 +23,8 @@ from pymock_api.model.openapi._tmp_data_model import (
     TmpReferenceConfigPropertyModel,
     TmpRequestParameterModel,
     _BaseTmpAPIDtailConfig,
-    set_component_definition,
 )
+from pymock_api.model.openapi.base_config import set_component_definition
 from pymock_api.model.openapi.config import (
     OpenAPIDocumentConfig,
     SwaggerAPIDocumentConfig,

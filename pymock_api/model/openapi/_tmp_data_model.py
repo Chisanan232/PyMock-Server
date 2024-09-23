@@ -1,7 +1,6 @@
 import copy
 import re
 from abc import ABC, ABCMeta, abstractmethod
-from collections import namedtuple
 from dataclasses import dataclass, field
 from http import HTTPMethod, HTTPStatus
 from pydoc import locate
@@ -14,23 +13,8 @@ from ..api_config.apis.response import ResponseProperty as PyMockResponsePropert
 from ..enums import OpenAPIVersion, ResponseStrategy
 from ._base import Transferable, get_openapi_version
 from ._js_handlers import ensure_type_is_python_type
+from .base_config import _Default_Required, get_component_definition
 from .content_type import ContentType
-
-ComponentDefinition: Dict[str, dict] = {}
-
-
-def get_component_definition() -> Dict:
-    global ComponentDefinition
-    return ComponentDefinition
-
-
-def set_component_definition(openapi_common_objects: Dict) -> None:
-    global ComponentDefinition
-    ComponentDefinition = openapi_common_objects
-
-
-_PropertyDefaultRequired = namedtuple("_PropertyDefaultRequired", ("empty", "general"))
-_Default_Required: _PropertyDefaultRequired = _PropertyDefaultRequired(empty=False, general=True)
 
 
 @dataclass

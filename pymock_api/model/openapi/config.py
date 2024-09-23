@@ -6,7 +6,8 @@ from .. import APIConfig, MockAPIs
 from ..api_config import BaseConfig
 from ..enums import OpenAPIVersion
 from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
-from ._tmp_data_model import TmpAPIConfig, set_component_definition
+from ._tmp_data_model import TmpAPIConfig
+from .base_config import set_component_definition
 
 
 @dataclass

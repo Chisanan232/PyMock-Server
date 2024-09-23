@@ -9,8 +9,8 @@ from pymock_api.model.openapi._tmp_data_model import (
     TmpHttpConfigV2,
     TmpHttpConfigV3,
     TmpReferenceConfigPropertyModel,
-    set_component_definition,
 )
+from pymock_api.model.openapi.base_config import set_component_definition
 from pymock_api.model.openapi.content_type import ContentType
 
 from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
