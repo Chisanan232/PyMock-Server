@@ -905,9 +905,15 @@ class _BaseTmpAPIDtailConfig(BaseTmpDataModel, ABC):
 
 
 @dataclass
-class TmpAPIDtailConfigV2(_BaseTmpAPIDtailConfig):
+class TmpAPIDtailConfigV2Interface(_BaseTmpAPIDtailConfig, ABC):
     produces: List[str] = field(default_factory=list)
     responses: Dict[HTTPStatus, TmpHttpConfigV2Interface] = field(default_factory=dict)  # type: ignore[assignment]
+
+
+@dataclass
+class TmpAPIDtailConfigV2(TmpAPIDtailConfigV2Interface):
+    produces: List[str] = field(default_factory=list)
+    responses: Dict[HTTPStatus, TmpHttpConfigV2Interface] = field(default_factory=dict)
 
     @classmethod
     def deserialize(cls, data: dict) -> "TmpAPIDtailConfigV2":
