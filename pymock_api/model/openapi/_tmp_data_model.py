@@ -984,7 +984,16 @@ class TmpAPIDtailConfigV3(TmpAPIDtailConfigV3Interface):
 
 
 @dataclass
-class TmpAPIConfig(BaseTmpDataModel):
+class TmpAPIConfigInterface(BaseTmpDataModel):
+    api: Dict[HTTPMethod, _BaseTmpAPIDtailConfig] = field(default_factory=dict)
+
+    @abstractmethod
+    def deserialize(self, data: dict) -> "TmpAPIConfigInterface":
+        pass
+
+
+@dataclass
+class TmpAPIConfig(TmpAPIConfigInterface):
     api: Dict[HTTPMethod, _BaseTmpAPIDtailConfig] = field(default_factory=dict)
 
     def __len__(self):
