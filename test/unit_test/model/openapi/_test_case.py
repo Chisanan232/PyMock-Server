@@ -3,14 +3,14 @@ from collections import namedtuple
 from typing import List, Tuple
 
 from pymock_api.model import OpenAPIVersion
-from pymock_api.model.openapi._tmp_data_model import (
+from pymock_api.model.openapi.base_config import set_component_definition
+from pymock_api.model.openapi.config import (
     TmpAPIDtailConfigV2,
     TmpAPIDtailConfigV3,
     TmpHttpConfigV2,
     TmpHttpConfigV3,
     TmpReferenceConfigPropertyModel,
 )
-from pymock_api.model.openapi.base_config import set_component_definition
 from pymock_api.model.openapi.content_type import ContentType
 
 from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath

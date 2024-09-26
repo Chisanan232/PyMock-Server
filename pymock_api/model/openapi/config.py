@@ -1,13 +1,494 @@
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, List
+from http import HTTPMethod, HTTPStatus
+from typing import Any, Dict, List, Optional, Type, Union, cast
 
 from .. import APIConfig, MockAPIs
 from ..api_config import BaseConfig
 from ..enums import OpenAPIVersion
-from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
-from ._tmp_data_model import TmpAPIConfig
-from .base_config import set_component_definition
+from ._base import (
+    BaseOpenAPIDataModel,
+    Transferable,
+    get_openapi_version,
+    set_openapi_version,
+)
+from ._js_handlers import ensure_type_is_python_type
+from ._tmp_data_model import API, PropertyDetail, RequestParameter, ResponseProperty
+from .base_config import (
+    APIInterface,
+    BaseTmpDataModel,
+    PropertyDetailInterface,
+    RequestParameterInterface,
+    ResponsePropertyInterface,
+    TmpAPIConfigInterface,
+    TmpAPIDtailConfigV2Interface,
+    TmpAPIDtailConfigV3Interface,
+    TmpConfigReferenceModelInterface,
+    TmpHttpConfigV2Interface,
+    TmpHttpConfigV3Interface,
+    TmpReferenceConfigPropertyModelInterface,
+    TmpRequestSchemaModelInterface,
+    _BaseAdapterFactory,
+    _BaseTmpAPIDtailConfig,
+    _BaseTmpRequestParameterModel,
+    _Default_Required,
+    set_component_definition,
+)
+from .content_type import ContentType
+
+
+class AdapterFactory(_BaseAdapterFactory):
+
+    def generate_property_details(self, **kwargs) -> PropertyDetailInterface:
+        return PropertyDetail(**kwargs)
+
+    def generate_request_params(self, **kwargs) -> RequestParameterInterface:
+        return RequestParameter(**kwargs)
+
+    def generate_response_props(self, **kwargs) -> ResponsePropertyInterface:
+        return ResponseProperty(**kwargs)
+
+    def generate_api(self, **kwargs) -> APIInterface:
+        return API(**kwargs)
+
+
+@dataclass
+class TmpRequestSchemaModel(TmpRequestSchemaModelInterface):
+    title: Optional[str] = None
+    value_type: Optional[str] = None
+    default: Optional[Any] = None
+    ref: Optional[str] = None
+
+    _adapter_factory = AdapterFactory()
+
+    def deserialize(self, data: dict) -> "TmpRequestSchemaModel":
+        self.title = data.get("title", None)
+        self.value_type = ensure_type_is_python_type(data["type"]) if data.get("type", None) else None
+        self.default = data.get("default", None)
+        self.ref = data.get("$ref", None)
+        return self
+
+    def has_ref(self) -> str:
+        return "ref" if self.ref else ""
+
+    def get_ref(self) -> str:
+        assert self.ref
+        return self.ref
+
+    @property
+    def _reference_object_type(self) -> Type["TmpConfigReferenceModel"]:
+        return TmpConfigReferenceModel
+
+
+@dataclass
+class TmpRequestParameterModel(_BaseTmpRequestParameterModel):
+    name: str = field(default_factory=str)
+    required: bool = False
+    value_type: Optional[str] = None
+    format: Optional[dict] = None
+    default: Optional[Any] = None
+    items: Optional[List["TmpRequestParameterModel"]] = None  # type: ignore[assignment]
+    schema: Optional["TmpRequestSchemaModel"] = None  # type: ignore[assignment]
+
+    _adapter_factory = AdapterFactory()
+
+    def _convert_items(self) -> List[Union["TmpRequestParameterModel"]]:
+        assert self.items
+        if True in list(  # type: ignore[comparison-overlap]
+            filter(lambda e: not isinstance(e, (dict, TmpRequestParameterModel)), self.items)
+        ):
+            raise ValueError(
+                f"There are some invalid data type item in the property *items*. Current *items*: {self.items}"
+            )
+        return [
+            TmpRequestParameterModel().deserialize(i) if isinstance(i, dict) else i for i in (self.items or [])  # type: ignore[arg-type]
+        ]
+
+    def deserialize(self, data: dict) -> "TmpRequestParameterModel":
+        print(f"[DEBUG in TmpRequestParameterModel.deserialize] data: {data}")
+        self.name = data.get("name", "")
+        self.required = data.get("required", True)
+
+        items = data.get("items", [])
+        if items:
+            self.items = items if isinstance(items, list) else [items]
+            self.items = self._convert_items()
+
+        schema = data.get("schema", {})
+        if schema:
+            self.schema = TmpRequestSchemaModel().deserialize(schema)
+
+        print(f"[DEBUG in TmpRequestParameterModel.deserialize] self.schema: {self.schema}")
+        self.value_type = ensure_type_is_python_type(data.get("type", "")) or (
+            self.schema.value_type if self.schema else ""
+        )
+        self.default = data.get("default", None) or (self.schema.default if self.schema else None)
+        print(f"[DEBUG in TmpRequestParameterModel.deserialize] self: {self}")
+        return self
+
+    def has_ref(self) -> str:
+        return "schema" if self.schema and self.schema.has_ref() else ""
+
+    def get_ref(self) -> str:
+        assert self.schema
+        return self.schema.get_ref()
+
+    def to_adapter_data_model(self) -> "RequestParameter":
+        return RequestParameter(
+            name=self.name,
+            required=(self.required or False),
+            value_type=self.value_type,
+            default=self.default,
+            items=self.items,  # type: ignore[arg-type]
+        )
+
+    @property
+    def _reference_object_type(self) -> Type["TmpConfigReferenceModel"]:
+        return TmpConfigReferenceModel
+
+
+@dataclass
+class TmpReferenceConfigPropertyModel(TmpReferenceConfigPropertyModelInterface):
+    title: Optional[str] = None
+    value_type: Optional[str] = None
+    format: Optional[str] = None  # For OpenAPI v3
+    default: Optional[str] = None  # For OpenAPI v3 request part
+    enums: List[str] = field(default_factory=list)
+    ref: Optional[str] = None
+    items: Optional["TmpReferenceConfigPropertyModel"] = None
+    additionalProperties: Optional["TmpReferenceConfigPropertyModel"] = None
+
+    _adapter_factory = AdapterFactory()
+
+    @classmethod
+    def deserialize(cls, data: Dict) -> "TmpReferenceConfigPropertyModel":
+        print(f"[DEBUG in TmpResponsePropertyModel.deserialize] data: {data}")
+        return TmpReferenceConfigPropertyModel(
+            title=data.get("title", None),
+            value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else None,
+            format="",  # TODO: Support in next PR
+            default=data.get("default", None),
+            enums=[],  # TODO: Support in next PR
+            ref=data.get("$ref", None),
+            items=TmpReferenceConfigPropertyModel.deserialize(data["items"]) if data.get("items", None) else None,
+            additionalProperties=(
+                TmpReferenceConfigPropertyModel.deserialize(data["additionalProperties"])
+                if data.get("additionalProperties", None)
+                else None
+            ),
+        )
+
+    def has_ref(self) -> str:
+        if self.ref:
+            return "ref"
+        # TODO: It should also integration *items* into this utility function
+        # elif self.items and self.items.has_ref():
+        #     return "items"
+        elif self.additionalProperties and self.additionalProperties.has_ref():
+            return "additionalProperties"
+        else:
+            return ""
+
+    def get_ref(self) -> str:
+        ref = self.has_ref()
+        if ref == "additionalProperties":
+            assert self.additionalProperties.ref  # type: ignore[union-attr]
+            return self.additionalProperties.ref  # type: ignore[union-attr]
+        return self.ref  # type: ignore[return-value]
+
+    def is_empty(self) -> bool:
+        return not (self.value_type or self.ref)
+
+    def process_response_from_data(
+        self,
+        init_response: Optional["ResponseProperty"] = None,  # type: ignore[override]
+    ) -> "ResponseProperty":
+        if not init_response:
+            init_response = ResponseProperty.initial_response_data()
+        response_config = self._generate_response(
+            init_response=init_response,
+            property_value=self,
+        )
+        response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
+        init_response.data.append(response_data_prop)  # type: ignore[arg-type]
+        return init_response
+
+    @property
+    def _reference_object_type(self) -> Type["TmpConfigReferenceModel"]:
+        return TmpConfigReferenceModel
+
+
+@dataclass
+class TmpConfigReferenceModel(TmpConfigReferenceModelInterface):
+    title: Optional[str] = None
+    value_type: str = field(default_factory=str)  # unused
+    required: Optional[list[str]] = None
+    properties: Dict[str, TmpReferenceConfigPropertyModelInterface] = field(default_factory=dict)
+
+    _adapter_factory = AdapterFactory()
+
+    @classmethod
+    def deserialize(cls, data: Dict) -> "TmpConfigReferenceModel":
+        print(f"[DEBUG in TmpResponseModel.deserialize] data: {data}")
+        properties = {}
+        properties_config: dict = data.get("properties", {})
+        if properties_config:
+            for k, v in properties_config.items():
+                properties[k] = TmpReferenceConfigPropertyModel.deserialize(v)
+        return TmpConfigReferenceModel(
+            title=data.get("title", None),
+            value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else "",
+            required=data.get("required", None),
+            properties=properties,  # type: ignore[arg-type]
+        )
+
+    def process_reference_object(
+        self,
+        init_response: "ResponseProperty",  # type: ignore[override]
+        empty_body_key: str = "",
+    ) -> "ResponseProperty":
+        # assert response_schema_ref
+        response_schema_properties: Dict[str, TmpReferenceConfigPropertyModelInterface] = self.properties or {}
+        print(f"[DEBUG in process_response_from_reference] response_schema_ref: {self}")
+        print(f"[DEBUG in process_response_from_reference] response_schema_properties: {response_schema_properties}")
+        if response_schema_properties:
+            for k, v in response_schema_properties.items():
+                print(f"[DEBUG in process_response_from_reference] k: {k}")
+                print(f"[DEBUG in process_response_from_reference] v: {v}")
+                # Check reference again
+                if v.has_ref():
+                    response_prop = v.get_schema_ref().process_reference_object(
+                        init_response=ResponseProperty.initial_response_data(),
+                        empty_body_key=k,
+                    )
+                    print(f"[DEBUG in process_response_from_reference] before asserion, response_prop: {response_prop}")
+                    # TODO: It should have better way to handle output streaming
+                    if len(list(filter(lambda d: d.value_type == "file", response_prop.data))) != 0:
+                        # It's file inputStream
+                        response_config = response_prop.data[0]
+                    else:
+                        response_config = PropertyDetail(
+                            name="",
+                            required=_Default_Required.empty,
+                            value_type="dict",
+                            format=None,
+                            items=response_prop.data,  # type: ignore[arg-type]
+                        )
+                else:
+                    response_config = self._generate_response(  # type: ignore[assignment]
+                        init_response=init_response,
+                        property_value=v,
+                    )
+                print(f"[DEBUG in process_response_from_reference] response_config: {response_config}")
+                response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
+                print(
+                    f"[DEBUG in process_response_from_reference] has properties, response_data_prop: {response_data_prop}"
+                )
+                response_data_prop.name = k
+                response_data_prop.required = k in (self.required or [k])
+                init_response.data.append(response_data_prop)  # type: ignore[arg-type]
+            print(f"[DEBUG in process_response_from_reference] parse with body, init_response: {init_response}")
+        else:
+            # The section which doesn't have setting body
+            response_config = PropertyDetail.generate_empty_response()
+            if self.title == "InputStream":
+                response_config.value_type = "file"
+
+                response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
+                print(
+                    f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
+                )
+                response_data_prop.name = empty_body_key
+                response_data_prop.required = empty_body_key in (self.required or [empty_body_key])
+                init_response.data.append(response_data_prop)  # type: ignore[arg-type]
+            else:
+                response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
+                print(
+                    f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
+                )
+                response_data_prop.name = "THIS_IS_EMPTY"
+                response_data_prop.required = False
+                init_response.data.append(response_data_prop)  # type: ignore[arg-type]
+                print(f"[DEBUG in process_response_from_reference] empty_body_key: {empty_body_key}")
+                print(
+                    f"[DEBUG in process_response_from_reference] parse with empty body, init_response: {init_response}"
+                )
+        return init_response
+
+
+@dataclass
+class TmpHttpConfigV2(TmpHttpConfigV2Interface):
+    schema: Optional[TmpReferenceConfigPropertyModelInterface] = None
+
+    _adapter_factory = AdapterFactory()
+
+    @classmethod
+    def deserialize(cls, data: dict) -> "TmpHttpConfigV2":
+        print(f"[DEBUG in TmpHttpConfigV2.deserialize] data: {data}")
+        assert data is not None and isinstance(data, dict)
+        return TmpHttpConfigV2(
+            schema=TmpReferenceConfigPropertyModel.deserialize(data.get("schema", {})),
+            # content=data.get("content", None),
+        )
+
+    def has_ref(self) -> str:
+        return "schema" if self.schema and self.schema.has_ref() else ""
+
+    def get_ref(self) -> str:
+        assert self.has_ref()
+        assert self.schema.ref  # type: ignore[union-attr]
+        return self.schema.ref  # type: ignore[union-attr]
+
+    @property
+    def _reference_object_type(self) -> Type["TmpConfigReferenceModel"]:
+        return TmpConfigReferenceModel
+
+
+@dataclass
+class TmpHttpConfigV3(TmpHttpConfigV3Interface):
+    content: Optional[Dict[ContentType, TmpHttpConfigV2Interface]] = None
+
+    _adapter_factory = AdapterFactory()
+
+    @classmethod
+    def deserialize(cls, data: dict) -> "TmpHttpConfigV3":
+        print(f"[DEBUG in TmpHttpConfigV3.deserialize] data: {data}")
+        assert data is not None and isinstance(data, dict)
+        content_config: Dict[ContentType, TmpHttpConfigV2Interface] = {}
+        for content_type, config in data.get("content", {}).items() or {}:
+            content_config[ContentType.to_enum(content_type)] = TmpHttpConfigV2.deserialize(config)
+        return TmpHttpConfigV3(content=content_config)
+
+    def exist_setting(self, content_type: Union[str, ContentType]) -> Optional[ContentType]:
+        content_type = ContentType.to_enum(content_type) if isinstance(content_type, str) else content_type
+        if content_type in (self.content or {}).keys():
+            return content_type
+        else:
+            return None
+
+    def get_setting(self, content_type: Union[str, ContentType]) -> TmpHttpConfigV2:
+        content_type = self.exist_setting(content_type=content_type)  # type: ignore[assignment]
+        assert content_type is not None
+        if self.content and len(self.content.values()) > 0:
+            return self.content[content_type]  # type: ignore[index, return-value]
+        raise ValueError("Cannot find the mapping setting of content type.")
+
+
+@dataclass
+class TmpAPIDtailConfigV2(TmpAPIDtailConfigV2Interface):
+    produces: List[str] = field(default_factory=list)
+    responses: Dict[HTTPStatus, TmpHttpConfigV2Interface] = field(default_factory=dict)
+
+    _adapter_factory = AdapterFactory()
+
+    @classmethod
+    def deserialize(cls, data: dict) -> "TmpAPIDtailConfigV2":
+        deserialized_data = cast(TmpAPIDtailConfigV2, super().deserialize(data))
+        deserialized_data.produces = data.get("produces", [])
+        return deserialized_data
+
+    @staticmethod
+    def _deserialize_request(data: dict) -> TmpRequestParameterModel:
+        return TmpRequestParameterModel().deserialize(data)
+
+    @staticmethod
+    def _deserialize_response(data: dict) -> TmpHttpConfigV2Interface:
+        return TmpHttpConfigV2.deserialize(data)
+
+    def process_api_parameters(self, http_method: str) -> List["RequestParameter"]:  # type: ignore[override]
+        return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type, return-value]
+
+    def _deserialize_empty_reference_config_properties(self) -> TmpReferenceConfigPropertyModelInterface:
+        return TmpReferenceConfigPropertyModel.deserialize({})
+
+    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> TmpHttpConfigV2Interface:
+        # tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
+        assert isinstance(status_200_response, TmpHttpConfigV2Interface)
+        return status_200_response
+
+
+@dataclass
+class TmpAPIDtailConfigV3(TmpAPIDtailConfigV3Interface):
+    request_body: Optional[TmpHttpConfigV3Interface] = None
+    responses: Dict[HTTPStatus, TmpHttpConfigV3Interface] = field(default_factory=dict)
+
+    _adapter_factory = AdapterFactory()
+
+    @classmethod
+    def deserialize(cls, data: dict) -> "TmpAPIDtailConfigV3":
+        deserialized_data = cast(TmpAPIDtailConfigV3, super().deserialize(data))
+        deserialized_data.request_body = (
+            TmpHttpConfigV3().deserialize(data["requestBody"]) if data.get("requestBody", {}) else None
+        )
+        return deserialized_data
+
+    @staticmethod
+    def _deserialize_request(data: dict) -> TmpRequestParameterModel:
+        return TmpRequestParameterModel().deserialize(data)
+
+    @staticmethod
+    def _deserialize_response(data: dict) -> TmpHttpConfigV3:
+        return TmpHttpConfigV3.deserialize(data)
+
+    def process_api_parameters(self, http_method: str) -> List["RequestParameter"]:  # type: ignore[override]
+        if http_method.upper() == "GET":
+            return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type, return-value]
+        else:
+            if self.request_body:
+                req_body_content_type: List[ContentType] = list(
+                    filter(lambda ct: self.request_body.exist_setting(content_type=ct) is not None, ContentType)  # type: ignore[arg-type]
+                )
+                print(f"[DEBUG] has content, req_body_content_type: {req_body_content_type}")
+                req_body_config = self.request_body.get_setting(content_type=req_body_content_type[0])
+                return self._initial_request_parameters_model([req_body_config], self.parameters)  # type: ignore[return-value]
+            else:
+                return self._initial_request_parameters_model(  # type: ignore[return-value]
+                    self.parameters, self.parameters  # type: ignore[arg-type]
+                )
+
+    def _deserialize_empty_reference_config_properties(self) -> TmpReferenceConfigPropertyModelInterface:
+        return TmpReferenceConfigPropertyModel.deserialize({})
+
+    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> TmpHttpConfigV2Interface:
+        # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
+        # status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
+        assert isinstance(status_200_response, TmpHttpConfigV3Interface)
+        status_200_response_model = status_200_response
+        resp_value_format: List[ContentType] = list(
+            filter(lambda ct: status_200_response_model.exist_setting(content_type=ct) is not None, ContentType)
+        )
+        print(f"[DEBUG] has content, resp_value_format: {resp_value_format}")
+        return status_200_response_model.get_setting(content_type=resp_value_format[0])
+
+
+@dataclass
+class TmpAPIConfig(TmpAPIConfigInterface):
+    api: Dict[HTTPMethod, _BaseTmpAPIDtailConfig] = field(default_factory=dict)
+
+    _adapter_factory = AdapterFactory()
+
+    def __len__(self):
+        return len(self.api.keys())
+
+    def deserialize(self, data: dict) -> "TmpAPIConfig":
+        initial_api_config: _BaseTmpAPIDtailConfig
+        if get_openapi_version() is OpenAPIVersion.V2:
+            initial_api_config = TmpAPIDtailConfigV2()
+        else:
+            initial_api_config = TmpAPIDtailConfigV3()
+
+        for http_method, config in data.items():
+            assert http_method.upper() in HTTPMethod
+            self.api[HTTPMethod(http_method.upper())] = initial_api_config.deserialize(config)
+
+        return self
+
+    def to_adapter_api(self, path: str) -> List["API"]:
+        apis: List[API] = []
+        for http_method, http_config in self.api.items():
+            api = API.generate(api_path=path, http_method=http_method.name, detail=http_config)
+            apis.append(api)
+        return apis
 
 
 @dataclass

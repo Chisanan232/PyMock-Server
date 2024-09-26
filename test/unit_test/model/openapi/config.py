@@ -12,22 +12,24 @@ from pymock_api.model.enums import OpenAPIVersion
 from pymock_api.model.openapi._base import Transferable, set_openapi_version
 from pymock_api.model.openapi._tmp_data_model import (
     API,
-    BaseTmpDataModel,
     PropertyDetail,
     RequestParameter,
     ResponseProperty,
+)
+from pymock_api.model.openapi.base_config import (
+    BaseTmpDataModel,
+    _BaseTmpAPIDtailConfig,
+    set_component_definition,
+)
+from pymock_api.model.openapi.config import (
+    OpenAPIDocumentConfig,
+    SwaggerAPIDocumentConfig,
     TmpAPIConfig,
     TmpAPIDtailConfigV2,
     TmpAPIDtailConfigV3,
     TmpHttpConfigV2,
     TmpReferenceConfigPropertyModel,
     TmpRequestParameterModel,
-    _BaseTmpAPIDtailConfig,
-)
-from pymock_api.model.openapi.base_config import set_component_definition
-from pymock_api.model.openapi.config import (
-    OpenAPIDocumentConfig,
-    SwaggerAPIDocumentConfig,
 )
 from pymock_api.model.openapi.content_type import ContentType
 

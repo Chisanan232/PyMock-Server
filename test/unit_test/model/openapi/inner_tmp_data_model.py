@@ -7,11 +7,17 @@ import pytest
 from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
 from pymock_api.model.openapi._base import set_openapi_version
 from pymock_api.model.openapi._tmp_data_model import (
-    BaseTmpDataModel,
-    BaseTmpRefDataModel,
     PropertyDetail,
     RequestParameter,
     ResponseProperty,
+)
+from pymock_api.model.openapi.base_config import (
+    BaseTmpDataModel,
+    BaseTmpRefDataModel,
+    _BaseTmpAPIDtailConfig,
+    set_component_definition,
+)
+from pymock_api.model.openapi.config import (
     TmpAPIDtailConfigV2,
     TmpAPIDtailConfigV3,
     TmpConfigReferenceModel,
@@ -20,9 +26,7 @@ from pymock_api.model.openapi._tmp_data_model import (
     TmpReferenceConfigPropertyModel,
     TmpRequestParameterModel,
     TmpRequestSchemaModel,
-    _BaseTmpAPIDtailConfig,
 )
-from pymock_api.model.openapi.base_config import set_component_definition
 from pymock_api.model.openapi.content_type import ContentType
 
 from ...model.openapi._test_case import (
