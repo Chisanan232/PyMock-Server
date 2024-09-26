@@ -11,10 +11,10 @@ from pymock_api.model.api_config import _Config
 from pymock_api.model.enums import OpenAPIVersion
 from pymock_api.model.openapi._base import Transferable, set_openapi_version
 from pymock_api.model.openapi._model_adapter import (
-    API,
-    PropertyDetail,
-    RequestParameter,
-    ResponseProperty,
+    APIAdapter,
+    PropertyDetailAdapter,
+    RequestParameterAdapter,
+    ResponsePropertyAdapter,
 )
 from pymock_api.model.openapi.base_config import (
     BaseTmpDataModel,
@@ -89,8 +89,8 @@ class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
 
 class TestAPI(_OpenAPIDocumentDataModelTestSuite):
     @pytest.fixture(scope="function")
-    def data_model(self) -> API:
-        return API()
+    def data_model(self) -> APIAdapter:
+        return APIAdapter()
 
     @pytest.mark.parametrize(
         ("openapi_doc_data", "entire_openapi_config", "doc_version", "schema_key", "api_data_model"),
@@ -116,13 +116,13 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         # Finally
         set_openapi_version(OpenAPIVersion.V3)
 
-    def _initial(self, data: API) -> None:
+    def _initial(self, data: APIAdapter) -> None:
         data.path = ""
         data.http_method = ""
         data.parameters = []
         data.response = {}
 
-    def _verify_result(self, data: API, og_data: _BaseTmpAPIDtailConfig) -> None:
+    def _verify_result(self, data: APIAdapter, og_data: _BaseTmpAPIDtailConfig) -> None:
         # TODO: Remove this deprecated test criteria if it ensure
         # def _get_api_param(name: str) -> Optional[dict]:
         #     swagger_api_params = og_data["parameters"]
@@ -177,8 +177,8 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         #         assert api_param.value_type == convert_js_type(one_swagger_api_param["type"])
         #         assert api_param.default == one_swagger_api_param.get("default", None)
 
-    def _given_props(self, data_model: API) -> None:
-        params = RequestParameter()
+    def _given_props(self, data_model: APIAdapter) -> None:
+        params = RequestParameterAdapter()
         params.name = "arg1"
         params.required = False
         params.value_type = "string"
@@ -187,14 +187,14 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         data_model.path = "/test/v1/foo-home"
         data_model.http_method = "POST"
         data_model.parameters = [params]
-        data_model.response = ResponseProperty(
+        data_model.response = ResponsePropertyAdapter(
             data=[
-                PropertyDetail(name="key1", value_type="str", required=True),
+                PropertyDetailAdapter(name="key1", value_type="str", required=True),
             ],
         )
         data_model.tags = ["first tag", "second tag"]
 
-    def _verify_api_config_model(self, under_test: MockAPI, data_from: API) -> None:
+    def _verify_api_config_model(self, under_test: MockAPI, data_from: APIAdapter) -> None:
         assert under_test.url == data_from.path
         assert under_test.http.request.method == data_from.http_method
         assert len(under_test.http.request.parameters) == len(data_from.parameters)

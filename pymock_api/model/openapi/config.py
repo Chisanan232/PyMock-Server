@@ -13,13 +13,18 @@ from ._base import (
     set_openapi_version,
 )
 from ._js_handlers import ensure_type_is_python_type
-from ._model_adapter import API, PropertyDetail, RequestParameter, ResponseProperty
+from ._model_adapter import (
+    APIAdapter,
+    PropertyDetailAdapter,
+    RequestParameterAdapter,
+    ResponsePropertyAdapter,
+)
 from .base_config import (
-    APIInterface,
+    BaseAPIAdapter,
+    BaseRefPropertyDetailAdapter,
+    BaseRequestParameterAdapter,
+    BaseResponsePropertyAdapter,
     BaseTmpDataModel,
-    PropertyDetailInterface,
-    RequestParameterInterface,
-    ResponsePropertyInterface,
     TmpAPIConfigInterface,
     TmpAPIDtailConfigV2Interface,
     TmpAPIDtailConfigV3Interface,
@@ -39,17 +44,17 @@ from .content_type import ContentType
 
 class AdapterFactory(_BaseAdapterFactory):
 
-    def generate_property_details(self, **kwargs) -> PropertyDetailInterface:
-        return PropertyDetail(**kwargs)
+    def generate_property_details(self, **kwargs) -> BaseRefPropertyDetailAdapter:
+        return PropertyDetailAdapter(**kwargs)
 
-    def generate_request_params(self, **kwargs) -> RequestParameterInterface:
-        return RequestParameter(**kwargs)
+    def generate_request_params(self, **kwargs) -> BaseRequestParameterAdapter:
+        return RequestParameterAdapter(**kwargs)
 
-    def generate_response_props(self, **kwargs) -> ResponsePropertyInterface:
-        return ResponseProperty(**kwargs)
+    def generate_response_props(self, **kwargs) -> BaseResponsePropertyAdapter:
+        return ResponsePropertyAdapter(**kwargs)
 
-    def generate_api(self, **kwargs) -> APIInterface:
-        return API(**kwargs)
+    def generate_api(self, **kwargs) -> BaseAPIAdapter:
+        return APIAdapter(**kwargs)
 
 
 @dataclass
@@ -133,8 +138,8 @@ class TmpRequestParameterModel(_BaseTmpRequestParameterModel):
         assert self.schema
         return self.schema.get_ref()
 
-    def to_adapter_data_model(self) -> "RequestParameter":
-        return RequestParameter(
+    def to_adapter_data_model(self) -> "RequestParameterAdapter":
+        return RequestParameterAdapter(
             name=self.name,
             required=(self.required or False),
             value_type=self.value_type,
@@ -201,10 +206,10 @@ class TmpReferenceConfigPropertyModel(TmpReferenceConfigPropertyModelInterface):
 
     def process_response_from_data(
         self,
-        init_response: Optional["ResponseProperty"] = None,  # type: ignore[override]
-    ) -> "ResponseProperty":
+        init_response: Optional["ResponsePropertyAdapter"] = None,  # type: ignore[override]
+    ) -> "ResponsePropertyAdapter":
         if not init_response:
-            init_response = ResponseProperty.initial_response_data()
+            init_response = ResponsePropertyAdapter.initial_response_data()
         response_config = self._generate_response(
             init_response=init_response,
             property_value=self,
@@ -244,9 +249,9 @@ class TmpConfigReferenceModel(TmpConfigReferenceModelInterface):
 
     def process_reference_object(
         self,
-        init_response: "ResponseProperty",  # type: ignore[override]
+        init_response: "ResponsePropertyAdapter",  # type: ignore[override]
         empty_body_key: str = "",
-    ) -> "ResponseProperty":
+    ) -> "ResponsePropertyAdapter":
         # assert response_schema_ref
         response_schema_properties: Dict[str, TmpReferenceConfigPropertyModelInterface] = self.properties or {}
         print(f"[DEBUG in process_response_from_reference] response_schema_ref: {self}")
@@ -258,7 +263,7 @@ class TmpConfigReferenceModel(TmpConfigReferenceModelInterface):
                 # Check reference again
                 if v.has_ref():
                     response_prop = v.get_schema_ref().process_reference_object(
-                        init_response=ResponseProperty.initial_response_data(),
+                        init_response=ResponsePropertyAdapter.initial_response_data(),
                         empty_body_key=k,
                     )
                     print(f"[DEBUG in process_response_from_reference] before asserion, response_prop: {response_prop}")
@@ -267,7 +272,7 @@ class TmpConfigReferenceModel(TmpConfigReferenceModelInterface):
                         # It's file inputStream
                         response_config = response_prop.data[0]
                     else:
-                        response_config = PropertyDetail(
+                        response_config = PropertyDetailAdapter(
                             name="",
                             required=_Default_Required.empty,
                             value_type="dict",
@@ -290,7 +295,7 @@ class TmpConfigReferenceModel(TmpConfigReferenceModelInterface):
             print(f"[DEBUG in process_response_from_reference] parse with body, init_response: {init_response}")
         else:
             # The section which doesn't have setting body
-            response_config = PropertyDetail.generate_empty_response()
+            response_config = PropertyDetailAdapter.generate_empty_response()
             if self.title == "InputStream":
                 response_config.value_type = "file"
 
@@ -395,7 +400,7 @@ class TmpAPIDtailConfigV2(TmpAPIDtailConfigV2Interface):
     def _deserialize_response(data: dict) -> TmpHttpConfigV2Interface:
         return TmpHttpConfigV2.deserialize(data)
 
-    def process_api_parameters(self, http_method: str) -> List["RequestParameter"]:  # type: ignore[override]
+    def process_api_parameters(self, http_method: str) -> List["RequestParameterAdapter"]:  # type: ignore[override]
         return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type, return-value]
 
     def _deserialize_empty_reference_config_properties(self) -> TmpReferenceConfigPropertyModelInterface:
@@ -430,7 +435,7 @@ class TmpAPIDtailConfigV3(TmpAPIDtailConfigV3Interface):
     def _deserialize_response(data: dict) -> TmpHttpConfigV3:
         return TmpHttpConfigV3.deserialize(data)
 
-    def process_api_parameters(self, http_method: str) -> List["RequestParameter"]:  # type: ignore[override]
+    def process_api_parameters(self, http_method: str) -> List["RequestParameterAdapter"]:  # type: ignore[override]
         if http_method.upper() == "GET":
             return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type, return-value]
         else:
@@ -483,10 +488,10 @@ class TmpAPIConfig(TmpAPIConfigInterface):
 
         return self
 
-    def to_adapter_api(self, path: str) -> List["API"]:
-        apis: List[API] = []
+    def to_adapter_api(self, path: str) -> List["APIAdapter"]:
+        apis: List[APIAdapter] = []
         for http_method, http_config in self.api.items():
-            api = API.generate(api_path=path, http_method=http_method.name, detail=http_config)
+            api = APIAdapter.generate(api_path=path, http_method=http_method.name, detail=http_config)
             apis.append(api)
         return apis
 

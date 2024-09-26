@@ -8,10 +8,10 @@ from ..api_config.apis.response import ResponseProperty as PyMockResponsePropert
 from ..enums import ResponseStrategy
 from ._js_handlers import ensure_type_is_python_type
 from .base_config import (
-    APIInterface,
-    PropertyDetailInterface,
-    RequestParameterInterface,
-    ResponsePropertyInterface,
+    BaseAPIAdapter,
+    BaseRefPropertyDetailAdapter,
+    BaseRequestParameterAdapter,
+    BaseResponsePropertyAdapter,
     _BaseTmpAPIDtailConfig,
     _BaseTmpRequestParameterModel,
     _Default_Required,
@@ -19,8 +19,8 @@ from .base_config import (
 
 
 @dataclass
-class PropertyDetail(PropertyDetailInterface):
-    items: Optional[List["PropertyDetail"]] = None  # type: ignore[assignment]
+class PropertyDetailAdapter(BaseRefPropertyDetailAdapter):
+    items: Optional[List["PropertyDetailAdapter"]] = None  # type: ignore[assignment]
     is_empty: Optional[bool] = None
 
     def serialize(self) -> dict:
@@ -29,9 +29,9 @@ class PropertyDetail(PropertyDetailInterface):
         return self._clear_empty_values(data)
 
     @staticmethod
-    def generate_empty_response() -> "PropertyDetail":
+    def generate_empty_response() -> "PropertyDetailAdapter":
         # if self is ResponseStrategy.OBJECT:
-        return PropertyDetail(
+        return PropertyDetailAdapter(
             name="",
             required=_Default_Required.empty,
             value_type=None,
@@ -44,8 +44,8 @@ class PropertyDetail(PropertyDetailInterface):
 
 
 @dataclass
-class RequestParameter(RequestParameterInterface):
-    items: Optional[List[Union["RequestParameterInterface", _BaseTmpRequestParameterModel]]] = None
+class RequestParameterAdapter(BaseRequestParameterAdapter):
+    items: Optional[List[Union["BaseRequestParameterAdapter", _BaseTmpRequestParameterModel]]] = None
     default: Optional[Any] = None
 
     def __post_init__(self) -> None:
@@ -54,12 +54,12 @@ class RequestParameter(RequestParameterInterface):
         if self.value_type:
             self.value_type = self._convert_value_type()
 
-    def _convert_items(self) -> List[Union["RequestParameterInterface", _BaseTmpRequestParameterModel]]:
-        items: List[Union["RequestParameterInterface", _BaseTmpRequestParameterModel]] = []
+    def _convert_items(self) -> List[Union["BaseRequestParameterAdapter", _BaseTmpRequestParameterModel]]:
+        items: List[Union["BaseRequestParameterAdapter", _BaseTmpRequestParameterModel]] = []
         print(f"[DEBUG in RequestParameter._convert_items] items: {items}")
         for item in self.items or []:
             print(f"[DEBUG in RequestParameter._convert_items] item: {item}")
-            assert isinstance(item, (RequestParameterInterface, _BaseTmpRequestParameterModel))
+            assert isinstance(item, (BaseRequestParameterAdapter, _BaseTmpRequestParameterModel))
             items.append(item)
         return items
 
@@ -70,8 +70,8 @@ class RequestParameter(RequestParameterInterface):
     @classmethod
     def deserialize_by_prps(
         cls, name: str = "", required: bool = True, value_type: str = "", default: Any = None, items: List = []
-    ) -> "RequestParameterInterface":
-        return RequestParameter(
+    ) -> "BaseRequestParameterAdapter":
+        return RequestParameterAdapter(
             name=name,
             required=required,
             value_type=ensure_type_is_python_type(value_type) if value_type else None,
@@ -81,8 +81,8 @@ class RequestParameter(RequestParameterInterface):
 
     def to_pymock_api_config(self) -> PyMockRequestProperty:
 
-        def to_items(item_data: Union[RequestParameterInterface, _BaseTmpRequestParameterModel]) -> IteratorItem:
-            if isinstance(item_data, RequestParameter):
+        def to_items(item_data: Union[BaseRequestParameterAdapter, _BaseTmpRequestParameterModel]) -> IteratorItem:
+            if isinstance(item_data, RequestParameterAdapter):
                 return IteratorItem(
                     name=item_data.name,
                     required=item_data.required,
@@ -112,31 +112,31 @@ class RequestParameter(RequestParameterInterface):
 
 
 @dataclass
-class ResponseProperty(ResponsePropertyInterface):
-    data: List[PropertyDetail] = field(default_factory=list)  # type: ignore[assignment]
+class ResponsePropertyAdapter(BaseResponsePropertyAdapter):
+    data: List[PropertyDetailAdapter] = field(default_factory=list)  # type: ignore[assignment]
 
     @staticmethod
-    def initial_response_data() -> "ResponseProperty":  # type: ignore[override]
-        return ResponseProperty(data=[])
+    def initial_response_data() -> "ResponsePropertyAdapter":  # type: ignore[override]
+        return ResponsePropertyAdapter(data=[])
 
 
 @dataclass
-class API(APIInterface):
+class APIAdapter(BaseAPIAdapter):
     path: str = field(default_factory=str)
     http_method: str = field(default_factory=str)
-    parameters: List[RequestParameter] = field(default_factory=list)  # type: ignore[assignment]
-    response: ResponseProperty = field(default_factory=ResponseProperty)
+    parameters: List[RequestParameterAdapter] = field(default_factory=list)  # type: ignore[assignment]
+    response: ResponsePropertyAdapter = field(default_factory=ResponsePropertyAdapter)
     tags: Optional[List[str]] = None
 
     @classmethod
-    def generate(cls, api_path: str, http_method: str, detail: _BaseTmpAPIDtailConfig) -> "API":
-        api = API()
+    def generate(cls, api_path: str, http_method: str, detail: _BaseTmpAPIDtailConfig) -> "APIAdapter":
+        api = APIAdapter()
         api.path = api_path
         api.http_method = http_method
         api.deserialize(data=detail)
         return api
 
-    def deserialize(self, data: _BaseTmpAPIDtailConfig) -> "API":  # type: ignore[override]
+    def deserialize(self, data: _BaseTmpAPIDtailConfig) -> "APIAdapter":  # type: ignore[override]
         api_config: _BaseTmpAPIDtailConfig
         api_config = data
         self.parameters = api_config.process_api_parameters(http_method=self.http_method)  # type: ignore[assignment]

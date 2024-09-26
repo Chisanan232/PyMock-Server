@@ -7,9 +7,9 @@ import pytest
 from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
 from pymock_api.model.openapi._base import set_openapi_version
 from pymock_api.model.openapi._model_adapter import (
-    PropertyDetail,
-    RequestParameter,
-    ResponseProperty,
+    PropertyDetailAdapter,
+    RequestParameterAdapter,
+    ResponsePropertyAdapter,
 )
 from pymock_api.model.openapi.base_config import (
     BaseTmpDataModel,
@@ -76,12 +76,12 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
 
         # Run target function under test
         response_prop_data = under_test._generate_response(
-            init_response=ResponseProperty(),
+            init_response=ResponsePropertyAdapter(),
             property_value=api_response_detail,
         )
 
         # Verify
-        assert response_prop_data and isinstance(response_prop_data, PropertyDetail)
+        assert response_prop_data and isinstance(response_prop_data, PropertyDetailAdapter)
         # for resp_k, resp_v in response_prop_data.items():
         #     assert resp_k in ["name", "required", "type", "format", "items", "FIXME"]
         # else:
@@ -383,7 +383,7 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
 
         # Run target
         resp = under_test._generate_response_from_data(
-            init_response=ResponseProperty.initial_response_data(),
+            init_response=ResponsePropertyAdapter.initial_response_data(),
             resp_prop_data=test_response_data_model,
         )
 
@@ -423,18 +423,22 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
         ("ut_response_config", "expect_result"),
         [
             (
-                [PropertyDetail(name="THIS_IS_EMPTY", required=True, value_type=None, format=None, items=None)],
-                [PropertyDetail(name="", required=True, value_type=None, format=None, is_empty=True, items=None)],
+                [PropertyDetailAdapter(name="THIS_IS_EMPTY", required=True, value_type=None, format=None, items=None)],
+                [
+                    PropertyDetailAdapter(
+                        name="", required=True, value_type=None, format=None, is_empty=True, items=None
+                    )
+                ],
             ),
             (
                 [
-                    PropertyDetail(
+                    PropertyDetailAdapter(
                         name="sample_list",
                         required=True,
                         value_type="list",
                         format=None,
                         items=[
-                            PropertyDetail(
+                            PropertyDetailAdapter(
                                 name="THIS_IS_EMPTY",
                                 required=True,
                                 value_type=None,
@@ -445,7 +449,7 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
                     ),
                 ],
                 [
-                    PropertyDetail(
+                    PropertyDetailAdapter(
                         name="sample_list",
                         required=True,
                         value_type="list",
@@ -457,36 +461,36 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
             ),
             (
                 [
-                    PropertyDetail(
+                    PropertyDetailAdapter(
                         name="sample_list",
                         required=True,
                         value_type="list",
                         format=None,
                         items=[
-                            PropertyDetail(
+                            PropertyDetailAdapter(
                                 name="sample_nested_list",
                                 required=True,
                                 value_type="list",
                                 format=None,
                                 items=[
-                                    PropertyDetail(
+                                    PropertyDetailAdapter(
                                         name="sample_nested_list",
                                         required=True,
                                         value_type="list",
                                         format=None,
                                         items=[
-                                            PropertyDetail(
+                                            PropertyDetailAdapter(
                                                 name="", required=True, value_type="str", format=None, items=None
                                             ),
                                         ],
                                     ),
-                                    PropertyDetail(
+                                    PropertyDetailAdapter(
                                         name="sample_nested_dict",
                                         required=True,
                                         value_type="dict",
                                         format=None,
                                         items=[
-                                            PropertyDetail(
+                                            PropertyDetailAdapter(
                                                 name="THIS_IS_EMPTY",
                                                 required=True,
                                                 value_type=None,
@@ -501,30 +505,30 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
                     ),
                 ],
                 [
-                    PropertyDetail(
+                    PropertyDetailAdapter(
                         name="sample_list",
                         required=True,
                         value_type="list",
                         format=None,
                         items=[
-                            PropertyDetail(
+                            PropertyDetailAdapter(
                                 name="sample_nested_list",
                                 required=True,
                                 value_type="list",
                                 format=None,
                                 items=[
-                                    PropertyDetail(
+                                    PropertyDetailAdapter(
                                         name="sample_nested_list",
                                         required=True,
                                         value_type="list",
                                         format=None,
                                         items=[
-                                            PropertyDetail(
+                                            PropertyDetailAdapter(
                                                 name="", required=True, value_type="str", format=None, items=None
                                             ),
                                         ],
                                     ),
-                                    PropertyDetail(
+                                    PropertyDetailAdapter(
                                         name="sample_nested_dict",
                                         required=True,
                                         value_type="dict",
@@ -543,8 +547,8 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
     def test__process_empty_body_response(
         self,
         under_test: BaseTmpRefDataModel,
-        ut_response_config: List[PropertyDetail],
-        expect_result: List[PropertyDetail],
+        ut_response_config: List[PropertyDetailAdapter],
+        expect_result: List[PropertyDetailAdapter],
     ):
         new_response_config = under_test._process_empty_body_response(response_columns_setting=ut_response_config)
         assert new_response_config == expect_result
@@ -649,7 +653,7 @@ class TestTmpRequestParameterModel(BaseTmpRefDataModelTestSuite):
         # Verify
         assert parameters and isinstance(parameters, list)
         assert len(parameters) == len(entire_openapi_config["definitions"]["UpdateFooRequest"]["properties"].keys())
-        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
+        type_checksum = list(map(lambda p: isinstance(p, RequestParameterAdapter), parameters))
         assert False not in type_checksum
 
     @pytest.mark.parametrize("openapi_doc_data", PARSE_FAIL_V2_OPENAPI_REQUEST_PARAMETERS_NO_REFERENCE_INFO_TEST_CASE)
@@ -683,8 +687,12 @@ class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
                 ResponseStrategy.OBJECT,
                 TmpConfigReferenceModel(value_type="object"),
                 # {"type": "object"},
-                ResponseProperty(
-                    data=[PropertyDetail(name="THIS_IS_EMPTY", required=False, value_type=None, format=None, items=[])],
+                ResponsePropertyAdapter(
+                    data=[
+                        PropertyDetailAdapter(
+                            name="THIS_IS_EMPTY", required=False, value_type=None, format=None, items=[]
+                        )
+                    ],
                 ),
                 # {
                 #     "strategy": ResponseStrategy.OBJECT,
@@ -694,10 +702,13 @@ class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
         ],
     )
     def test__process_reference_object_with_empty_body_response(
-        self, strategy: ResponseStrategy, test_response_data: TmpConfigReferenceModel, expected_value: ResponseProperty
+        self,
+        strategy: ResponseStrategy,
+        test_response_data: TmpConfigReferenceModel,
+        expected_value: ResponsePropertyAdapter,
     ):
         response_config = test_response_data.process_reference_object(
-            init_response=ResponseProperty.initial_response_data(),
+            init_response=ResponsePropertyAdapter.initial_response_data(),
         )
         assert response_config == expected_value
 
@@ -735,7 +746,7 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
         set_openapi_version(OpenAPIVersion.V3)
 
     @abstractmethod
-    def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameter]) -> None:
+    def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameterAdapter]) -> None:
         pass
 
     @pytest.mark.parametrize(("api_detail", "entire_config"), [])
@@ -852,10 +863,10 @@ class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
             api_data_model=api_data_model,
         )
 
-    def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameter]) -> None:
+    def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameterAdapter]) -> None:
         assert parameters and isinstance(parameters, list)
         assert len(parameters) == len(openapi_doc_data["parameters"])
-        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
+        type_checksum = list(map(lambda p: isinstance(p, RequestParameterAdapter), parameters))
         assert False not in type_checksum
 
     @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
@@ -906,7 +917,7 @@ class TestTmpAPIDetailConfigV3(BaseTmpAPIDetailConfigTestSuite):
             api_data_model=api_data_model,
         )
 
-    def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameter]) -> None:
+    def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameterAdapter]) -> None:
         assert isinstance(parameters, list)
         print(f"[DEBUG in test] openapi_doc_data: {openapi_doc_data}")
         if parameters:
@@ -927,7 +938,7 @@ class TestTmpAPIDetailConfigV3(BaseTmpAPIDetailConfigTestSuite):
                 assert len(parameters) == len(all_params)
             else:
                 raise ValueError("")
-            type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
+            type_checksum = list(map(lambda p: isinstance(p, RequestParameterAdapter), parameters))
             assert False not in type_checksum
 
     @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V3_OPENAPI_RESPONSES_TEST_CASE)
@@ -964,9 +975,9 @@ class TestPropertyDetail:
     @pytest.mark.parametrize(
         ("strategy", "expected_type"),
         [
-            (ResponseStrategy.OBJECT, PropertyDetail),
+            (ResponseStrategy.OBJECT, PropertyDetailAdapter),
         ],
     )
     def test_generate_empty_response(self, strategy: ResponseStrategy, expected_type: Union[type, Type]):
-        empty_resp = PropertyDetail.generate_empty_response()
+        empty_resp = PropertyDetailAdapter.generate_empty_response()
         assert isinstance(empty_resp, expected_type)
