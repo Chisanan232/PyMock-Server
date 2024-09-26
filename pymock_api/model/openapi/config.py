@@ -13,7 +13,7 @@ from ._base import (
     set_openapi_version,
 )
 from ._js_handlers import ensure_type_is_python_type
-from ._tmp_data_model import API, PropertyDetail, RequestParameter, ResponseProperty
+from ._model_adapter import API, PropertyDetail, RequestParameter, ResponseProperty
 from .base_config import (
     APIInterface,
     BaseTmpDataModel,

@@ -6,7 +6,7 @@ import pytest
 
 from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
 from pymock_api.model.openapi._base import set_openapi_version
-from pymock_api.model.openapi._tmp_data_model import (
+from pymock_api.model.openapi._model_adapter import (
     PropertyDetail,
     RequestParameter,
     ResponseProperty,

@@ -10,7 +10,7 @@ from pymock_api.model import MockAPI
 from pymock_api.model.api_config import _Config
 from pymock_api.model.enums import OpenAPIVersion
 from pymock_api.model.openapi._base import Transferable, set_openapi_version
-from pymock_api.model.openapi._tmp_data_model import (
+from pymock_api.model.openapi._model_adapter import (
     API,
     PropertyDetail,
     RequestParameter,
