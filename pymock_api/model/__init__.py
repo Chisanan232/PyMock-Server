@@ -7,6 +7,7 @@ import pathlib
 from argparse import Namespace
 from typing import Optional
 
+from ..exceptions import NotSupportAPIDocumentVersion
 from .api_config import APIConfig, MockAPIs
 from .api_config.apis import HTTP, APIParameter, HTTPRequest, HTTPResponse, MockAPI
 from .api_config.base import BaseConfig
@@ -116,7 +117,7 @@ def deserialize_openapi_doc_config(data: dict) -> BaseAPIDocumentConfig:
     elif get_api_doc_version(data) is OpenAPIVersion.V3:
         return OpenAPIDocumentConfig().deserialize(data)
     else:
-        raise
+        raise NotSupportAPIDocumentVersion(get_api_doc_version(data).name)
 
 
 def load_config(path: str, is_pull: bool = False, base_file_path: str = "") -> Optional[APIConfig]:

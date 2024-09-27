@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from http import HTTPMethod, HTTPStatus
 from typing import Any, Dict, List, Optional, Type, Union, cast
 
+from ...exceptions import CannotParsingAPIDocumentVersion
 from .. import APIConfig as PyMockAPI_APIConfig
 from .. import MockAPIs
 from ..api_config import BaseConfig
@@ -620,4 +621,4 @@ def get_api_doc_version(data: Dict) -> OpenAPIVersion:
     elif "openapi" in data.keys():
         return OpenAPIVersion.V3
     else:
-        raise
+        raise CannotParsingAPIDocumentVersion()
