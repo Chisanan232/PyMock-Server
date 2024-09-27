@@ -153,7 +153,7 @@ class SwaggerDiffChecking(_BaseChecking):
             mocked_apis_path = list(map(lambda p: p.url, mocked_apis_info.values()))
         swagger_api_doc_model = self._get_swagger_config(swagger_url=args.swagger_doc_url)
         for path, swagger_api_config in swagger_api_doc_model.paths.items():
-            apis = swagger_api_config.to_adapter_api(path)
+            apis = swagger_api_config.to_adapter(path)
             for one_swagger_api_config in apis:
                 # Check API path
                 if args.check_api_path and one_swagger_api_config.path not in mocked_apis_path:

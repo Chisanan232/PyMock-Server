@@ -141,13 +141,13 @@ class RequestParameter(_BaseRequestParameter):
         assert self.schema
         return self.schema.get_ref()
 
-    def to_adapter_data_model(self) -> "RequestParameterAdapter":
+    def to_adapter(self) -> "RequestParameterAdapter":
         return RequestParameterAdapter(
             name=self.name,
             required=(self.required or False),
             value_type=self.value_type,
             default=self.default,
-            items=[item.to_adapter_data_model() for item in self.items] if self.items else None,
+            items=[item.to_adapter() for item in self.items] if self.items else None,
         )
 
     @property
@@ -403,7 +403,7 @@ class APIConfigWithMethodV2(BaseAPIConfigWithMethodV2):
     def _deserialize_response(data: dict) -> BaseHttpConfigV2:
         return HttpConfigV2.deserialize(data)
 
-    def process_api_parameters(self, http_method: str) -> List["RequestParameterAdapter"]:  # type: ignore[override]
+    def to_request_adapter(self, http_method: str) -> List["RequestParameterAdapter"]:  # type: ignore[override]
         return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type, return-value]
 
     def _deserialize_empty_reference_config_properties(self) -> BaseReferenceConfigProperty:
@@ -438,7 +438,7 @@ class APIConfigWithMethodV3(BaseAPIConfigWithMethodV3):
     def _deserialize_response(data: dict) -> HttpConfigV3:
         return HttpConfigV3.deserialize(data)
 
-    def process_api_parameters(self, http_method: str) -> List["RequestParameterAdapter"]:  # type: ignore[override]
+    def to_request_adapter(self, http_method: str) -> List["RequestParameterAdapter"]:  # type: ignore[override]
         if http_method.upper() == "GET":
             return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type, return-value]
         else:
@@ -491,7 +491,7 @@ class APIConfig(BaseAPIConfig):
 
         return self
 
-    def to_adapter_api(self, path: str) -> List[APIAdapter]:  # type: ignore[override]
+    def to_adapter(self, path: str) -> List[APIAdapter]:  # type: ignore[override]
         apis: List[APIAdapter] = []
         for http_method, http_config in self.api.items():
             api = APIAdapter.generate(api_path=path, http_method=http_method.name, detail=http_config)
@@ -552,7 +552,7 @@ class BaseAPIDocumentConfig(Transferable):
         for path, openapi_doc_api in self.paths.items():
             path = self._align_url_format(path)
             base_url = self._align_url_format(base_url)
-            apis = openapi_doc_api.to_adapter_api(path=path)
+            apis = openapi_doc_api.to_adapter(path=path)
             for api in apis:
                 api_config.apis.apis[
                     self._generate_api_key(path=path, base_url=base_url, http_method=api.http_method)

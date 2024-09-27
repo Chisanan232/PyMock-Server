@@ -733,7 +733,7 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
         under_test = under_test.deserialize(openapi_doc_data)
 
         # Run target function
-        parameters = under_test.process_api_parameters(http_method="HTTP method")
+        parameters = under_test.to_request_adapter(http_method="HTTP method")
 
         # Verify
         self._verify_req_parameter(openapi_doc_data, parameters)
@@ -755,7 +755,7 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
         print(f"[DEBUG in test] api_detail: {api_detail}")
         # parser_instance = parser(parser=OpenAPIV2PathSchemaParser(data=api_detail))
         under_test = under_test.deserialize(api_detail)
-        response_data = under_test.process_responses()
+        response_data = under_test.to_responses_adapter()
         print(f"[DEBUG in test] response_data: {response_data}")
 
         # Verify

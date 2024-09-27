@@ -489,7 +489,7 @@ class _BaseRequestParameter(BaseReferencialConfig):
         pass
 
     @abstractmethod
-    def to_adapter_data_model(self) -> BaseRequestParameterAdapter:
+    def to_adapter(self) -> BaseRequestParameterAdapter:
         pass
 
 
@@ -610,7 +610,7 @@ class _BaseAPIConfigWithMethod(BaseAPIDocConfig, ABC):
         pass
 
     @abstractmethod
-    def process_api_parameters(self, http_method: str) -> List[BaseRequestParameterAdapter]:
+    def to_request_adapter(self, http_method: str) -> List[BaseRequestParameterAdapter]:
         pass
 
     def _initial_request_parameters_model(
@@ -625,10 +625,10 @@ class _BaseAPIConfigWithMethod(BaseAPIDocConfig, ABC):
             for d in _data:
                 handled_parameters.extend(d.process_has_ref_request_parameters())
         else:
-            handled_parameters = [p.to_adapter_data_model() for p in not_ref_data]
+            handled_parameters = [p.to_adapter() for p in not_ref_data]
         return handled_parameters
 
-    def process_responses(self) -> BaseResponsePropertyAdapter:
+    def to_responses_adapter(self) -> BaseResponsePropertyAdapter:
         print(f"[DEBUG in src.process_responses] self.responses: {self.responses}")
         assert self.exist_in_response(status_code=200) is True
         status_200_response = self.get_response(status_code=200)
@@ -683,5 +683,5 @@ class BaseAPIConfig(BaseAPIDocConfig):
         pass
 
     @abstractmethod
-    def to_adapter_api(self, path: str) -> List["BaseAPIAdapter"]:
+    def to_adapter(self, path: str) -> List["BaseAPIAdapter"]:
         pass

@@ -113,8 +113,10 @@ class deserialize_args:
 def deserialize_openapi_doc_config(data: dict) -> BaseAPIDocumentConfig:
     if get_api_doc_version(data) is OpenAPIVersion.V2:
         return SwaggerAPIDocumentConfig().deserialize(data)
-    else:
+    elif get_api_doc_version(data) is OpenAPIVersion.V3:
         return OpenAPIDocumentConfig().deserialize(data)
+    else:
+        raise
 
 
 def load_config(path: str, is_pull: bool = False, base_file_path: str = "") -> Optional[APIConfig]:

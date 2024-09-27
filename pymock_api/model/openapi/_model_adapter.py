@@ -128,12 +128,9 @@ class APIAdapter(BaseAPIAdapter):
         return api
 
     def deserialize(self, data: _BaseAPIConfigWithMethod) -> "APIAdapter":  # type: ignore[override]
-        api_config: _BaseAPIConfigWithMethod
-        api_config = data
-        self.parameters = api_config.process_api_parameters(http_method=self.http_method)  # type: ignore[assignment]
-        self.response = api_config.process_responses()  # type: ignore[assignment]
-        self.tags = api_config.tags
-
+        self.parameters = data.to_request_adapter(http_method=self.http_method)  # type: ignore[assignment]
+        self.response = data.to_responses_adapter()  # type: ignore[assignment]
+        self.tags = data.tags
         return self
 
     def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]

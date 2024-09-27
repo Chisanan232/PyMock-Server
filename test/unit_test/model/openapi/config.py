@@ -239,7 +239,7 @@ class TestSwaggerAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
         data_model_apis = [len(v) for v in data.paths.values()]
         assert sum(data_model_apis) == sum(path_with_method_number)
         for path, api_config in data.paths.items():
-            apis = api_config.to_adapter_api(path)
+            apis = api_config.to_adapter(path)
             for api in apis:
                 assert api.path in og_data["paths"].keys()
                 assert api.http_method.lower() in og_data["paths"][api.path].keys()
@@ -352,7 +352,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
         assert sum(data_model_apis) == sum(path_with_method_number)
         for api_path, api_config in data.paths.items():
             assert api_path in og_data["paths"].keys()
-            apis = api_config.to_adapter_api(api_path)
+            apis = api_config.to_adapter(api_path)
             for api in apis:
                 assert api.http_method.lower() in og_data["paths"][api.path].keys()
 
@@ -471,7 +471,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
         assert sum(data_model_apis) == sum(path_with_method_number)
         for api_path, api_config in data.paths.items():
             assert api_path in og_data["paths"].keys()
-            apis = api_config.to_adapter_api(api_path)
+            apis = api_config.to_adapter(api_path)
             for api in apis:
                 assert api.http_method.lower() in og_data["paths"][api.path].keys()
 
