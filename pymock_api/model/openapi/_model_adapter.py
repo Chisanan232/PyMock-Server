@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 
 from .. import MockAPI
 from ..api_config import IteratorItem
@@ -13,7 +13,6 @@ from .base_config import (
     BaseRequestParameterAdapter,
     BaseResponsePropertyAdapter,
     _BaseAPIConfigWithMethod,
-    _BaseRequestParameter,
     _Default_Required,
 )
 
@@ -45,7 +44,7 @@ class PropertyDetailAdapter(BaseRefPropertyDetailAdapter):
 
 @dataclass
 class RequestParameterAdapter(BaseRequestParameterAdapter):
-    items: Optional[List[Union["BaseRequestParameterAdapter", _BaseRequestParameter]]] = None
+    items: Optional[List["RequestParameterAdapter"]] = None  # type: ignore[assignment]
     default: Optional[Any] = None
 
     def __post_init__(self) -> None:
@@ -54,12 +53,12 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
         if self.value_type:
             self.value_type = self._convert_value_type()
 
-    def _convert_items(self) -> List[Union["BaseRequestParameterAdapter", _BaseRequestParameter]]:
-        items: List[Union["BaseRequestParameterAdapter", _BaseRequestParameter]] = []
+    def _convert_items(self) -> List["RequestParameterAdapter"]:
+        items: List["RequestParameterAdapter"] = []
         print(f"[DEBUG in RequestParameter._convert_items] items: {items}")
         for item in self.items or []:
             print(f"[DEBUG in RequestParameter._convert_items] item: {item}")
-            assert isinstance(item, (BaseRequestParameterAdapter, _BaseRequestParameter))
+            assert isinstance(item, RequestParameterAdapter)
             items.append(item)
         return items
 
@@ -69,7 +68,12 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
 
     @classmethod
     def deserialize_by_prps(
-        cls, name: str = "", required: bool = True, value_type: str = "", default: Any = None, items: List = []
+        cls,
+        name: str = "",
+        required: bool = True,
+        value_type: str = "",
+        default: Any = None,
+        items: List["RequestParameterAdapter"] = [],
     ) -> "BaseRequestParameterAdapter":
         return RequestParameterAdapter(
             name=name,
@@ -81,25 +85,13 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
 
     def to_pymock_api_config(self) -> PyMockRequestProperty:
 
-        def to_items(item_data: Union[BaseRequestParameterAdapter, _BaseRequestParameter]) -> IteratorItem:
-            if isinstance(item_data, RequestParameterAdapter):
-                return IteratorItem(
-                    name=item_data.name,
-                    required=item_data.required,
-                    value_type=item_data.value_type,
-                    items=[to_items(i) for i in (item_data.items or [])],
-                )
-            elif isinstance(item_data, _BaseRequestParameter):
-                return IteratorItem(
-                    name=item_data.name,
-                    required=item_data.required,
-                    value_type=item_data.value_type,
-                    items=[to_items(i) for i in (item_data.items or [])],
-                )
-            else:
-                raise TypeError(
-                    f"The data model must be *TmpAPIParameterModel* or *TmpItemModel*. But it get *{item_data}*. Please check it."
-                )
+        def to_items(item_data: BaseRequestParameterAdapter) -> IteratorItem:
+            return IteratorItem(
+                name=item_data.name,
+                required=item_data.required,
+                value_type=item_data.value_type,
+                items=[to_items(i) for i in (item_data.items or [])],
+            )
 
         return PyMockRequestProperty(
             name=self.name,

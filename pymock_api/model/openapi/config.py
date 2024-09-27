@@ -145,7 +145,7 @@ class RequestParameter(_BaseRequestParameter):
             required=(self.required or False),
             value_type=self.value_type,
             default=self.default,
-            items=self.items,  # type: ignore[arg-type]
+            items=[item.to_adapter_data_model() for item in self.items] if self.items else None,
         )
 
     @property

@@ -407,6 +407,8 @@ class BaseReferencialConfig(BaseAPIDocConfig):
                         ),
                     )
 
+            if items_props and True in list(map(lambda i: isinstance(i, _BaseRequestParameter), items_props)):
+                raise TypeError("Please convert the data model.")
             parameters.append(
                 self._adapter_factory.generate_request_params().deserialize_by_prps(
                     name=param_name,
@@ -713,7 +715,7 @@ class BasePropertyDetailAdapter(metaclass=ABCMeta):
 # The data models for final result which would be converted as the data models of PyMock-API configuration
 @dataclass
 class BaseRequestParameterAdapter(BasePropertyDetailAdapter, ABC):
-    items: Optional[List[Union["BaseRequestParameterAdapter", _BaseRequestParameter]]] = None  # type: ignore[assignment]
+    items: Optional[List["BaseRequestParameterAdapter"]] = None  # type: ignore[assignment]
     default: Optional[Any] = None
 
     @classmethod
