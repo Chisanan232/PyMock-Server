@@ -723,7 +723,7 @@ class BaseAPIConfigWithMethodTestSuite(BaseAPIDocConfigTestSuite, ABC):
         [],
     )
     @abstractmethod
-    def test_process_api_parameters(
+    def test_to_request_adapter(
         self,
         under_test: _BaseAPIConfigWithMethod,
         openapi_doc_data: dict,
@@ -753,7 +753,7 @@ class BaseAPIConfigWithMethodTestSuite(BaseAPIDocConfigTestSuite, ABC):
         pass
 
     @pytest.mark.parametrize(("api_detail", "entire_config"), [])
-    def test_process_responses(self, under_test: _BaseAPIConfigWithMethod, api_detail: dict, entire_config: dict):
+    def test_to_responses_adapter(self, under_test: _BaseAPIConfigWithMethod, api_detail: dict, entire_config: dict):
         # Pre-process
         set_openapi_version(self._api_doc_version)
         set_component_definition(entire_config.get(self._common_objects_yaml_schema, {}))
@@ -848,7 +848,7 @@ class TestAPIConfigWithMethodV2(BaseAPIConfigWithMethodTestSuite):
         ("openapi_doc_data", "entire_openapi_config", "doc_version", "schema_key", "api_data_model"),
         DESERIALIZE_V2_OPENAPI_ENTIRE_API_TEST_CASE,
     )
-    def test_process_api_parameters(
+    def test_to_request_adapter(
         self,
         under_test: APIConfigWithMethodV2,
         openapi_doc_data: dict,
@@ -857,7 +857,7 @@ class TestAPIConfigWithMethodV2(BaseAPIConfigWithMethodTestSuite):
         schema_key: str,
         api_data_model: APIConfigWithMethodV2,
     ):
-        super().test_process_api_parameters(
+        super().test_to_request_adapter(
             under_test=under_test,
             openapi_doc_data=openapi_doc_data,
             entire_openapi_config=entire_openapi_config,
@@ -873,8 +873,8 @@ class TestAPIConfigWithMethodV2(BaseAPIConfigWithMethodTestSuite):
         assert False not in type_checksum
 
     @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
-    def test_process_responses(self, under_test: _BaseAPIConfigWithMethod, api_detail: dict, entire_config: dict):
-        super().test_process_responses(
+    def test_to_responses_adapter(self, under_test: _BaseAPIConfigWithMethod, api_detail: dict, entire_config: dict):
+        super().test_to_responses_adapter(
             under_test=under_test,
             api_detail=api_detail,
             entire_config=entire_config,
@@ -902,7 +902,7 @@ class TestAPIConfigWithMethodV3(BaseAPIConfigWithMethodTestSuite):
         ("openapi_doc_data", "entire_openapi_config", "doc_version", "schema_key", "api_data_model"),
         DESERIALIZE_V3_OPENAPI_ENTIRE_API_TEST_CASE,
     )
-    def test_process_api_parameters(
+    def test_to_request_adapter(
         self,
         under_test: APIConfigWithMethodV3,
         openapi_doc_data: dict,
@@ -911,7 +911,7 @@ class TestAPIConfigWithMethodV3(BaseAPIConfigWithMethodTestSuite):
         schema_key: str,
         api_data_model: APIConfigWithMethodV3,
     ):
-        super().test_process_api_parameters(
+        super().test_to_request_adapter(
             under_test=under_test,
             openapi_doc_data=openapi_doc_data,
             entire_openapi_config=entire_openapi_config,
@@ -945,8 +945,8 @@ class TestAPIConfigWithMethodV3(BaseAPIConfigWithMethodTestSuite):
             assert False not in type_checksum
 
     @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V3_OPENAPI_RESPONSES_TEST_CASE)
-    def test_process_responses(self, under_test: _BaseAPIConfigWithMethod, api_detail: dict, entire_config: dict):
-        super().test_process_responses(
+    def test_to_responses_adapter(self, under_test: _BaseAPIConfigWithMethod, api_detail: dict, entire_config: dict):
+        super().test_to_responses_adapter(
             under_test=under_test,
             api_detail=api_detail,
             entire_config=entire_config,
