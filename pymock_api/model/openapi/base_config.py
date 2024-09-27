@@ -509,8 +509,9 @@ class BaseReferenceConfigProperty(BaseReferencialConfig):
     def deserialize(cls, data: Dict) -> "BaseReferenceConfigProperty":
         pass
 
+    @abstractmethod
     def is_empty(self) -> bool:
-        return not (self.value_type or self.ref)
+        pass
 
     @abstractmethod
     def process_response_from_data(
