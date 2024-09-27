@@ -681,3 +681,7 @@ class BaseAPIConfig(BaseAPIDocConfig):
     @abstractmethod
     def deserialize(self, data: dict) -> "BaseAPIConfig":
         pass
+
+    @abstractmethod
+    def to_adapter_api(self, path: str) -> List["BaseAPIAdapter"]:
+        pass

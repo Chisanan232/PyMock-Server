@@ -491,7 +491,7 @@ class APIConfig(BaseAPIConfig):
 
         return self
 
-    def to_adapter_api(self, path: str) -> List["APIAdapter"]:
+    def to_adapter_api(self, path: str) -> List[APIAdapter]:  # type: ignore[override]
         apis: List[APIAdapter] = []
         for http_method, http_config in self.api.items():
             api = APIAdapter.generate(api_path=path, http_method=http_method.name, detail=http_config)

@@ -13,9 +13,9 @@ from ...model import (
 )
 from ...model.api_config.apis import APIParameter as MockedAPIParameter
 from ...model.enums import ResponseStrategy
-from ...model.openapi._model_adapter import APIAdapter as SwaggerAPI
-from ...model.openapi._model_adapter import (
-    RequestParameterAdapter as SwaggerAPIParameter,
+from ...model.openapi._base_model_adapter import BaseAPIAdapter as SwaggerAPI
+from ...model.openapi._base_model_adapter import (
+    BaseRequestParameterAdapter as SwaggerAPIParameter,
 )
 from ..component import BaseSubCmdComponent
 
