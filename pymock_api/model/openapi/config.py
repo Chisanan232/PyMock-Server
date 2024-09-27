@@ -13,6 +13,12 @@ from ._base import (
     get_openapi_version,
     set_openapi_version,
 )
+from ._base_model_adapter import (
+    BaseAPIAdapter,
+    BaseRefPropertyDetailAdapter,
+    BaseRequestParameterAdapter,
+    BaseResponsePropertyAdapter,
+)
 from ._js_handlers import ensure_type_is_python_type
 from ._model_adapter import (
     APIAdapter,
@@ -21,7 +27,6 @@ from ._model_adapter import (
     ResponsePropertyAdapter,
 )
 from .base_config import (
-    BaseAPIAdapter,
     BaseAPIConfig,
     BaseAPIConfigWithMethodV2,
     BaseAPIConfigWithMethodV3,
@@ -30,10 +35,7 @@ from .base_config import (
     BaseHttpConfigV3,
     BaseReferenceConfig,
     BaseReferenceConfigProperty,
-    BaseRefPropertyDetailAdapter,
-    BaseRequestParameterAdapter,
     BaseRequestSchema,
-    BaseResponsePropertyAdapter,
     _BaseAdapterFactory,
     _BaseAPIConfigWithMethod,
     _BaseRequestParameter,

@@ -6,15 +6,14 @@ from ..api_config import IteratorItem
 from ..api_config.apis.request import APIParameter as PyMockRequestProperty
 from ..api_config.apis.response import ResponseProperty as PyMockResponseProperty
 from ..enums import ResponseStrategy
-from ._js_handlers import ensure_type_is_python_type
-from .base_config import (
+from ._base_model_adapter import (
     BaseAPIAdapter,
     BaseRefPropertyDetailAdapter,
     BaseRequestParameterAdapter,
     BaseResponsePropertyAdapter,
-    _BaseAPIConfigWithMethod,
-    _Default_Required,
 )
+from ._js_handlers import ensure_type_is_python_type
+from .base_config import _BaseAPIConfigWithMethod, _Default_Required
 
 
 @dataclass

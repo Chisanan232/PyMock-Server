@@ -7,9 +7,12 @@ from http import HTTPMethod, HTTPStatus
 from pydoc import locate
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
-from .. import APIParameter as PyMockRequestProperty
-from ..api_config import ResponseProperty as PyMockResponseProperty
-from ._base import Transferable
+from ._base_model_adapter import (
+    BaseAPIAdapter,
+    BaseRefPropertyDetailAdapter,
+    BaseRequestParameterAdapter,
+    BaseResponsePropertyAdapter,
+)
 from .content_type import ContentType
 
 ComponentDefinition: Dict[str, dict] = {}
@@ -31,19 +34,19 @@ _Default_Required: _PropertyDefaultRequired = _PropertyDefaultRequired(empty=Fal
 
 class _BaseAdapterFactory(metaclass=ABCMeta):
     @abstractmethod
-    def generate_property_details(self, **kwargs) -> "BaseRefPropertyDetailAdapter":
+    def generate_property_details(self, **kwargs) -> BaseRefPropertyDetailAdapter:
         pass
 
     @abstractmethod
-    def generate_request_params(self, **kwargs) -> "BaseRequestParameterAdapter":
+    def generate_request_params(self, **kwargs) -> BaseRequestParameterAdapter:
         pass
 
     @abstractmethod
-    def generate_response_props(self, **kwargs) -> "BaseResponsePropertyAdapter":
+    def generate_response_props(self, **kwargs) -> BaseResponsePropertyAdapter:
         pass
 
     @abstractmethod
-    def generate_api(self, **kwargs) -> "BaseAPIAdapter":
+    def generate_api(self, **kwargs) -> BaseAPIAdapter:
         pass
 
 
@@ -53,9 +56,9 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
 
     def _ensure_data_structure_when_object_strategy(
         self,
-        init_response: "BaseResponsePropertyAdapter",
-        response_data_prop: Union["BaseRefPropertyDetailAdapter", List["BaseRefPropertyDetailAdapter"]],
-    ) -> "BaseRefPropertyDetailAdapter":
+        init_response: BaseResponsePropertyAdapter,
+        response_data_prop: Union[BaseRefPropertyDetailAdapter, List[BaseRefPropertyDetailAdapter]],
+    ) -> BaseRefPropertyDetailAdapter:
         print(f"[DEBUG in _ensure_data_structure_when_object_strategy] response_data_prop: {response_data_prop}")
         assert isinstance(response_data_prop, BaseRefPropertyDetailAdapter)
         assert isinstance(
@@ -68,9 +71,9 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
 
     def _generate_response(
         self,
-        init_response: "BaseResponsePropertyAdapter",
+        init_response: BaseResponsePropertyAdapter,
         property_value: "BaseReferenceConfigProperty",
-    ) -> Union["BaseRefPropertyDetailAdapter", List["BaseRefPropertyDetailAdapter"]]:
+    ) -> Union[BaseRefPropertyDetailAdapter, List[BaseRefPropertyDetailAdapter]]:
         if property_value.is_empty():
             return self._adapter_factory.generate_property_details().generate_empty_response()
         print(f"[DEBUG in _generate_response] property_value: {property_value}")
@@ -87,9 +90,9 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
 
     def _generate_response_from_data(
         self,
-        init_response: "BaseResponsePropertyAdapter",
+        init_response: BaseResponsePropertyAdapter,
         resp_prop_data: Union["BaseReferenceConfigProperty", "BaseReferenceConfig"],
-    ) -> Union["BaseRefPropertyDetailAdapter", List["BaseRefPropertyDetailAdapter"]]:
+    ) -> Union[BaseRefPropertyDetailAdapter, List[BaseRefPropertyDetailAdapter]]:
 
         def _handle_list_type_data(
             data: BaseReferenceConfigProperty,
@@ -375,7 +378,7 @@ class BaseReferencialConfig(BaseAPIDocConfig):
     def _reference_object_type(self) -> Type["BaseReferenceConfig"]:
         pass
 
-    def process_has_ref_request_parameters(self) -> List["BaseRequestParameterAdapter"]:
+    def process_has_ref_request_parameters(self) -> List[BaseRequestParameterAdapter]:
         request_body_params = self.get_schema_ref()
         parameters: List[BaseRequestParameterAdapter] = []
         for param_name, param_props in request_body_params.properties.items():
@@ -423,8 +426,8 @@ class BaseReferencialConfig(BaseAPIDocConfig):
 
     def process_response_from_reference(
         self,
-        init_response: Optional["BaseResponsePropertyAdapter"] = None,
-    ) -> "BaseResponsePropertyAdapter":
+        init_response: Optional[BaseResponsePropertyAdapter] = None,
+    ) -> BaseResponsePropertyAdapter:
         if not init_response:
             init_response = self._adapter_factory.generate_response_props().initial_response_data()  # type: ignore[assignment]
         response = self.get_schema_ref().process_reference_object(init_response=init_response)  # type: ignore[arg-type]
@@ -438,8 +441,8 @@ class BaseReferencialConfig(BaseAPIDocConfig):
         return response
 
     def _process_empty_body_response(
-        self, response_columns_setting: List["BaseRefPropertyDetailAdapter"]
-    ) -> List["BaseRefPropertyDetailAdapter"]:
+        self, response_columns_setting: List[BaseRefPropertyDetailAdapter]
+    ) -> List[BaseRefPropertyDetailAdapter]:
         new_response_columns_setting = []
         for resp_column in response_columns_setting:
             # element self
@@ -488,7 +491,7 @@ class _BaseRequestParameter(BaseReferencialConfig):
         pass
 
     @abstractmethod
-    def to_adapter_data_model(self) -> "BaseRequestParameterAdapter":
+    def to_adapter_data_model(self) -> BaseRequestParameterAdapter:
         pass
 
 
@@ -514,8 +517,8 @@ class BaseReferenceConfigProperty(BaseReferencialConfig):
     @abstractmethod
     def process_response_from_data(
         self,
-        init_response: Optional["BaseResponsePropertyAdapter"] = None,
-    ) -> "BaseResponsePropertyAdapter":
+        init_response: Optional[BaseResponsePropertyAdapter] = None,
+    ) -> BaseResponsePropertyAdapter:
         pass
 
 
@@ -534,9 +537,9 @@ class BaseReferenceConfig(BaseAPIDocConfig):
     @abstractmethod
     def process_reference_object(
         self,
-        init_response: "BaseResponsePropertyAdapter",
+        init_response: BaseResponsePropertyAdapter,
         empty_body_key: str = "",
-    ) -> "BaseResponsePropertyAdapter":
+    ) -> BaseResponsePropertyAdapter:
         pass
 
 
@@ -608,14 +611,14 @@ class _BaseAPIConfigWithMethod(BaseAPIDocConfig, ABC):
         pass
 
     @abstractmethod
-    def process_api_parameters(self, http_method: str) -> List["BaseRequestParameterAdapter"]:
+    def process_api_parameters(self, http_method: str) -> List[BaseRequestParameterAdapter]:
         pass
 
     def _initial_request_parameters_model(
         self,
         _data: List[Union[_BaseRequestParameter, BaseHttpConfigV2]],
         not_ref_data: List[_BaseRequestParameter],
-    ) -> List["BaseRequestParameterAdapter"]:
+    ) -> List[BaseRequestParameterAdapter]:
         has_ref_in_schema_param = list(filter(lambda p: p.has_ref() != "", _data))
         if has_ref_in_schema_param:
             # TODO: Ensure the value maps this condition is really only one
@@ -626,7 +629,7 @@ class _BaseAPIConfigWithMethod(BaseAPIDocConfig, ABC):
             handled_parameters = [p.to_adapter_data_model() for p in not_ref_data]
         return handled_parameters
 
-    def process_responses(self) -> "BaseResponsePropertyAdapter":
+    def process_responses(self) -> BaseResponsePropertyAdapter:
         print(f"[DEBUG in src.process_responses] self.responses: {self.responses}")
         assert self.exist_in_response(status_code=200) is True
         status_200_response = self.get_response(status_code=200)
@@ -679,81 +682,3 @@ class BaseAPIConfig(BaseAPIDocConfig):
     @abstractmethod
     def deserialize(self, data: dict) -> "BaseAPIConfig":
         pass
-
-
-# The tmp data model for final result to convert as PyMock-API
-@dataclass
-class BasePropertyDetailAdapter(metaclass=ABCMeta):
-    name: str = field(default_factory=str)
-    required: bool = False
-    value_type: Optional[str] = None
-    format: Optional[dict] = None
-    items: Optional[List["BasePropertyDetailAdapter"]] = None
-
-    def serialize(self) -> dict:
-        data = {
-            "name": self.name,
-            "required": self.required,
-            "type": self.value_type,
-            "format": self.format,
-            "items": [item.serialize() for item in self.items] if self.items else None,
-        }
-        return self._clear_empty_values(data)
-
-    def _clear_empty_values(self, data):
-        new_data = {}
-        for k, v in data.items():
-            if v is not None:
-                new_data[k] = v
-        return new_data
-
-    @abstractmethod
-    def to_pymock_api_config(self) -> Union[PyMockRequestProperty, PyMockResponseProperty]:
-        pass
-
-
-# The data models for final result which would be converted as the data models of PyMock-API configuration
-@dataclass
-class BaseRequestParameterAdapter(BasePropertyDetailAdapter, ABC):
-    items: Optional[List["BaseRequestParameterAdapter"]] = None  # type: ignore[assignment]
-    default: Optional[Any] = None
-
-    @classmethod
-    @abstractmethod
-    def deserialize_by_prps(
-        cls, name: str = "", required: bool = True, value_type: str = "", default: Any = None, items: List = []
-    ) -> "BaseRequestParameterAdapter":
-        pass
-
-
-# The base data model for request and response
-@dataclass
-class BaseRefPropertyDetailAdapter(BasePropertyDetailAdapter, ABC):
-    items: Optional[List["BaseRefPropertyDetailAdapter"]] = None  # type: ignore[assignment]
-    is_empty: Optional[bool] = None
-
-    @staticmethod
-    @abstractmethod
-    def generate_empty_response() -> "BaseRefPropertyDetailAdapter":
-        pass
-
-
-# Just for temporarily use in data process
-@dataclass
-class BaseResponsePropertyAdapter(metaclass=ABCMeta):
-    data: List[BaseRefPropertyDetailAdapter] = field(default_factory=list)
-
-    @staticmethod
-    @abstractmethod
-    def initial_response_data() -> "BaseRefPropertyDetailAdapter":
-        pass
-
-
-# The tmp data model for final result to convert as PyMock-API
-@dataclass
-class BaseAPIAdapter(Transferable, ABC):
-    path: str = field(default_factory=str)
-    http_method: str = field(default_factory=str)
-    parameters: List[BaseRequestParameterAdapter] = field(default_factory=list)
-    response: Optional[BaseResponsePropertyAdapter] = None
-    tags: Optional[List[str]] = None
