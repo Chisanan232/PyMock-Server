@@ -55,7 +55,7 @@ PARSE_V3_OPENAPI_ENTIRE_APIS_TEST_CASE = V3_OPENAPI_API_DOC_CONFIG_TEST_CASE.eac
 PARSE_V3_OPENAPI_RESPONSES_TEST_CASE = V3_OPENAPI_API_DOC_CONFIG_TEST_CASE.entire_api_http_response
 
 
-class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
+class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
 
     @pytest.fixture(scope="function")
     @abstractmethod
@@ -397,7 +397,7 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
         assert resp == expected_value
 
 
-class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
+class BaseReferencialConfigTestSuite(BaseAPIDocConfigTestSuite):
 
     @pytest.fixture(scope="function")
     @abstractmethod
@@ -554,7 +554,7 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
         assert new_response_config == expect_result
 
 
-class TestTmpResponsePropertyModel(BaseTmpRefDataModelTestSuite):
+class TestReferenceConfigProperty(BaseReferencialConfigTestSuite):
 
     @pytest.fixture(scope="function")
     def under_test(self) -> ReferenceConfigProperty:
@@ -606,7 +606,7 @@ class TestTmpResponsePropertyModel(BaseTmpRefDataModelTestSuite):
         assert under_test.is_empty() == expect_result
 
 
-class TestTmpRequestParameterModel(BaseTmpRefDataModelTestSuite):
+class TestRequestParameter(BaseReferencialConfigTestSuite):
 
     @pytest.fixture(scope="function")
     def under_test(self) -> RequestParameter:
@@ -665,7 +665,7 @@ class TestTmpRequestParameterModel(BaseTmpRefDataModelTestSuite):
         assert re.search(r".{1,64}no ref.{1,64}", str(exc_info.value), re.IGNORECASE)
 
 
-class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
+class TestReferenceConfig(BaseAPIDocConfigTestSuite):
 
     @pytest.fixture(scope="function")
     def under_test(self) -> ReferenceConfig:
@@ -709,7 +709,7 @@ class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
         assert response_config == expected_value
 
 
-class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
+class BaseAPIConfigWithMethodTestSuite(BaseAPIDocConfigTestSuite, ABC):
 
     @pytest.mark.parametrize(
         ("openapi_doc_data", "entire_openapi_config", "doc_version", "schema_key", "api_data_model"),
@@ -831,7 +831,7 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
         pass
 
 
-class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
+class TestAPIConfigWithMethodV2(BaseAPIConfigWithMethodTestSuite):
 
     @pytest.fixture(scope="function")
     def under_test(self) -> APIConfigWithMethodV2:
@@ -885,7 +885,7 @@ class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
         return HttpConfigV2.deserialize(resp_200)
 
 
-class TestTmpAPIDetailConfigV3(BaseTmpAPIDetailConfigTestSuite):
+class TestAPIConfigWithMethodV3(BaseAPIConfigWithMethodTestSuite):
 
     @pytest.fixture(scope="function")
     def under_test(self) -> APIConfigWithMethodV3:
@@ -966,7 +966,7 @@ class TestTmpAPIDetailConfigV3(BaseTmpAPIDetailConfigTestSuite):
         return status_200_response_setting
 
 
-class TestPropertyDetail:
+class TestPropertyDetailAdapter:
 
     @pytest.mark.parametrize(
         ("strategy", "expected_type"),
