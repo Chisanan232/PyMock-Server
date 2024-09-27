@@ -23,7 +23,7 @@ from .cmd_args import (
 )
 from .enums import OpenAPIVersion
 from .openapi.config import (
-    BaseOpenAPIDocumentConfig,
+    BaseAPIDocumentConfig,
     OpenAPIDocumentConfig,
     SwaggerAPIDocumentConfig,
     get_api_doc_version,
@@ -110,7 +110,7 @@ class deserialize_args:
         return DeserializeParsedArgs.subcommand_pull(args)
 
 
-def deserialize_openapi_doc_config(data: dict) -> BaseOpenAPIDocumentConfig:
+def deserialize_openapi_doc_config(data: dict) -> BaseAPIDocumentConfig:
     if get_api_doc_version(data) is OpenAPIVersion.V2:
         return SwaggerAPIDocumentConfig().deserialize(data)
     else:

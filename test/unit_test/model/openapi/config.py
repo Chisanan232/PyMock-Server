@@ -17,19 +17,19 @@ from pymock_api.model.openapi._model_adapter import (
     ResponsePropertyAdapter,
 )
 from pymock_api.model.openapi.base_config import (
-    BaseTmpDataModel,
-    _BaseTmpAPIDtailConfig,
+    BaseAPIDocConfig,
+    _BaseAPIConfigWithMethod,
     set_component_definition,
 )
 from pymock_api.model.openapi.config import (
+    APIConfig,
+    APIConfigWithMethodV2,
+    APIConfigWithMethodV3,
+    HttpConfigV2,
     OpenAPIDocumentConfig,
+    ReferenceConfigProperty,
+    RequestParameter,
     SwaggerAPIDocumentConfig,
-    TmpAPIConfig,
-    TmpAPIDtailConfigV2,
-    TmpAPIDtailConfigV3,
-    TmpHttpConfigV2,
-    TmpReferenceConfigPropertyModel,
-    TmpRequestParameterModel,
 )
 from pymock_api.model.openapi.content_type import ContentType
 
@@ -59,7 +59,7 @@ class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
         pass
 
     @pytest.mark.parametrize("openapi_doc_data", [])
-    def test_deserialize(self, openapi_doc_data: Union[dict, BaseTmpDataModel], data_model: Transferable):
+    def test_deserialize(self, openapi_doc_data: Union[dict, BaseAPIDocConfig], data_model: Transferable):
         self._initial(data=data_model)
         deserialized_data = data_model.deserialize(data=openapi_doc_data)
         assert deserialized_data
@@ -75,7 +75,7 @@ class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _verify_result(self, data: Transferable, og_data: Union[dict, BaseTmpDataModel]) -> None:
+    def _verify_result(self, data: Transferable, og_data: Union[dict, BaseAPIDocConfig]) -> None:
         pass
 
     @abstractmethod
@@ -103,7 +103,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         entire_openapi_config: dict,
         doc_version: OpenAPIVersion,
         schema_key: str,
-        api_data_model: _BaseTmpAPIDtailConfig,
+        api_data_model: _BaseAPIConfigWithMethod,
     ):
         # Previous process
         set_openapi_version(doc_version)
@@ -122,7 +122,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         data.parameters = []
         data.response = {}
 
-    def _verify_result(self, data: APIAdapter, og_data: _BaseTmpAPIDtailConfig) -> None:
+    def _verify_result(self, data: APIAdapter, og_data: _BaseAPIConfigWithMethod) -> None:
         # TODO: Remove this deprecated test criteria if it ensure
         # def _get_api_param(name: str) -> Optional[dict]:
         #     swagger_api_params = og_data["parameters"]
@@ -140,9 +140,9 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         #     print(f"[DEBUG in test] param: {param}")
         #     assert len(data.parameters) == len(param[0].get_schema_ref().properties)
         # else:
-        if isinstance(og_data, TmpAPIDtailConfigV3):
+        if isinstance(og_data, APIConfigWithMethodV3):
             request_body = og_data.request_body
-            has_ref_params: List[TmpRequestParameterModel] = (
+            has_ref_params: List[RequestParameter] = (
                 list(filter(lambda p: p.has_ref(), og_data.parameters)) if og_data.parameters else None
             )
             if request_body:
@@ -254,23 +254,23 @@ class TestSwaggerAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                 #     assert api_param.default == one_swagger_api_param["schema"]["default"]
 
     def _given_props(self, data_model: OpenAPIDocumentConfig) -> None:
-        params = TmpRequestParameterModel()
+        params = RequestParameter()
         params.name = "arg1"
         params.required = False
         params.value_type = "str"
         params.default = "default_value_pytest"
 
-        api_with_one_method = TmpAPIDtailConfigV2()
+        api_with_one_method = APIConfigWithMethodV2()
         api_with_one_method.parameters = [params]
         api_with_one_method.responses = {
-            HTTPStatus.OK: TmpHttpConfigV2(
-                schema=TmpReferenceConfigPropertyModel(
+            HTTPStatus.OK: HttpConfigV2(
+                schema=ReferenceConfigProperty(
                     value_type="str",
                 )
             )
         }
 
-        apis = TmpAPIConfig()
+        apis = APIConfig()
         apis.api = {HTTPMethod.POST: api_with_one_method}
 
         data_model.paths = {"/test/v1/foo-home": apis}
@@ -311,7 +311,7 @@ class TestSwaggerAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                 assert api_param.default == param_data_from.default
             assert HTTPStatus.OK in expect_api_config.responses.keys()
             response = expect_api_config.responses[HTTPStatus.OK]
-            assert isinstance(response, TmpHttpConfigV2)
+            assert isinstance(response, HttpConfigV2)
             assert api_details.http.response.properties == []
 
     @pytest.mark.parametrize(
@@ -360,7 +360,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                 if api.http_method.upper() == "GET":
                     expected_parameters = 0
                     api_req_params_data_model = list(
-                        map(lambda e: TmpRequestParameterModel().deserialize(e), api_http_details.get("parameters", []))
+                        map(lambda e: RequestParameter().deserialize(e), api_http_details.get("parameters", []))
                     )
                     for param in api_req_params_data_model:
                         if param.has_ref():
@@ -375,12 +375,12 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                             filter(lambda b: b in request_body["content"].keys(), ["application/json", "*/*"])
                         )
                         assert len(data_format) == 1
-                        req_body_model = TmpRequestParameterModel().deserialize(request_body["content"][data_format[0]])
+                        req_body_model = RequestParameter().deserialize(request_body["content"][data_format[0]])
                         assert len(api.parameters) == len(req_body_model.get_schema_ref().properties.keys())
                     else:
                         expected_parameters = 0
                         api_req_params_data_model = list(
-                            map(lambda e: TmpRequestParameterModel().deserialize(e), api_http_details["parameters"])
+                            map(lambda e: RequestParameter().deserialize(e), api_http_details["parameters"])
                         )
                         for param in api_req_params_data_model:
                             if param.has_ref():
@@ -390,23 +390,23 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                         assert len(api.parameters) == expected_parameters
 
     def _given_props(self, data_model: OpenAPIDocumentConfig) -> None:
-        params = TmpRequestParameterModel()
+        params = RequestParameter()
         params.name = "arg1"
         params.required = False
         params.value_type = "str"
         params.default = "default_value_pytest"
 
-        api_with_one_method = TmpAPIDtailConfigV2()
+        api_with_one_method = APIConfigWithMethodV2()
         api_with_one_method.parameters = [params]
         api_with_one_method.responses = {
-            HTTPStatus.OK: TmpHttpConfigV2(
-                schema=TmpReferenceConfigPropertyModel(
+            HTTPStatus.OK: HttpConfigV2(
+                schema=ReferenceConfigProperty(
                     value_type="str",
                 )
             )
         }
 
-        apis = TmpAPIConfig()
+        apis = APIConfig()
         apis.api = {HTTPMethod.POST: api_with_one_method}
 
         data_model.paths = {"/test/v1/foo-home": apis}
@@ -447,7 +447,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                 assert api_param.default == param_data_from.default
             assert HTTPStatus.OK in expect_api_config.responses.keys()
             response = expect_api_config.responses[HTTPStatus.OK]
-            assert isinstance(response, TmpHttpConfigV2)
+            assert isinstance(response, HttpConfigV2)
             assert api_details.http.response.properties == []
 
     @pytest.mark.parametrize(
@@ -479,7 +479,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                 if api.http_method.upper() == "GET":
                     expected_parameters = 0
                     api_req_params_data_model = list(
-                        map(lambda e: TmpRequestParameterModel().deserialize(e), api_http_details.get("parameters", []))
+                        map(lambda e: RequestParameter().deserialize(e), api_http_details.get("parameters", []))
                     )
                     for param in api_req_params_data_model:
                         if param.has_ref():
@@ -494,12 +494,12 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                             filter(lambda b: b in request_body["content"].keys(), ["application/json", "*/*"])
                         )
                         assert len(data_format) == 1
-                        req_body_model = TmpRequestParameterModel().deserialize(request_body["content"][data_format[0]])
+                        req_body_model = RequestParameter().deserialize(request_body["content"][data_format[0]])
                         assert len(api.parameters) == len(req_body_model.get_schema_ref().properties.keys())
                     else:
                         expected_parameters = 0
                         api_req_params_data_model = list(
-                            map(lambda e: TmpRequestParameterModel().deserialize(e), api_http_details["parameters"])
+                            map(lambda e: RequestParameter().deserialize(e), api_http_details["parameters"])
                         )
                         for param in api_req_params_data_model:
                             if param.has_ref():

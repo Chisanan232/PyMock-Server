@@ -3,7 +3,7 @@ from typing import Union
 
 from ..._utils import JSON
 from ..._utils.api_client import URLLibHTTPClient
-from ...model import BaseOpenAPIDocumentConfig, deserialize_openapi_doc_config
+from ...model import BaseAPIDocumentConfig, deserialize_openapi_doc_config
 from ...model.cmd_args import SubcmdPullArguments
 from .._common.component import SavingConfigComponent
 from ..component import BaseSubCmdComponent
@@ -33,7 +33,7 @@ class SubCmdPullComponent(BaseSubCmdComponent):
         api_config = openapi_doc_config.to_api_config(base_url=args.base_url)
         self._saving_config_component.serialize_and_save(cmd_args=args, api_config=api_config)
 
-    def _get_openapi_doc_config(self, url: str = "", config_file: Union[str, Path] = "") -> BaseOpenAPIDocumentConfig:
+    def _get_openapi_doc_config(self, url: str = "", config_file: Union[str, Path] = "") -> BaseAPIDocumentConfig:
         openapi_doc_config: dict = {}
         if url:
             openapi_doc_config = self._api_client.request(method="GET", url=url)

@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from pymock_api.model import (
-    BaseOpenAPIDocumentConfig,
+    BaseAPIDocumentConfig,
     DeserializeParsedArgs,
     OpenAPIDocumentConfig,
     SwaggerAPIDocumentConfig,
@@ -107,9 +107,7 @@ def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
         (OpenAPIDocumentConfig, {"openapi": "version info", "some key": "some value"}),
     ],
 )
-def test_deserialize_openapi_doc_config(
-    expect_running_data_model: Type[BaseOpenAPIDocumentConfig], data: Dict[str, str]
-):
+def test_deserialize_openapi_doc_config(expect_running_data_model: Type[BaseAPIDocumentConfig], data: Dict[str, str]):
     with patch(
         f"pymock_api.model.{expect_running_data_model.__name__}.deserialize"
     ) as mock_deserialize_api_doc_config_function:

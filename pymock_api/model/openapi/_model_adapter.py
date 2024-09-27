@@ -12,8 +12,8 @@ from .base_config import (
     BaseRefPropertyDetailAdapter,
     BaseRequestParameterAdapter,
     BaseResponsePropertyAdapter,
-    _BaseTmpAPIDtailConfig,
-    _BaseTmpRequestParameterModel,
+    _BaseAPIConfigWithMethod,
+    _BaseRequestParameter,
     _Default_Required,
 )
 
@@ -45,7 +45,7 @@ class PropertyDetailAdapter(BaseRefPropertyDetailAdapter):
 
 @dataclass
 class RequestParameterAdapter(BaseRequestParameterAdapter):
-    items: Optional[List[Union["BaseRequestParameterAdapter", _BaseTmpRequestParameterModel]]] = None
+    items: Optional[List[Union["BaseRequestParameterAdapter", _BaseRequestParameter]]] = None
     default: Optional[Any] = None
 
     def __post_init__(self) -> None:
@@ -54,12 +54,12 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
         if self.value_type:
             self.value_type = self._convert_value_type()
 
-    def _convert_items(self) -> List[Union["BaseRequestParameterAdapter", _BaseTmpRequestParameterModel]]:
-        items: List[Union["BaseRequestParameterAdapter", _BaseTmpRequestParameterModel]] = []
+    def _convert_items(self) -> List[Union["BaseRequestParameterAdapter", _BaseRequestParameter]]:
+        items: List[Union["BaseRequestParameterAdapter", _BaseRequestParameter]] = []
         print(f"[DEBUG in RequestParameter._convert_items] items: {items}")
         for item in self.items or []:
             print(f"[DEBUG in RequestParameter._convert_items] item: {item}")
-            assert isinstance(item, (BaseRequestParameterAdapter, _BaseTmpRequestParameterModel))
+            assert isinstance(item, (BaseRequestParameterAdapter, _BaseRequestParameter))
             items.append(item)
         return items
 
@@ -81,7 +81,7 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
 
     def to_pymock_api_config(self) -> PyMockRequestProperty:
 
-        def to_items(item_data: Union[BaseRequestParameterAdapter, _BaseTmpRequestParameterModel]) -> IteratorItem:
+        def to_items(item_data: Union[BaseRequestParameterAdapter, _BaseRequestParameter]) -> IteratorItem:
             if isinstance(item_data, RequestParameterAdapter):
                 return IteratorItem(
                     name=item_data.name,
@@ -89,7 +89,7 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
                     value_type=item_data.value_type,
                     items=[to_items(i) for i in (item_data.items or [])],
                 )
-            elif isinstance(item_data, _BaseTmpRequestParameterModel):
+            elif isinstance(item_data, _BaseRequestParameter):
                 return IteratorItem(
                     name=item_data.name,
                     required=item_data.required,
@@ -129,15 +129,15 @@ class APIAdapter(BaseAPIAdapter):
     tags: Optional[List[str]] = None
 
     @classmethod
-    def generate(cls, api_path: str, http_method: str, detail: _BaseTmpAPIDtailConfig) -> "APIAdapter":
+    def generate(cls, api_path: str, http_method: str, detail: _BaseAPIConfigWithMethod) -> "APIAdapter":
         api = APIAdapter()
         api.path = api_path
         api.http_method = http_method
         api.deserialize(data=detail)
         return api
 
-    def deserialize(self, data: _BaseTmpAPIDtailConfig) -> "APIAdapter":  # type: ignore[override]
-        api_config: _BaseTmpAPIDtailConfig
+    def deserialize(self, data: _BaseAPIConfigWithMethod) -> "APIAdapter":  # type: ignore[override]
+        api_config: _BaseAPIConfigWithMethod
         api_config = data
         self.parameters = api_config.process_api_parameters(http_method=self.http_method)  # type: ignore[assignment]
         self.response = api_config.process_responses()  # type: ignore[assignment]

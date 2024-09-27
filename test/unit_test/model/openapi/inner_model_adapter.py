@@ -12,20 +12,20 @@ from pymock_api.model.openapi._model_adapter import (
     ResponsePropertyAdapter,
 )
 from pymock_api.model.openapi.base_config import (
-    BaseTmpDataModel,
-    BaseTmpRefDataModel,
-    _BaseTmpAPIDtailConfig,
+    BaseAPIDocConfig,
+    BaseReferencialConfig,
+    _BaseAPIConfigWithMethod,
     set_component_definition,
 )
 from pymock_api.model.openapi.config import (
-    TmpAPIDtailConfigV2,
-    TmpAPIDtailConfigV3,
-    TmpConfigReferenceModel,
-    TmpHttpConfigV2,
-    TmpHttpConfigV3,
-    TmpReferenceConfigPropertyModel,
-    TmpRequestParameterModel,
-    TmpRequestSchemaModel,
+    APIConfigWithMethodV2,
+    APIConfigWithMethodV3,
+    HttpConfigV2,
+    HttpConfigV3,
+    ReferenceConfig,
+    ReferenceConfigProperty,
+    RequestParameter,
+    RequestSchema,
 )
 from pymock_api.model.openapi.content_type import ContentType
 
@@ -59,7 +59,7 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
 
     @pytest.fixture(scope="function")
     @abstractmethod
-    def under_test(self) -> BaseTmpDataModel:
+    def under_test(self) -> BaseAPIDocConfig:
         pass
 
     @pytest.mark.parametrize(
@@ -67,8 +67,8 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
     )
     def test_generate_response(
         self,
-        under_test: BaseTmpRefDataModel,
-        api_response_detail: TmpReferenceConfigPropertyModel,
+        under_test: BaseReferencialConfig,
+        api_response_detail: ReferenceConfigProperty,
         entire_config: dict,
     ):
         # Pre-process
@@ -318,7 +318,7 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
         ],
     )
     def test_generate_response_from_data(
-        self, under_test: BaseTmpRefDataModel, test_response_data: dict, expected_value: str
+        self, under_test: BaseReferencialConfig, test_response_data: dict, expected_value: str
     ):
         # Pre-process
         if test_response_data.get("type", "array") == "array":
@@ -379,7 +379,7 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
                     },
                 }
             )
-        test_response_data_model = TmpReferenceConfigPropertyModel.deserialize(test_response_data)
+        test_response_data_model = ReferenceConfigProperty.deserialize(test_response_data)
 
         # Run target
         resp = under_test._generate_response_from_data(
@@ -401,20 +401,20 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
 
     @pytest.fixture(scope="function")
     @abstractmethod
-    def under_test(self) -> BaseTmpRefDataModel:
+    def under_test(self) -> BaseReferencialConfig:
         pass
 
     @pytest.mark.parametrize(("under_test", "expect_result"), [])
     @abstractmethod
-    def test_has_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+    def test_has_ref(self, under_test: BaseReferencialConfig, expect_result: str):
         assert under_test.has_ref() == expect_result
 
     @pytest.mark.parametrize(("under_test", "expect_result"), [])
     @abstractmethod
-    def test_get_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+    def test_get_ref(self, under_test: BaseReferencialConfig, expect_result: str):
         assert under_test.get_ref() == expect_result
 
-    def test_get_schema_ref_with_not_exist_ref(self, under_test: BaseTmpRefDataModel):
+    def test_get_schema_ref_with_not_exist_ref(self, under_test: BaseReferencialConfig):
         with pytest.raises(ValueError) as exc_info:
             under_test.get_schema_ref()
         assert re.search(r"no ref", str(exc_info.value), re.IGNORECASE)
@@ -546,7 +546,7 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
     )
     def test__process_empty_body_response(
         self,
-        under_test: BaseTmpRefDataModel,
+        under_test: BaseReferencialConfig,
         ut_response_config: List[PropertyDetailAdapter],
         expect_result: List[PropertyDetailAdapter],
     ):
@@ -557,91 +557,87 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
 class TestTmpResponsePropertyModel(BaseTmpRefDataModelTestSuite):
 
     @pytest.fixture(scope="function")
-    def under_test(self) -> TmpReferenceConfigPropertyModel:
-        return TmpReferenceConfigPropertyModel()
+    def under_test(self) -> ReferenceConfigProperty:
+        return ReferenceConfigProperty()
 
     @pytest.mark.parametrize(
         ("under_test", "expect_result"),
         [
-            (TmpReferenceConfigPropertyModel(ref=None), ""),
-            (TmpReferenceConfigPropertyModel(ref=""), ""),
-            (TmpReferenceConfigPropertyModel(ref="reference value"), "ref"),
-            (TmpReferenceConfigPropertyModel(additionalProperties=TmpReferenceConfigPropertyModel(ref=None)), ""),
-            (TmpReferenceConfigPropertyModel(additionalProperties=TmpReferenceConfigPropertyModel(ref="")), ""),
+            (ReferenceConfigProperty(ref=None), ""),
+            (ReferenceConfigProperty(ref=""), ""),
+            (ReferenceConfigProperty(ref="reference value"), "ref"),
+            (ReferenceConfigProperty(additionalProperties=ReferenceConfigProperty(ref=None)), ""),
+            (ReferenceConfigProperty(additionalProperties=ReferenceConfigProperty(ref="")), ""),
             (
-                TmpReferenceConfigPropertyModel(
-                    additionalProperties=TmpReferenceConfigPropertyModel(ref="reference value")
-                ),
+                ReferenceConfigProperty(additionalProperties=ReferenceConfigProperty(ref="reference value")),
                 "additionalProperties",
             ),
         ],
     )
-    def test_has_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+    def test_has_ref(self, under_test: BaseReferencialConfig, expect_result: str):
         super().test_has_ref(under_test, expect_result)
 
     @pytest.mark.parametrize(
         ("under_test", "expect_result"),
         [
-            (TmpReferenceConfigPropertyModel(ref="reference value"), "reference value"),
+            (ReferenceConfigProperty(ref="reference value"), "reference value"),
             (
-                TmpReferenceConfigPropertyModel(
-                    additionalProperties=TmpReferenceConfigPropertyModel(ref="reference value")
-                ),
+                ReferenceConfigProperty(additionalProperties=ReferenceConfigProperty(ref="reference value")),
                 "reference value",
             ),
         ],
     )
-    def test_get_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+    def test_get_ref(self, under_test: BaseReferencialConfig, expect_result: str):
         super().test_get_ref(under_test, expect_result)
 
     @pytest.mark.parametrize(
         ("under_test", "expect_result"),
         [
-            (TmpReferenceConfigPropertyModel(), True),
-            (TmpReferenceConfigPropertyModel(value_type=None), True),
-            (TmpReferenceConfigPropertyModel(ref=None), True),
-            (TmpReferenceConfigPropertyModel(value_type=""), True),
-            (TmpReferenceConfigPropertyModel(ref=""), True),
-            (TmpReferenceConfigPropertyModel(value_type="data type", ref=""), False),
-            (TmpReferenceConfigPropertyModel(value_type=None, ref="reference value"), False),
+            (ReferenceConfigProperty(), True),
+            (ReferenceConfigProperty(value_type=None), True),
+            (ReferenceConfigProperty(ref=None), True),
+            (ReferenceConfigProperty(value_type=""), True),
+            (ReferenceConfigProperty(ref=""), True),
+            (ReferenceConfigProperty(value_type="data type", ref=""), False),
+            (ReferenceConfigProperty(value_type=None, ref="reference value"), False),
         ],
     )
-    def test_is_empty(self, under_test: TmpReferenceConfigPropertyModel, expect_result: str):
+    def test_is_empty(self, under_test: ReferenceConfigProperty, expect_result: str):
         assert under_test.is_empty() == expect_result
 
 
 class TestTmpRequestParameterModel(BaseTmpRefDataModelTestSuite):
 
     @pytest.fixture(scope="function")
-    def under_test(self) -> TmpRequestParameterModel:
-        return TmpRequestParameterModel()
+    def under_test(self) -> RequestParameter:
+        return RequestParameter()
 
     @pytest.mark.parametrize(
         ("under_test", "expect_result"),
         [
-            (TmpRequestParameterModel(schema=None), ""),
-            (TmpRequestParameterModel(schema=TmpRequestSchemaModel(ref=None)), ""),
-            (TmpRequestParameterModel(schema=TmpRequestSchemaModel(ref="")), ""),
-            (TmpRequestParameterModel(schema=TmpRequestSchemaModel(ref="reference value")), "schema"),
+            (RequestParameter(schema=None), ""),
+            (RequestParameter(schema=RequestSchema(ref=None)), ""),
+            (RequestParameter(schema=RequestSchema(ref="")), ""),
+            (RequestParameter(schema=RequestSchema(ref="reference value")), "schema"),
         ],
     )
-    def test_has_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+    def test_has_ref(self, under_test: BaseReferencialConfig, expect_result: str):
         super().test_has_ref(under_test, expect_result)
 
     @pytest.mark.parametrize(
         ("under_test", "expect_result"),
         [
-            (TmpRequestParameterModel(schema=TmpRequestSchemaModel(ref="reference value")), "reference value"),
+            (RequestParameter(schema=RequestSchema(ref="reference value")), "reference value"),
         ],
     )
-    def test_get_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+    def test_get_ref(self, under_test: BaseReferencialConfig, expect_result: str):
         super().test_get_ref(under_test, expect_result)
 
     @pytest.mark.parametrize(
         ("openapi_doc_data", "entire_openapi_config"), PARSE_V2_OPENAPI_REQUEST_PARAMETERS_WITH_REFERENCE_INFO_TEST_CASE
     )
     def test_process_has_ref_request_parameters_with_valid_value(
-        self, under_test: TmpRequestParameterModel, openapi_doc_data: dict, entire_openapi_config: dict
+        self, under_test: RequestParameter, openapi_doc_data: dict, entire_openapi_config: dict
     ):
         # Pre-process
         set_component_definition(entire_openapi_config.get("definitions", {}))
@@ -658,7 +654,7 @@ class TestTmpRequestParameterModel(BaseTmpRefDataModelTestSuite):
 
     @pytest.mark.parametrize("openapi_doc_data", PARSE_FAIL_V2_OPENAPI_REQUEST_PARAMETERS_NO_REFERENCE_INFO_TEST_CASE)
     def test_process_has_ref_request_parameters_with_invalid_value(
-        self, under_test: TmpRequestParameterModel, openapi_doc_data: dict
+        self, under_test: RequestParameter, openapi_doc_data: dict
     ):
         with pytest.raises(ValueError) as exc_info:
             # Run target function
@@ -672,8 +668,8 @@ class TestTmpRequestParameterModel(BaseTmpRefDataModelTestSuite):
 class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
 
     @pytest.fixture(scope="function")
-    def under_test(self) -> TmpConfigReferenceModel:
-        return TmpConfigReferenceModel()
+    def under_test(self) -> ReferenceConfig:
+        return ReferenceConfig()
 
     @pytest.mark.parametrize(
         ("strategy", "test_response_data", "expected_value"),
@@ -685,7 +681,7 @@ class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
             # ),
             (
                 ResponseStrategy.OBJECT,
-                TmpConfigReferenceModel(value_type="object"),
+                ReferenceConfig(value_type="object"),
                 # {"type": "object"},
                 ResponsePropertyAdapter(
                     data=[
@@ -704,7 +700,7 @@ class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
     def test__process_reference_object_with_empty_body_response(
         self,
         strategy: ResponseStrategy,
-        test_response_data: TmpConfigReferenceModel,
+        test_response_data: ReferenceConfig,
         expected_value: ResponsePropertyAdapter,
     ):
         response_config = test_response_data.process_reference_object(
@@ -722,12 +718,12 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
     @abstractmethod
     def test_process_api_parameters(
         self,
-        under_test: _BaseTmpAPIDtailConfig,
+        under_test: _BaseAPIConfigWithMethod,
         openapi_doc_data: dict,
         entire_openapi_config: dict,
         doc_version: OpenAPIVersion,
         schema_key: str,
-        api_data_model: _BaseTmpAPIDtailConfig,
+        api_data_model: _BaseAPIConfigWithMethod,
     ):
         print(f"[DEBUG in test__process_api_params] ")
         # Pre-process
@@ -750,7 +746,7 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
         pass
 
     @pytest.mark.parametrize(("api_detail", "entire_config"), [])
-    def test_process_responses(self, under_test: _BaseTmpAPIDtailConfig, api_detail: dict, entire_config: dict):
+    def test_process_responses(self, under_test: _BaseAPIConfigWithMethod, api_detail: dict, entire_config: dict):
         # Pre-process
         set_openapi_version(self._api_doc_version)
         set_component_definition(entire_config.get(self._common_objects_yaml_schema, {}))
@@ -821,7 +817,7 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
         #                         assert item_value == "empty value"
 
     @abstractmethod
-    def _deserialize_as_response_model(self, resp_200: dict) -> TmpHttpConfigV2:
+    def _deserialize_as_response_model(self, resp_200: dict) -> HttpConfigV2:
         pass
 
     @property
@@ -838,8 +834,8 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
 class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
 
     @pytest.fixture(scope="function")
-    def under_test(self) -> TmpAPIDtailConfigV2:
-        return TmpAPIDtailConfigV2()
+    def under_test(self) -> APIConfigWithMethodV2:
+        return APIConfigWithMethodV2()
 
     @pytest.mark.parametrize(
         ("openapi_doc_data", "entire_openapi_config", "doc_version", "schema_key", "api_data_model"),
@@ -847,12 +843,12 @@ class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
     )
     def test_process_api_parameters(
         self,
-        under_test: TmpAPIDtailConfigV2,
+        under_test: APIConfigWithMethodV2,
         openapi_doc_data: dict,
         entire_openapi_config: dict,
         doc_version: OpenAPIVersion,
         schema_key: str,
-        api_data_model: TmpAPIDtailConfigV2,
+        api_data_model: APIConfigWithMethodV2,
     ):
         super().test_process_api_parameters(
             under_test=under_test,
@@ -870,7 +866,7 @@ class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
         assert False not in type_checksum
 
     @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
-    def test_process_responses(self, under_test: _BaseTmpAPIDtailConfig, api_detail: dict, entire_config: dict):
+    def test_process_responses(self, under_test: _BaseAPIConfigWithMethod, api_detail: dict, entire_config: dict):
         super().test_process_responses(
             under_test=under_test,
             api_detail=api_detail,
@@ -885,15 +881,15 @@ class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
     def _common_objects_yaml_schema(self) -> str:
         return "definitions"
 
-    def _deserialize_as_response_model(self, resp_200: dict) -> TmpHttpConfigV2:
-        return TmpHttpConfigV2.deserialize(resp_200)
+    def _deserialize_as_response_model(self, resp_200: dict) -> HttpConfigV2:
+        return HttpConfigV2.deserialize(resp_200)
 
 
 class TestTmpAPIDetailConfigV3(BaseTmpAPIDetailConfigTestSuite):
 
     @pytest.fixture(scope="function")
-    def under_test(self) -> TmpAPIDtailConfigV3:
-        return TmpAPIDtailConfigV3()
+    def under_test(self) -> APIConfigWithMethodV3:
+        return APIConfigWithMethodV3()
 
     @pytest.mark.parametrize(
         ("openapi_doc_data", "entire_openapi_config", "doc_version", "schema_key", "api_data_model"),
@@ -901,12 +897,12 @@ class TestTmpAPIDetailConfigV3(BaseTmpAPIDetailConfigTestSuite):
     )
     def test_process_api_parameters(
         self,
-        under_test: TmpAPIDtailConfigV3,
+        under_test: APIConfigWithMethodV3,
         openapi_doc_data: dict,
         entire_openapi_config: dict,
         doc_version: OpenAPIVersion,
         schema_key: str,
-        api_data_model: TmpAPIDtailConfigV3,
+        api_data_model: APIConfigWithMethodV3,
     ):
         super().test_process_api_parameters(
             under_test=under_test,
@@ -925,12 +921,12 @@ class TestTmpAPIDetailConfigV3(BaseTmpAPIDetailConfigTestSuite):
                 request_body = openapi_doc_data.get("requestBody", {})
                 data_format = list(filter(lambda b: b in request_body["content"].keys(), ["application/json", "*/*"]))
                 assert len(data_format) == 1
-                req_body_model = TmpRequestParameterModel().deserialize(request_body["content"][data_format[0]])
+                req_body_model = RequestParameter().deserialize(request_body["content"][data_format[0]])
                 assert len(parameters) == len(req_body_model.get_schema_ref().properties.keys())
             elif "parameters" in openapi_doc_data.keys():
                 all_params = []
                 for param in openapi_doc_data["parameters"]:
-                    req_body_model = TmpRequestParameterModel().deserialize(param)
+                    req_body_model = RequestParameter().deserialize(param)
                     if req_body_model.has_ref():
                         all_params.extend(list(req_body_model.get_schema_ref().properties.keys()))
                     else:
@@ -942,7 +938,7 @@ class TestTmpAPIDetailConfigV3(BaseTmpAPIDetailConfigTestSuite):
             assert False not in type_checksum
 
     @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V3_OPENAPI_RESPONSES_TEST_CASE)
-    def test_process_responses(self, under_test: _BaseTmpAPIDtailConfig, api_detail: dict, entire_config: dict):
+    def test_process_responses(self, under_test: _BaseAPIConfigWithMethod, api_detail: dict, entire_config: dict):
         super().test_process_responses(
             under_test=under_test,
             api_detail=api_detail,
@@ -957,8 +953,8 @@ class TestTmpAPIDetailConfigV3(BaseTmpAPIDetailConfigTestSuite):
     def _common_objects_yaml_schema(self) -> str:
         return "components"
 
-    def _deserialize_as_response_model(self, resp_200: dict) -> TmpHttpConfigV2:
-        v3_http_config = TmpHttpConfigV3.deserialize(resp_200)
+    def _deserialize_as_response_model(self, resp_200: dict) -> HttpConfigV2:
+        v3_http_config = HttpConfigV3.deserialize(resp_200)
         resp_format: List[ContentType] = list(
             filter(
                 lambda ct: v3_http_config.exist_setting(content_type=ct) is not None,

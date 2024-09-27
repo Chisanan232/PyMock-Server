@@ -3,7 +3,8 @@ from dataclasses import dataclass, field
 from http import HTTPMethod, HTTPStatus
 from typing import Any, Dict, List, Optional, Type, Union, cast
 
-from .. import APIConfig, MockAPIs
+from .. import APIConfig as PyMockAPI_APIConfig
+from .. import MockAPIs
 from ..api_config import BaseConfig
 from ..enums import OpenAPIVersion
 from ._base import (
@@ -21,21 +22,21 @@ from ._model_adapter import (
 )
 from .base_config import (
     BaseAPIAdapter,
+    BaseAPIConfig,
+    BaseAPIConfigWithMethodV2,
+    BaseAPIConfigWithMethodV3,
+    BaseAPIDocConfig,
+    BaseHttpConfigV2,
+    BaseHttpConfigV3,
+    BaseReferenceConfig,
+    BaseReferenceConfigProperty,
     BaseRefPropertyDetailAdapter,
     BaseRequestParameterAdapter,
+    BaseRequestSchema,
     BaseResponsePropertyAdapter,
-    BaseTmpDataModel,
-    TmpAPIConfigInterface,
-    TmpAPIDtailConfigV2Interface,
-    TmpAPIDtailConfigV3Interface,
-    TmpConfigReferenceModelInterface,
-    TmpHttpConfigV2Interface,
-    TmpHttpConfigV3Interface,
-    TmpReferenceConfigPropertyModelInterface,
-    TmpRequestSchemaModelInterface,
     _BaseAdapterFactory,
-    _BaseTmpAPIDtailConfig,
-    _BaseTmpRequestParameterModel,
+    _BaseAPIConfigWithMethod,
+    _BaseRequestParameter,
     _Default_Required,
     set_component_definition,
 )
@@ -58,7 +59,7 @@ class AdapterFactory(_BaseAdapterFactory):
 
 
 @dataclass
-class TmpRequestSchemaModel(TmpRequestSchemaModelInterface):
+class RequestSchema(BaseRequestSchema):
     title: Optional[str] = None
     value_type: Optional[str] = None
     default: Optional[Any] = None
@@ -66,7 +67,7 @@ class TmpRequestSchemaModel(TmpRequestSchemaModelInterface):
 
     _adapter_factory = AdapterFactory()
 
-    def deserialize(self, data: dict) -> "TmpRequestSchemaModel":
+    def deserialize(self, data: dict) -> "RequestSchema":
         self.title = data.get("title", None)
         self.value_type = ensure_type_is_python_type(data["type"]) if data.get("type", None) else None
         self.default = data.get("default", None)
@@ -81,35 +82,35 @@ class TmpRequestSchemaModel(TmpRequestSchemaModelInterface):
         return self.ref
 
     @property
-    def _reference_object_type(self) -> Type["TmpConfigReferenceModel"]:
-        return TmpConfigReferenceModel
+    def _reference_object_type(self) -> Type["ReferenceConfig"]:
+        return ReferenceConfig
 
 
 @dataclass
-class TmpRequestParameterModel(_BaseTmpRequestParameterModel):
+class RequestParameter(_BaseRequestParameter):
     name: str = field(default_factory=str)
     required: bool = False
     value_type: Optional[str] = None
     format: Optional[dict] = None
     default: Optional[Any] = None
-    items: Optional[List["TmpRequestParameterModel"]] = None  # type: ignore[assignment]
-    schema: Optional["TmpRequestSchemaModel"] = None  # type: ignore[assignment]
+    items: Optional[List["RequestParameter"]] = None  # type: ignore[assignment]
+    schema: Optional["RequestSchema"] = None  # type: ignore[assignment]
 
     _adapter_factory = AdapterFactory()
 
-    def _convert_items(self) -> List[Union["TmpRequestParameterModel"]]:
+    def _convert_items(self) -> List[Union["RequestParameter"]]:
         assert self.items
         if True in list(  # type: ignore[comparison-overlap]
-            filter(lambda e: not isinstance(e, (dict, TmpRequestParameterModel)), self.items)
+            filter(lambda e: not isinstance(e, (dict, RequestParameter)), self.items)
         ):
             raise ValueError(
                 f"There are some invalid data type item in the property *items*. Current *items*: {self.items}"
             )
         return [
-            TmpRequestParameterModel().deserialize(i) if isinstance(i, dict) else i for i in (self.items or [])  # type: ignore[arg-type]
+            RequestParameter().deserialize(i) if isinstance(i, dict) else i for i in (self.items or [])  # type: ignore[arg-type]
         ]
 
-    def deserialize(self, data: dict) -> "TmpRequestParameterModel":
+    def deserialize(self, data: dict) -> "RequestParameter":
         print(f"[DEBUG in TmpRequestParameterModel.deserialize] data: {data}")
         self.name = data.get("name", "")
         self.required = data.get("required", True)
@@ -121,7 +122,7 @@ class TmpRequestParameterModel(_BaseTmpRequestParameterModel):
 
         schema = data.get("schema", {})
         if schema:
-            self.schema = TmpRequestSchemaModel().deserialize(schema)
+            self.schema = RequestSchema().deserialize(schema)
 
         print(f"[DEBUG in TmpRequestParameterModel.deserialize] self.schema: {self.schema}")
         self.value_type = ensure_type_is_python_type(data.get("type", "")) or (
@@ -148,36 +149,36 @@ class TmpRequestParameterModel(_BaseTmpRequestParameterModel):
         )
 
     @property
-    def _reference_object_type(self) -> Type["TmpConfigReferenceModel"]:
-        return TmpConfigReferenceModel
+    def _reference_object_type(self) -> Type["ReferenceConfig"]:
+        return ReferenceConfig
 
 
 @dataclass
-class TmpReferenceConfigPropertyModel(TmpReferenceConfigPropertyModelInterface):
+class ReferenceConfigProperty(BaseReferenceConfigProperty):
     title: Optional[str] = None
     value_type: Optional[str] = None
     format: Optional[str] = None  # For OpenAPI v3
     default: Optional[str] = None  # For OpenAPI v3 request part
     enums: List[str] = field(default_factory=list)
     ref: Optional[str] = None
-    items: Optional["TmpReferenceConfigPropertyModel"] = None
-    additionalProperties: Optional["TmpReferenceConfigPropertyModel"] = None
+    items: Optional["ReferenceConfigProperty"] = None
+    additionalProperties: Optional["ReferenceConfigProperty"] = None
 
     _adapter_factory = AdapterFactory()
 
     @classmethod
-    def deserialize(cls, data: Dict) -> "TmpReferenceConfigPropertyModel":
+    def deserialize(cls, data: Dict) -> "ReferenceConfigProperty":
         print(f"[DEBUG in TmpResponsePropertyModel.deserialize] data: {data}")
-        return TmpReferenceConfigPropertyModel(
+        return ReferenceConfigProperty(
             title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else None,
             format="",  # TODO: Support in next PR
             default=data.get("default", None),
             enums=[],  # TODO: Support in next PR
             ref=data.get("$ref", None),
-            items=TmpReferenceConfigPropertyModel.deserialize(data["items"]) if data.get("items", None) else None,
+            items=ReferenceConfigProperty.deserialize(data["items"]) if data.get("items", None) else None,
             additionalProperties=(
-                TmpReferenceConfigPropertyModel.deserialize(data["additionalProperties"])
+                ReferenceConfigProperty.deserialize(data["additionalProperties"])
                 if data.get("additionalProperties", None)
                 else None
             ),
@@ -219,28 +220,28 @@ class TmpReferenceConfigPropertyModel(TmpReferenceConfigPropertyModelInterface):
         return init_response
 
     @property
-    def _reference_object_type(self) -> Type["TmpConfigReferenceModel"]:
-        return TmpConfigReferenceModel
+    def _reference_object_type(self) -> Type["ReferenceConfig"]:
+        return ReferenceConfig
 
 
 @dataclass
-class TmpConfigReferenceModel(TmpConfigReferenceModelInterface):
+class ReferenceConfig(BaseReferenceConfig):
     title: Optional[str] = None
     value_type: str = field(default_factory=str)  # unused
     required: Optional[list[str]] = None
-    properties: Dict[str, TmpReferenceConfigPropertyModelInterface] = field(default_factory=dict)
+    properties: Dict[str, BaseReferenceConfigProperty] = field(default_factory=dict)
 
     _adapter_factory = AdapterFactory()
 
     @classmethod
-    def deserialize(cls, data: Dict) -> "TmpConfigReferenceModel":
+    def deserialize(cls, data: Dict) -> "ReferenceConfig":
         print(f"[DEBUG in TmpResponseModel.deserialize] data: {data}")
         properties = {}
         properties_config: dict = data.get("properties", {})
         if properties_config:
             for k, v in properties_config.items():
-                properties[k] = TmpReferenceConfigPropertyModel.deserialize(v)
-        return TmpConfigReferenceModel(
+                properties[k] = ReferenceConfigProperty.deserialize(v)
+        return ReferenceConfig(
             title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else "",
             required=data.get("required", None),
@@ -253,7 +254,7 @@ class TmpConfigReferenceModel(TmpConfigReferenceModelInterface):
         empty_body_key: str = "",
     ) -> "ResponsePropertyAdapter":
         # assert response_schema_ref
-        response_schema_properties: Dict[str, TmpReferenceConfigPropertyModelInterface] = self.properties or {}
+        response_schema_properties: Dict[str, BaseReferenceConfigProperty] = self.properties or {}
         print(f"[DEBUG in process_response_from_reference] response_schema_ref: {self}")
         print(f"[DEBUG in process_response_from_reference] response_schema_properties: {response_schema_properties}")
         if response_schema_properties:
@@ -322,17 +323,17 @@ class TmpConfigReferenceModel(TmpConfigReferenceModelInterface):
 
 
 @dataclass
-class TmpHttpConfigV2(TmpHttpConfigV2Interface):
-    schema: Optional[TmpReferenceConfigPropertyModelInterface] = None
+class HttpConfigV2(BaseHttpConfigV2):
+    schema: Optional[BaseReferenceConfigProperty] = None
 
     _adapter_factory = AdapterFactory()
 
     @classmethod
-    def deserialize(cls, data: dict) -> "TmpHttpConfigV2":
+    def deserialize(cls, data: dict) -> "HttpConfigV2":
         print(f"[DEBUG in TmpHttpConfigV2.deserialize] data: {data}")
         assert data is not None and isinstance(data, dict)
-        return TmpHttpConfigV2(
-            schema=TmpReferenceConfigPropertyModel.deserialize(data.get("schema", {})),
+        return HttpConfigV2(
+            schema=ReferenceConfigProperty.deserialize(data.get("schema", {})),
             # content=data.get("content", None),
         )
 
@@ -345,24 +346,24 @@ class TmpHttpConfigV2(TmpHttpConfigV2Interface):
         return self.schema.ref  # type: ignore[union-attr]
 
     @property
-    def _reference_object_type(self) -> Type["TmpConfigReferenceModel"]:
-        return TmpConfigReferenceModel
+    def _reference_object_type(self) -> Type["ReferenceConfig"]:
+        return ReferenceConfig
 
 
 @dataclass
-class TmpHttpConfigV3(TmpHttpConfigV3Interface):
-    content: Optional[Dict[ContentType, TmpHttpConfigV2Interface]] = None
+class HttpConfigV3(BaseHttpConfigV3):
+    content: Optional[Dict[ContentType, BaseHttpConfigV2]] = None
 
     _adapter_factory = AdapterFactory()
 
     @classmethod
-    def deserialize(cls, data: dict) -> "TmpHttpConfigV3":
+    def deserialize(cls, data: dict) -> "HttpConfigV3":
         print(f"[DEBUG in TmpHttpConfigV3.deserialize] data: {data}")
         assert data is not None and isinstance(data, dict)
-        content_config: Dict[ContentType, TmpHttpConfigV2Interface] = {}
+        content_config: Dict[ContentType, BaseHttpConfigV2] = {}
         for content_type, config in data.get("content", {}).items() or {}:
-            content_config[ContentType.to_enum(content_type)] = TmpHttpConfigV2.deserialize(config)
-        return TmpHttpConfigV3(content=content_config)
+            content_config[ContentType.to_enum(content_type)] = HttpConfigV2.deserialize(config)
+        return HttpConfigV3(content=content_config)
 
     def exist_setting(self, content_type: Union[str, ContentType]) -> Optional[ContentType]:
         content_type = ContentType.to_enum(content_type) if isinstance(content_type, str) else content_type
@@ -371,7 +372,7 @@ class TmpHttpConfigV3(TmpHttpConfigV3Interface):
         else:
             return None
 
-    def get_setting(self, content_type: Union[str, ContentType]) -> TmpHttpConfigV2:
+    def get_setting(self, content_type: Union[str, ContentType]) -> HttpConfigV2:
         content_type = self.exist_setting(content_type=content_type)  # type: ignore[assignment]
         assert content_type is not None
         if self.content and len(self.content.values()) > 0:
@@ -380,60 +381,60 @@ class TmpHttpConfigV3(TmpHttpConfigV3Interface):
 
 
 @dataclass
-class TmpAPIDtailConfigV2(TmpAPIDtailConfigV2Interface):
+class APIConfigWithMethodV2(BaseAPIConfigWithMethodV2):
     produces: List[str] = field(default_factory=list)
-    responses: Dict[HTTPStatus, TmpHttpConfigV2Interface] = field(default_factory=dict)
+    responses: Dict[HTTPStatus, BaseHttpConfigV2] = field(default_factory=dict)
 
     _adapter_factory = AdapterFactory()
 
     @classmethod
-    def deserialize(cls, data: dict) -> "TmpAPIDtailConfigV2":
-        deserialized_data = cast(TmpAPIDtailConfigV2, super().deserialize(data))
+    def deserialize(cls, data: dict) -> "APIConfigWithMethodV2":
+        deserialized_data = cast(APIConfigWithMethodV2, super().deserialize(data))
         deserialized_data.produces = data.get("produces", [])
         return deserialized_data
 
     @staticmethod
-    def _deserialize_request(data: dict) -> TmpRequestParameterModel:
-        return TmpRequestParameterModel().deserialize(data)
+    def _deserialize_request(data: dict) -> RequestParameter:
+        return RequestParameter().deserialize(data)
 
     @staticmethod
-    def _deserialize_response(data: dict) -> TmpHttpConfigV2Interface:
-        return TmpHttpConfigV2.deserialize(data)
+    def _deserialize_response(data: dict) -> BaseHttpConfigV2:
+        return HttpConfigV2.deserialize(data)
 
     def process_api_parameters(self, http_method: str) -> List["RequestParameterAdapter"]:  # type: ignore[override]
         return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type, return-value]
 
-    def _deserialize_empty_reference_config_properties(self) -> TmpReferenceConfigPropertyModelInterface:
-        return TmpReferenceConfigPropertyModel.deserialize({})
+    def _deserialize_empty_reference_config_properties(self) -> BaseReferenceConfigProperty:
+        return ReferenceConfigProperty.deserialize({})
 
-    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> TmpHttpConfigV2Interface:
+    def _get_http_config(self, status_200_response: BaseAPIDocConfig) -> BaseHttpConfigV2:
         # tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
-        assert isinstance(status_200_response, TmpHttpConfigV2Interface)
+        assert isinstance(status_200_response, BaseHttpConfigV2)
         return status_200_response
 
 
 @dataclass
-class TmpAPIDtailConfigV3(TmpAPIDtailConfigV3Interface):
-    request_body: Optional[TmpHttpConfigV3Interface] = None
-    responses: Dict[HTTPStatus, TmpHttpConfigV3Interface] = field(default_factory=dict)
+class APIConfigWithMethodV3(BaseAPIConfigWithMethodV3):
+    request_body: Optional[BaseHttpConfigV3] = None
+    responses: Dict[HTTPStatus, BaseHttpConfigV3] = field(default_factory=dict)
 
     _adapter_factory = AdapterFactory()
 
     @classmethod
-    def deserialize(cls, data: dict) -> "TmpAPIDtailConfigV3":
-        deserialized_data = cast(TmpAPIDtailConfigV3, super().deserialize(data))
+    def deserialize(cls, data: dict) -> "APIConfigWithMethodV3":
+        deserialized_data = cast(APIConfigWithMethodV3, super().deserialize(data))
         deserialized_data.request_body = (
-            TmpHttpConfigV3().deserialize(data["requestBody"]) if data.get("requestBody", {}) else None
+            HttpConfigV3().deserialize(data["requestBody"]) if data.get("requestBody", {}) else None
         )
         return deserialized_data
 
     @staticmethod
-    def _deserialize_request(data: dict) -> TmpRequestParameterModel:
-        return TmpRequestParameterModel().deserialize(data)
+    def _deserialize_request(data: dict) -> RequestParameter:
+        return RequestParameter().deserialize(data)
 
     @staticmethod
-    def _deserialize_response(data: dict) -> TmpHttpConfigV3:
-        return TmpHttpConfigV3.deserialize(data)
+    def _deserialize_response(data: dict) -> HttpConfigV3:
+        return HttpConfigV3.deserialize(data)
 
     def process_api_parameters(self, http_method: str) -> List["RequestParameterAdapter"]:  # type: ignore[override]
         if http_method.upper() == "GET":
@@ -451,13 +452,13 @@ class TmpAPIDtailConfigV3(TmpAPIDtailConfigV3Interface):
                     self.parameters, self.parameters  # type: ignore[arg-type]
                 )
 
-    def _deserialize_empty_reference_config_properties(self) -> TmpReferenceConfigPropertyModelInterface:
-        return TmpReferenceConfigPropertyModel.deserialize({})
+    def _deserialize_empty_reference_config_properties(self) -> BaseReferenceConfigProperty:
+        return ReferenceConfigProperty.deserialize({})
 
-    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> TmpHttpConfigV2Interface:
+    def _get_http_config(self, status_200_response: BaseAPIDocConfig) -> BaseHttpConfigV2:
         # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
         # status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
-        assert isinstance(status_200_response, TmpHttpConfigV3Interface)
+        assert isinstance(status_200_response, BaseHttpConfigV3)
         status_200_response_model = status_200_response
         resp_value_format: List[ContentType] = list(
             filter(lambda ct: status_200_response_model.exist_setting(content_type=ct) is not None, ContentType)
@@ -467,20 +468,20 @@ class TmpAPIDtailConfigV3(TmpAPIDtailConfigV3Interface):
 
 
 @dataclass
-class TmpAPIConfig(TmpAPIConfigInterface):
-    api: Dict[HTTPMethod, _BaseTmpAPIDtailConfig] = field(default_factory=dict)
+class APIConfig(BaseAPIConfig):
+    api: Dict[HTTPMethod, _BaseAPIConfigWithMethod] = field(default_factory=dict)
 
     _adapter_factory = AdapterFactory()
 
     def __len__(self):
         return len(self.api.keys())
 
-    def deserialize(self, data: dict) -> "TmpAPIConfig":
-        initial_api_config: _BaseTmpAPIDtailConfig
+    def deserialize(self, data: dict) -> "APIConfig":
+        initial_api_config: _BaseAPIConfigWithMethod
         if get_openapi_version() is OpenAPIVersion.V2:
-            initial_api_config = TmpAPIDtailConfigV2()
+            initial_api_config = APIConfigWithMethodV2()
         else:
-            initial_api_config = TmpAPIDtailConfigV3()
+            initial_api_config = APIConfigWithMethodV3()
 
         for http_method, config in data.items():
             assert http_method.upper() in HTTPMethod
@@ -512,15 +513,15 @@ class Tag(BaseOpenAPIDataModel):
 
 
 @dataclass
-class BaseOpenAPIDocumentConfig(Transferable):
-    paths: Dict[str, TmpAPIConfig] = field(default_factory=dict)
+class BaseAPIDocumentConfig(Transferable):
+    paths: Dict[str, APIConfig] = field(default_factory=dict)
     tags: List[Tag] = field(default_factory=list)
 
-    def deserialize(self, data: Dict) -> "BaseOpenAPIDocumentConfig":
+    def deserialize(self, data: Dict) -> "BaseAPIDocumentConfig":
         self._parse_and_set_api_doc_version(data)
 
         for path, config in data.get("paths", {}).items():
-            self.paths[path] = TmpAPIConfig().deserialize(config)
+            self.paths[path] = APIConfig().deserialize(config)
         self.tags = list(map(lambda t: Tag.generate(t), data.get("tags", [])))
         self._set_common_objects(data)
 
@@ -543,8 +544,8 @@ class BaseOpenAPIDocumentConfig(Transferable):
     def _set_common_objects(self, data: Dict) -> None:
         pass
 
-    def to_api_config(self, base_url: str = "") -> APIConfig:  # type: ignore[override]
-        api_config = APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=base_url), apis={}))
+    def to_api_config(self, base_url: str = "") -> PyMockAPI_APIConfig:  # type: ignore[override]
+        api_config = PyMockAPI_APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=base_url), apis={}))
         assert api_config.apis is not None and api_config.apis.apis == {}
         for path, openapi_doc_api in self.paths.items():
             path = self._align_url_format(path)
@@ -564,7 +565,7 @@ class BaseOpenAPIDocumentConfig(Transferable):
 
 
 @dataclass
-class SwaggerAPIDocumentConfig(BaseOpenAPIDocumentConfig):
+class SwaggerAPIDocumentConfig(BaseAPIDocumentConfig):
     """
     Swagger API documentation configuration (version 2).
     """
@@ -588,7 +589,7 @@ class SwaggerAPIDocumentConfig(BaseOpenAPIDocumentConfig):
 
 
 @dataclass
-class OpenAPIDocumentConfig(BaseOpenAPIDocumentConfig):
+class OpenAPIDocumentConfig(BaseAPIDocumentConfig):
     """
     Open API documentation configuration (version 3).
     """
