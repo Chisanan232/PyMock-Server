@@ -111,7 +111,7 @@ class deserialize_args:
         return DeserializeParsedArgs.subcommand_pull(args)
 
 
-def deserialize_openapi_doc_config(data: dict) -> BaseAPIDocumentConfig:
+def deserialize_api_doc_config(data: dict) -> BaseAPIDocumentConfig:
     if get_api_doc_version(data) is OpenAPIVersion.V2:
         return SwaggerAPIDocumentConfig().deserialize(data)
     elif get_api_doc_version(data) is OpenAPIVersion.V3:

@@ -3,7 +3,7 @@ from typing import Union
 
 from ..._utils import JSON
 from ..._utils.api_client import URLLibHTTPClient
-from ...model import BaseAPIDocumentConfig, deserialize_openapi_doc_config
+from ...model import BaseAPIDocumentConfig, deserialize_api_doc_config
 from ...model.cmd_args import SubcmdPullArguments
 from .._common.component import SavingConfigComponent
 from ..component import BaseSubCmdComponent
@@ -43,4 +43,4 @@ class SubCmdPullComponent(BaseSubCmdComponent):
             raise ValueError(
                 "It must has host URL or configuration file path to get the OpenAPI documentation details."
             )
-        return deserialize_openapi_doc_config(data=openapi_doc_config)
+        return deserialize_api_doc_config(data=openapi_doc_config)

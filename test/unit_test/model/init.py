@@ -9,8 +9,8 @@ from pymock_api.model import (
     DeserializeParsedArgs,
     OpenAPIDocumentConfig,
     SwaggerAPIDocumentConfig,
+    deserialize_api_doc_config,
     deserialize_args,
-    deserialize_openapi_doc_config,
 )
 
 from ..._values import (
@@ -107,9 +107,9 @@ def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
         (OpenAPIDocumentConfig, {"openapi": "version info", "some key": "some value"}),
     ],
 )
-def test_deserialize_openapi_doc_config(expect_running_data_model: Type[BaseAPIDocumentConfig], data: Dict[str, str]):
+def test_deserialize_api_doc_config(expect_running_data_model: Type[BaseAPIDocumentConfig], data: Dict[str, str]):
     with patch(
         f"pymock_api.model.{expect_running_data_model.__name__}.deserialize"
     ) as mock_deserialize_api_doc_config_function:
-        deserialize_openapi_doc_config(data)
+        deserialize_api_doc_config(data)
         mock_deserialize_api_doc_config_function.assert_called_once_with(data)
