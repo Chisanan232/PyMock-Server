@@ -13,6 +13,7 @@ from ._base_model_adapter import (
     BaseRequestParameterAdapter,
     BaseResponsePropertyAdapter,
 )
+from ._factory import _BaseAdapterFactory
 from .content_type import ContentType
 
 ComponentDefinition: Dict[str, dict] = {}
@@ -30,24 +31,6 @@ def set_component_definition(openapi_common_objects: Dict) -> None:
 
 _PropertyDefaultRequired = namedtuple("_PropertyDefaultRequired", ("empty", "general"))
 _Default_Required: _PropertyDefaultRequired = _PropertyDefaultRequired(empty=False, general=True)
-
-
-class _BaseAdapterFactory(metaclass=ABCMeta):
-    @abstractmethod
-    def generate_property_details(self, **kwargs) -> BaseRefPropertyDetailAdapter:
-        pass
-
-    @abstractmethod
-    def generate_request_params(self, **kwargs) -> BaseRequestParameterAdapter:
-        pass
-
-    @abstractmethod
-    def generate_response_props(self, **kwargs) -> BaseResponsePropertyAdapter:
-        pass
-
-    @abstractmethod
-    def generate_api(self, **kwargs) -> BaseAPIAdapter:
-        pass
 
 
 @dataclass

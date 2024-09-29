@@ -20,6 +20,7 @@ from ._base_model_adapter import (
     BaseRequestParameterAdapter,
     BaseResponsePropertyAdapter,
 )
+from ._factory import _BaseAdapterFactory
 from ._js_handlers import ensure_type_is_python_type
 from ._model_adapter import (
     APIAdapter,
@@ -37,7 +38,6 @@ from .base_config import (
     BaseReferenceConfig,
     BaseReferenceConfigProperty,
     BaseRequestSchema,
-    _BaseAdapterFactory,
     _BaseAPIConfigWithMethod,
     _BaseRequestParameter,
     _Default_Required,
