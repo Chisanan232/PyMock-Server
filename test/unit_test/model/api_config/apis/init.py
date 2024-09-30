@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from pymock_api._utils import JSON, YAML
+from pymock_api._utils.file import Format
 from pymock_api._utils.file.operation import _BaseFileOperation
 from pymock_api.model import HTTP, MockAPI
 from pymock_api.model.api_config import ResponseProperty
@@ -14,7 +15,6 @@ from pymock_api.model.api_config.apis import (
     HTTPResponse,
     ResponseStrategy,
 )
-from pymock_api.model.enums import Format
 
 from ....._values import (
     _Test_Response_Properties,

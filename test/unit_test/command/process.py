@@ -21,6 +21,7 @@ try:
 except ImportError:
     from yaml import Dumper, Loader  # type: ignore
 
+from pymock_api._utils.file import Format
 from pymock_api._utils.file.operation import YAML
 from pymock_api.command.options import SubCommand, get_all_subcommands
 from pymock_api.command.process import (
@@ -46,7 +47,7 @@ from pymock_api.model import (
     deserialize_api_doc_config,
 )
 from pymock_api.model.api_config.apis import ResponseStrategy
-from pymock_api.model.enums import Format, SampleType
+from pymock_api.model.enums import SampleType
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (

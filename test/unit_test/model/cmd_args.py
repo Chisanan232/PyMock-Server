@@ -4,6 +4,7 @@ from typing import Type
 
 import pytest
 
+from pymock_api._utils.file import Format
 from pymock_api.model.cmd_args import (
     DeserializeParsedArgs,
     SubcmdAddArguments,
@@ -13,7 +14,7 @@ from pymock_api.model.cmd_args import (
     SubcmdRunArguments,
     SubcmdSampleArguments,
 )
-from pymock_api.model.enums import Format, SampleType
+from pymock_api.model.enums import SampleType
 
 from ..._values import (
     _API_Doc_Source,

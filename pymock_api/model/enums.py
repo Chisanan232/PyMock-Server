@@ -1,12 +1,6 @@
 from enum import Enum
 
 
-class Format(Enum):
-    TEXT: str = "text"
-    YAML: str = "yaml"
-    JSON: str = "json"
-
-
 class SampleType(Enum):
     ALL: str = "response_all"
     RESPONSE_AS_STR: str = "response_as_str"
