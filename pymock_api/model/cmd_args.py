@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import List, Optional, Union
 
 from .._utils.file import Format
-from ..model.enums import SampleType
+from ._sample import SampleType
 from .api_config.apis import ResponseStrategy
 
 

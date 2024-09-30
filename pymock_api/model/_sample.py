@@ -1,4 +1,4 @@
-from ..model.enums import SampleType
+from enum import Enum
 
 Str_Resp_API: dict = {
     "url": "/test-str-resp",
@@ -29,6 +29,14 @@ File_Content: dict = {
     "errorMessage": "OK",
     "content": "This is sample API with response value from file content.",
 }
+
+
+class SampleType(Enum):
+    ALL: str = "response_all"
+    RESPONSE_AS_STR: str = "response_as_str"
+    RESPONSE_AS_JSON: str = "response_as_json"
+    RESPONSE_WITH_FILE: str = "response_with_file"
+
 
 Mocked_APIs: dict = {
     "base": {"url": "/test/v1"},

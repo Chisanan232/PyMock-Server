@@ -5,8 +5,8 @@ import pytest
 
 from pymock_api._utils.file.operation import YAML
 from pymock_api.command.sample.component import SubCmdSampleComponent
+from pymock_api.model._sample import SampleType
 from pymock_api.model.cmd_args import SubcmdSampleArguments
-from pymock_api.model.enums import SampleType
 
 from ...._values import _Test_SubCommand_Add
 
