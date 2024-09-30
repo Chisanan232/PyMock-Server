@@ -105,7 +105,7 @@ class DeserializeParsedArgs:
 
     @classmethod
     def subcommand_add(cls, args: Namespace) -> SubcmdAddArguments:
-        args.response_strategy = ResponseStrategy.to_enum(args.response_strategy)
+        args.response_strategy = ResponseStrategy(args.response_strategy)
         if args.parameters:
             args.parameters = list(map(lambda p: json.loads(p), args.parameters))
         if args.response_value:

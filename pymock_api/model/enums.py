@@ -37,13 +37,6 @@ class ResponseStrategy(Enum):
     FILE: str = "file"
     OBJECT: str = "object"
 
-    @staticmethod
-    def to_enum(v: Union[str, "ResponseStrategy"]) -> "ResponseStrategy":
-        if isinstance(v, str):
-            return ResponseStrategy(v.lower())
-        else:
-            return v
-
 
 class ConfigLoadingOrderKey(Enum):
     APIs: str = "apis"
