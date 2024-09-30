@@ -43,7 +43,7 @@ class Format(_Config, _Checkable):
 
     def _convert_strategy(self) -> None:
         if isinstance(self.strategy, str):
-            self.strategy = FormatStrategy.to_enum(self.strategy)
+            self.strategy = FormatStrategy(self.strategy)
 
     def _convert_digit(self) -> None:
         if isinstance(self.digit, dict):
@@ -105,7 +105,7 @@ class Format(_Config, _Checkable):
 
     @_Config._clean_empty_value
     def serialize(self, data: Optional["Format"] = None) -> Optional[Dict[str, Any]]:
-        strategy: FormatStrategy = self.strategy or FormatStrategy.to_enum(self._get_prop(data, prop="strategy"))
+        strategy: FormatStrategy = self.strategy or FormatStrategy(self._get_prop(data, prop="strategy"))
 
         digit_data_model: Digit = self._get_prop(data, prop="digit")
         digit: dict = digit_data_model.serialize() if digit_data_model else None  # type: ignore[assignment]
@@ -138,7 +138,7 @@ class Format(_Config, _Checkable):
             variable.absolute_model_key = self.key
             return variable.deserialize(d)
 
-        self.strategy = FormatStrategy.to_enum(data.get("strategy", None))
+        self.strategy = FormatStrategy(data.get("strategy", None))
         if not self.strategy:
             raise ValueError("Schema key *strategy* cannot be empty.")
 
