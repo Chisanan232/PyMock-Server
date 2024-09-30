@@ -6,6 +6,7 @@ from typing import List, Union
 import pytest
 
 from pymock_api import APIConfig
+from pymock_api.exceptions import CannotParsingAPIDocumentVersion
 from pymock_api.model import MockAPI
 from pymock_api.model.api_config import _Config
 from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
@@ -34,6 +35,7 @@ from pymock_api.model.openapi.config import (
     RequestParameter,
     RequestSchema,
     SwaggerAPIDocumentConfig,
+    get_api_doc_version,
 )
 from pymock_api.model.openapi.content_type import ContentType
 
@@ -1428,3 +1430,9 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                             else:
                                 expected_parameters += 1
                         assert len(api.parameters) == expected_parameters
+
+
+def test_get_api_doc_version_with_invalid_version():
+    data = {"doesn't have key which could identify which version the API document is.": ""}
+    with pytest.raises(CannotParsingAPIDocumentVersion):
+        get_api_doc_version(data)

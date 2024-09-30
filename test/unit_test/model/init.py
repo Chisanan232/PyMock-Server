@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from pymock_api.exceptions import NotSupportAPIDocumentVersion
 from pymock_api.model import (
     BaseAPIDocumentConfig,
     DeserializeParsedArgs,
@@ -113,3 +114,17 @@ def test_deserialize_api_doc_config(expect_running_data_model: Type[BaseAPIDocum
     ) as mock_deserialize_api_doc_config_function:
         deserialize_api_doc_config(data)
         mock_deserialize_api_doc_config_function.assert_called_once_with(data)
+
+
+def test_deserialize_invalid_version_api_doc_config():
+    data = {"doesn't have key which could identify which version the API document is.": ""}
+    with patch("pymock_api.model.SwaggerAPIDocumentConfig.deserialize") as mock_swaggerapi_deserialize_func:
+        with patch("pymock_api.model.OpenAPIDocumentConfig.deserialize") as mock_openapi_deserialize_func:
+            with patch("pymock_api.model.get_api_doc_version") as mock_get_api_doc_version:
+                mock_get_api_doc_version.return_value = "Invalid API document version"
+
+                with pytest.raises(NotSupportAPIDocumentVersion):
+                    deserialize_api_doc_config(data)
+
+                mock_swaggerapi_deserialize_func.assert_not_called()
+                mock_openapi_deserialize_func.assert_not_called()
