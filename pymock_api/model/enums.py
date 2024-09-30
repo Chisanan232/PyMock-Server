@@ -14,10 +14,6 @@ class SampleType(Enum):
     RESPONSE_WITH_FILE: str = "response_with_file"
 
 
-# _PropertyDefaultRequired = namedtuple("_PropertyDefaultRequired", ("empty", "general"))
-# _Default_Required: _PropertyDefaultRequired = _PropertyDefaultRequired(empty=False, general=True)
-
-
 class ResponseStrategy(Enum):
     STRING: str = "string"
     FILE: str = "file"
