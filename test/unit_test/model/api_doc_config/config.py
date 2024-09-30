@@ -40,7 +40,7 @@ from pymock_api.model.api_doc_config.config import (
 )
 from pymock_api.model.api_doc_config.content_type import ContentType
 
-from ...model.openapi._test_case import (
+from ...model.api_doc_config._test_case import (
     DeserializeV2OpenAPIConfigTestCaseFactory,
     DeserializeV3OpenAPIConfigTestCaseFactory,
 )
