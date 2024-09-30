@@ -38,24 +38,6 @@ class ResponseStrategy(Enum):
     OBJECT: str = "object"
 
 
-class OpenAPIVersion(Enum):
-    V2: str = "OpenAPI V2"
-    V3: str = "OpenAPI V3"
-
-    @staticmethod
-    def to_enum(v: Union[str, "OpenAPIVersion"]) -> "OpenAPIVersion":
-        if isinstance(v, str):
-            if re.search(r"OpenAPI V[2-3]", v):
-                return OpenAPIVersion(v)
-            if re.search(r"2\.\d(\.\d)?.{0,8}", v):
-                return OpenAPIVersion.V2
-            if re.search(r"3\.\d(\.\d)?.{0,8}", v):
-                return OpenAPIVersion.V3
-            raise NotImplementedError(f"PyMock-API doesn't support parsing OpenAPI configuration with version '{v}'.")
-        else:
-            return v
-
-
 Default_Value_Size = ValueSize(max=10, min=1)
 Default_Digit_Range = DigitRange(integer=128, decimal=128)
 

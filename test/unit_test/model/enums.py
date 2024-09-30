@@ -7,12 +7,7 @@ from typing import Any, List, Optional, Type, Union
 import pytest
 
 from pymock_api._utils.random import DigitRange, ValueSize
-from pymock_api.model.enums import (
-    FormatStrategy,
-    OpenAPIVersion,
-    ResponseStrategy,
-    ValueFormat,
-)
+from pymock_api.model.enums import FormatStrategy, ResponseStrategy, ValueFormat
 
 from ..._test_utils import Verify
 
@@ -47,38 +42,6 @@ class TestResponseStrategy(EnumTestSuite):
     )
     def test_to_enum(self, value: Any, enum_obj: Type[ResponseStrategy]):
         super().test_to_enum(value, enum_obj)
-
-
-class TestOpenAPIVersion(EnumTestSuite):
-    @pytest.fixture(scope="function")
-    def enum_obj(self) -> Type[OpenAPIVersion]:
-        return OpenAPIVersion
-
-    @pytest.mark.parametrize(
-        "value",
-        [
-            OpenAPIVersion.V2,
-            OpenAPIVersion.V3,
-            "OpenAPI V2",
-            "OpenAPI V3",
-            "2.0",
-            "2.0.0",
-            "2.0.4",
-            "2.3.7",
-            "3.0",
-            "3.0.0",
-            "3.0.9",
-            "3.1.0",
-        ],
-    )
-    def test_to_enum(self, value: Any, enum_obj: Type[OpenAPIVersion]):
-        super().test_to_enum(value, enum_obj)
-
-    @pytest.mark.parametrize("value", ["1.0.0", "4.0.0", "invalid value"])
-    def test_invalid_enum(self, enum_obj: Type[OpenAPIVersion], value: str):
-        with pytest.raises(NotImplementedError) as exc_info:
-            enum_obj.to_enum(value)
-        assert re.search(re.escape(value), str(exc_info.value)) is not None
 
 
 class TestValueFormat(EnumTestSuite):
