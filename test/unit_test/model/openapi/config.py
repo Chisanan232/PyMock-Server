@@ -1010,7 +1010,7 @@ class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
         pass
 
 
-class TestAPI(_OpenAPIDocumentDataModelTestSuite):
+class TestAPIAdapter(_OpenAPIDocumentDataModelTestSuite):
     @pytest.fixture(scope="function")
     def data_model(self) -> APIAdapter:
         return APIAdapter()
