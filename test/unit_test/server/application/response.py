@@ -9,11 +9,10 @@ import pytest
 
 from pymock_api.exceptions import FileFormatNotSupport
 from pymock_api.model.api_config import IteratorItem, ResponseProperty
-from pymock_api.model.api_config.apis import HTTPResponse
+from pymock_api.model.api_config.apis import HTTPResponse, ResponseStrategy
 from pymock_api.model.api_config.format import Format
 from pymock_api.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_api.model.api_config.variable import Size, Variable
-from pymock_api.model.enums import ResponseStrategy
 from pymock_api.server.application.response import HTTPResponse as _HTTPResponse
 
 from ...._values import (

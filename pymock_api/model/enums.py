@@ -12,9 +12,3 @@ class SampleType(Enum):
     RESPONSE_AS_STR: str = "response_as_str"
     RESPONSE_AS_JSON: str = "response_as_json"
     RESPONSE_WITH_FILE: str = "response_with_file"
-
-
-class ResponseStrategy(Enum):
-    STRING: str = "string"
-    FILE: str = "file"
-    OBJECT: str = "object"

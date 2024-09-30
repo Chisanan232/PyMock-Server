@@ -6,8 +6,7 @@ import pytest
 
 from pymock_api.model.api_config import ResponseProperty, _Config
 from pymock_api.model.api_config._base import _HasItemsPropConfig
-from pymock_api.model.api_config.apis import HTTPResponse
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.api_config.apis import HTTPResponse, ResponseStrategy
 
 from ....._values import (
     _Test_HTTP_Resp,

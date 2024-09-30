@@ -4,11 +4,11 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from ...enums import ResponseStrategy
 from .._base import _Checkable, _Config
 from ..template._base_wrapper import _DividableOnlyTemplatableConfig
 from ..template.file import TemplateConfigPathResponse
 from ._property import BaseProperty
+from .response_strategy import ResponseStrategy
 
 
 @dataclass(eq=False)

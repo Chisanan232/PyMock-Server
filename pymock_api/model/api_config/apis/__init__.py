@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from ...._utils import YAML
 from ...._utils.file_opt import JSON
-from ...enums import Format, ResponseStrategy
+from ...enums import Format
 from .._base import _Checkable, _Config
 from ..template import TemplateConfig
 from ..template._base import _BaseTemplatableConfig
@@ -18,6 +18,7 @@ from ..template._load.process import (
 from ..template.file import TemplateConfigPathAPI, TemplateConfigPathHTTP
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
+from .response_strategy import ResponseStrategy
 
 
 @dataclass(eq=False)

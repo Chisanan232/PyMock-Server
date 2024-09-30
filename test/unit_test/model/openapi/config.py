@@ -10,7 +10,7 @@ from pymock_api import APIConfig
 from pymock_api.exceptions import CannotParsingAPIDocumentVersion
 from pymock_api.model import MockAPI, OpenAPIVersion
 from pymock_api.model.api_config import _Config
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.api_config.apis import ResponseStrategy
 from pymock_api.model.openapi._base import Transferable, set_openapi_version
 from pymock_api.model.openapi._model_adapter import (
     APIAdapter,

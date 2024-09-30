@@ -3,7 +3,8 @@ from argparse import Namespace
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
-from ..model.enums import Format, ResponseStrategy, SampleType
+from ..model.enums import Format, SampleType
+from .api_config.apis import ResponseStrategy
 
 
 @dataclass(frozen=True)

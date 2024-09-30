@@ -22,7 +22,12 @@ from pymock_api.model.api_config import (
     _Config,
 )
 from pymock_api.model.api_config._base import _HasItemsPropConfig
-from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
+from pymock_api.model.api_config.apis import (
+    APIParameter,
+    HTTPRequest,
+    HTTPResponse,
+    ResponseStrategy,
+)
 from pymock_api.model.api_config.format import Format, _HasFormatPropConfig
 from pymock_api.model.api_config.template import TemplateConfig
 from pymock_api.model.api_config.template.common import (
@@ -40,7 +45,6 @@ from pymock_api.model.api_config.template.file import (
 )
 from pymock_api.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_api.model.api_config.variable import Variable
-from pymock_api.model.enums import ResponseStrategy
 
 from ...._values import (
     _Base_URL,

@@ -45,7 +45,8 @@ from pymock_api.model import (
     SubcmdSampleArguments,
     deserialize_api_doc_config,
 )
-from pymock_api.model.enums import Format, ResponseStrategy, SampleType
+from pymock_api.model.api_config.apis import ResponseStrategy
+from pymock_api.model.enums import Format, SampleType
 from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (

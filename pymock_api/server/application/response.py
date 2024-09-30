@@ -9,7 +9,7 @@ from ..._utils import import_web_lib
 from ...exceptions import FileFormatNotSupport
 from ...model.api_config import ResponseProperty
 from ...model.api_config.apis import HTTPResponse as MockAPIHTTPResponseConfig
-from ...model.enums import ResponseStrategy
+from ...model.api_config.apis.response_strategy import ResponseStrategy
 
 
 class BaseResponse(metaclass=ABCMeta):
