@@ -67,7 +67,7 @@ class ValueFormat(Enum):
         elif self is ValueFormat.Enum:
             return RandomFromSequence.generate(enums)
         else:
-            raise ValueError("This is program bug, please report this issue.")
+            raise NotImplementedError(f"Doesn't implement how to generate the value by format {self}.")
 
     def generate_regex(
         self, enums: List[str] = [], size: ValueSize = Default_Value_Size, digit: DigitRange = Default_Digit_Range
@@ -92,7 +92,7 @@ class ValueFormat(Enum):
         elif self is ValueFormat.Enum:
             return r"(" + r"|".join([re.escape(e) for e in enums]) + r")"
         else:
-            raise ValueError("This is program bug, please report this issue.")
+            raise NotImplementedError(f"Doesn't implement what the regex expression should be with format {self}.")
 
     def _ensure_setting_value_is_valid(self, enums: List[str], size: ValueSize, digit: DigitRange) -> None:
         if self is ValueFormat.String:

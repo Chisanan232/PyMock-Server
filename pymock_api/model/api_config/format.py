@@ -232,7 +232,9 @@ class Format(_Config, _Checkable):
             format_config._current_template = self._current_template
             return format_config.value_format_is_match(data_type=data_type, value=value)
         else:
-            raise ValueError("This is program bug, please report this issue.")
+            raise NotImplementedError(
+                f"Doesn't implement how it should generate the response setting by strategy {self}."
+            )
 
     def generate_value(self, data_type: type) -> Union[str, int, bool, Decimal]:
         assert self.strategy
