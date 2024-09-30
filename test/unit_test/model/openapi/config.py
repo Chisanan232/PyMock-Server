@@ -11,20 +11,20 @@ from pymock_api.exceptions import CannotParsingAPIDocumentVersion
 from pymock_api.model import MockAPI, OpenAPIVersion
 from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.apis import ResponseStrategy
-from pymock_api.model.openapi._base import Transferable, set_openapi_version
-from pymock_api.model.openapi._model_adapter import (
+from pymock_api.model.api_doc_config._base import Transferable, set_openapi_version
+from pymock_api.model.api_doc_config._model_adapter import (
     APIAdapter,
     PropertyDetailAdapter,
     RequestParameterAdapter,
     ResponsePropertyAdapter,
 )
-from pymock_api.model.openapi.base_config import (
+from pymock_api.model.api_doc_config.base_config import (
     BaseAPIDocConfig,
     BaseReferencialConfig,
     _BaseAPIConfigWithMethod,
     set_component_definition,
 )
-from pymock_api.model.openapi.config import (
+from pymock_api.model.api_doc_config.config import (
     APIConfig,
     APIConfigWithMethodV2,
     APIConfigWithMethodV3,
@@ -38,7 +38,7 @@ from pymock_api.model.openapi.config import (
     SwaggerAPIDocumentConfig,
     get_api_doc_version,
 )
-from pymock_api.model.openapi.content_type import ContentType
+from pymock_api.model.api_doc_config.content_type import ContentType
 
 from ...model.openapi._test_case import (
     DeserializeV2OpenAPIConfigTestCaseFactory,

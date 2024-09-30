@@ -13,8 +13,8 @@ from ...model import (
 )
 from ...model.api_config.apis import APIParameter as MockedAPIParameter
 from ...model.api_config.apis.response_strategy import ResponseStrategy
-from ...model.openapi._base_model_adapter import BaseAPIAdapter as SwaggerAPI
-from ...model.openapi._base_model_adapter import (
+from ...model.api_doc_config._base_model_adapter import BaseAPIAdapter as SwaggerAPI
+from ...model.api_doc_config._base_model_adapter import (
     BaseRequestParameterAdapter as SwaggerAPIParameter,
 )
 from ..component import BaseSubCmdComponent

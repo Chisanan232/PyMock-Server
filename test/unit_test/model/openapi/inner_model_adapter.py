@@ -3,7 +3,7 @@ from typing import Type, Union
 import pytest
 
 from pymock_api.model.api_config.apis import ResponseStrategy
-from pymock_api.model.openapi._model_adapter import PropertyDetailAdapter
+from pymock_api.model.api_doc_config._model_adapter import PropertyDetailAdapter
 
 
 class TestPropertyDetailAdapter:
