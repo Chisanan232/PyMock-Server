@@ -8,7 +8,7 @@ try:
 except ImportError:
     pass
 
-from pymock_api._utils.file_opt import JSON, YAML, _BaseFileOperation
+from pymock_api._utils.file.operation import JSON, YAML, _BaseFileOperation
 
 
 class _FileOptTestSpec(metaclass=ABCMeta):
@@ -54,7 +54,7 @@ class TestYAML(_FileOptTestSpec):
 
     @property
     def _load_function_path(self) -> str:
-        return "pymock_api._utils.file_opt.load"
+        return "pymock_api._utils.file.operation.load"
 
 
 class TestJSON(_FileOptTestSpec):
@@ -68,4 +68,4 @@ class TestJSON(_FileOptTestSpec):
 
     @property
     def _load_function_path(self) -> str:
-        return "pymock_api._utils.file_opt.json.loads"
+        return "pymock_api._utils.file.operation.json.loads"

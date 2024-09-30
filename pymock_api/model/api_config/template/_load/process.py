@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Dict, Optional
 
 from pymock_api._utils import YAML
-from pymock_api._utils.file_opt import _BaseFileOperation
+from pymock_api._utils.file.operation import _BaseFileOperation
 
 from .. import TemplateConfig
 from .._base import _BaseTemplatableConfig, _Config

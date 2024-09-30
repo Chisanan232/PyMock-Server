@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pymock_api._utils.file_opt import YAML
+from pymock_api._utils.file.operation import YAML
 from pymock_api.command.sample.component import SubCmdSampleComponent
 from pymock_api.model.cmd_args import SubcmdSampleArguments
 from pymock_api.model.enums import SampleType

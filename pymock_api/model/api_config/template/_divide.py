@@ -4,8 +4,9 @@ from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Optional, Union
 
+from pymock_api._utils.file.operation import _BaseFileOperation
+
 from ...._utils import YAML
-from ...._utils.file_opt import _BaseFileOperation
 from .._base import _Config
 from . import TemplateConfig
 from ._base import _BaseTemplatableConfig

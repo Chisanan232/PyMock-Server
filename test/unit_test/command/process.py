@@ -21,7 +21,7 @@ try:
 except ImportError:
     from yaml import Dumper, Loader  # type: ignore
 
-from pymock_api._utils.file_opt import YAML
+from pymock_api._utils.file.operation import YAML
 from pymock_api.command.options import SubCommand, get_all_subcommands
 from pymock_api.command.process import (
     BaseCommandProcessor,
