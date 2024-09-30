@@ -34,7 +34,10 @@ class EnumTestSuite(metaclass=ABCMeta):
         pass
 
     def test_to_enum(self, value: Any, enum_obj: Type[Enum]):
-        result = enum_obj.to_enum(value)
+        if hasattr(enum_obj, "to_enum"):
+            result = enum_obj.to_enum(value)
+        else:
+            result = enum_obj(value)
         assert isinstance(result, enum_obj)
 
 
