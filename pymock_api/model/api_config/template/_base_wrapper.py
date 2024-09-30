@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from .._base import _Config
 from ._base import _BaseTemplatableConfig
 from ._divide import BeDividedableAsTemplatableConfig, TemplatableConfigDividable
-from ._load import TemplatableConfigLoadable
+from ._load.process import TemplatableConfigLoadable
 
 
 class _OperatingTemplatableConfig(_Config, TemplatableConfigLoadable, TemplatableConfigDividable):

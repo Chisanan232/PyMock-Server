@@ -27,7 +27,7 @@ from .template._divide import (
     DivideStrategy,
     TemplatableConfigDividable,
 )
-from .template._load import (
+from .template._load.process import (
     TemplatableConfigLoadable,
     TemplateConfigLoader,
     _BaseTemplateConfigLoader,

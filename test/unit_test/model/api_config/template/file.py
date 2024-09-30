@@ -11,7 +11,7 @@ from pymock_api.model.api_config import (
     _Config,
 )
 from pymock_api.model.api_config.template import TemplateConfig
-from pymock_api.model.api_config.template._load import (
+from pymock_api.model.api_config.template._load.process import (
     TemplateConfigLoaderByApply,
     TemplateConfigLoaderByScanFile,
     TemplateConfigLoaderWithAPIConfig,
