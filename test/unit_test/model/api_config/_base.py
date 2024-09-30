@@ -38,8 +38,9 @@ from pymock_api.model.api_config.template.file import (
     TemplateConfigPathValues,
     TemplateFileConfig,
 )
+from pymock_api.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_api.model.api_config.variable import Variable
-from pymock_api.model.enums import FormatStrategy, ResponseStrategy, ValueFormat
+from pymock_api.model.enums import ResponseStrategy
 
 from ...._values import (
     _Base_URL,

@@ -13,8 +13,8 @@ from pymock_api.model.api_config.template.common import (
     TemplateFormatConfig,
     TemplateFormatEntity,
 )
+from pymock_api.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_api.model.api_config.variable import Digit, Size, Variable
-from pymock_api.model.enums import FormatStrategy, ValueFormat
 
 from ....._test_utils import Verify
 from ....._values import _Customize_Format_With_Self_Vars, _General_Format

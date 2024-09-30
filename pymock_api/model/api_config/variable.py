@@ -2,8 +2,8 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from ..._utils.random import DigitRange, RandomInteger, ValueSize
-from ..enums import ValueFormat
 from ._base import _Checkable, _Config
+from .value import ValueFormat
 
 
 @dataclass(eq=False)
