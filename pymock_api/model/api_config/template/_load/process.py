@@ -7,14 +7,10 @@ from typing import Dict, Optional
 
 from pymock_api._utils import YAML
 from pymock_api._utils.file_opt import _BaseFileOperation
-from pymock_api.model.enums import (
-    ConfigLoadingOrder,
-    ConfigLoadingOrderKey,
-    set_loading_function,
-)
 
 from .. import TemplateConfig
 from .._base import _BaseTemplatableConfig, _Config
+from .key import ConfigLoadingOrder, ConfigLoadingOrderKey, set_loading_function
 
 
 class TemplateConfigOpts(metaclass=ABCMeta):

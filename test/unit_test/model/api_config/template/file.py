@@ -11,6 +11,11 @@ from pymock_api.model.api_config import (
     _Config,
 )
 from pymock_api.model.api_config.template import TemplateConfig
+from pymock_api.model.api_config.template._load.key import (
+    ConfigLoadingOrder,
+    ConfigLoadingOrderKey,
+    set_loading_function,
+)
 from pymock_api.model.api_config.template._load.process import (
     TemplateConfigLoaderByApply,
     TemplateConfigLoaderByScanFile,
@@ -27,11 +32,6 @@ from pymock_api.model.api_config.template.file import (
     TemplateConfigPathSetting,
     TemplateConfigPathValues,
     TemplateFileConfig,
-)
-from pymock_api.model.enums import (
-    ConfigLoadingOrder,
-    ConfigLoadingOrderKey,
-    set_loading_function,
 )
 
 from ....._values import (

@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
-from ...enums import ConfigLoadingOrder
 from .._base import _Checkable, _Config
+from ._load.key import ConfigLoadingOrder
 
 
 @dataclass(eq=False)

@@ -7,13 +7,15 @@ from typing import Any, List, Optional, Type, Union
 import pytest
 
 from pymock_api._utils.random import DigitRange, ValueSize
-from pymock_api.model.enums import (
+from pymock_api.model.api_config.template._load.key import (
     ConfigLoadingOrder,
+    set_loading_function,
+)
+from pymock_api.model.enums import (
     FormatStrategy,
     OpenAPIVersion,
     ResponseStrategy,
     ValueFormat,
-    set_loading_function,
 )
 
 from ..._test_utils import Verify
