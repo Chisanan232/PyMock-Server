@@ -76,13 +76,6 @@ class ConfigLoadingOrder(Enum):
     APPLY: str = ConfigLoadingOrderKey.APPLY.value
     FILE: str = ConfigLoadingOrderKey.FILE.value
 
-    @staticmethod
-    def to_enum(v: Union[str, "ConfigLoadingOrder"]) -> "ConfigLoadingOrder":
-        if isinstance(v, str):
-            return ConfigLoadingOrder(v.lower())
-        else:
-            return v
-
     def get_loading_function(self, data_modal_key: str) -> Callable:
         return ConfigLoadingFunction[data_modal_key][self.value]
 
