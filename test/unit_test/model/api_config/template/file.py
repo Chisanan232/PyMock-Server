@@ -382,7 +382,7 @@ class TestTemplateConfigLoadable:
                 criteria = getattr(call, f"{obj[0]}_load_config")()
             criteria_order.append(criteria)
 
-        # Pre-process of setting loading function
+        # Pre-process of setting load function
         set_loading_function(data_model_key="data_modal", **mock_load_config_data)
         template_config = TemplateConfig(
             activate=True,
