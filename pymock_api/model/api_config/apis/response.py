@@ -138,8 +138,6 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
         serialized_data = super().serialize(data)
         assert serialized_data is not None
         strategy: ResponseStrategy = self.strategy or ResponseStrategy(self._get_prop(data, prop="strategy"))
-        if not strategy:
-            raise ValueError("Necessary argument *strategy* is missing.")
         if not isinstance(strategy, ResponseStrategy):
             raise TypeError("Argument *strategy* data type is invalid. It only accepts *ResponseStrategy* type value.")
         if strategy is ResponseStrategy.STRING:
@@ -205,8 +203,6 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
         super().deserialize(data)
 
         self.strategy = ResponseStrategy(data.get("strategy", None))
-        if not self.strategy:
-            raise ValueError("Schema key *strategy* cannot be empty.")
         if self.strategy is ResponseStrategy.STRING:
             self.value = data.get("value", None)
         elif self.strategy is ResponseStrategy.FILE:

@@ -117,8 +117,6 @@ class Format(_Config, _Checkable):
         customize: str = self._get_prop(data, prop="customize")
         variables: List[Variable] = self._get_prop(data, prop="variables")
         use_name: str = self._get_prop(data, prop="use_name")
-        if not strategy:
-            return None
         serialized_data = {
             "strategy": strategy.value,
             "digit": digit,
@@ -139,8 +137,6 @@ class Format(_Config, _Checkable):
             return variable.deserialize(d)
 
         self.strategy = FormatStrategy(data.get("strategy", None))
-        if not self.strategy:
-            raise ValueError("Schema key *strategy* cannot be empty.")
 
         if data.get("digit", None):
             digit_data_model = Digit()
@@ -198,9 +194,7 @@ class Format(_Config, _Checkable):
             digit = self.digit
             if digit is None:
                 digit = Digit(integer=128, decimal=128) if data_type == "big_decimal" else Digit()
-            size = self.size
-            if size is None:
-                size = Size()
+            size = Size() if self.size is None else self.size
             regex = self.strategy.to_value_format(data_type).generate_regex(
                 size=size.to_value_size(), digit=digit.to_digit_range()
             )
@@ -225,7 +219,7 @@ class Format(_Config, _Checkable):
                         if find_result[0].value_format is ValueFormat.BigDecimal
                         else Digit()
                     )
-                size = find_result[0].size
+                size = find_result[0].size  # type: ignore[assignment]
                 if size is None:
                     size = Size()
                 one_var_regex = find_result[0].value_format.generate_regex(
