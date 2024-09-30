@@ -1,7 +1,7 @@
 import re
 from abc import ABC, ABCMeta, abstractmethod
 from http import HTTPMethod, HTTPStatus
-from typing import List, Union
+from typing import List, Optional, Union
 
 import pytest
 
@@ -838,6 +838,44 @@ class BaseAPIConfigWithMethodTestSuite(BaseAPIDocConfigTestSuite, ABC):
     @abstractmethod
     def _api_doc_version(self) -> OpenAPIVersion:
         pass
+
+
+class TestHttpConfigV3:
+
+    @pytest.fixture(scope="function")
+    def data_model(self) -> HttpConfigV3:
+        return HttpConfigV3()
+
+    @pytest.mark.parametrize(
+        ("given_content_type", "find_content_type", "expect_result"),
+        [
+            (ContentType.APPLICATION_JSON, ContentType.APPLICATION_JSON, ContentType.APPLICATION_JSON),
+            (
+                ContentType.APPLICATION_OCTET_STREAM,
+                ContentType.APPLICATION_OCTET_STREAM,
+                ContentType.APPLICATION_OCTET_STREAM,
+            ),
+            (ContentType.ALL, ContentType.ALL, ContentType.ALL),
+            (ContentType.APPLICATION_OCTET_STREAM, ContentType.APPLICATION_JSON, None),
+            (ContentType.APPLICATION_JSON, ContentType.ALL, None),
+            (ContentType.ALL, ContentType.APPLICATION_OCTET_STREAM, None),
+        ],
+    )
+    def test_exist_setting(
+        self,
+        data_model: HttpConfigV3,
+        given_content_type: ContentType,
+        find_content_type: ContentType,
+        expect_result: Optional[ContentType],
+    ):
+        # given
+        data_model.content = {given_content_type: HttpConfigV2()}
+
+        # when
+        exist_content_type = data_model.exist_setting(content_type=find_content_type)
+
+        # should
+        assert exist_content_type == expect_result
 
 
 class TestAPIConfigWithMethodV2(BaseAPIConfigWithMethodTestSuite):
