@@ -8,7 +8,7 @@ from pymock_api.model.api_config.template._load.key import (
     set_loading_function,
 )
 
-from ....enums import EnumTestSuite
+from ...._enums import EnumTestSuite
 
 
 def test_set_loading_function():

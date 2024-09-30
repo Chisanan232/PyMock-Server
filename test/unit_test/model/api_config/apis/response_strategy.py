@@ -4,7 +4,7 @@ import pytest
 
 from pymock_api.model.api_config.apis import ResponseStrategy
 
-from ...enums import EnumTestSuite
+from ..._enums import EnumTestSuite
 
 
 class TestResponseStrategy(EnumTestSuite):

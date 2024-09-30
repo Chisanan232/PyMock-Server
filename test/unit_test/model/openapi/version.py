@@ -5,7 +5,7 @@ import pytest
 
 from pymock_api.model import OpenAPIVersion
 
-from ..enums import EnumTestSuite
+from .._enums import EnumTestSuite
 
 
 class TestOpenAPIVersion(EnumTestSuite):
