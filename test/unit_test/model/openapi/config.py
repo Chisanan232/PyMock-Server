@@ -622,6 +622,10 @@ class TestRequestParameter(BaseReferencialConfigTestSuite):
     def under_test(self) -> RequestParameter:
         return RequestParameter()
 
+    def test_converting_with_invalid_items(self, under_test: RequestParameter):
+        with pytest.raises(ValueError):
+            under_test.deserialize(data={"items": ["invalid data type"]})
+
     @pytest.mark.parametrize(
         ("under_test", "expect_result"),
         [

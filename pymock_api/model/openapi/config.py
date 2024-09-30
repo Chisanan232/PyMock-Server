@@ -103,9 +103,7 @@ class RequestParameter(_BaseRequestParameter):
 
     def _convert_items(self) -> List[Union["RequestParameter"]]:
         assert self.items
-        if True in list(  # type: ignore[comparison-overlap]
-            filter(lambda e: not isinstance(e, (dict, RequestParameter)), self.items)
-        ):
+        if True in list(map(lambda e: not isinstance(e, (dict, RequestParameter)), self.items)):
             raise ValueError(
                 f"There are some invalid data type item in the property *items*. Current *items*: {self.items}"
             )
