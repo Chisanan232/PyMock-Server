@@ -1,3 +1,4 @@
+import random
 import re
 from abc import ABC, ABCMeta, abstractmethod
 from http import HTTPMethod, HTTPStatus
@@ -876,6 +877,35 @@ class TestHttpConfigV3:
 
         # should
         assert exist_content_type == expect_result
+
+    @pytest.mark.parametrize(
+        "content_type", [ContentType.APPLICATION_JSON, ContentType.APPLICATION_OCTET_STREAM, ContentType.ALL]
+    )
+    def test_get_setting(self, data_model: HttpConfigV3, content_type: ContentType):
+        # given
+        content_type_setting = HttpConfigV2()
+        data_model.content = {content_type: content_type_setting}
+
+        # when
+        exist_content_type_setting = data_model.get_setting(content_type=content_type)
+
+        # should
+        assert exist_content_type_setting == content_type_setting
+
+    @pytest.mark.parametrize(
+        "content_type", [ContentType.APPLICATION_JSON, ContentType.APPLICATION_OCTET_STREAM, ContentType.ALL]
+    )
+    def test_get_setting_with_invalid_content_type(self, data_model: HttpConfigV3, content_type: ContentType):
+        # given
+        data_model.content = {content_type: HttpConfigV2()}
+
+        # when
+        not_exist_content_type = random.choice(list(filter(lambda t: t is not content_type, ContentType)))
+        with pytest.raises(ValueError) as exc_info:
+            data_model.get_setting(content_type=not_exist_content_type)
+
+        # should
+        assert re.search(r"cannot find.{0,64}content type.{0,64}", str(exc_info.value), re.IGNORECASE)
 
 
 class TestAPIConfigWithMethodV2(BaseAPIConfigWithMethodTestSuite):

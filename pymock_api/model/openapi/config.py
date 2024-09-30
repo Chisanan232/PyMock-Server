@@ -377,10 +377,10 @@ class HttpConfigV3(BaseHttpConfigV3):
 
     def get_setting(self, content_type: Union[str, ContentType]) -> HttpConfigV2:
         content_type = self.exist_setting(content_type=content_type)  # type: ignore[assignment]
-        assert content_type is not None
-        if self.content and len(self.content.values()) > 0:
-            return self.content[content_type]  # type: ignore[index, return-value]
-        raise ValueError("Cannot find the mapping setting of content type.")
+        if content_type is None:
+            raise ValueError("Cannot find the mapping setting of content type.")
+        assert self.content and len(self.content.values()) > 0
+        return self.content[content_type]  # type: ignore[index, return-value]
 
 
 @dataclass
