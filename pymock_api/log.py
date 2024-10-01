@@ -2,7 +2,7 @@ import logging
 
 
 def init_logger_config(
-    format: str = "%(asctime)s %(levelname)s %(message)s",
+    format: str = "%(asctime)s [%(levelname)s] (%(name)s): %(message)s",
     datefmt: str = "%Y-%m-%d %H:%M:%S",
     level: int = logging.WARNING,
     encoding: str = "utf-8",
