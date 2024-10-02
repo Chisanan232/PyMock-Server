@@ -91,6 +91,7 @@ class RequestSchema(BaseRequestSchema):
 @dataclass
 class RequestParameter(_BaseRequestParameter):
     name: str = field(default_factory=str)
+    query_in: Optional[str] = None
     required: bool = False
     value_type: Optional[str] = None
     format: Optional[dict] = None
@@ -113,6 +114,7 @@ class RequestParameter(_BaseRequestParameter):
     def deserialize(self, data: dict) -> "RequestParameter":
         print(f"[DEBUG in TmpRequestParameterModel.deserialize] data: {data}")
         self.name = data.get("name", "")
+        self.query_in = data.get("in", None)
         self.required = data.get("required", True)
 
         items = data.get("items", [])
