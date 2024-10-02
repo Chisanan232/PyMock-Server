@@ -7,7 +7,7 @@ DEBUG_LEVEL_LOG_DATETIME_FORMAT: str = "%Y-%m-%d %H:%M:%S UTC%z"
 def init_logger_config(
     format: str = "",
     datefmt: str = "",
-    level: int = logging.WARNING,
+    level: int = logging.INFO,
     encoding: str = "utf-8",
 ) -> None:
     if level is logging.DEBUG:
