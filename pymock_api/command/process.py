@@ -1,8 +1,10 @@
 import copy
+import logging
 import sys
 from argparse import ArgumentParser, Namespace
 from typing import List, Optional, Tuple, Type
 
+from ..log import init_logger_config
 from ..model import (
     ParserArguments,
     SubcmdAddArguments,
@@ -21,6 +23,8 @@ from .options import MockAPICommandParser, SubCommand
 from .pull.component import SubCmdPullComponent
 from .run import SubCmdRunComponent
 from .sample.component import SubCmdSampleComponent
+
+logger = logging.getLogger(__name__)
 
 _COMMAND_CHAIN: List[Type["CommandProcessor"]] = []
 
@@ -111,6 +115,7 @@ class CommandProcessor:
         return subcmd == self.responsible_subcommand
 
     def _run(self, args: ParserArguments) -> None:
+        init_logger_config()
         self._subcmd_component.process(args)
 
     def _parse_cmd_arguments(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> Namespace:
@@ -187,7 +192,7 @@ class SubCmdSample(BaseCommandProcessor):
         try:
             return deserialize_args.subcmd_sample(cmd_options)
         except KeyError:
-            print(f"❌  Invalid value of option *--sample-config-type*: {cmd_options.sample_config_type}.")
+            logger.error(f"❌  Invalid value of option *--sample-config-type*: {cmd_options.sample_config_type}.")
             sys.exit(1)
 
 
