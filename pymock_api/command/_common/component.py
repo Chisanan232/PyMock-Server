@@ -1,9 +1,13 @@
+import logging
+import pathlib
 from typing import Any, Dict, Optional
 
 from ..._utils import YAML
 from ...model.api_config import APIConfig
 from ...model.api_config.template._divide import DivideStrategy
 from ...model.cmd_args import _BaseSubCmdArgumentsSavingConfig
+
+logger = logging.getLogger(__name__)
 
 
 class SavingConfigComponent:
@@ -39,17 +43,26 @@ class SavingConfigComponent:
         self, cmd_args: _BaseSubCmdArgumentsSavingConfig, serialized_api_config: Optional[Dict[str, Any]]
     ) -> None:
         if cmd_args.dry_run:
-            self._dry_run_final_process(serialized_api_config)
+            self._dry_run_final_process(cmd_args, serialized_api_config)
         else:
             self._final_process(cmd_args, serialized_api_config)
 
     def _final_process(
         self, cmd_args: _BaseSubCmdArgumentsSavingConfig, serialized_api_config: Optional[Dict[str, Any]]
     ) -> None:
-        print("Write the API configuration to file ...")
+        logger.info("Write the API configuration to file ...")
         self._file.write(path=cmd_args.config_path, config=serialized_api_config, mode="w+")
-        print(f"All configuration has been writen in file '{cmd_args.config_path}'.")
+        logger.info(f"All configuration has been writen in file '{cmd_args.config_path}'.")
 
-    def _dry_run_final_process(self, serialized_api_config: Optional[Dict[str, Any]]) -> None:
-        print("The result serialized API configuration:\n")
-        print(serialized_api_config)
+    def _dry_run_final_process(
+        self, cmd_args: _BaseSubCmdArgumentsSavingConfig, serialized_api_config: Optional[Dict[str, Any]]
+    ) -> None:
+        if len(str(serialized_api_config)) > 1000:
+            dry_run_file_path = str(pathlib.Path(cmd_args.base_file_path, "dry-run_result.yaml"))
+            logger.info(
+                f"The serialized API configuration content is too much, the result will be saves at *{dry_run_file_path}*"
+            )
+            self._file.write(path=dry_run_file_path, config=serialized_api_config, mode="w+")
+        else:
+            logger.info("The result serialized API configuration:\n")
+            logger.info(serialized_api_config)

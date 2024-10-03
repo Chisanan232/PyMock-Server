@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass, field
 from typing import Any, List, Optional
 
@@ -14,6 +15,8 @@ from ._base_model_adapter import (
 )
 from ._js_handlers import ensure_type_is_python_type
 from .base_config import _BaseAPIConfigWithMethod, _Default_Required
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -54,9 +57,7 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
 
     def _convert_items(self) -> List["RequestParameterAdapter"]:
         items: List["RequestParameterAdapter"] = []
-        print(f"[DEBUG in RequestParameter._convert_items] items: {items}")
         for item in self.items or []:
-            print(f"[DEBUG in RequestParameter._convert_items] item: {item}")
             assert isinstance(item, RequestParameterAdapter)
             items.append(item)
         return items
@@ -143,12 +144,11 @@ class APIAdapter(BaseAPIAdapter):
         )
 
         # Handle response config
-        print(f"[DEBUG in src] self.response: {self.response}")
         if list(filter(lambda p: p.name == "", self.response.data or [])):
             values = []
         else:
             values = self.response.data
-        print(f"[DEBUG in to_api_config] values: {values}")
+        logger.debug(f"The values for converting to PyMock-API format response config: {values}")
         resp_props_values = [p.to_pymock_api_config() for p in values] if values else values
         mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=resp_props_values)  # type: ignore[arg-type]
         return mock_api

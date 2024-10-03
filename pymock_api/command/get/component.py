@@ -1,5 +1,6 @@
 import importlib
 import inspect
+import logging
 import os
 import sys
 from abc import ABCMeta, abstractmethod
@@ -10,16 +11,18 @@ from ...model import MockAPI, load_config
 from ...model.cmd_args import SubcmdGetArguments
 from ..component import BaseSubCmdComponent
 
+logger = logging.getLogger(__name__)
+
 
 class SubCmdGetComponent(BaseSubCmdComponent):
     def process(self, args: SubcmdGetArguments) -> None:  # type: ignore[override]
         current_api_config = load_config(path=args.config_path)
         if current_api_config is None:
-            print("❌  Empty content in configuration file.")
+            logger.error("❌  Empty content in configuration file.")
             sys.exit(1)
         apis_info = current_api_config.apis
         if apis_info.apis is None or (apis_info.apis is not None and len(apis_info.apis.keys())) == 0:  # type: ignore[union-attr]
-            print("❌  Cannot find any API setting to mock.")
+            logger.error("❌  Cannot find any API setting to mock.")
             sys.exit(1)
         assert apis_info
         specific_api_info = apis_info.get_api_config_by_url(url=args.api_path, base=apis_info.base)
@@ -29,7 +32,7 @@ class SubCmdGetComponent(BaseSubCmdComponent):
 class _BaseDisplayChain(metaclass=ABCMeta):
     def __init__(self):
         self.displays: Dict[Format, "_BaseDisplayFormat"] = self._get_display_members()
-        print(f"[DEBUG] self.displays: {self.displays}")
+        logger.debug(f"[DEBUG] self.displays: {self.displays}")
         assert self.displays, "The API info display chain cannot be empty."
         self._current_format: Format = Format.TEXT
         self._current_display = self.displays[self._current_format]
@@ -60,7 +63,7 @@ class _BaseDisplayChain(metaclass=ABCMeta):
 
     def dispatch(self, format: Format) -> "_BaseDisplayFormat":
         if format not in self.displays.keys():
-            print("❌  Invalid valid of option *--show-as-format*.")
+            logger.error("❌  Invalid valid of option *--show-as-format*.")
             sys.exit(1)
 
         self._current_format = format
@@ -78,12 +81,12 @@ class _BaseDisplayChain(metaclass=ABCMeta):
 class APIInfoDisplayChain(_BaseDisplayChain):
     def show(self, args: SubcmdGetArguments, api_config: Optional[MockAPI]) -> None:
         if api_config:
-            print("🍻  Find the API info which satisfy the conditions.")
+            logger.info("🍻  Find the API info which satisfy the conditions.")
             if args.show_detail:
                 self.dispatch(format=args.show_as_format).display(api_config)
             sys.exit(0)
         else:
-            print("🙅‍♂️  Cannot find the API info with the conditions.")
+            logger.error("🙅‍♂️  Cannot find the API info with the conditions.")
             sys.exit(1)
 
 
@@ -107,30 +110,30 @@ class DisplayAsTextFormat(_BaseDisplayFormat):
         return Format.TEXT
 
     def display(self, api_config: MockAPI) -> None:
-        print("+--------------- API info ---------------+")
-        print(f"+ Path:  {api_config.url}")
-        print("+ HTTP:")
+        logger.info("+--------------- API info ---------------+")
+        logger.info(f"+ Path:  {api_config.url}")
+        logger.info("+ HTTP:")
         http_info = api_config.http
-        print("+   Request:")
+        logger.info("+   Request:")
         if http_info:
             if http_info.request:
-                print(f"+     HTTP method:  {http_info.request.method}")
-                print("+       Parameters:")
+                logger.info(f"+     HTTP method:  {http_info.request.method}")
+                logger.info("+       Parameters:")
                 for param in http_info.request.parameters:
-                    print(f"+         name:  {param.name}")
-                    print(f"+           required:  {param.required}")
-                    print(f"+           default value:  {param.default}")
-                    print(f"+           data type:  {param.value_type}")
-                    print(f"+           value format:  {param.value_format}")
+                    logger.info(f"+         name:  {param.name}")
+                    logger.info(f"+           required:  {param.required}")
+                    logger.info(f"+           default value:  {param.default}")
+                    logger.info(f"+           data type:  {param.value_type}")
+                    logger.info(f"+           value format:  {param.value_format}")
             else:
-                print("+     Miss HTTP request settings.")
-            print("+     Response:")
+                logger.info("+     Miss HTTP request settings.")
+            logger.info("+     Response:")
             if http_info.response:
-                print(f"+       Values:  {http_info.response.value}")
+                logger.info(f"+       Values:  {http_info.response.value}")
             else:
-                print("+     Miss HTTP response settings.")
+                logger.info("+     Miss HTTP response settings.")
         else:
-            print("+     Miss HTTP settings.")
+            logger.info("+     Miss HTTP settings.")
 
 
 class DisplayAsYamlFormat(_BaseDisplayFormat):
@@ -139,7 +142,7 @@ class DisplayAsYamlFormat(_BaseDisplayFormat):
         return Format.YAML
 
     def display(self, api_config: MockAPI) -> None:
-        print(api_config.format(self.format))
+        logger.info(api_config.format(self.format))
 
 
 class DisplayAsJsonFormat(_BaseDisplayFormat):
@@ -148,4 +151,4 @@ class DisplayAsJsonFormat(_BaseDisplayFormat):
         return Format.JSON
 
     def display(self, api_config: MockAPI) -> None:
-        print(api_config.format(self.format))
+        logger.info(api_config.format(self.format))

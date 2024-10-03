@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import Union
 
@@ -7,6 +8,8 @@ from ...model import BaseAPIDocumentConfig, deserialize_api_doc_config
 from ...model.cmd_args import SubcmdPullArguments
 from .._common.component import SavingConfigComponent
 from ..component import BaseSubCmdComponent
+
+logger = logging.getLogger(__name__)
 
 
 class SubCmdPullComponent(BaseSubCmdComponent):
@@ -28,7 +31,7 @@ class SubCmdPullComponent(BaseSubCmdComponent):
             source_info_log = (
                 f"configuration file '{openapi_doc_config_file}'" if not source_info_log else source_info_log
             )
-        print(f"Try to get OpenAPI API (aka Swagger API before) documentation content from {source_info_log}.")
+        logger.info(f"Try to get OpenAPI API (aka Swagger API before) documentation content from {source_info_log}.")
         openapi_doc_config = self._get_openapi_doc_config(url=openapi_doc_url, config_file=openapi_doc_config_file)
         api_config = openapi_doc_config.to_api_config(base_url=args.base_url)
         self._saving_config_component.serialize_and_save(cmd_args=args, api_config=api_config)

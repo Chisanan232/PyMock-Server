@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -7,6 +8,8 @@ from ...model.api_config.apis.response_strategy import ResponseStrategy
 from ...model.cmd_args import SubcmdAddArguments
 from .._common.component import SavingConfigComponent
 from ..component import BaseSubCmdComponent
+
+logger = logging.getLogger(__name__)
 
 
 def _option_cannot_be_empty_assertion(cmd_option: str) -> str:
@@ -21,7 +24,7 @@ class SubCmdAddComponent(BaseSubCmdComponent):
         # TODO: Add logic about using mapping file operation by the file extension.
         assert args.config_path, _option_cannot_be_empty_assertion("-o, --output")
         if not args.api_info_is_complete():
-            print(f"❌  API info is not enough to add new API.")
+            logger.error(f"❌  API info is not enough to add new API.")
             sys.exit(1)
         # yaml: YAML = YAML()
         api_config = self._get_api_config(args)
@@ -59,14 +62,14 @@ class SubCmdAddComponent(BaseSubCmdComponent):
             try:
                 mocked_api.set_request(method=args.http_method, parameters=args.parameters)  # type: ignore[arg-type]
             except ValueError:
-                print("❌  The data format of API parameter is incorrect.")
+                logger.error("❌  The data format of API parameter is incorrect.")
                 sys.exit(1)
         # Set *<mock_api>.http.response*
         if args.response_strategy is ResponseStrategy.OBJECT:
             mocked_api.set_response(strategy=args.response_strategy, iterable_value=args.response_value)
         else:
             if args.response_value and not isinstance(args.response_value[0], str):
-                print("❌  The data type of command line option *--response-value* must be *str*.")
+                logger.error("❌  The data type of command line option *--response-value* must be *str*.")
                 sys.exit(1)
             mocked_api.set_response(
                 strategy=args.response_strategy, value=args.response_value[0] if args.response_value else None  # type: ignore[arg-type]

@@ -1,5 +1,6 @@
 import glob
 import json
+import logging
 import os.path
 import pathlib
 import re
@@ -773,7 +774,7 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
             sample_config_type=SampleType.ALL,
         )
 
-        with patch("builtins.print", autospec=True, side_effect=print) as mock_print:
+        with patch("pymock_api.command.sample.component.logger", autospec=True, side_effect=logging) as mock_logging:
             with patch(
                 "pymock_api.command.sample.component.get_sample_by_type", return_value=sample_config
             ) as mock_get_sample_by_type:
@@ -787,29 +788,29 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
                     FakeYAML.serialize.assert_called_once()
 
                     if oprint and generate:
-                        mock_print.assert_has_calls(
+                        mock_logging.assert_has_calls(
                             [
-                                call(f"{sample_config}"),
-                                call(f"🍻  Write sample configuration into file {output}."),
+                                call.info(f"{sample_config}"),
+                                call.info(f"🍻  Write sample configuration into file {output}."),
                             ]
                         )
                         FakeYAML.write.assert_called_once()
                     elif oprint and not generate:
-                        mock_print.assert_has_calls(
+                        mock_logging.assert_has_calls(
                             [
-                                call(f"{sample_config}"),
+                                call.info(f"{sample_config}"),
                             ]
                         )
                         FakeYAML.write.assert_not_called()
                     elif not oprint and generate:
-                        mock_print.assert_has_calls(
+                        mock_logging.assert_has_calls(
                             [
-                                call(f"🍻  Write sample configuration into file {output}."),
+                                call.info(f"🍻  Write sample configuration into file {output}."),
                             ]
                         )
                         FakeYAML.write.assert_called_once()
                     else:
-                        mock_print.assert_not_called()
+                        mock_logging.assert_not_called()
                         FakeYAML.write.assert_not_called()
 
     def _given_cmd_args_namespace(self) -> Namespace:
@@ -969,7 +970,12 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
                         assert expected_api_config == under_test_api_config
 
                 if mock_parser_arg.dry_run:
-                    FakeYAML.write.assert_not_called()
+                    if len(str(expected_config_data)) > 1000:
+                        FakeYAML.write.assert_called_once_with(
+                            path="dry-run_result.yaml", config=expected_config_data, mode="w+"
+                        )
+                    else:
+                        FakeYAML.write.assert_not_called()
                 else:
                     FakeYAML.write.assert_called_once_with(path=_Test_Config, config=expected_config_data, mode="w+")
 

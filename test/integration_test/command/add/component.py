@@ -298,7 +298,7 @@ class TestSubCmdAddComponent:
                         cmd_args=cmd_args, api_config=new_api_config
                     )
                     if cmd_args.dry_run:
-                        mock_dry_run_final_process.assert_called_once_with(api_config_serialize_data)
+                        mock_dry_run_final_process.assert_called_once_with(cmd_args, api_config_serialize_data)
                         mock_final_process.assert_not_called()
                     else:
                         mock_dry_run_final_process.assert_not_called()
