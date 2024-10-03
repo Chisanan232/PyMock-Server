@@ -1,3 +1,4 @@
+import logging
 import random
 import re
 from abc import ABC, ABCMeta, abstractmethod
@@ -6,9 +7,9 @@ from typing import List, Optional, Union
 
 import pytest
 
-from pymock_api import APIConfig
 from pymock_api.exceptions import CannotParsingAPIDocumentVersion
 from pymock_api.model import MockAPI, OpenAPIVersion
+from pymock_api.model.api_config import APIConfig as PyMockEntireAPIConfig
 from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.apis import ResponseStrategy
 from pymock_api.model.api_doc_config._base import Transferable, set_openapi_version
@@ -24,8 +25,8 @@ from pymock_api.model.api_doc_config.base_config import (
     _BaseAPIConfigWithMethod,
     set_component_definition,
 )
+from pymock_api.model.api_doc_config.config import APIConfig as APIDocOneAPIConfig
 from pymock_api.model.api_doc_config.config import (
-    APIConfig,
     APIConfigWithMethodV2,
     APIConfigWithMethodV3,
     HttpConfigV2,
@@ -44,6 +45,8 @@ from ...model.api_doc_config._test_case import (
     DeserializeV2OpenAPIConfigTestCaseFactory,
     DeserializeV3OpenAPIConfigTestCaseFactory,
 )
+
+logger = logging.getLogger(__name__)
 
 DeserializeV2OpenAPIConfigTestCaseFactory.load()
 DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE = DeserializeV2OpenAPIConfigTestCaseFactory.get_test_case()
@@ -398,7 +401,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
         )
 
         # Verify
-        print(f"resp: {resp}")
+        logger.debug(f"resp: {resp}")
         assert resp
         if isinstance(resp, list):
             resp = [r.serialize() for r in resp]
@@ -739,7 +742,6 @@ class BaseAPIConfigWithMethodTestSuite(BaseAPIDocConfigTestSuite, ABC):
         schema_key: str,
         api_data_model: _BaseAPIConfigWithMethod,
     ):
-        print(f"[DEBUG in test__process_api_params] ")
         # Pre-process
         set_openapi_version(doc_version)
         set_component_definition(entire_openapi_config.get(schema_key, {}))
@@ -766,11 +768,10 @@ class BaseAPIConfigWithMethodTestSuite(BaseAPIDocConfigTestSuite, ABC):
         set_component_definition(entire_config.get(self._common_objects_yaml_schema, {}))
 
         # Run target function under test
-        print(f"[DEBUG in test] api_detail: {api_detail}")
-        # parser_instance = parser(parser=OpenAPIV2PathSchemaParser(data=api_detail))
+        logger.debug(f"api_detail: {api_detail}")
         under_test = under_test.deserialize(api_detail)
         response_data = under_test.to_responses_adapter()
-        print(f"[DEBUG in test] response_data: {response_data}")
+        logger.debug(f"response_data: {response_data}")
 
         # Verify
         resp_200 = api_detail["responses"]["200"]
@@ -786,7 +787,7 @@ class BaseAPIConfigWithMethodTestSuite(BaseAPIDocConfigTestSuite, ABC):
             #     should_check_name = False
             # else:
             #     should_check_name = True
-        print(f"[DEBUG in test] should_check_name: {should_check_name}")
+        logger.debug(f"should_check_name: {should_check_name}")
 
         # assert isinstance(response_data, ResponseProperty)
         data_details = response_data.data
@@ -996,7 +997,7 @@ class TestAPIConfigWithMethodV3(BaseAPIConfigWithMethodTestSuite):
 
     def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameterAdapter]) -> None:
         assert isinstance(parameters, list)
-        print(f"[DEBUG in test] openapi_doc_data: {openapi_doc_data}")
+        logger.debug(f"openapi_doc_data: {openapi_doc_data}")
         if parameters:
             if "requestBody" in openapi_doc_data.keys():
                 request_body = openapi_doc_data.get("requestBody", {})
@@ -1042,7 +1043,7 @@ class TestAPIConfigWithMethodV3(BaseAPIConfigWithMethodTestSuite):
                 ContentType,
             )
         )
-        print(f"[DEBUG] has content, resp_format: {resp_format}")
+        logger.debug(f"has content, resp_format: {resp_format}")
         status_200_response_setting = v3_http_config.get_setting(content_type=resp_format[0])
         return status_200_response_setting
 
@@ -1132,7 +1133,7 @@ class TestAPIAdapter(_OpenAPIDocumentDataModelTestSuite):
 
         # param: List[TmpRequestParameterModel] = list(filter(lambda e: e.has_ref(), og_data.parameters))
         # if param is not None:
-        #     print(f"[DEBUG in test] param: {param}")
+        #     logger.debug(f"param: {param}")
         #     assert len(data.parameters) == len(param[0].get_schema_ref().properties)
         # else:
         if isinstance(og_data, APIConfigWithMethodV3):
@@ -1147,7 +1148,7 @@ class TestAPIAdapter(_OpenAPIDocumentDataModelTestSuite):
                         ContentType,
                     )
                 )
-                print(f"[DEBUG] has content, req_param_format: {req_param_format}")
+                logger.debug(f"has content, req_param_format: {req_param_format}")
                 req_param_setting = request_body.get_setting(content_type=req_param_format[0])
                 req_param_data_model = req_param_setting.get_schema_ref()
                 assert len(data.parameters) == len(req_param_data_model.properties)
@@ -1265,15 +1266,15 @@ class TestSwaggerAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             )
         }
 
-        apis = APIConfig()
+        apis = APIDocOneAPIConfig()
         apis.api = {HTTPMethod.POST: api_with_one_method}
 
         data_model.paths = {"/test/v1/foo-home": apis}
 
-    def _verify_api_config_model(self, under_test: APIConfig, data_from: OpenAPIDocumentConfig) -> None:
+    def _verify_api_config_model(self, under_test: PyMockEntireAPIConfig, data_from: OpenAPIDocumentConfig) -> None:
         assert len(under_test.apis.apis.keys()) == len(data_from.paths)
         for api_path, api_details in under_test.apis.apis.items():
-            print(f"[DEBUG in test] api_path: {api_path}")
+            logger.debug(f"api_path: {api_path}")
             # Find the mapping expect API config
 
             def _find_path(_http_method: HTTPMethod) -> bool:
@@ -1401,15 +1402,15 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             )
         }
 
-        apis = APIConfig()
+        apis = APIDocOneAPIConfig()
         apis.api = {HTTPMethod.POST: api_with_one_method}
 
         data_model.paths = {"/test/v1/foo-home": apis}
 
-    def _verify_api_config_model(self, under_test: APIConfig, data_from: OpenAPIDocumentConfig) -> None:
+    def _verify_api_config_model(self, under_test: PyMockEntireAPIConfig, data_from: OpenAPIDocumentConfig) -> None:
         assert len(under_test.apis.apis.keys()) == len(data_from.paths)
         for api_path, api_details in under_test.apis.apis.items():
-            print(f"[DEBUG in test] api_path: {api_path}")
+            logger.debug(f"api_path: {api_path}")
             # Find the mapping expect API config
 
             def _find_path(_http_method: HTTPMethod) -> bool:

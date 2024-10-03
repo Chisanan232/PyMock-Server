@@ -315,7 +315,6 @@ class TestSubCmdAddComponent:
         expected_yaml_config_path: str,
     ):
         # Given command line argument
-        print(f"[DEBUG in test] cmd_arg: {cmd_arg}")
         under_test_dir = pathlib.Path(under_test_api_config_dir)
         # under_test_dir = "v3_openapi" if "v3" in under_test_api_config else "v2_openapi"
         # ut_dir = pathlib.Path(test_scenario_dir, "under_test", under_test_dir)

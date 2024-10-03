@@ -89,6 +89,8 @@ from ..._values import (
     _Workers_Amount,
 )
 
+logger = logging.getLogger(__name__)
+
 _Fake_SubCmd: str = "pytest-subcmd"
 _Fake_Duplicated_SubCmd: str = "pytest-duplicated"
 _No_SubCmd_Amt: int = 1
@@ -910,7 +912,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
                 "pymock_api.command.pull.component.URLLibHTTPClient.request", return_value=swagger_json_data
             ) as mock_swagger_request:
                 # Run target function
-                print(f"[DEBUG in test] run target function: {cmd_ps}")
+                logger.debug(f"run target function: {cmd_ps}")
                 cmd_ps(mock_parser_arg)
 
                 mock_instantiate_writer.assert_called_once()
