@@ -1362,7 +1362,8 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                         if param.has_ref():
                             expected_parameters += len(param.get_schema_ref().properties.keys())
                         else:
-                            expected_parameters += 1
+                            if param.query_in != "path":
+                                expected_parameters += 1
                     assert len(api.parameters) == expected_parameters
                 else:
                     request_body = api_http_details.get("requestBody", {})
