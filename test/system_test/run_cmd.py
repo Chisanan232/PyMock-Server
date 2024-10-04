@@ -87,7 +87,7 @@ class TestSubCommandRun(CommandTestSpec):
         return "run --help"
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "mock-api run [-h]")
+        self._should_contains_chars_in_result(cmd_running_result, "mock-server run [-h]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "--app-type APP_TYPE")
         self._should_contains_chars_in_result(cmd_running_result, "-c CONFIG, --config CONFIG")
