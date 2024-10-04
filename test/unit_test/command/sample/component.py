@@ -3,10 +3,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pymock_api._utils.file.operation import YAML
-from pymock_api.command.sample.component import SubCmdSampleComponent
-from pymock_api.model._sample import SampleType
-from pymock_api.model.cmd_args import SubcmdSampleArguments
+from pymock_server._utils.file.operation import YAML
+from pymock_server.command.sample.component import SubCmdSampleComponent
+from pymock_server.model._sample import SampleType
+from pymock_server.model.cmd_args import SubcmdSampleArguments
 
 from ...._values import _Test_SubCommand_Add
 
@@ -34,9 +34,9 @@ class TestSubCmdSampleComponent:
         )
 
         # Run target function to test
-        with patch("pymock_api.command.sample.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+        with patch("pymock_server.command.sample.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
             with patch(
-                "pymock_api.command.sample.component.get_sample_by_type", return_value=FakeYAML
+                "pymock_server.command.sample.component.get_sample_by_type", return_value=FakeYAML
             ) as mock_get_sample_by_type:
                 with pytest.raises(AssertionError) as exc_info:
                     component.process(invalid_args)

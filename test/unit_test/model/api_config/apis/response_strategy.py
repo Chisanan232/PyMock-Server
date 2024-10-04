@@ -2,7 +2,7 @@ from typing import Any, Type
 
 import pytest
 
-from pymock_api.model.api_config.apis import ResponseStrategy
+from pymock_server.model.api_config.apis import ResponseStrategy
 
 from ..._enums import EnumTestSuite
 

@@ -12,8 +12,8 @@ from unittest.mock import MagicMock, Mock, call, patch
 import pytest
 from yaml import load as yaml_load
 
-from pymock_api.command._common.component import SavingConfigComponent
-from pymock_api.model.api_doc_config.base_config import set_component_definition
+from pymock_server.command._common.component import SavingConfigComponent
+from pymock_server.model.api_doc_config.base_config import set_component_definition
 
 from ._test_case import SubCmdGetTestCaseFactory, SubCmdPullTestCaseFactory
 
@@ -22,10 +22,10 @@ try:
 except ImportError:
     from yaml import Dumper, Loader  # type: ignore
 
-from pymock_api._utils.file import Format
-from pymock_api._utils.file.operation import YAML
-from pymock_api.command.options import SubCommand, get_all_subcommands
-from pymock_api.command.process import (
+from pymock_server._utils.file import Format
+from pymock_server._utils.file.operation import YAML
+from pymock_server.command.options import SubCommand, get_all_subcommands
+from pymock_server.command.process import (
     BaseCommandProcessor,
     NoSubCmd,
     SubCmdAdd,
@@ -37,7 +37,7 @@ from pymock_api.command.process import (
     make_command_chain,
     run_command_chain,
 )
-from pymock_api.model import (
+from pymock_server.model import (
     ParserArguments,
     SubcmdAddArguments,
     SubcmdCheckArguments,
@@ -47,9 +47,9 @@ from pymock_api.model import (
     SubcmdSampleArguments,
     deserialize_api_doc_config,
 )
-from pymock_api.model._sample import SampleType
-from pymock_api.model.api_config.apis import ResponseStrategy
-from pymock_api.server import ASGIServer, Command, CommandOptions, WSGIServer
+from pymock_server.model._sample import SampleType
+from pymock_server.model.api_config.apis import ResponseStrategy
+from pymock_server.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ..._values import (
     _API_Doc_Source,
@@ -520,7 +520,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         )
 
         with patch(
-            "pymock_api.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent
+            "pymock_server.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent
         ) as mock_saving_config_component:
             cmd_ps(mock_parser_arg)
 
@@ -776,12 +776,12 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
             sample_config_type=SampleType.ALL,
         )
 
-        with patch("pymock_api.command.sample.component.logger", autospec=True, side_effect=logging) as mock_logging:
+        with patch("pymock_server.command.sample.component.logger", autospec=True, side_effect=logging) as mock_logging:
             with patch(
-                "pymock_api.command.sample.component.get_sample_by_type", return_value=sample_config
+                "pymock_server.command.sample.component.get_sample_by_type", return_value=sample_config
             ) as mock_get_sample_by_type:
                 with patch(
-                    "pymock_api.command.sample.component.YAML", return_value=FakeYAML
+                    "pymock_server.command.sample.component.YAML", return_value=FakeYAML
                 ) as mock_instantiate_writer:
                     cmd_ps(mock_parser_arg)
 
@@ -907,9 +907,9 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
             expected_config_data = yaml_load(file, Loader=Loader)
 
         set_component_definition(swagger_json_data.get("definitions", {}))
-        with patch("pymock_api.command._common.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+        with patch("pymock_server.command._common.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
             with patch(
-                "pymock_api.command.pull.component.URLLibHTTPClient.request", return_value=swagger_json_data
+                "pymock_server.command.pull.component.URLLibHTTPClient.request", return_value=swagger_json_data
             ) as mock_swagger_request:
                 # Run target function
                 logger.debug(f"run target function: {cmd_ps}")
@@ -1027,6 +1027,6 @@ def test_make_command_chain_if_duplicated_subcmd():
     assert re.search(r"subcommand.{1,64}has been used", str(exc_info.value), re.IGNORECASE)
 
     # Remove the invalid object for test could run finely.
-    from pymock_api.command.process import _COMMAND_CHAIN
+    from pymock_server.command.process import _COMMAND_CHAIN
 
     _COMMAND_CHAIN.pop(-1)

@@ -9,7 +9,7 @@ description = "🕸🤖👺 A Python tool to mock server, e.g., API server, easi
 authors = ["Liu, Bryant <chi10211201@cycu.org.tw>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "pymock_api"}]
+packages = [{include = "pymock_server"}]
 keywords = ["mock", "API", "mock server", "mock API server", "web", "server"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -75,4 +75,4 @@ mkdocstrings = ">=0.24.1,<0.26.0"
 mkdocstrings-python = "^1.9.0"
 
 [tool.poetry.scripts]
-mock-server = "pymock_api.runner:run"
+mock-server = "pymock_server.runner:run"

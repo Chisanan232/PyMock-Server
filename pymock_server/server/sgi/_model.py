@@ -36,7 +36,7 @@ class Command:
     entry_point: str
     options: CommandOptions
     app: str
-    app_module_path: str = "pymock_api.server"
+    app_module_path: str = "pymock_server.server"
 
     @property
     def line(self) -> str:

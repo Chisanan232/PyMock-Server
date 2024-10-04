@@ -1,6 +1,6 @@
 from abc import ABC
 
-from pymock_api.model.api_config import _BaseTemplatableConfig
+from pymock_server.model.api_config import _BaseTemplatableConfig
 
 from ....._values import _Mock_Templatable_Setting
 from .._base import ConfigTestSpec

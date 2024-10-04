@@ -75,7 +75,7 @@ class WSGIServer(BaseSGIServer):
 
         .. code-block: shell
 
-            >>> gunicorn --bind 127.0.0.1:9672 'pymock_api.server:create_flask_app()'
+            >>> gunicorn --bind 127.0.0.1:9672 'pymock_server.server:create_flask_app()'
 
     """
 
@@ -98,7 +98,7 @@ class ASGIServer(BaseSGIServer):
 
         .. code-block: shell
 
-            >>> uvicorn --host 127.0.0.1 --port 9672 --factory 'pymock_api.server:create_flask_app()'
+            >>> uvicorn --host 127.0.0.1 --port 9672 --factory 'pymock_server.server:create_flask_app()'
 
     """
 

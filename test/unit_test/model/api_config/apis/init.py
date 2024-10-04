@@ -4,12 +4,12 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_api._utils import JSON, YAML
-from pymock_api._utils.file import Format
-from pymock_api._utils.file.operation import _BaseFileOperation
-from pymock_api.model import HTTP, MockAPI
-from pymock_api.model.api_config import ResponseProperty
-from pymock_api.model.api_config.apis import (
+from pymock_server._utils import JSON, YAML
+from pymock_server._utils.file import Format
+from pymock_server._utils.file.operation import _BaseFileOperation
+from pymock_server.model import HTTP, MockAPI
+from pymock_server.model.api_config import ResponseProperty
+from pymock_server.model.api_config.apis import (
     APIParameter,
     HTTPRequest,
     HTTPResponse,

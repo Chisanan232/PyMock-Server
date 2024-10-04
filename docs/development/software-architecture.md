@@ -145,7 +145,7 @@ You'll have 3 things need to do:
 New sub-command line must have options. So you need to define which sub-command line options it has.
 
 ```python
-# In module pymock_api.model.cmd_args
+# In module pymock_server.model.cmd_args
 
 @dataclass(frozen=True)
 class SubcmdNewProcessArguments(ParserArguments):
@@ -157,7 +157,7 @@ class SubcmdNewProcessArguments(ParserArguments):
 After defining new sub-command line's options, you should define how to deserialize it:
 
 ```python
-# In module pymock_api.model.cmd_args
+# In module pymock_server.model.cmd_args
 
 class DeserializeParsedArgs:
   
@@ -174,7 +174,7 @@ class DeserializeParsedArgs:
 And also defining the utility function at module **_\_\_init\_\__**:
 
 ```python
-# In module pymock_api.model.__init__
+# In module pymock_server.model.__init__
 
 class deserialize_args:
   
@@ -336,7 +336,7 @@ Object ``SubCommand`` is the standard for **_PyMock-API_** to recognize which su
 line here:
 
 ```python hl_lines="9"
-# In module pymock_api.command.options
+# In module pymock_server.command.options
 
 @dataclass
 class SubCommand:
@@ -352,7 +352,7 @@ class SubCommand:
 Add new class extends base class ``BaseSubCommand`` and set value at attribute ``sub_parser``.
 
 ```python
-# In module pymock_api.command.options
+# In module pymock_server.command.options
 
 class SubCommandNewProcessOption(BaseSubCommand):
     sub_parser: SubParserAttr = SubParserAttr(
@@ -366,7 +366,7 @@ class SubCommandNewProcessOption(BaseSubCommand):
 Instantiate a base class for adding options.
 
 ```python
-# In module pymock_api.command.options
+# In module pymock_server.command.options
 
 BaseSubCmdNewProcessOption: type = MetaCommandOption("BaseSubCmdNewProcessOption", (SubCommandNewProcessOption,), {})
 ```
@@ -378,7 +378,7 @@ It would auto-register this sub-command line into ``SUBCOMMAND``. We have sub-co
 Add new command option with extending ``BaseSubCmdNewProcessOption`` and set needed attributes in it:
 
 ```python
-# In module pymock_api.command.options
+# In module pymock_server.command.options
 
 class Arg_1(BaseSubCmdNewProcessOption):
 
@@ -395,7 +395,7 @@ Finally, don't forget to let command line process know which sub-command line is
 attribute ``responsible_subcommand``:
 
 ```python hl_lines="6"
-# In module pymock_api.command.process
+# In module pymock_server.command.process
 
 # ... some code
 
@@ -443,7 +443,7 @@ If you want to use other file formatter, e.g., JSON, you could extend the base c
 to implement needed features.
 
 ```python
-# In module pymock_api.command.options
+# In module pymock_server.command.options
 
 # ... some code
 
@@ -462,7 +462,7 @@ Because currently it won't have option in command line to control which way it s
 file, so we need to manually modify the code to use it.
 
 ```python hl_lines="10"
-# In module pymock_api.model.api_config
+# In module pymock_server.model.api_config
 
 class APIConfig(_Config):
     """*The entire configuration*"""
@@ -532,7 +532,7 @@ APIs with configuration.
 2 Things you need to implement: importing the web framework and check importing the web framework.
 
 ```python
-# In module pymock_api._utils.importing
+# In module pymock_server._utils.importing
 
 class import_web_lib:
 
@@ -561,7 +561,7 @@ Extend the web application feature about how PyMock-API should set up it? How to
 Python web framework? How to add new API by the customized web framework?
 
 ```python
-# In module pymock_api.server.application
+# In module pymock_server.server.application
 
 class FooWebLibrary(BaseAppServer):
     def setup(self) -> "foo_web_lib.Foo":
@@ -582,7 +582,7 @@ Implement how to run web application by your own customized Python web framework
 with options.
 
 ```python
-# In module pymock_api.server.sgi.cmd
+# In module pymock_server.server.sgi.cmd
 
 class FooSGIServer(BaseSGIServer):
     def _init_cmd_option(self) -> BaseCommandOption:
@@ -598,7 +598,7 @@ class FooSGIServer(BaseSGIServer):
 Previous one implement the command line entry point, here implement each options how to set it.
 
 ```python
-# In module pymock_api.server.sgi.cmdoption
+# In module pymock_server.server.sgi.cmdoption
 
 class FooWebSGIServerCmdOption(BaseCommandOption):
     def bind(self, address: Optional[str] = None, host: Optional[str] = None, port: Optional[str] = None) -> str:
@@ -626,7 +626,7 @@ Now, we have done the core implementation, then we just leave some utility funct
 * Utility function in module ``pymock_api.server.sgi.__init__``
 
 ```python hl_lines="10"
-# In module pymock_api.server.sgi.__init__
+# In module pymock_server.server.sgi.__init__
 
 class setup_server_gateway:
     # Some code ...
@@ -646,7 +646,7 @@ generate the web application. Here usage should base on which way should use by 
 * Utility function in module ``pymock_api.server.__init__``
 
 ```python
-# In module pymock_api.server.__init__
+# In module pymock_server.server.__init__
 
 # Some code ...
 
@@ -687,7 +687,7 @@ Finally, we need to add a new value to let option ``--app-type`` could recognize
 application by your own customized Python web framework.
 
 ```python hl_lines="19-20"
-# In module pymock_api.command.process
+# In module pymock_server.command.process
 
 # Some code ...
 

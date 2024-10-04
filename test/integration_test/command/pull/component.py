@@ -4,15 +4,15 @@ from unittest.mock import PropertyMock, patch
 
 import pytest
 
-from pymock_api.command.options import SubCommand
-from pymock_api.command.pull.component import SubCmdPullComponent
-from pymock_api.model import (
+from pymock_server.command.options import SubCommand
+from pymock_server.command.pull.component import SubCmdPullComponent
+from pymock_server.model import (
     SubcmdPullArguments,
     deserialize_api_doc_config,
     load_config,
 )
-from pymock_api.model.api_config import DivideStrategy, TemplateConfig
-from pymock_api.model.api_doc_config.base_config import set_component_definition
+from pymock_server.model.api_config import DivideStrategy, TemplateConfig
+from pymock_server.model.api_doc_config.base_config import set_component_definition
 
 from ...._values import _API_Doc_Source, _API_Doc_Source_File, _Test_Request_With_Https
 from ._test_case import (
@@ -240,10 +240,10 @@ class TestSubCmdPullComponent:
             openapi_doc_config = deserialize_api_doc_config(data=_OpenAPI_Doc_Config)
             mock_get_openapi_doc_config.return_value = openapi_doc_config
             with patch(
-                "pymock_api.command._common.component.SavingConfigComponent._dry_run_final_process"
+                "pymock_server.command._common.component.SavingConfigComponent._dry_run_final_process"
             ) as mock_dry_run_final_process:
                 with patch(
-                    "pymock_api.command._common.component.SavingConfigComponent._final_process"
+                    "pymock_server.command._common.component.SavingConfigComponent._final_process"
                 ) as mock_final_process:
                     # Run target function
                     sub_cmd.process(args=cmd_args)
@@ -317,7 +317,7 @@ class TestSubCmdPullComponent:
         # Note: Set the base file path to let the test could run and save the result configuration under the target
         # directory
         with patch(
-            "pymock_api.model.api_config.MockAPIs.template", new_callable=PropertyMock
+            "pymock_server.model.api_config.MockAPIs.template", new_callable=PropertyMock
         ) as mock_mock_apis_template:
             template_config = TemplateConfig()
             template_config.file.config_path_values.base_file_path = str(ut_dir)
@@ -328,7 +328,7 @@ class TestSubCmdPullComponent:
             set_component_definition(swagger_api_resp.get(openapi_schema_key, {}))
             # Mock the HTTP request result as the Swagger API documentation data
             with patch(
-                "pymock_api.command.pull.component.URLLibHTTPClient.request", return_value=swagger_api_resp
+                "pymock_server.command.pull.component.URLLibHTTPClient.request", return_value=swagger_api_resp
             ) as mock_swagger_request:
                 # Run target function
                 sub_cmd.process(args=cmd_args)

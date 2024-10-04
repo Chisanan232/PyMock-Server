@@ -8,7 +8,7 @@ try:
 except ImportError:
     from yaml import Dumper  # type: ignore
 
-from pymock_api._utils.file.operation import JSON, YAML, _BaseFileOperation
+from pymock_server._utils.file.operation import JSON, YAML, _BaseFileOperation
 
 from ...._file_utils import (
     MockAPI_Config_Json_Path,

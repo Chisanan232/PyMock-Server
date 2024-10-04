@@ -3,8 +3,8 @@ from abc import ABCMeta, abstractmethod
 
 import pytest
 
-from pymock_api.command.options import SubCommand
-from pymock_api.runner import CommandRunner
+from pymock_server.command.options import SubCommand
+from pymock_server.runner import CommandRunner
 
 from .._sut import get_runner
 from .._utils import Capturing

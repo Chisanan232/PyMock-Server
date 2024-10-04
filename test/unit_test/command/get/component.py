@@ -12,9 +12,9 @@ except ImportError:
 
 import pytest
 
-from pymock_api import APIConfig
-from pymock_api._utils.file import Format
-from pymock_api.command.get.component import (
+from pymock_server import APIConfig
+from pymock_server._utils.file import Format
+from pymock_server.command.get.component import (
     APIInfoDisplayChain,
     DisplayAsJsonFormat,
     DisplayAsTextFormat,
@@ -22,8 +22,8 @@ from pymock_api.command.get.component import (
     SubCmdGetComponent,
     _BaseDisplayFormat,
 )
-from pymock_api.model import MockAPI
-from pymock_api.model.cmd_args import SubcmdGetArguments
+from pymock_server.model import MockAPI
+from pymock_server.model.cmd_args import SubcmdGetArguments
 
 from ...._values import _Test_HTTP_Method, _Test_URL, _TestConfig
 
@@ -48,7 +48,7 @@ class TestSubCmdGetComponent:
         expected_exit_code: int,
         component: SubCmdGetComponent,
     ):
-        with patch("pymock_api.command.get.component.load_config") as mock_load_config:
+        with patch("pymock_server.command.get.component.load_config") as mock_load_config:
             mock_load_config.return_value = APIConfig().deserialize(data=_TestConfig.API_Config)
             with patch.object(expected_object, "display") as mock_formatter_display:
                 with pytest.raises(SystemExit) as exc_info:
@@ -66,7 +66,7 @@ class TestSubCmdGetComponent:
                 mock_formatter_display.assert_called_once_with(MockAPI().deserialize(data=_TestConfig.Mock_API))
 
     def test_component_with_invalid_format(self, component: SubCmdGetComponent):
-        with patch("pymock_api.command.get.component.load_config") as mock_load_config:
+        with patch("pymock_server.command.get.component.load_config") as mock_load_config:
             mock_load_config.return_value = APIConfig().deserialize(data=_TestConfig.API_Config)
             with pytest.raises(SystemExit) as exc_info:
                 subcmd_get_args = SubcmdGetArguments(
@@ -82,7 +82,7 @@ class TestSubCmdGetComponent:
             assert str(exc_info.value) == "1"
 
     def test_component_when_getting_empty_config(self, component: SubCmdGetComponent):
-        with patch("pymock_api.command.get.component.load_config") as mock_load_config:
+        with patch("pymock_server.command.get.component.load_config") as mock_load_config:
             no_mocked_apis_config: dict = {
                 "name": "",
                 "description": "",

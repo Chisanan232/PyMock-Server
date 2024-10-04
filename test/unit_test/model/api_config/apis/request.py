@@ -3,9 +3,9 @@ from typing import Type
 
 import pytest
 
-from pymock_api.model.api_config import IteratorItem
-from pymock_api.model.api_config._base import _HasItemsPropConfig
-from pymock_api.model.api_config.apis import APIParameter, HTTPRequest
+from pymock_server.model.api_config import IteratorItem
+from pymock_server.model.api_config._base import _HasItemsPropConfig
+from pymock_server.model.api_config.apis import APIParameter, HTTPRequest
 
 from ....._values import (
     _Test_API_Parameter,

@@ -4,12 +4,12 @@ from typing import Any, List, Union
 
 import pytest
 
-from pymock_api.model.api_config.template.common import (
+from pymock_server.model.api_config.template.common import (
     TemplateCommonConfig,
     TemplateFormatConfig,
     TemplateFormatEntity,
 )
-from pymock_api.model.api_config.variable import Variable
+from pymock_server.model.api_config.variable import Variable
 
 from ....._values import (
     _Customize_Format,

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pymock_api.runner import CommandRunner
+from pymock_server.runner import CommandRunner
 
 CMD_RUNNER: Optional[CommandRunner] = None
 
