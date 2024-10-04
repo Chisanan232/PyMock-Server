@@ -42,7 +42,6 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
         init_response: BaseResponsePropertyAdapter,
         response_data_prop: Union[BaseRefPropertyDetailAdapter, List[BaseRefPropertyDetailAdapter]],
     ) -> BaseRefPropertyDetailAdapter:
-        print(f"[DEBUG in _ensure_data_structure_when_object_strategy] response_data_prop: {response_data_prop}")
         assert isinstance(response_data_prop, BaseRefPropertyDetailAdapter)
         assert isinstance(
             init_response.data, list
@@ -59,8 +58,6 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
     ) -> Union[BaseRefPropertyDetailAdapter, List[BaseRefPropertyDetailAdapter]]:
         if property_value.is_empty():
             return self._adapter_factory.generate_property_details().generate_empty_response()
-        print(f"[DEBUG in _generate_response] property_value: {property_value}")
-        print(f"[DEBUG in _generate_response] before it have init_response: {init_response}")
         if property_value.has_ref():
             resp_prop_data = property_value.get_schema_ref()
         else:
@@ -90,13 +87,10 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                     response, items_data, noref_val_process_callback, ref_val_process_callback
                 )
             else:
-                print(f"[DEBUG in _handle_list_type_data] init_response: {init_response}")
-                print(f"[DEBUG in _handle_list_type_data] items_data: {items_data}")
                 response_item_value = self._generate_response_from_data(
                     init_response=init_response,
                     resp_prop_data=items_data,
                 )
-                print(f"[DEBUG in _handle_list_type_data] response_item_value: {response_item_value}")
                 items = None
                 if response_item_value:
                     items = response_item_value if isinstance(response_item_value, list) else [response_item_value]
@@ -108,7 +102,6 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                     format=None,
                     items=items,
                 )
-                print(f"[DEBUG in _handle_list_type_data] response: {response}")
             return response
 
         def _handle_reference_object(
@@ -137,8 +130,6 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
             single_response: Optional[BaseReferenceConfig] = items_data.get_schema_ref()
             assert single_response
             for item_k, item_v in (single_response.properties or {}).items():
-                print(f"[DEBUG in nested data issue at _handle_list_type_data] item_v: {item_v}")
-                print(f"[DEBUG in nested data issue at _handle_list_type_data] response: {response}")
                 if item_v.has_ref():
                     response = ref_val_process_callback(
                         item_k, item_v, response, single_response, noref_val_process_callback
@@ -176,19 +167,10 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                     ref_val_process_callback=_ref_process_callback,
                     response=item_k_data_prop,
                 )
-                print(
-                    f"[DEBUG in nested data issue at _handle_list_type_data] ref_item_v_response from data which has reference object: {ref_item_v_response}"
-                )
-                print(
-                    f"[DEBUG in nested data issue at _handle_list_type_data] response from data which has reference object: {response}"
-                )
-                print(f"[DEBUG in _handle_list_type_data] check whether the itme is empty or not: {response.items}")
                 if response.items:
-                    print("[DEBUG in _handle_list_type_data] the response item has data")
                     assert response.items and isinstance(response.items, list)
                     response.items.append(ref_item_v_response)
                 else:
-                    print("[DEBUG in _handle_list_type_data] the response item doesn't have data")
                     response.items = (
                         [ref_item_v_response] if not isinstance(ref_item_v_response, list) else ref_item_v_response
                     )
@@ -228,7 +210,6 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
         def _handle_object_type_value_with_object_strategy(
             data: Union[BaseReferenceConfigProperty, BaseReferenceConfig]
         ) -> Union[BaseRefPropertyDetailAdapter, List[BaseRefPropertyDetailAdapter]]:
-            print(f"[DEBUG in _handle_object_type_value_with_object_strategy] data: {data}")
             data_title = data.title
             if data_title:
                 # Example data: {'type': 'object', 'title': 'InputStream'}
@@ -250,8 +231,6 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                 resp = data.process_response_from_reference(
                     init_response=init_response,
                 )
-                print("[DEBUG in _handle_object_type_value_with_object_strategy] has reference schema")
-                print(f"[DEBUG in _handle_object_type_value_with_object_strategy] resp: {resp}")
                 if has_ref == "additionalProperties":
                     return self._adapter_factory.generate_property_details(
                         name="additionalKey",
@@ -271,9 +250,6 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                 assert additional_properties_type
                 if locate(additional_properties_type) in [list, dict, "file"]:
                     items_config_data = _handle_list_type_value_with_object_strategy(additional_properties)
-                    print(
-                        f"[DEBUG in _handle_object_type_value_with_object_strategy] items_config_data: {items_config_data}"
-                    )
                     # Collection type config has been wrap one level of *additionalKey*. So it doesn't need to wrap
                     # it again.
                     return items_config_data
@@ -315,11 +291,8 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
             elif locate(v_type) == dict:
                 return _handle_object_type_value_with_object_strategy(data)
             else:
-                print(f"[DEBUG in src._handle_each_data_types_response_with_object_strategy] v_type: {v_type}")
-                print(f"[DEBUG in src._handle_each_data_types_response_with_object_strategy] data: {data}")
                 return _handle_other_types_value_with_object_strategy(v_type)
 
-        print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
         if not resp_prop_data.value_type:
             assert not isinstance(resp_prop_data, BaseReferenceConfig)
             assert resp_prop_data.has_ref()
@@ -346,13 +319,10 @@ class BaseReferencialConfig(BaseAPIDocConfig):
             else:
                 return _get_schema(component_def_data[paths[i]], paths, i + 1)
 
-        print(f"[DEBUG in get_schema_ref] self: {self}")
         _has_ref = self.has_ref()
-        print(f"[DEBUG in get_schema_ref] _has_ref: {_has_ref}")
         if not _has_ref:
             raise ValueError("This parameter has no ref in schema.")
         schema_path = self.get_ref().replace("#/", "").split("/")[1:]
-        print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")
         # Operate the component definition object
         return self._reference_object_type.deserialize(_get_schema(get_component_definition(), schema_path, 0))
 
@@ -402,7 +372,6 @@ class BaseReferencialConfig(BaseAPIDocConfig):
                     items=items_props if items is not None else items,  # type: ignore[arg-type]
                 ),
             )
-        print(f"[DEBUG in APIParser._process_has_ref_parameters] parameters: {parameters}")
         return parameters
 
     def process_response_from_reference(
@@ -567,11 +536,9 @@ class _BaseAPIConfigWithMethod(BaseAPIDocConfig, ABC):
         request_config = [cls._deserialize_request(param) for param in data.get("parameters", [])]
 
         response = data.get("responses", {})
-        print(f"[DEBUG in src.deserialize] response: {response}")
         response_config: Dict[HTTPStatus, BaseAPIDocConfig] = {}
         for status_code, resp_config in response.items():
             response_config[HTTPStatus(int(status_code))] = cls._deserialize_response(resp_config)
-        print(f"[DEBUG in src.deserialize] response_config: {response_config}")
 
         return cls(
             tags=data.get("tags", []),
@@ -612,12 +579,9 @@ class _BaseAPIConfigWithMethod(BaseAPIDocConfig, ABC):
         return handled_parameters
 
     def to_responses_adapter(self) -> BaseResponsePropertyAdapter:
-        print(f"[DEBUG in src.process_responses] self.responses: {self.responses}")
         assert self.exist_in_response(status_code=200) is True
         status_200_response = self.get_response(status_code=200)
-        print(f"[DEBUG] status_200_response: {status_200_response}")
         tmp_resp_config = self._get_http_config(status_200_response)
-        print(f"[DEBUG] has content, tmp_resp_config: {tmp_resp_config}")
         # Handle response config
         if tmp_resp_config.has_ref():
             response_data = tmp_resp_config.process_response_from_reference()

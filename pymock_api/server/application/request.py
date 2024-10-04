@@ -49,27 +49,21 @@ class FlaskRequest(BaseCurrentRequest):
             )[self.http_method(request)].http.request.parameters
             iterable_mock_api_params = list(filter(lambda p: p.value_type == "list", mock_api_params_info))
 
-            print(f"[DEBUG in src] iterable_mock_api_params: {iterable_mock_api_params}")
             # Get iterable parameters (only for HTTP method *GET*)
             for mock_api_param in iterable_mock_api_params:
                 iterable_api_param = request.args.getlist(mock_api_param.name)
-                print(f"[DEBUG in src] iterable_api_param: {iterable_api_param}")
                 handled_api_params[mock_api_param.name] = iterable_api_param
 
         # Get general parameters
         api_params = request.args if request.method.upper() == "GET" else request.form or request.data
-        print(f"[DEBUG in src] api_params: {api_params}")
         if api_params and isinstance(api_params, bytes):
             api_params = json.loads(api_params.decode("utf-8"))
-            print(f"[DEBUG in src] try to JSONize api_params: {api_params}")
 
         if handled_api_params:
             for k, v in api_params.items():
                 if k not in handled_api_params.keys():
                     handled_api_params[k] = v
-            print(f"[DEBUG in src FlaskRequest.api_parameters] after handled_api_params: {handled_api_params}")
             return handled_api_params
-        print(f"[DEBUG in src FlaskRequest.api_parameters] after api_params: {api_params}")
         return api_params
 
     def find_api_detail_by_api_path(self, mock_api_details: Dict[str, dict], api_path: str) -> dict:

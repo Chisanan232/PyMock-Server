@@ -1,3 +1,4 @@
+import logging
 import re
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
@@ -31,6 +32,8 @@ from ...._values import (
     _Test_Home_With_Enums_Format_Req_Param,
     _Test_Home_With_General_Format_Req_Param,
 )
+
+logger = logging.getLogger(__name__)
 
 MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
 
@@ -244,7 +247,7 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
         # Verify
         response_content = self._get_response_content(response)
         response_str = response_content.decode("utf-8") if isinstance(response_content, bytes) else response_content
-        print(f"[DEBUG in test_request_process] response: {response_str}")
+        logger.debug(f"response: {response_str}")
         assert isinstance(response, self._expected_response_type)
         assert response.status_code == expected_status_code
         if response.status_code != 200:

@@ -3,6 +3,7 @@
 This module provides which library of Python web framework you could use to set up a web application.
 """
 
+import logging
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
@@ -17,6 +18,8 @@ from .code_generator import (
 from .process import HTTPRequestProcess, HTTPResponseProcess
 from .request import FastAPIRequest, FlaskRequest
 from .response import FastAPIResponse, FlaskResponse
+
+logger = logging.getLogger(__name__)
 
 
 class BaseAppServer(metaclass=ABCMeta):
@@ -81,16 +84,16 @@ class BaseAppServer(metaclass=ABCMeta):
         aggregated_mocked_apis = self._get_all_api_details(mocked_apis)
         for api_name, api_config in aggregated_mocked_apis.items():
             if api_name and api_config:
-                print(f"[DEBUG in src] api_name: {api_name}")
+                logger.debug(f"api_name: {api_name}")
                 annotate_function_pycode = self._code_generator.annotate_function(api_name, api_config)
                 add_api_pycode = self._code_generator.add_api(
                     api_name, api_config, base_url=mocked_apis.base.url if mocked_apis.base else None
                 )
-                print(f"[DEBUG in src] annotate_function_pycode: {annotate_function_pycode}")
+                logger.debug(f"annotate_function_pycode: {annotate_function_pycode}")
                 # pylint: disable=exec-used
                 exec(annotate_function_pycode)
                 # pylint: disable=exec-used
-                print(f"[DEBUG in src] add_api_pycode: {add_api_pycode}")
+                logger.debug(f"add_api_pycode: {add_api_pycode}")
                 exec(add_api_pycode)
 
     @abstractmethod

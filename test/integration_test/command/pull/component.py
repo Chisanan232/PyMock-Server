@@ -272,7 +272,7 @@ class TestSubCmdPullComponent:
                     api_config.apis.template.file.config_path_values.base_file_path = cmd_args.base_file_path
                     api_config_serialize_data = api_config.serialize()
                     if cmd_args.dry_run:
-                        mock_dry_run_final_process.assert_called_once_with(api_config_serialize_data)
+                        mock_dry_run_final_process.assert_called_once_with(cmd_args, api_config_serialize_data)
                         mock_final_process.assert_not_called()
                     else:
                         mock_dry_run_final_process.assert_not_called()
@@ -289,7 +289,6 @@ class TestSubCmdPullComponent:
         sub_cmd: SubCmdPullComponent,
     ):
         # Given command line argument
-        print(f"[DEBUG in test] cmd_arg: {cmd_arg}")
         test_scenario_dir = pathlib.Path(swagger_api_resp_path).parent
         under_test_dir = "v3_openapi" if "v3" in swagger_api_resp_path else "v2_openapi"
         ut_dir = pathlib.Path(test_scenario_dir, "under_test", under_test_dir)

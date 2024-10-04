@@ -3,6 +3,7 @@
 content ...
 """
 
+import logging
 import os
 from typing import Any, Dict, List, Optional, Union
 
@@ -290,7 +291,7 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
         if self.apis:
             for ak, av in self.apis.items():
                 # TODO: Check the key validity about it will be the function naming in Python code
-                print(f"Check mock API (key: {ak}) ...")
+                logging.info(f"Check mock API (key: {ak}) ...")
                 api_config_is_valid = self.props_should_not_be_none(
                     under_check={
                         f"{self.absolute_model_key}.<API name>": ak,

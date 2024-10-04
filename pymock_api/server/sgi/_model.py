@@ -3,6 +3,8 @@ import subprocess
 from dataclasses import dataclass
 from typing import List
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class CommandOptions:
@@ -52,5 +54,5 @@ class Command:
             None.
 
         """
-        logging.info(f"Command line for set up application by SGI tool: {self.line}")
+        logger.debug(f"Command line for set up application by SGI tool: {self.line}")
         subprocess.run(self.line, shell=True)

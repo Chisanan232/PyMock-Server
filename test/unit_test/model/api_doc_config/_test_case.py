@@ -1,4 +1,5 @@
 import json
+import logging
 from collections import namedtuple
 from typing import List, Tuple
 
@@ -14,6 +15,8 @@ from pymock_api.model.api_doc_config.config import (
 from pymock_api.model.api_doc_config.content_type import ContentType
 
 from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
+
+logger = logging.getLogger(__name__)
 
 # For version 2 OpenAPI
 V2_SWAGGER_API_DOC_JSON: List[tuple] = []
@@ -93,7 +96,7 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
     def _load_all_openapi_api_doc(cls) -> None:
 
         def _generate_test_case_callback(file_path: str) -> None:
-            print(f"[DEBUG] file_path: {file_path}")
+            logger.debug(f"file_path: {file_path}")
             with open(file_path, "r", encoding="utf-8") as file_stream:
                 openapi_api_docs = json.loads(file_stream.read())
                 V2_SWAGGER_API_DOC_JSON.append(openapi_api_docs)
@@ -169,7 +172,7 @@ class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
     def _load_all_openapi_api_doc(cls) -> None:
 
         def _generate_test_case_callback(file_path: str) -> None:
-            print(f"[DEBUG] file_path: {file_path}")
+            logger.debug(f"[DEBUG] file_path: {file_path}")
             with open(file_path, "r", encoding="utf-8") as file_stream:
                 openapi_api_docs = json.loads(file_stream.read())
                 V3_OPENAPI_API_DOC_JSON.append(openapi_api_docs)
@@ -196,7 +199,7 @@ class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                                 ContentType,
                             )
                         )
-                        print(f"[DEBUG] has content, req_param_format: {req_param_format}")
+                        logger.debug(f"has content, req_param_format: {req_param_format}")
                         status_200_response_setting = status_200_response_model.get_setting(
                             content_type=req_param_format[0]
                         )

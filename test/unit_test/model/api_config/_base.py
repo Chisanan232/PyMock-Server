@@ -1,4 +1,5 @@
 import glob
+import logging
 import os
 import pathlib
 import re
@@ -58,6 +59,8 @@ from ...._values import (
     _Test_URL,
     _TestConfig,
 )
+
+logger = logging.getLogger(__name__)
 
 _assertion_msg = "Its property's value should be same as we set."
 MOCK_RETURN_VALUE: Mock = Mock()
@@ -508,7 +511,7 @@ class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
         formatter = self._data_model_not_instantiate_yet()
         assert hasattr(formatter, "value_type")
         setattr(formatter, "value_type", data_type)
-        print(f"[DEBUG] formatter: {getattr(formatter, 'value_type')}")
+        logger.debug(f"formatter: {getattr(formatter, 'value_type')}")
         formatter.value_format = value_format
         kwarg = {"data_type": data_type, "default": default} if default else {"data_type": data_type}
         value = formatter.generate_value_by_format(**kwarg)

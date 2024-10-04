@@ -1,8 +1,11 @@
+import logging
 import sys
 from abc import ABC, ABCMeta, abstractmethod
 from copy import copy
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar
+
+logger = logging.getLogger(__name__)
 
 # The truly semantically is more near like following:
 #
@@ -121,7 +124,7 @@ class _Checkable(metaclass=ABCMeta):
         err_msg: Optional[str] = None,
     ) -> bool:
         if (config_value is None) or (accept_empty and not config_value):
-            print(err_msg if err_msg else f"Configuration *{config_key}* content cannot be empty.")
+            logger.error(err_msg if err_msg else f"Configuration *{config_key}* content cannot be empty.")
             self._config_is_wrong = True
             if self._stop_if_fail:
                 self._exit_program(1)
@@ -156,7 +159,7 @@ class _Checkable(metaclass=ABCMeta):
 
         is_valid = config_value in criteria
         if not is_valid:
-            print(f"Configuration *{config_key}* value is invalid.")
+            logger.error(f"Configuration *{config_key}* value is invalid.")
             self._config_is_wrong = True
             if self._stop_if_fail:
                 self._exit_program(1)
@@ -173,7 +176,7 @@ class _Checkable(metaclass=ABCMeta):
     ) -> bool:
         if condition is True:
             base_error_msg = f"Configuration *{config_key}* setting is invalid."
-            print(f"{base_error_msg} {err_msg}" if err_msg else base_error_msg)
+            logger.error(f"{base_error_msg} {err_msg}" if err_msg else base_error_msg)
             self._config_is_wrong = True
             if self._stop_if_fail:
                 self._exit_program(1)
@@ -183,7 +186,10 @@ class _Checkable(metaclass=ABCMeta):
 
     def _exit_program(self, exit_code: int = 0, msg: str = "") -> None:
         if msg:
-            print(msg)
+            if exit_code == 0:
+                logger.info(msg)
+            else:
+                logger.error(msg)
         sys.exit(exit_code)
 
 

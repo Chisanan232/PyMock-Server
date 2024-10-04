@@ -1,3 +1,4 @@
+import logging
 import re
 import sys
 from abc import ABCMeta, abstractmethod
@@ -19,6 +20,8 @@ from ...model.api_doc_config._base_model_adapter import (
 )
 from ..component import BaseSubCmdComponent
 
+logger = logging.getLogger(__name__)
+
 
 class SubCmdCheckComponent(BaseSubCmdComponent):
     def __init__(self):
@@ -31,7 +34,7 @@ class SubCmdCheckComponent(BaseSubCmdComponent):
         except ValueError as e:
             if re.search(r"is not a valid " + re.escape(ResponseStrategy.__name__), str(e), re.IGNORECASE):
                 invalid_strategy = str(e).split("'")[1]
-                print(f"*{invalid_strategy}* is a invalid HTTP response strategy.")
+                logger.error(f"*{invalid_strategy}* is a invalid HTTP response strategy.")
                 sys.exit(1)
             raise e
 
@@ -114,7 +117,7 @@ class ValidityChecking(_BaseChecking):
         err_msg: Optional[str] = None,
     ) -> bool:
         if config_value is None:
-            print(err_msg if err_msg else f"Configuration *{config_key}* content cannot be empty.")
+            logger.error(err_msg if err_msg else f"Configuration *{config_key}* content cannot be empty.")
             self._config_is_wrong = True
             if self._stop_if_fail:
                 sys.exit(1)
@@ -123,16 +126,19 @@ class ValidityChecking(_BaseChecking):
             return True
 
     def _exit_program(self, msg: str, exit_code: int = 0) -> None:
-        print(msg)
+        if exit_code == 0:
+            logger.info(msg)
+        else:
+            logger.error(msg)
         sys.exit(exit_code)
 
     def run_finally(self, args: SubcmdCheckArguments) -> None:
         if self._config_is_wrong:
-            print("Configuration is invalid.")
+            logger.error("Configuration is invalid.")
             if self._stop_if_fail or not args.swagger_doc_url:
                 sys.exit(1)
         else:
-            print("Configuration is valid.")
+            logger.info("Configuration is valid.")
             if not args.swagger_doc_url:
                 sys.exit(0)
 
@@ -244,13 +250,16 @@ class SwaggerDiffChecking(_BaseChecking):
         )
 
     def _chk_fail_error_log(self, log: str, stop_if_fail: bool) -> None:
-        print(log)
+        logger.error(log)
         self._config_is_wrong = True
         if stop_if_fail:
             sys.exit(1)
 
     def _exit_program(self, msg: str, exit_code: int = 0) -> None:
-        print(msg)
+        if exit_code == 0:
+            logger.info(msg)
+        else:
+            logger.error(msg)
         sys.exit(exit_code)
 
     def run_finally(self, args: SubcmdCheckArguments) -> None:

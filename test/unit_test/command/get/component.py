@@ -161,6 +161,7 @@ class DisplayFormatTestSpec(metaclass=ABCMeta):
         pass
 
     def test_display(self, formatter: _BaseDisplayFormat):
+        # FIXME: This mock is incorrect for really implementation. We should fix it.
         with patch("builtins.print") as mock_print:
             formatter.display(self._given_mock_api())
             mock_print(self._expected_format_value)
