@@ -137,6 +137,12 @@ class MetaCommandOption(type):
         return new_class
 
 
+@dataclass
+class SubCmdParser:
+    subcmd_name: str
+    subcmd_parser: argparse._SubParsersAction
+
+
 class CommandOption:
     sub_cmd: Optional[SubCommandAttr] = None
     sub_parser: Optional[SubParserAttr] = None
@@ -148,7 +154,7 @@ class CommandOption:
     action: Optional[str] = None
     _options: Optional[List[str]] = None
 
-    _subparser: List[argparse._SubParsersAction] = []
+    _subparser: List[SubCmdParser] = []
     _parser_of_subparser: Dict[str, argparse.ArgumentParser] = {}
 
     @property
@@ -207,15 +213,18 @@ class CommandOption:
         if self.sub_cmd and self.sub_parser:
             if not self._subparser:
                 self._subparser.append(
-                    parser.add_subparsers(
-                        title=self.sub_cmd.title,
-                        dest=self.sub_cmd.dest,
-                        description=self.sub_cmd.description,
-                        help=self.sub_cmd.help,
-                    )
+                    SubCmdParser(
+                        subcmd_name=self.sub_cmd.title,
+                        subcmd_parser=parser.add_subparsers(
+                            title=self.sub_cmd.title,
+                            dest=self.sub_cmd.dest,
+                            description=self.sub_cmd.description,
+                            help=self.sub_cmd.help,
+                        ),
+                    ),
                 )
             if self.sub_parser.name not in self._parser_of_subparser.keys():
-                self._parser_of_subparser[self.sub_parser.name] = self._subparser[0].add_parser(
+                self._parser_of_subparser[self.sub_parser.name] = self._subparser[0].subcmd_parser.add_parser(
                     name=self.sub_parser.name, help=self.sub_parser.help
                 )
             parser = self._parser_of_subparser[self.sub_parser.name]
