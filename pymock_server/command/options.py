@@ -143,8 +143,15 @@ class SubCmdParser:
     subcmd_parser: argparse._SubParsersAction
 
 
+@dataclass
+class SubCommandTitle:
+    Base: str = "Subcommands"
+    Api: str = "SubcommandsApi"
+
+
 class CommandOption:
     sub_cmd: Optional[SubCommandAttr] = None
+    in_sub_cmd: Optional[str] = None
     sub_parser: Optional[SubParserAttr] = None
     cli_option: str
     name: Optional[str] = None
@@ -211,7 +218,8 @@ class CommandOption:
 
     def _dispatch_parser(self, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         if self.sub_cmd and self.sub_parser:
-            if not self._subparser:
+            subcmd_parser = self._find_subcmd_parser()
+            if (not self._subparser) or (self.in_sub_cmd and subcmd_parser is not None):
                 self._subparser.append(
                     SubCmdParser(
                         subcmd_name=self.sub_cmd.title,
@@ -223,12 +231,27 @@ class CommandOption:
                         ),
                     ),
                 )
+
+            subcmd_parser = self._find_subcmd_parser() if subcmd_parser is None else subcmd_parser
             if self.sub_parser.name not in self._parser_of_subparser.keys():
-                self._parser_of_subparser[self.sub_parser.name] = self._subparser[0].subcmd_parser.add_parser(
+                self._parser_of_subparser[self.sub_parser.name] = subcmd_parser.subcmd_parser.add_parser(  # type: ignore[union-attr]
                     name=self.sub_parser.name, help=self.sub_parser.help
                 )
+
             parser = self._parser_of_subparser[self.sub_parser.name]
         return parser
+
+    def _find_subcmd_parser(self, subcmd_name: str = "") -> Optional[SubCmdParser]:
+        in_sub_cmd = list(
+            filter(lambda e: e.subcmd_name == (subcmd_name if subcmd_name else self.in_sub_cmd), self._subparser)
+        )
+        if in_sub_cmd:
+            return in_sub_cmd[0]
+        else:
+            default_parser = None
+            if len(self._subparser) > 0:
+                default_parser = self._find_subcmd_parser(SubCommandTitle.Base)
+            return default_parser
 
 
 @dataclass
@@ -244,7 +267,7 @@ class SubCommand:
 
 class BaseSubCommand(CommandOption):
     sub_cmd: SubCommandAttr = SubCommandAttr(
-        title="Subcommands",
+        title=SubCommandTitle.Base,
         dest=SubCommand.Base,
         description="",
         help="",
