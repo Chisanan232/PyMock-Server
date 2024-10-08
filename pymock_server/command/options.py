@@ -138,7 +138,7 @@ class MetaCommandOption(type):
 
 
 @dataclass
-class SubCmdParser:
+class SubCmdParserAction:
     subcmd_name: str
     subcmd_parser: argparse._SubParsersAction
 
@@ -161,7 +161,7 @@ class CommandOption:
     action: Optional[str] = None
     _options: Optional[List[str]] = None
 
-    _subparser: List[SubCmdParser] = []
+    _subparser: List[SubCmdParserAction] = []
     _parser_of_subparser: Dict[str, argparse.ArgumentParser] = {}
 
     @property
@@ -218,12 +218,11 @@ class CommandOption:
 
     def _dispatch_parser(self, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         if self.sub_cmd and self.sub_parser:
-            subcmd_parser = self._find_subcmd_parser()
+            subcmd_parser = self._find_subcmd_parser_action()
             if (not self._subparser) or (self.in_sub_cmd and subcmd_parser is not None):
-                assert self.in_sub_cmd
                 self._subparser.append(
-                    SubCmdParser(
-                        subcmd_name=self.in_sub_cmd,
+                    SubCmdParserAction(
+                        subcmd_name=self.in_sub_cmd,  # type: ignore[arg-type]
                         subcmd_parser=parser.add_subparsers(
                             title=self.sub_cmd.title,
                             dest=self.sub_cmd.dest,
@@ -233,7 +232,7 @@ class CommandOption:
                     ),
                 )
 
-            subcmd_parser = self._find_subcmd_parser() if subcmd_parser is None else subcmd_parser
+            subcmd_parser = self._find_subcmd_parser_action() if subcmd_parser is None else subcmd_parser
             if self.sub_parser.name not in self._parser_of_subparser.keys():
                 self._parser_of_subparser[self.sub_parser.name] = subcmd_parser.subcmd_parser.add_parser(  # type: ignore[union-attr]
                     name=self.sub_parser.name, help=self.sub_parser.help
@@ -242,7 +241,7 @@ class CommandOption:
             parser = self._parser_of_subparser[self.sub_parser.name]
         return parser
 
-    def _find_subcmd_parser(self, subcmd_name: str = "") -> Optional[SubCmdParser]:
+    def _find_subcmd_parser_action(self, subcmd_name: str = "") -> Optional[SubCmdParserAction]:
         in_sub_cmd = list(
             filter(lambda e: e.subcmd_name == (subcmd_name if subcmd_name else self.in_sub_cmd), self._subparser)
         )
@@ -251,7 +250,7 @@ class CommandOption:
         else:
             default_parser = None
             if len(self._subparser) > 0:
-                default_parser = self._find_subcmd_parser(SubCommandTitle.Base)
+                default_parser = self._find_subcmd_parser_action(SubCommandTitle.Base)
             return default_parser
 
 
