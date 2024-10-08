@@ -220,9 +220,10 @@ class CommandOption:
         if self.sub_cmd and self.sub_parser:
             subcmd_parser = self._find_subcmd_parser()
             if (not self._subparser) or (self.in_sub_cmd and subcmd_parser is not None):
+                assert self.in_sub_cmd
                 self._subparser.append(
                     SubCmdParser(
-                        subcmd_name=self.sub_cmd.title,
+                        subcmd_name=self.in_sub_cmd,
                         subcmd_parser=parser.add_subparsers(
                             title=self.sub_cmd.title,
                             dest=self.sub_cmd.dest,
