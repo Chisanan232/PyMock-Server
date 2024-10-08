@@ -218,8 +218,8 @@ class CommandOption:
 
     def _dispatch_parser(self, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         if self.sub_cmd and self.sub_parser:
-            subcmd_parser = self._find_subcmd_parser_action()
-            if (not self._subparser) or (self.in_sub_cmd and subcmd_parser is not None):
+            subcmd_parser_action = self._find_subcmd_parser_action()
+            if (not self._subparser) or (self.in_sub_cmd and subcmd_parser_action is not None):
                 self._subparser.append(
                     SubCmdParserAction(
                         subcmd_name=self.in_sub_cmd,  # type: ignore[arg-type]
@@ -232,9 +232,11 @@ class CommandOption:
                     ),
                 )
 
-            subcmd_parser = self._find_subcmd_parser_action() if subcmd_parser is None else subcmd_parser
+            subcmd_parser_action = (
+                self._find_subcmd_parser_action() if subcmd_parser_action is None else subcmd_parser_action
+            )
             if self.sub_parser.name not in self._parser_of_subparser.keys():
-                self._parser_of_subparser[self.sub_parser.name] = subcmd_parser.subcmd_parser.add_parser(  # type: ignore[union-attr]
+                self._parser_of_subparser[self.sub_parser.name] = subcmd_parser_action.subcmd_parser.add_parser(  # type: ignore[union-attr]
                     name=self.sub_parser.name, help=self.sub_parser.help
                 )
 
