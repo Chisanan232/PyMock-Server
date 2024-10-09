@@ -144,6 +144,26 @@ class SubCmdParserAction:
 
 
 @dataclass
+class SubCmdParser:
+    in_subcmd: str
+    parser: argparse.ArgumentParser
+    sub_parser: List["SubCmdParser"]
+
+    def find(self, subcmd: str) -> Optional[argparse.ArgumentParser]:
+        if subcmd == self.in_subcmd:
+            return self.parser
+        else:
+            if self.sub_parser:
+                all_subcmd_parser = list(map(lambda sp: sp.find(subcmd), self.sub_parser))
+                exist_subcmd_parser = list(filter(lambda sp: sp is not None, all_subcmd_parser))
+                if exist_subcmd_parser:
+                    return exist_subcmd_parser[0]
+                return None
+            else:
+                return None
+
+
+@dataclass
 class SubCommandTitle:
     Base: str = "Subcommands"
     Api: str = "SubcommandsApi"
@@ -162,7 +182,7 @@ class CommandOption:
     _options: Optional[List[str]] = None
 
     _subparser: List[SubCmdParserAction] = []
-    _parser_of_subparser: Dict[str, argparse.ArgumentParser] = {}
+    _parser_of_subparser: List[SubCmdParser] = []
 
     @property
     def cli_option_name(self) -> Tuple[str, ...]:
@@ -235,13 +255,25 @@ class CommandOption:
             subcmd_parser_action = (
                 self._find_subcmd_parser_action() if subcmd_parser_action is None else subcmd_parser_action
             )
-            if self.sub_parser.name not in self._parser_of_subparser.keys():
-                self._parser_of_subparser[self.sub_parser.name] = subcmd_parser_action.subcmd_parser.add_parser(  # type: ignore[union-attr]
+            subcmd_parser_model = self._find_subcmd_parser(self.sub_parser.name)
+            if subcmd_parser_model is None:
+                parser = subcmd_parser_action.subcmd_parser.add_parser(  # type: ignore[union-attr]
                     name=self.sub_parser.name, help=self.sub_parser.help
                 )
-
-            parser = self._parser_of_subparser[self.sub_parser.name]
+                self._parser_of_subparser.append(
+                    SubCmdParser(
+                        in_subcmd=self.sub_parser.name,
+                        parser=parser,
+                        sub_parser=[],
+                    )
+                )
+            else:
+                parser = subcmd_parser_model.parser
         return parser
+
+    def _find_subcmd_parser(self, subcmd_name: str) -> Optional[SubCmdParser]:
+        in_sub_cmd = list(filter(lambda e: e.find(subcmd_name) is not None, self._parser_of_subparser))
+        return in_sub_cmd[0] if in_sub_cmd else None
 
     def _find_subcmd_parser_action(self, subcmd_name: str = "") -> Optional[SubCmdParserAction]:
         in_sub_cmd = list(
