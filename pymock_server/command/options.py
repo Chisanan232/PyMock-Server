@@ -270,7 +270,8 @@ class CommandOption:
                     ),
                 )
 
-            subcmd_parser_action = self._find_subcmd_parser_action()
+            subcmd_parser_name = SubCommand.Base if self.in_sub_cmd is None else self.in_sub_cmd
+            subcmd_parser_action = self._find_subcmd_parser_action(subcmd_parser_name)
 
             subcmd_parser_action = (
                 self._find_subcmd_parser_action() if subcmd_parser_action is None else subcmd_parser_action
