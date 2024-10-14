@@ -167,9 +167,9 @@ SUBCOMMAND_PARSER: List[SubCmdParser] = []
 
 
 @dataclass
-class SubCommandTitle:
-    Base: str = "Subcommands"
-    Api: str = "SubcommandsApi"
+class SubCommandSection:
+    Base: str = "subcommands"
+    ServerType: str = "server types"
 
 
 @dataclass
@@ -256,7 +256,7 @@ class CommandOption:
             # initial the sub-command line parser collection first if it's empty.
             if not self._subparser or self._find_subcmd_parser_action(SubCommand.Base) is None:
                 sub_cmd: SubCommandAttr = SubCommandAttr(
-                    title=SubCommandTitle.Base,
+                    title=SubCommandSection.Base,
                     dest=SubCommand.Base,
                     description="",
                     help="",
@@ -305,7 +305,7 @@ class CommandOption:
 
 class BaseSubCommand(CommandOption):
     sub_cmd: SubCommandAttr = SubCommandAttr(
-        title=SubCommandTitle.Base,
+        title=SubCommandSection.Base,
         dest=SubCommand.Base,
         description="",
         help="",

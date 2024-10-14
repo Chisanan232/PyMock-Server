@@ -47,7 +47,7 @@ class TestHelp(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "mock-server [SUBCOMMAND] [OPTIONS]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "-v, --version")
-        self._should_contains_chars_in_result(cmd_running_result, "Subcommands:")
+        self._should_contains_chars_in_result(cmd_running_result, "subcommands:")
         self._should_contains_chars_in_result(
             cmd_running_result,
             f"{SubCommand.Run},{SubCommand.Sample},{SubCommand.Add},{SubCommand.Check},{SubCommand.Get}",
