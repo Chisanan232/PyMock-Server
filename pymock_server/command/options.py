@@ -185,7 +185,7 @@ class SubCommand:
 
 class CommandOption:
     sub_cmd: Optional[SubCommandAttr] = None
-    in_sub_cmd: Optional[str] = SubCommand.Base
+    in_sub_cmd: str = SubCommand.Base
     sub_parser: Optional[SubParserAttr] = None
     cli_option: str
     name: Optional[str] = None
@@ -273,8 +273,7 @@ class CommandOption:
                     ),
                 )
 
-            subcmd_parser_name = SubCommand.Base if self.in_sub_cmd is None else self.in_sub_cmd
-            subcmd_parser_action = self._find_subcmd_parser_action(subcmd_parser_name)
+            subcmd_parser_action = self._find_subcmd_parser_action(self.in_sub_cmd)
 
             subcmd_parser_model = self._find_subcmd_parser(self.sub_parser.name)
             if subcmd_parser_model is None:
@@ -294,14 +293,14 @@ class CommandOption:
         return parser
 
     def _find_subcmd_parser(self, subcmd_name: str) -> Optional[SubCmdParser]:
-        in_sub_cmd = list(filter(lambda e: e.find(subcmd_name) is not None, SUBCOMMAND_PARSER))
-        return in_sub_cmd[0] if in_sub_cmd else None
+        mapping_subcmd_parser = list(filter(lambda e: e.find(subcmd_name) is not None, SUBCOMMAND_PARSER))
+        return mapping_subcmd_parser[0] if mapping_subcmd_parser else None
 
     def _find_subcmd_parser_action(self, subcmd_name: str = "") -> Optional[SubCmdParserAction]:
-        in_sub_cmd = list(
+        mapping_subcmd_parser_action = list(
             filter(lambda e: e.subcmd_name == (subcmd_name if subcmd_name else self.in_sub_cmd), self._subparser)
         )
-        return in_sub_cmd[0] if in_sub_cmd else None
+        return mapping_subcmd_parser_action[0] if mapping_subcmd_parser_action else None
 
 
 class BaseSubCommand(CommandOption):
