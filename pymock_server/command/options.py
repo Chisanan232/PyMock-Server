@@ -163,6 +163,9 @@ class SubCmdParser:
                 return None
 
 
+SUBCOMMAND_PARSER: List[SubCmdParser] = []
+
+
 @dataclass
 class SubCommandTitle:
     Base: str = "Subcommands"
@@ -193,7 +196,7 @@ class CommandOption:
     _options: Optional[List[str]] = None
 
     _subparser: List[SubCmdParserAction] = []
-    _parser_of_subparser: List[SubCmdParser] = []
+    # _parser_of_subparser: List[SubCmdParser] = []    # Deprecated and use object *SUBCOMMAND_PARSER* to replace it
 
     @property
     def cli_option_name(self) -> Tuple[str, ...]:
@@ -278,7 +281,8 @@ class CommandOption:
                 parser = subcmd_parser_action.subcmd_parser.add_parser(  # type: ignore[union-attr]
                     name=self.sub_parser.name, help=self.sub_parser.help
                 )
-                self._parser_of_subparser.append(
+                global SUBCOMMAND_PARSER
+                SUBCOMMAND_PARSER.append(
                     SubCmdParser(
                         in_subcmd=self.sub_parser.name,
                         parser=parser,
@@ -290,7 +294,7 @@ class CommandOption:
         return parser
 
     def _find_subcmd_parser(self, subcmd_name: str) -> Optional[SubCmdParser]:
-        in_sub_cmd = list(filter(lambda e: e.find(subcmd_name) is not None, self._parser_of_subparser))
+        in_sub_cmd = list(filter(lambda e: e.find(subcmd_name) is not None, SUBCOMMAND_PARSER))
         return in_sub_cmd[0] if in_sub_cmd else None
 
     def _find_subcmd_parser_action(self, subcmd_name: str = "") -> Optional[SubCmdParserAction]:
