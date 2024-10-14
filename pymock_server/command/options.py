@@ -251,7 +251,7 @@ class CommandOption:
         if self.sub_cmd and self.sub_parser:
 
             # initial the sub-command line parser collection first if it's empty.
-            if not self._subparser:
+            if not self._subparser or self._find_subcmd_parser_action(SubCommand.Base) is None:
                 sub_cmd: SubCommandAttr = SubCommandAttr(
                     title=SubCommandTitle.Base,
                     dest=SubCommand.Base,
@@ -260,7 +260,7 @@ class CommandOption:
                 )
                 self._subparser.append(
                     SubCmdParserAction(
-                        subcmd_name=self.in_sub_cmd,  # type: ignore[arg-type]
+                        subcmd_name=SubCommand.Base,
                         subcmd_parser=parser.add_subparsers(
                             title=sub_cmd.title,
                             dest=sub_cmd.dest,
