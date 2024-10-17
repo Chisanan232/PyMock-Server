@@ -254,7 +254,7 @@ class CommandOption:
         if self.sub_cmd and self.sub_parser:
 
             # initial the sub-command line parser collection first if it's empty.
-            if not self._subparser or self._find_subcmd_parser_action(SubCommand.Base) is None:
+            if self._find_subcmd_parser_action(SubCommand.Base) is None:
                 sub_cmd: SubCommandAttr = SubCommandAttr(
                     title=SubCommandSection.Base,
                     dest=SubCommand.Base,
@@ -274,6 +274,40 @@ class CommandOption:
                 )
 
             subcmd_parser_action = self._find_subcmd_parser_action(self.in_sub_cmd)
+
+            def _add_new_subcommand_line() -> None:
+                # Add parser first
+                _base_subcmd_parser_action = subcmd_parser_action
+                if _base_subcmd_parser_action is None:
+                    _base_subcmd_parser_action = self._find_subcmd_parser_action(SubCommand.Base)
+                _parser = _base_subcmd_parser_action.subcmd_parser.add_parser(  # type: ignore[union-attr]
+                    name=self.sub_cmd.dest, help=self.sub_cmd.help  # type: ignore[union-attr]
+                )
+                global SUBCOMMAND_PARSER
+                SUBCOMMAND_PARSER.append(
+                    SubCmdParser(
+                        in_subcmd=self.sub_cmd.dest,  # type: ignore[union-attr]
+                        parser=_parser,
+                        sub_parser=[],
+                    )
+                )
+
+                # Add sub-command line parser
+                self._subparser.append(
+                    SubCmdParserAction(
+                        subcmd_name=self.in_sub_cmd,
+                        subcmd_parser=_parser.add_subparsers(
+                            title=self.sub_cmd.title,  # type: ignore[union-attr]
+                            dest=self.sub_cmd.dest,  # type: ignore[union-attr]
+                            description=self.sub_cmd.description,  # type: ignore[union-attr]
+                            help=self.sub_cmd.help,  # type: ignore[union-attr]
+                        ),
+                    ),
+                )
+
+            if self.in_sub_cmd and subcmd_parser_action is None:
+                _add_new_subcommand_line()
+                subcmd_parser_action = self._find_subcmd_parser_action(self.in_sub_cmd)
 
             subcmd_parser_model = self._find_subcmd_parser(self.sub_parser.name)
             if subcmd_parser_model is None:
