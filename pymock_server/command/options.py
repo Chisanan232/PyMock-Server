@@ -110,8 +110,8 @@ class MockAPICommandParser:
         return self._parser
 
     @property
-    def subcommand(self) -> Optional[str]:
-        return sys.argv[1] if self.is_running_subcmd else None
+    def subcommand(self) -> Optional[SysArg]:
+        return SysArg.parse(sys.argv) if self.is_running_subcmd else None
 
     @property
     def is_running_subcmd(self) -> bool:

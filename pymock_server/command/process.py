@@ -19,7 +19,7 @@ from .add import SubCmdAddComponent
 from .check import SubCmdCheckComponent
 from .component import BaseSubCmdComponent, NoSubCmdComponent
 from .get import SubCmdGetComponent
-from .options import MockAPICommandParser, SubCommand
+from .options import MockAPICommandParser, SubCommand, SysArg
 from .pull.component import SubCmdPullComponent
 from .run import SubCmdRunComponent
 from .sample.component import SubCmdSampleComponent
@@ -109,10 +109,10 @@ class CommandProcessor:
     def copy(self) -> "CommandProcessor":
         return copy.copy(self)
 
-    def _is_responsible(self, subcmd: Optional[str] = None, args: Optional[ParserArguments] = None) -> bool:
+    def _is_responsible(self, subcmd: Optional[SysArg] = None, args: Optional[ParserArguments] = None) -> bool:
         if args:
             return args.subparser_name == self.responsible_subcommand
-        return subcmd == self.responsible_subcommand
+        return (subcmd.subcmd if subcmd else None) == self.responsible_subcommand
 
     def _run(self, args: ParserArguments) -> None:
         init_logger_config()

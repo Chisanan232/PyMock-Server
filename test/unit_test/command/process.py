@@ -24,7 +24,7 @@ except ImportError:
 
 from pymock_server._utils.file import Format
 from pymock_server._utils.file.operation import YAML
-from pymock_server.command.options import SubCommand, get_all_subcommands
+from pymock_server.command.options import SubCommand, SysArg, get_all_subcommands
 from pymock_server.command.process import (
     BaseCommandProcessor,
     NoSubCmd,
@@ -279,7 +279,7 @@ class BaseCommandProcessorTestSpec(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _given_subcmd(self) -> Optional[str]:
+    def _given_subcmd(self) -> Optional[SysArg]:
         pass
 
     @abstractmethod
@@ -319,7 +319,7 @@ class TestNoSubCmd(BaseCommandProcessorTestSpec):
         args_namespace.subcommand = None
         return args_namespace
 
-    def _given_subcmd(self) -> Optional[str]:
+    def _given_subcmd(self) -> Optional[SysArg]:
         return None
 
     def _expected_argument_type(self) -> Type[Namespace]:
@@ -404,8 +404,8 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
         args_namespace.log_level = _Log_Level.value
         return args_namespace
 
-    def _given_subcmd(self) -> Optional[str]:
-        return SubCommand.Run
+    def _given_subcmd(self) -> Optional[SysArg]:
+        return SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd=SubCommand.Run)
 
     def _expected_argument_type(self) -> Type[SubcmdRunArguments]:
         return SubcmdRunArguments
@@ -547,8 +547,8 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         args_namespace.divide_http_response = False
         return args_namespace
 
-    def _given_subcmd(self) -> Optional[str]:
-        return SubCommand.Add
+    def _given_subcmd(self) -> Optional[SysArg]:
+        return SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd=SubCommand.Add)
 
     def _expected_argument_type(self) -> Type[SubcmdAddArguments]:
         return SubcmdAddArguments
@@ -636,8 +636,8 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
         args_namespace.check_api_parameters = True
         return args_namespace
 
-    def _given_subcmd(self) -> Optional[str]:
-        return SubCommand.Check
+    def _given_subcmd(self) -> Optional[SysArg]:
+        return SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd=SubCommand.Check)
 
     def _expected_argument_type(self) -> Type[SubcmdCheckArguments]:
         return SubcmdCheckArguments
@@ -714,8 +714,8 @@ class TestSubCmdGet(BaseCommandProcessorTestSpec):
         args_namespace.http_method = _Cmd_Arg_HTTP_Method
         return args_namespace
 
-    def _given_subcmd(self) -> Optional[str]:
-        return SubCommand.Get
+    def _given_subcmd(self) -> Optional[SysArg]:
+        return SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd=SubCommand.Get)
 
     def _expected_argument_type(self) -> Type[SubcmdGetArguments]:
         return SubcmdGetArguments
@@ -824,8 +824,8 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
         args_namespace.sample_config_type = _Sample_Data_Type
         return args_namespace
 
-    def _given_subcmd(self) -> Optional[str]:
-        return SubCommand.Sample
+    def _given_subcmd(self) -> Optional[SysArg]:
+        return SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd=SubCommand.Sample)
 
     def _expected_argument_type(self) -> Type[SubcmdSampleArguments]:
         return SubcmdSampleArguments
@@ -998,8 +998,8 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         args_namespace.divide_http_response = _Test_Divide_Http_Response
         return args_namespace
 
-    def _given_subcmd(self) -> Optional[str]:
-        return SubCommand.Pull
+    def _given_subcmd(self) -> Optional[SysArg]:
+        return SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd=SubCommand.Pull)
 
     def _expected_argument_type(self) -> Type[SubcmdPullArguments]:
         return SubcmdPullArguments
