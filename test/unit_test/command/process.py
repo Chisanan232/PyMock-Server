@@ -92,7 +92,9 @@ from ..._values import (
 logger = logging.getLogger(__name__)
 
 _Fake_SubCmd: str = "pytest-subcmd"
+_Fake_SubCmd_Obj: SysArg = SysArg(pre_subcmd=None, subcmd=_Fake_SubCmd)
 _Fake_Duplicated_SubCmd: str = "pytest-duplicated"
+_Fake_Duplicated_SubCmd_Obj: SysArg = SysArg(pre_subcmd=None, subcmd=_Fake_Duplicated_SubCmd)
 _No_SubCmd_Amt: int = 1
 _Fake_Amt: int = 1
 
@@ -175,7 +177,7 @@ class FakeSavingConfigComponent(SavingConfigComponent):
 
 
 class FakeCommandProcess(BaseCommandProcessor):
-    responsible_subcommand: str = _Fake_SubCmd
+    responsible_subcommand: str = _Fake_SubCmd_Obj
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         return
@@ -1011,13 +1013,13 @@ def test_make_command_chain():
 
 def test_make_command_chain_if_duplicated_subcmd():
     class FakeCmdPS(BaseCommandProcessor):
-        responsible_subcommand: str = _Fake_Duplicated_SubCmd
+        responsible_subcommand: SysArg = _Fake_Duplicated_SubCmd_Obj
 
         def run(self, args: ParserArguments) -> None:
             pass
 
     class FakeDuplicatedCmdPS(BaseCommandProcessor):
-        responsible_subcommand: str = _Fake_Duplicated_SubCmd
+        responsible_subcommand: SysArg = _Fake_Duplicated_SubCmd_Obj
 
         def run(self, args: ParserArguments) -> None:
             pass
