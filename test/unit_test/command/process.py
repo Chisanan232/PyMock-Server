@@ -407,7 +407,9 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
         return args_namespace
 
     def _given_subcmd(self) -> Optional[SysArg]:
-        return SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd=SubCommand.Run)
+        return SysArg(
+            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.RestServer), subcmd=SubCommand.Run
+        )
 
     def _expected_argument_type(self) -> Type[SubcmdRunArguments]:
         return SubcmdRunArguments
@@ -550,7 +552,9 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         return args_namespace
 
     def _given_subcmd(self) -> Optional[SysArg]:
-        return SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd=SubCommand.Add)
+        return SysArg(
+            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.RestServer), subcmd=SubCommand.Add
+        )
 
     def _expected_argument_type(self) -> Type[SubcmdAddArguments]:
         return SubcmdAddArguments
@@ -639,7 +643,9 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
         return args_namespace
 
     def _given_subcmd(self) -> Optional[SysArg]:
-        return SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd=SubCommand.Check)
+        return SysArg(
+            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.RestServer), subcmd=SubCommand.Check
+        )
 
     def _expected_argument_type(self) -> Type[SubcmdCheckArguments]:
         return SubcmdCheckArguments
@@ -717,7 +723,9 @@ class TestSubCmdGet(BaseCommandProcessorTestSpec):
         return args_namespace
 
     def _given_subcmd(self) -> Optional[SysArg]:
-        return SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd=SubCommand.Get)
+        return SysArg(
+            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.RestServer), subcmd=SubCommand.Get
+        )
 
     def _expected_argument_type(self) -> Type[SubcmdGetArguments]:
         return SubcmdGetArguments
@@ -827,7 +835,9 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
         return args_namespace
 
     def _given_subcmd(self) -> Optional[SysArg]:
-        return SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd=SubCommand.Sample)
+        return SysArg(
+            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.RestServer), subcmd=SubCommand.Sample
+        )
 
     def _expected_argument_type(self) -> Type[SubcmdSampleArguments]:
         return SubcmdSampleArguments
@@ -1001,7 +1011,9 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         return args_namespace
 
     def _given_subcmd(self) -> Optional[SysArg]:
-        return SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd=SubCommand.Pull)
+        return SysArg(
+            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.RestServer), subcmd=SubCommand.Pull
+        )
 
     def _expected_argument_type(self) -> Type[SubcmdPullArguments]:
         return SubcmdPullArguments
