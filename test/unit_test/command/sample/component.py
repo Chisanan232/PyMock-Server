@@ -1,5 +1,5 @@
 import re
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -39,7 +39,7 @@ class TestSubCmdSampleComponent:
                 "pymock_server.command.sample.component.get_sample_by_type", return_value=FakeYAML
             ) as mock_get_sample_by_type:
                 with pytest.raises(AssertionError) as exc_info:
-                    component.process(invalid_args)
+                    component.process(parser=Mock(), args=invalid_args)
 
                 # Verify result
                 assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)

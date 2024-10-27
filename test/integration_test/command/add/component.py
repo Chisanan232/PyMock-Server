@@ -1,5 +1,5 @@
 import pathlib
-from unittest.mock import PropertyMock, patch
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 
@@ -290,7 +290,7 @@ class TestSubCmdAddComponent:
                     "pymock_server.command._common.component.SavingConfigComponent._final_process"
                 ) as mock_final_process:
                     # Run target function
-                    sub_cmd.process(args=cmd_args)
+                    sub_cmd.process(parser=Mock(), args=cmd_args)
 
                     # Verify
                     new_api_config = sub_cmd._generate_api_config(api_config=api_config, args=cmd_args)
@@ -362,7 +362,7 @@ class TestSubCmdAddComponent:
             #     "pymock_server.command.pull.component.URLLibHTTPClient.request", return_value=new_api_config_has_new_api
             # ) as mock_swagger_request:
             # Run target function
-            sub_cmd.process(args=cmd_args)
+            sub_cmd.process(parser=Mock(), args=cmd_args)
 
             # Expected values
             expected_config_data_modal = load_config(expected_yaml_config_path, is_pull=True)

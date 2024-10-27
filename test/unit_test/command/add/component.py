@@ -1,6 +1,6 @@
 import re
 from typing import List, Optional
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -54,7 +54,7 @@ class TestSubCmdAddComponent:
 
         # Run target function to test
         with pytest.raises(AssertionError) as exc_info:
-            component.process(invalid_args)
+            component.process(parser=Mock(), args=invalid_args)
 
         # Verify result
         assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)
@@ -160,7 +160,7 @@ class TestSubCmdAddComponent:
                 divide_http_request=False,
                 divide_http_response=False,
             )
-            component.process(args)
+            component.process(parser=Mock(), args=args)
 
             api_config = generate_empty_config()
             api_config = component._generate_api_config(api_config=api_config, args=args)
@@ -237,7 +237,7 @@ class TestSubCmdAddComponent:
                 divide_http_response=False,
             )
             with pytest.raises(SystemExit) as exc_info:
-                component.process(args)
+                component.process(parser=Mock(), args=args)
             assert str(exc_info.value) == "1"
 
             if url_path:

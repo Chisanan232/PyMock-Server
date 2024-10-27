@@ -1,7 +1,7 @@
 import json
 from abc import ABCMeta, abstractmethod
 from typing import Type
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from yaml import dump
 
@@ -60,7 +60,7 @@ class TestSubCmdGetComponent:
                         api_path=_Test_URL,
                         http_method=_Test_HTTP_Method,
                     )
-                    component.process(subcmd_get_args)
+                    component.process(parser=Mock(), args=subcmd_get_args)
 
                 assert str(exc_info.value) == str(expected_exit_code)
                 mock_formatter_display.assert_called_once_with(MockAPI().deserialize(data=_TestConfig.Mock_API))
@@ -77,7 +77,7 @@ class TestSubCmdGetComponent:
                     api_path=_Test_URL,
                     http_method=_Test_HTTP_Method,
                 )
-                component.process(subcmd_get_args)
+                component.process(parser=Mock(), args=subcmd_get_args)
 
             assert str(exc_info.value) == "1"
 
@@ -98,7 +98,7 @@ class TestSubCmdGetComponent:
                     api_path=_Test_URL,
                     http_method=_Test_HTTP_Method,
                 )
-                component.process(subcmd_get_args)
+                component.process(parser=Mock(), args=subcmd_get_args)
 
             assert str(exc_info.value) == "1"
 

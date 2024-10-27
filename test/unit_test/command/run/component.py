@@ -46,7 +46,7 @@ class TestSubCmdRunComponent:
 
         # Run target function to test
         with pytest.raises(AssertionError) as exc_info:
-            component.process(invalid_args)
+            component.process(parser=Mock(), args=invalid_args)
 
         # Verify result
         assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)

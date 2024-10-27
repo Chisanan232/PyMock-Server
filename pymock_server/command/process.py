@@ -98,8 +98,7 @@ class CommandProcessor:
             return self._next.distribute(args=args, cmd_index=self._current_index)
 
     def process(self, parser: ArgumentParser, args: ParserArguments, cmd_index: int = 0) -> None:
-        # TODO: integrate the argument *parser* into each component major function *process*
-        self.distribute(args=args, cmd_index=cmd_index)._run(args)
+        self.distribute(args=args, cmd_index=cmd_index)._run(parser=parser, args=args)
 
     def parse(
         self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None, cmd_index: int = 0
@@ -117,9 +116,9 @@ class CommandProcessor:
             return args.subparser_name == (self.responsible_subcommand.subcmd if self.responsible_subcommand else None)
         return subcmd == self.responsible_subcommand
 
-    def _run(self, args: ParserArguments) -> None:
+    def _run(self, parser: ArgumentParser, args: ParserArguments) -> None:
         init_logger_config()
-        self._subcmd_component.process(args)
+        self._subcmd_component.process(parser=parser, args=args)
 
     def _parse_cmd_arguments(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> Namespace:
         return parser.parse_args(cmd_args)

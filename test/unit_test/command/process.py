@@ -182,7 +182,7 @@ class FakeCommandProcess(BaseCommandProcessor):
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         return
 
-    def _run(self, args: ParserArguments) -> None:
+    def _run(self, parser: ArgumentParser, args: ParserArguments) -> None:
         pass
 
 
@@ -225,13 +225,13 @@ class TestSubCmdProcessChain:
 
         arg = ParserArguments(subparser_name=_Fake_SubCmd)
         cmd_parser = Mock()
-        cmd_processor.process(cmd_parser, arg)
+        cmd_processor.process(parser=cmd_parser, args=arg)
 
         cmd_processor._is_responsible.assert_called_once_with(subcmd=None, args=arg)
         if should_dispatch:
             cmd_processor._run.assert_not_called()
         else:
-            cmd_processor._run.assert_called_once_with(arg)
+            cmd_processor._run.assert_called_once_with(parser=cmd_parser, args=arg)
 
     @patch("copy.copy")
     def test_copy(self, mock_copy: Mock, cmd_processor: FakeCommandProcess):

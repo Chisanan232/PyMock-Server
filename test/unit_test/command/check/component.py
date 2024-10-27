@@ -1,6 +1,6 @@
 import json
 from typing import Union
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -133,7 +133,7 @@ class TestSubCmdCheckComponent:
                     mock_get_swagger_config.return_value = deserialize_api_doc_config(json.loads(file_stream.read()))
 
                 with pytest.raises(SystemExit) as exc_info:
-                    subcmd.process(mock_parser_arg)
+                    subcmd.process(parser=Mock(), args=mock_parser_arg)
                 assert expected_exit_code in str(exc_info.value)
 
     @pytest.mark.parametrize(
@@ -154,7 +154,7 @@ class TestSubCmdCheckComponent:
         MagicMock()
         with patch("pymock_server.command.check.component.load_config", side_effect=mock_exception) as mock_load_config:
             with pytest.raises(Exception):
-                subcmd.process(mock_parser_arg)
+                subcmd.process(parser=Mock(), args=mock_parser_arg)
             mock_load_config.assert_called_once()
 
 

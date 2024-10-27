@@ -1,6 +1,6 @@
 import json
 import pathlib
-from unittest.mock import PropertyMock, patch
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 
@@ -246,7 +246,7 @@ class TestSubCmdPullComponent:
                     "pymock_server.command._common.component.SavingConfigComponent._final_process"
                 ) as mock_final_process:
                     # Run target function
-                    sub_cmd.process(args=cmd_args)
+                    sub_cmd.process(parser=Mock(), args=cmd_args)
 
                     # Verify
                     http_proto = "https" if cmd_args.request_with_https else "http"
@@ -331,7 +331,7 @@ class TestSubCmdPullComponent:
                 "pymock_server.command.pull.component.URLLibHTTPClient.request", return_value=swagger_api_resp
             ) as mock_swagger_request:
                 # Run target function
-                sub_cmd.process(args=cmd_args)
+                sub_cmd.process(parser=Mock(), args=cmd_args)
 
                 # Expected values
                 expected_config_data_modal = load_config(expected_yaml_config_path, is_pull=True)
