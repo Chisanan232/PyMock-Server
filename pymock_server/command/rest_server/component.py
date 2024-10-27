@@ -2,10 +2,11 @@ from argparse import ArgumentParser
 
 from ...model.cmd_args import ParserArguments
 from ..component import BaseSubCmdComponent
+from ..options import SubCommand
 
 
 class SubCmdRestServerComponent(BaseSubCmdComponent):
 
     def process(self, parser: ArgumentParser, args: ParserArguments) -> None:
-        # FIXME: Let this proces just print the help info of how to use subcommand line *rest-server*
-        print("Do nothing, please use anyone of subcommand line to do you want to do.")
+        print("⚠️ warn: please operate on this command with one more subcommand line you need.")
+        parser.parse_args(args=[SubCommand.RestServer, "--help"])

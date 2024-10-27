@@ -10,6 +10,7 @@ from typing import Optional
 import pytest
 
 from pymock_server._utils.file.operation import YAML
+from pymock_server.command.options import SubCommand
 from pymock_server.model._sample import Mocked_APIs, Sample_Config_Value
 
 from .._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
@@ -84,6 +85,31 @@ class SubCmdRestServerTestSuite(CommandTestSpec, ABC):
     @property
     def command_line(self) -> str:
         return f"python3 {self.Server_Running_Entry_Point} rest-server {self.options}"
+
+
+class TestSubCmdRestServerWithoutAnyCmdArgs(SubCmdRestServerTestSuite):
+    Terminate_Command_Running_When_Sniff_IP_Info: bool = False
+
+    @property
+    def options(self) -> str:
+        return ""
+
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._should_contains_chars_in_result(
+            cmd_running_result, "warn: please operate on this command with one more subcommand line you need"
+        )
+        self._should_contains_chars_in_result(cmd_running_result, "mock-server [SUBCOMMAND] [OPTIONS]")
+        self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
+        self._should_contains_chars_in_result(cmd_running_result, "API server subcommands:")
+        self._should_contains_chars_in_result(
+            cmd_running_result,
+            f"{SubCommand.Run},{SubCommand.Sample},{SubCommand.Add},{SubCommand.Check},{SubCommand.Get}",
+        )
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Run)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Check)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Add)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Get)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Sample)
 
 
 class TestSubCommandRun(SubCmdRestServerTestSuite):
