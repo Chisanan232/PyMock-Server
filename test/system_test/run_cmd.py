@@ -79,7 +79,14 @@ class CommandTestSpec(metaclass=ABCMeta):
             assert re.search(expected_char, target, re.IGNORECASE)
 
 
-class TestSubCommandRun(CommandTestSpec):
+class SubCmdRestServerTestSuite(CommandTestSpec, ABC):
+
+    @property
+    def command_line(self) -> str:
+        return f"python3 {self.Server_Running_Entry_Point} rest-server {self.options}"
+
+
+class TestSubCommandRun(SubCmdRestServerTestSuite):
     Terminate_Command_Running_When_Sniff_IP_Info: bool = False
 
     @property
@@ -87,7 +94,7 @@ class TestSubCommandRun(CommandTestSpec):
         return "run --help"
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "mock-server run [-h]")
+        self._should_contains_chars_in_result(cmd_running_result, "mock-server rest-server run [-h]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "--app-type APP_TYPE")
         self._should_contains_chars_in_result(cmd_running_result, "-c CONFIG, --config CONFIG")
@@ -96,7 +103,7 @@ class TestSubCommandRun(CommandTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "--log-level LOG_LEVEL")
 
 
-class TestSubCommandSample(CommandTestSpec):
+class TestSubCommandSample(SubCmdRestServerTestSuite):
     Terminate_Command_Running_When_Sniff_IP_Info: bool = False
 
     @property
@@ -110,7 +117,7 @@ class TestSubCommandSample(CommandTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "-o FILE_PATH, --output FILE_PATH")
 
 
-class TestShowSampleConfiguration(CommandTestSpec):
+class TestShowSampleConfiguration(SubCmdRestServerTestSuite):
     Terminate_Command_Running_When_Sniff_IP_Info: bool = False
 
     @property
@@ -126,7 +133,7 @@ class TestShowSampleConfiguration(CommandTestSpec):
                 self._should_contains_chars_in_result(cmd_running_result, str(api_config["http"]["response"]["value"]))
 
 
-class TestGenerateSampleConfiguration(CommandTestSpec):
+class TestGenerateSampleConfiguration(SubCmdRestServerTestSuite):
     Terminate_Command_Running_When_Sniff_IP_Info: bool = False
     _Default_Path: str = "sample-api.yaml"
     _Under_Test_Path: Optional[str] = None
@@ -157,7 +164,7 @@ class TestGenerateSampleConfiguration(CommandTestSpec):
         assert config_data == Sample_Config_Value
 
 
-class RunMockApplicationTestSpec(CommandTestSpec, ABC):
+class RunMockApplicationTestSpec(SubCmdRestServerTestSuite, ABC):
     def _verify_running_output(self, cmd_running_result: str) -> None:
         self._verify_apis()
 
