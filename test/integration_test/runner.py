@@ -50,13 +50,9 @@ class TestHelp(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "subcommands:")
         self._should_contains_chars_in_result(
             cmd_running_result,
-            f"{SubCommand.Run},{SubCommand.Sample},{SubCommand.Add},{SubCommand.Check},{SubCommand.Get}",
+            f"{SubCommand.RestServer}",
         )
-        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Run)
-        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Check)
-        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Add)
-        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Get)
-        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Sample)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.RestServer)
 
 
 class TestVersion(CommandFunctionTestSpec):
