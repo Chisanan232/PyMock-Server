@@ -2,7 +2,7 @@ import copy
 import logging
 import sys
 from argparse import ArgumentParser, Namespace
-from typing import List, Optional, Tuple, Type
+from typing import List, Optional, Tuple, Type, Union
 
 from ..log import init_logger_config
 from ..model import (
@@ -90,7 +90,9 @@ class CommandProcessor:
     def _subcmd_component(self) -> BaseSubCmdComponent:
         raise NotImplementedError
 
-    def distribute(self, args: Optional[ParserArguments] = None, cmd_index: int = 0) -> "CommandProcessor":
+    def distribute(
+        self, args: Optional[Union[Namespace, ParserArguments]] = None, cmd_index: int = 0
+    ) -> "CommandProcessor":
         if self._is_responsible(subcmd=self.mock_api_parser.subcommand, args=args):
             return self
         else:
@@ -111,9 +113,12 @@ class CommandProcessor:
     def copy(self) -> "CommandProcessor":
         return copy.copy(self)
 
-    def _is_responsible(self, subcmd: Optional[SysArg] = None, args: Optional[ParserArguments] = None) -> bool:
+    def _is_responsible(
+        self, subcmd: Optional[SysArg] = None, args: Optional[Union[Namespace, ParserArguments]] = None
+    ) -> bool:
         if args:
-            return args.subparser_name == (self.responsible_subcommand.subcmd if self.responsible_subcommand else None)
+            subcmd_key = args.subparser_name if isinstance(args, ParserArguments) else args.subcommand
+            return subcmd_key == (self.responsible_subcommand.subcmd if self.responsible_subcommand else None)
         return subcmd == self.responsible_subcommand
 
     def _run(self, parser: ArgumentParser, args: ParserArguments) -> None:
