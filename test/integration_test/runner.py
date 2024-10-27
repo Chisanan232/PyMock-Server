@@ -65,3 +65,23 @@ class TestVersion(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(
             cmd_running_result, re.escape("pymock-api") + software_version_format, translate=False
         )
+
+
+class TestSubCmdRestServerHelp(CommandFunctionTestSpec):
+    @property
+    def options(self) -> str:
+        return "rest-server --help"
+
+    def verify_running_output(self, cmd_running_result: str) -> None:
+        self._should_contains_chars_in_result(cmd_running_result, "mock-server [SUBCOMMAND] [OPTIONS]")
+        self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
+        self._should_contains_chars_in_result(cmd_running_result, "API server subcommands:")
+        self._should_contains_chars_in_result(
+            cmd_running_result,
+            f"{SubCommand.Run},{SubCommand.Sample},{SubCommand.Add},{SubCommand.Check},{SubCommand.Get}",
+        )
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Run)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Check)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Add)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Get)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Sample)
