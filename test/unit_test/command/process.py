@@ -224,7 +224,8 @@ class TestSubCmdProcessChain:
         cmd_processor._run = MagicMock()
 
         arg = ParserArguments(subparser_name=_Fake_SubCmd)
-        cmd_processor.process(arg)
+        cmd_parser = Mock()
+        cmd_processor.process(cmd_parser, arg)
 
         cmd_processor._is_responsible.assert_called_once_with(subcmd=None, args=arg)
         if should_dispatch:
@@ -310,9 +311,10 @@ class TestNoSubCmd(BaseCommandProcessorTestSpec):
         mock_parser_arg = _given_parser_args(subcommand=None)
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
+        cmd_parser = Mock()
 
         with patch.object(WSGIServer, "generate", return_value=command) as mock_sgi_generate:
-            cmd_ps(mock_parser_arg)
+            cmd_ps(cmd_parser, mock_parser_arg)
             mock_sgi_generate.assert_not_called()
             command.run.assert_not_called()
 
@@ -371,18 +373,19 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
         mock_parser_arg = _given_parser_args(subcommand=_Test_SubCommand_Run, app_type=app_type)
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
+        cmd_parser = Mock()
 
         with patch.object(ASGIServer, "generate", return_value=command) as mock_asgi_generate:
             with patch.object(WSGIServer, "generate", return_value=command) as mock_wsgi_generate:
                 if should_raise_exc:
                     with pytest.raises(ValueError) as exc_info:
-                        cmd_ps(mock_parser_arg)
+                        cmd_ps(cmd_parser, mock_parser_arg)
                     assert "Invalid value" in str(exc_info.value)
                     mock_asgi_generate.assert_not_called()
                     mock_wsgi_generate.assert_not_called()
                     command.run.assert_not_called()
                 else:
-                    cmd_ps(mock_parser_arg)
+                    cmd_ps(cmd_parser, mock_parser_arg)
                     if app_type == "auto":
                         mock_asgi_generate.assert_called_once_with(mock_parser_arg)
                         mock_wsgi_generate.assert_not_called()
@@ -522,11 +525,12 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
             divide_http_request=False,
             divide_http_response=False,
         )
+        cmd_parser = Mock()
 
         with patch(
             "pymock_server.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent
         ) as mock_saving_config_component:
-            cmd_ps(mock_parser_arg)
+            cmd_ps(cmd_parser, mock_parser_arg)
 
             mock_saving_config_component.assert_called_once()
             FakeSavingConfigComponent.serialize_and_save.assert_called_once()
@@ -626,8 +630,9 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
         mock_parser_arg = _given_parser_args(
             subcommand=_Test_SubCommand_Check, config_path=config_path, stop_if_fail=stop_if_fail
         )
+        cmd_parser = Mock()
         with pytest.raises(SystemExit) as exc_info:
-            cmd_ps(mock_parser_arg)
+            cmd_ps(cmd_parser, mock_parser_arg)
         assert expected_exit_code in str(exc_info.value)
         # TODO: Add one more checking of the error message content with function *_expected_err_msg*
 
@@ -708,8 +713,9 @@ class TestSubCmdGet(BaseCommandProcessorTestSpec):
         mock_parser_arg = _given_parser_args(
             subcommand=_Test_SubCommand_Get, config_path=yaml_config_path, get_api_path=get_api_path
         )
+        cmd_parser = Mock()
         with pytest.raises(SystemExit) as exc_info:
-            cmd_ps(mock_parser_arg)
+            cmd_ps(cmd_parser, mock_parser_arg)
         assert str(expected_exit_code) == str(exc_info.value)
 
     def _given_cmd_args_namespace(self) -> Namespace:
@@ -785,6 +791,7 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
             sample_output_path=output,
             sample_config_type=SampleType.ALL,
         )
+        cmd_parser = Mock()
 
         with patch("pymock_server.command.sample.component.logger", autospec=True, side_effect=logging) as mock_logging:
             with patch(
@@ -793,7 +800,7 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
                 with patch(
                     "pymock_server.command.sample.component.YAML", return_value=FakeYAML
                 ) as mock_instantiate_writer:
-                    cmd_ps(mock_parser_arg)
+                    cmd_ps(cmd_parser, mock_parser_arg)
 
                     mock_instantiate_writer.assert_called_once()
                     mock_get_sample_by_type.assert_called_once_with(mock_parser_arg.sample_config_type)
@@ -911,6 +918,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
             divide_http_request=_Test_Divide_Http_Request,
             divide_http_response=_Test_Divide_Http_Response,
         )
+        cmd_parser = Mock()
 
         with open(swagger_config, "r") as file:
             swagger_json_data = json.loads(file.read())
@@ -925,7 +933,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
             ) as mock_swagger_request:
                 # Run target function
                 logger.debug(f"run target function: {cmd_ps}")
-                cmd_ps(mock_parser_arg)
+                cmd_ps(cmd_parser, mock_parser_arg)
 
                 mock_instantiate_writer.assert_called_once()
                 mock_swagger_request.assert_called_once_with(method="GET", url=f"http://{_API_Doc_Source}")

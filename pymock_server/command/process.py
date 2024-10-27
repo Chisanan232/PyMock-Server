@@ -36,10 +36,10 @@ def dispatch_command_processor() -> "CommandProcessor":
     return cmd_chain[0].distribute()
 
 
-def run_command_chain(args: ParserArguments) -> None:
+def run_command_chain(parser: ArgumentParser, args: ParserArguments) -> None:
     cmd_chain = make_command_chain()
     assert len(cmd_chain) > 0, "It's impossible that command line processors list is empty."
-    cmd_chain[0].process(args)
+    cmd_chain[0].process(parser=parser, args=args)
 
 
 def make_command_chain() -> List["CommandProcessor"]:
@@ -97,7 +97,8 @@ class CommandProcessor:
             self._current_index = cmd_index
             return self._next.distribute(args=args, cmd_index=self._current_index)
 
-    def process(self, args: ParserArguments, cmd_index: int = 0) -> None:
+    def process(self, parser: ArgumentParser, args: ParserArguments, cmd_index: int = 0) -> None:
+        # TODO: integrate the argument *parser* into each component major function *process*
         self.distribute(args=args, cmd_index=cmd_index)._run(args)
 
     def parse(
