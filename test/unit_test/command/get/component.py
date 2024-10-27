@@ -5,6 +5,8 @@ from unittest.mock import Mock, patch
 
 from yaml import dump
 
+from pymock_server.command.options import SubCommand, SysArg
+
 try:
     from yaml import CDumper as Dumper
 except ImportError:
@@ -53,7 +55,8 @@ class TestSubCmdGetComponent:
             with patch.object(expected_object, "display") as mock_formatter_display:
                 with pytest.raises(SystemExit) as exc_info:
                     subcmd_get_args = SubcmdGetArguments(
-                        subparser_name="get",
+                        subparser_name=SubCommand.Get,
+                        subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),
                         config_path="config path",
                         show_detail=True,
                         show_as_format=display_as_format,
@@ -70,7 +73,8 @@ class TestSubCmdGetComponent:
             mock_load_config.return_value = APIConfig().deserialize(data=_TestConfig.API_Config)
             with pytest.raises(SystemExit) as exc_info:
                 subcmd_get_args = SubcmdGetArguments(
-                    subparser_name="get",
+                    subparser_name=SubCommand.Get,
+                    subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),
                     config_path="config path",
                     show_detail=True,
                     show_as_format="invalid format",
@@ -91,7 +95,8 @@ class TestSubCmdGetComponent:
             mock_load_config.return_value = APIConfig().deserialize(data=no_mocked_apis_config)
             with pytest.raises(SystemExit) as exc_info:
                 subcmd_get_args = SubcmdGetArguments(
-                    subparser_name="get",
+                    subparser_name=SubCommand.Get,
+                    subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),
                     config_path="config path",
                     show_detail=True,
                     show_as_format=Format.YAML,

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import List, Optional, Union
 
 from .._utils.file import Format
+from ..command.options import SysArg
 from ._sample import SampleType
 from .api_config.apis import ResponseStrategy
 
@@ -13,6 +14,13 @@ class ParserArguments:
     """*The data object for the arguments from parsing the command line of PyMock-API program*"""
 
     subparser_name: Optional[str]
+    subparser_structure: SysArg
+
+    @staticmethod
+    def parse_subparser_cmd(args: Namespace) -> SysArg:
+        major_subcmd = args.subcommand
+        major_subcmd_feature = args.__dict__[major_subcmd]
+        return SysArg.parse([major_subcmd, major_subcmd_feature])
 
 
 @dataclass(frozen=True)
@@ -98,6 +106,7 @@ class DeserializeParsedArgs:
     def subcommand_run(cls, args: Namespace) -> SubcmdRunArguments:
         return SubcmdRunArguments(
             subparser_name=args.subcommand,
+            subparser_structure=ParserArguments.parse_subparser_cmd(args),
             config=args.config,
             app_type=args.app_type,
             bind=args.bind,
@@ -119,6 +128,7 @@ class DeserializeParsedArgs:
             )
         return SubcmdAddArguments(
             subparser_name=args.subcommand,
+            subparser_structure=ParserArguments.parse_subparser_cmd(args),
             config_path=args.config_path,
             tag=args.tag,
             api_path=args.api_path,
@@ -145,6 +155,7 @@ class DeserializeParsedArgs:
             args.check_api_parameters = True
         return SubcmdCheckArguments(
             subparser_name=args.subcommand,
+            subparser_structure=ParserArguments.parse_subparser_cmd(args),
             config_path=args.config_path,
             swagger_doc_url=args.swagger_doc_url,
             stop_if_fail=args.stop_if_fail,
@@ -157,6 +168,7 @@ class DeserializeParsedArgs:
     def subcommand_get(cls, args: Namespace) -> SubcmdGetArguments:
         return SubcmdGetArguments(
             subparser_name=args.subcommand,
+            subparser_structure=ParserArguments.parse_subparser_cmd(args),
             config_path=args.config_path,
             show_detail=args.show_detail,
             show_as_format=Format[str(args.show_as_format).upper()],
@@ -168,6 +180,7 @@ class DeserializeParsedArgs:
     def subcommand_sample(cls, args: Namespace) -> SubcmdSampleArguments:
         return SubcmdSampleArguments(
             subparser_name=args.subcommand,
+            subparser_structure=ParserArguments.parse_subparser_cmd(args),
             generate_sample=args.generate_sample,
             print_sample=args.print_sample,
             sample_output_path=args.file_path,
@@ -178,6 +191,7 @@ class DeserializeParsedArgs:
     def subcommand_pull(cls, args: Namespace) -> SubcmdPullArguments:
         return SubcmdPullArguments(
             subparser_name=args.subcommand,
+            subparser_structure=ParserArguments.parse_subparser_cmd(args),
             request_with_https=args.request_with_https,
             source=args.source,
             source_file=args.source_file,

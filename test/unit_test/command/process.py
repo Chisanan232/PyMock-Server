@@ -110,6 +110,7 @@ def _given_parser_args(
     if subcommand == "run":
         return SubcmdRunArguments(
             subparser_name=subcommand,
+            subparser_structure=SysArg.parse([SubCommand.RestServer, subcommand]),
             app_type=app_type,
             config=_Test_Config,
             bind=_Bind_Host_And_Port.value,
@@ -119,6 +120,7 @@ def _given_parser_args(
     elif subcommand == "add":
         return SubcmdAddArguments(
             subparser_name=subcommand,
+            subparser_structure=SysArg.parse([SubCommand.RestServer, subcommand]),
             config_path=_Sample_File_Path,
             api_path=_Test_URL,
             http_method=_Test_HTTP_Method,
@@ -136,6 +138,7 @@ def _given_parser_args(
     elif subcommand == "check":
         return SubcmdCheckArguments(
             subparser_name=subcommand,
+            subparser_structure=SysArg.parse([SubCommand.RestServer, subcommand]),
             config_path=(config_path or _Test_Config),
             swagger_doc_url=swagger_doc_url,
             stop_if_fail=stop_if_fail,
@@ -146,6 +149,7 @@ def _given_parser_args(
     elif subcommand == "get":
         return SubcmdGetArguments(
             subparser_name=subcommand,
+            subparser_structure=SysArg.parse([SubCommand.RestServer, subcommand]),
             config_path=(config_path or _Test_Config),
             show_detail=True,
             show_as_format=Format[_Show_Detail_As_Format.upper()],
@@ -155,6 +159,7 @@ def _given_parser_args(
     else:
         return ParserArguments(
             subparser_name=None,
+            subparser_structure=SysArg.parse([]),
         )
 
 
@@ -208,7 +213,7 @@ class TestSubCmdProcessChain:
         ],
     )
     def test_is_responsible(self, subcmd: str, expected_result: bool, cmd_processor: FakeCommandProcess):
-        arg = ParserArguments(subparser_name=subcmd)
+        arg = ParserArguments(subparser_name=subcmd, subparser_structure=_Fake_SubCmd_Obj)
         is_responsible = cmd_processor._is_responsible(subcmd=None, args=arg)
         assert is_responsible is expected_result
 
@@ -223,7 +228,7 @@ class TestSubCmdProcessChain:
         cmd_processor._is_responsible = MagicMock(return_value=chk_result)
         cmd_processor._run = MagicMock()
 
-        arg = ParserArguments(subparser_name=_Fake_SubCmd)
+        arg = ParserArguments(subparser_name=_Fake_SubCmd, subparser_structure=_Fake_SubCmd_Obj)
         cmd_parser = Mock()
         cmd_processor.process(parser=cmd_parser, args=arg)
 
@@ -401,7 +406,8 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
-        args_namespace.subcommand = SubCommand.Run
+        args_namespace.subcommand = SubCommand.RestServer
+        setattr(args_namespace, SubCommand.RestServer, SubCommand.Run)
         args_namespace.config = _Test_Config
         args_namespace.app_type = _Test_App_Type
         args_namespace.bind = _Bind_Host_And_Port.value
@@ -509,6 +515,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         FakeSavingConfigComponent.serialize_and_save = MagicMock()
         mock_parser_arg = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
+            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
             config_path=_Test_Config,
             tag="",
             api_path=url_path,
@@ -537,7 +544,8 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
-        args_namespace.subcommand = SubCommand.Add
+        args_namespace.subcommand = SubCommand.RestServer
+        setattr(args_namespace, SubCommand.RestServer, SubCommand.Add)
         args_namespace.config_path = ""
         args_namespace.tag = ""
         args_namespace.api_path = _Test_URL
@@ -638,7 +646,8 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
-        args_namespace.subcommand = SubCommand.Check
+        args_namespace.subcommand = SubCommand.RestServer
+        setattr(args_namespace, SubCommand.RestServer, SubCommand.Check)
         args_namespace.config_path = _Test_Config
         args_namespace.swagger_doc_url = "http://127.0.0.1:8080/docs"
         args_namespace.stop_if_fail = True
@@ -720,7 +729,8 @@ class TestSubCmdGet(BaseCommandProcessorTestSpec):
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
-        args_namespace.subcommand = SubCommand.Get
+        args_namespace.subcommand = SubCommand.RestServer
+        setattr(args_namespace, SubCommand.RestServer, SubCommand.Get)
         args_namespace.config_path = _Test_Config
         args_namespace.show_detail = True
         args_namespace.show_as_format = _Show_Detail_As_Format
@@ -786,6 +796,7 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
         FakeYAML.write = MagicMock()
         mock_parser_arg = SubcmdSampleArguments(
             subparser_name=_Test_SubCommand_Sample,
+            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Sample]),
             print_sample=oprint,
             generate_sample=generate,
             sample_output_path=output,
@@ -834,7 +845,8 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
-        args_namespace.subcommand = SubCommand.Sample
+        args_namespace.subcommand = SubCommand.RestServer
+        setattr(args_namespace, SubCommand.RestServer, SubCommand.Sample)
         args_namespace.generate_sample = _Generate_Sample
         args_namespace.print_sample = _Print_Sample
         args_namespace.file_path = _Sample_File_Path
@@ -905,6 +917,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         base_url = _Base_URL if ("has-base" in swagger_config and "has-base" in expected_config) else ""
         mock_parser_arg = SubcmdPullArguments(
             subparser_name=_Test_SubCommand_Pull,
+            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
             request_with_https=_Test_Request_With_Https,
             source=_API_Doc_Source,
             source_file=_API_Doc_Source_File,
@@ -1003,7 +1016,8 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
-        args_namespace.subcommand = SubCommand.Pull
+        args_namespace.subcommand = SubCommand.RestServer
+        setattr(args_namespace, SubCommand.RestServer, SubCommand.Pull)
         args_namespace.request_with_https = _Test_Request_With_Https
         args_namespace.source = _API_Doc_Source
         args_namespace.source_file = _API_Doc_Source_File

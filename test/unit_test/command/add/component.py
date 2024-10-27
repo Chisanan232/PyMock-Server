@@ -7,6 +7,7 @@ import pytest
 from pymock_server import APIConfig
 from pymock_server.command._common.component import SavingConfigComponent
 from pymock_server.command.add.component import SubCmdAddComponent
+from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.model import generate_empty_config
 from pymock_server.model.api_config.apis import ResponseStrategy
 from pymock_server.model.cmd_args import SubcmdAddArguments
@@ -35,6 +36,7 @@ class TestSubCmdAddComponent:
 
         invalid_args = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
+            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
             config_path="",
             tag="",
             api_path="",
@@ -78,6 +80,7 @@ class TestSubCmdAddComponent:
                 with patch("os.path.exists", return_value=file_exist) as mock_path_exist:
                     args = SubcmdAddArguments(
                         subparser_name=_Test_SubCommand_Add,
+                        subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                         config_path=_Test_Config,
                         tag="",
                         api_path=_Test_URL,
@@ -144,6 +147,7 @@ class TestSubCmdAddComponent:
         with patch("os.path.exists", return_value=False) as mock_path_exist:
             args = SubcmdAddArguments(
                 subparser_name=_Test_SubCommand_Add,
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path=_Test_Config,
                 tag="",
                 api_path=_Test_URL,
@@ -220,6 +224,7 @@ class TestSubCmdAddComponent:
         with patch("os.path.exists", return_value=False) as mock_path_exist:
             args = SubcmdAddArguments(
                 subparser_name=_Test_SubCommand_Add,
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path=_Test_Config,
                 tag="",
                 api_path=url_path,

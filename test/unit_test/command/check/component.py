@@ -9,6 +9,7 @@ from pymock_server.command.check.component import (
     SwaggerDiffChecking,
     ValidityChecking,
 )
+from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.model import (
     ParserArguments,
     SubcmdAddArguments,
@@ -62,6 +63,7 @@ def _given_parser_args(
     elif subcommand == "check":
         return SubcmdCheckArguments(
             subparser_name=subcommand,
+            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Check]),
             config_path=(config_path or _Test_Config),
             swagger_doc_url=swagger_doc_url,
             stop_if_fail=stop_if_fail,
