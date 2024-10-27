@@ -117,9 +117,11 @@ class CommandProcessor:
         self, subcmd: Optional[SysArg] = None, args: Optional[Union[Namespace, ParserArguments]] = None
     ) -> bool:
         if args:
-            subcmd_key = args.subparser_name if isinstance(args, ParserArguments) else args.subcommand
+            subcmd_key = args.subparser_structure.subcmd if isinstance(args, ParserArguments) else args.subcommand
             return subcmd_key == (self.responsible_subcommand.subcmd if self.responsible_subcommand else None)
-        return subcmd == self.responsible_subcommand
+        return (subcmd == self.responsible_subcommand) or (
+            subcmd is None and self.responsible_subcommand == SysArg(subcmd="base")
+        )
 
     def _run(self, parser: ArgumentParser, args: ParserArguments) -> None:
         init_logger_config()
@@ -133,7 +135,7 @@ BaseCommandProcessor: type = MetaCommand("BaseCommandProcessor", (CommandProcess
 
 
 class NoSubCmd(BaseCommandProcessor):
-    responsible_subcommand: Optional[SysArg] = None
+    responsible_subcommand: SysArg = SysArg(subcmd="base")
 
     @property
     def _subcmd_component(self) -> NoSubCmdComponent:
