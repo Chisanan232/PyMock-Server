@@ -92,9 +92,10 @@ from ..._values import (
 logger = logging.getLogger(__name__)
 
 _Fake_SubCmd: str = "pytest-subcmd"
-_Fake_SubCmd_Obj: SysArg = SysArg(pre_subcmd=None, subcmd=_Fake_SubCmd)
+_Fake_SubCmd_Obj: SysArg = SysArg(subcmd=_Fake_SubCmd)
 _Fake_Duplicated_SubCmd: str = "pytest-duplicated"
 _Fake_Duplicated_SubCmd_Obj: SysArg = SysArg(pre_subcmd=None, subcmd=_Fake_Duplicated_SubCmd)
+_Major_SubCmd_Amt: int = 1  # *rest-server*
 _No_SubCmd_Amt: int = 1
 _Fake_Amt: int = 1
 
@@ -213,7 +214,7 @@ class TestSubCmdProcessChain:
         ],
     )
     def test_is_responsible(self, subcmd: str, expected_result: bool, cmd_processor: FakeCommandProcess):
-        arg = ParserArguments(subparser_name=subcmd, subparser_structure=_Fake_SubCmd_Obj)
+        arg = ParserArguments(subparser_name=subcmd, subparser_structure=SysArg(subcmd=subcmd))
         is_responsible = cmd_processor._is_responsible(subcmd=None, args=arg)
         assert is_responsible is expected_result
 
@@ -329,7 +330,7 @@ class TestNoSubCmd(BaseCommandProcessorTestSpec):
         return args_namespace
 
     def _given_subcmd(self) -> Optional[SysArg]:
-        return None
+        return SysArg(subcmd="base")
 
     def _expected_argument_type(self) -> Type[Namespace]:
         return Namespace
@@ -1042,7 +1043,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
 
 
 def test_make_command_chain():
-    assert len(get_all_subcommands()) == len(make_command_chain()) - _No_SubCmd_Amt - _Fake_Amt
+    assert len(get_all_subcommands()) == len(make_command_chain()) - _Major_SubCmd_Amt - _No_SubCmd_Amt - _Fake_Amt
 
 
 def test_make_command_chain_if_duplicated_subcmd():
