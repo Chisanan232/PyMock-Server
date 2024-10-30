@@ -3,8 +3,9 @@ from abc import ABC, ABCMeta, abstractmethod
 from pydoc import locate
 from typing import Any, Dict, List, Union, cast
 
-from ...model import MockAPI
-from ...model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
+from pymock_server.model import MockAPI
+from pymock_server.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
+
 from .request import BaseCurrentRequest
 from .response import BaseResponse
 from .response import HTTPResponse as MockHTTPResponse

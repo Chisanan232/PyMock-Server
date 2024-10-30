@@ -7,9 +7,9 @@ import pytest
 
 from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.model.cmd_args import SubcmdRunArguments
-from pymock_server.server.sgi._model import Command, CommandOptions
-from pymock_server.server.sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
-from pymock_server.server.sgi.cmdoption import (
+from pymock_server.server.rest.sgi._model import Command, CommandOptions
+from pymock_server.server.rest.sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
+from pymock_server.server.rest.sgi.cmdoption import (
     ASGICmdOption,
     BaseCommandOption,
     WSGICmdOption,
@@ -62,8 +62,8 @@ class BaseSGIServerTestSpec(metaclass=ABCMeta):
     def sgi_cmd(self) -> Generic[BaseSGICmdType]:
         pass
 
-    @patch("pymock_server.server.sgi.cmd.CommandOptions", return_value=mock_cmd_option_obj)
-    @patch("pymock_server.server.sgi.cmd.Command", return_value=mock_cmd_obj)
+    @patch("pymock_server.server.rest.sgi.cmd.CommandOptions", return_value=mock_cmd_option_obj)
+    @patch("pymock_server.server.rest.sgi.cmd.Command", return_value=mock_cmd_obj)
     def test_generate(self, mock_command: Mock, mock_command_option: Mock, sgi_cmd: Generic[BaseSGICmdType]):
         command = sgi_cmd.generate(parser_args=mock_parser_arg_obj)
 

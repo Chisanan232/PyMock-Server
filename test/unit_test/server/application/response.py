@@ -13,7 +13,7 @@ from pymock_server.model.api_config.apis import HTTPResponse, ResponseStrategy
 from pymock_server.model.api_config.format import Format
 from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_server.model.api_config.variable import Size, Variable
-from pymock_server.server.application.response import HTTPResponse as _HTTPResponse
+from pymock_server.server.rest.application.response import HTTPResponse as _HTTPResponse
 
 from ...._values import (
     _General_String_Value,

@@ -7,7 +7,7 @@ import pytest
 
 from pymock_server.model import MockAPI
 from pymock_server.model.api_config.apis import HTTP, APIParameter
-from pymock_server.server.application.code_generator import (
+from pymock_server.server.rest.application.code_generator import (
     BaseWebServerCodeGenerator,
     FastAPICodeGenerator,
     FlaskCodeGenerator,

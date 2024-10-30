@@ -18,7 +18,7 @@ class TestSetupServerGateway:
         ("app", "expected_app"),
         [("create_flask_app()", "create_flask_app()"), (mock_server.create_flask_app, "create_flask_app()")],
     )
-    @patch("pymock_server.server.sgi.WSGIServer")
+    @patch("pymock_server.server.rest.sgi.WSGIServer")
     def test_setup_wsgi(self, mock_instantiate_wsgi: Mock, app: Union[str, Callable], expected_app: str):
         mock_server.setup_server_gateway.wsgi(web_app=app)
         mock_instantiate_wsgi.assert_called_once_with(app=expected_app)
@@ -30,7 +30,7 @@ class TestSetupServerGateway:
             ("wsgi", _fake_function, FunctionNotFoundError),
         ],
     )
-    @patch("pymock_server.server.sgi.WSGIServer")
+    @patch("pymock_server.server.rest.sgi.WSGIServer")
     def test_bad_setup_wsgi(
         self, mock_instantiate_wsgi: Mock, sut_func: str, app: Union[str, Callable], expected_error: Exception
     ):
@@ -46,7 +46,7 @@ class TestSetupServerGateway:
         ("app", "expected_app"),
         [("create_fastapi_app", "create_fastapi_app"), (mock_server.create_fastapi_app, "create_fastapi_app")],
     )
-    @patch("pymock_server.server.sgi.ASGIServer")
+    @patch("pymock_server.server.rest.sgi.ASGIServer")
     def test_setup_asgi(self, mock_instantiate_asgi: Mock, app: Union[str, Callable], expected_app: str):
         mock_server.setup_server_gateway.asgi(web_app=app)
         mock_instantiate_asgi.assert_called_once_with(app=expected_app)

@@ -3,8 +3,8 @@ import re
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List
 
-from ..._utils import import_web_lib
-from ...model.api_config.apis import APIParameter
+from pymock_server._utils import import_web_lib
+from pymock_server.model.api_config.apis import APIParameter
 
 
 class BaseCurrentRequest(metaclass=ABCMeta):

@@ -5,11 +5,13 @@ from decimal import Decimal
 from pydoc import locate
 from typing import Any, Callable, List, Union
 
-from ..._utils import import_web_lib
-from ...exceptions import FileFormatNotSupport
-from ...model.api_config import ResponseProperty
-from ...model.api_config.apis import HTTPResponse as MockAPIHTTPResponseConfig
-from ...model.api_config.apis.response_strategy import ResponseStrategy
+from pymock_server._utils import import_web_lib
+from pymock_server.exceptions import FileFormatNotSupport
+from pymock_server.model.api_config import ResponseProperty
+from pymock_server.model.api_config.apis import (
+    HTTPResponse as MockAPIHTTPResponseConfig,
+)
+from pymock_server.model.api_config.apis.response_strategy import ResponseStrategy
 
 
 class BaseResponse(metaclass=ABCMeta):

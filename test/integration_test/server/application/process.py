@@ -13,13 +13,16 @@ from flask import Flask
 from flask import Response as LibFlaskResponse
 
 from pymock_server.model import MockAPI
-from pymock_server.server.application.process import BaseHTTPProcess, HTTPRequestProcess
-from pymock_server.server.application.request import (
+from pymock_server.server.rest.application.process import (
+    BaseHTTPProcess,
+    HTTPRequestProcess,
+)
+from pymock_server.server.rest.application.request import (
     BaseCurrentRequest,
     FastAPIRequest,
     FlaskRequest,
 )
-from pymock_server.server.application.response import (
+from pymock_server.server.rest.application.response import (
     BaseResponse,
     FastAPIResponse,
     FlaskResponse,

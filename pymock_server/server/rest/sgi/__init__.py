@@ -6,7 +6,8 @@ The factory to generate SGI application instance to run Python web framework.
 import re
 from typing import Callable, Optional, Union
 
-from ...exceptions import FunctionNotFoundError
+from pymock_server.exceptions import FunctionNotFoundError
+
 from .cmd import ASGIServer, WSGIServer
 from .cmdoption import ASGICmdOption, WSGICmdOption
 
