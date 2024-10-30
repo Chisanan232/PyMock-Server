@@ -14,7 +14,7 @@ from pymock_server.model import (
 from pymock_server.model.api_config import DivideStrategy, TemplateConfig
 from pymock_server.model.api_doc_config.base_config import set_component_definition
 
-from ...._values import _API_Doc_Source, _API_Doc_Source_File, _Test_Request_With_Https
+from ....._values import _API_Doc_Source, _API_Doc_Source_File, _Test_Request_With_Https
 from ._test_case import (
     PullOpenAPIDocConfigAsDividingConfigTestCaseFactory,
     SubCmdPullTestArgs,
@@ -115,7 +115,7 @@ class TestSubCmdPullComponent:
                 config_path="./api.yaml",
                 base_url="",
                 include_template_config=False,
-                base_file_path="./",
+                base_file_path="/",
                 dry_run=False,
                 divide_api=False,
                 divide_http=False,
@@ -149,7 +149,7 @@ class TestSubCmdPullComponent:
                 config_path="./api.yaml",
                 base_url="",
                 include_template_config=True,
-                base_file_path="./",
+                base_file_path="/",
                 dry_run=False,
                 divide_api=False,
                 divide_http=False,
@@ -183,7 +183,7 @@ class TestSubCmdPullComponent:
                 config_path="./api.yaml",
                 base_url="",
                 include_template_config=False,
-                base_file_path="./",
+                base_file_path="/",
                 dry_run=True,
                 divide_api=False,
                 divide_http=False,
@@ -217,7 +217,7 @@ class TestSubCmdPullComponent:
                 config_path="./api.yaml",
                 base_url="",
                 include_template_config=True,
-                base_file_path="./",
+                base_file_path="/",
                 dry_run=True,
                 divide_api=True,
                 divide_http=False,

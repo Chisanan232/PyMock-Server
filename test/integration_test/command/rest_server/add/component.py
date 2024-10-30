@@ -14,7 +14,7 @@ from pymock_server.model import (
 )
 from pymock_server.model.api_config.apis import ResponseStrategy
 
-from ...._values import (
+from ....._values import (
     _Dummy_Add_Arg_Parameter,
     _generate_response_for_add,
     _Test_HTTP_Method,
@@ -122,7 +122,7 @@ class TestSubCmdAddComponent:
                 response_value=_Dummy_Add_Arg_Values,
                 # saving details
                 include_template_config=False,
-                base_file_path="./",
+                base_file_path="/",
                 base_url="",
                 divide_api=False,
                 divide_http=False,
@@ -166,7 +166,7 @@ class TestSubCmdAddComponent:
                 response_value=_Dummy_Add_Arg_Values,
                 # saving details
                 include_template_config=True,
-                base_file_path="./",
+                base_file_path="/",
                 base_url="",
                 divide_api=False,
                 divide_http=False,
@@ -210,7 +210,7 @@ class TestSubCmdAddComponent:
                 response_value=_Dummy_Add_Arg_Values,
                 # saving details
                 include_template_config=False,
-                base_file_path="./",
+                base_file_path="/",
                 base_url="",
                 divide_api=False,
                 divide_http=False,
@@ -254,7 +254,7 @@ class TestSubCmdAddComponent:
                 response_value=_Dummy_Add_Arg_Values,
                 # saving details
                 include_template_config=True,
-                base_file_path="./",
+                base_file_path="/",
                 base_url="",
                 divide_api=True,
                 divide_http=False,

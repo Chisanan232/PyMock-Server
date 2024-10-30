@@ -12,7 +12,7 @@ from pymock_server.model import generate_empty_config
 from pymock_server.model.api_config.apis import ResponseStrategy
 from pymock_server.model.cmd_args import SubcmdAddArguments
 
-from ...._values import (
+from ....._values import (
     _Test_Config,
     _Test_Response_Strategy,
     _Test_SubCommand_Add,
@@ -45,7 +45,7 @@ class TestSubCmdAddComponent:
             response_strategy=_Test_Response_Strategy,
             response_value=[""],
             include_template_config=False,
-            base_file_path="./",
+            base_file_path="/",
             base_url="",
             dry_run=False,
             divide_api=False,
@@ -91,7 +91,7 @@ class TestSubCmdAddComponent:
                         response_strategy=_Test_Response_Strategy,
                         response_value=["OK"],
                         include_template_config=False,
-                        base_file_path="./",
+                        base_file_path="/",
                         base_url="",
                         dry_run=False,
                         divide_api=False,
@@ -158,7 +158,7 @@ class TestSubCmdAddComponent:
                 response_strategy=response_strategy,
                 response_value=response_value,
                 include_template_config=False,
-                base_file_path="./",
+                base_file_path="/",
                 base_url="",
                 dry_run=False,
                 divide_api=False,
@@ -235,7 +235,7 @@ class TestSubCmdAddComponent:
                 response_strategy=response_strategy,
                 response_value=response_value,
                 include_template_config=False,
-                base_file_path="./",
+                base_file_path="/",
                 base_url="",
                 dry_run=False,
                 divide_api=False,

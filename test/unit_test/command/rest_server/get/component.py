@@ -27,7 +27,7 @@ from pymock_server.command.rest_server.get.component import (
 from pymock_server.model import MockAPI
 from pymock_server.model.cmd_args import SubcmdGetArguments
 
-from ...._values import _Test_HTTP_Method, _Test_URL, _TestConfig
+from ....._values import _Test_HTTP_Method, _Test_URL, _TestConfig
 
 
 class TestSubCmdGetComponent:
