@@ -15,7 +15,7 @@ from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_server.model.api_config.variable import Size, Variable
 from pymock_server.server.rest.application.response import HTTPResponse as _HTTPResponse
 
-from ...._values import (
+from ....._values import (
     _General_String_Value,
     _Json_File_Content,
     _Json_File_Name,

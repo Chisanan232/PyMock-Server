@@ -4,7 +4,7 @@ import pytest
 
 from pymock_server.server.rest.sgi._model import Command, CommandOptions
 
-from ...._values import (
+from ....._values import (
     _Bind_Host_And_Port,
     _Cmd_Option,
     _Log_Level,

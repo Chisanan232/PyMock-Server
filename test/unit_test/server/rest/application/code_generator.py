@@ -13,7 +13,7 @@ from pymock_server.server.rest.application.code_generator import (
     FlaskCodeGenerator,
 )
 
-from ...._values import _Test_API_Parameters
+from ....._values import _Test_API_Parameters
 
 
 class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
