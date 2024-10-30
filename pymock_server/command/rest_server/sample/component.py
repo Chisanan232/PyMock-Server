@@ -1,9 +1,9 @@
 import logging
 from argparse import ArgumentParser
 
-from ..._utils import YAML
-from ...model._sample import get_sample_by_type
-from ...model.cmd_args import SubcmdSampleArguments
+from ...._utils import YAML
+from ....model._sample import get_sample_by_type
+from ....model.cmd_args import SubcmdSampleArguments
 from ..component import BaseSubCmdComponent
 
 logger = logging.getLogger(__name__)

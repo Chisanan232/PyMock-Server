@@ -6,8 +6,8 @@ import pytest
 
 from pymock_server import APIConfig
 from pymock_server.command._common.component import SavingConfigComponent
-from pymock_server.command.add.component import SubCmdAddComponent
 from pymock_server.command.options import SubCommand, SysArg
+from pymock_server.command.rest_server.add.component import SubCmdAddComponent
 from pymock_server.model import generate_empty_config
 from pymock_server.model.api_config.apis import ResponseStrategy
 from pymock_server.model.cmd_args import SubcmdAddArguments
@@ -74,9 +74,11 @@ class TestSubCmdAddComponent:
         self, file_exist: bool, load_config_result: Optional[APIConfig], component: SubCmdAddComponent
     ):
         with patch(
-            "pymock_server.command.add.component.load_config", return_value=load_config_result
+            "pymock_server.command.rest_server.add.component.load_config", return_value=load_config_result
         ) as mock_load_config:
-            with patch("pymock_server.command.add.component.generate_empty_config") as mock_generate_empty_config:
+            with patch(
+                "pymock_server.command.rest_server.add.component.generate_empty_config"
+            ) as mock_generate_empty_config:
                 with patch("os.path.exists", return_value=file_exist) as mock_path_exist:
                     args = SubcmdAddArguments(
                         subparser_name=_Test_SubCommand_Add,

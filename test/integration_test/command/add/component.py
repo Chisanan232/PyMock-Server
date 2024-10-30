@@ -4,8 +4,8 @@ from unittest.mock import Mock, PropertyMock, patch
 import pytest
 
 from pymock_server.command._common.component import SavingConfigComponent
-from pymock_server.command.add.component import SubCmdAddComponent
 from pymock_server.command.options import SubCommand, SysArg
+from pymock_server.command.rest_server.add.component import SubCmdAddComponent
 from pymock_server.model import (
     SubcmdAddArguments,
     TemplateConfig,

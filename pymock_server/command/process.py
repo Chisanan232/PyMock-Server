@@ -4,6 +4,13 @@ import sys
 from argparse import ArgumentParser, Namespace
 from typing import List, Optional, Tuple, Type, Union
 
+from pymock_server.command.rest_server.add import SubCmdAddComponent
+from pymock_server.command.rest_server.check import SubCmdCheckComponent
+from pymock_server.command.rest_server.get import SubCmdGetComponent
+from pymock_server.command.rest_server.pull.component import SubCmdPullComponent
+from pymock_server.command.rest_server.run import SubCmdRunComponent
+from pymock_server.command.rest_server.sample.component import SubCmdSampleComponent
+
 from ..log import init_logger_config
 from ..model import (
     ParserArguments,
@@ -15,15 +22,9 @@ from ..model import (
     SubcmdSampleArguments,
     deserialize_args,
 )
-from .add import SubCmdAddComponent
-from .check import SubCmdCheckComponent
 from .component import BaseSubCmdComponent, NoSubCmdComponent
-from .get import SubCmdGetComponent
 from .options import MockAPICommandParser, SubCommand, SysArg
-from .pull.component import SubCmdPullComponent
 from .rest_server import SubCmdRestServerComponent
-from .run import SubCmdRunComponent
-from .sample.component import SubCmdSampleComponent
 
 logger = logging.getLogger(__name__)
 

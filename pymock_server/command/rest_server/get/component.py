@@ -7,9 +7,9 @@ from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser
 from typing import Dict, Optional, cast
 
-from ..._utils.file import Format
-from ...model import MockAPI, load_config
-from ...model.cmd_args import SubcmdGetArguments
+from ...._utils.file import Format
+from ....model import MockAPI, load_config
+from ....model.cmd_args import SubcmdGetArguments
 from ..component import BaseSubCmdComponent
 
 logger = logging.getLogger(__name__)

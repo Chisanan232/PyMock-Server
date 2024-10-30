@@ -5,7 +5,7 @@ from unittest.mock import Mock, PropertyMock, patch
 import pytest
 
 from pymock_server.command.options import SubCommand, SysArg
-from pymock_server.command.pull.component import SubCmdPullComponent
+from pymock_server.command.rest_server.pull.component import SubCmdPullComponent
 from pymock_server.model import (
     SubcmdPullArguments,
     deserialize_api_doc_config,
@@ -337,7 +337,8 @@ class TestSubCmdPullComponent:
             set_component_definition(swagger_api_resp.get(openapi_schema_key, {}))
             # Mock the HTTP request result as the Swagger API documentation data
             with patch(
-                "pymock_server.command.pull.component.URLLibHTTPClient.request", return_value=swagger_api_resp
+                "pymock_server.command.rest_server.pull.component.URLLibHTTPClient.request",
+                return_value=swagger_api_resp,
             ) as mock_swagger_request:
                 # Run target function
                 sub_cmd.process(parser=Mock(), args=cmd_args)
