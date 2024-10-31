@@ -1,11 +1,10 @@
 import re
+from test.unit_test.model._enums import EnumTestSuite
 from typing import Any, Type
 
 import pytest
 
 from pymock_server.model import OpenAPIVersion
-
-from .._enums import EnumTestSuite
 
 
 class TestOpenAPIVersion(EnumTestSuite):

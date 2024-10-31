@@ -1,6 +1,14 @@
 import copy
 import re
 from decimal import Decimal
+from test._test_utils import Verify
+from test._values import _Customize_Format_With_Self_Vars, _General_Format
+from test.unit_test.model.api_config._base import (
+    CheckableTestSuite,
+    ConfigTestSpec,
+    _assertion_msg,
+    set_checking_test_data,
+)
 from typing import Any, List, Optional, Union
 
 import pytest
@@ -15,15 +23,6 @@ from pymock_server.model.api_config.template.common import (
 )
 from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_server.model.api_config.variable import Digit, Size, Variable
-
-from ....._test_utils import Verify
-from ....._values import _Customize_Format_With_Self_Vars, _General_Format
-from .._base import (
-    CheckableTestSuite,
-    ConfigTestSpec,
-    _assertion_msg,
-    set_checking_test_data,
-)
 
 
 class TestFormatWithGeneralStrategy(ConfigTestSpec):

@@ -3,6 +3,10 @@ import random
 import re
 from abc import ABC, ABCMeta, abstractmethod
 from http import HTTPMethod, HTTPStatus
+from test.unit_test.model.rest_api_doc_config._test_case import (
+    DeserializeV2OpenAPIConfigTestCaseFactory,
+    DeserializeV3OpenAPIConfigTestCaseFactory,
+)
 from typing import List, Optional, Union
 
 import pytest
@@ -45,11 +49,6 @@ from pymock_server.model.rest_api_doc_config.config import (
     get_api_doc_version,
 )
 from pymock_server.model.rest_api_doc_config.content_type import ContentType
-
-from ...model.rest_api_doc_config._test_case import (
-    DeserializeV2OpenAPIConfigTestCaseFactory,
-    DeserializeV3OpenAPIConfigTestCaseFactory,
-)
 
 logger = logging.getLogger(__name__)
 

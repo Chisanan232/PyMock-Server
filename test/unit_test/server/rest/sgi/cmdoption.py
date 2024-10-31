@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from test._values import _Bind_Host_And_Port, _Log_Level, _Workers_Amount
 from typing import List, Tuple
 
 import pytest
@@ -8,8 +9,6 @@ from pymock_server.server.rest.sgi.cmdoption import (
     BaseCommandOption,
     WSGICmdOption,
 )
-
-from ....._values import _Bind_Host_And_Port, _Log_Level, _Workers_Amount
 
 
 class BaseCommandOptionTest(metaclass=ABCMeta):

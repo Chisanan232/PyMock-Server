@@ -1,13 +1,5 @@
 import re
-from typing import Type
-
-import pytest
-
-from pymock_server.model.api_config import IteratorItem
-from pymock_server.model.api_config._base import _HasItemsPropConfig
-from pymock_server.model.api_config.apis import APIParameter, HTTPRequest
-
-from ....._values import (
+from test._values import (
     _Test_API_Parameter,
     _Test_Iterable_Parameter_Item_Name,
     _Test_Iterable_Parameter_Item_Value,
@@ -15,14 +7,21 @@ from ....._values import (
     _Test_Iterable_Parameter_With_MultiValue,
     _TestConfig,
 )
-from .._base import (
+from test.unit_test.model.api_config._base import (
     CheckableTestSuite,
     ConfigTestSpec,
     HasFormatPropConfigTestSuite,
     _assertion_msg,
     set_checking_test_data,
 )
-from ..template._base import TemplatableConfigTestSuite
+from test.unit_test.model.api_config.template._base import TemplatableConfigTestSuite
+from typing import Type
+
+import pytest
+
+from pymock_server.model.api_config import IteratorItem
+from pymock_server.model.api_config._base import _HasItemsPropConfig
+from pymock_server.model.api_config.apis import APIParameter, HTTPRequest
 
 
 class TestHTTPReqeust(TemplatableConfigTestSuite, CheckableTestSuite):

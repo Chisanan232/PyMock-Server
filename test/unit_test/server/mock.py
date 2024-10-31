@@ -1,3 +1,4 @@
+from test._values import _Test_Config
 from typing import Any, Callable, Dict, List, Optional, Union
 from unittest.mock import Mock, patch
 
@@ -13,8 +14,6 @@ from pymock_server.server.rest.application import (
     HTTPRequestProcess,
     HTTPResponseProcess,
 )
-
-from ..._values import _Test_Config
 
 mock_api_config = Mock(APIConfig(name=Mock(), description=Mock(), apis=Mock(MockAPIs(base=Mock(), apis=Mock()))))
 

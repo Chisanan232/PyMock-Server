@@ -1,11 +1,10 @@
+from test._values import _Test_Config
 from typing import Type
 from unittest.mock import Mock, patch
 
 import pytest
 
 import pymock_server.server as mock_server
-
-from ..._values import _Test_Config
 
 mock_flask_server = Mock(mock_server.FlaskServer())
 mock_fastapi_server = Mock(mock_server.FastAPIServer())

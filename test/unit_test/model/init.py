@@ -1,20 +1,5 @@
 from argparse import Namespace
-from typing import Dict, Type
-from unittest.mock import Mock, patch
-
-import pytest
-
-from pymock_server.exceptions import NotSupportAPIDocumentVersion
-from pymock_server.model import (
-    BaseAPIDocumentConfig,
-    DeserializeParsedArgs,
-    OpenAPIDocumentConfig,
-    SwaggerAPIDocumentConfig,
-    deserialize_api_doc_config,
-    deserialize_args,
-)
-
-from ..._values import (
+from test._values import (
     _API_Doc_Source,
     _Base_URL,
     _Bind_Host_And_Port,
@@ -31,6 +16,20 @@ from ..._values import (
     _Test_SubCommand_Pull,
     _Test_SubCommand_Run,
     _Workers_Amount,
+)
+from typing import Dict, Type
+from unittest.mock import Mock, patch
+
+import pytest
+
+from pymock_server.exceptions import NotSupportAPIDocumentVersion
+from pymock_server.model import (
+    BaseAPIDocumentConfig,
+    DeserializeParsedArgs,
+    OpenAPIDocumentConfig,
+    SwaggerAPIDocumentConfig,
+    deserialize_api_doc_config,
+    deserialize_args,
 )
 
 

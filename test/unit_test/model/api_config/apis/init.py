@@ -1,4 +1,21 @@
 import re
+from test._values import (
+    _Test_Response_Properties,
+    _Test_Response_Property_Dict,
+    _Test_Tag,
+    _Test_URL,
+    _TestConfig,
+)
+from test.unit_test.model.api_config._base import (
+    MOCK_MODEL,
+    MOCK_RETURN_VALUE,
+    CheckableTestSuite,
+    DividableTestSuite,
+    MockModel,
+    _assertion_msg,
+    set_checking_test_data,
+)
+from test.unit_test.model.api_config.template._base import TemplatableConfigTestSuite
 from typing import List, Optional, Union
 from unittest.mock import Mock, patch
 
@@ -15,24 +32,6 @@ from pymock_server.model.api_config.apis import (
     HTTPResponse,
     ResponseStrategy,
 )
-
-from ....._values import (
-    _Test_Response_Properties,
-    _Test_Response_Property_Dict,
-    _Test_Tag,
-    _Test_URL,
-    _TestConfig,
-)
-from .._base import (
-    MOCK_MODEL,
-    MOCK_RETURN_VALUE,
-    CheckableTestSuite,
-    DividableTestSuite,
-    MockModel,
-    _assertion_msg,
-    set_checking_test_data,
-)
-from ..template._base import TemplatableConfigTestSuite
 
 _MockAPI_Test_Data: List[tuple] = []
 _HTTP_Test_Data: List[tuple] = []

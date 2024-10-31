@@ -1,10 +1,9 @@
+from test.unit_test.model._enums import EnumTestSuite
 from typing import Any, Type
 
 import pytest
 
 from pymock_server.model.api_config.apis import ResponseStrategy
-
-from ..._enums import EnumTestSuite
 
 
 class TestResponseStrategy(EnumTestSuite):

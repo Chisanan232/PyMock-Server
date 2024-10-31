@@ -2,6 +2,14 @@ import json
 import os
 import re
 from decimal import Decimal
+from test._values import (
+    _General_String_Value,
+    _Json_File_Content,
+    _Json_File_Name,
+    _Not_Exist_File_Name,
+    _Not_Json_File_Name,
+    _Unexpected_File_Name,
+)
 from typing import Type, Union
 from unittest.mock import Mock, mock_open, patch
 
@@ -14,15 +22,6 @@ from pymock_server.model.api_config.format import Format
 from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_server.model.api_config.variable import Size, Variable
 from pymock_server.server.rest.application.response import HTTPResponse as _HTTPResponse
-
-from ....._values import (
-    _General_String_Value,
-    _Json_File_Content,
-    _Json_File_Name,
-    _Not_Exist_File_Name,
-    _Not_Json_File_Name,
-    _Unexpected_File_Name,
-)
 
 
 class _MockHTTPResponse:

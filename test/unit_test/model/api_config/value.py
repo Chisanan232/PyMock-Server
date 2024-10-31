@@ -1,14 +1,13 @@
 import re
 from decimal import Decimal
+from test._test_utils import Verify
+from test.unit_test.model._enums import EnumTestSuite
 from typing import Any, List, Optional, Type, Union
 
 import pytest
 
 from pymock_server._utils.random import DigitRange, ValueSize
 from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
-
-from ...._test_utils import Verify
-from .._enums import EnumTestSuite
 
 
 class TestValueFormat(EnumTestSuite):

@@ -1,4 +1,15 @@
 import json
+from test._values import (
+    _Bind_Host_And_Port,
+    _Generate_Sample,
+    _Log_Level,
+    _Print_Sample,
+    _Sample_File_Path,
+    _Swagger_API_Document_URL,
+    _Test_Config,
+    _Test_SubCommand_Check,
+    _Workers_Amount,
+)
 from typing import Union
 from unittest.mock import MagicMock, Mock, patch
 
@@ -20,17 +31,6 @@ from pymock_server.model import (
     load_config,
 )
 
-from ....._values import (
-    _Bind_Host_And_Port,
-    _Generate_Sample,
-    _Log_Level,
-    _Print_Sample,
-    _Sample_File_Path,
-    _Swagger_API_Document_URL,
-    _Test_Config,
-    _Test_SubCommand_Check,
-    _Workers_Amount,
-)
 from ._test_case import (
     SubCmdCheckComponentTestCaseFactory,
     SwaggerDiffCheckTestCaseFactory,
