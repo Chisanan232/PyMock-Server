@@ -1,13 +1,12 @@
 import re
 from abc import ABCMeta, abstractmethod
+from test._sut import get_runner
+from test._utils import Capturing
 
 import pytest
 
 from pymock_server.command.options import SubCommand
 from pymock_server.runner import CommandRunner
-
-from .._sut import get_runner
-from .._utils import Capturing
 
 
 class CommandFunctionTestSpec(metaclass=ABCMeta):

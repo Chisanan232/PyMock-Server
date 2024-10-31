@@ -1,4 +1,6 @@
 import json
+from test._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
+from test._spec import run_test
 from typing import Dict
 
 import pytest
@@ -6,8 +8,6 @@ import pytest
 from pymock_server import APIConfig
 from pymock_server.model import deserialize_api_doc_config, load_config
 
-from ..._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
-from ..._spec import run_test
 from ._test_case import (
     DeserializeOpenAPIConfigTestCaseFactory,
     LoadApiConfigWithDividingConfigTestCaseFactory,
