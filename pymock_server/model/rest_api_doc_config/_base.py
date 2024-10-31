@@ -2,7 +2,8 @@ from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
-from ..api_config import _Config
+from pymock_server.model.api_config import _Config
+
 from .version import OpenAPIVersion
 
 Self = Any

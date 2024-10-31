@@ -4,9 +4,10 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional, Type
 
-from ...._utils import YAML
-from ...._utils.file.operation import _BaseFileOperation
-from .._base import SelfType, _Config
+from pymock_server._utils import YAML
+from pymock_server._utils.file.operation import _BaseFileOperation
+from pymock_server.model.api_config._base import SelfType, _Config
+
 from . import _BaseTemplateAccessable
 from .file import TemplateConfigPathSetting
 

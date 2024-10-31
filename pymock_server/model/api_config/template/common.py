@@ -1,9 +1,14 @@
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional
 
-from .._base import _Checkable, _CheckableConfigType, _Config, _ConfigType
-from ..format import Format
-from ..variable import Variable
+from pymock_server.model.api_config._base import (
+    _Checkable,
+    _CheckableConfigType,
+    _Config,
+    _ConfigType,
+)
+from pymock_server.model.api_config.format import Format
+from pymock_server.model.api_config.variable import Variable
 
 
 @dataclass(eq=False)

@@ -7,7 +7,8 @@ import pathlib
 from argparse import Namespace
 from typing import Optional
 
-from ..exceptions import NotSupportAPIDocumentVersion
+from pymock_server.exceptions import NotSupportAPIDocumentVersion
+
 from .api_config import APIConfig, MockAPIs
 from .api_config.apis import HTTP, APIParameter, HTTPRequest, HTTPResponse, MockAPI
 from .api_config.base import BaseConfig

@@ -2,11 +2,16 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, List, Optional
 
-from .. import MockAPI
-from ..api_config import IteratorItem
-from ..api_config.apis.request import APIParameter as PyMockRequestProperty
-from ..api_config.apis.response import ResponseProperty as PyMockResponseProperty
-from ..api_config.apis.response_strategy import ResponseStrategy
+from pymock_server.model import MockAPI
+from pymock_server.model.api_config import IteratorItem
+from pymock_server.model.api_config.apis.request import (
+    APIParameter as PyMockRequestProperty,
+)
+from pymock_server.model.api_config.apis.response import (
+    ResponseProperty as PyMockResponseProperty,
+)
+from pymock_server.model.api_config.apis.response_strategy import ResponseStrategy
+
 from ._base_model_adapter import (
     BaseAPIAdapter,
     BaseRefPropertyDetailAdapter,

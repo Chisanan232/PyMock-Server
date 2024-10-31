@@ -2,8 +2,9 @@ from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, List, Optional, Union
 
-from ...model import APIParameter as PyMockRequestProperty
-from ..api_config import ResponseProperty as PyMockResponseProperty
+from pymock_server.model import APIParameter as PyMockRequestProperty
+from pymock_server.model.api_config import ResponseProperty as PyMockResponseProperty
+
 from ._base import Transferable
 
 

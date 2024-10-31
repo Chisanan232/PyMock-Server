@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from ..._utils.random import DigitRange, RandomInteger, ValueSize
+from pymock_server._utils.random import DigitRange, RandomInteger, ValueSize
+
 from ._base import _Checkable, _Config
 from .value import ValueFormat
 

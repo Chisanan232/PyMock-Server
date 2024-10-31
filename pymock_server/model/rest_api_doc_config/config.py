@@ -3,9 +3,10 @@ from dataclasses import dataclass, field
 from http import HTTPMethod, HTTPStatus
 from typing import Any, Dict, List, Optional, Type, Union, cast
 
-from ...exceptions import CannotParsingAPIDocumentVersion
-from ..api_config import APIConfig as PyMockAPI_APIConfig
-from ..api_config import BaseConfig, MockAPIs
+from pymock_server.exceptions import CannotParsingAPIDocumentVersion
+from pymock_server.model.api_config import APIConfig as PyMockAPI_APIConfig
+from pymock_server.model.api_config import BaseConfig, MockAPIs
+
 from ._base import (
     BaseOpenAPIDataModel,
     Transferable,

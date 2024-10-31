@@ -1,7 +1,8 @@
 from abc import ABC
 from dataclasses import dataclass
 
-from .._base import _Config
+from pymock_server.model.api_config._base import _Config
+
 from ._base import _BaseTemplatableConfig
 from ._divide import BeDividedableAsTemplatableConfig, TemplatableConfigDividable
 from ._load.process import TemplatableConfigLoadable
