@@ -2,11 +2,11 @@ import os
 import re
 from argparse import ArgumentParser
 
-from ...._utils import import_web_lib
-from ....exceptions import InvalidAppType, NoValidWebLibrary
-from ....model import SubcmdRunArguments
-from ....server import BaseSGIServer, setup_asgi, setup_wsgi
-from ..component import BaseSubCmdComponent
+from pymock_server._utils import import_web_lib
+from pymock_server.command.component import BaseSubCmdComponent
+from pymock_server.exceptions import InvalidAppType, NoValidWebLibrary
+from pymock_server.model import SubcmdRunArguments
+from pymock_server.server import BaseSGIServer, setup_asgi, setup_wsgi
 
 
 def _option_cannot_be_empty_assertion(cmd_option: str) -> str:

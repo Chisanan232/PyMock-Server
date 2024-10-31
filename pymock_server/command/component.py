@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser
 from typing import TypeVar
 
-from ..model.cmd_args import ParserArguments
+from pymock_server.model.cmd_args import ParserArguments
 
 ParserArgumentsType = TypeVar("ParserArgumentsType", bound=ParserArguments)
 

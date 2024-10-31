@@ -2,10 +2,10 @@ import logging
 import pathlib
 from typing import Any, Dict, Optional
 
-from ..._utils import YAML
-from ...model.api_config import APIConfig
-from ...model.api_config.template._divide import DivideStrategy
-from ...model.cmd_args import _BaseSubCmdArgumentsSavingConfig
+from pymock_server._utils import YAML
+from pymock_server.model.api_config import APIConfig
+from pymock_server.model.api_config.template._divide import DivideStrategy
+from pymock_server.model.cmd_args import _BaseSubCmdArgumentsSavingConfig
 
 logger = logging.getLogger(__name__)
 

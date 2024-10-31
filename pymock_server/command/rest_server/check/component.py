@@ -5,23 +5,23 @@ from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser
 from typing import Any, Optional
 
-from ...._utils.api_client import URLLibHTTPClient
-from ....model import (
+from pymock_server._utils.api_client import URLLibHTTPClient
+from pymock_server.command.component import BaseSubCmdComponent
+from pymock_server.model import (
     APIConfig,
     BaseAPIDocumentConfig,
     SubcmdCheckArguments,
     deserialize_api_doc_config,
     load_config,
 )
-from ....model.api_config.apis import APIParameter as MockedAPIParameter
-from ....model.api_config.apis.response_strategy import ResponseStrategy
-from ....model.rest_api_doc_config._base_model_adapter import (
+from pymock_server.model.api_config.apis import APIParameter as MockedAPIParameter
+from pymock_server.model.api_config.apis.response_strategy import ResponseStrategy
+from pymock_server.model.rest_api_doc_config._base_model_adapter import (
     BaseAPIAdapter as SwaggerAPI,
 )
-from ....model.rest_api_doc_config._base_model_adapter import (
+from pymock_server.model.rest_api_doc_config._base_model_adapter import (
     BaseRequestParameterAdapter as SwaggerAPIParameter,
 )
-from ..component import BaseSubCmdComponent
 
 logger = logging.getLogger(__name__)
 

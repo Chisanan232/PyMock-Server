@@ -3,12 +3,12 @@ from argparse import ArgumentParser
 from pathlib import Path
 from typing import Union
 
-from ...._utils import JSON
-from ...._utils.api_client import URLLibHTTPClient
-from ....model import BaseAPIDocumentConfig, deserialize_api_doc_config
-from ....model.cmd_args import SubcmdPullArguments
-from ..._common.component import SavingConfigComponent
-from ..component import BaseSubCmdComponent
+from pymock_server._utils import JSON
+from pymock_server._utils.api_client import URLLibHTTPClient
+from pymock_server.command._common.component import SavingConfigComponent
+from pymock_server.command.component import BaseSubCmdComponent
+from pymock_server.model import BaseAPIDocumentConfig, deserialize_api_doc_config
+from pymock_server.model.cmd_args import SubcmdPullArguments
 
 logger = logging.getLogger(__name__)
 
