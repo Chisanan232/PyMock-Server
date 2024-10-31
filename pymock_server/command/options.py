@@ -105,8 +105,8 @@ class MockAPICommandParser:
         self._prog = "pymock-api"
         self._usage = "mock" if self.is_running_subcmd else "mock [SUBCOMMAND] [OPTIONS]"
         self._description = """
-        A Python tool for mocking APIs by set up an application easily. PyMock-API bases on Python web framework to set
-        up application, i.e., you could select using *flask* to set up application to mock APIs.
+        A Python tool for mocking APIs by set up an application easily. PyMock-API bases on Python framework to set
+        up application, i.e., for REST API, you could select using *flask* to set up application to mock APIs.
         """
         self._parser_args: Dict[str, Any] = {
             "prog": self._prog,
