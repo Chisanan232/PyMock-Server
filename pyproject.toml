@@ -75,4 +75,4 @@ mkdocstrings = ">=0.24.1,<0.26.0"
 mkdocstrings-python = "^1.9.0"
 
 [tool.poetry.scripts]
-mock-server = "pymock_server.runner:run"
+mock = "pymock_server.runner:run"
