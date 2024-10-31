@@ -3,7 +3,7 @@
 Getting detail info with specific conditions for comprehensive inspection of configuration.
 
 ```console
->>> mock-api get <option>
+>>> mock rest-server get <option>
 ```
 
 

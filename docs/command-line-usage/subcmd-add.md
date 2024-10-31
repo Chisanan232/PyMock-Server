@@ -3,7 +3,7 @@
 Doing something operations about configuration or its content.
 
 ```console
->>> mock-api add <option>
+>>> mock rest-server add <option>
 ```
 
 

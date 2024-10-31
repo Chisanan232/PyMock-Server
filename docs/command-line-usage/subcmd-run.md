@@ -4,7 +4,7 @@ Activate and run a web server which could provide all the APIs be configured in 
 running the web server would be different if the web library is different so that the log message would be different.
 
 ```console
->>> mock-api run <option>
+>>> mock rest-server run <option>
 ```
 
 

@@ -3,7 +3,7 @@
 Check the validity of configuration content.
 
 ```console
->>> mock-api check <option>
+>>> mock rest-server check <option>
 ```
 
 
