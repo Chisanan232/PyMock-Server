@@ -97,7 +97,7 @@ class TestSubCmdRestServerWithoutAnyCmdArgs(SubCmdRestServerTestSuite):
         self._should_contains_chars_in_result(
             cmd_running_result, "warn: please operate on this command with one more subcommand line you need"
         )
-        self._should_contains_chars_in_result(cmd_running_result, "mock-server [SUBCOMMAND] [OPTIONS]")
+        self._should_contains_chars_in_result(cmd_running_result, "mock-server rest-server")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "API server subcommands:")
         self._should_contains_chars_in_result(
