@@ -111,12 +111,14 @@ nav:
     - Command line usages:
       - subcommand:
         - command-line-usage/index.md
-        - run: command-line-usage/subcmd-run.md
-        - get: command-line-usage/subcmd-get.md
-        - add: command-line-usage/subcmd-add.md
-        - check: command-line-usage/subcmd-check.md
-        - sample: command-line-usage/subcmd-sample.md
-        - pull: command-line-usage/subcmd-pull.md
+        - rest-server:
+          - command-line-usage/rest-server/index.md
+          - run: command-line-usage/rest-server/subcmd-run.md
+          - get: command-line-usage/rest-server/subcmd-get.md
+          - add: command-line-usage/rest-server/subcmd-add.md
+          - check: command-line-usage/rest-server/subcmd-check.md
+          - sample: command-line-usage/rest-server/subcmd-sample.md
+          - pull: command-line-usage/rest-server/subcmd-pull.md
   - Configure references:
     - Basic info: configure-references/config-basic-info.md
     - Mocked API:
