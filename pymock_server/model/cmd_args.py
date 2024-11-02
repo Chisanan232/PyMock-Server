@@ -4,10 +4,10 @@ from dataclasses import dataclass
 from typing import List, Optional, Union
 
 from pymock_server._utils.file import Format
-from pymock_server.command.options import SysArg
 
 from ._sample import SampleType
 from .api_config.apis import ResponseStrategy
+from .subcmd_common import SysArg
 
 
 @dataclass(frozen=True)

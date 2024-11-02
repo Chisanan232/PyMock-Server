@@ -5,7 +5,8 @@ from unittest.mock import Mock, patch
 
 from yaml import dump
 
-from pymock_server.command.options import SubCommand, SysArg
+from pymock_server.command.options import SubCommand
+from pymock_server.model.subcmd_common import SysArg
 
 try:
     from yaml import CDumper as Dumper

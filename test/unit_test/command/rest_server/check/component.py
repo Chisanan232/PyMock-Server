@@ -15,7 +15,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from pymock_server.command.options import SubCommand, SysArg
+from pymock_server.command.options import SubCommand
 from pymock_server.command.rest_server.check.component import (
     SubCmdCheckComponent,
     SwaggerDiffChecking,
@@ -30,6 +30,7 @@ from pymock_server.model import (
     deserialize_api_doc_config,
     load_config,
 )
+from pymock_server.model.subcmd_common import SysArg
 
 from ._test_case import (
     SubCmdCheckComponentTestCaseFactory,

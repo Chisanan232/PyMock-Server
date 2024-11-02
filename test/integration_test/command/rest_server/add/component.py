@@ -10,7 +10,7 @@ from unittest.mock import Mock, PropertyMock, patch
 import pytest
 
 from pymock_server.command._common.component import SavingConfigComponent
-from pymock_server.command.options import SubCommand, SysArg
+from pymock_server.command.options import SubCommand
 from pymock_server.command.rest_server.add.component import SubCmdAddComponent
 from pymock_server.model import (
     SubcmdAddArguments,
@@ -19,6 +19,7 @@ from pymock_server.model import (
     load_config,
 )
 from pymock_server.model.api_config.apis import ResponseStrategy
+from pymock_server.model.subcmd_common import SysArg
 
 from ._test_case import AddMockAPIAsDividingConfigTestCaseFactory, SubCmdAddTestArgs
 

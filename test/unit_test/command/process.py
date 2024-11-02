@@ -60,7 +60,7 @@ from test._values import (
 
 from pymock_server._utils.file import Format
 from pymock_server._utils.file.operation import YAML
-from pymock_server.command.options import SubCommand, SysArg, get_all_subcommands
+from pymock_server.command.options import SubCommand, get_all_subcommands
 from pymock_server.command.process import (
     BaseCommandProcessor,
     NoSubCmd,
@@ -85,6 +85,7 @@ from pymock_server.model import (
 )
 from pymock_server.model._sample import SampleType
 from pymock_server.model.api_config.apis import ResponseStrategy
+from pymock_server.model.subcmd_common import SysArg
 from pymock_server.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 from ._test_case import SubCmdGetTestCaseFactory, SubCmdPullTestCaseFactory

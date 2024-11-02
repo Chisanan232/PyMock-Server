@@ -5,7 +5,7 @@ from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 
-from pymock_server.command.options import SubCommand, SysArg
+from pymock_server.command.options import SubCommand
 from pymock_server.command.rest_server.pull.component import SubCmdPullComponent
 from pymock_server.model import (
     SubcmdPullArguments,
@@ -14,6 +14,7 @@ from pymock_server.model import (
 )
 from pymock_server.model.api_config import DivideStrategy, TemplateConfig
 from pymock_server.model.rest_api_doc_config.base_config import set_component_definition
+from pymock_server.model.subcmd_common import SysArg
 
 from ._test_case import (
     PullOpenAPIDocConfigAsDividingConfigTestCaseFactory,

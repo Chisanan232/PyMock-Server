@@ -42,7 +42,7 @@ from typing import Type
 import pytest
 
 from pymock_server._utils.file import Format
-from pymock_server.command.options import SubCommand, SysArg
+from pymock_server.command.options import SubCommand
 from pymock_server.model._sample import SampleType
 from pymock_server.model.cmd_args import (
     DeserializeParsedArgs,
@@ -53,6 +53,7 @@ from pymock_server.model.cmd_args import (
     SubcmdRunArguments,
     SubcmdSampleArguments,
 )
+from pymock_server.model.subcmd_common import SysArg
 
 check_attrs = namedtuple("check_attrs", ("entire_check", "api_path", "http_method", "api_parameters"))
 expected_check_attrs = namedtuple("expected_check_attrs", ("entire_check", "api_path", "http_method", "api_parameters"))
