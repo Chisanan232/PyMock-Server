@@ -17,6 +17,7 @@ import copy
 import re
 import sys
 from collections import namedtuple
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
 from pymock_server.__pkg_info__ import __version__
@@ -100,8 +101,19 @@ class MockAPICommandParser:
         return self.parser
 
 
-SubCommandAttr = namedtuple("SubCommandAttr", ["title", "dest", "description", "help"])
-SubParserAttr = namedtuple("SubParserAttr", ["name", "help"])
+@dataclass
+class SubCommandAttr:
+    title: str
+    dest: str
+    description: str
+    help: str
+
+
+@dataclass
+class SubParserAttr:
+    name: str
+    help: str
+
 
 _ClsNamingFormat = namedtuple("_ClsNamingFormat", ["ahead", "tail"])
 _ClsNamingFormat.ahead = "BaseSubCmd"
