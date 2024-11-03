@@ -22,19 +22,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from ..__pkg_info__ import __version__
 from ..model.subcmd_common import SysArg
-
-
-@dataclass
-class SubCommand:
-    Base: str = "subcommand"
-    RestServer: str = "rest-server"
-    Run: str = "run"
-    Add: str = "add"
-    Check: str = "check"
-    Get: str = "get"
-    Sample: str = "sample"
-    Pull: str = "pull"
-
+from .subcommand import SubCommand
 
 SUBCOMMAND: List[str] = [SubCommand.RestServer]
 COMMAND_OPTIONS: List["MetaCommandOption"] = []

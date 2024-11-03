@@ -5,8 +5,8 @@ from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 
-from pymock_server.command.options import SubCommand
 from pymock_server.command.rest_server.pull.component import SubCmdPullComponent
+from pymock_server.command.subcommand import SubCommand
 from pymock_server.model import (
     SubcmdPullArguments,
     deserialize_api_doc_config,

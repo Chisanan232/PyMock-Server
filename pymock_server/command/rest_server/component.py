@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 
 from pymock_server.command.component import BaseSubCmdComponent
-from pymock_server.command.options import SubCommand
+from pymock_server.command.subcommand import SubCommand
 from pymock_server.model.cmd_args import ParserArguments
 
 

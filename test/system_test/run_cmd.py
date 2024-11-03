@@ -20,7 +20,7 @@ from typing import Optional
 import pytest
 
 from pymock_server._utils.file.operation import YAML
-from pymock_server.command.options import SubCommand
+from pymock_server.command.subcommand import SubCommand
 from pymock_server.model._sample import Mocked_APIs, Sample_Config_Value
 
 

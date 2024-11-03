@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 
 from yaml import dump
 
-from pymock_server.command.options import SubCommand
+from pymock_server.command.subcommand import SubCommand
 from pymock_server.model.subcmd_common import SysArg
 
 try:

@@ -60,7 +60,7 @@ from test._values import (
 
 from pymock_server._utils.file import Format
 from pymock_server._utils.file.operation import YAML
-from pymock_server.command.options import SubCommand, get_all_subcommands
+from pymock_server.command.options import get_all_subcommands
 from pymock_server.command.process import (
     BaseCommandProcessor,
     NoSubCmd,
@@ -73,6 +73,7 @@ from pymock_server.command.process import (
     make_command_chain,
     run_command_chain,
 )
+from pymock_server.command.subcommand import SubCommand
 from pymock_server.model import (
     ParserArguments,
     SubcmdAddArguments,

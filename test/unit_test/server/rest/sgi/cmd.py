@@ -12,7 +12,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_server.command.options import SubCommand
+from pymock_server.command.subcommand import SubCommand
 from pymock_server.model.cmd_args import SubcmdRunArguments
 from pymock_server.model.subcmd_common import SysArg
 from pymock_server.server.rest.sgi._model import Command, CommandOptions

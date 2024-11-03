@@ -15,12 +15,12 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from pymock_server.command.options import SubCommand
 from pymock_server.command.rest_server.check.component import (
     SubCmdCheckComponent,
     SwaggerDiffChecking,
     ValidityChecking,
 )
+from pymock_server.command.subcommand import SubCommand
 from pymock_server.model import (
     ParserArguments,
     SubcmdAddArguments,

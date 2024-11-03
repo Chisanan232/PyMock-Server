@@ -18,7 +18,7 @@ from pymock_server.model import (
 
 from ..model.subcmd_common import SysArg
 from .component import BaseSubCmdComponent, NoSubCmdComponent
-from .options import MockAPICommandParser, SubCommand
+from .options import MockAPICommandParser
 from .rest_server import SubCmdRestServerComponent
 from .rest_server.add import SubCmdAddComponent
 from .rest_server.check import SubCmdCheckComponent
@@ -26,6 +26,7 @@ from .rest_server.get import SubCmdGetComponent
 from .rest_server.pull.component import SubCmdPullComponent
 from .rest_server.run import SubCmdRunComponent
 from .rest_server.sample.component import SubCmdSampleComponent
+from .subcommand import SubCommand
 
 logger = logging.getLogger(__name__)
 
