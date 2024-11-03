@@ -17,12 +17,17 @@ import copy
 import re
 import sys
 from collections import namedtuple
-from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
 from pymock_server.__pkg_info__ import __version__
 
-from ..model.subcmd_common import SubCmdParser, SubCmdParserAction, SysArg
+from ..model.subcmd_common import (
+    SubCmdParser,
+    SubCmdParserAction,
+    SubCommandAttr,
+    SubParserAttr,
+    SysArg,
+)
 from .subcommand import SubCommand, SubCommandSection
 
 SUBCOMMAND: List[str] = [SubCommand.RestServer]
@@ -99,20 +104,6 @@ class MockAPICommandParser:
             option.add_option(parser=self.parser)
 
         return self.parser
-
-
-@dataclass
-class SubCommandAttr:
-    title: str
-    dest: str
-    description: str
-    help: str
-
-
-@dataclass
-class SubParserAttr:
-    name: str
-    help: str
 
 
 _ClsNamingFormat = namedtuple("_ClsNamingFormat", ["ahead", "tail"])

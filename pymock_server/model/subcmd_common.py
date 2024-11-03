@@ -63,3 +63,17 @@ class SubCmdParser:
                 return None
             else:
                 return None
+
+
+@dataclass
+class SubCommandAttr:
+    title: str
+    dest: str
+    description: str
+    help: str
+
+
+@dataclass
+class SubParserAttr:
+    name: str
+    help: str
