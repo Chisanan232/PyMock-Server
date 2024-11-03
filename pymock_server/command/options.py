@@ -17,12 +17,12 @@ import copy
 import re
 import sys
 from collections import namedtuple
-from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
-from ..__pkg_info__ import __version__
+from pymock_server.__pkg_info__ import __version__
+
 from ..model.subcmd_common import SubCmdParser, SubCmdParserAction, SysArg
-from .subcommand import SubCommand
+from .subcommand import SubCommand, SubCommandSection
 
 SUBCOMMAND: List[str] = [SubCommand.RestServer]
 COMMAND_OPTIONS: List["MetaCommandOption"] = []
@@ -140,12 +140,6 @@ class MetaCommandOption(type):
 
 
 SUBCOMMAND_PARSER: List[SubCmdParser] = []
-
-
-@dataclass
-class SubCommandSection:
-    Base: str = "subcommands"
-    ApiServer: str = "API server subcommands"
 
 
 class CommandOption:

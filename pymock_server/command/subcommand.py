@@ -11,3 +11,9 @@ class SubCommand:
     Get: str = "get"
     Sample: str = "sample"
     Pull: str = "pull"
+
+
+@dataclass
+class SubCommandSection:
+    Base: str = "subcommands"
+    ApiServer: str = "API server subcommands"
