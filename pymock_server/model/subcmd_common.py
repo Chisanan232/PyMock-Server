@@ -1,3 +1,4 @@
+import argparse
 import re
 from dataclasses import dataclass
 from typing import List, Optional
@@ -36,3 +37,29 @@ class SysArg:
                 pre_subcmd=SysArg.parse(subcmds[:-1]),
                 subcmd=subcmds[-1],
             )
+
+
+@dataclass
+class SubCmdParserAction:
+    subcmd_name: str
+    subcmd_parser: argparse._SubParsersAction
+
+
+@dataclass
+class SubCmdParser:
+    in_subcmd: str
+    parser: argparse.ArgumentParser
+    sub_parser: List["SubCmdParser"]
+
+    def find(self, subcmd: str) -> Optional[argparse.ArgumentParser]:
+        if subcmd == self.in_subcmd:
+            return self.parser
+        else:
+            if self.sub_parser:
+                all_subcmd_parser = list(map(lambda sp: sp.find(subcmd), self.sub_parser))
+                exist_subcmd_parser = list(filter(lambda sp: sp is not None, all_subcmd_parser))
+                if exist_subcmd_parser:
+                    return exist_subcmd_parser[0]
+                return None
+            else:
+                return None
