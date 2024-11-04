@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 
 
 @dataclass
@@ -13,7 +14,6 @@ class SubCommand:
     Pull: str = "pull"
 
 
-@dataclass
-class SubCommandSection:
+class SubCommandSection(Enum):
     Base: str = "subcommands"
     ApiServer: str = "API server subcommands"

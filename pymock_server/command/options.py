@@ -227,7 +227,7 @@ class CommandOption:
                     SubCmdParserAction(
                         subcmd_name=SubCommand.Base,
                         subcmd_parser=parser.add_subparsers(
-                            title=sub_cmd.title,
+                            title=sub_cmd.title.value,
                             dest=sub_cmd.dest,
                             description=sub_cmd.description,
                             help=sub_cmd.help,
@@ -255,14 +255,15 @@ class CommandOption:
                 )
 
                 # Add sub-command line parser
+                assert self.sub_cmd is not None
                 self._subparser.append(
                     SubCmdParserAction(
                         subcmd_name=self.in_sub_cmd,
                         subcmd_parser=_parser.add_subparsers(
-                            title=self.sub_cmd.title,  # type: ignore[union-attr]
-                            dest=self.sub_cmd.dest,  # type: ignore[union-attr]
-                            description=self.sub_cmd.description,  # type: ignore[union-attr]
-                            help=self.sub_cmd.help,  # type: ignore[union-attr]
+                            title=self.sub_cmd.title.value,
+                            dest=self.sub_cmd.dest,
+                            description=self.sub_cmd.description,
+                            help=self.sub_cmd.help,
                         ),
                     ),
                 )

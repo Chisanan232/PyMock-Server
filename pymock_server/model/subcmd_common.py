@@ -3,6 +3,8 @@ import re
 from dataclasses import dataclass
 from typing import List, Optional
 
+from pymock_server.command.subcommand import SubCommandSection
+
 
 @dataclass
 class SysArg:
@@ -67,7 +69,7 @@ class SubCmdParser:
 
 @dataclass
 class SubCommandAttr:
-    title: str
+    title: SubCommandSection
     dest: str
     description: str
     help: str
