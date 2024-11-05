@@ -6,6 +6,7 @@ import pathlib
 import re
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, Namespace
+from enum import Enum
 from typing import Callable, List, Optional, Type, Union
 from unittest.mock import MagicMock, Mock, call, patch
 
@@ -73,7 +74,7 @@ from pymock_server.command.process import (
     make_command_chain,
     run_command_chain,
 )
-from pymock_server.command.subcommand import SubCommand
+from pymock_server.command.subcommand import SubCommand, SubCommandLine
 from pymock_server.model import (
     ParserArguments,
     SubcmdAddArguments,
@@ -93,9 +94,15 @@ from ._test_case import SubCmdGetTestCaseFactory, SubCmdPullTestCaseFactory
 
 logger = logging.getLogger(__name__)
 
-_Fake_SubCmd: str = "pytest-subcmd"
+
+class FakeSubCommandLine(Enum):
+    PyTest: str = "pytest-subcmd"
+    Fake: str = "pytest-duplicated"
+
+
+_Fake_SubCmd: FakeSubCommandLine = FakeSubCommandLine.PyTest
 _Fake_SubCmd_Obj: SysArg = SysArg(subcmd=_Fake_SubCmd)
-_Fake_Duplicated_SubCmd: str = "pytest-duplicated"
+_Fake_Duplicated_SubCmd: FakeSubCommandLine = FakeSubCommandLine.Fake
 _Fake_Duplicated_SubCmd_Obj: SysArg = SysArg(pre_subcmd=None, subcmd=_Fake_Duplicated_SubCmd)
 _No_SubCmd_Amt: int = 1
 _Fake_Amt: int = 1
@@ -211,11 +218,11 @@ class TestSubCmdProcessChain:
         ("subcmd", "expected_result"),
         [
             (_Fake_SubCmd, True),
-            ("not-mapping-subcmd", False),
+            (_Fake_Duplicated_SubCmd, False),
         ],
     )
-    def test_is_responsible(self, subcmd: str, expected_result: bool, cmd_processor: FakeCommandProcess):
-        arg = ParserArguments(subparser_name=subcmd, subparser_structure=SysArg(subcmd=subcmd))
+    def test_is_responsible(self, subcmd: FakeSubCommandLine, expected_result: bool, cmd_processor: FakeCommandProcess):
+        arg = ParserArguments(subparser_name=subcmd.value, subparser_structure=SysArg(subcmd=subcmd))
         is_responsible = cmd_processor._is_responsible(subcmd=None, args=arg)
         assert is_responsible is expected_result
 
@@ -230,7 +237,7 @@ class TestSubCmdProcessChain:
         cmd_processor._is_responsible = MagicMock(return_value=chk_result)
         cmd_processor._run = MagicMock()
 
-        arg = ParserArguments(subparser_name=_Fake_SubCmd, subparser_structure=_Fake_SubCmd_Obj)
+        arg = ParserArguments(subparser_name=_Fake_SubCmd.value, subparser_structure=_Fake_SubCmd_Obj)
         cmd_parser = Mock()
         cmd_processor.process(parser=cmd_parser, args=arg)
 
@@ -331,7 +338,7 @@ class TestNoSubCmd(BaseCommandProcessorTestSpec):
         return args_namespace
 
     def _given_subcmd(self) -> Optional[SysArg]:
-        return SysArg(subcmd="base")
+        return SysArg(subcmd=SubCommandLine.Base)
 
     def _expected_argument_type(self) -> Type[Namespace]:
         return Namespace
@@ -419,7 +426,8 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
 
     def _given_subcmd(self) -> Optional[SysArg]:
         return SysArg(
-            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.RestServer), subcmd=SubCommand.Run
+            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
+            subcmd=SubCommandLine.Run,
         )
 
     def _expected_argument_type(self) -> Type[SubcmdRunArguments]:
@@ -568,7 +576,8 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
 
     def _given_subcmd(self) -> Optional[SysArg]:
         return SysArg(
-            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.RestServer), subcmd=SubCommand.Add
+            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
+            subcmd=SubCommandLine.Add,
         )
 
     def _expected_argument_type(self) -> Type[SubcmdAddArguments]:
@@ -661,7 +670,8 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
 
     def _given_subcmd(self) -> Optional[SysArg]:
         return SysArg(
-            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.RestServer), subcmd=SubCommand.Check
+            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
+            subcmd=SubCommandLine.Check,
         )
 
     def _expected_argument_type(self) -> Type[SubcmdCheckArguments]:
@@ -743,7 +753,8 @@ class TestSubCmdGet(BaseCommandProcessorTestSpec):
 
     def _given_subcmd(self) -> Optional[SysArg]:
         return SysArg(
-            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.RestServer), subcmd=SubCommand.Get
+            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
+            subcmd=SubCommandLine.Get,
         )
 
     def _expected_argument_type(self) -> Type[SubcmdGetArguments]:
@@ -860,7 +871,8 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
 
     def _given_subcmd(self) -> Optional[SysArg]:
         return SysArg(
-            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.RestServer), subcmd=SubCommand.Sample
+            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
+            subcmd=SubCommandLine.Sample,
         )
 
     def _expected_argument_type(self) -> Type[SubcmdSampleArguments]:
@@ -1040,7 +1052,8 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
 
     def _given_subcmd(self) -> Optional[SysArg]:
         return SysArg(
-            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.RestServer), subcmd=SubCommand.Pull
+            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
+            subcmd=SubCommandLine.Pull,
         )
 
     def _expected_argument_type(self) -> Type[SubcmdPullArguments]:

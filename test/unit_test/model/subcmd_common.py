@@ -2,6 +2,7 @@ from typing import List
 
 import pytest
 
+from pymock_server.command.subcommand import SubCommandLine
 from pymock_server.model.subcmd_common import SysArg
 
 
@@ -11,41 +12,50 @@ class TestSysArg:
         ("sys_args_value", "expect_data_model"),
         [
             # only one sub-command
-            (["pymock.py", "--help"], SysArg(pre_subcmd=None, subcmd="base")),
-            (["pymock.py", "-h"], SysArg(pre_subcmd=None, subcmd="base")),
-            (["pymock.py", "run"], SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd="run")),
+            (["pymock.py", "--help"], SysArg(pre_subcmd=None, subcmd=SubCommandLine.Base)),
+            (["pymock.py", "-h"], SysArg(pre_subcmd=None, subcmd=SubCommandLine.Base)),
+            (
+                ["pymock.py", "run"],
+                SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd=SubCommandLine.Base), subcmd=SubCommandLine.Run),
+            ),
             (
                 ["./test/pymock.py", "run", "-h"],
-                SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd="run"),
+                SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd=SubCommandLine.Base), subcmd=SubCommandLine.Run),
             ),
             (
                 ["./pymock.py", "run", "-c", "./sample-api.yaml"],
-                SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd="run"),
+                SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd=SubCommandLine.Base), subcmd=SubCommandLine.Run),
             ),
             (
                 ["./pymock.py", "run", "--app-type", "fastapi"],
-                SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd="run"),
+                SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd=SubCommandLine.Base), subcmd=SubCommandLine.Run),
             ),
             # nested sub-command which includes 2 or more sub-commands
             (
-                ["./test/pymock.py", "api-server", "run", "-h"],
+                ["./test/pymock.py", "rest-server", "run", "-h"],
                 SysArg(
-                    pre_subcmd=SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd="api-server"),
-                    subcmd="run",
+                    pre_subcmd=SysArg(
+                        pre_subcmd=SysArg(pre_subcmd=None, subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer
+                    ),
+                    subcmd=SubCommandLine.Run,
                 ),
             ),
             (
-                ["./test/pymock.py", "api-server", "run", "-c", "./sample-api.yaml"],
+                ["./test/pymock.py", "rest-server", "run", "-c", "./sample-api.yaml"],
                 SysArg(
-                    pre_subcmd=SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd="api-server"),
-                    subcmd="run",
+                    pre_subcmd=SysArg(
+                        pre_subcmd=SysArg(pre_subcmd=None, subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer
+                    ),
+                    subcmd=SubCommandLine.Run,
                 ),
             ),
             (
-                ["./test/pymock.py", "api-server", "run", "--app-type", "fastapi"],
+                ["./test/pymock.py", "rest-server", "run", "--app-type", "fastapi"],
                 SysArg(
-                    pre_subcmd=SysArg(pre_subcmd=SysArg(pre_subcmd=None, subcmd="base"), subcmd="api-server"),
-                    subcmd="run",
+                    pre_subcmd=SysArg(
+                        pre_subcmd=SysArg(pre_subcmd=None, subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer
+                    ),
+                    subcmd=SubCommandLine.Run,
                 ),
             ),
         ],
