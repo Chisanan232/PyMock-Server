@@ -50,12 +50,9 @@ from test._values import (
     _Test_HTTP_Resp,
     _Test_Request_With_Https,
     _Test_Response_Strategy,
-    _Test_SubCommand_Add,
     _Test_SubCommand_Check,
     _Test_SubCommand_Get,
-    _Test_SubCommand_Pull,
     _Test_SubCommand_Run,
-    _Test_SubCommand_Sample,
     _Test_URL,
     _Workers_Amount,
 )
@@ -119,7 +116,6 @@ def _given_parser_args(
 ) -> Union[SubcmdRunArguments, SubcmdAddArguments, SubcmdCheckArguments, SubcmdGetArguments, ParserArguments]:
     if subcommand == "run":
         return SubcmdRunArguments(
-            subparser_name=subcommand,
             subparser_structure=SysArg.parse([SubCommand.RestServer, subcommand]),
             app_type=app_type,
             config=_Test_Config,
@@ -129,7 +125,6 @@ def _given_parser_args(
         )
     elif subcommand == "add":
         return SubcmdAddArguments(
-            subparser_name=subcommand,
             subparser_structure=SysArg.parse([SubCommand.RestServer, subcommand]),
             config_path=_Sample_File_Path,
             api_path=_Test_URL,
@@ -147,7 +142,6 @@ def _given_parser_args(
         )
     elif subcommand == "check":
         return SubcmdCheckArguments(
-            subparser_name=subcommand,
             subparser_structure=SysArg.parse([SubCommand.RestServer, subcommand]),
             config_path=(config_path or _Test_Config),
             swagger_doc_url=swagger_doc_url,
@@ -158,7 +152,6 @@ def _given_parser_args(
         )
     elif subcommand == "get":
         return SubcmdGetArguments(
-            subparser_name=subcommand,
             subparser_structure=SysArg.parse([SubCommand.RestServer, subcommand]),
             config_path=(config_path or _Test_Config),
             show_detail=True,
@@ -168,7 +161,6 @@ def _given_parser_args(
         )
     else:
         return ParserArguments(
-            subparser_name=None,
             subparser_structure=SysArg.parse([]),
         )
 
@@ -237,7 +229,7 @@ class TestSubCmdProcessChain:
         cmd_processor._is_responsible = MagicMock(return_value=chk_result)
         cmd_processor._run = MagicMock()
 
-        arg = ParserArguments(subparser_name=_Fake_SubCmd.value, subparser_structure=_Fake_SubCmd_Obj)
+        arg = ParserArguments(subparser_structure=_Fake_SubCmd_Obj)
         cmd_parser = Mock()
         cmd_processor.process(parser=cmd_parser, args=arg)
 
@@ -539,7 +531,6 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
     ):
         FakeSavingConfigComponent.serialize_and_save = MagicMock()
         mock_parser_arg = SubcmdAddArguments(
-            subparser_name=_Test_SubCommand_Add,
             subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
             config_path=_Test_Config,
             tag="",
@@ -836,7 +827,6 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
         FakeYAML.serialize = MagicMock(return_value=f"{sample_config}")
         FakeYAML.write = MagicMock()
         mock_parser_arg = SubcmdSampleArguments(
-            subparser_name=_Test_SubCommand_Sample,
             subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Sample]),
             print_sample=oprint,
             generate_sample=generate,
@@ -964,7 +954,6 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         FakeYAML.write = MagicMock()
         base_url = _Base_URL if ("has-base" in swagger_config and "has-base" in expected_config) else ""
         mock_parser_arg = SubcmdPullArguments(
-            subparser_name=_Test_SubCommand_Pull,
             subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
             request_with_https=_Test_Request_With_Https,
             source=_API_Doc_Source,

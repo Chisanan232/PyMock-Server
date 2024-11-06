@@ -47,7 +47,7 @@ def _given_parser_args(
 ) -> Union[SubcmdRunArguments, SubcmdAddArguments, SubcmdCheckArguments, SubcmdGetArguments, ParserArguments]:
     if subcommand == "run":
         return SubcmdRunArguments(
-            subparser_name=subcommand,
+            # subparser_name=subcommand,
             app_type=app_type,
             config=_Test_Config,
             bind=_Bind_Host_And_Port.value,
@@ -56,14 +56,14 @@ def _given_parser_args(
         )
     elif subcommand == "config":
         return SubcmdAddArguments(
-            subparser_name=subcommand,
+            # subparser_name=subcommand,
             print_sample=_Print_Sample,
             generate_sample=_Generate_Sample,
             sample_output_path=_Sample_File_Path,
         )
     elif subcommand == "check":
         return SubcmdCheckArguments(
-            subparser_name=subcommand,
+            # subparser_name=subcommand,
             subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Check]),
             config_path=(config_path or _Test_Config),
             swagger_doc_url=swagger_doc_url,
@@ -74,12 +74,12 @@ def _given_parser_args(
         )
     elif subcommand == "inspect":
         return SubcmdGetArguments(
-            subparser_name=subcommand,
+            # subparser_name=subcommand,
             config_path=(config_path or _Test_Config),
         )
     else:
         return ParserArguments(
-            subparser_name=None,
+            # subparser_name=None,
         )
 
 

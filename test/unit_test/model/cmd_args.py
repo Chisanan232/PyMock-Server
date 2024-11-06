@@ -77,7 +77,6 @@ class TestDeserialize:
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_run(namespace)
         assert isinstance(arguments, SubcmdRunArguments)
-        assert arguments.subparser_name == SubCommand.RestServer
         assert arguments.subparser_structure == SysArg.parse([SubCommand.RestServer, _Test_SubCommand_Run])
         assert arguments.config == _Test_Config
         assert arguments.app_type == _Test_App_Type
@@ -108,7 +107,6 @@ class TestDeserialize:
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_add(namespace)
         assert isinstance(arguments, SubcmdAddArguments)
-        assert arguments.subparser_name == SubCommand.RestServer
         assert arguments.subparser_structure == SysArg.parse([SubCommand.RestServer, _Test_SubCommand_Add])
         assert arguments.config_path == _Sample_File_Path
         assert arguments.tag == _Test_Tag
@@ -185,7 +183,6 @@ class TestDeserialize:
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_check(namespace)
         assert isinstance(arguments, SubcmdCheckArguments)
-        assert arguments.subparser_name == SubCommand.RestServer
         assert arguments.subparser_structure == SysArg.parse([SubCommand.RestServer, _Test_SubCommand_Check])
         assert arguments.config_path == _Test_Config
         assert arguments.swagger_doc_url == _Swagger_API_Document_URL
@@ -210,7 +207,6 @@ class TestDeserialize:
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_get(namespace)
         assert isinstance(arguments, SubcmdGetArguments)
-        assert arguments.subparser_name == SubCommand.RestServer
         assert arguments.subparser_structure == SysArg.parse([SubCommand.RestServer, _Test_SubCommand_Get])
         assert arguments.config_path == _Test_Config
         assert arguments.show_detail == True
@@ -230,7 +226,6 @@ class TestDeserialize:
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_sample(namespace)
         assert isinstance(arguments, SubcmdSampleArguments)
-        assert arguments.subparser_name == SubCommand.RestServer
         assert arguments.subparser_structure == SysArg.parse([SubCommand.RestServer, _Test_SubCommand_Sample])
         assert arguments.generate_sample == _Generate_Sample
         assert arguments.print_sample == _Print_Sample
@@ -257,7 +252,6 @@ class TestDeserialize:
         namespace = Namespace(**namespace_args)
         arguments = deserialize.subcommand_pull(namespace)
         assert isinstance(arguments, SubcmdPullArguments)
-        assert arguments.subparser_name == SubCommand.RestServer
         assert arguments.subparser_structure == SysArg.parse([SubCommand.RestServer, _Test_SubCommand_Pull])
         assert arguments.request_with_https == _Test_Request_With_Https
         assert arguments.source == _API_Doc_Source

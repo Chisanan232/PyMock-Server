@@ -1,10 +1,5 @@
 import re
-from test._values import (
-    _Test_Config,
-    _Test_Response_Strategy,
-    _Test_SubCommand_Add,
-    _Test_URL,
-)
+from test._values import _Test_Config, _Test_Response_Strategy, _Test_URL
 from typing import List, Optional
 from unittest.mock import MagicMock, Mock, patch
 
@@ -35,7 +30,6 @@ class TestSubCmdAddComponent:
         FakeSavingConfigComponent.serialize_and_save = MagicMock()
 
         invalid_args = SubcmdAddArguments(
-            subparser_name=_Test_SubCommand_Add,
             subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
             config_path="",
             tag="",
@@ -81,7 +75,6 @@ class TestSubCmdAddComponent:
             ) as mock_generate_empty_config:
                 with patch("os.path.exists", return_value=file_exist) as mock_path_exist:
                     args = SubcmdAddArguments(
-                        subparser_name=_Test_SubCommand_Add,
                         subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                         config_path=_Test_Config,
                         tag="",
@@ -148,7 +141,6 @@ class TestSubCmdAddComponent:
         # with patch("pymock_server.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent):
         with patch("os.path.exists", return_value=False) as mock_path_exist:
             args = SubcmdAddArguments(
-                subparser_name=_Test_SubCommand_Add,
                 subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path=_Test_Config,
                 tag="",
@@ -225,7 +217,6 @@ class TestSubCmdAddComponent:
 
         with patch("os.path.exists", return_value=False) as mock_path_exist:
             args = SubcmdAddArguments(
-                subparser_name=_Test_SubCommand_Add,
                 subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path=_Test_Config,
                 tag="",

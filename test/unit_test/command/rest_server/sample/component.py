@@ -1,5 +1,4 @@
 import re
-from test._values import _Test_SubCommand_Add
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -27,7 +26,6 @@ class TestSubCmdSampleComponent:
         FakeYAML.write = MagicMock()
 
         invalid_args = SubcmdSampleArguments(
-            subparser_name=_Test_SubCommand_Add,
             subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
             print_sample=False,
             generate_sample=True,

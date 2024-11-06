@@ -56,7 +56,6 @@ class TestSubCmdGetComponent:
             with patch.object(expected_object, "display") as mock_formatter_display:
                 with pytest.raises(SystemExit) as exc_info:
                     subcmd_get_args = SubcmdGetArguments(
-                        subparser_name=SubCommand.Get,
                         subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),
                         config_path="config path",
                         show_detail=True,
@@ -74,7 +73,6 @@ class TestSubCmdGetComponent:
             mock_load_config.return_value = APIConfig().deserialize(data=_TestConfig.API_Config)
             with pytest.raises(SystemExit) as exc_info:
                 subcmd_get_args = SubcmdGetArguments(
-                    subparser_name=SubCommand.Get,
                     subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),
                     config_path="config path",
                     show_detail=True,
@@ -96,7 +94,6 @@ class TestSubCmdGetComponent:
             mock_load_config.return_value = APIConfig().deserialize(data=no_mocked_apis_config)
             with pytest.raises(SystemExit) as exc_info:
                 subcmd_get_args = SubcmdGetArguments(
-                    subparser_name=SubCommand.Get,
                     subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),
                     config_path="config path",
                     show_detail=True,

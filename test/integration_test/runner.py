@@ -5,7 +5,7 @@ from test._utils import Capturing
 
 import pytest
 
-from pymock_server.command.subcommand import SubCommand
+from pymock_server.command.subcommand import SubCommandLine
 from pymock_server.runner import CommandRunner
 
 
@@ -49,9 +49,9 @@ class TestHelp(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "subcommands:")
         self._should_contains_chars_in_result(
             cmd_running_result,
-            f"{SubCommand.RestServer}",
+            f"{SubCommandLine.RestServer.value}",
         )
-        self._should_contains_chars_in_result(cmd_running_result, SubCommand.RestServer)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.RestServer.value)
 
 
 class TestVersion(CommandFunctionTestSpec):
@@ -77,10 +77,10 @@ class TestSubCmdRestServerHelp(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "API server subcommands:")
         self._should_contains_chars_in_result(
             cmd_running_result,
-            f"{SubCommand.Run},{SubCommand.Sample},{SubCommand.Add},{SubCommand.Check},{SubCommand.Get}",
+            f"{SubCommandLine.Run.value},{SubCommandLine.Sample.value},{SubCommandLine.Add.value},{SubCommandLine.Check.value},{SubCommandLine.Get.value}",
         )
-        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Run)
-        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Check)
-        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Add)
-        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Get)
-        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Sample)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.Run.value)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.Check.value)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.Add.value)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.Get.value)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.Sample.value)

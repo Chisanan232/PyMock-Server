@@ -4,7 +4,6 @@ from test._values import (
     _Log_Level,
     _Test_Auto_Type,
     _Test_Config,
-    _Test_SubCommand_Run,
     _Workers_Amount,
 )
 from unittest.mock import MagicMock, Mock, patch
@@ -37,7 +36,6 @@ class TestSubCmdRunComponent:
         component._server_gateway = mock_server_gateway
 
         invalid_args = SubcmdRunArguments(
-            subparser_name=_Test_SubCommand_Run,
             subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Run]),
             app_type="",
             config=_Test_Config,

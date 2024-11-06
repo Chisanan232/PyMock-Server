@@ -1,12 +1,6 @@
 import re
 from abc import ABCMeta, abstractmethod
-from test._values import (
-    _Bind_Host_And_Port,
-    _Log_Level,
-    _Test_Config,
-    _Test_SubCommand_Run,
-    _Workers_Amount,
-)
+from test._values import _Bind_Host_And_Port, _Log_Level, _Test_Config, _Workers_Amount
 from typing import Generic, Optional, Type, TypeVar
 from unittest.mock import Mock, patch
 
@@ -27,7 +21,7 @@ BaseSGICmdType = TypeVar("BaseSGICmdType", bound=BaseSGIServer)
 
 app_path: str = "application instance path"
 mock_parser_arg_obj = SubcmdRunArguments(
-    subparser_name=_Test_SubCommand_Run,
+    # subparser_name=_Test_SubCommand_Run,
     subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Run]),
     config=_Test_Config,
     app_type="python web library name",
