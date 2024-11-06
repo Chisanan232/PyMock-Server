@@ -28,9 +28,9 @@ from ..model.subcmd_common import (
     SubParserAttr,
     SysArg,
 )
-from .subcommand import SubCommand, SubCommandLine, SubCommandSection
+from .subcommand import SubCommandLine, SubCommandSection
 
-SUBCOMMAND: List[str] = [SubCommand.RestServer]
+SUBCOMMAND: List[str] = [SubCommandLine.RestServer.value]
 COMMAND_OPTIONS: List["MetaCommandOption"] = []
 
 
