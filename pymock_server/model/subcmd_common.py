@@ -49,12 +49,12 @@ class SubCmdParserAction:
 
 @dataclass
 class SubCmdParser:
-    in_subcmd: str
+    in_subcmd: SubCommandLine
     parser: argparse.ArgumentParser
     sub_parser: List["SubCmdParser"]
 
-    def find(self, subcmd: str) -> Optional[argparse.ArgumentParser]:
-        if subcmd == self.in_subcmd:
+    def find(self, subcmd: SubCommandLine) -> Optional[argparse.ArgumentParser]:
+        if subcmd is self.in_subcmd:
             return self.parser
         else:
             if self.sub_parser:
@@ -70,12 +70,12 @@ class SubCmdParser:
 @dataclass
 class SubCommandAttr:
     title: SubCommandSection
-    dest: str
+    dest: SubCommandLine
     description: str
     help: str
 
 
 @dataclass
 class SubParserAttr:
-    name: str
+    name: SubCommandLine
     help: str

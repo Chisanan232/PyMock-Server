@@ -28,7 +28,7 @@ from ..model.subcmd_common import (
     SubParserAttr,
     SysArg,
 )
-from .subcommand import SubCommand, SubCommandSection
+from .subcommand import SubCommand, SubCommandLine, SubCommandSection
 
 SUBCOMMAND: List[str] = [SubCommand.RestServer]
 COMMAND_OPTIONS: List["MetaCommandOption"] = []
@@ -219,7 +219,7 @@ class CommandOption:
             if self._find_subcmd_parser_action(SubCommand.Base) is None:
                 sub_cmd: SubCommandAttr = SubCommandAttr(
                     title=SubCommandSection.Base,
-                    dest=SubCommand.Base,
+                    dest=SubCommandLine.Base,
                     description="",
                     help="",
                 )
@@ -228,7 +228,7 @@ class CommandOption:
                         subcmd_name=SubCommand.Base,
                         subcmd_parser=parser.add_subparsers(
                             title=sub_cmd.title.value,
-                            dest=sub_cmd.dest,
+                            dest=sub_cmd.dest.value,
                             description=sub_cmd.description,
                             help=sub_cmd.help,
                         ),
@@ -243,7 +243,7 @@ class CommandOption:
                 if _base_subcmd_parser_action is None:
                     _base_subcmd_parser_action = self._find_subcmd_parser_action(SubCommand.Base)
                 _parser = _base_subcmd_parser_action.subcmd_parser.add_parser(  # type: ignore[union-attr]
-                    name=self.sub_cmd.dest, help=self.sub_cmd.help  # type: ignore[union-attr]
+                    name=self.sub_cmd.dest.value, help=self.sub_cmd.help  # type: ignore[union-attr]
                 )
                 global SUBCOMMAND_PARSER
                 SUBCOMMAND_PARSER.append(
@@ -261,7 +261,7 @@ class CommandOption:
                         subcmd_name=self.in_sub_cmd,
                         subcmd_parser=_parser.add_subparsers(
                             title=self.sub_cmd.title.value,
-                            dest=self.sub_cmd.dest,
+                            dest=self.sub_cmd.dest.value,
                             description=self.sub_cmd.description,
                             help=self.sub_cmd.help,
                         ),
@@ -274,8 +274,9 @@ class CommandOption:
 
             subcmd_parser_model = self._find_subcmd_parser(self.sub_parser.name)
             if subcmd_parser_model is None:
-                parser = subcmd_parser_action.subcmd_parser.add_parser(  # type: ignore[union-attr]
-                    name=self.sub_parser.name, help=self.sub_parser.help
+                assert subcmd_parser_action is not None
+                parser = subcmd_parser_action.subcmd_parser.add_parser(
+                    name=self.sub_parser.name.value, help=self.sub_parser.help
                 )
                 global SUBCOMMAND_PARSER
                 SUBCOMMAND_PARSER.append(
@@ -289,7 +290,7 @@ class CommandOption:
                 parser = subcmd_parser_model.parser
         return parser
 
-    def _find_subcmd_parser(self, subcmd_name: str) -> Optional[SubCmdParser]:
+    def _find_subcmd_parser(self, subcmd_name: SubCommandLine) -> Optional[SubCmdParser]:
         mapping_subcmd_parser = list(filter(lambda e: e.find(subcmd_name) is not None, SUBCOMMAND_PARSER))
         return mapping_subcmd_parser[0] if mapping_subcmd_parser else None
 
@@ -303,7 +304,7 @@ class CommandOption:
 class BaseSubCommand(CommandOption):
     sub_cmd: SubCommandAttr = SubCommandAttr(
         title=SubCommandSection.Base,
-        dest=SubCommand.Base,
+        dest=SubCommandLine.Base,
         description="",
         help="",
     )
@@ -312,7 +313,7 @@ class BaseSubCommand(CommandOption):
 class BaseSubCommandRestServer(CommandOption):
     sub_cmd: SubCommandAttr = SubCommandAttr(
         title=SubCommandSection.ApiServer,
-        dest=SubCommand.RestServer,
+        dest=SubCommandLine.RestServer,
         description="Some operations for mocking REST API server.",
         help="Set up an application to mock HTTP server which adopts REST API to communicate between client and server.",
     )
@@ -321,7 +322,7 @@ class BaseSubCommandRestServer(CommandOption):
 
 class SubCommandRunOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Run,
+        name=SubCommandLine.Run,
         help="Set up APIs with configuration and run a web application to mock them.",
     )
     option_value_type: type = str
@@ -329,7 +330,7 @@ class SubCommandRunOption(BaseSubCommandRestServer):
 
 class SubCommandAddOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Add,
+        name=SubCommandLine.Add,
         help="Something processing about configuration, i.e., generate a sample configuration or validate configuration"
         " content.",
     )
@@ -337,28 +338,28 @@ class SubCommandAddOption(BaseSubCommandRestServer):
 
 class SubCommandCheckOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Check,
+        name=SubCommandLine.Check,
         help="Check the validity of *PyMock-API* configuration.",
     )
 
 
 class SubCommandGetOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Get,
+        name=SubCommandLine.Get,
         help="Do some comprehensive inspection for configuration.",
     )
 
 
 class SubCommandSampleOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Sample,
+        name=SubCommandLine.Sample,
         help="Quickly display or generate a sample configuration helps to use this tool.",
     )
 
 
 class SubCommandPullOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Pull,
+        name=SubCommandLine.Pull,
         help="Pull the API details from one specific source, e.g., Swagger API documentation.",
     )
 
