@@ -147,7 +147,7 @@ SUBCOMMAND_PARSER: List[SubCmdParser] = []
 
 class CommandOption:
     sub_cmd: Optional[SubCommandAttr] = None
-    in_sub_cmd: str = SubCommand.Base
+    in_sub_cmd: SubCommandLine = SubCommandLine.Base
     sub_parser: Optional[SubParserAttr] = None
     cli_option: str
     name: Optional[str] = None
@@ -216,7 +216,7 @@ class CommandOption:
         if self.sub_cmd and self.sub_parser:
 
             # initial the sub-command line parser collection first if it's empty.
-            if self._find_subcmd_parser_action(SubCommand.Base) is None:
+            if self._find_subcmd_parser_action(SubCommandLine.Base) is None:
                 sub_cmd: SubCommandAttr = SubCommandAttr(
                     title=SubCommandSection.Base,
                     dest=SubCommandLine.Base,
@@ -225,7 +225,7 @@ class CommandOption:
                 )
                 self._subparser.append(
                     SubCmdParserAction(
-                        subcmd_name=SubCommand.Base,
+                        subcmd_name=SubCommandLine.Base,
                         subcmd_parser=parser.add_subparsers(
                             title=sub_cmd.title.value,
                             dest=sub_cmd.dest.value,
@@ -241,7 +241,7 @@ class CommandOption:
                 # Add parser first
                 _base_subcmd_parser_action = subcmd_parser_action
                 if _base_subcmd_parser_action is None:
-                    _base_subcmd_parser_action = self._find_subcmd_parser_action(SubCommand.Base)
+                    _base_subcmd_parser_action = self._find_subcmd_parser_action(SubCommandLine.Base)
                 _parser = _base_subcmd_parser_action.subcmd_parser.add_parser(  # type: ignore[union-attr]
                     name=self.sub_cmd.dest.value, help=self.sub_cmd.help  # type: ignore[union-attr]
                 )
@@ -294,9 +294,9 @@ class CommandOption:
         mapping_subcmd_parser = list(filter(lambda e: e.find(subcmd_name) is not None, SUBCOMMAND_PARSER))
         return mapping_subcmd_parser[0] if mapping_subcmd_parser else None
 
-    def _find_subcmd_parser_action(self, subcmd_name: str = "") -> Optional[SubCmdParserAction]:
-        mapping_subcmd_parser_action = list(
-            filter(lambda e: e.subcmd_name == (subcmd_name if subcmd_name else self.in_sub_cmd), self._subparser)
+    def _find_subcmd_parser_action(self, subcmd_name: SubCommandLine) -> Optional[SubCmdParserAction]:
+        mapping_subcmd_parser_action: List[SubCmdParserAction] = list(
+            filter(lambda e: e.subcmd_name is subcmd_name, self._subparser)
         )
         return mapping_subcmd_parser_action[0] if mapping_subcmd_parser_action else None
 
@@ -317,7 +317,7 @@ class BaseSubCommandRestServer(CommandOption):
         description="Some operations for mocking REST API server.",
         help="Set up an application to mock HTTP server which adopts REST API to communicate between client and server.",
     )
-    in_sub_cmd = SubCommand.RestServer
+    in_sub_cmd = SubCommandLine.RestServer
 
 
 class SubCommandRunOption(BaseSubCommandRestServer):

@@ -43,7 +43,7 @@ class SysArg:
 
 @dataclass
 class SubCmdParserAction:
-    subcmd_name: str
+    subcmd_name: SubCommandLine
     subcmd_parser: argparse._SubParsersAction
 
 
