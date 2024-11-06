@@ -119,9 +119,6 @@ class CommandProcessor:
     def _is_responsible(
         self, subcmd: Optional[SysArg] = None, args: Optional[Union[Namespace, ParserArguments]] = None
     ) -> bool:
-        if args:
-            subcmd_key = args.subparser_structure.subcmd.value if isinstance(args, ParserArguments) else args.subcommand
-            return subcmd_key == (self.responsible_subcommand.subcmd.value if self.responsible_subcommand else None)
         return (subcmd == self.responsible_subcommand) or (
             subcmd is None and self.responsible_subcommand == SysArg(subcmd=SubCommandLine.Base)
         )
