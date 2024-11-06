@@ -223,7 +223,6 @@ class TestSubCmdProcessChain:
         ],
     )
     def test_is_responsible(self, subcmd: SysArg, expected_result: bool, cmd_processor: FakeCommandProcess):
-        # arg = ParserArguments(subparser_name=subcmd.value, subparser_structure=SysArg(subcmd=subcmd))
         is_responsible = cmd_processor._is_responsible(subcmd=subcmd)
         assert is_responsible is expected_result
 
