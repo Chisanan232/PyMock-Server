@@ -4,6 +4,7 @@ import logging
 import os.path
 import pathlib
 import re
+import sys
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, Namespace
 from enum import Enum
@@ -191,7 +192,7 @@ class FakeSavingConfigComponent(SavingConfigComponent):
 
 
 class FakeCommandProcess(BaseCommandProcessor):
-    responsible_subcommand: str = _Fake_SubCmd_Obj
+    responsible_subcommand: SysArg = _Fake_SubCmd_Obj
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         return
@@ -217,13 +218,13 @@ class TestSubCmdProcessChain:
     @pytest.mark.parametrize(
         ("subcmd", "expected_result"),
         [
-            (_Fake_SubCmd, True),
-            (_Fake_Duplicated_SubCmd, False),
+            (_Fake_SubCmd_Obj, True),
+            (_Fake_Duplicated_SubCmd_Obj, False),
         ],
     )
-    def test_is_responsible(self, subcmd: FakeSubCommandLine, expected_result: bool, cmd_processor: FakeCommandProcess):
-        arg = ParserArguments(subparser_name=subcmd.value, subparser_structure=SysArg(subcmd=subcmd))
-        is_responsible = cmd_processor._is_responsible(subcmd=None, args=arg)
+    def test_is_responsible(self, subcmd: SysArg, expected_result: bool, cmd_processor: FakeCommandProcess):
+        # arg = ParserArguments(subparser_name=subcmd.value, subparser_structure=SysArg(subcmd=subcmd))
+        is_responsible = cmd_processor._is_responsible(subcmd=subcmd, args=None)
         assert is_responsible is expected_result
 
     @pytest.mark.parametrize(
@@ -268,12 +269,18 @@ class BaseCommandProcessorTestSpec(metaclass=ABCMeta):
         return run_command_chain
 
     def test_with_command_processor(self, object_under_test: Callable, **kwargs):
-        kwargs["cmd_ps"] = object_under_test
-        self._test_process(**kwargs)
+        with patch.object(sys, "argv", self._given_command_line()):
+            kwargs["cmd_ps"] = object_under_test
+            self._test_process(**kwargs)
+
+    @abstractmethod
+    def _given_command_line(self) -> List[str]:
+        pass
 
     def test_with_run_entry_point(self, entry_point_under_test: Callable, **kwargs):
-        kwargs["cmd_ps"] = entry_point_under_test
-        self._test_process(**kwargs)
+        with patch.object(sys, "argv", self._given_command_line()):
+            kwargs["cmd_ps"] = entry_point_under_test
+            self._test_process(**kwargs)
 
     @abstractmethod
     def _test_process(self, **kwargs):
@@ -310,16 +317,18 @@ class TestNoSubCmd(BaseCommandProcessorTestSpec):
         return NoSubCmd()
 
     def test_with_command_processor(self, object_under_test: Callable, **kwargs):
-        kwargs = {
-            "cmd_ps": object_under_test,
-        }
-        self._test_process(**kwargs)
+        with patch.object(sys, "argv", self._given_command_line()):
+            kwargs = {
+                "cmd_ps": object_under_test,
+            }
+            self._test_process(**kwargs)
 
     def test_with_run_entry_point(self, entry_point_under_test: Callable, **kwargs):
-        kwargs = {
-            "cmd_ps": entry_point_under_test,
-        }
-        self._test_process(**kwargs)
+        with patch.object(sys, "argv", self._given_command_line()):
+            kwargs = {
+                "cmd_ps": entry_point_under_test,
+            }
+            self._test_process(**kwargs)
 
     def _test_process(self, cmd_ps: Callable):
         mock_parser_arg = _given_parser_args(subcommand=None)
@@ -331,6 +340,9 @@ class TestNoSubCmd(BaseCommandProcessorTestSpec):
             cmd_ps(cmd_parser, mock_parser_arg)
             mock_sgi_generate.assert_not_called()
             command.run.assert_not_called()
+
+    def _given_command_line(self) -> List[str]:
+        return []
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
@@ -389,29 +401,33 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
         command.run = MagicMock()
         cmd_parser = Mock()
 
-        with patch.object(ASGIServer, "generate", return_value=command) as mock_asgi_generate:
-            with patch.object(WSGIServer, "generate", return_value=command) as mock_wsgi_generate:
-                if should_raise_exc:
-                    with pytest.raises(ValueError) as exc_info:
-                        cmd_ps(cmd_parser, mock_parser_arg)
-                    assert "Invalid value" in str(exc_info.value)
-                    mock_asgi_generate.assert_not_called()
-                    mock_wsgi_generate.assert_not_called()
-                    command.run.assert_not_called()
-                else:
-                    cmd_ps(cmd_parser, mock_parser_arg)
-                    if app_type == "auto":
-                        mock_asgi_generate.assert_called_once_with(mock_parser_arg)
-                        mock_wsgi_generate.assert_not_called()
-                    elif app_type == "flask":
+        with patch.object(sys, "argv", self._given_command_line()):
+            with patch.object(ASGIServer, "generate", return_value=command) as mock_asgi_generate:
+                with patch.object(WSGIServer, "generate", return_value=command) as mock_wsgi_generate:
+                    if should_raise_exc:
+                        with pytest.raises(ValueError) as exc_info:
+                            cmd_ps(cmd_parser, mock_parser_arg)
+                        assert "Invalid value" in str(exc_info.value)
                         mock_asgi_generate.assert_not_called()
-                        mock_wsgi_generate.assert_called_once_with(mock_parser_arg)
-                    elif app_type == "fastapi":
-                        mock_asgi_generate.assert_called_once_with(mock_parser_arg)
                         mock_wsgi_generate.assert_not_called()
+                        command.run.assert_not_called()
                     else:
-                        assert False, "Please use valid *app-type* option value."
-                    command.run.assert_called_once()
+                        cmd_ps(cmd_parser, mock_parser_arg)
+                        if app_type == "auto":
+                            mock_asgi_generate.assert_called_once_with(mock_parser_arg)
+                            mock_wsgi_generate.assert_not_called()
+                        elif app_type == "flask":
+                            mock_asgi_generate.assert_not_called()
+                            mock_wsgi_generate.assert_called_once_with(mock_parser_arg)
+                        elif app_type == "fastapi":
+                            mock_asgi_generate.assert_called_once_with(mock_parser_arg)
+                            mock_wsgi_generate.assert_not_called()
+                        else:
+                            assert False, "Please use valid *app-type* option value."
+                        command.run.assert_called_once()
+
+    def _given_command_line(self) -> List[str]:
+        return ["rest-server", "run"]
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
@@ -544,14 +560,18 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         )
         cmd_parser = Mock()
 
-        with patch(
-            "pymock_server.command.rest_server.add.component.SavingConfigComponent",
-            return_value=FakeSavingConfigComponent,
-        ) as mock_saving_config_component:
-            cmd_ps(cmd_parser, mock_parser_arg)
+        with patch.object(sys, "argv", self._given_command_line()):
+            with patch(
+                "pymock_server.command.rest_server.add.component.SavingConfigComponent",
+                return_value=FakeSavingConfigComponent,
+            ) as mock_saving_config_component:
+                cmd_ps(cmd_parser, mock_parser_arg)
 
-            mock_saving_config_component.assert_called_once()
-            FakeSavingConfigComponent.serialize_and_save.assert_called_once()
+                mock_saving_config_component.assert_called_once()
+                FakeSavingConfigComponent.serialize_and_save.assert_called_once()
+
+    def _given_command_line(self) -> List[str]:
+        return ["rest-server", "add"]
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
@@ -651,10 +671,14 @@ class TestSubCmdCheck(BaseCommandProcessorTestSpec):
             subcommand=_Test_SubCommand_Check, config_path=config_path, stop_if_fail=stop_if_fail
         )
         cmd_parser = Mock()
-        with pytest.raises(SystemExit) as exc_info:
-            cmd_ps(cmd_parser, mock_parser_arg)
+        with patch.object(sys, "argv", self._given_command_line()):
+            with pytest.raises(SystemExit) as exc_info:
+                cmd_ps(cmd_parser, mock_parser_arg)
         assert expected_exit_code in str(exc_info.value)
         # TODO: Add one more checking of the error message content with function *_expected_err_msg*
+
+    def _given_command_line(self) -> List[str]:
+        return ["rest-server", "check"]
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
@@ -736,9 +760,13 @@ class TestSubCmdGet(BaseCommandProcessorTestSpec):
             subcommand=_Test_SubCommand_Get, config_path=yaml_config_path, get_api_path=get_api_path
         )
         cmd_parser = Mock()
-        with pytest.raises(SystemExit) as exc_info:
-            cmd_ps(cmd_parser, mock_parser_arg)
+        with patch.object(sys, "argv", self._given_command_line()):
+            with pytest.raises(SystemExit) as exc_info:
+                cmd_ps(cmd_parser, mock_parser_arg)
         assert str(expected_exit_code) == str(exc_info.value)
+
+    def _given_command_line(self) -> List[str]:
+        return ["rest-server", "get"]
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
@@ -818,46 +846,50 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
         )
         cmd_parser = Mock()
 
-        with patch(
-            "pymock_server.command.rest_server.sample.component.logger", autospec=True, side_effect=logging
-        ) as mock_logging:
+        with patch.object(sys, "argv", self._given_command_line()):
             with patch(
-                "pymock_server.command.rest_server.sample.component.get_sample_by_type", return_value=sample_config
-            ) as mock_get_sample_by_type:
+                "pymock_server.command.rest_server.sample.component.logger", autospec=True, side_effect=logging
+            ) as mock_logging:
                 with patch(
-                    "pymock_server.command.rest_server.sample.component.YAML", return_value=FakeYAML
-                ) as mock_instantiate_writer:
-                    cmd_ps(cmd_parser, mock_parser_arg)
+                    "pymock_server.command.rest_server.sample.component.get_sample_by_type", return_value=sample_config
+                ) as mock_get_sample_by_type:
+                    with patch(
+                        "pymock_server.command.rest_server.sample.component.YAML", return_value=FakeYAML
+                    ) as mock_instantiate_writer:
+                        cmd_ps(cmd_parser, mock_parser_arg)
 
-                    mock_instantiate_writer.assert_called_once()
-                    mock_get_sample_by_type.assert_called_once_with(mock_parser_arg.sample_config_type)
-                    FakeYAML.serialize.assert_called_once()
+                        mock_instantiate_writer.assert_called_once()
+                        mock_get_sample_by_type.assert_called_once_with(mock_parser_arg.sample_config_type)
+                        FakeYAML.serialize.assert_called_once()
 
-                    if oprint and generate:
-                        mock_logging.assert_has_calls(
-                            [
-                                call.info(f"{sample_config}"),
-                                call.info(f"🍻  Write sample configuration into file {output}."),
-                            ]
-                        )
-                        FakeYAML.write.assert_called_once()
-                    elif oprint and not generate:
-                        mock_logging.assert_has_calls(
-                            [
-                                call.info(f"{sample_config}"),
-                            ]
-                        )
-                        FakeYAML.write.assert_not_called()
-                    elif not oprint and generate:
-                        mock_logging.assert_has_calls(
-                            [
-                                call.info(f"🍻  Write sample configuration into file {output}."),
-                            ]
-                        )
-                        FakeYAML.write.assert_called_once()
-                    else:
-                        mock_logging.assert_not_called()
-                        FakeYAML.write.assert_not_called()
+                        if oprint and generate:
+                            mock_logging.assert_has_calls(
+                                [
+                                    call.info(f"{sample_config}"),
+                                    call.info(f"🍻  Write sample configuration into file {output}."),
+                                ]
+                            )
+                            FakeYAML.write.assert_called_once()
+                        elif oprint and not generate:
+                            mock_logging.assert_has_calls(
+                                [
+                                    call.info(f"{sample_config}"),
+                                ]
+                            )
+                            FakeYAML.write.assert_not_called()
+                        elif not oprint and generate:
+                            mock_logging.assert_has_calls(
+                                [
+                                    call.info(f"🍻  Write sample configuration into file {output}."),
+                                ]
+                            )
+                            FakeYAML.write.assert_called_once()
+                        else:
+                            mock_logging.assert_not_called()
+                            FakeYAML.write.assert_not_called()
+
+    def _given_command_line(self) -> List[str]:
+        return ["rest-server", "sample"]
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
@@ -957,80 +989,88 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
             expected_config_data = yaml_load(file, Loader=Loader)
 
         set_component_definition(swagger_json_data.get("definitions", {}))
-        with patch("pymock_server.command._common.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
+        with patch("sys.argv", self._given_command_line()):
             with patch(
-                "pymock_server.command.rest_server.pull.component.URLLibHTTPClient.request",
-                return_value=swagger_json_data,
-            ) as mock_swagger_request:
-                # Run target function
-                logger.debug(f"run target function: {cmd_ps}")
-                cmd_ps(cmd_parser, mock_parser_arg)
+                "pymock_server.command._common.component.YAML", return_value=FakeYAML
+            ) as mock_instantiate_writer:
+                with patch(
+                    "pymock_server.command.rest_server.pull.component.URLLibHTTPClient.request",
+                    return_value=swagger_json_data,
+                ) as mock_swagger_request:
+                    # Run target function
+                    logger.debug(f"run target function: {cmd_ps}")
+                    cmd_ps(cmd_parser, mock_parser_arg)
 
-                mock_instantiate_writer.assert_called_once()
-                mock_swagger_request.assert_called_once_with(method="GET", url=f"http://{_API_Doc_Source}")
+                    mock_instantiate_writer.assert_called_once()
+                    mock_swagger_request.assert_called_once_with(method="GET", url=f"http://{_API_Doc_Source}")
 
-                # Run one core logic of target function
-                under_test_api_config = deserialize_api_doc_config(swagger_json_data).to_api_config(
-                    mock_parser_arg.base_url
-                )
-                under_test_api_config.set_template_in_config = False
-                under_test_config_data = under_test_api_config.serialize()
-                assert expected_config_data["name"] == under_test_config_data["name"]
-                assert expected_config_data["description"] == under_test_config_data["description"]
-                assert len(expected_config_data["mocked_apis"].keys()) == len(
-                    under_test_config_data["mocked_apis"].keys()
-                )
-                assert len(expected_config_data["mocked_apis"]["apis"].keys()) == len(
-                    under_test_config_data["mocked_apis"]["apis"].keys()
-                )
-                expected_config_data_keys = sorted(expected_config_data["mocked_apis"]["apis"].keys())
-                under_test_config_data_keys = sorted(under_test_config_data["mocked_apis"]["apis"].keys())
-                for expected_key, under_test_key in zip(expected_config_data_keys, under_test_config_data_keys):
-                    assert expected_key == under_test_key
-                    expected_api_config = expected_config_data["mocked_apis"]["apis"][expected_key]
-                    under_test_api_config = under_test_config_data["mocked_apis"]["apis"][under_test_key]
-                    if expected_key != "base":
-                        # Verify mock API URL
-                        assert expected_api_config["url"] == under_test_api_config["url"]
-                        # Verify mock API request properties - HTTP method
-                        assert expected_api_config["http"]["request"] is not None
-                        assert under_test_api_config["http"]["request"] is not None
-                        assert (
-                            expected_api_config["http"]["request"]["method"]
-                            == under_test_api_config["http"]["request"]["method"]
-                        )
-                        # Verify mock API request properties - request parameters
-                        assert (
-                            expected_api_config["http"]["request"]["parameters"]
-                            == under_test_api_config["http"]["request"]["parameters"]
-                        )
-                        # Verify mock API response properties
-                        assert (
-                            expected_api_config["http"]["response"]["strategy"]
-                            == under_test_api_config["http"]["response"]["strategy"]
-                        )
-                        assert expected_api_config["http"]["response"].get("value", None) == under_test_api_config[
-                            "http"
-                        ]["response"].get("value", None)
-                        assert expected_api_config["http"]["response"].get("path", None) == under_test_api_config[
-                            "http"
-                        ]["response"].get("path", None)
-                        assert expected_api_config["http"]["response"].get("properties", None) == under_test_api_config[
-                            "http"
-                        ]["response"].get("properties", None)
+                    # Run one core logic of target function
+                    under_test_api_config = deserialize_api_doc_config(swagger_json_data).to_api_config(
+                        mock_parser_arg.base_url
+                    )
+                    under_test_api_config.set_template_in_config = False
+                    under_test_config_data = under_test_api_config.serialize()
+                    assert expected_config_data["name"] == under_test_config_data["name"]
+                    assert expected_config_data["description"] == under_test_config_data["description"]
+                    assert len(expected_config_data["mocked_apis"].keys()) == len(
+                        under_test_config_data["mocked_apis"].keys()
+                    )
+                    assert len(expected_config_data["mocked_apis"]["apis"].keys()) == len(
+                        under_test_config_data["mocked_apis"]["apis"].keys()
+                    )
+                    expected_config_data_keys = sorted(expected_config_data["mocked_apis"]["apis"].keys())
+                    under_test_config_data_keys = sorted(under_test_config_data["mocked_apis"]["apis"].keys())
+                    for expected_key, under_test_key in zip(expected_config_data_keys, under_test_config_data_keys):
+                        assert expected_key == under_test_key
+                        expected_api_config = expected_config_data["mocked_apis"]["apis"][expected_key]
+                        under_test_api_config = under_test_config_data["mocked_apis"]["apis"][under_test_key]
+                        if expected_key != "base":
+                            # Verify mock API URL
+                            assert expected_api_config["url"] == under_test_api_config["url"]
+                            # Verify mock API request properties - HTTP method
+                            assert expected_api_config["http"]["request"] is not None
+                            assert under_test_api_config["http"]["request"] is not None
+                            assert (
+                                expected_api_config["http"]["request"]["method"]
+                                == under_test_api_config["http"]["request"]["method"]
+                            )
+                            # Verify mock API request properties - request parameters
+                            assert (
+                                expected_api_config["http"]["request"]["parameters"]
+                                == under_test_api_config["http"]["request"]["parameters"]
+                            )
+                            # Verify mock API response properties
+                            assert (
+                                expected_api_config["http"]["response"]["strategy"]
+                                == under_test_api_config["http"]["response"]["strategy"]
+                            )
+                            assert expected_api_config["http"]["response"].get("value", None) == under_test_api_config[
+                                "http"
+                            ]["response"].get("value", None)
+                            assert expected_api_config["http"]["response"].get("path", None) == under_test_api_config[
+                                "http"
+                            ]["response"].get("path", None)
+                            assert expected_api_config["http"]["response"].get(
+                                "properties", None
+                            ) == under_test_api_config["http"]["response"].get("properties", None)
+                        else:
+                            # Verify base info
+                            assert expected_api_config == under_test_api_config
+
+                    if mock_parser_arg.dry_run:
+                        if len(str(expected_config_data)) > 1000:
+                            FakeYAML.write.assert_called_once_with(
+                                path="dry-run_result.yaml", config=expected_config_data, mode="w+"
+                            )
+                        else:
+                            FakeYAML.write.assert_not_called()
                     else:
-                        # Verify base info
-                        assert expected_api_config == under_test_api_config
-
-                if mock_parser_arg.dry_run:
-                    if len(str(expected_config_data)) > 1000:
                         FakeYAML.write.assert_called_once_with(
-                            path="dry-run_result.yaml", config=expected_config_data, mode="w+"
+                            path=_Test_Config, config=expected_config_data, mode="w+"
                         )
-                    else:
-                        FakeYAML.write.assert_not_called()
-                else:
-                    FakeYAML.write.assert_called_once_with(path=_Test_Config, config=expected_config_data, mode="w+")
+
+    def _given_command_line(self) -> List[str]:
+        return ["rest-server", "pull"]
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
