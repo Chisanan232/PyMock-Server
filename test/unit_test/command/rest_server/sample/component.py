@@ -1,11 +1,11 @@
 import re
+from test._values import SubCommand
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
 from pymock_server._utils.file.operation import YAML
 from pymock_server.command.rest_server.sample.component import SubCmdSampleComponent
-from pymock_server.command.subcommand import SubCommand
 from pymock_server.model._sample import SampleType
 from pymock_server.model.cmd_args import SubcmdSampleArguments
 from pymock_server.model.subcmd_common import SysArg

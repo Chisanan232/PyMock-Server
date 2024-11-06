@@ -23,6 +23,7 @@ except ImportError:
     from yaml import Dumper, Loader  # type: ignore
 
 from test._values import (
+    SubCommand,
     _API_Doc_Source,
     _API_Doc_Source_File,
     _Base_URL,
@@ -72,7 +73,7 @@ from pymock_server.command.process import (
     make_command_chain,
     run_command_chain,
 )
-from pymock_server.command.subcommand import SubCommand, SubCommandLine
+from pymock_server.command.subcommand import SubCommandLine
 from pymock_server.model import (
     ParserArguments,
     SubcmdAddArguments,

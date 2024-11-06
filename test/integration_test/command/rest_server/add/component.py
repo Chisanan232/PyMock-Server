@@ -1,5 +1,6 @@
 import pathlib
 from test._values import (
+    SubCommand,
     _Dummy_Add_Arg_Parameter,
     _generate_response_for_add,
     _Test_HTTP_Method,
@@ -11,7 +12,6 @@ import pytest
 
 from pymock_server.command._common.component import SavingConfigComponent
 from pymock_server.command.rest_server.add.component import SubCmdAddComponent
-from pymock_server.command.subcommand import SubCommand
 from pymock_server.model import (
     SubcmdAddArguments,
     TemplateConfig,

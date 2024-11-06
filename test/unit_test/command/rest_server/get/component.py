@@ -5,7 +5,6 @@ from unittest.mock import Mock, patch
 
 from yaml import dump
 
-from pymock_server.command.subcommand import SubCommand
 from pymock_server.model.subcmd_common import SysArg
 
 try:
@@ -13,7 +12,7 @@ try:
 except ImportError:
     from yaml import Dumper  # type: ignore
 
-from test._values import _Test_HTTP_Method, _Test_URL, _TestConfig
+from test._values import SubCommand, _Test_HTTP_Method, _Test_URL, _TestConfig
 
 import pytest
 

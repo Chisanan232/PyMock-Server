@@ -1,5 +1,5 @@
 import re
-from test._values import _Test_Config, _Test_Response_Strategy, _Test_URL
+from test._values import SubCommand, _Test_Config, _Test_Response_Strategy, _Test_URL
 from typing import List, Optional
 from unittest.mock import MagicMock, Mock, patch
 
@@ -8,7 +8,6 @@ import pytest
 from pymock_server import APIConfig
 from pymock_server.command._common.component import SavingConfigComponent
 from pymock_server.command.rest_server.add.component import SubCmdAddComponent
-from pymock_server.command.subcommand import SubCommand
 from pymock_server.model import generate_empty_config
 from pymock_server.model.api_config.apis import ResponseStrategy
 from pymock_server.model.cmd_args import SubcmdAddArguments

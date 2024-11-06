@@ -1,5 +1,6 @@
 import json
 from test._values import (
+    SubCommand,
     _Bind_Host_And_Port,
     _Generate_Sample,
     _Log_Level,
@@ -20,7 +21,6 @@ from pymock_server.command.rest_server.check.component import (
     SwaggerDiffChecking,
     ValidityChecking,
 )
-from pymock_server.command.subcommand import SubCommand
 from pymock_server.model import (
     ParserArguments,
     SubcmdAddArguments,

@@ -1,18 +1,5 @@
-from dataclasses import dataclass
 from enum import Enum
 from typing import Union
-
-
-@dataclass
-class SubCommand:
-    Base: str = "subcommand"
-    RestServer: str = "rest-server"
-    Run: str = "run"
-    Add: str = "add"
-    Check: str = "check"
-    Get: str = "get"
-    Sample: str = "sample"
-    Pull: str = "pull"
 
 
 class SubCommandLine(Enum):

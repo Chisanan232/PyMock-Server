@@ -1,12 +1,16 @@
 import json
 import pathlib
-from test._values import _API_Doc_Source, _API_Doc_Source_File, _Test_Request_With_Https
+from test._values import (
+    SubCommand,
+    _API_Doc_Source,
+    _API_Doc_Source_File,
+    _Test_Request_With_Https,
+)
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 
 from pymock_server.command.rest_server.pull.component import SubCmdPullComponent
-from pymock_server.command.subcommand import SubCommand
 from pymock_server.model import (
     SubcmdPullArguments,
     deserialize_api_doc_config,

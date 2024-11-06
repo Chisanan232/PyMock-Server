@@ -1,6 +1,7 @@
 from argparse import Namespace
 from collections import namedtuple
 from test._values import (
+    SubCommand,
     _API_Doc_Source,
     _API_Doc_Source_File,
     _Base_URL,
@@ -42,7 +43,6 @@ from typing import Type
 import pytest
 
 from pymock_server._utils.file import Format
-from pymock_server.command.subcommand import SubCommand
 from pymock_server.model._sample import SampleType
 from pymock_server.model.cmd_args import (
     DeserializeParsedArgs,
