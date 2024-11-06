@@ -2,7 +2,7 @@ import copy
 import logging
 import sys
 from argparse import ArgumentParser, Namespace
-from typing import List, Optional, Tuple, Type, Union
+from typing import List, Optional, Tuple, Type
 
 from pymock_server.log import init_logger_config
 from pymock_server.model import (
@@ -93,17 +93,15 @@ class CommandProcessor:
     def _subcmd_component(self) -> BaseSubCmdComponent:
         raise NotImplementedError
 
-    def distribute(
-        self, args: Optional[Union[Namespace, ParserArguments]] = None, cmd_index: int = 0
-    ) -> "CommandProcessor":
-        if self._is_responsible(subcmd=self.mock_api_parser.subcommand, args=args):
+    def distribute(self, cmd_index: int = 0) -> "CommandProcessor":
+        if self._is_responsible(subcmd=self.mock_api_parser.subcommand):
             return self
         else:
             self._current_index = cmd_index
-            return self._next.distribute(args=args, cmd_index=self._current_index)
+            return self._next.distribute(cmd_index=self._current_index)
 
     def process(self, parser: ArgumentParser, args: ParserArguments, cmd_index: int = 0) -> None:
-        self.distribute(args=args, cmd_index=cmd_index)._run(parser=parser, args=args)
+        self.distribute(cmd_index=cmd_index)._run(parser=parser, args=args)
 
     def parse(
         self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None, cmd_index: int = 0
@@ -116,9 +114,7 @@ class CommandProcessor:
     def copy(self) -> "CommandProcessor":
         return copy.copy(self)
 
-    def _is_responsible(
-        self, subcmd: Optional[SysArg] = None, args: Optional[Union[Namespace, ParserArguments]] = None
-    ) -> bool:
+    def _is_responsible(self, subcmd: Optional[SysArg] = None) -> bool:
         return (subcmd == self.responsible_subcommand) or (
             subcmd is None and self.responsible_subcommand == SysArg(subcmd=SubCommandLine.Base)
         )

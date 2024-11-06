@@ -224,7 +224,7 @@ class TestSubCmdProcessChain:
     )
     def test_is_responsible(self, subcmd: SysArg, expected_result: bool, cmd_processor: FakeCommandProcess):
         # arg = ParserArguments(subparser_name=subcmd.value, subparser_structure=SysArg(subcmd=subcmd))
-        is_responsible = cmd_processor._is_responsible(subcmd=subcmd, args=None)
+        is_responsible = cmd_processor._is_responsible(subcmd=subcmd)
         assert is_responsible is expected_result
 
     @pytest.mark.parametrize(
@@ -242,7 +242,7 @@ class TestSubCmdProcessChain:
         cmd_parser = Mock()
         cmd_processor.process(parser=cmd_parser, args=arg)
 
-        cmd_processor._is_responsible.assert_called_once_with(subcmd=None, args=arg)
+        cmd_processor._is_responsible.assert_called_once_with(subcmd=None)
         if should_dispatch:
             cmd_processor._run.assert_not_called()
         else:
