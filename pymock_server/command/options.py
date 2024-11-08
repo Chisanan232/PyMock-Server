@@ -34,8 +34,20 @@ SUBCOMMAND: List[str] = [SubCommandLine.RestServer.value]
 COMMAND_OPTIONS: List["MetaCommandOption"] = []
 
 
+class SubCommandInterface:
+    @staticmethod
+    def get() -> List[str]:
+        return SUBCOMMAND
+
+    @staticmethod
+    def extend(v: List[str]) -> None:
+        assert isinstance(v, list)
+        global SUBCOMMAND
+        SUBCOMMAND.extend(v)
+
+
 def get_all_subcommands() -> List[str]:
-    return list(set(SUBCOMMAND))
+    return list(set(SubCommandInterface.get()))
 
 
 def make_options() -> List["CommandOption"]:
@@ -131,7 +143,7 @@ class MetaCommandOption(type):
             )
         )
         if parent_is_subcmd:
-            SUBCOMMAND.extend(
+            SubCommandInterface.extend(
                 [
                     b.__name__.replace(_ClsNamingFormat.ahead, "").replace(_ClsNamingFormat.tail, "").lower()
                     for b in bases
