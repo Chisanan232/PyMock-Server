@@ -60,9 +60,9 @@ from test._values import (
 
 from pymock_server._utils.file import Format
 from pymock_server._utils.file.operation import YAML
+from pymock_server.command._base_process import BaseCommandProcessor
 from pymock_server.command.options import get_all_subcommands
 from pymock_server.command.process import (
-    BaseCommandProcessor,
     NoSubCmd,
     SubCmdAdd,
     SubCmdCheck,

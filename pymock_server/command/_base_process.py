@@ -102,3 +102,6 @@ class CommandProcessor:
 
     def _parse_cmd_arguments(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> Namespace:
         return parser.parse_args(cmd_args)
+
+
+BaseCommandProcessor: type = MetaCommand("BaseCommandProcessor", (CommandProcessor,), {})

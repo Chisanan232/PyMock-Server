@@ -15,7 +15,7 @@ from pymock_server.model import (
 )
 from pymock_server.model.subcmd_common import SysArg
 
-from ._base_process import CommandProcessChain, CommandProcessor, MetaCommand
+from ._base_process import BaseCommandProcessor, CommandProcessChain, CommandProcessor
 from .component import NoSubCmdComponent
 from .rest_server import SubCmdRestServerComponent
 from .rest_server.add import SubCmdAddComponent
@@ -51,9 +51,6 @@ def make_command_chain() -> List["CommandProcessor"]:
         existed_subcmd.append(getattr(cmd, "responsible_subcommand"))
         mock_api_cmd.append(cmd.copy())
     return mock_api_cmd
-
-
-BaseCommandProcessor: type = MetaCommand("BaseCommandProcessor", (CommandProcessor,), {})
 
 
 class NoSubCmd(BaseCommandProcessor):
