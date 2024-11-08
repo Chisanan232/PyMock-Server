@@ -19,10 +19,10 @@ class APIClientTestSuite(metaclass=ABCMeta):
     def client(self) -> BaseAPIClient:
         pass
 
-    @pytest.mark.parametrize("swagger_config_response_path", API_CLIENT_REQUEST_TEST_CASE)
-    def test_request(self, swagger_config_response_path: str, client: BaseAPIClient):
+    @pytest.mark.parametrize("api_doc_config_response_path", API_CLIENT_REQUEST_TEST_CASE)
+    def test_request(self, api_doc_config_response_path: str, client: BaseAPIClient):
         with self._mock_request_process() as mock_request:
-            mock_request.return_value = self._mock_return_value(swagger_config_response_path)
+            mock_request.return_value = self._mock_return_value(api_doc_config_response_path)
             result = client.request(**self._request_params)
             self._verify(mock_request, result)
 
@@ -31,7 +31,7 @@ class APIClientTestSuite(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _mock_return_value(self, swagger_config_response_path: str) -> Any:
+    def _mock_return_value(self, api_doc_config_response_path: str) -> Any:
         pass
 
     @property
@@ -52,8 +52,8 @@ class TestURLLibClient(APIClientTestSuite):
     def _mock_request_process(self) -> patch.object:
         return patch.object(PoolManager, "request")
 
-    def _mock_return_value(self, swagger_config_response_path: str) -> Any:
-        with open(swagger_config_response_path, "r", encoding="utf-8") as file_stream:
+    def _mock_return_value(self, api_doc_config_response_path: str) -> Any:
+        with open(api_doc_config_response_path, "r", encoding="utf-8") as file_stream:
             return HTTPResponse(body=bytes(file_stream.read(), "utf-8"))
 
     @property
