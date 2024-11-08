@@ -79,7 +79,7 @@ class TestSubCmdRestServerHelp(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "API server subcommands:")
         self._should_contains_chars_in_result(
             cmd_running_result,
-            f"{SubCommandLine.Add.value},{SubCommandLine.Check.value},{SubCommandLine.Get.value},{SubCommandLine.Run.value},{SubCommandLine.Sample.value}",
+            f"{SubCommandLine.Add.value},{SubCommandLine.Check.value},{SubCommandLine.Get.value},{SubCommandLine.Pull.value},{SubCommandLine.Run.value},{SubCommandLine.Sample.value}",
         )
         self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.Run.value)
         self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.Check.value)
