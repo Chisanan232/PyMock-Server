@@ -1111,6 +1111,6 @@ def test_make_command_chain_if_duplicated_subcmd():
     assert re.search(r"subcommand.{1,64}has been used", str(exc_info.value), re.IGNORECASE)
 
     # Remove the invalid object for test could run finely.
-    from pymock_server.command.process import CommandProcessChain
+    from pymock_server.command._base_process import CommandProcessChain
 
     CommandProcessChain.pop(-1)
