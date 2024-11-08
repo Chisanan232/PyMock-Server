@@ -54,6 +54,10 @@ import_get_options()
 import_pull_options()
 import_sample_options()
 
+"""
+Common functon about command line option
+"""
+
 
 def get_all_subcommands() -> List[str]:
     return list(set(SubCommandInterface.get()))
@@ -73,6 +77,11 @@ def make_options() -> List["CommandOption"]:
             raise ValueError(f"The object {option.__class__}'s attribute *cli_option* cannot be None or empty value.")
         mock_api_cmd_options.append(option.copy())
     return mock_api_cmd_options
+
+
+"""
+Command line options for first layer command line (without any subcommand line).
+"""
 
 
 class BaseSubCommand(CommandOption):
