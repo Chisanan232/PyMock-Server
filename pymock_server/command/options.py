@@ -22,6 +22,9 @@ from pymock_server.command.rest_server.add.options import (
 from pymock_server.command.rest_server.check.options import (
     import_option as import_check_options,
 )
+from pymock_server.command.rest_server.get.options import (
+    import_option as import_get_options,
+)
 
 # NOTE: Just for importing the command line options, do nothing in this module
 from pymock_server.command.rest_server.run.options import (
@@ -42,6 +45,7 @@ from .subcommand import SubCommandLine, SubCommandSection
 import_run_options()
 import_add_options()
 import_check_options()
+import_get_options()
 
 
 def get_all_subcommands() -> List[str]:
@@ -73,13 +77,6 @@ class BaseSubCommand(CommandOption):
     )
 
 
-class SubCommandGetOption(BaseSubCommandRestServer):
-    sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommandLine.Get,
-        help="Do some comprehensive inspection for configuration.",
-    )
-
-
 class SubCommandSampleOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommandLine.Sample,
@@ -95,7 +92,6 @@ class SubCommandPullOption(BaseSubCommandRestServer):
 
 
 BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
-BaseSubCmdGetOption: type = MetaCommandOption("BaseSubCmdGetOption", (SubCommandGetOption,), {})
 BaseSubCmdSampleOption: type = MetaCommandOption("BaseSubCmdSampleOption", (SubCommandSampleOption,), {})
 BaseSubCmdPullOption: type = MetaCommandOption("BaseSubCmdPullOption", (SubCommandPullOption,), {})
 
@@ -156,46 +152,6 @@ class DemoSampleType(BaseSubCmdSampleOption):
     option_value_type: type = str
     default_value: str = "all"
     _options: List[str] = ["all", "response_as_str", "response_as_json", "response_with_file"]
-
-
-class UnderCheckConfigPath(BaseSubCmdGetOption):
-    cli_option: str = "-p, --config-path"
-    name: str = "config_path"
-    help_description: str = "The file path of configuration."
-    default_value: str = "api.yaml"
-
-
-class GetAPIShowDetail(BaseSubCmdGetOption):
-    cli_option: str = "-s, --show-detail"
-    name: str = "show_detail"
-    help_description: str = "Show the API details."
-    action: str = "store_true"
-    option_value_type: Optional[type] = None
-    default_value: bool = False
-
-
-class GetAPIShowDetailAsFormat(BaseSubCmdGetOption):
-    cli_option: str = "-f, --show-as-format"
-    name: str = "show_as_format"
-    help_description: str = "Show the API details as one specific format."
-    option_value_type: type = str
-    default_value: str = "text"
-    _options: List[str] = ["text", "json", "yaml"]
-
-
-class GetAPIPath(BaseSubCmdGetOption):
-    cli_option: str = "-a, --api-path"
-    name: str = "api_path"
-    help_description: str = "Get the API info by API path."
-
-
-class GetWithHTTPMethod(BaseSubCmdGetOption):
-    cli_option: str = "-m, --http-method"
-    name: str = "http_method"
-    help_description: str = (
-        "This is an option for searching condition which cannot be used individually. Add "
-        "condition of HTTP method to get the API info."
-    )
 
 
 class Source(BaseSubCmdPullOption):
