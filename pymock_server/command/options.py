@@ -27,8 +27,7 @@ from pymock_server.model.subcmd_common import (
     SysArg,
 )
 
-from ._base_options import CommandLineOptions, MetaCommandOption
-from ._global_value import SubCommandInterface
+from ._base_options import CommandLineOptions, MetaCommandOption, SubCommandInterface
 from .subcommand import SubCommandLine, SubCommandSection
 
 

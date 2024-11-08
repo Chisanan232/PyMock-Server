@@ -2,9 +2,22 @@ import re
 from collections import namedtuple
 from typing import List, Tuple
 
-from ._global_value import SubCommandInterface
+from .subcommand import SubCommandLine
 
+SUBCOMMAND: List[str] = [SubCommandLine.RestServer.value]
 COMMAND_OPTIONS: List["MetaCommandOption"] = []
+
+
+class SubCommandInterface:
+    @staticmethod
+    def get() -> List[str]:
+        return SUBCOMMAND
+
+    @staticmethod
+    def extend(v: List[str]) -> None:
+        assert isinstance(v, list)
+        global SUBCOMMAND
+        SUBCOMMAND.extend(v)
 
 
 class CommandLineOptions:
