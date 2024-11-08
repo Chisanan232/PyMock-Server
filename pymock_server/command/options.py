@@ -19,6 +19,9 @@ from pymock_server.__pkg_info__ import __version__
 from pymock_server.command.rest_server.add.options import (
     import_option as import_add_options,
 )
+from pymock_server.command.rest_server.check.options import (
+    import_option as import_check_options,
+)
 
 # NOTE: Just for importing the command line options, do nothing in this module
 from pymock_server.command.rest_server.run.options import (
@@ -38,6 +41,7 @@ from .subcommand import SubCommandLine, SubCommandSection
 # FIXME: Please use more clear and beautiful implementation to apply the command line options
 import_run_options()
 import_add_options()
+import_check_options()
 
 
 def get_all_subcommands() -> List[str]:
@@ -69,13 +73,6 @@ class BaseSubCommand(CommandOption):
     )
 
 
-class SubCommandCheckOption(BaseSubCommandRestServer):
-    sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommandLine.Check,
-        help="Check the validity of *PyMock-API* configuration.",
-    )
-
-
 class SubCommandGetOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommandLine.Get,
@@ -98,7 +95,6 @@ class SubCommandPullOption(BaseSubCommandRestServer):
 
 
 BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
-BaseSubCmdCheckOption: type = MetaCommandOption("BaseSubCmdCheckOption", (SubCommandCheckOption,), {})
 BaseSubCmdGetOption: type = MetaCommandOption("BaseSubCmdGetOption", (SubCommandGetOption,), {})
 BaseSubCmdSampleOption: type = MetaCommandOption("BaseSubCmdSampleOption", (SubCommandSampleOption,), {})
 BaseSubCmdPullOption: type = MetaCommandOption("BaseSubCmdPullOption", (SubCommandPullOption,), {})
@@ -160,64 +156,6 @@ class DemoSampleType(BaseSubCmdSampleOption):
     option_value_type: type = str
     default_value: str = "all"
     _options: List[str] = ["all", "response_as_str", "response_as_json", "response_with_file"]
-
-
-class ConfigPath(BaseSubCmdCheckOption):
-    cli_option: str = "-p, --config-path"
-    name: str = "config_path"
-    help_description: str = "The file path of configuration."
-    default_value: str = "api.yaml"
-
-
-class StopCheckIfFail(BaseSubCmdCheckOption):
-    cli_option: str = "--stop-if-fail"
-    name: str = "stop_if_fail"
-    help_description: str = "Stop program if it gets any fail in checking."
-    action: str = "store_true"
-    option_value_type: Optional[type] = None
-    default_value: bool = False
-
-
-class SwaggerDocURL(BaseSubCmdCheckOption):
-    cli_option: str = "-s, --swagger-doc-url"
-    name: str = "swagger_doc_url"
-    help_description: str = "The URL path of swagger style API document."
-
-
-class CheckEntireAPI(BaseSubCmdCheckOption):
-    cli_option: str = "--check-entire-api"
-    name: str = "check_entire_api"
-    help_description: str = "Do the inspection of all properties of each API."
-    action: str = "store_true"
-    option_value_type: Optional[type] = None
-    default_value: bool = False
-
-
-class CheckAPIPath(BaseSubCmdCheckOption):
-    cli_option: str = "--check-api-path"
-    name: str = "check_api_path"
-    help_description: str = "Do the inspection of property API path."
-    action: str = "store_true"
-    option_value_type: Optional[type] = None
-    default_value: bool = False
-
-
-class CheckAPIHTTPMethod(BaseSubCmdCheckOption):
-    cli_option: str = "--check-api-http-method"
-    name: str = "check_api_http_method"
-    help_description: str = "Do the inspection of property allowable HTTP method of one specific API."
-    action: str = "store_true"
-    option_value_type: Optional[type] = None
-    default_value: bool = False
-
-
-class CheckAPIParameter(BaseSubCmdCheckOption):
-    cli_option: str = "--check-api-parameters"
-    name: str = "check_api_parameters"
-    help_description: str = "Do the inspection of property API parameters."
-    action: str = "store_true"
-    option_value_type: Optional[type] = None
-    default_value: bool = False
 
 
 class UnderCheckConfigPath(BaseSubCmdGetOption):

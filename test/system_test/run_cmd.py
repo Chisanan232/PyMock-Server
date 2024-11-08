@@ -102,7 +102,7 @@ class TestSubCmdRestServerWithoutAnyCmdArgs(SubCmdRestServerTestSuite):
         self._should_contains_chars_in_result(cmd_running_result, "API server subcommands:")
         self._should_contains_chars_in_result(
             cmd_running_result,
-            f"{SubCommand.Add},{SubCommand.Run},{SubCommand.Sample},{SubCommand.Check},{SubCommand.Get}",
+            f"{SubCommand.Add},{SubCommand.Check},{SubCommand.Run},{SubCommand.Sample},{SubCommand.Get}",
         )
         self._should_contains_chars_in_result(cmd_running_result, SubCommand.Run)
         self._should_contains_chars_in_result(cmd_running_result, SubCommand.Check)
