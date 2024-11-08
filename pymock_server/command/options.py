@@ -20,30 +20,18 @@ from collections import namedtuple
 from typing import Any, Dict, List, Optional, Tuple
 
 from pymock_server.__pkg_info__ import __version__
-
-from ..model.subcmd_common import (
+from pymock_server.model.subcmd_common import (
     SubCmdParser,
     SubCmdParserAction,
     SubCommandAttr,
     SubParserAttr,
     SysArg,
 )
+
+from ._global_value import SubCommandInterface
 from .subcommand import SubCommandLine, SubCommandSection
 
-SUBCOMMAND: List[str] = [SubCommandLine.RestServer.value]
 COMMAND_OPTIONS: List["MetaCommandOption"] = []
-
-
-class SubCommandInterface:
-    @staticmethod
-    def get() -> List[str]:
-        return SUBCOMMAND
-
-    @staticmethod
-    def extend(v: List[str]) -> None:
-        assert isinstance(v, list)
-        global SUBCOMMAND
-        SUBCOMMAND.extend(v)
 
 
 def get_all_subcommands() -> List[str]:
