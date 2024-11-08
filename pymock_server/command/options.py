@@ -24,6 +24,7 @@ from ._base_options import (
     MetaCommandOption,
     SubCommandInterface,
 )
+from .rest_server.option import BaseSubCommandRestServer
 from .subcommand import SubCommandLine, SubCommandSection
 
 
@@ -54,16 +55,6 @@ class BaseSubCommand(CommandOption):
         description="",
         help="",
     )
-
-
-class BaseSubCommandRestServer(CommandOption):
-    sub_cmd: SubCommandAttr = SubCommandAttr(
-        title=SubCommandSection.ApiServer,
-        dest=SubCommandLine.RestServer,
-        description="Some operations for mocking REST API server.",
-        help="Set up an application to mock HTTP server which adopts REST API to communicate between client and server.",
-    )
-    in_sub_cmd = SubCommandLine.RestServer
 
 
 class SubCommandRunOption(BaseSubCommandRestServer):
