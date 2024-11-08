@@ -34,6 +34,23 @@ from .subcommand import SubCommandLine, SubCommandSection
 COMMAND_OPTIONS: List["MetaCommandOption"] = []
 
 
+class CommandLineOptions:
+    @staticmethod
+    def get() -> List["MetaCommandOption"]:
+        return COMMAND_OPTIONS
+
+    @staticmethod
+    def append(v: "MetaCommandOption") -> None:
+        assert isinstance(v, MetaCommandOption)
+        global COMMAND_OPTIONS
+        COMMAND_OPTIONS.append(v)
+
+    @staticmethod
+    def pop(index: int) -> None:
+        global COMMAND_OPTIONS
+        COMMAND_OPTIONS.pop(index)
+
+
 def get_all_subcommands() -> List[str]:
     return list(set(SubCommandInterface.get()))
 
@@ -46,7 +63,7 @@ def make_options() -> List["CommandOption"]:
 
     """
     mock_api_cmd_options: List["CommandOption"] = []
-    for option_cls in COMMAND_OPTIONS:
+    for option_cls in CommandLineOptions.get():
         option = option_cls()
         if not option.cli_option:
             raise ValueError(f"The object {option.__class__}'s attribute *cli_option* cannot be None or empty value.")
@@ -138,7 +155,7 @@ class MetaCommandOption(type):
                 ]
             )
         new_class = super_new(cls, name, bases, attrs)
-        COMMAND_OPTIONS.append(new_class)
+        CommandLineOptions.append(new_class)
         return new_class
 
 
