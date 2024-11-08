@@ -33,6 +33,27 @@ logger = logging.getLogger(__name__)
 _COMMAND_CHAIN: List[Type["CommandProcessor"]] = []
 
 
+class CommandProcessChain:
+    @staticmethod
+    def get() -> List[Type["CommandProcessor"]]:
+        return _COMMAND_CHAIN
+
+    @staticmethod
+    def get_element(index: int) -> Type["CommandProcessor"]:
+        return _COMMAND_CHAIN[index]
+
+    @staticmethod
+    def append(v: Type["CommandProcessor"]) -> None:
+        assert issubclass(v, CommandProcessor)
+        global _COMMAND_CHAIN
+        return _COMMAND_CHAIN.append(v)
+
+    @staticmethod
+    def pop(index: int) -> None:
+        global _COMMAND_CHAIN
+        _COMMAND_CHAIN.pop(index)
+
+
 def dispatch_command_processor() -> "CommandProcessor":
     cmd_chain = make_command_chain()
     assert len(cmd_chain) > 0, "It's impossible that command line processors list is empty."
@@ -48,7 +69,7 @@ def run_command_chain(parser: ArgumentParser, args: ParserArguments) -> None:
 def make_command_chain() -> List["CommandProcessor"]:
     existed_subcmd: List[Optional[SysArg]] = []
     mock_api_cmd: List["CommandProcessor"] = []
-    for cmd_cls in _COMMAND_CHAIN:
+    for cmd_cls in CommandProcessChain.get():
         cmd = cmd_cls()
         if cmd.responsible_subcommand in existed_subcmd:
             raise ValueError(f"The subcommand *{cmd.responsible_subcommand}* has been used. Please use other naming.")
@@ -69,7 +90,7 @@ class MetaCommand(type):
         if not parent:
             return super_new(cls, name, bases, attrs)
         new_class = super_new(cls, name, bases, attrs)
-        _COMMAND_CHAIN.append(new_class)  # type: ignore
+        CommandProcessChain.append(new_class)  # type: ignore
         return new_class
 
 
@@ -83,9 +104,9 @@ class CommandProcessor:
 
     @property
     def _next(self) -> "CommandProcessor":
-        if self._current_index == len(_COMMAND_CHAIN):
+        if self._current_index == len(CommandProcessChain.get()):
             raise StopIteration("It cannot find the component which is responsible of this sub-command line.")
-        cmd = _COMMAND_CHAIN[self._current_index]
+        cmd = CommandProcessChain.get_element(self._current_index)
         self._current_index += 1
         return cmd()
 
