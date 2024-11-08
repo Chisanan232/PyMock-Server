@@ -16,6 +16,9 @@ import argparse
 from typing import Any, List, Optional
 
 from pymock_server.__pkg_info__ import __version__
+
+# NOTE: Just for importing the command line options, do nothing in this module
+from pymock_server.command.rest_server.run.options import import_option
 from pymock_server.model.subcmd_common import SubCommandAttr, SubParserAttr
 
 from ._base_options import (
@@ -26,6 +29,9 @@ from ._base_options import (
 )
 from .rest_server.option import BaseSubCommandRestServer
 from .subcommand import SubCommandLine, SubCommandSection
+
+# FIXME: Please use more clear and beautiful implementation to apply the command line options
+import_option()
 
 
 def get_all_subcommands() -> List[str]:
@@ -55,14 +61,6 @@ class BaseSubCommand(CommandOption):
         description="",
         help="",
     )
-
-
-class SubCommandRunOption(BaseSubCommandRestServer):
-    sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommandLine.Run,
-        help="Set up APIs with configuration and run a web application to mock them.",
-    )
-    option_value_type: type = str
 
 
 class SubCommandAddOption(BaseSubCommandRestServer):
@@ -102,7 +100,6 @@ class SubCommandPullOption(BaseSubCommandRestServer):
 
 
 BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
-BaseSubCmdRunOption: type = MetaCommandOption("BaseSubCmdRunOption", (SubCommandRunOption,), {})
 BaseSubCmdAddOption: type = MetaCommandOption("BaseSubCmdAddOption", (SubCommandAddOption,), {})
 BaseSubCmdCheckOption: type = MetaCommandOption("BaseSubCmdCheckOption", (SubCommandCheckOption,), {})
 BaseSubCmdGetOption: type = MetaCommandOption("BaseSubCmdGetOption", (SubCommandGetOption,), {})
@@ -128,52 +125,6 @@ class Version(BaseCmdOption):
             "version": self._version_output,
         }
         parser.add_argument(*self.cli_option_name, **cmd_option_args)
-
-
-class WebAppType(BaseSubCmdRunOption):
-    """
-    Which Python web framework it should use to set up web server for mocking APIs.
-
-    Option values:
-        * *auto*: it would automatically scan which Python web library it could use to initial and set up server gateway in current runtime environment.
-        * *flask*: Use Python web framework Flask (https://palletsprojects.com/p/flask/) to set up web application.
-        * *fastapi*: Use Python web framework FastAPI (https://fastapi.tiangolo.com/) to set up web application.
-    """
-
-    cli_option: str = "--app-type"
-    name: str = "app_type"
-    help_description: str = "Which Python web framework it should use to set up web server for mocking APIs."
-    default_value: str = "auto"
-    _options: List[str] = ["auto", "flask", "fastapi"]
-
-
-class Config(BaseSubCmdRunOption):
-    cli_option: str = "-c, --config"
-    name: str = "config"
-    help_description: str = "The configuration of tool PyMock-API."
-    default_value: str = "api.yaml"
-
-
-class Bind(BaseSubCmdRunOption):
-    cli_option: str = "-b, --bind"
-    name: str = "bind"
-    help_description: str = "The socket to bind."
-    default_value: str = "127.0.0.1:9672"
-
-
-class Workers(BaseSubCmdRunOption):
-    cli_option: str = "-w, --workers"
-    name: str = "workers"
-    help_description: str = "The workers amount."
-    default_value: int = 1
-
-
-class LegLevel(BaseSubCmdRunOption):
-    cli_option: str = "--log-level"
-    name: str = "log_level"
-    help_description: str = "The log level."
-    default_value: str = "info"
-    _options: List[str] = ["critical", "error", "warning", "info", "debug", "trace"]
 
 
 class PrintSample(BaseSubCmdSampleOption):
