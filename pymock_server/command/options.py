@@ -16,9 +16,14 @@ import argparse
 from typing import Any, List, Optional
 
 from pymock_server.__pkg_info__ import __version__
+from pymock_server.command.rest_server.add.options import (
+    import_option as import_add_options,
+)
 
 # NOTE: Just for importing the command line options, do nothing in this module
-from pymock_server.command.rest_server.run.options import import_option
+from pymock_server.command.rest_server.run.options import (
+    import_option as import_run_options,
+)
 from pymock_server.model.subcmd_common import SubCommandAttr, SubParserAttr
 
 from ._base_options import (
@@ -31,7 +36,8 @@ from .rest_server.option import BaseSubCommandRestServer
 from .subcommand import SubCommandLine, SubCommandSection
 
 # FIXME: Please use more clear and beautiful implementation to apply the command line options
-import_option()
+import_run_options()
+import_add_options()
 
 
 def get_all_subcommands() -> List[str]:
@@ -60,14 +66,6 @@ class BaseSubCommand(CommandOption):
         dest=SubCommandLine.Base,
         description="",
         help="",
-    )
-
-
-class SubCommandAddOption(BaseSubCommandRestServer):
-    sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommandLine.Add,
-        help="Something processing about configuration, i.e., generate a sample configuration or validate configuration"
-        " content.",
     )
 
 
@@ -100,7 +98,6 @@ class SubCommandPullOption(BaseSubCommandRestServer):
 
 
 BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
-BaseSubCmdAddOption: type = MetaCommandOption("BaseSubCmdAddOption", (SubCommandAddOption,), {})
 BaseSubCmdCheckOption: type = MetaCommandOption("BaseSubCmdCheckOption", (SubCommandCheckOption,), {})
 BaseSubCmdGetOption: type = MetaCommandOption("BaseSubCmdGetOption", (SubCommandGetOption,), {})
 BaseSubCmdSampleOption: type = MetaCommandOption("BaseSubCmdSampleOption", (SubCommandSampleOption,), {})
@@ -163,141 +160,6 @@ class DemoSampleType(BaseSubCmdSampleOption):
     option_value_type: type = str
     default_value: str = "all"
     _options: List[str] = ["all", "response_as_str", "response_as_json", "response_with_file"]
-
-
-class APIConfigPath(BaseSubCmdAddOption):
-    cli_option: str = "--config-path"
-    name: str = "config_path"
-    help_description: str = "The configuration file path."
-    option_value_type: type = str
-    default_value: str = "api.yaml"
-
-
-class AddAPIPath(BaseSubCmdAddOption):
-    cli_option: str = "--api-path"
-    name: str = "api_path"
-    help_description: str = "Set URL path of one specific API."
-    option_value_type: type = str
-
-
-class AddHTTPMethod(BaseSubCmdAddOption):
-    cli_option: str = "--http-method"
-    name: str = "http_method"
-    help_description: str = "Set HTTP method of one specific API."
-    option_value_type: type = str
-    default_value: str = "GET"
-
-
-class AddParameters(BaseSubCmdAddOption):
-    cli_option: str = "--parameters"
-    name: str = "parameters"
-    help_description: str = "Set HTTP request parameter(s) of one specific API."
-    action: str = "append"
-    option_value_type: type = str
-    default_value: str = ""
-
-
-class AddResponseStrategy(BaseSubCmdAddOption):
-    cli_option: str = "--response-strategy"
-    name: str = "response_strategy"
-    help_description: str = "Set HTTP response strategy of one specific API."
-    option_value_type: type = str
-    _options: List[str] = ["string", "file", "object"]
-
-
-class AddResponse(BaseSubCmdAddOption):
-    cli_option: str = "--response-value"
-    name: str = "response_value"
-    help_description: str = "Set HTTP response value of one specific API."
-    action: str = "append"
-    option_value_type: type = str
-    default_value: str = "OK."
-
-
-class AddBaseFilePath(BaseSubCmdAddOption):
-    cli_option: str = "--base-file-path"
-    name: str = "base_file_path"
-    help_description: str = (
-        "The path which is the basic value of all configuration file paths. In the other "
-        "words, it would automatically add the base path in front of all the other file "
-        "paths in configuration."
-    )
-
-
-class AddIncludeTemplateConfig(BaseSubCmdAddOption):
-    cli_option: str = "--include-template-config"
-    name: str = "include_template_config"
-    help_description: str = "If it's true, it would also configure *template* section setting in result configuration."
-    action: str = "store_true"
-    option_value_type: Optional[type] = None
-    default_value: bool = False
-
-
-class AddBaseURL(BaseSubCmdAddOption):
-    cli_option: str = "--base-url"
-    name: str = "base_url"
-    help_description: str = "The base URL which must be the part of path all the APIs begin with."
-
-
-class AddTag(BaseSubCmdAddOption):
-    cli_option: str = "--tag"
-    name: str = "tag"
-    help_description: str = "Set tag at the new mock API."
-
-
-class AddDryRun(BaseSubCmdAddOption):
-    cli_option: str = "--dry-run"
-    name: str = "dry_run"
-    help_description: str = "If it's true, it would run pulling process without saving result configuration."
-    action: str = "store_true"
-    option_value_type: Optional[type] = None
-    default_value: bool = False
-
-
-class AddDivideApi(BaseSubCmdAddOption):
-    cli_option: str = "--divide-api"
-    name: str = "divide_api"
-    help_description: str = (
-        "If it's true, it would divide the setting values of mocked API section " "(mocked_apis.apis.<mock API>)."
-    )
-    action: str = "store_true"
-    option_value_type: Optional[type] = None
-    default_value: bool = False
-
-
-class AddDivideHttp(BaseSubCmdAddOption):
-    cli_option: str = "--divide-http"
-    name: str = "divide_http"
-    help_description: str = (
-        "If it's true, it would divide the setting values of HTTP part section " "(mocked_apis.apis.<mock API>.http)."
-    )
-    action: str = "store_true"
-    option_value_type: Optional[type] = None
-    default_value: bool = False
-
-
-class AddDivideHttpRequest(BaseSubCmdAddOption):
-    cli_option: str = "--divide-http-request"
-    name: str = "divide_http_request"
-    help_description: str = (
-        "If it's true, it would divide the setting values of HTTP request part section "
-        "(mocked_apis.apis.<mock API>.http.request)."
-    )
-    action: str = "store_true"
-    option_value_type: Optional[type] = None
-    default_value: bool = False
-
-
-class AddDivideHttpResponse(BaseSubCmdAddOption):
-    cli_option: str = "--divide-http-response"
-    name: str = "divide_http_response"
-    help_description: str = (
-        "If it's true, it would divide the setting values of HTTP response part section "
-        "(mocked_apis.apis.<mock API>.http.response)."
-    )
-    action: str = "store_true"
-    option_value_type: Optional[type] = None
-    default_value: bool = False
 
 
 class ConfigPath(BaseSubCmdCheckOption):
