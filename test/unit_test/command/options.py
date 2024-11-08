@@ -5,11 +5,8 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from pymock_server.command.options import (
-    BaseCmdOption,
-    MockAPICommandParser,
-    make_options,
-)
+from pymock_server.command._parser import MockAPICommandParser
+from pymock_server.command.options import BaseCmdOption, make_options
 
 
 def test_make_options():

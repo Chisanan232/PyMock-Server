@@ -17,8 +17,8 @@ from pymock_server.model import (
 )
 from pymock_server.model.subcmd_common import SysArg
 
+from ._parser import MockAPICommandParser
 from .component import BaseSubCmdComponent, NoSubCmdComponent
-from .options import MockAPICommandParser
 from .rest_server import SubCmdRestServerComponent
 from .rest_server.add import SubCmdAddComponent
 from .rest_server.check import SubCmdCheckComponent
