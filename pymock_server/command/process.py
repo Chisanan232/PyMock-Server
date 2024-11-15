@@ -1,9 +1,7 @@
-import logging
-import sys
 from argparse import ArgumentParser
 from typing import List, Optional
 
-from pymock_server.model import ParserArguments, SubcmdSampleArguments, deserialize_args
+from pymock_server.model import ParserArguments
 from pymock_server.model.subcmd_common import SysArg
 
 from ._base_process import BaseCommandProcessor, CommandProcessChain, CommandProcessor
@@ -16,11 +14,8 @@ from .rest_server.get.process import import_process as import_get_process
 from .rest_server.process import import_option
 from .rest_server.pull.process import import_process as import_pull_process
 from .rest_server.run.process import import_process as import_run_process
-from .rest_server.sample.component import SubCmdSampleComponent
+from .rest_server.sample.process import import_process as import_sample_process
 from .subcommand import SubCommandLine
-
-logger = logging.getLogger(__name__)
-
 
 # FIXME: Please use more clear and beautiful implementation to apply the command line options
 import_option()
@@ -29,6 +24,7 @@ import_check_process()
 import_get_process()
 import_pull_process()
 import_run_process()
+import_sample_process()
 
 
 def dispatch_command_processor() -> "CommandProcessor":
@@ -64,22 +60,3 @@ class NoSubCmd(BaseCommandProcessor):
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         return self._parse_cmd_arguments(parser, cmd_args)
-
-
-class SubCmdSample(BaseCommandProcessor):
-    responsible_subcommand: SysArg = SysArg(
-        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
-        subcmd=SubCommandLine.Sample,
-    )
-
-    @property
-    def _subcmd_component(self) -> SubCmdSampleComponent:
-        return SubCmdSampleComponent()
-
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdSampleArguments:
-        cmd_options = self._parse_cmd_arguments(parser, cmd_args)
-        try:
-            return deserialize_args.subcmd_sample(cmd_options)
-        except KeyError:
-            logger.error(f"❌  Invalid value of option *--sample-config-type*: {cmd_options.sample_config_type}.")
-            sys.exit(1)
