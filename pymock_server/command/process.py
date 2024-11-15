@@ -5,7 +5,6 @@ from typing import List, Optional
 
 from pymock_server.model import (
     ParserArguments,
-    SubcmdPullArguments,
     SubcmdRunArguments,
     SubcmdSampleArguments,
     deserialize_args,
@@ -20,7 +19,7 @@ from .rest_server.add.process import import_add_process
 from .rest_server.check.process import import_process as import_check_process
 from .rest_server.get.process import import_process as import_get_process
 from .rest_server.process import import_option
-from .rest_server.pull.component import SubCmdPullComponent
+from .rest_server.pull.process import import_process as import_pull_process
 from .rest_server.run import SubCmdRunComponent
 from .rest_server.sample.component import SubCmdSampleComponent
 from .subcommand import SubCommandLine
@@ -33,6 +32,7 @@ import_option()
 import_add_process()
 import_check_process()
 import_get_process()
+import_pull_process()
 
 
 def dispatch_command_processor() -> "CommandProcessor":
@@ -101,17 +101,3 @@ class SubCmdSample(BaseCommandProcessor):
         except KeyError:
             logger.error(f"❌  Invalid value of option *--sample-config-type*: {cmd_options.sample_config_type}.")
             sys.exit(1)
-
-
-class SubCmdPull(BaseCommandProcessor):
-    responsible_subcommand: SysArg = SysArg(
-        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
-        subcmd=SubCommandLine.Pull,
-    )
-
-    @property
-    def _subcmd_component(self) -> SubCmdPullComponent:
-        return SubCmdPullComponent()
-
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdPullArguments:
-        return deserialize_args.subcmd_pull(self._parse_cmd_arguments(parser, cmd_args))
