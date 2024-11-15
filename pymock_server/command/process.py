@@ -5,7 +5,6 @@ from typing import List, Optional
 
 from pymock_server.model import (
     ParserArguments,
-    SubcmdCheckArguments,
     SubcmdGetArguments,
     SubcmdPullArguments,
     SubcmdRunArguments,
@@ -17,7 +16,7 @@ from pymock_server.model.subcmd_common import SysArg
 from ._base_process import BaseCommandProcessor, CommandProcessChain, CommandProcessor
 from .component import NoSubCmdComponent
 from .rest_server.add.process import import_add_process
-from .rest_server.check import SubCmdCheckComponent
+from .rest_server.check.process import import_process as import_check_process
 from .rest_server.get import SubCmdGetComponent
 from .rest_server.process import import_option
 from .rest_server.pull.component import SubCmdPullComponent
@@ -31,6 +30,7 @@ logger = logging.getLogger(__name__)
 # FIXME: Please use more clear and beautiful implementation to apply the command line options
 import_option()
 import_add_process()
+import_check_process()
 
 
 def dispatch_command_processor() -> "CommandProcessor":
@@ -80,20 +80,6 @@ class SubCmdRun(BaseCommandProcessor):
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdRunArguments:
         return deserialize_args.subcmd_run(self._parse_cmd_arguments(parser, cmd_args))
-
-
-class SubCmdCheck(BaseCommandProcessor):
-    responsible_subcommand: SysArg = SysArg(
-        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
-        subcmd=SubCommandLine.Check,
-    )
-
-    @property
-    def _subcmd_component(self) -> SubCmdCheckComponent:
-        return SubCmdCheckComponent()
-
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdCheckArguments:
-        return deserialize_args.subcmd_check(self._parse_cmd_arguments(parser, cmd_args))
 
 
 class SubCmdGet(BaseCommandProcessor):

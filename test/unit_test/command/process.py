@@ -64,7 +64,6 @@ from pymock_server.command._base_process import BaseCommandProcessor
 from pymock_server.command.options import get_all_subcommands
 from pymock_server.command.process import (
     NoSubCmd,
-    SubCmdCheck,
     SubCmdGet,
     SubCmdPull,
     SubCmdRun,
@@ -73,6 +72,7 @@ from pymock_server.command.process import (
     run_command_chain,
 )
 from pymock_server.command.rest_server.add.process import SubCmdAdd
+from pymock_server.command.rest_server.check.process import SubCmdCheck
 from pymock_server.command.subcommand import SubCommandLine
 from pymock_server.model import (
     ParserArguments,
