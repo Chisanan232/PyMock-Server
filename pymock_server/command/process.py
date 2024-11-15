@@ -3,12 +3,7 @@ import sys
 from argparse import ArgumentParser
 from typing import List, Optional
 
-from pymock_server.model import (
-    ParserArguments,
-    SubcmdRunArguments,
-    SubcmdSampleArguments,
-    deserialize_args,
-)
+from pymock_server.model import ParserArguments, SubcmdSampleArguments, deserialize_args
 from pymock_server.model.subcmd_common import SysArg
 
 from ._base_process import BaseCommandProcessor, CommandProcessChain, CommandProcessor
@@ -20,7 +15,7 @@ from .rest_server.check.process import import_process as import_check_process
 from .rest_server.get.process import import_process as import_get_process
 from .rest_server.process import import_option
 from .rest_server.pull.process import import_process as import_pull_process
-from .rest_server.run import SubCmdRunComponent
+from .rest_server.run.process import import_process as import_run_process
 from .rest_server.sample.component import SubCmdSampleComponent
 from .subcommand import SubCommandLine
 
@@ -33,6 +28,7 @@ import_add_process()
 import_check_process()
 import_get_process()
 import_pull_process()
+import_run_process()
 
 
 def dispatch_command_processor() -> "CommandProcessor":
@@ -68,20 +64,6 @@ class NoSubCmd(BaseCommandProcessor):
 
     def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         return self._parse_cmd_arguments(parser, cmd_args)
-
-
-class SubCmdRun(BaseCommandProcessor):
-    responsible_subcommand: SysArg = SysArg(
-        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
-        subcmd=SubCommandLine.Run,
-    )
-
-    @property
-    def _subcmd_component(self) -> SubCmdRunComponent:
-        return SubCmdRunComponent()
-
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdRunArguments:
-        return deserialize_args.subcmd_run(self._parse_cmd_arguments(parser, cmd_args))
 
 
 class SubCmdSample(BaseCommandProcessor):
