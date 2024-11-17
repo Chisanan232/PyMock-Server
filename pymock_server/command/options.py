@@ -61,11 +61,11 @@ logger = logging.getLogger(__name__)
 # import_pull_options()
 # import_sample_options()
 
-_Subcommand_Interface: List[str] = ["rest-server"]
+_Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 
 
 def import_subcommand_option() -> None:
-    for subcmd_inf in list(map(lambda e: e.replace("-", "_"), _Subcommand_Interface)):
+    for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
         current_module_parent_path = pathlib.Path(__file__).parent.absolute()
         subcmd_inf_pkg_path = pathlib.Path(current_module_parent_path, subcmd_inf, "**")
         for subcmd_dir in glob.glob(str(subcmd_inf_pkg_path)):
