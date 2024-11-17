@@ -66,8 +66,8 @@ _Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 
 def import_subcommand_option() -> None:
     for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
-        current_module_parent_path = pathlib.Path(__file__).parent.absolute()
-        subcmd_inf_pkg_path = pathlib.Path(current_module_parent_path, subcmd_inf, "**")
+        cmd_module_path = pathlib.Path(__file__).parent.absolute()
+        subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "**")
         for subcmd_dir in glob.glob(str(subcmd_inf_pkg_path)):
             if os.path.isdir(subcmd_dir):
                 subcmd_options_module = pathlib.Path(f"{subcmd_dir}", "options.py")
