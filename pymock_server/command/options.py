@@ -20,26 +20,6 @@ import pathlib
 from typing import Any, List
 
 from pymock_server.__pkg_info__ import __version__
-
-# NOTE: Just for importing the command line options, do nothing in this module
-# from pymock_server.command.rest_server.add.options import (
-#     import_option as import_add_options,
-# )
-# from pymock_server.command.rest_server.check.options import (
-#     import_option as import_check_options,
-# )
-# from pymock_server.command.rest_server.get.options import (
-#     import_option as import_get_options,
-# )
-# from pymock_server.command.rest_server.pull.options import (
-#     import_option as import_pull_options,
-# )
-# from pymock_server.command.rest_server.run.options import (
-#     import_option as import_run_options,
-# )
-# from pymock_server.command.rest_server.sample.options import (
-#     import_option as import_sample_options,
-# )
 from pymock_server.model.subcmd_common import SubCommandAttr
 
 from ._base_options import (
@@ -51,15 +31,6 @@ from ._base_options import (
 from .subcommand import SubCommandLine, SubCommandSection
 
 logger = logging.getLogger(__name__)
-
-
-# FIXME: Please use more clear and beautiful implementation to apply the command line options
-# import_run_options()
-# import_add_options()
-# import_check_options()
-# import_get_options()
-# import_pull_options()
-# import_sample_options()
 
 _Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 
