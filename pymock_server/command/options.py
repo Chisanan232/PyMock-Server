@@ -13,29 +13,13 @@ briefly, It has below major features:
 """
 
 import argparse
+import glob
+import logging
+import os
+import pathlib
 from typing import Any, List
 
 from pymock_server.__pkg_info__ import __version__
-
-# NOTE: Just for importing the command line options, do nothing in this module
-from pymock_server.command.rest_server.add.options import (
-    import_option as import_add_options,
-)
-from pymock_server.command.rest_server.check.options import (
-    import_option as import_check_options,
-)
-from pymock_server.command.rest_server.get.options import (
-    import_option as import_get_options,
-)
-from pymock_server.command.rest_server.pull.options import (
-    import_option as import_pull_options,
-)
-from pymock_server.command.rest_server.run.options import (
-    import_option as import_run_options,
-)
-from pymock_server.command.rest_server.sample.options import (
-    import_option as import_sample_options,
-)
 from pymock_server.model.subcmd_common import SubCommandAttr
 
 from ._base_options import (
@@ -46,13 +30,29 @@ from ._base_options import (
 )
 from .subcommand import SubCommandLine, SubCommandSection
 
-# FIXME: Please use more clear and beautiful implementation to apply the command line options
-import_run_options()
-import_add_options()
-import_check_options()
-import_get_options()
-import_pull_options()
-import_sample_options()
+logger = logging.getLogger(__name__)
+
+_Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
+
+
+def import_subcommand_option() -> None:
+    for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
+        cmd_module_path = pathlib.Path(__file__).parent.absolute()
+        subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "**")
+        for subcmd_dir in glob.glob(str(subcmd_inf_pkg_path)):
+            if os.path.isdir(subcmd_dir):
+                subcmd_options_module = pathlib.Path(f"{subcmd_dir}", "options.py")
+                if os.path.exists(str(subcmd_options_module)):
+                    # convert the file path as Python importing
+                    import_style = str(subcmd_options_module).replace(".py", "").replace("/", ".")
+                    lib_name = "pymock_server"
+                    subcmd_sub_pkg_name = pathlib.Path(subcmd_dir).name
+                    import_abs_path = ".".join([lib_name, import_style.split(f"{lib_name}.")[1]])
+                    subcmd_option_obj = f"SubCommand{subcmd_sub_pkg_name[0].upper() + subcmd_sub_pkg_name[1:]}Option"
+                    exec(f"from {import_abs_path} import {subcmd_option_obj}")
+
+
+import_subcommand_option()
 
 """
 Common functon about command line option

@@ -6,12 +6,6 @@ from pymock_server.command.subcommand import SubCommandLine
 from pymock_server.model.subcmd_common import SubParserAttr
 
 
-# FIXME: Please remove this function after using more clear and beautiful implementation to apply the command line
-#  options
-def import_option() -> None:
-    pass
-
-
 class SubCommandRunOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommandLine.Run,
