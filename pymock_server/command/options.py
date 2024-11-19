@@ -19,14 +19,15 @@ import pathlib
 from typing import Any, List
 
 from pymock_server.__pkg_info__ import __version__
-from pymock_server.command._base.options import (
+from pymock_server.model.subcmd_common import SubCommandAttr
+
+from ._base import BaseAutoLoad
+from ._base.options import (
     CommandLineOptions,
     CommandOption,
     MetaCommandOption,
     SubCommandInterface,
 )
-from pymock_server.model.subcmd_common import SubCommandAttr
-
 from .subcommand import SubCommandLine, SubCommandSection
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ logger = logging.getLogger(__name__)
 _Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 
 
-class AutoLoadOptions:
+class AutoLoadOptions(BaseAutoLoad):
     @staticmethod
     def import_all() -> None:
         for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):

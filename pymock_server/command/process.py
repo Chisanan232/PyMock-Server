@@ -4,21 +4,18 @@ import pathlib
 from argparse import ArgumentParser
 from typing import List, Optional
 
-from pymock_server.command._base.process import (
-    BaseCommandProcessor,
-    CommandProcessChain,
-    CommandProcessor,
-)
 from pymock_server.model import ParserArguments
 from pymock_server.model.subcmd_common import SysArg
 
+from ._base import BaseAutoLoad
+from ._base.process import BaseCommandProcessor, CommandProcessChain, CommandProcessor
 from .component import NoSubCmdComponent
 from .subcommand import SubCommandLine
 
 _Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 
 
-class AutoLoadProcessor:
+class AutoLoadProcessor(BaseAutoLoad):
     @staticmethod
     def import_all() -> None:
         for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
