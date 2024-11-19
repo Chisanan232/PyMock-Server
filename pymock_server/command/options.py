@@ -39,13 +39,17 @@ class AutoLoadOptions(BaseAutoLoad):
     _current_module: str = __file__
 
     @classmethod
-    def _to_subcmd_object(cls, subcmd_option_module_file_path: str) -> str:
-        return f"SubCommand{cls._to_camel_case(subcmd_option_module_file_path)}Option"
+    def _wrap_as_object_name(cls, subcmd_object: str) -> str:
+        return f"SubCommand{subcmd_object}Option"
 
     @classmethod
-    def _to_camel_case(cls, subcmd_option_module_file_path: str) -> str:
-        subcmd_sub_pkg_name = pathlib.Path(subcmd_option_module_file_path).parent.name
-        return subcmd_sub_pkg_name[0].upper() + subcmd_sub_pkg_name[1:]
+    def _to_subcmd_object(cls, subcmd_module_file_path: str) -> str:
+        subcmd_dir = pathlib.Path(subcmd_module_file_path).parent.name
+        subcmd_sub_pkg_name_parts = subcmd_dir.split("_")
+        subcmd_option_obj: str = ""
+        for part in subcmd_sub_pkg_name_parts:
+            subcmd_option_obj += part[0].upper() + part[1:]
+        return subcmd_option_obj
 
 
 AutoLoadOptions.import_all()

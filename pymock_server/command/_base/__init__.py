@@ -22,7 +22,7 @@ class BaseAutoLoad(metaclass=ABCMeta):
                 # module path
                 import_abs_path = cls._to_import_module_path(subcmd_option_module_file_path)
                 # option object
-                subcmd_option_obj = cls._to_subcmd_object(subcmd_option_module_file_path)
+                subcmd_option_obj = cls._wrap_as_object_name(cls._to_subcmd_object(subcmd_option_module_file_path))
 
                 # import the option object by the module path
                 exec(f"from {import_abs_path} import {subcmd_option_obj}")
@@ -43,5 +43,10 @@ class BaseAutoLoad(metaclass=ABCMeta):
 
     @classmethod
     @abstractmethod
-    def _to_subcmd_object(cls, subcmd_option_module_file_path: str) -> str:
+    def _wrap_as_object_name(cls, subcmd_object: str) -> str:
+        pass
+
+    @classmethod
+    @abstractmethod
+    def _to_subcmd_object(cls, subcmd_module_file_path: str) -> str:
         pass
