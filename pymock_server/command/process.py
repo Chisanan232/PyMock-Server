@@ -16,12 +16,11 @@ class AutoLoadProcessor(BaseAutoLoad):
     py_module: str = "process.py"
     _current_module: str = __file__
 
-    @classmethod
-    def _wrap_as_object_name(cls, subcmd_object: str) -> str:
+    def _wrap_as_object_name(self, subcmd_object: str) -> str:
         return f"SubCmd{subcmd_object}"
 
 
-AutoLoadProcessor.import_all()
+AutoLoadProcessor().import_all()
 
 
 def dispatch_command_processor() -> "CommandProcessor":

@@ -37,12 +37,11 @@ class AutoLoadOptions(BaseAutoLoad):
     py_module: str = "options.py"
     _current_module: str = __file__
 
-    @classmethod
-    def _wrap_as_object_name(cls, subcmd_object: str) -> str:
+    def _wrap_as_object_name(self, subcmd_object: str) -> str:
         return f"SubCommand{subcmd_object}Option"
 
 
-AutoLoadOptions.import_all()
+AutoLoadOptions().import_all()
 
 """
 Common functon about command line option
