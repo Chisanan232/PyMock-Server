@@ -34,7 +34,6 @@ _Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 
 
 class AutoLoadOptions(BaseAutoLoad):
-    py_module: str = "options.py"
     _current_module: str = __file__
 
     def _wrap_as_object_name(self, subcmd_object: str) -> str:
