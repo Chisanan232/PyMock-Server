@@ -3,11 +3,12 @@ from argparse import ArgumentParser, Namespace
 from typing import List, Optional, Tuple, Type
 
 from pymock_server.command._parser import MockAPICommandParser
-from pymock_server.command.component import BaseSubCmdComponent
 from pymock_server.command.subcommand import SubCommandLine
 from pymock_server.log import init_logger_config
 from pymock_server.model import ParserArguments, deserialize_args
 from pymock_server.model.subcmd_common import SysArg
+
+from .component import BaseSubCmdComponent
 
 _COMMAND_CHAIN: List[Type["CommandProcessor"]] = []
 

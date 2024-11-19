@@ -3,8 +3,8 @@ import os
 import sys
 from argparse import ArgumentParser
 
+from pymock_server.command._base.component import BaseSubCmdComponent
 from pymock_server.command._common.component import SavingConfigComponent
-from pymock_server.command.component import BaseSubCmdComponent
 from pymock_server.model import (
     APIConfig,
     BaseConfig,

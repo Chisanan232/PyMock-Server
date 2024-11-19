@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 from typing import Any, Optional
 
 from pymock_server._utils.api_client import URLLibHTTPClient
-from pymock_server.command.component import BaseSubCmdComponent
+from pymock_server.command._base.component import BaseSubCmdComponent
 from pymock_server.model import (
     APIConfig,
     BaseAPIDocumentConfig,
