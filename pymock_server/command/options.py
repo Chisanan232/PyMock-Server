@@ -14,7 +14,6 @@ briefly, It has below major features:
 
 import argparse
 import logging
-import pathlib
 from typing import Any, List
 
 from pymock_server.__pkg_info__ import __version__
@@ -41,15 +40,6 @@ class AutoLoadOptions(BaseAutoLoad):
     @classmethod
     def _wrap_as_object_name(cls, subcmd_object: str) -> str:
         return f"SubCommand{subcmd_object}Option"
-
-    @classmethod
-    def _to_subcmd_object(cls, subcmd_module_file_path: str) -> str:
-        subcmd_dir = pathlib.Path(subcmd_module_file_path).parent.name
-        subcmd_sub_pkg_name_parts = subcmd_dir.split("_")
-        subcmd_option_obj: str = ""
-        for part in subcmd_sub_pkg_name_parts:
-            subcmd_option_obj += part[0].upper() + part[1:]
-        return subcmd_option_obj
 
 
 AutoLoadOptions.import_all()

@@ -47,6 +47,10 @@ class BaseAutoLoad(metaclass=ABCMeta):
         pass
 
     @classmethod
-    @abstractmethod
     def _to_subcmd_object(cls, subcmd_module_file_path: str) -> str:
-        pass
+        subcmd_dir = pathlib.Path(subcmd_module_file_path).parent.name
+        subcmd_sub_pkg_name_parts = subcmd_dir.split("_")
+        subcmd_option_obj: str = ""
+        for part in subcmd_sub_pkg_name_parts:
+            subcmd_option_obj += part[0].upper() + part[1:]
+        return subcmd_option_obj
