@@ -27,15 +27,19 @@ class AutoLoadProcessor(BaseAutoLoad):
                 import_abs_path = cls._to_import_module_path(subcmd_ps_module_file_path)
 
                 # object
-                subcmd_dir = pathlib.Path(subcmd_ps_module_file_path).parent.name
-                subcmd_sub_pkg_name = pathlib.Path(subcmd_dir).name
-                subcmd_sub_pkg_name_parts = subcmd_sub_pkg_name.split("_")
-                subcmd_option_obj: str = "SubCmd"
-                for part in subcmd_sub_pkg_name_parts:
-                    subcmd_option_obj += part[0].upper() + part[1:]
+                subcmd_option_obj = cls._to_subcmd_object(subcmd_ps_module_file_path)
 
                 # import the object from the module path
                 exec(f"from {import_abs_path} import {subcmd_option_obj}")
+
+    @classmethod
+    def _to_subcmd_object(cls, subcmd_ps_module_file_path: str) -> str:
+        subcmd_dir = pathlib.Path(subcmd_ps_module_file_path).parent.name
+        subcmd_sub_pkg_name_parts = subcmd_dir.split("_")
+        subcmd_option_obj: str = "SubCmd"
+        for part in subcmd_sub_pkg_name_parts:
+            subcmd_option_obj += part[0].upper() + part[1:]
+        return subcmd_option_obj
 
     @classmethod
     def _to_import_module_path(cls, subcmd_ps_module_file_path: str) -> str:

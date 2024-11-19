@@ -47,11 +47,19 @@ class AutoLoadOptions(BaseAutoLoad):
                 import_abs_path = cls._to_import_module_path(subcmd_option_module_file_path)
 
                 # option object
-                subcmd_sub_pkg_name = pathlib.Path(subcmd_option_module_file_path).parent.name
-                subcmd_option_obj = f"SubCommand{subcmd_sub_pkg_name[0].upper() + subcmd_sub_pkg_name[1:]}Option"
+                subcmd_option_obj = cls._to_subcmd_object(subcmd_option_module_file_path)
 
                 # import the option object by the module path
                 exec(f"from {import_abs_path} import {subcmd_option_obj}")
+
+    @classmethod
+    def _to_subcmd_object(cls, subcmd_option_module_file_path: str) -> str:
+        return f"SubCommand{cls._to_camel_case(subcmd_option_module_file_path)}Option"
+
+    @classmethod
+    def _to_camel_case(cls, subcmd_option_module_file_path: str) -> str:
+        subcmd_sub_pkg_name = pathlib.Path(subcmd_option_module_file_path).parent.name
+        return subcmd_sub_pkg_name[0].upper() + subcmd_sub_pkg_name[1:]
 
     @classmethod
     def _to_import_module_path(cls, subcmd_option_module_file_path: str) -> str:
