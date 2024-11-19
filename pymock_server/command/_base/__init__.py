@@ -5,7 +5,7 @@ from typing import List
 
 from pymock_server.command.subcommand import SubCommandLine
 
-_Major_Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
+_Major_Subcommand_Interface: List[SubCommandLine] = SubCommandLine.major_cli()
 
 
 class BaseAutoLoad(metaclass=ABCMeta):
