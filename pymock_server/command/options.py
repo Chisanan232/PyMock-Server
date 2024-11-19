@@ -19,14 +19,14 @@ import pathlib
 from typing import Any, List
 
 from pymock_server.__pkg_info__ import __version__
-from pymock_server.model.subcmd_common import SubCommandAttr
-
-from ._base_options import (
+from pymock_server.command._base._base_options import (
     CommandLineOptions,
     CommandOption,
     MetaCommandOption,
     SubCommandInterface,
 )
+from pymock_server.model.subcmd_common import SubCommandAttr
+
 from .subcommand import SubCommandLine, SubCommandSection
 
 logger = logging.getLogger(__name__)
