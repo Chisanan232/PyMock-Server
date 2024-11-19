@@ -2,7 +2,7 @@ import argparse
 import sys
 from typing import Any, Dict, List, Optional
 
-from pymock_server.command._base._base_options import CommandOption
+from pymock_server.command._base.options import CommandOption
 from pymock_server.model.subcmd_common import SysArg
 
 from .options import get_all_subcommands, make_options

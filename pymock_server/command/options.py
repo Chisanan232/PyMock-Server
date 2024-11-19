@@ -19,7 +19,7 @@ import pathlib
 from typing import Any, List
 
 from pymock_server.__pkg_info__ import __version__
-from pymock_server.command._base._base_options import (
+from pymock_server.command._base.options import (
     CommandLineOptions,
     CommandOption,
     MetaCommandOption,

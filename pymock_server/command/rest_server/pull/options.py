@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pymock_server.command._base._base_options import MetaCommandOption
+from pymock_server.command._base.options import MetaCommandOption
 from pymock_server.command.rest_server.option import BaseSubCommandRestServer
 from pymock_server.command.subcommand import SubCommandLine
 from pymock_server.model.subcmd_common import SubParserAttr

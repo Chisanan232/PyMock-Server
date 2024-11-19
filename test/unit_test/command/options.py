@@ -56,7 +56,7 @@ class TestCommandOption:
         assert re.search(r"\*cli_option\* cannot be None or empty value", str(exc_info), re.IGNORECASE)
 
         # Remove the invalid option object of the list to let test could be run finely.
-        from pymock_server.command._base._base_options import CommandLineOptions
+        from pymock_server.command._base.options import CommandLineOptions
 
         CommandLineOptions.pop(-1)
 
