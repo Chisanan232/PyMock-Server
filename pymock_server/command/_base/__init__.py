@@ -10,9 +10,8 @@ _Major_Subcommand_Interface: List[SubCommandLine] = SubCommandLine.major_cli()
 
 class BaseAutoLoad(metaclass=ABCMeta):
     @property
-    @abstractmethod
     def py_module(self) -> str:
-        pass
+        return pathlib.Path(self._current_module).name
 
     @property
     @abstractmethod
