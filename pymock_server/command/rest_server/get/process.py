@@ -9,12 +9,6 @@ from pymock_server.model.subcmd_common import SysArg
 from .component import SubCmdGetComponent
 
 
-# FIXME: Please remove this function after using more clear and beautiful implementation to apply the command line
-#  options
-def import_process() -> None:
-    pass
-
-
 class SubCmdGet(BaseCommandProcessor):
     responsible_subcommand: SysArg = SysArg(
         pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),

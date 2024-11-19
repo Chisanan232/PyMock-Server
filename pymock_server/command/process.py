@@ -9,25 +9,7 @@ from pymock_server.model.subcmd_common import SysArg
 
 from ._base_process import BaseCommandProcessor, CommandProcessChain, CommandProcessor
 from .component import NoSubCmdComponent
-
-# FIXME: Please remove below imports after refactoring done
-# from .rest_server.add.process import import_add_process
-# from .rest_server.check.process import import_process as import_check_process
-# from .rest_server.get.process import import_process as import_get_process
-# from .rest_server.process import import_option
-# from .rest_server.pull.process import import_process as import_pull_process
-# from .rest_server.run.process import import_process as import_run_process
-# from .rest_server.sample.process import import_process as import_sample_process
 from .subcommand import SubCommandLine
-
-# FIXME: Please use more clear and beautiful implementation to apply the command line options
-# import_option()
-# import_add_process()
-# import_check_process()
-# import_get_process()
-# import_pull_process()
-# import_run_process()
-# import_sample_process()
 
 _Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 

@@ -13,12 +13,6 @@ from .component import SubCmdSampleComponent
 logger = logging.getLogger(__name__)
 
 
-# FIXME: Please remove this function after using more clear and beautiful implementation to apply the command line
-#  options
-def import_process() -> None:
-    pass
-
-
 class SubCmdSample(BaseCommandProcessor):
     responsible_subcommand: SysArg = SysArg(
         pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
