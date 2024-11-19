@@ -1,5 +1,4 @@
 import glob
-import os
 import pathlib
 from argparse import ArgumentParser
 from typing import List, Optional
@@ -19,23 +18,22 @@ def import_subcommand_processor() -> None:
         cmd_module_path = pathlib.Path(__file__).parent.absolute()
         subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "**", "process.py")
         for subcmd_ps_module in glob.glob(str(subcmd_inf_pkg_path), recursive=True):
-            if os.path.exists(subcmd_ps_module):
-                # convert the file path as Python importing
-                # module path
-                import_style = subcmd_ps_module.replace(".py", "").replace("/", ".")
-                lib_name = "pymock_server"
-                import_abs_path = ".".join([lib_name, import_style.split(f"{lib_name}.")[1]])
+            # convert the file path as Python importing
+            # module path
+            import_style = subcmd_ps_module.replace(".py", "").replace("/", ".")
+            lib_name = "pymock_server"
+            import_abs_path = ".".join([lib_name, import_style.split(f"{lib_name}.")[1]])
 
-                # object
-                subcmd_dir = pathlib.Path(subcmd_ps_module).parent.name
-                subcmd_sub_pkg_name = pathlib.Path(subcmd_dir).name
-                subcmd_sub_pkg_name_parts = subcmd_sub_pkg_name.split("_")
-                subcmd_option_obj: str = "SubCmd"
-                for part in subcmd_sub_pkg_name_parts:
-                    subcmd_option_obj += part[0].upper() + part[1:]
+            # object
+            subcmd_dir = pathlib.Path(subcmd_ps_module).parent.name
+            subcmd_sub_pkg_name = pathlib.Path(subcmd_dir).name
+            subcmd_sub_pkg_name_parts = subcmd_sub_pkg_name.split("_")
+            subcmd_option_obj: str = "SubCmd"
+            for part in subcmd_sub_pkg_name_parts:
+                subcmd_option_obj += part[0].upper() + part[1:]
 
-                # import the object from the module path
-                exec(f"from {import_abs_path} import {subcmd_option_obj}")
+            # import the object from the module path
+            exec(f"from {import_abs_path} import {subcmd_option_obj}")
 
 
 import_subcommand_processor()
