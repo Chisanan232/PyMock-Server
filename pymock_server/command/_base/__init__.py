@@ -5,7 +5,7 @@ from typing import List
 
 from pymock_server.command.subcommand import SubCommandLine
 
-_Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
+_Major_Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 
 
 class BaseAutoLoad(metaclass=ABCMeta):
@@ -20,7 +20,7 @@ class BaseAutoLoad(metaclass=ABCMeta):
         pass
 
     def import_all(self) -> None:
-        for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
+        for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Major_Subcommand_Interface)):
             subcmd_inf_pkg_path = self._regex_module_paths(subcmd_inf)
             for subcmd_prop_module_file_path in glob.glob(str(subcmd_inf_pkg_path), recursive=True):
                 # convert the file path as Python importing
