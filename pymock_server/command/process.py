@@ -4,7 +4,7 @@ import pathlib
 from argparse import ArgumentParser
 from typing import List, Optional
 
-from pymock_server.command._base._base_process import (
+from pymock_server.command._base.process import (
     BaseCommandProcessor,
     CommandProcessChain,
     CommandProcessor,
