@@ -15,11 +15,14 @@ _Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 
 
 class AutoLoadProcessor(BaseAutoLoad):
-    @staticmethod
-    def import_all() -> None:
+    py_module: str = "process.py"
+
+    @classmethod
+    def import_all(cls) -> None:
         for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
             cmd_module_path = pathlib.Path(__file__).parent.absolute()
-            subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "**", "process.py")
+            assert cls.py_module, "Python module name must not be empty."
+            subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "**", cls.py_module)
             for subcmd_ps_module in glob.glob(str(subcmd_inf_pkg_path), recursive=True):
                 # convert the file path as Python importing
                 # module path

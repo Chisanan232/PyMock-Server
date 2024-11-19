@@ -36,11 +36,14 @@ _Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 
 
 class AutoLoadOptions(BaseAutoLoad):
-    @staticmethod
-    def import_all() -> None:
+    py_module: str = "options.py"
+
+    @classmethod
+    def import_all(cls) -> None:
         for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
             cmd_module_path = pathlib.Path(__file__).parent.absolute()
-            subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "*", "options.py")
+            assert cls.py_module, "Python module name must not be empty."
+            subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "*", cls.py_module)
             for subcmd_option_module in glob.glob(str(subcmd_inf_pkg_path), recursive=True):
                 # module path
                 import_style = str(subcmd_option_module).replace(".py", "").replace("/", ".")
