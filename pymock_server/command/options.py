@@ -41,9 +41,7 @@ class AutoLoadOptions(BaseAutoLoad):
     @classmethod
     def import_all(cls) -> None:
         for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
-            cmd_module_path = pathlib.Path(__file__).parent.absolute()
-            assert cls.py_module, "Python module name must not be empty."
-            subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "*", cls.py_module)
+            subcmd_inf_pkg_path = cls._regex_module_paths(subcmd_inf)
             for subcmd_option_module in glob.glob(str(subcmd_inf_pkg_path), recursive=True):
                 # module path
                 import_style = str(subcmd_option_module).replace(".py", "").replace("/", ".")
@@ -56,6 +54,13 @@ class AutoLoadOptions(BaseAutoLoad):
 
                 # import the option object by the module path
                 exec(f"from {import_abs_path} import {subcmd_option_obj}")
+
+    @classmethod
+    def _regex_module_paths(cls, subcmd_inf: str) -> pathlib.Path:
+        cmd_module_path = pathlib.Path(__file__).parent.absolute()
+        assert cls.py_module, "Python module name must not be empty."
+        subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "*", cls.py_module)
+        return subcmd_inf_pkg_path
 
 
 AutoLoadOptions.import_all()
