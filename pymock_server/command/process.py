@@ -21,15 +21,13 @@ class AutoLoadProcessor(BaseAutoLoad):
     def import_all(cls) -> None:
         for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
             subcmd_inf_pkg_path = cls._regex_module_paths(subcmd_inf)
-            for subcmd_ps_module in glob.glob(str(subcmd_inf_pkg_path), recursive=True):
+            for subcmd_ps_module_file_path in glob.glob(str(subcmd_inf_pkg_path), recursive=True):
                 # convert the file path as Python importing
                 # module path
-                import_style = subcmd_ps_module.replace(".py", "").replace("/", ".")
-                lib_name = "pymock_server"
-                import_abs_path = ".".join([lib_name, import_style.split(f"{lib_name}.")[1]])
+                import_abs_path = cls._to_import_module_path(subcmd_ps_module_file_path)
 
                 # object
-                subcmd_dir = pathlib.Path(subcmd_ps_module).parent.name
+                subcmd_dir = pathlib.Path(subcmd_ps_module_file_path).parent.name
                 subcmd_sub_pkg_name = pathlib.Path(subcmd_dir).name
                 subcmd_sub_pkg_name_parts = subcmd_sub_pkg_name.split("_")
                 subcmd_option_obj: str = "SubCmd"
@@ -40,10 +38,17 @@ class AutoLoadProcessor(BaseAutoLoad):
                 exec(f"from {import_abs_path} import {subcmd_option_obj}")
 
     @classmethod
+    def _to_import_module_path(cls, subcmd_ps_module_file_path: str) -> str:
+        import_style = subcmd_ps_module_file_path.replace(".py", "").replace("/", ".")
+        lib_name = "pymock_server"
+        import_abs_path = ".".join([lib_name, import_style.split(f"{lib_name}.")[1]])
+        return import_abs_path
+
+    @classmethod
     def _regex_module_paths(cls, subcmd_inf: str) -> pathlib.Path:
         cmd_module_path = pathlib.Path(__file__).parent.absolute()
         assert cls.py_module, "Python module name must not be empty."
-        subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "*", cls.py_module)
+        subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "**", cls.py_module)
         return subcmd_inf_pkg_path
 
 
