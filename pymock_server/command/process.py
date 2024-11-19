@@ -18,7 +18,7 @@ from .subcommand import SubCommandLine
 _Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 
 
-def import_subcommand_option() -> None:
+def import_subcommand_processor() -> None:
     for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
         cmd_module_path = pathlib.Path(__file__).parent.absolute()
         subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "**", "process.py")
@@ -42,7 +42,7 @@ def import_subcommand_option() -> None:
                 exec(f"from {import_abs_path} import {subcmd_option_obj}")
 
 
-import_subcommand_option()
+import_subcommand_processor()
 
 
 def dispatch_command_processor() -> "CommandProcessor":
