@@ -5,8 +5,6 @@ from unittest.mock import Mock, patch
 
 from yaml import dump
 
-from pymock_server.model.subcmd_common import SysArg
-
 try:
     from yaml import CDumper as Dumper
 except ImportError:
@@ -28,6 +26,7 @@ from pymock_server.command.rest_server.get.component import (
 )
 from pymock_server.model import MockAPI
 from pymock_server.model.cmd_args import SubcmdGetArguments
+from pymock_server.model.subcmd_common import SysArg
 
 
 class TestSubCmdGetComponent:
@@ -155,11 +154,11 @@ class DisplayFormatTestSpec(metaclass=ABCMeta):
         pass
 
     def test_format(self, formatter: _BaseDisplayFormat):
-        assert formatter.format == self._expected_format
+        assert formatter.format is self._expected_format
 
     @property
     @abstractmethod
-    def _expected_format(self) -> str:
+    def _expected_format(self) -> Format:
         pass
 
     def test_display(self, formatter: _BaseDisplayFormat):
@@ -183,7 +182,7 @@ class TestDisplayAsYamlFormat(DisplayFormatTestSpec):
         return DisplayAsYamlFormat()
 
     @property
-    def _expected_format(self) -> str:
+    def _expected_format(self) -> Format:
         return Format.YAML
 
     @property
@@ -197,7 +196,7 @@ class TestDisplayAsJsonFormat(DisplayFormatTestSpec):
         return DisplayAsJsonFormat()
 
     @property
-    def _expected_format(self) -> str:
+    def _expected_format(self) -> Format:
         return Format.JSON
 
     @property
