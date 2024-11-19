@@ -1,4 +1,3 @@
-import logging
 import re
 import sys
 from argparse import ArgumentParser, Namespace
@@ -29,8 +28,6 @@ from pymock_server.command.subcommand import SubCommandLine
 from pymock_server.model import ParserArguments, SubcmdRunArguments
 from pymock_server.model.subcmd_common import SysArg
 from pymock_server.server import Command, CommandOptions, WSGIServer
-
-logger = logging.getLogger(__name__)
 
 
 class FakeSubCommandLine(Enum):
