@@ -5,7 +5,6 @@ import os.path
 import pathlib
 import re
 import sys
-from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, Namespace
 from enum import Enum
 from typing import Callable, List, Optional, Type, Union
@@ -57,16 +56,13 @@ from test._values import (
     _Test_URL,
     _Workers_Amount,
 )
+from test.unit_test.command._base.process import BaseCommandProcessorTestSpec
 
 from pymock_server._utils.file import Format
 from pymock_server._utils.file.operation import YAML
 from pymock_server.command._base.process import BaseCommandProcessor
 from pymock_server.command.options import get_all_subcommands
-from pymock_server.command.process import (
-    NoSubCmd,
-    make_command_chain,
-    run_command_chain,
-)
+from pymock_server.command.process import NoSubCmd, make_command_chain
 from pymock_server.command.rest_server.add.process import SubCmdAdd
 from pymock_server.command.rest_server.check.process import SubCmdCheck
 from pymock_server.command.rest_server.get.process import SubCmdGet
@@ -244,63 +240,6 @@ class TestSubCmdProcessChain:
     def test_copy(self, mock_copy: Mock, cmd_processor: FakeCommandProcess):
         cmd_processor.copy()
         mock_copy.assert_called_once_with(cmd_processor)
-
-
-class BaseCommandProcessorTestSpec(metaclass=ABCMeta):
-    @pytest.fixture(scope="function")
-    @abstractmethod
-    def cmd_ps(self) -> BaseCommandProcessor:
-        pass
-
-    @pytest.fixture(scope="function")
-    def object_under_test(self, cmd_ps: BaseCommandProcessor) -> Callable:
-        return cmd_ps.process
-
-    @pytest.fixture(scope="function")
-    def entry_point_under_test(self) -> Callable:
-        return run_command_chain
-
-    def test_with_command_processor(self, object_under_test: Callable, **kwargs):
-        with patch.object(sys, "argv", self._given_command_line()):
-            kwargs["cmd_ps"] = object_under_test
-            self._test_process(**kwargs)
-
-    @abstractmethod
-    def _given_command_line(self) -> List[str]:
-        pass
-
-    def test_with_run_entry_point(self, entry_point_under_test: Callable, **kwargs):
-        with patch.object(sys, "argv", self._given_command_line()):
-            kwargs["cmd_ps"] = entry_point_under_test
-            self._test_process(**kwargs)
-
-    @abstractmethod
-    def _test_process(self, **kwargs):
-        pass
-
-    def test_parse(self, cmd_ps: BaseCommandProcessor):
-        args_namespace = self._given_cmd_args_namespace()
-        cmd_ps._parse_cmd_arguments = MagicMock(return_value=args_namespace)
-
-        api_parser = MagicMock()
-        api_parser.subcommand = self._given_subcmd()
-        cmd_ps.mock_api_parser = api_parser
-
-        arguments = cmd_ps.parse(parser=cmd_ps.mock_api_parser.parse(), cmd_args=None)
-
-        assert isinstance(arguments, self._expected_argument_type())
-
-    @abstractmethod
-    def _given_cmd_args_namespace(self) -> Namespace:
-        pass
-
-    @abstractmethod
-    def _given_subcmd(self) -> Optional[SysArg]:
-        pass
-
-    @abstractmethod
-    def _expected_argument_type(self) -> Type[Union[Namespace, ParserArguments]]:
-        pass
 
 
 class TestNoSubCmd(BaseCommandProcessorTestSpec):
