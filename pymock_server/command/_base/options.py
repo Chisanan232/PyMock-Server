@@ -4,13 +4,13 @@ import re
 from collections import namedtuple
 from typing import Any, List, Optional, Tuple
 
-from ..model.subcmd_common import (
+from pymock_server.command.subcommand import SubCommandLine, SubCommandSection
+from pymock_server.model.subcmd_common import (
     SubCmdParser,
     SubCmdParserAction,
     SubCommandAttr,
     SubParserAttr,
 )
-from .subcommand import SubCommandLine, SubCommandSection
 
 SUBCOMMAND: List[str] = [SubCommandLine.RestServer.value]
 COMMAND_OPTIONS: List["MetaCommandOption"] = []

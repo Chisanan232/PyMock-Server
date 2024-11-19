@@ -1,15 +1,9 @@
 from typing import List, Optional
 
-from pymock_server.command._base_options import MetaCommandOption
+from pymock_server.command._base.options import MetaCommandOption
 from pymock_server.command.rest_server.option import BaseSubCommandRestServer
 from pymock_server.command.subcommand import SubCommandLine
 from pymock_server.model.subcmd_common import SubParserAttr
-
-
-# FIXME: Please remove this function after using more clear and beautiful implementation to apply the command line
-#  options
-def import_option() -> None:
-    pass
 
 
 class SubCommandGetOption(BaseSubCommandRestServer):
