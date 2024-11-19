@@ -31,8 +31,6 @@ class CommandFunctionTestSpec(metaclass=ABCMeta):
 
     @classmethod
     def _should_contains_chars_in_result(cls, target: str, expected_char, translate: bool = True) -> None:
-        print(f"[DEBUG] expected_char: {expected_char}")
-        print(f"[DEBUG] target: {target}")
         if translate:
             assert re.search(re.escape(expected_char), target, re.IGNORECASE)
         else:
