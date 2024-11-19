@@ -9,10 +9,16 @@ _Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 
 
 class BaseAutoLoad(metaclass=ABCMeta):
-    py_module: str = ""
-    _current_module: str = ""
+    @property
+    @abstractmethod
+    def py_module(self) -> str:
+        pass
 
-    # @abstractmethod
+    @property
+    @abstractmethod
+    def _current_module(self) -> str:
+        pass
+
     def import_all(self) -> None:
         for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
             subcmd_inf_pkg_path = self._regex_module_paths(subcmd_inf)
@@ -28,7 +34,6 @@ class BaseAutoLoad(metaclass=ABCMeta):
 
     def _regex_module_paths(self, subcmd_inf: str) -> pathlib.Path:
         cmd_module_path = pathlib.Path(self._current_module).parent.absolute()
-        assert self.py_module, "Python module name must not be empty."
         subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "**", self.py_module)
         return subcmd_inf_pkg_path
 
