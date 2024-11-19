@@ -3,7 +3,7 @@ import re
 import sys
 from argparse import ArgumentParser, Namespace
 from enum import Enum
-from typing import Callable, List, Optional, Type, Union
+from typing import Callable, List, Optional, Type
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -16,33 +16,17 @@ except ImportError:
 from test._values import (
     SubCommand,
     _Bind_Host_And_Port,
-    _Cmd_Arg_API_Path,
-    _Cmd_Arg_HTTP_Method,
     _Log_Level,
-    _Sample_File_Path,
-    _Show_Detail_As_Format,
     _Test_Config,
-    _Test_HTTP_Method,
-    _Test_HTTP_Resp,
-    _Test_URL,
     _Workers_Amount,
 )
 from test.unit_test.command._base.process import BaseCommandProcessorTestSpec
 
-from pymock_server._utils.file import Format
-from pymock_server._utils.file.operation import YAML
 from pymock_server.command._base.process import BaseCommandProcessor
 from pymock_server.command.options import get_all_subcommands
 from pymock_server.command.process import NoSubCmd, make_command_chain
 from pymock_server.command.subcommand import SubCommandLine
-from pymock_server.model import (
-    ParserArguments,
-    SubcmdAddArguments,
-    SubcmdCheckArguments,
-    SubcmdGetArguments,
-    SubcmdRunArguments,
-)
-from pymock_server.model.api_config.apis import ResponseStrategy
+from pymock_server.model import ParserArguments, SubcmdRunArguments
 from pymock_server.model.subcmd_common import SysArg
 from pymock_server.server import Command, CommandOptions, WSGIServer
 
@@ -62,77 +46,21 @@ _No_SubCmd_Amt: int = 1
 _Fake_Amt: int = 1
 
 
-def _given_parser_args(
-    subcommand: str = None,
-    app_type: str = None,
-    config_path: str = None,
-    swagger_doc_url: str = None,
-    stop_if_fail: bool = True,
-    get_api_path: str = _Cmd_Arg_API_Path,
-) -> Union[SubcmdRunArguments, SubcmdAddArguments, SubcmdCheckArguments, SubcmdGetArguments, ParserArguments]:
-    if subcommand == "run":
-        return SubcmdRunArguments(
-            subparser_structure=SysArg.parse([SubCommand.RestServer, subcommand]),
-            app_type=app_type,
-            config=_Test_Config,
-            bind=_Bind_Host_And_Port.value,
-            workers=_Workers_Amount.value,
-            log_level=_Log_Level.value,
-        )
-    elif subcommand == "add":
-        return SubcmdAddArguments(
-            subparser_structure=SysArg.parse([SubCommand.RestServer, subcommand]),
-            config_path=_Sample_File_Path,
-            api_path=_Test_URL,
-            http_method=_Test_HTTP_Method,
-            parameters=[],
-            response_strategy=ResponseStrategy.STRING,
-            response_value=_Test_HTTP_Resp,
-            include_template_config=False,
-            base_file_path="./",
-            dry_run=False,
-            divide_api=False,
-            divide_http=False,
-            divide_http_request=False,
-            divide_http_response=False,
-        )
-    elif subcommand == "check":
-        return SubcmdCheckArguments(
-            subparser_structure=SysArg.parse([SubCommand.RestServer, subcommand]),
-            config_path=(config_path or _Test_Config),
-            swagger_doc_url=swagger_doc_url,
-            stop_if_fail=stop_if_fail,
-            check_api_path=True,
-            check_api_parameters=True,
-            check_api_http_method=True,
-        )
-    elif subcommand == "get":
-        return SubcmdGetArguments(
-            subparser_structure=SysArg.parse([SubCommand.RestServer, subcommand]),
-            config_path=(config_path or _Test_Config),
-            show_detail=True,
-            show_as_format=Format[_Show_Detail_As_Format.upper()],
-            api_path=get_api_path,
-            http_method=_Cmd_Arg_HTTP_Method,
-        )
-    else:
-        return ParserArguments(
-            subparser_structure=SysArg.parse([]),
-        )
-
-
 def _given_command_option() -> CommandOptions:
     return CommandOptions(bind=_Bind_Host_And_Port.value, workers=_Workers_Amount.value, log_level=_Log_Level.value)
 
 
 def _given_command(app_type: str) -> Command:
-    mock_parser_arg = _given_parser_args(subcommand="run", app_type=app_type)
+    mock_parser_arg = SubcmdRunArguments(
+        subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Run]),
+        app_type=app_type,
+        config=_Test_Config,
+        bind=_Bind_Host_And_Port.value,
+        workers=_Workers_Amount.value,
+        log_level=_Log_Level.value,
+    )
     mock_cmd_option_obj = _given_command_option()
     return Command(entry_point="SGI tool command", app=mock_parser_arg.app_type, options=mock_cmd_option_obj)
-
-
-class FakeYAML(YAML):
-    pass
 
 
 class FakeCommandProcess(BaseCommandProcessor):
@@ -217,7 +145,7 @@ class TestNoSubCmd(BaseCommandProcessorTestSpec):
             self._test_process(**kwargs)
 
     def _test_process(self, cmd_ps: Callable):
-        mock_parser_arg = _given_parser_args(subcommand=None)
+        mock_parser_arg = self._given_parser_args()
         command = _given_command(app_type="Python web library")
         command.run = MagicMock()
         cmd_parser = Mock()
@@ -226,6 +154,11 @@ class TestNoSubCmd(BaseCommandProcessorTestSpec):
             cmd_ps(cmd_parser, mock_parser_arg)
             mock_sgi_generate.assert_not_called()
             command.run.assert_not_called()
+
+    def _given_parser_args(self) -> ParserArguments:
+        return ParserArguments(
+            subparser_structure=SysArg.parse([]),
+        )
 
     def _given_command_line(self) -> List[str]:
         return []
@@ -240,19 +173,6 @@ class TestNoSubCmd(BaseCommandProcessorTestSpec):
 
     def _expected_argument_type(self) -> Type[Namespace]:
         return Namespace
-
-
-# # With valid configuration
-# SubCmdGetTestCaseFactory.load(get_api_path="/foo-home", is_valid_config=True, exit_code=0)
-# SubCmdGetTestCaseFactory.load(get_api_path="/not-exist-api", is_valid_config=True, exit_code=1)
-#
-# # With invalid configuration
-# SubCmdGetTestCaseFactory.load(get_api_path="/foo-home", is_valid_config=False, acceptable_error=True, exit_code=0)
-# SubCmdGetTestCaseFactory.load(get_api_path="/foo-home", is_valid_config=False, acceptable_error=False, exit_code=1)
-# SubCmdGetTestCaseFactory.load(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=True, exit_code=1)
-# SubCmdGetTestCaseFactory.load(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=False, exit_code=1)
-#
-# SUBCMD_GET_TEST_CASE = SubCmdGetTestCaseFactory.get_test_case()
 
 
 def test_make_command_chain():
