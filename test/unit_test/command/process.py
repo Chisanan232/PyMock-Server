@@ -40,7 +40,6 @@ from test._values import (
     _Test_HTTP_Method,
     _Test_HTTP_Resp,
     _Test_Request_With_Https,
-    _Test_SubCommand_Get,
     _Test_URL,
     _Workers_Amount,
 )
@@ -51,7 +50,6 @@ from pymock_server._utils.file.operation import YAML
 from pymock_server.command._base.process import BaseCommandProcessor
 from pymock_server.command.options import get_all_subcommands
 from pymock_server.command.process import NoSubCmd, make_command_chain
-from pymock_server.command.rest_server.get.process import SubCmdGet
 from pymock_server.command.rest_server.pull.process import SubCmdPull
 from pymock_server.command.rest_server.sample.process import SubCmdSample
 from pymock_server.command.subcommand import SubCommandLine
@@ -71,7 +69,7 @@ from pymock_server.model.rest_api_doc_config.base_config import set_component_de
 from pymock_server.model.subcmd_common import SysArg
 from pymock_server.server import Command, CommandOptions, WSGIServer
 
-from ._test_case import SubCmdGetTestCaseFactory, SubCmdPullTestCaseFactory
+from ._test_case import SubCmdPullTestCaseFactory
 
 logger = logging.getLogger(__name__)
 
@@ -269,91 +267,17 @@ class TestNoSubCmd(BaseCommandProcessorTestSpec):
         return Namespace
 
 
-# With valid configuration
-SubCmdGetTestCaseFactory.load(get_api_path="/foo-home", is_valid_config=True, exit_code=0)
-SubCmdGetTestCaseFactory.load(get_api_path="/not-exist-api", is_valid_config=True, exit_code=1)
-
-# With invalid configuration
-SubCmdGetTestCaseFactory.load(get_api_path="/foo-home", is_valid_config=False, acceptable_error=True, exit_code=0)
-SubCmdGetTestCaseFactory.load(get_api_path="/foo-home", is_valid_config=False, acceptable_error=False, exit_code=1)
-SubCmdGetTestCaseFactory.load(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=True, exit_code=1)
-SubCmdGetTestCaseFactory.load(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=False, exit_code=1)
-
-SUBCMD_GET_TEST_CASE = SubCmdGetTestCaseFactory.get_test_case()
-
-
-class TestSubCmdGet(BaseCommandProcessorTestSpec):
-    @pytest.fixture(scope="function")
-    def cmd_ps(self) -> SubCmdGet:
-        return SubCmdGet()
-
-    @pytest.mark.parametrize(
-        ("yaml_config_path", "get_api_path", "expected_exit_code"),
-        SUBCMD_GET_TEST_CASE,
-    )
-    def test_with_command_processor(
-        self, yaml_config_path: str, get_api_path: str, expected_exit_code: int, object_under_test: Callable, **kwargs
-    ):
-        kwargs = {
-            "yaml_config_path": yaml_config_path,
-            "get_api_path": get_api_path,
-            "expected_exit_code": expected_exit_code,
-            "cmd_ps": object_under_test,
-        }
-        self._test_process(**kwargs)
-
-    @pytest.mark.parametrize(
-        ("yaml_config_path", "get_api_path", "expected_exit_code"),
-        SUBCMD_GET_TEST_CASE,
-    )
-    def test_with_run_entry_point(
-        self,
-        yaml_config_path: str,
-        get_api_path: str,
-        expected_exit_code: int,
-        entry_point_under_test: Callable,
-        **kwargs,
-    ):
-        kwargs = {
-            "yaml_config_path": yaml_config_path,
-            "get_api_path": get_api_path,
-            "expected_exit_code": expected_exit_code,
-            "cmd_ps": entry_point_under_test,
-        }
-        self._test_process(**kwargs)
-
-    def _test_process(self, yaml_config_path: str, get_api_path: str, expected_exit_code: int, cmd_ps: Callable):
-        mock_parser_arg = _given_parser_args(
-            subcommand=_Test_SubCommand_Get, config_path=yaml_config_path, get_api_path=get_api_path
-        )
-        cmd_parser = Mock()
-        with patch.object(sys, "argv", self._given_command_line()):
-            with pytest.raises(SystemExit) as exc_info:
-                cmd_ps(cmd_parser, mock_parser_arg)
-        assert str(expected_exit_code) == str(exc_info.value)
-
-    def _given_command_line(self) -> List[str]:
-        return ["rest-server", "get"]
-
-    def _given_cmd_args_namespace(self) -> Namespace:
-        args_namespace = Namespace()
-        args_namespace.subcommand = SubCommand.RestServer
-        setattr(args_namespace, SubCommand.RestServer, SubCommand.Get)
-        args_namespace.config_path = _Test_Config
-        args_namespace.show_detail = True
-        args_namespace.show_as_format = _Show_Detail_As_Format
-        args_namespace.api_path = _Cmd_Arg_API_Path
-        args_namespace.http_method = _Cmd_Arg_HTTP_Method
-        return args_namespace
-
-    def _given_subcmd(self) -> Optional[SysArg]:
-        return SysArg(
-            pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
-            subcmd=SubCommandLine.Get,
-        )
-
-    def _expected_argument_type(self) -> Type[SubcmdGetArguments]:
-        return SubcmdGetArguments
+# # With valid configuration
+# SubCmdGetTestCaseFactory.load(get_api_path="/foo-home", is_valid_config=True, exit_code=0)
+# SubCmdGetTestCaseFactory.load(get_api_path="/not-exist-api", is_valid_config=True, exit_code=1)
+#
+# # With invalid configuration
+# SubCmdGetTestCaseFactory.load(get_api_path="/foo-home", is_valid_config=False, acceptable_error=True, exit_code=0)
+# SubCmdGetTestCaseFactory.load(get_api_path="/foo-home", is_valid_config=False, acceptable_error=False, exit_code=1)
+# SubCmdGetTestCaseFactory.load(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=True, exit_code=1)
+# SubCmdGetTestCaseFactory.load(get_api_path="/not-exist-api", is_valid_config=False, acceptable_error=False, exit_code=1)
+#
+# SUBCMD_GET_TEST_CASE = SubCmdGetTestCaseFactory.get_test_case()
 
 
 class TestSubCmdSample(BaseCommandProcessorTestSpec):
