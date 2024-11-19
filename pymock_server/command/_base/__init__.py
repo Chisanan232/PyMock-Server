@@ -22,12 +22,12 @@ class BaseAutoLoad(metaclass=ABCMeta):
     def import_all(self) -> None:
         for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
             subcmd_inf_pkg_path = self._regex_module_paths(subcmd_inf)
-            for subcmd_option_module_file_path in glob.glob(str(subcmd_inf_pkg_path), recursive=True):
+            for subcmd_prop_module_file_path in glob.glob(str(subcmd_inf_pkg_path), recursive=True):
                 # convert the file path as Python importing
                 # module path
-                import_abs_path = self._to_import_module_path(subcmd_option_module_file_path)
+                import_abs_path = self._to_import_module_path(subcmd_prop_module_file_path)
                 # option object
-                subcmd_option_obj = self._wrap_as_object_name(self._to_subcmd_object(subcmd_option_module_file_path))
+                subcmd_option_obj = self._wrap_as_object_name(self._to_subcmd_object(subcmd_prop_module_file_path))
 
                 # import the option object by the module path
                 exec(f"from {import_abs_path} import {subcmd_option_obj}")
@@ -37,8 +37,8 @@ class BaseAutoLoad(metaclass=ABCMeta):
         subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "**", self.py_module)
         return subcmd_inf_pkg_path
 
-    def _to_import_module_path(self, subcmd_option_module_file_path: str) -> str:
-        import_style = str(subcmd_option_module_file_path).replace(".py", "").replace("/", ".")
+    def _to_import_module_path(self, subcmd_prop_module_file_path: str) -> str:
+        import_style = str(subcmd_prop_module_file_path).replace(".py", "").replace("/", ".")
         lib_name = "pymock_server"
         import_abs_path = ".".join([lib_name, import_style.split(f"{lib_name}.")[1]])
         return import_abs_path
@@ -47,8 +47,8 @@ class BaseAutoLoad(metaclass=ABCMeta):
     def _wrap_as_object_name(self, subcmd_object: str) -> str:
         pass
 
-    def _to_subcmd_object(self, subcmd_module_file_path: str) -> str:
-        subcmd_dir = pathlib.Path(subcmd_module_file_path).parent.name
+    def _to_subcmd_object(self, subcmd_prop_module_file_path: str) -> str:
+        subcmd_dir = pathlib.Path(subcmd_prop_module_file_path).parent.name
         subcmd_sub_pkg_name_parts = subcmd_dir.split("_")
         subcmd_option_obj: str = ""
         for part in subcmd_sub_pkg_name_parts:
