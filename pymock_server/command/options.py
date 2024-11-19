@@ -15,7 +15,6 @@ briefly, It has below major features:
 import argparse
 import glob
 import logging
-import os
 import pathlib
 from typing import Any, List
 
@@ -38,18 +37,19 @@ _Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 def import_subcommand_option() -> None:
     for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
         cmd_module_path = pathlib.Path(__file__).parent.absolute()
-        subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "**")
-        for subcmd_dir in glob.glob(str(subcmd_inf_pkg_path)):
-            if os.path.isdir(subcmd_dir):
-                subcmd_options_module = pathlib.Path(f"{subcmd_dir}", "options.py")
-                if os.path.exists(str(subcmd_options_module)):
-                    # convert the file path as Python importing
-                    import_style = str(subcmd_options_module).replace(".py", "").replace("/", ".")
-                    lib_name = "pymock_server"
-                    subcmd_sub_pkg_name = pathlib.Path(subcmd_dir).name
-                    import_abs_path = ".".join([lib_name, import_style.split(f"{lib_name}.")[1]])
-                    subcmd_option_obj = f"SubCommand{subcmd_sub_pkg_name[0].upper() + subcmd_sub_pkg_name[1:]}Option"
-                    exec(f"from {import_abs_path} import {subcmd_option_obj}")
+        subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "*", "options.py")
+        for subcmd_option_module in glob.glob(str(subcmd_inf_pkg_path), recursive=True):
+            # module path
+            import_style = str(subcmd_option_module).replace(".py", "").replace("/", ".")
+            lib_name = "pymock_server"
+            import_abs_path = ".".join([lib_name, import_style.split(f"{lib_name}.")[1]])
+
+            # option object
+            subcmd_sub_pkg_name = pathlib.Path(subcmd_option_module).parent.name
+            subcmd_option_obj = f"SubCommand{subcmd_sub_pkg_name[0].upper() + subcmd_sub_pkg_name[1:]}Option"
+
+            # import the option object by the module path
+            exec(f"from {import_abs_path} import {subcmd_option_obj}")
 
 
 import_subcommand_option()
