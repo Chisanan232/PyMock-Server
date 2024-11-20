@@ -17,9 +17,11 @@ from pymock_server.model.rest_api_doc_config._base import (
     Transferable,
     set_openapi_version,
 )
+from pymock_server.model.rest_api_doc_config._base_model_adapter import (
+    BaseRequestParameterAdapter,
+)
 from pymock_server.model.rest_api_doc_config._model_adapter import (
     PropertyDetailAdapter,
-    RequestParameterAdapter,
     ResponsePropertyAdapter,
 )
 from pymock_server.model.rest_api_doc_config.base_config import (
@@ -555,7 +557,7 @@ class BaseAPIConfigWithMethodTestSuite(BaseAPIDocConfigTestSuite, ABC):
         set_openapi_version(OpenAPIVersion.V3)
 
     @abstractmethod
-    def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameterAdapter]) -> None:
+    def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[BaseRequestParameterAdapter]) -> None:
         pass
 
     @pytest.mark.parametrize(("api_detail", "entire_config"), [])
@@ -577,13 +579,6 @@ class BaseAPIConfigWithMethodTestSuite(BaseAPIDocConfigTestSuite, ABC):
             should_check_name = True
         else:
             should_check_name = False
-            # response_content = resp_200_model.content
-            # resp_val_format = list(filter(lambda f: f in response_content.keys(), ["application/json", "*/*"]))
-            # response_detail = response_content[resp_val_format[0]]["schema"]
-            # if not response_detail:
-            #     should_check_name = False
-            # else:
-            #     should_check_name = True
         logger.debug(f"should_check_name: {should_check_name}")
 
         data_details = response_data.data
@@ -594,7 +589,7 @@ class BaseAPIConfigWithMethodTestSuite(BaseAPIDocConfigTestSuite, ABC):
                 assert d.value_type
             assert d.required is not None
             assert d.format is None  # FIXME: Should activate this verify after support this feature
-            if d.value_type == "list":
+            if d.value_type in ("list", "dict"):
                 assert d.items is not None
                 for item in d.items:
                     assert item.name
