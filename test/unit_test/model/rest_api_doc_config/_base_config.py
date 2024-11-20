@@ -586,7 +586,6 @@ class BaseAPIConfigWithMethodTestSuite(BaseAPIDocConfigTestSuite, ABC):
             #     should_check_name = True
         logger.debug(f"should_check_name: {should_check_name}")
 
-        # assert isinstance(response_data, ResponseProperty)
         data_details = response_data.data
         assert data_details is not None and isinstance(data_details, list)
         for d in data_details:
@@ -601,32 +600,6 @@ class BaseAPIConfigWithMethodTestSuite(BaseAPIDocConfigTestSuite, ABC):
                     assert item.name
                     assert item.value_type
                     assert item.required is not None
-        # assert False
-        # else:
-        #     assert data_details is not None and isinstance(data_details, dict)
-        #     for v in data_details.values():
-        #         if isinstance(v, str):
-        #             if should_check_name:
-        #                 assert v in [
-        #                     "random string value",
-        #                     "random integer value",
-        #                     "random boolean value",
-        #                     "random file output stream",
-        #                     "FIXME: Handle the reference",
-        #                 ]
-        #             else:
-        #                 assert v == "empty value"
-        #         else:
-        #             for item in v:
-        #                 for item_value in item.values():
-        #                     if should_check_name:
-        #                         assert item_value in [
-        #                             "random string value",
-        #                             "random integer value",
-        #                             "random boolean value",
-        #                         ]
-        #                     else:
-        #                         assert item_value == "empty value"
 
     @abstractmethod
     def _deserialize_as_response_model(self, resp_200: dict) -> HttpConfigV2:
