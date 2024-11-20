@@ -15,7 +15,6 @@ from pymock_server.exceptions import CannotParsingAPIDocumentVersion
 from pymock_server.model import MockAPI, OpenAPIVersion
 from pymock_server.model.api_config import APIConfig as PyMockEntireAPIConfig
 from pymock_server.model.api_config import _Config
-from pymock_server.model.api_config.apis import ResponseStrategy
 from pymock_server.model.rest_api_doc_config._base import (
     Transferable,
     set_openapi_version,
@@ -693,17 +692,10 @@ class TestReferenceConfig(BaseAPIDocConfigTestSuite):
         return ReferenceConfig()
 
     @pytest.mark.parametrize(
-        ("strategy", "test_response_data", "expected_value"),
+        ("test_response_data", "expected_value"),
         [
-            # (
-            #     ResponseStrategy.STRING,
-            #     {"type": "object"},
-            #     {"strategy": ResponseStrategy.STRING, "data": {"THIS_IS_EMPTY": "empty value"}},
-            # ),
             (
-                ResponseStrategy.OBJECT,
                 ReferenceConfig(value_type="object"),
-                # {"type": "object"},
                 ResponsePropertyAdapter(
                     data=[
                         PropertyDetailAdapter(
@@ -711,16 +703,11 @@ class TestReferenceConfig(BaseAPIDocConfigTestSuite):
                         )
                     ],
                 ),
-                # {
-                #     "strategy": ResponseStrategy.OBJECT,
-                #     "data": [{"name": "THIS_IS_EMPTY", "required": False, "type": None, "format": None, "items": []}],
-                # },
             ),
         ],
     )
     def test__process_reference_object_with_empty_body_response(
         self,
-        strategy: ResponseStrategy,
         test_response_data: ReferenceConfig,
         expected_value: ResponsePropertyAdapter,
     ):
