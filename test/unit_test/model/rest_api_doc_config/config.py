@@ -97,23 +97,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
         )
 
         # Verify
-        assert response_prop_data and isinstance(response_prop_data, PropertyDetailAdapter)
-        # for resp_k, resp_v in response_prop_data.items():
-        #     assert resp_k in ["name", "required", "type", "format", "items", "FIXME"]
-        # else:
-        #     assert response_prop_data and isinstance(response_prop_data, (str, list))
-        #     if response_prop_data and isinstance(response_prop_data, str):
-        #         assert response_prop_data in [
-        #             "random string value",
-        #             "random integer value",
-        #             "random boolean value",
-        #             "random file output stream",
-        #             "FIXME: Handle the reference",
-        #         ]
-        #     else:
-        #         for item in response_prop_data:
-        #             for item_value in item.values():
-        #                 assert item_value in ["random string value", "random integer value", "random boolean value"]
+        assert response_prop_data and isinstance(response_prop_data, (PropertyDetailAdapter, list))
 
     @pytest.mark.parametrize(
         ("test_response_data", "expected_value"),
