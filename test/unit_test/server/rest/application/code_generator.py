@@ -1,3 +1,4 @@
+import re
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from test._values import _Test_API_Parameters
@@ -45,7 +46,6 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
 
     @pytest.mark.parametrize("base_url", [None, "Has base URL"])
     def test_generate_pycode_about_adding_api(self, sut: BaseWebServerCodeGenerator, base_url: Optional[str]):
-        # TODO: Should think a better implementation of this test
         for_test_api_name = "Function name"
         for_test_url = "this is an url path"
         for_test_req_method = "HTTP method"
@@ -57,13 +57,28 @@ class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):
             api_name=for_test_api_name, api_config=self._get_api_config_param(api_config), base_url=base_url
         )
 
+        clean_add_api_pycode = add_api_pycode.replace("  ", "").replace("\n", "")
+        expect_pycode = self._expect_controller_pycode(
+            method=for_test_req_method, base_url=base_url, url=for_test_url, api_name=for_test_api_name
+        )
+        search_expect_pycode = re.search(re.escape(expect_pycode), clean_add_api_pycode)
+
         assert (
             self._get_url_criteria(base_url) in add_api_pycode
             and self._get_http_method_in_generating_code(for_test_req_method) in add_api_pycode
         )
+        assert search_expect_pycode is not None
 
     @abstractmethod
     def _get_api_config_param(self, api_config: MockAPI) -> Union[MockAPI, List[MockAPI]]:
+        pass
+
+    @property
+    def _server_instance(self) -> str:
+        return "self.web_application"
+
+    @abstractmethod
+    def _expect_controller_pycode(self, method: str, base_url: Optional[str], url: str, api_name: str) -> str:
         pass
 
     @abstractmethod
@@ -122,6 +137,14 @@ class TestFlaskCodeGenerator(WebServerCodeGeneratorTestSpec):
 
     def _get_api_config_param(self, api_config: MockAPI) -> List[MockAPI]:
         return [api_config]
+
+    def _expect_controller_pycode(self, method: str, base_url: Optional[str], url: str, api_name: str) -> str:
+        """
+        Python code:
+        self.web_application.route("Function name", methods=['HTTP method'])()
+        """
+        new_api_name = f"{base_url}{api_name}" if base_url else api_name
+        return f"{self._server_instance}.route(\"{new_api_name}\", methods=['{self._get_http_method_in_generating_code(method)}'])()"
 
     def _get_url_criteria(self, base_url: Optional[str]) -> str:
         return "Function name"
@@ -204,6 +227,16 @@ class TestFastAPICodeGenerator(WebServerCodeGeneratorTestSpec):
 
     def _get_api_config_param(self, api_config: MockAPI) -> MockAPI:
         return api_config
+
+    def _expect_controller_pycode(self, method: str, base_url: Optional[str], url: str, api_name: str) -> str:
+        """
+        Python code:
+        self.web_application.http method(path="this is an url path")(function name)
+        """
+        api_path = f"{base_url}{url}" if base_url else url
+        return (
+            f'{self._server_instance}.{self._get_http_method_in_generating_code(method)}(path="{api_path}")({api_name})'
+        )
 
     def _get_url_criteria(self, base_url: Optional[str]) -> str:
         for_test_url = "this is an url path"
