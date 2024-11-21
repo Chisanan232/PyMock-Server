@@ -2,7 +2,7 @@ import logging
 import random
 import re
 from http import HTTPMethod, HTTPStatus
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import pytest
 
@@ -26,6 +26,7 @@ from pymock_server.model import MockAPI, OpenAPIVersion
 from pymock_server.model.api_config import APIConfig as PyMockEntireAPIConfig
 from pymock_server.model.rest_api_doc_config._base import (
     Transferable,
+    get_openapi_version,
     set_openapi_version,
 )
 from pymock_server.model.rest_api_doc_config._model_adapter import (
@@ -35,6 +36,7 @@ from pymock_server.model.rest_api_doc_config._model_adapter import (
     ResponsePropertyAdapter,
 )
 from pymock_server.model.rest_api_doc_config.base_config import (
+    BaseReferenceConfigProperty,
     BaseReferencialConfig,
     _BaseAPIConfigWithMethod,
     set_component_definition,
@@ -461,24 +463,26 @@ class TestAPIAdapter(_OpenAPIDocumentDataModelTestSuite):
         data.response = {}
 
     def _verify_result(self, data: APIAdapter, og_data: _BaseAPIConfigWithMethod) -> None:
-        # TODO: Remove this deprecated test criteria if it ensure
-        # def _get_api_param(name: str) -> Optional[dict]:
-        #     swagger_api_params = og_data["parameters"]
-        #     for param in swagger_api_params:
-        #         if param["name"] == name:
-        #             return param
-        #     return None
+
+        def _verify_param_details(expect_key: List[Any], expect_params: Dict[str, BaseReferenceConfigProperty]) -> None:
+            assert len(data.parameters) == len(expect_key)
+            for _param in data.parameters:
+                find_map_og_param: List[Tuple[str, BaseReferenceConfigProperty]] = list(
+                    filter(lambda i: i[0] == _param.name, expect_params.items())
+                )
+                assert len(find_map_og_param) == 1
+                map_og_param: BaseReferenceConfigProperty = find_map_og_param[0][1]
+                assert _param.value_type == map_og_param.value_type
+                assert _param.default == map_og_param.default
+                if map_og_param.items:
+                    assert _param.items
 
         assert data is not None
         assert data.path == ""
         assert data.http_method == ""
 
-        # param: List[TmpRequestParameterModel] = list(filter(lambda e: e.has_ref(), og_data.parameters))
-        # if param is not None:
-        #     logger.debug(f"param: {param}")
-        #     assert len(data.parameters) == len(param[0].get_schema_ref().properties)
-        # else:
-        if isinstance(og_data, APIConfigWithMethodV3):
+        if get_openapi_version() is OpenAPIVersion.V3:
+            assert isinstance(og_data, APIConfigWithMethodV3)
             request_body = og_data.request_body
             has_ref_params: List[RequestParameter] = (
                 list(filter(lambda p: p.has_ref(), og_data.parameters)) if og_data.parameters else None
@@ -493,27 +497,40 @@ class TestAPIAdapter(_OpenAPIDocumentDataModelTestSuite):
                 logger.debug(f"has content, req_param_format: {req_param_format}")
                 req_param_setting = request_body.get_setting(content_type=req_param_format[0])
                 req_param_data_model = req_param_setting.get_schema_ref()
-                assert len(data.parameters) == len(req_param_data_model.properties)
+
+                _verify_param_details(
+                    expect_key=list(req_param_data_model.properties.keys()),
+                    expect_params=req_param_data_model.properties,
+                )
             elif has_ref_params:
-                all_params = []
+                all_params_key: List[str] = []
+                all_params: Dict[str, BaseReferenceConfigProperty] = {}
                 for param in has_ref_params:
-                    all_params.extend(list(param.get_schema_ref().properties.keys()))
-                assert len(data.parameters) == len(all_params)
+                    all_params_key.extend(list(param.get_schema_ref().properties.keys()))
+                    all_params.update(param.get_schema_ref().properties)
+
+                _verify_param_details(expect_key=all_params_key, expect_params=all_params)
             else:
                 assert len(data.parameters) == len(og_data.parameters)
+                assert data.parameters == [param.to_adapter() for param in og_data.parameters]
+        elif get_openapi_version() is OpenAPIVersion.V2:
+            assert isinstance(og_data, APIConfigWithMethodV2)
+            has_ref_params: List[RequestParameter] = (
+                list(filter(lambda p: p.has_ref(), og_data.parameters)) if og_data.parameters else None
+            )
+            has_ref_all_params_key: List[str] = []
+            has_ref_all_params: Dict[str, BaseReferenceConfigProperty] = {}
+            for param in has_ref_params:
+                has_ref_all_params_key.extend(list(param.get_schema_ref().properties.keys()))
+                has_ref_all_params.update(param.get_schema_ref().properties)
+
+            if has_ref_params:
+                _verify_param_details(expect_key=og_data.parameters, expect_params=has_ref_all_params)
+            else:
+                assert len(data.parameters) == len(og_data.parameters)
+                assert data.parameters == [param.to_adapter() for param in og_data.parameters]
         else:
-            assert len(data.parameters) == len(og_data.parameters)
-        # TODO: Remove this deprecated test criteria if it ensure
-        # for api_param in data.parameters:
-        #     one_swagger_api_param = _get_api_param(api_param.name)
-        #     assert one_swagger_api_param is not None
-        #     assert api_param.required == one_swagger_api_param["required"]
-        #     if api_param.has_schema(one_swagger_api_param):
-        #         assert api_param.value_type == convert_js_type(one_swagger_api_param["schema"]["type"])
-        #         assert api_param.default == one_swagger_api_param["schema"].get("default", None)
-        #     else:
-        #         assert api_param.value_type == convert_js_type(one_swagger_api_param["type"])
-        #         assert api_param.default == one_swagger_api_param.get("default", None)
+            raise NotImplementedError(f"It doesn't support API document version {get_openapi_version()} yet.")
 
     def _given_props(self, data_model: APIAdapter) -> None:
         params = RequestParameterAdapter()
