@@ -582,14 +582,6 @@ class TestSwaggerAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
         data.paths = {}
 
     def _verify_result(self, data: OpenAPIDocumentConfig, og_data: dict) -> None:
-        # TODO: Remove this deprecated test criteria if it ensure
-        # def _get_api_param(name: str) -> Optional[dict]:
-        #     swagger_api_params = og_data["paths"][api.path][api.http_method]["parameters"]
-        #     for param in swagger_api_params:
-        #         if param["name"] == name:
-        #             return param
-        #     return None
-
         path_with_method_number = [len(v.keys()) for v in og_data["paths"].values()]
         data_model_apis = [len(v) for v in data.paths.values()]
         assert sum(data_model_apis) == sum(path_with_method_number)
@@ -598,15 +590,7 @@ class TestSwaggerAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             for api in apis:
                 assert api.path in og_data["paths"].keys()
                 assert api.http_method.lower() in og_data["paths"][api.path].keys()
-
                 assert len(api.parameters) == len(og_data["paths"][api.path][api.http_method.lower()]["parameters"])
-                # TODO: Remove this deprecated test criteria if it ensure
-                # for api_param in api.parameters:
-                #     one_swagger_api_param = _get_api_param(api_param.name)
-                #     assert one_swagger_api_param is not None
-                #     assert api_param.required == one_swagger_api_param["required"]
-                #     assert api_param.value_type == convert_js_type(one_swagger_api_param["schema"]["type"])
-                #     assert api_param.default == one_swagger_api_param["schema"]["default"]
 
     def _given_props(self, data_model: OpenAPIDocumentConfig) -> None:
         params = RequestParameter()
