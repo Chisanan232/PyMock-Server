@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 from unittest.mock import Mock
 
 from pymock_api.model.enums import ResponseStrategy
@@ -487,7 +487,7 @@ _Dummy_Add_Arg_Parameter: List[dict] = [{"name": "arg1", "required": True, "type
 
 
 # Test subcommand *add* options
-def _generate_response_for_add(strategy: ResponseStrategy) -> tuple[ResponseStrategy, List[Union[str, dict]]]:
+def _generate_response_for_add(strategy: ResponseStrategy) -> Tuple[ResponseStrategy, List[Union[str, dict]]]:
     _strategy: ResponseStrategy = strategy
     if strategy is ResponseStrategy.STRING:
         _values: List[str] = ["This is foo."]
