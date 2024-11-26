@@ -159,7 +159,7 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
             if self.is_pull:
                 template.activate = True
                 if self.base_file_path:
-                    template.values.base_file_path = self.base_file_path
+                    template.config_path_values.base_file_path = self.base_file_path
             api_info["template"] = template.serialize()
 
         # Process section *apis*
@@ -256,7 +256,7 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
         if self.is_pull:
             self.template.activate = True
             if self.base_file_path:
-                self.template.values.base_file_path = self.base_file_path
+                self.template.config_path_values.base_file_path = self.base_file_path
         self.template.deserialize(data=template_info)
 
         # Processing section *base*
@@ -311,7 +311,8 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
 
     @property
     def _config_file_format(self) -> str:
-        return self.template.values.api.config_path_format
+        print(f"[DEBUG in src] self.template.config_path_values: {self.template.config_path_values}")
+        return self.template.config_path_values.api.config_path_format
 
     @property
     def _deserialize_as_template_config(self) -> MockAPI:

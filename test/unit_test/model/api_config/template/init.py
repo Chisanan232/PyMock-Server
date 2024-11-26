@@ -13,13 +13,13 @@ from pymock_api.model.api_config import (
 )
 from pymock_api.model.api_config.template import (
     LoadConfig,
-    TemplateAPI,
     TemplateApply,
-    TemplateHTTP,
-    TemplateRequest,
-    TemplateResponse,
-    TemplateSetting,
-    TemplateValues,
+    TemplateConfigPathAPI,
+    TemplateConfigPathHTTP,
+    TemplateConfigPathRequest,
+    TemplateConfigPathResponse,
+    TemplateConfigPathSetting,
+    TemplateConfigPathValues,
 )
 from pymock_api.model.api_config.template._load import (
     TemplateConfigLoaderByApply,
@@ -85,50 +85,50 @@ class TestLoadConfig(ConfigTestSpec):
         assert [o.value for o in obj.order] == _Mock_Load_Config["order"]
 
 
-class TestTemplateAPI(TemplateSettingTestSuite):
+class TestTemplateConfigPathAPI(TemplateSettingTestSuite):
     @property
     def under_test_data(self) -> dict:
         return _Mock_Template_API_Setting
 
     @property
-    def sut_object(self) -> Type[TemplateSetting]:
-        return TemplateAPI
+    def sut_object(self) -> Type[TemplateConfigPathSetting]:
+        return TemplateConfigPathAPI
 
 
-class TestTemplateHTTP(TemplateSettingTestSuite):
+class TestTemplateConfigPathHTTP(TemplateSettingTestSuite):
     @property
     def under_test_data(self) -> dict:
         return _Mock_Template_HTTP_Setting
 
     @property
-    def sut_object(self) -> Type[TemplateHTTP]:
-        return TemplateHTTP
+    def sut_object(self) -> Type[TemplateConfigPathHTTP]:
+        return TemplateConfigPathHTTP
 
 
-class TestTemplateRequest(TemplateSettingTestSuite):
+class TestTemplateConfigPathRequest(TemplateSettingTestSuite):
     @property
     def under_test_data(self) -> dict:
         return _Mock_Template_API_Request_Setting
 
     @property
-    def sut_object(self) -> Type[TemplateSetting]:
-        return TemplateRequest
+    def sut_object(self) -> Type[TemplateConfigPathSetting]:
+        return TemplateConfigPathRequest
 
 
-class TestTemplateResponse(TemplateSettingTestSuite):
+class TestTemplateConfigPathResponse(TemplateSettingTestSuite):
     @property
     def under_test_data(self) -> dict:
         return _Mock_Template_API_Response_Setting
 
     @property
-    def sut_object(self) -> Type[TemplateSetting]:
-        return TemplateResponse
+    def sut_object(self) -> Type[TemplateConfigPathSetting]:
+        return TemplateConfigPathResponse
 
 
-class TestTemplateValues(ConfigTestSpec):
+class TestTemplateConfigPathValues(ConfigTestSpec):
     @pytest.fixture(scope="function")
-    def sut(self) -> TemplateValues:
-        return TemplateValues(
+    def sut(self) -> TemplateConfigPathValues:
+        return TemplateConfigPathValues(
             base_file_path=_Mock_Base_File_Path,
             api=MOCK_MODEL.template_values_api,
             request=MOCK_MODEL.template_values_request,
@@ -136,20 +136,20 @@ class TestTemplateValues(ConfigTestSpec):
         )
 
     @pytest.fixture(scope="function")
-    def sut_with_nothing(self) -> TemplateValues:
-        return TemplateValues()
+    def sut_with_nothing(self) -> TemplateConfigPathValues:
+        return TemplateConfigPathValues()
 
     def test_eq_operation_with_valid_object(self, sut: _Config, sut_with_nothing: _Config):
         # NOTE: TemplateConfig has default value
         assert sut == sut_with_nothing
 
-    def test_value_attributes(self, sut: TemplateValues):
+    def test_value_attributes(self, sut: TemplateConfigPathValues):
         assert sut.base_file_path == _Mock_Base_File_Path
         assert sut.api == MOCK_MODEL.template_values_api
         assert sut.request == MOCK_MODEL.template_values_request
         assert sut.response == MOCK_MODEL.template_values_response
 
-    def test_serialize_with_none(self, sut_with_nothing: TemplateValues):
+    def test_serialize_with_none(self, sut_with_nothing: TemplateConfigPathValues):
         sut_with_nothing.base_file_path = None
         sut_with_nothing.api = None
         sut_with_nothing.request = None
@@ -159,8 +159,8 @@ class TestTemplateValues(ConfigTestSpec):
     def _expected_serialize_value(self) -> dict:
         return _Mock_Template_Values_Setting
 
-    def _expected_deserialize_value(self, obj: TemplateValues) -> None:
-        assert isinstance(obj, TemplateValues)
+    def _expected_deserialize_value(self, obj: TemplateConfigPathValues) -> None:
+        assert isinstance(obj, TemplateConfigPathValues)
         assert obj.base_file_path == _Mock_Base_File_Path
         assert obj.api.serialize() == _Mock_Template_Values_Setting.get("api")
         assert obj.request.serialize() == _Mock_Template_Values_Setting.get("request")
@@ -203,7 +203,7 @@ class TestTemplateConfig(CheckableTestSuite):
         return TemplateConfig(
             activate=_Mock_Template_Config_Activate,
             load_config=MOCK_MODEL.template_load_config,
-            values=MOCK_MODEL.template_values,
+            config_path_values=MOCK_MODEL.template_values,
             apply=MOCK_MODEL.template_apply,
         )
 
@@ -216,16 +216,16 @@ class TestTemplateConfig(CheckableTestSuite):
         assert sut.activate == MOCK_MODEL.template_config.activate
 
         # Verify section *template.values*
-        assert sut.values.api == MOCK_MODEL.template_values_api
-        assert sut.values.request == MOCK_MODEL.template_values_request
-        assert sut.values.response == MOCK_MODEL.template_values_response
+        assert sut.config_path_values.api == MOCK_MODEL.template_values_api
+        assert sut.config_path_values.request == MOCK_MODEL.template_values_request
+        assert sut.config_path_values.response == MOCK_MODEL.template_values_response
 
         # Verify section *template.apply*
         assert sut.apply == MOCK_MODEL.template_apply
 
     def test_serialize_with_none(self, sut_with_nothing: TemplateConfig):
         sut_with_nothing.activate = None
-        sut_with_nothing.values = None
+        sut_with_nothing.config_path_values = None
         sut_with_nothing.apply = None
         super().test_serialize_with_none(sut_with_nothing)
 
@@ -235,7 +235,7 @@ class TestTemplateConfig(CheckableTestSuite):
     def _expected_deserialize_value(self, obj: TemplateConfig) -> None:
         assert isinstance(obj, TemplateConfig)
         assert obj.activate == _Mock_Template_Setting.get("activate")
-        assert obj.values.serialize() == _Mock_Template_Setting.get("values")
+        assert obj.config_path_values.serialize() == _Mock_Template_Setting.get("config_path_values")
         assert obj.apply.serialize() == _Mock_Template_Setting.get("apply")
 
 

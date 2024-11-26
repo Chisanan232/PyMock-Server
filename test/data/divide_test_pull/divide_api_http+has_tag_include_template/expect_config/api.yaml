@@ -9,7 +9,7 @@ mocked_apis:
       order:
         - 'apis'    # Load the setting by scanning files which naming be ruled by section *mocked_apis.template.apply*
         - 'file'    # Load the setting by scanning files which naming be ruled by section *mocked_apis.template.apply*
-    values:
+    config_path_values:
       base_file_path: './test/data/divide_test_pull/divide_api_http+has_tag_include_template/expect_config'    # Default value should be current path './'
       api:
         config_path_format: '**-api.yaml'    # ex. ./foo/get_foo.yaml
