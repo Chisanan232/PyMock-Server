@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "PyMock-API"
-version = "0.1.0"
+version = "0.2.0"
 description = "🕸🤖👺 A Python tool to mock API easily and humanly without any coding."
 authors = ["Liu, Bryant <chi10211201@cycu.org.tw>"]
 license = "MIT"
