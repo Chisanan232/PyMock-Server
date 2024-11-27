@@ -1,6 +1,6 @@
 # Template values setting
 
-## ``mocked_apis.template.values``
+## ``mocked_apis.template.config_path_values``
 
 The section about detail settings of scanning file to load configuration.
 
