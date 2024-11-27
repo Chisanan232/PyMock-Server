@@ -1,0 +1,7 @@
+name: enum_sample
+value_format: enum
+range: 0-10
+enum:
+  - ENUM_1
+  - ENUM_2
+  - ENUM_3

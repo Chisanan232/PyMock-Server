@@ -1,0 +1,6 @@
+name: enum_sample
+value_format: enum
+enum:
+  - ENUM_1
+  - ENUM_2
+  - ENUM_3

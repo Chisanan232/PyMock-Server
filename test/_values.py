@@ -159,6 +159,65 @@ _Not_Exist_File_Name: str = "not_exist.json"
 _Not_Json_File_Name: str = "test.yaml"
 _Unexpected_File_Name: str = ".file"
 
+# Test variable
+# The expect value it should generate: 123456.123
+_Test_Variables_BigDecimal_USD: dict = {
+    "name": "big_decimal_usd",
+    "value_format": "big_decimal",
+    "value": "30:3",
+    "range": None,
+    "enum": None,
+}
+
+_Test_Variables_BigDecimal_TWD: dict = {
+    "name": "big_decimal_twd",
+    "value_format": "big_decimal",
+    "value": "30:0",
+    "range": None,
+    "enum": None,
+}
+
+# The expect value it should generate: USD
+_Test_Variables_Currency_Code: dict = {
+    "name": "currency_code",
+    "value_format": "enum",
+    "value": None,
+    "range": None,
+    "enum": ["TWD", "USD", "EUR"],
+}
+
+# The expect value it should generate: dgwretvgweg
+_Test_Response_Property_General_Format: dict = {
+    "name": "sample_name",
+    "required": True,
+    "type": "str",
+    "format": {
+        "strategy": "random_string",
+    },
+}
+
+# The expect value it should generate: ENUM2
+_Test_Response_Property_General_Format_Enum: dict = {
+    "name": "sample_prices",
+    "required": True,
+    "type": "str",
+    "format": {
+        "strategy": "from_enums",
+        "enums": ["ENUM1", "ENUM2", "ENUM3"],
+    },
+}
+
+# The expect value it should generate: 123456.123 USD\n123 TWD
+_Test_Response_Property_Customize_Format: dict = {
+    "name": "sample_prices",
+    "required": True,
+    "type": "str",
+    "format": {
+        "strategy": "customize",
+        "customize": "<big_decimal_usd> <currency_code>\n<big_decimal_twd> <currency_code>",
+    },
+}
+
 _Test_Response_Property_Int: dict = {
     "name": "id",
     "required": True,
