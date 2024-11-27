@@ -187,35 +187,49 @@ _Test_Variables_Currency_Code: dict = {
 }
 
 # The expect value it should generate: dgwretvgweg
+_General_Format: dict = {
+    "strategy": "random_string",
+}
 _Test_Response_Property_General_Format: dict = {
     "name": "sample_name",
     "required": True,
     "type": "str",
-    "format": {
-        "strategy": "random_string",
-    },
+    "format": _General_Format,
 }
 
 # The expect value it should generate: ENUM2
+_General_Enum_Format: dict = {
+    "strategy": "from_enums",
+    "enums": ["ENUM1", "ENUM2", "ENUM3"],
+}
 _Test_Response_Property_General_Format_Enum: dict = {
     "name": "sample_prices",
     "required": True,
     "type": "str",
-    "format": {
-        "strategy": "from_enums",
-        "enums": ["ENUM1", "ENUM2", "ENUM3"],
-    },
+    "format": _General_Enum_Format,
 }
 
 # The expect value it should generate: 123456.123 USD\n123 TWD
+_Customize_Format: dict = {
+    "strategy": "customize",
+    "customize": "<big_decimal_usd> <currency_code>\n<big_decimal_twd> <currency_code>",
+}
 _Test_Response_Property_Customize_Format: dict = {
     "name": "sample_prices",
     "required": True,
     "type": "str",
-    "format": {
-        "strategy": "customize",
-        "customize": "<big_decimal_usd> <currency_code>\n<big_decimal_twd> <currency_code>",
-    },
+    "format": _Customize_Format,
+}
+
+_Customize_Format_With_Self_Vars: dict = {
+    "strategy": "customize",
+    "enums": None,
+    "customize": "<big_decimal_usd> <currency_code>\n<big_decimal_twd> <currency_code>",
+    "variables": [
+        _Test_Variables_BigDecimal_USD,
+        _Test_Variables_BigDecimal_TWD,
+        _Test_Variables_Currency_Code,
+    ],
 }
 
 _Test_Response_Property_Int: dict = {
