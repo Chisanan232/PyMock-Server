@@ -7,7 +7,7 @@ from .apis._format import _HasFormatPropConfig
 
 
 @dataclass(eq=False)
-class IteratorItem(_HasItemsPropConfig, _HasFormatPropConfig):
+class IteratorItem(_HasFormatPropConfig, _HasItemsPropConfig):
     name: str = field(default_factory=str)
     required: Optional[bool] = None
     value_type: Optional[str] = None  # A type value as string
