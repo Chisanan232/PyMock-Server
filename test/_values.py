@@ -121,7 +121,10 @@ _Test_API_Parameter: dict = {
     "required": True,
     "default": None,
     "type": "str",
-    "format": "any_format",
+    "format": {
+        "strategy": "customize",
+        "customize": "any_format",
+    },
 }
 _Test_API_Parameter_With_Int: dict = {
     "name": "param2",

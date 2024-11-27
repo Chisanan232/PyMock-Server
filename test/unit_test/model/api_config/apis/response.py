@@ -45,7 +45,15 @@ class TestResponseProperty(ConfigTestSpec):
         assert sut.name == _Test_Response_Property_List["name"], _assertion_msg
         assert sut.required is _Test_Response_Property_List["required"], _assertion_msg
         assert sut.value_type == _Test_Response_Property_List["type"], _assertion_msg
-        assert sut.value_format == _Test_Response_Property_List["format"], _assertion_msg
+        if _Test_Response_Property_List["format"]:
+            assert sut.value_format.strategy.value == _Test_Response_Property_List["format"]["strategy"], _assertion_msg
+            assert sut.value_format.enums == _Test_Response_Property_List["format"].get("enums", []), _assertion_msg
+            assert sut.value_format.customize == _Test_Response_Property_List["format"].get(
+                "customize", ""
+            ), _assertion_msg
+            assert sut.value_format.variables == _Test_Response_Property_List["format"].get(
+                "variables", []
+            ), _assertion_msg
         assert isinstance(sut.items, list)
         for item in sut.items:
             assert list(filter(lambda i: i["name"] == item.name, _Test_Response_Property_List["items"]))
@@ -60,7 +68,15 @@ class TestResponseProperty(ConfigTestSpec):
         assert obj.name == _Test_Response_Property_List["name"]
         assert obj.required is _Test_Response_Property_List["required"]
         assert obj.value_type == _Test_Response_Property_List["type"]
-        assert obj.value_format == _Test_Response_Property_List["format"]
+        if _Test_Response_Property_List["format"]:
+            assert obj.value_format.strategy.value == _Test_Response_Property_List["format"]["strategy"], _assertion_msg
+            assert obj.value_format.enums == _Test_Response_Property_List["format"].get("enums", []), _assertion_msg
+            assert obj.value_format.customize == _Test_Response_Property_List["format"].get(
+                "customize", ""
+            ), _assertion_msg
+            assert obj.value_format.variables == _Test_Response_Property_List["format"].get(
+                "variables", []
+            ), _assertion_msg
         assert isinstance(obj.items, list)
         for item in obj.items:
             assert list(filter(lambda i: i["name"] == item.name, _Test_Response_Property_List["items"]))
@@ -92,7 +108,15 @@ class TestResponsePropertyWithNestedData(TestResponseProperty, HasItemsPropConfi
         assert sut.name == _Test_Response_Property_Dict["name"], _assertion_msg
         assert sut.required is _Test_Response_Property_Dict["required"], _assertion_msg
         assert sut.value_type == _Test_Response_Property_Dict["type"], _assertion_msg
-        assert sut.value_format == _Test_Response_Property_Dict["format"], _assertion_msg
+        if _Test_Response_Property_Dict["format"]:
+            assert sut.value_format.strategy.value == _Test_Response_Property_Dict["format"]["strategy"], _assertion_msg
+            assert sut.value_format.enums == _Test_Response_Property_Dict["format"].get("enums", []), _assertion_msg
+            assert sut.value_format.customize == _Test_Response_Property_Dict["format"].get(
+                "customize", ""
+            ), _assertion_msg
+            assert sut.value_format.variables == _Test_Response_Property_Dict["format"].get(
+                "variables", []
+            ), _assertion_msg
         assert isinstance(sut.items, list)
         for item in sut.items:
             assert list(filter(lambda i: i["name"] == item.name, _Test_Response_Property_Dict["items"]))
@@ -107,7 +131,15 @@ class TestResponsePropertyWithNestedData(TestResponseProperty, HasItemsPropConfi
         assert obj.name == _Test_Response_Property_Dict["name"]
         assert obj.required is _Test_Response_Property_Dict["required"]
         assert obj.value_type == _Test_Response_Property_Dict["type"]
-        assert obj.value_format == _Test_Response_Property_Dict["format"]
+        if _Test_Response_Property_Dict["format"]:
+            assert obj.value_format.strategy.value == _Test_Response_Property_Dict["format"]["strategy"], _assertion_msg
+            assert obj.value_format.enums == _Test_Response_Property_Dict["format"].get("enums", []), _assertion_msg
+            assert obj.value_format.customize == _Test_Response_Property_Dict["format"].get(
+                "customize", ""
+            ), _assertion_msg
+            assert obj.value_format.variables == _Test_Response_Property_Dict["format"].get(
+                "variables", []
+            ), _assertion_msg
         assert isinstance(obj.items, list)
         for item in obj.items:
             assert list(filter(lambda i: i["name"] == item.name, _Test_Response_Property_Dict["items"]))

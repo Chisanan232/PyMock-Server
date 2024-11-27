@@ -82,6 +82,7 @@ mocked_apis:
               required: False
               type: list
               format:
+              is_empty: true
       tag: 'foo'
     get_foo-boo_export:
       url: '/foo-boo/export'
