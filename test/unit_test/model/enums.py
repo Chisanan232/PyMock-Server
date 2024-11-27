@@ -1,12 +1,13 @@
 import re
 from abc import ABCMeta, abstractmethod
 from enum import Enum
-from typing import Any, Type
+from typing import Any, List, Type
 
 import pytest
 
 from pymock_api.model.enums import (
     ConfigLoadingOrder,
+    FormatStrategy,
     OpenAPIVersion,
     ResponseStrategy,
     ValueFormat,
@@ -791,3 +792,58 @@ class TestValueFormat(EnumTestSuite):
     )
     def test_to_enum(self, value: Any, enum_obj: Type[ValueFormat]):
         super().test_to_enum(value, enum_obj)
+
+
+class TestFormatStrategy(EnumTestSuite):
+    @pytest.fixture(scope="function")
+    def enum_obj(self) -> Type[FormatStrategy]:
+        return FormatStrategy
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            FormatStrategy.RANDOM_STRING,
+            FormatStrategy.RANDOM_INTEGER,
+            FormatStrategy.RANDOM_BIG_DECIMAL,
+            FormatStrategy.RANDOM_BOOLEAN,
+            FormatStrategy.FROM_ENUMS,
+            FormatStrategy.CUSTOMIZE,
+            "random_string",
+            "random_integer",
+            "random_big_decimal",
+            "random_boolean",
+            "customize",
+        ],
+    )
+    def test_to_enum(self, value: Any, enum_obj: Type[FormatStrategy]):
+        super().test_to_enum(value, enum_obj)
+
+    @pytest.mark.parametrize(
+        ("strategy", "value", "enums", "customize"),
+        [
+            (FormatStrategy.RANDOM_STRING, "random_string", [], ""),
+            (FormatStrategy.RANDOM_INTEGER, 123, [], ""),
+            (FormatStrategy.RANDOM_BIG_DECIMAL, 123.123, [], ""),
+            (FormatStrategy.RANDOM_BOOLEAN, True, [], ""),
+            (FormatStrategy.RANDOM_BOOLEAN, False, [], ""),
+            (FormatStrategy.FROM_ENUMS, "ENUM_2", ["ENUM_1", "ENUM_2", "ENUM_3"], ""),
+            (FormatStrategy.CUSTOMIZE, "sample_format", [], "sample_format"),
+        ],
+    )
+    def test_chk_format_is_match(self, strategy: FormatStrategy, value: Any, enums: List[str], customize: str):
+        assert strategy.chk_format_is_match(value=value, enums=enums, customize=customize) is True
+
+    @pytest.mark.parametrize(
+        ("strategy", "value", "enums", "customize"),
+        [
+            (FormatStrategy.RANDOM_STRING, 123, [], ""),
+            (FormatStrategy.RANDOM_INTEGER, "not int value", [], ""),
+            (FormatStrategy.RANDOM_BIG_DECIMAL, "not int or float value", [], ""),
+            (FormatStrategy.RANDOM_BOOLEAN, "not bool value", [], ""),
+            (FormatStrategy.RANDOM_BOOLEAN, "False", [], ""),
+            (FormatStrategy.FROM_ENUMS, "not in enums", ["ENUM_1", "ENUM_2", "ENUM_3"], ""),
+            (FormatStrategy.CUSTOMIZE, "different_format", [], "sample_format"),
+        ],
+    )
+    def test_failure_chk_format_is_match(self, strategy: FormatStrategy, value: Any, enums: List[str], customize: str):
+        assert strategy.chk_format_is_match(value=value, enums=enums, customize=customize) is False

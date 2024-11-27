@@ -693,3 +693,35 @@ class ValueFormat(Enum):
             return ValueFormat(v.lower())
         else:
             return v
+
+
+class FormatStrategy(Enum):
+    RANDOM_STRING: str = "random_string"
+    RANDOM_INTEGER: str = "random_integer"
+    RANDOM_BIG_DECIMAL: str = "random_big_decimal"
+    RANDOM_BOOLEAN: str = "random_boolean"
+    FROM_ENUMS: str = "from_enums"
+    CUSTOMIZE: str = "customize"
+
+    @staticmethod
+    def to_enum(v: Union[str, "FormatStrategy"]) -> "FormatStrategy":
+        if isinstance(v, str):
+            return FormatStrategy(v.lower())
+        else:
+            return v
+
+    def chk_format_is_match(self, value: Any, enums: List[str] = [], customize: str = "") -> bool:
+        if self is FormatStrategy.RANDOM_STRING:
+            return isinstance(value, str)
+        elif self is FormatStrategy.RANDOM_INTEGER:
+            return isinstance(value, int)
+        elif self is FormatStrategy.RANDOM_BIG_DECIMAL:
+            return isinstance(value, (int, float))
+        elif self is FormatStrategy.RANDOM_BOOLEAN:
+            return isinstance(value, bool)
+        elif self is FormatStrategy.FROM_ENUMS:
+            return isinstance(value, str) and value in enums
+        elif self is FormatStrategy.CUSTOMIZE:
+            return re.search(re.escape(customize), str(value), re.IGNORECASE) is not None
+        else:
+            raise ValueError("This is program bug, please report this issue.")
