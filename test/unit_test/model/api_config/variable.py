@@ -45,6 +45,10 @@ class TestVariable(CheckableTestSuite):
         assert obj.range == _Test_Variables_BigDecimal_USD["range"]
         assert obj.enum == _Test_Variables_BigDecimal_USD["enum"]
 
+    def test_key(self, sut: Variable):
+        # TODO: Should consider let this test be the base one in base test suite
+        assert sut.key == "<variable>"
+
 
 class TestVariableWithEnumFormat(CheckableTestSuite):
     test_data_dir = "variable"
