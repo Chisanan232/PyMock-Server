@@ -678,3 +678,18 @@ class OpenAPIVersion(Enum):
             raise NotImplementedError(f"PyMock-API doesn't support parsing OpenAPI configuration with version '{v}'.")
         else:
             return v
+
+
+class ValueFormat(Enum):
+    String: str = "string"
+    Integer: str = "integer"
+    BigDecimal: str = "big_decimal"
+    Boolean: str = "boolean"
+    Enum: str = "enum"
+
+    @staticmethod
+    def to_enum(v: Union[str, "ValueFormat"]) -> "ValueFormat":
+        if isinstance(v, str):
+            return ValueFormat(v.lower())
+        else:
+            return v
