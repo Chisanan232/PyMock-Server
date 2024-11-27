@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from ...._utils.file_opt import YAML, _BaseFileOperation
 from .._base import _Checkable, _Config
-from ..template import TemplateRequest
+from ..template import TemplateConfigPathRequest
 from ..template._base_wrapper import _DividableOnlyTemplatableConfig
 from ._property import BaseProperty
 
@@ -121,8 +121,8 @@ class HTTPRequest(_DividableOnlyTemplatableConfig, _Checkable):
         return self
 
     @property
-    def _template_setting(self) -> TemplateRequest:
-        return self._current_template.values.request
+    def _template_setting(self) -> TemplateConfigPathRequest:
+        return self._current_template.config_path_values.request
 
     def get_one_param_by_name(self, name: str) -> Optional[APIParameter]:
         for param in self.parameters:

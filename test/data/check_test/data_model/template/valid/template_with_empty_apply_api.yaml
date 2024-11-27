@@ -4,7 +4,7 @@ load_config:
   order:
     - 'apply'
     - 'file'
-values:
+config_path_values:
   base_file_path: './test/data/divide_test/has-base-info_and_tags_has_mocked_apis_with_divide_http_test/'    # Default value should be current path './'
   api:
     config_path_format: '**-api'    # ex. ./foo/get_foo.yaml
