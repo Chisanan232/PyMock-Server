@@ -1,0 +1,17 @@
+method: 'PUT'
+parameters:
+  - name: 'date'
+    required: true
+    default:
+    type: str
+    format:
+  - name: 'fooType'
+    required: true
+    default:
+    type: str
+    format:
+      strategy: 'from_enums'
+      enums:
+        - FOO_TYPE
+        - FOO_TYPE_2
+        - FOO_TYPE_3

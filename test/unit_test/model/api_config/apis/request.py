@@ -85,7 +85,11 @@ class TestAPIParameter(ConfigTestSpec):
         assert sut.required is _Test_API_Parameter["required"], _assertion_msg
         assert sut.default == _Test_API_Parameter["default"], _assertion_msg
         assert sut.value_type == _Test_API_Parameter["type"], _assertion_msg
-        assert sut.value_format == _Test_API_Parameter["format"], _assertion_msg
+        if _Test_API_Parameter["format"]:
+            assert sut.value_format.strategy.value == _Test_API_Parameter["format"]["strategy"], _assertion_msg
+            assert sut.value_format.enums == _Test_API_Parameter["format"].get("enums", []), _assertion_msg
+            assert sut.value_format.customize == _Test_API_Parameter["format"].get("customize", ""), _assertion_msg
+            assert sut.value_format.variables == _Test_API_Parameter["format"].get("variables", []), _assertion_msg
         assert sut.items is None, _assertion_msg
 
     def _expected_serialize_value(self) -> dict:
@@ -97,7 +101,11 @@ class TestAPIParameter(ConfigTestSpec):
         assert obj.required is _Test_API_Parameter["required"]
         assert obj.default == _Test_API_Parameter["default"]
         assert obj.value_type == _Test_API_Parameter["type"]
-        assert obj.value_format == _Test_API_Parameter["format"]
+        if _Test_API_Parameter["format"]:
+            assert obj.value_format.strategy.value == _Test_API_Parameter["format"]["strategy"], _assertion_msg
+            assert obj.value_format.enums == _Test_API_Parameter["format"].get("enums", []), _assertion_msg
+            assert obj.value_format.customize == _Test_API_Parameter["format"].get("customize", ""), _assertion_msg
+            assert obj.value_format.variables == _Test_API_Parameter["format"].get("variables", []), _assertion_msg
         assert obj.items is None
 
     def test_serialize_api_parameter_with_iterable_items(self, sut_with_nothing: APIParameter):

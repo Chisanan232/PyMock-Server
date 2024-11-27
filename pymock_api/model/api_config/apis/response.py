@@ -287,8 +287,12 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
             assert isinstance(
                 config_value, list
             ), "If HTTP response strategy is *object*, the data type of response value must be *list*."
-            for v in config_value:
-                assert isinstance(v, ResponseProperty)
-                v.stop_if_fail = self.stop_if_fail
-                return v.is_work()
+
+            def _resp_prop_is_work(p: ResponseProperty) -> bool:
+                p.stop_if_fail = self.stop_if_fail
+                return p.is_work()
+
+            is_work_props = list(filter(lambda v: _resp_prop_is_work(v), config_value))
+            if len(is_work_props) != len(config_value):
+                return False
             return True
