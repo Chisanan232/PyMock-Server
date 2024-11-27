@@ -182,7 +182,10 @@ class _Checkable(metaclass=ABCMeta):
 @dataclass(eq=False)
 class _BaseConfig(_Config, ABC):
     def __post_init__(self):
-        pass
+        """
+        For the Python MRO, some specific base data models would need to override this method to reach some feature like
+        deserialize.
+        """
 
 
 @dataclass(eq=False)
