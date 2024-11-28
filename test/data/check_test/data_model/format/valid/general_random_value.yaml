@@ -1,1 +1,1 @@
-strategy: 'random_string'
+strategy: 'by_data_type'
