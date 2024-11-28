@@ -85,83 +85,6 @@ _Mock_Templatable_Setting: dict = {
     "apply_template_props": False,
 }
 
-
-# Sample item of iterator
-_Test_Iterable_Parameter_Item_Name: dict = {
-    "name": "name",
-    "required": True,
-    "type": "str",
-}
-_Test_Iterable_Parameter_Item_Value: dict = {
-    "name": "value",
-    "required": True,
-    "type": "str",
-}
-_Test_Iterable_Parameter_Items: List[dict] = [_Test_Iterable_Parameter_Item_Name, _Test_Iterable_Parameter_Item_Value]
-_Test_Iterable_Parameter_With_Single_Value: dict = {
-    "name": "single_iterable_param",
-    "required": True,
-    "default": None,
-    "type": "list",
-    "format": None,
-    "items": [_Test_Iterable_Parameter_Item_Name],
-}
-_Test_Iterable_Parameter_With_MultiValue: dict = {
-    "name": "iterable_param",
-    "required": True,
-    "default": [],
-    "type": "list",
-    "format": None,
-    "items": _Test_Iterable_Parameter_Items,
-}
-
-# Sample API parameters
-_Test_API_Parameter: dict = {
-    "name": "param1",
-    "required": True,
-    "default": None,
-    "type": "str",
-    "format": {
-        "strategy": "customize",
-        "customize": "any_format",
-    },
-}
-_Test_API_Parameter_With_Int: dict = {
-    "name": "param2",
-    "required": False,
-    "default": 0,
-    "type": "int",
-    "format": None,
-}
-_Test_API_Parameter_With_Str: dict = {
-    "name": "param3",
-    "required": False,
-    "default": "default_value",
-    "type": "str",
-    "format": None,
-}
-_Test_API_Parameter_Without_Default: dict = {
-    "name": "param4",
-    "required": False,
-    "default": None,
-    "type": "dict",
-    "format": None,
-}
-_Test_API_Parameters: List[dict] = [
-    _Test_API_Parameter,
-    _Test_API_Parameter_With_Int,
-    _Test_API_Parameter_With_Str,
-    _Test_API_Parameter_Without_Default,
-]
-
-# Test HTTP response
-_General_String_Value: str = "This is test message for PyTest."
-_Json_File_Name: str = "test.json"
-_Json_File_Content: dict = {"responseCode": "200", "errorMessage": "OK", "content": "This is YouTube home."}
-_Not_Exist_File_Name: str = "not_exist.json"
-_Not_Json_File_Name: str = "test.yaml"
-_Unexpected_File_Name: str = ".file"
-
 # Test variable
 # The expect value it should generate: 123456.123
 _Test_Variables_BigDecimal_USD: dict = {
@@ -234,6 +157,110 @@ _Customize_Format_With_Self_Vars: dict = {
         _Test_Variables_Currency_Code,
     ],
 }
+
+# Sample item of iterator
+_Test_Iterable_Parameter_Item_Name: dict = {
+    "name": "name",
+    "required": True,
+    "type": "str",
+}
+_Test_Iterable_Parameter_Item_Value: dict = {
+    "name": "value",
+    "required": True,
+    "type": "str",
+}
+_Test_Iterable_Parameter_Items: List[dict] = [_Test_Iterable_Parameter_Item_Name, _Test_Iterable_Parameter_Item_Value]
+_Test_Iterable_Parameter_With_Single_Value: dict = {
+    "name": "single_iterable_param",
+    "required": True,
+    "default": None,
+    "type": "list",
+    "format": None,
+    "items": [_Test_Iterable_Parameter_Item_Name],
+}
+_Test_Iterable_Parameter_With_MultiValue: dict = {
+    "name": "iterable_param",
+    "required": True,
+    "default": [],
+    "type": "list",
+    "format": None,
+    "items": _Test_Iterable_Parameter_Items,
+}
+
+# Sample API parameters
+_Test_API_Parameter: dict = {
+    "name": "param1",
+    "required": True,
+    "default": None,
+    "type": "str",
+    "format": {
+        "strategy": "customize",
+        "customize": "any_format",
+    },
+}
+_Test_API_Parameter_With_Int: dict = {
+    "name": "param2",
+    "required": False,
+    "default": 0,
+    "type": "int",
+    "format": None,
+}
+_Test_API_Parameter_With_Str: dict = {
+    "name": "param3",
+    "required": False,
+    "default": "default_value",
+    "type": "str",
+    "format": None,
+}
+_Test_API_Parameter_Without_Default: dict = {
+    "name": "param4",
+    "required": False,
+    "default": None,
+    "type": "dict",
+    "format": None,
+}
+_Test_API_Parameter_With_General_Format_Str: dict = {
+    "name": "format_param_str",
+    "required": False,
+    "default": None,
+    "type": "str",
+    "format": _General_Format,
+}
+_Test_API_Parameter_With_General_Format_Float: dict = {
+    "name": "format_param_float",
+    "required": False,
+    "default": None,
+    "type": "float",
+    "format": _General_Format,
+}
+_Test_API_Parameter_With_Enum_Format: dict = {
+    "name": "format_param",
+    "required": True,
+    "default": None,
+    "type": "str",
+    "format": _General_Enum_Format,
+}
+_Test_API_Parameter_With_Customize_Format: dict = {
+    "name": "format_param",
+    "required": True,
+    "default": None,
+    "type": "str",
+    "format": _Customize_Format_With_Self_Vars,
+}
+_Test_API_Parameters: List[dict] = [
+    _Test_API_Parameter,
+    _Test_API_Parameter_With_Int,
+    _Test_API_Parameter_With_Str,
+    _Test_API_Parameter_Without_Default,
+]
+
+# Test HTTP response
+_General_String_Value: str = "This is test message for PyTest."
+_Json_File_Name: str = "test.json"
+_Json_File_Content: dict = {"responseCode": "200", "errorMessage": "OK", "content": "This is YouTube home."}
+_Not_Exist_File_Name: str = "not_exist.json"
+_Not_Json_File_Name: str = "test.yaml"
+_Unexpected_File_Name: str = ".file"
 
 _Test_Response_Property_Int: dict = {
     "name": "id",
@@ -494,6 +521,54 @@ _Foo_With_Multiple_Variables_In_Api: dict = {
     "cookie": [{"USERNAME": "test"}, {"SESSION_EXPIRED": "2023-12-31T00:00:00.000"}],
 }
 
+# API has parameters which have format setting
+_Test_Home_With_General_Format_Req_Param: dict = {
+    "url": "/test/verify-general-format-req-param",
+    "http": {
+        "request": {
+            "method": "GET",
+            "parameters": [_Test_API_Parameter_With_General_Format_Str, _Test_API_Parameter_With_General_Format_Float],
+        },
+        "response": {
+            "strategy": "string",
+            "value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }',
+        },
+    },
+    "cookie": [{"TEST": "cookie_value"}],
+}
+
+# API has parameters which have format setting
+_Test_Home_With_Enums_Format_Req_Param: dict = {
+    "url": "/test/verify-enums-format-req-param",
+    "http": {
+        "request": {
+            "method": "POST",
+            "parameters": [_Test_API_Parameter_With_Enum_Format],
+        },
+        "response": {
+            "strategy": "string",
+            "value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }',
+        },
+    },
+    "cookie": [{"TEST": "cookie_value"}],
+}
+
+# API has parameters which have format setting
+_Test_Home_With_Customize_Format_Req_Param: dict = {
+    "url": "/test/verify-customize-format-req-param",
+    "http": {
+        "request": {
+            "method": "PUT",
+            "parameters": [_Test_API_Parameter_With_Customize_Format],
+        },
+        "response": {
+            "strategy": "string",
+            "value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is Test home." }',
+        },
+    },
+    "cookie": [{"TEST": "cookie_value"}],
+}
+
 
 _Mocked_APIs: dict = {
     "template": _Mock_Template_Setting,
@@ -509,6 +584,9 @@ _Mocked_APIs: dict = {
         "foo-object_data": _Foo_Object_Data_Value,
         "foo_var_id": _Foo_With_Variable_In_Api,
         "foo_var_id_process_var_work_id": _Foo_With_Multiple_Variables_In_Api,
+        "test_verify_general_format_req_param": _Test_Home_With_General_Format_Req_Param,
+        "test_verify_enums_format_req_param": _Test_Home_With_Enums_Format_Req_Param,
+        "test_verify_customize_format_req_param": _Test_Home_With_Customize_Format_Req_Param,
     },
 }
 

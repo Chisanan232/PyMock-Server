@@ -27,6 +27,9 @@ from ...._values import (
     _Post_Google_Home_Value,
     _Put_Google_Home_Value,
     _Test_Home,
+    _Test_Home_With_Customize_Format_Req_Param,
+    _Test_Home_With_Enums_Format_Req_Param,
+    _Test_Home_With_General_Format_Req_Param,
     _Test_Iterable_Parameter_With_MultiValue,
     _YouTube_API_Content,
     _YouTube_Home_Value,
@@ -106,6 +109,18 @@ class MockHTTPServerTestSpec:
             _test_api_attr(api=_Foo_Object_Data_Value, payload={"param1": "any_format"}),
             _test_api_attr(api=_Foo_With_Variable_In_Api, payload={"param1": "any_format"}),
             _test_api_attr(api=_Foo_With_Multiple_Variables_In_Api, payload={"param1": "any_format"}),
+            _test_api_attr(
+                api=_Test_Home_With_General_Format_Req_Param,
+                payload={"format_param_str": "string_value_with_any_format"},
+            ),
+            _test_api_attr(
+                api=_Test_Home_With_General_Format_Req_Param,
+                payload={"format_param_float": 123.123},
+            ),
+            _test_api_attr(api=_Test_Home_With_Enums_Format_Req_Param, payload={"format_param": "ENUM2"}),
+            _test_api_attr(
+                api=_Test_Home_With_Customize_Format_Req_Param, payload={"format_param": "123.321 USD\n567 TWD"}
+            ),
         ],
     )
     def test_mock_apis(

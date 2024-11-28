@@ -8,6 +8,8 @@ from ...model.api_config.apis import APIParameter
 
 
 class BaseCurrentRequest(metaclass=ABCMeta):
+    int_type_value_is_string: bool = False
+
     @abstractmethod
     def request_instance(self, **kwargs) -> Any:
         pass
@@ -29,6 +31,9 @@ class BaseCurrentRequest(metaclass=ABCMeta):
 
 
 class FlaskRequest(BaseCurrentRequest):
+    # For Flask, the API parameter always be string even it's integer.
+    int_type_value_is_string: bool = True
+
     def request_instance(self, **kwargs) -> "flask.Request":  # type: ignore
         return import_web_lib.flask().request
 

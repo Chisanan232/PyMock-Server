@@ -24,7 +24,13 @@ from pymock_api.server.application.response import (
     FlaskResponse,
 )
 
-from ...._values import _Google_Home_Value, _Post_Google_Home_Value
+from ...._values import (
+    _Google_Home_Value,
+    _Post_Google_Home_Value,
+    _Test_Home_With_Customize_Format_Req_Param,
+    _Test_Home_With_Enums_Format_Req_Param,
+    _Test_Home_With_General_Format_Req_Param,
+)
 
 MockerModule = namedtuple("MockerModule", ["module_path", "return_value"])
 
@@ -70,39 +76,126 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
         pass
 
     @pytest.mark.parametrize(
-        ("method", "api_params", "error_msg_like", "expected_status_code"),
+        ("path", "method", "api_params", "error_msg_like", "expected_status_code"),
         [
             # Valid request with *GET* HTTP method
-            ("GET", {"param1": "any_format", "single_iterable_param": ["param1", "param2", "param3"]}, None, 200),
-            # Invalid request with *GET* HTTP method
-            ("GET", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
-            ("GET", {"param1": None}, ["Miss required parameter"], 400),
-            ("GET", {"param1": 123}, ["type of data", "is different"], 400),
-            ("GET", {"param1": "any_format", "single_iterable_param": [123]}, ["type of data", "is different"], 400),
-            ("GET", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
-            # Valid request with *POST* HTTP method
-            ("POST", {"param1": "any_format", "iterable_param": [{"name": "param1", "value": "value1"}]}, None, 200),
-            # Invalid request with *POST* HTTP method
-            ("POST", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
-            ("POST", {"param1": None}, ["Miss required parameter"], 400),
-            ("POST", {"param1": 123}, ["type of data", "is different"], 400),
             (
+                "/test-api-path",
+                "GET",
+                {"param1": "any_format", "single_iterable_param": ["param1", "param2", "param3"]},
+                None,
+                200,
+            ),
+            # Invalid request with *GET* HTTP method
+            ("/test-api-path", "GET", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
+            ("/test-api-path", "GET", {"param1": None}, ["Miss required parameter"], 400),
+            ("/test-api-path", "GET", {"param1": 123}, ["type of data", "is different"], 400),
+            (
+                "/test-api-path",
+                "GET",
+                {"param1": "any_format", "single_iterable_param": [123]},
+                ["type of data", "is different"],
+                400,
+            ),
+            ("/test-api-path", "GET", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
+            # Valid request with *POST* HTTP method
+            (
+                "/test-api-path",
+                "POST",
+                {"param1": "any_format", "iterable_param": [{"name": "param1", "value": "value1"}]},
+                None,
+                200,
+            ),
+            # Invalid request with *POST* HTTP method
+            ("/test-api-path", "POST", {"miss_param": "miss_param"}, ["Miss required parameter"], 400),
+            ("/test-api-path", "POST", {"param1": None}, ["Miss required parameter"], 400),
+            ("/test-api-path", "POST", {"param1": 123}, ["type of data", "is different"], 400),
+            (
+                "/test-api-path",
                 "POST",
                 {"param1": "any_format", "iterable_param": [{"name": "param1", "miss_param": "miss_param"}]},
                 ["Miss required parameter"],
                 400,
             ),
             (
+                "/test-api-path",
                 "POST",
                 {"param1": "any_format", "iterable_param": [{"name": "param1", "value": 123}]},
                 ["type of data", "is different"],
                 400,
             ),
-            ("POST", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
+            ("/test-api-path", "POST", {"param1": "incorrect_format"}, ["format of data", "is incorrect"], 400),
+            # Valid request with general format strategy
+            ("/test-api-req-param-format", "GET", {"format_param_str": "string_value"}, None, 200),
+            (
+                "/test-api-req-param-format",
+                "GET",
+                {"format_param_str": "@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,."},
+                None,
+                200,
+            ),
+            ("/test-api-req-param-format", "GET", {"format_param_float": 123.123}, None, 200),
+            (
+                "/test-api-req-param-format",
+                "GET",
+                {"format_param_str": "string_value", "format_param_float": 123.123},
+                None,
+                200,
+            ),
+            # Valid request with enum format strategy
+            ("/test-api-req-param-format", "POST", {"format_param": "ENUM2"}, None, 200),
+            # Valid request with customize format strategy
+            ("/test-api-req-param-format", "PUT", {"format_param": "123.123 USD\n456 TWD"}, None, 200),
+            # Invalid request with general format strategy
+            (
+                "/test-api-req-param-format",
+                "GET",
+                {"format_param_float": "not big decimal value"},
+                ["type of data", "is different"],
+                400,
+            ),
+            (
+                "/test-api-req-param-format",
+                "GET",
+                {"format_param_str": "string_value", "format_param_float": "not big decimal value"},
+                ["type of data", "is different"],
+                400,
+            ),
+            # Invalid request with enum format strategy
+            (
+                "/test-api-req-param-format",
+                "POST",
+                {"format_param": "NOT_EXIST_ENUM"},
+                ["format should be", "oen of the enums value"],
+                400,
+            ),
+            # Invalid request with customize format strategy
+            (
+                "/test-api-req-param-format",
+                "PUT",
+                {"format_param": "123.123 USD"},
+                ["format should be", "like format as"],
+                400,
+            ),
+            (
+                "/test-api-req-param-format",
+                "PUT",
+                {"format_param": "not big decimal USD\n456 TWD"},
+                ["format should be", "like format as"],
+                400,
+            ),
+            (
+                "/test-api-req-param-format",
+                "PUT",
+                {"format_param": "123.123 NOT_EXIST_CURRENCY\n456 TWD"},
+                ["format should be", "like format as"],
+                400,
+            ),
         ],
     )
-    def test_invalid_request_process(
+    def test_request_process(
         self,
+        path: str,
         method: str,
         api_params: dict,
         error_msg_like: Optional[List[str]],
@@ -112,7 +205,7 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
         sut: Type[HTTPRequestProcess],
     ):
         # Mock request
-        current_request = self._mock_request(method=method, api_params=api_params)
+        current_request = self._mock_request(path=path, method=method, api_params=api_params)
 
         request_utils.request_instance = MagicMock(return_value=current_request)  # type: ignore[method-assign]
         sut_instance = sut(
@@ -124,25 +217,37 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
             "/test-api-path": {
                 _Google_Home_Value["http"]["request"]["method"]: MockAPI().deserialize(_Google_Home_Value),
                 _Post_Google_Home_Value["http"]["request"]["method"]: MockAPI().deserialize(_Post_Google_Home_Value),
-            }
+            },
+            "/test-api-req-param-format": {
+                _Test_Home_With_General_Format_Req_Param["http"]["request"]["method"]: MockAPI().deserialize(
+                    _Test_Home_With_General_Format_Req_Param
+                ),
+                _Test_Home_With_Enums_Format_Req_Param["http"]["request"]["method"]: MockAPI().deserialize(
+                    _Test_Home_With_Enums_Format_Req_Param
+                ),
+                _Test_Home_With_Customize_Format_Req_Param["http"]["request"]["method"]: MockAPI().deserialize(
+                    _Test_Home_With_Customize_Format_Req_Param
+                ),
+            },
         }
 
         # Run target function
         response = self._run_request_process_func(sut_instance, request=current_request)
 
         # Verify
+        response_content = self._get_response_content(response)
+        response_str = response_content.decode("utf-8") if isinstance(response_content, bytes) else response_content
+        print(f"[DEBUG in test_request_process] response: {response_str}")
         assert isinstance(response, self._expected_response_type)
         assert response.status_code == expected_status_code
         if response.status_code != 200:
-            response_content = self._get_response_content(response)
-            response_str = response_content.decode("utf-8") if isinstance(response_content, bytes) else response_content
             regular = r""
             for er_msg_f in error_msg_like or []:
                 regular += r".{0,512}" + re.escape(er_msg_f)
             assert re.search(regular, response_str, re.IGNORECASE)  # type: ignore[arg-type]
 
     @abstractmethod
-    def _mock_request(self, method: str, api_params: dict) -> Mock:
+    def _mock_request(self, path: str, method: str, api_params: dict) -> Mock:
         pass
 
     @abstractmethod
@@ -180,7 +285,7 @@ class TestHTTPRequestProcessWithFlask(HTTPProcessTestSpec):
     def mocker(self) -> MockerModule:
         return MockerModule(module_path="flask.Flask", return_value=FakeFlask("PyTest-Used"))
 
-    def _mock_request(self, method: str, api_params: dict) -> Mock:
+    def _mock_request(self, path: str, method: str, api_params: dict) -> Mock:
         def _get_list_param() -> str:
             has_single_iterable_param = api_params.get("single_iterable_param", None) is not None
             has_iterable_param = api_params.get("iterable_param", None) is not None
@@ -198,7 +303,7 @@ class TestHTTPRequestProcessWithFlask(HTTPProcessTestSpec):
         dd.update(**api_params)
 
         request = Mock()
-        request.path = "/test-api-path"
+        request.path = path
         request.method = method
         if method.upper() == "GET":
             request.args = dd
@@ -240,9 +345,9 @@ class TestHTTPRequestWithFastAPI(HTTPProcessTestSpec):
     def mocker(self) -> MockerModule:
         return MockerModule(module_path="fastapi.FastAPI", return_value=FakeFastAPI())
 
-    def _mock_request(self, method: str, api_params: dict) -> Mock:
+    def _mock_request(self, path: str, method: str, api_params: dict) -> Mock:
         route_prop = Mock()
-        route_prop.path = "/test-api-path"
+        route_prop.path = path
 
         request = Mock()
         request.scope = {

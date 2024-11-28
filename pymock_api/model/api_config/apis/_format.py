@@ -3,6 +3,7 @@ import re
 from abc import ABC
 from dataclasses import dataclass, field
 from decimal import Decimal
+from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
 from ...enums import FormatStrategy
@@ -126,9 +127,28 @@ class Format(_Config, _Checkable):
             return False
         return True
 
-    def value_format_is_match(self, data_type: type, value: Any, enums: List[str] = [], customize: str = "") -> bool:
+    def value_format_is_match(self, data_type: Union[str, type], value: Any) -> bool:
         assert self.strategy
-        return self.strategy.chk_format_is_match(data_type=data_type, value=value, enums=enums, customize=customize)
+        if self.strategy is FormatStrategy.BY_DATA_TYPE:
+            data_type = "big_decimal" if isinstance(data_type, float) else data_type
+            data_type = locate(data_type) if (data_type != "big_decimal" and isinstance(data_type, str)) else data_type  # type: ignore[assignment]
+            regex = self.strategy.to_value_format(data_type).generate_regex()
+            return re.search(regex, str(value)) is not None
+        elif self.strategy is FormatStrategy.FROM_ENUMS:
+            return isinstance(value, str) and value in self.enums
+        elif self.strategy is FormatStrategy.CUSTOMIZE:
+            all_vars_in_customize = re.findall(r"<\w{1,128}>", str(self.customize), re.IGNORECASE)
+            regex = re.escape(copy.copy(self.customize))
+            for var in all_vars_in_customize:
+                pure_var = var.replace("<", "").replace(">", "")
+                find_result: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
+                assert len(find_result) == 1, "Cannot find the mapping name of variable setting."
+                assert find_result[0].value_format
+                one_var_regex = find_result[0].value_format.generate_regex(enums=find_result[0].enum or [])
+                regex = regex.replace(var, one_var_regex)
+            return re.search(regex, str(value), re.IGNORECASE) is not None
+        else:
+            raise ValueError("This is program bug, please report this issue.")
 
     def generate_value(self, data_type: type) -> Union[str, int, bool, Decimal]:
         assert self.strategy
@@ -145,6 +165,16 @@ class Format(_Config, _Checkable):
             return value
         else:
             return self.strategy.generate_not_customize_value(data_type=data_type, enums=self.enums)
+
+    def expect_format_log_msg(self, data_type: type) -> str:
+        if self.strategy is FormatStrategy.BY_DATA_TYPE:
+            return f"*{data_type}* type data"
+        elif self.strategy is FormatStrategy.FROM_ENUMS:
+            return f"oen of the enums value *{self.enums}*"
+        elif self.strategy is FormatStrategy.CUSTOMIZE:
+            return f"like format as *{self.customize}*. Please refer to the property *variables* to know the details of variable settings."
+        else:
+            raise ValueError("Unsupported FormatStrategy")
 
 
 @dataclass(eq=False)
