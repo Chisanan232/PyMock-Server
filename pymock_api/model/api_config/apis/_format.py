@@ -1,6 +1,9 @@
+import copy
+import re
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from decimal import Decimal
+from typing import Any, Dict, List, Optional, Union
 
 from ...enums import FormatStrategy
 from .._base import _BaseConfig, _Checkable, _Config
@@ -123,9 +126,25 @@ class Format(_Config, _Checkable):
             return False
         return True
 
-    def value_format_is_match(self, value: Any, enums: List[str] = [], customize: str = "") -> bool:
+    def value_format_is_match(self, data_type: type, value: Any, enums: List[str] = [], customize: str = "") -> bool:
         assert self.strategy
-        return self.strategy.chk_format_is_match(value=value, enums=enums, customize=customize)
+        return self.strategy.chk_format_is_match(data_type=data_type, value=value, enums=enums, customize=customize)
+
+    def generate_value(self, data_type: type) -> Union[str, int, bool, Decimal]:
+        assert self.strategy
+        if self.strategy is FormatStrategy.CUSTOMIZE:
+            all_vars_in_customize = re.findall(r"<\w{1,128}>", str(self.customize), re.IGNORECASE)
+            value = copy.copy(self.customize)
+            for var in all_vars_in_customize:
+                pure_var = var.replace("<", "").replace(">", "")
+                find_result: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
+                assert len(find_result) == 1, "Cannot find the mapping name of variable setting."
+                assert find_result[0].value_format
+                new_value = find_result[0].value_format.generate_value(enums=find_result[0].enum or [])
+                value = value.replace(var, str(new_value))
+            return value
+        else:
+            return self.strategy.generate_not_customize_value(data_type=data_type, enums=self.enums)
 
 
 @dataclass(eq=False)
@@ -175,3 +194,13 @@ class _HasFormatPropConfig(_BaseConfig, _Checkable, ABC):
         if is_work is False:
             return False
         return True
+
+    def generate_value_by_format(
+        self, data_type: Optional[type] = None, default: str = "no default"
+    ) -> Union[str, int, bool, Decimal]:
+        if self.value_format is not None:
+            assert data_type is not None, "Format setting require *data_type* must not be empty."
+            value = self.value_format.generate_value(data_type=data_type)
+        else:
+            value = default
+        return value

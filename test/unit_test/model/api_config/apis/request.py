@@ -1,4 +1,5 @@
 import re
+from typing import Type
 
 import pytest
 
@@ -17,6 +18,7 @@ from ....._values import (
 from .._base import (
     CheckableTestSuite,
     ConfigTestSpec,
+    HasFormatPropConfigTestSuite,
     _assertion_msg,
     set_checking_test_data,
 )
@@ -65,7 +67,7 @@ class TestHTTPReqeust(TemplatableConfigTestSuite, CheckableTestSuite):
         assert param is None
 
 
-class TestAPIParameter(ConfigTestSpec):
+class TestAPIParameter(ConfigTestSpec, HasFormatPropConfigTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> APIParameter:
         return APIParameter(
@@ -166,3 +168,8 @@ class TestAPIParameter(ConfigTestSpec):
             str(exc_info.value),
             re.IGNORECASE,
         )
+
+    # for base *HasFormatPropConfigTestSuite*
+    @property
+    def _data_model_not_instantiate_yet(self) -> Type[APIParameter]:
+        return APIParameter

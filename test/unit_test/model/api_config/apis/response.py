@@ -18,6 +18,7 @@ from ....._values import (
 from .._base import (
     CheckableTestSuite,
     ConfigTestSpec,
+    HasFormatPropConfigTestSuite,
     HasItemsPropConfigTestSuite,
     MockModel,
     _assertion_msg,
@@ -26,7 +27,7 @@ from .._base import (
 from ..template._base import TemplatableConfigTestSuite
 
 
-class TestResponseProperty(ConfigTestSpec):
+class TestResponseProperty(ConfigTestSpec, HasFormatPropConfigTestSuite):
     @pytest.fixture(scope="function")
     def sut(self) -> ResponseProperty:
         return ResponseProperty(
@@ -91,6 +92,11 @@ class TestResponseProperty(ConfigTestSpec):
             str(exc_info.value),
             re.IGNORECASE,
         )
+
+    # for base *HasFormatPropConfigTestSuite*
+    @property
+    def _data_model_not_instantiate_yet(self) -> Type[ResponseProperty]:
+        return ResponseProperty
 
 
 class TestResponsePropertyWithNestedData(TestResponseProperty, HasItemsPropConfigTestSuite):

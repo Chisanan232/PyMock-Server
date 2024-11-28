@@ -107,9 +107,12 @@ class HTTPRequestProcess(BaseHTTPProcess):
                                     status_code=400,
                                 )
                 # Check the data format of parameter
+                assert param_info.value_type, "Miss required property *value_type*."
+                data_type = locate(param_info.value_type)
+                assert isinstance(data_type, type)
                 value_format = param_info.value_format
                 if param_info.value_format and not value_format.value_format_is_match(  # type: ignore[union-attr]
-                    value=one_req_param_value, enums=value_format.enums, customize=value_format.customize  # type: ignore[union-attr]
+                    data_type=data_type, value=one_req_param_value, enums=value_format.enums, customize=value_format.customize  # type: ignore[union-attr]
                 ):
                     return self._generate_http_response(
                         f"The format of data from Font-End site (value: *{one_req_param_value}*) is incorrect. Its "

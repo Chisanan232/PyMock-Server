@@ -1,6 +1,7 @@
 import json
 import os
 from abc import ABCMeta, abstractmethod
+from decimal import Decimal
 from pydoc import locate
 from typing import Any, List, Union
 
@@ -79,15 +80,18 @@ class HTTPResponse:
     @classmethod
     def _generate_response_from_object(cls, data: MockAPIHTTPResponseConfig) -> dict:
 
-        def _initial_resp_details(v: ResponseProperty) -> Union[str, dict]:
+        def _initial_resp_details(v: ResponseProperty) -> Union[str, int, Decimal, bool, list, dict]:
             assert v.value_type
+            data_type = locate(v.value_type)
+            assert isinstance(data_type, type)
             if locate(v.value_type) is str:
-                # lowercase_letters = string.ascii_lowercase
-                # value = "".join([random.choice(lowercase_letters) for _ in range(5)])
-                value = "random string"
+                value = v.generate_value_by_format(data_type=data_type, default="random string")
             elif locate(v.value_type) is int:
-                # value = int("".join([random.choice([f"{i}" for i in range(10)]) for _ in range(5)]))
-                value = "random integer"
+                value = v.generate_value_by_format(data_type=data_type, default="random integer")
+            elif locate(v.value_type) is float:
+                value = v.generate_value_by_format(data_type=data_type, default="random big decimal")
+            elif locate(v.value_type) is bool:
+                value = v.generate_value_by_format(data_type=data_type, default="random boolean")
             elif locate(v.value_type) in (list, dict):
                 value = [] if locate(v.value_type) is list else {}  # type: ignore[assignment]
                 item = {}  # type: ignore[var-annotated]
@@ -97,7 +101,7 @@ class HTTPResponse:
                     else:
                         item[i.name] = _initial_resp_details(i)  # type: ignore[arg-type]
                 if locate(v.value_type) is list:
-                    value.append(item)  # type: ignore[attr-defined]
+                    value.append(item)  # type: ignore[union-attr]
                     assert isinstance(value, list)
                 else:
                     value = item  # type: ignore[assignment]

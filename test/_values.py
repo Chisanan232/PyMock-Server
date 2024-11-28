@@ -191,7 +191,7 @@ _Test_Variables_Currency_Code: dict = {
 
 # The expect value it should generate: dgwretvgweg
 _General_Format: dict = {
-    "strategy": "random_string",
+    "strategy": "by_data_type",
 }
 _Test_Response_Property_General_Format: dict = {
     "name": "sample_name",
@@ -246,7 +246,7 @@ _Test_Response_Property_Str: dict = {
     "required": True,
     "type": "str",
     "format": {
-        "strategy": "random_string",
+        "strategy": "by_data_type",
     },
 }
 _Test_Response_Property_List: dict = {
