@@ -33,7 +33,7 @@ class _Config(metaclass=ABCMeta):
 
     @abstractmethod
     def _compare(self, other: SelfType) -> bool:
-        pass
+        return True
 
     @property
     def absolute_model_key(self) -> str:
@@ -180,7 +180,16 @@ class _Checkable(metaclass=ABCMeta):
 
 
 @dataclass(eq=False)
-class _HasItemsPropConfig(_Config, _Checkable, ABC):
+class _BaseConfig(_Config, ABC):
+    def __post_init__(self):
+        """
+        For the Python MRO, some specific base data models would need to override this method to reach some feature like
+        deserialize.
+        """
+
+
+@dataclass(eq=False)
+class _HasItemsPropConfig(_BaseConfig, _Checkable, ABC):
     items: Optional[List["_HasItemsPropConfig"]] = None
 
     def _compare(self, other: "_HasItemsPropConfig") -> bool:
@@ -203,7 +212,7 @@ class _HasItemsPropConfig(_Config, _Checkable, ABC):
                 items_prop_is_same = False
                 break
 
-        return items_prop_is_same
+        return items_prop_is_same and super()._compare(other)
 
     @abstractmethod
     def _find_same_key_item_to_compare(
@@ -214,6 +223,7 @@ class _HasItemsPropConfig(_Config, _Checkable, ABC):
     def __post_init__(self) -> None:
         if self.items is not None:
             self._convert_items()
+        super().__post_init__()
 
     def _convert_items(self):
         if False in list(map(lambda i: isinstance(i, (dict, self._item_type())), self.items)):
@@ -241,6 +251,10 @@ class _HasItemsPropConfig(_Config, _Checkable, ABC):
             serialized_data["items"] = [
                 item.serialize() if isinstance(item, self._item_type()) else item for item in items
             ]
+
+        serialized_data_model = super().serialize(data)  # type: ignore[safe-super]
+        if serialized_data_model:
+            serialized_data.update(serialized_data_model)
         return serialized_data
 
     @_Config._ensure_process_with_not_empty_value
@@ -250,6 +264,8 @@ class _HasItemsPropConfig(_Config, _Checkable, ABC):
             for item in (data.get("items", []) or [])
         ]
         self.items = items if items else None
+
+        super().deserialize(data)  # type: ignore[safe-super]
         return self
 
     def is_work(self) -> bool:
@@ -262,4 +278,8 @@ class _HasItemsPropConfig(_Config, _Checkable, ABC):
             is_work_props = list(filter(lambda i: _i_is_work(i), self.items))
             if len(is_work_props) != len(self.items):
                 return False
+
+        is_work = super().is_work()  # type: ignore[safe-super]
+        if is_work is False:
+            return False
         return True

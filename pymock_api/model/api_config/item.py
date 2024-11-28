@@ -3,10 +3,11 @@ from pydoc import locate
 from typing import Any, Dict, List, Optional, Type
 
 from ._base import _Config, _HasItemsPropConfig
+from .apis._format import _HasFormatPropConfig
 
 
 @dataclass(eq=False)
-class IteratorItem(_HasItemsPropConfig):
+class IteratorItem(_HasFormatPropConfig, _HasItemsPropConfig):
     name: str = field(default_factory=str)
     required: Optional[bool] = None
     value_type: Optional[str] = None  # A type value as string
