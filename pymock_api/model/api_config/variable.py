@@ -114,12 +114,11 @@ class Size(_Config, _Checkable):
             ):
                 return False
 
-        if self.only_equal:
-            if not self.condition_should_be_true(
-                config_key=f"{self.absolute_model_key}.only_equal",
-                condition=(self.only_equal is not None and not isinstance(self.only_equal, int)),
-            ):
-                return False
+        if self.only_equal and not self.condition_should_be_true(
+            config_key=f"{self.absolute_model_key}.only_equal",
+            condition=(self.only_equal is not None and not isinstance(self.only_equal, int)),
+        ):
+            return False
         return True
 
     def to_value_size(self) -> ValueSize:
