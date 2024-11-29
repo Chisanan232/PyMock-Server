@@ -1,3 +1,4 @@
+import re
 from abc import ABC, ABCMeta, abstractmethod
 from pydoc import locate
 from typing import Any, Dict, List, Union, cast
@@ -71,14 +72,25 @@ class HTTPRequestProcess(BaseHTTPProcess):
                 return self._generate_http_response(f"Miss required parameter *{param_info.name}*.", status_code=400)
             if one_req_param_value:
                 # Check the data type of parameter
-                if param_info.value_type and not isinstance(one_req_param_value, locate(param_info.value_type)):  # type: ignore[arg-type]
-                    return self._generate_http_response(
-                        f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different with the "
-                        f"implementation of Back-End site (*{locate(param_info.value_type)}*).",
-                        status_code=400,
-                    )
+                assert param_info.value_type, "It must cannot miss the value type value of each parameters."
+                value_py_data_type: type = locate(param_info.value_type)  # type: ignore[assignment]
+                if value_py_data_type in [int, float, "big_decimal"] and self._request.int_type_value_is_string:
+                    # For the Flask part. It would always be string type of each API parameter.
+                    if re.search(r"\d{1,128}", str(one_req_param_value)) is None:
+                        return self._generate_http_response(
+                            f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different with the "
+                            f"implementation of Back-End site (*{value_py_data_type}*).",
+                            status_code=400,
+                        )
+                else:
+                    if param_info.value_type and not isinstance(one_req_param_value, value_py_data_type):
+                        return self._generate_http_response(
+                            f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different with the "
+                            f"implementation of Back-End site (*{value_py_data_type}*).",
+                            status_code=400,
+                        )
                 # Check the element of list
-                if param_info.value_type and locate(param_info.value_type) is list and param_info.items:
+                if param_info.value_type and value_py_data_type is list and param_info.items:
                     assert isinstance(one_req_param_value, list)
                     for e in one_req_param_value:
                         if len(param_info.items) > 1:
@@ -92,7 +104,7 @@ class HTTPRequestProcess(BaseHTTPProcess):
                                 if item.value_type and not isinstance(e[item.name], locate(item.value_type)):  # type: ignore[arg-type]
                                     return self._generate_http_response(
                                         f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different "
-                                        f"with the implementation of Back-End site (*{locate(param_info.value_type)}*).",
+                                        f"with the implementation of Back-End site (*{value_py_data_type}*).",
                                         status_code=400,
                                     )
                         elif len(param_info.items) == 1:
@@ -103,20 +115,20 @@ class HTTPRequestProcess(BaseHTTPProcess):
                             if item.value_type and not isinstance(e, locate(item.value_type)):  # type: ignore[arg-type]
                                 return self._generate_http_response(
                                     f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different "
-                                    f"with the implementation of Back-End site (*{locate(param_info.value_type)}*).",
+                                    f"with the implementation of Back-End site (*{value_py_data_type}*).",
                                     status_code=400,
                                 )
                 # Check the data format of parameter
                 assert param_info.value_type, "Miss required property *value_type*."
-                data_type = locate(param_info.value_type)
-                assert isinstance(data_type, type)
+                assert isinstance(value_py_data_type, type)
                 value_format = param_info.value_format
                 if param_info.value_format and not value_format.value_format_is_match(  # type: ignore[union-attr]
-                    data_type=data_type, value=one_req_param_value, enums=value_format.enums, customize=value_format.customize  # type: ignore[union-attr]
+                    data_type=value_py_data_type, value=one_req_param_value
                 ):
                     return self._generate_http_response(
-                        f"The format of data from Font-End site (value: *{one_req_param_value}*) is incorrect. Its "
-                        f"format should be '{param_info.value_format}'.",
+                        f"The format of data from Font-End site (param: '{param_info.name}', "
+                        f"value: '{one_req_param_value}') is incorrect. Its format should be "
+                        f"{param_info.value_format.expect_format_log_msg(data_type=value_py_data_type)}.",
                         status_code=400,
                     )
         return self._generate_http_response(body="OK.", status_code=200)

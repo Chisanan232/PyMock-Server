@@ -868,50 +868,6 @@ class TestFormatStrategy(EnumTestSuite):
             format_strategy.to_value_format(data_type="any data type")
 
     @pytest.mark.parametrize(
-        ("strategy", "value", "data_type", "enums", "customize"),
-        [
-            (FormatStrategy.BY_DATA_TYPE, "random_string", str, [], ""),
-            (FormatStrategy.BY_DATA_TYPE, 123, int, [], ""),
-            (FormatStrategy.BY_DATA_TYPE, 123.123, "big_decimal", [], ""),
-            (FormatStrategy.BY_DATA_TYPE, True, bool, [], ""),
-            (FormatStrategy.BY_DATA_TYPE, False, bool, [], ""),
-            (FormatStrategy.FROM_ENUMS, "ENUM_2", None, ["ENUM_1", "ENUM_2", "ENUM_3"], ""),
-            (FormatStrategy.CUSTOMIZE, "sample_format", None, [], "sample_format"),
-        ],
-    )
-    def test_chk_format_is_match(
-        self,
-        strategy: FormatStrategy,
-        value: Any,
-        data_type: Union[None, str, object],
-        enums: List[str],
-        customize: str,
-    ):
-        assert strategy.chk_format_is_match(value=value, data_type=data_type, enums=enums, customize=customize) is True
-
-    @pytest.mark.parametrize(
-        ("strategy", "value", "data_type", "enums", "customize"),
-        [
-            (FormatStrategy.BY_DATA_TYPE, 123, str, [], ""),
-            (FormatStrategy.BY_DATA_TYPE, "not int value", int, [], ""),
-            (FormatStrategy.BY_DATA_TYPE, "not int or float value", "big_decimal", [], ""),
-            (FormatStrategy.BY_DATA_TYPE, "not bool value", bool, [], ""),
-            (FormatStrategy.BY_DATA_TYPE, "False", bool, [], ""),
-            (FormatStrategy.FROM_ENUMS, "not in enums", None, ["ENUM_1", "ENUM_2", "ENUM_3"], ""),
-            (FormatStrategy.CUSTOMIZE, "different_format", str, [], "sample_format"),
-        ],
-    )
-    def test_failure_chk_format_is_match(
-        self,
-        strategy: FormatStrategy,
-        value: Any,
-        data_type: Union[None, str, object],
-        enums: List[str],
-        customize: str,
-    ):
-        assert strategy.chk_format_is_match(value=value, data_type=data_type, enums=enums, customize=customize) is False
-
-    @pytest.mark.parametrize(
         ("strategy", "data_type", "enums", "expect_type"),
         [
             (FormatStrategy.BY_DATA_TYPE, str, [], str),

@@ -109,46 +109,181 @@ class TestFormat(CheckableTestSuite):
         assert ut_obj != other_obj
 
     @pytest.mark.parametrize(
-        ("strategy", "data_type", "value", "enums", "customize"),
+        ("strategy", "data_type", "value", "enums", "customize", "variables"),
         [
-            (FormatStrategy.BY_DATA_TYPE, str, "random_string", [], ""),
-            (FormatStrategy.BY_DATA_TYPE, int, 123, [], ""),
-            (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, [], ""),
-            (FormatStrategy.BY_DATA_TYPE, bool, True, [], ""),
-            (FormatStrategy.BY_DATA_TYPE, bool, False, [], ""),
-            (FormatStrategy.FROM_ENUMS, str, "ENUM_2", ["ENUM_1", "ENUM_2", "ENUM_3"], ""),
-            (FormatStrategy.CUSTOMIZE, str, "sample_format", [], "sample_format"),
+            (FormatStrategy.BY_DATA_TYPE, str, "random_string", [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, str, "123", [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, int, 123, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, bool, True, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, bool, False, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, bool, "True", [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, bool, "False", [], "", []),
+            (FormatStrategy.FROM_ENUMS, str, "ENUM_2", ["ENUM_1", "ENUM_2", "ENUM_3"], "", []),
+            (FormatStrategy.CUSTOMIZE, str, "sample_format", [], "sample_format", []),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                "sample_format",
+                [],
+                "<string_check>",
+                [Variable(name="string_check", value_format=ValueFormat.String)],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                "true",
+                [],
+                "<boolean_check>",
+                [Variable(name="boolean_check", value_format=ValueFormat.Boolean)],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                "ENUM_3",
+                [],
+                "<enum_check>",
+                [
+                    Variable(
+                        name="enum_check",
+                        value_format=ValueFormat.Enum,
+                        enum=["ENUM_1", "ENUM_2", "ENUM_3", "ENUM_4", "ENUM_5"],
+                    )
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                "123.123 USD",
+                [],
+                "<decimal_price> <fiat_currency_code>",
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                "123.123 USD\n 135789 JPY",
+                [],
+                "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>",
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                "123.123 USD\n 135789 JPY\n the lowest value",
+                [],
+                "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>\n <string_value>",
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                    Variable(name="string_value", value_format=ValueFormat.String),
+                ],
+            ),
         ],
     )
     def test_chk_format_is_match(
-        self, strategy: FormatStrategy, data_type: Union[str, object], value: Any, enums: List[str], customize: str
+        self,
+        strategy: FormatStrategy,
+        data_type: Union[str, object],
+        value: Any,
+        enums: List[str],
+        customize: str,
+        variables: List[Variable],
     ):
-        format_model = Format(strategy=strategy, enums=enums, customize=customize)
-        assert (
-            format_model.value_format_is_match(data_type=data_type, value=value, enums=enums, customize=customize)
-            is True
-        )
+        format_model = Format(strategy=strategy, enums=enums, customize=customize, variables=variables)
+        assert format_model.value_format_is_match(data_type=data_type, value=value) is True
 
     @pytest.mark.parametrize(
-        ("strategy", "data_type", "value", "enums", "customize"),
+        ("strategy", "data_type", "value", "enums", "customize", "variables"),
         [
-            (FormatStrategy.BY_DATA_TYPE, str, 123, [], ""),
-            (FormatStrategy.BY_DATA_TYPE, int, "not int value", [], ""),
-            (FormatStrategy.BY_DATA_TYPE, "big_decimal", "not int or float value", [], ""),
-            (FormatStrategy.BY_DATA_TYPE, bool, "not bool value", [], ""),
-            (FormatStrategy.BY_DATA_TYPE, bool, "False", [], ""),
-            (FormatStrategy.FROM_ENUMS, str, "not in enums", ["ENUM_1", "ENUM_2", "ENUM_3"], ""),
-            (FormatStrategy.CUSTOMIZE, str, "different_format", [], "sample_format"),
+            (FormatStrategy.BY_DATA_TYPE, int, "not int value", [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", "not int or float value", [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, bool, "not bool value", [], "", []),
+            (FormatStrategy.FROM_ENUMS, str, "not in enums", ["ENUM_1", "ENUM_2", "ENUM_3"], "", []),
+            (FormatStrategy.CUSTOMIZE, str, "different_format", [], "sample_format", []),
+            (
+                FormatStrategy.CUSTOMIZE,
+                int,
+                "not integer",
+                [],
+                "<integer_check>",
+                [Variable(name="integer_check", value_format=ValueFormat.Integer)],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                bool,
+                "not boolean",
+                [],
+                "<boolean_check>",
+                [Variable(name="boolean_check", value_format=ValueFormat.Boolean)],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                "ENUM_NOT_EXIST",
+                [],
+                "<enum_check>",
+                [
+                    Variable(
+                        name="enum_check",
+                        value_format=ValueFormat.Enum,
+                        enum=["ENUM_1", "ENUM_2", "ENUM_3", "ENUM_4", "ENUM_5"],
+                    )
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                "123.123 EUR",
+                [],
+                "<decimal_price> <fiat_currency_code>",
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                "123.123 USD\n 135789 JPY",
+                [],
+                "<decimal_price> <fiat_currency_code> <decimal_price> <fiat_currency_code>",
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                "123.123 USD\n incorrect_value JPY\n the lowest value",
+                [],
+                "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>\n <string_value>",
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                    Variable(name="string_value", value_format=ValueFormat.String),
+                ],
+            ),
         ],
     )
     def test_failure_chk_format_is_match(
-        self, strategy: FormatStrategy, data_type: Union[str, object], value: Any, enums: List[str], customize: str
+        self,
+        strategy: FormatStrategy,
+        data_type: Union[str, object],
+        value: Any,
+        enums: List[str],
+        customize: str,
+        variables: List[Variable],
     ):
-        format_model = Format(strategy=strategy, enums=enums, customize=customize)
-        assert (
-            format_model.value_format_is_match(data_type=data_type, value=value, enums=enums, customize=customize)
-            is False
-        )
+        format_model = Format(strategy=strategy, enums=enums, customize=customize, variables=variables)
+        assert format_model.value_format_is_match(data_type=data_type, value=value) is False
 
     @pytest.mark.parametrize(
         ("strategy", "data_type", "enums", "customize", "expect_type", "expect_value_format"),
@@ -195,3 +330,14 @@ class TestFormat(CheckableTestSuite):
             assert value in enums
         if expect_value_format:
             assert re.search(expect_value_format, str(value), re.IGNORECASE) is not None
+
+    @pytest.mark.parametrize("strategy", [s for s in FormatStrategy])
+    def test_valid_expect_format_log_msg(self, strategy: FormatStrategy):
+        non_strategy_format = Format(strategy=strategy)
+        msg = non_strategy_format.expect_format_log_msg(data_type="any data type")
+        assert msg and isinstance(msg, str)
+
+    def test_invalid_expect_format_log_msg(self):
+        non_strategy_format = Format(strategy=None)
+        with pytest.raises(ValueError):
+            non_strategy_format.expect_format_log_msg(data_type="any data type")
