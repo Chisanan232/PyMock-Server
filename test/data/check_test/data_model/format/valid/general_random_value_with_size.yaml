@@ -1,0 +1,4 @@
+strategy: 'by_data_type'
+size:
+  max: 100
+  min: 0

@@ -12,7 +12,7 @@ from pymock_api._utils.random import (
     RandomFromSequence,
     RandomInteger,
     RandomString,
-    ValueRange,
+    ValueSize,
 )
 from pymock_api.model.openapi._js_handlers import convert_js_type
 
@@ -690,6 +690,7 @@ class OpenAPIVersion(Enum):
             return v
 
 
+Default_Value_Size = ValueSize(max=10, min=1)
 Default_Digit_Range = DigitRange(integer=128, decimal=128)
 
 
@@ -719,24 +720,24 @@ class ValueFormat(Enum):
             return v
 
     def generate_value(
-        self, enums: List[str] = [], digit: DigitRange = Default_Digit_Range
+        self, enums: List[str] = [], size: ValueSize = Default_Value_Size, digit: DigitRange = Default_Digit_Range
     ) -> Union[str, int, bool, Decimal]:
 
         def _generate_max_value(digit_number: int) -> int:
             return int("".join(["9" for _ in range(digit_number)])) if digit_number > 0 else 0
 
+        self._ensure_setting_value_is_valid(enums=enums, size=size, digit=digit)
         if self is ValueFormat.String:
-            # TODO: Add setting about the string size or string detail format, i.e., integer format string?
-            return RandomString.generate()
+            return RandomString.generate(size=size)
         elif self is ValueFormat.Integer:
             max_value = _generate_max_value(digit.integer)
-            return RandomInteger.generate(value_range=ValueRange(min=0 - max_value, max=max_value))
+            return RandomInteger.generate(value_range=ValueSize(min=0 - max_value, max=max_value))
         elif self is ValueFormat.BigDecimal:
             max_integer_value = _generate_max_value(digit.integer)
             max_decimal_value = _generate_max_value(digit.decimal)
             return RandomBigDecimal.generate(
-                integer_range=ValueRange(min=0 - max_integer_value, max=max_integer_value),
-                decimal_range=ValueRange(min=0, max=max_decimal_value),
+                integer_range=ValueSize(min=0 - max_integer_value, max=max_integer_value),
+                decimal_range=ValueSize(min=0, max=max_decimal_value),
             )
         elif self is ValueFormat.Boolean:
             return RandomBoolean.generate()
@@ -745,10 +746,18 @@ class ValueFormat(Enum):
         else:
             raise ValueError("This is program bug, please report this issue.")
 
-    def generate_regex(self, enums: List[str] = [], digit: DigitRange = Default_Digit_Range) -> str:
+    def generate_regex(
+        self, enums: List[str] = [], size: ValueSize = Default_Value_Size, digit: DigitRange = Default_Digit_Range
+    ) -> str:
+        self._ensure_setting_value_is_valid(enums=enums, size=size, digit=digit)
         if self is ValueFormat.String:
-            # TODO: Set the string type value size?
-            return r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1,128}"
+            return (
+                r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{"
+                + re.escape(str(size.min))
+                + ","
+                + re.escape(str(size.max))
+                + "}"
+            )
         elif self is ValueFormat.Integer:
             integer_digit = 1 if digit.integer <= 0 else digit.integer
             return r"\d{1," + re.escape(str(integer_digit)) + "}"
@@ -761,6 +770,28 @@ class ValueFormat(Enum):
             return r"(" + r"|".join([re.escape(e) for e in enums]) + r")"
         else:
             raise ValueError("This is program bug, please report this issue.")
+
+    def _ensure_setting_value_is_valid(self, enums: List[str], size: ValueSize, digit: DigitRange) -> None:
+        if self is ValueFormat.String:
+            assert size is not None, "The size of string must not be empty."
+            assert size.max > 0, f"The maximum size of string must be greater than 0. size: {size}."
+            assert size.min >= 0, f"The minimum size of string must be greater or equal to 0. size: {size}."
+        elif self is ValueFormat.Integer:
+            assert digit is not None, "The digit must not be empty."
+            assert digit.integer > 0, f"The digit number must be greater than 0. digit.integer: {digit.integer}."
+        elif self is ValueFormat.BigDecimal:
+            assert digit is not None, "The digit must not be empty."
+            assert (
+                digit.integer >= 0
+            ), f"The digit number of integer part must be greater or equal to 0. digit.integer: {digit.integer}."
+            assert (
+                digit.decimal >= 0
+            ), f"The digit number of decimal part must be greater or equal to 0. digit.decimal: {digit.decimal}."
+        elif self is ValueFormat.Enum:
+            assert enums is not None and len(enums) > 0, "The enums must not be empty."
+            assert (
+                len(list(filter(lambda e: not isinstance(e, str), enums))) == 0
+            ), "The data type of element in enums must be string."
 
 
 class FormatStrategy(Enum):
@@ -781,11 +812,15 @@ class FormatStrategy(Enum):
         return ValueFormat.to_enum(data_type)
 
     def generate_not_customize_value(
-        self, data_type: Optional[type] = None, enums: List[str] = [], digit: DigitRange = Default_Digit_Range
+        self,
+        data_type: Optional[type] = None,
+        enums: List[str] = [],
+        size: ValueSize = Default_Value_Size,
+        digit: DigitRange = Default_Digit_Range,
     ) -> Union[str, int, bool, Decimal]:
         if self in [FormatStrategy.BY_DATA_TYPE, FormatStrategy.FROM_ENUMS]:
             assert data_type is not None, "Format setting require *data_type* must not be empty."
             if self is FormatStrategy.FROM_ENUMS:
                 data_type = "enum"  # type: ignore[assignment]
-            return self.to_value_format(data_type=data_type).generate_value(enums=enums, digit=digit)
+            return self.to_value_format(data_type=data_type).generate_value(enums=enums, size=size, digit=digit)
         raise ValueError(f"This function doesn't support *{self}* currently.")

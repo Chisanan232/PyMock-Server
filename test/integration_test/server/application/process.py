@@ -150,6 +150,13 @@ class HTTPProcessTestSpec(metaclass=ABCMeta):
             (
                 "/test-api-req-param-format",
                 "GET",
+                {"format_param_str": "".join(["a" for _ in range(66)])},  # Too big size of string
+                ["format should be", "str", "type data"],
+                400,
+            ),
+            (
+                "/test-api-req-param-format",
+                "GET",
                 {"format_param_float": "not big decimal value"},
                 ["type of data", "is different"],
                 400,
