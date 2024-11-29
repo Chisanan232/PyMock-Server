@@ -1,0 +1,5 @@
+name: string_sample
+value_format: str
+size:
+  max: 10
+  min: 1

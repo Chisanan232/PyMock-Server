@@ -1,0 +1,4 @@
+name: string_sample
+value_format: str
+size:
+  only_equal: 4

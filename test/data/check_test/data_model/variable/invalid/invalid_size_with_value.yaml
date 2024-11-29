@@ -1,0 +1,5 @@
+name: string_sample
+value_format: str
+size:
+  max: 'this is invalid data type'
+  min: 1

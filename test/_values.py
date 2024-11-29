@@ -86,6 +86,12 @@ _Mock_Templatable_Setting: dict = {
 }
 
 # Test variable
+_Test_Size_In_Format: dict = {
+    "max": 8,
+    "min": 1,
+    "only_equal": None,
+}
+
 _Test_Digit_In_Format: dict = {
     "integer": 128,
     "decimal": 0,
@@ -99,7 +105,11 @@ _Test_Variables_BigDecimal_USD: dict = {
         "integer": 30,
         "decimal": 3,
     },
-    "range": None,
+    # Just for testing logic converts as *Size*
+    "size": {
+        "max": 8,
+        "min": 4,
+    },
     "enum": None,
 }
 
@@ -110,7 +120,7 @@ _Test_Variables_BigDecimal_TWD: dict = {
         "integer": 30,
         "decimal": 0,
     },
-    "range": None,
+    "size": None,
     "enum": None,
 }
 
@@ -119,13 +129,21 @@ _Test_Variables_Currency_Code: dict = {
     "name": "currency_code",
     "value_format": "enum",
     "digit": None,
-    "range": None,
+    "size": None,
     "enum": ["TWD", "USD", "EUR"],
 }
 
 # The expect value it should generate: dgwretvgweg
 _General_Format: dict = {
     "strategy": "by_data_type",
+    "digit": {
+        "integer": 5,
+        "decimal": 3,
+    },
+    "size": {
+        "max": 64,
+        "min": 2,
+    },
 }
 _Test_Response_Property_General_Format: dict = {
     "name": "sample_name",
@@ -161,6 +179,7 @@ _Test_Response_Property_Customize_Format: dict = {
 _Customize_Format_With_Self_Vars: dict = {
     "strategy": "customize",
     "enums": None,
+    "size": None,
     "customize": "<big_decimal_usd> <currency_code>\n<big_decimal_twd> <currency_code>",
     "variables": [
         _Test_Variables_BigDecimal_USD,

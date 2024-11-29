@@ -4,19 +4,67 @@ from typing import Any, List, Optional, Union
 
 import pytest
 
-from pymock_api._utils.random import ValueRange
+from pymock_api._utils.random import ValueSize
 from pymock_api.model.api_config.apis._format import Format
-from pymock_api.model.api_config.variable import Digit, Variable
+from pymock_api.model.api_config.variable import Digit, Size, Variable
 from pymock_api.model.enums import FormatStrategy, ValueFormat
 
-from ....._values import (
-    _Customize_Format_With_Self_Vars,
-    _Test_Variables_BigDecimal_USD,
+from ....._test_utils import Verify
+from ....._values import _Customize_Format_With_Self_Vars, _General_Format
+from .._base import (
+    CheckableTestSuite,
+    ConfigTestSpec,
+    _assertion_msg,
+    set_checking_test_data,
 )
-from .._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
 
 
-class TestFormat(CheckableTestSuite):
+class TestFormatWithGeneralStrategy(ConfigTestSpec):
+    @pytest.fixture(scope="function")
+    def sut(self) -> Format:
+        return Format(
+            strategy=_General_Format["strategy"],
+            digit=_General_Format["digit"],
+            size=_General_Format["size"],
+        )
+
+    @pytest.fixture(scope="function")
+    def sut_with_nothing(self) -> Format:
+        return Format()
+
+    def test_value_attributes(self, sut: Format):
+        self._verify_props_value(sut, self._expected_serialize_value())
+
+    def _expected_serialize_value(self) -> dict:
+        return _General_Format
+
+    def _expected_deserialize_value(self, obj: Format) -> None:
+        assert isinstance(obj, Format)
+        self._verify_props_value(ut_obj=obj, expect_format=self._expected_serialize_value())
+
+    def _verify_props_value(self, ut_obj: Format, expect_format: dict) -> None:
+        assert ut_obj.strategy.value == expect_format["strategy"], _assertion_msg
+        if expect_format.get("digit", None):
+            assert ut_obj.digit.serialize() == expect_format.get("digit", None), _assertion_msg
+        if expect_format.get("size", None):
+            assert ut_obj.size.serialize() == expect_format.get("size", None), _assertion_msg
+        assert ut_obj.enums == expect_format.get("enums", []), _assertion_msg
+        assert ut_obj.customize == expect_format.get("customize", ""), _assertion_msg
+        for var in ut_obj.variables:
+            expect_var_value = list(filter(lambda v: v["name"] == var.name, expect_format["variables"]))
+            assert expect_var_value and len(expect_var_value) == 1
+            assert var.name == expect_var_value[0]["name"]
+            assert var.value_format.value == expect_var_value[0]["value_format"]
+            if expect_var_value[0]["digit"]:
+                assert var.digit.integer == expect_var_value[0]["digit"]["integer"]
+                assert var.digit.decimal == expect_var_value[0]["digit"]["decimal"]
+            if expect_var_value[0]["size"]:
+                assert var.size.max_value == expect_var_value[0]["size"]["max"]
+                assert var.size.min_value == expect_var_value[0]["size"]["min"]
+            assert var.enum == expect_var_value[0]["enum"]
+
+
+class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTestSuite):
     test_data_dir = "format"
     set_checking_test_data(test_data_dir)
 
@@ -24,7 +72,6 @@ class TestFormat(CheckableTestSuite):
     def sut(self) -> Format:
         return Format(
             strategy=_Customize_Format_With_Self_Vars["strategy"],
-            digit=_Test_Variables_BigDecimal_USD["digit"],
             enums=_Customize_Format_With_Self_Vars["enums"],
             customize=_Customize_Format_With_Self_Vars["customize"],
             variables=_Customize_Format_With_Self_Vars["variables"],
@@ -34,34 +81,8 @@ class TestFormat(CheckableTestSuite):
     def sut_with_nothing(self) -> Format:
         return Format()
 
-    def test_value_attributes(self, sut: Format):
-        self._verify_props_value(sut)
-
     def _expected_serialize_value(self) -> Any:
-        expect_value = _Customize_Format_With_Self_Vars
-        expect_value["digit"] = _Test_Variables_BigDecimal_USD["digit"]
-        return expect_value
-
-    def _expected_deserialize_value(self, obj: Format) -> None:
-        assert isinstance(obj, Format)
-        self._verify_props_value(ut_obj=obj)
-
-    def _verify_props_value(self, ut_obj: Format) -> None:
-        assert ut_obj.strategy.value == _Customize_Format_With_Self_Vars["strategy"], _assertion_msg
-        assert ut_obj.enums is _Customize_Format_With_Self_Vars["enums"], _assertion_msg
-        assert ut_obj.customize is _Customize_Format_With_Self_Vars["customize"], _assertion_msg
-        for var in ut_obj.variables:
-            expect_var_value = list(
-                filter(lambda v: v["name"] == var.name, _Customize_Format_With_Self_Vars["variables"])
-            )
-            assert expect_var_value and len(expect_var_value) == 1
-            assert var.name == expect_var_value[0]["name"]
-            assert var.value_format.value == expect_var_value[0]["value_format"]
-            if expect_var_value[0]["digit"]:
-                assert var.digit.integer == expect_var_value[0]["digit"]["integer"]
-                assert var.digit.decimal == expect_var_value[0]["digit"]["decimal"]
-            assert var.range == expect_var_value[0]["range"]
-            assert var.enum == expect_var_value[0]["enum"]
+        return _Customize_Format_With_Self_Vars
 
     @pytest.mark.parametrize("invalid_data", ["invalid data type", ["invalid data type"]])
     def test_invalid_data_at_prop_variables(self, invalid_data: Any):
@@ -249,12 +270,20 @@ class TestFormat(CheckableTestSuite):
         customize: str,
         variables: List[Variable],
     ):
-        format_model = Format(strategy=strategy, digit=digit, enums=enums, customize=customize, variables=variables)
+        format_model = Format(
+            strategy=strategy,
+            size=Size(max_value=64, min_value=0),
+            digit=digit,
+            enums=enums,
+            customize=customize,
+            variables=variables,
+        )
         assert format_model.value_format_is_match(data_type=data_type, value=value) is True
 
     @pytest.mark.parametrize(
         ("strategy", "data_type", "value", "digit", "enums", "customize", "variables"),
         [
+            (FormatStrategy.BY_DATA_TYPE, str, "".join(["a" for _ in range(6)]), None, [], "", []),
             (FormatStrategy.BY_DATA_TYPE, int, "not int value", None, [], "", []),
             (FormatStrategy.BY_DATA_TYPE, int, 123, Digit(integer=1, decimal=0), [], "", []),
             (FormatStrategy.BY_DATA_TYPE, "big_decimal", "not int or float value", None, [], "", []),
@@ -345,7 +374,14 @@ class TestFormat(CheckableTestSuite):
         customize: str,
         variables: List[Variable],
     ):
-        format_model = Format(strategy=strategy, digit=digit, enums=enums, customize=customize, variables=variables)
+        format_model = Format(
+            strategy=strategy,
+            size=Size(max_value=5, min_value=0),
+            digit=digit,
+            enums=enums,
+            customize=customize,
+            variables=variables,
+        )
         assert format_model.value_format_is_match(data_type=data_type, value=value) is False
 
     @pytest.mark.parametrize(
@@ -381,13 +417,13 @@ class TestFormat(CheckableTestSuite):
             customize=customize,
             variables=[
                 Variable(
-                    name="big_decimal_price", value_format=ValueFormat.BigDecimal, digit=Digit(), range="", enum=[]
+                    name="big_decimal_price", value_format=ValueFormat.BigDecimal, digit=Digit(), size=Size(), enum=[]
                 ),
                 Variable(
                     name="fiat_currency_code",
                     value_format=ValueFormat.Enum,
                     digit=Digit(),
-                    range="",
+                    size=Size(),
                     enum=["USD", "TWD"],
                 ),
             ],
@@ -401,60 +437,73 @@ class TestFormat(CheckableTestSuite):
             assert re.search(expect_value_format, str(value), re.IGNORECASE) is not None
 
     @pytest.mark.parametrize(
+        ("strategy", "data_type", "size"),
+        [
+            (FormatStrategy.BY_DATA_TYPE, str, Size(max_value=3, min_value=0)),
+            (FormatStrategy.BY_DATA_TYPE, str, Size(max_value=10, min_value=6)),
+        ],
+    )
+    def test_generate_string_value(self, strategy: FormatStrategy, data_type: object, size: Size):
+        format_data_model = Format(strategy=strategy, size=size)
+        value = format_data_model.generate_value(data_type=data_type)
+        assert isinstance(value, data_type)
+        assert size.min_value <= len(value) <= size.max_value
+
+    @pytest.mark.parametrize(
         ("strategy", "data_type", "digit", "expect_type", "expect_value_range"),
         [
-            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=1, decimal=0), int, ValueRange(min=-9, max=9)),
-            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=3, decimal=0), int, ValueRange(min=-999, max=999)),
-            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=1, decimal=2), int, ValueRange(min=-9, max=9)),
-            (FormatStrategy.BY_DATA_TYPE, float, Digit(integer=1, decimal=0), Decimal, ValueRange(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=1, decimal=0), int, ValueSize(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=3, decimal=0), int, ValueSize(min=-999, max=999)),
+            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=1, decimal=2), int, ValueSize(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, float, Digit(integer=1, decimal=0), Decimal, ValueSize(min=-9, max=9)),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 float,
                 Digit(integer=3, decimal=0),
                 Decimal,
-                ValueRange(min=-999, max=999),
+                ValueSize(min=-999, max=999),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 float,
                 Digit(integer=3, decimal=2),
                 Decimal,
-                ValueRange(min=-999.99, max=999.99),
+                ValueSize(min=-999.99, max=999.99),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 float,
                 Digit(integer=0, decimal=3),
                 Decimal,
-                ValueRange(min=-0.999, max=0.999),
+                ValueSize(min=-0.999, max=0.999),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 "big_decimal",
                 Digit(integer=1, decimal=0),
                 Decimal,
-                ValueRange(min=-9, max=9),
+                ValueSize(min=-9, max=9),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 "big_decimal",
                 Digit(integer=3, decimal=0),
                 Decimal,
-                ValueRange(min=-999, max=999),
+                ValueSize(min=-999, max=999),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 "big_decimal",
                 Digit(integer=3, decimal=2),
                 Decimal,
-                ValueRange(min=-999.99, max=999.99),
+                ValueSize(min=-999.99, max=999.99),
             ),
             (
                 FormatStrategy.BY_DATA_TYPE,
                 "big_decimal",
                 Digit(integer=0, decimal=3),
                 Decimal,
-                ValueRange(min=-0.999, max=0.999),
+                ValueSize(min=-0.999, max=0.999),
             ),
         ],
     )
@@ -464,7 +513,7 @@ class TestFormat(CheckableTestSuite):
         data_type: Union[None, str, object],
         digit: Digit,
         expect_type: type,
-        expect_value_range: ValueRange,
+        expect_value_range: ValueSize,
     ):
         format_model = Format(
             strategy=strategy,
@@ -473,11 +522,7 @@ class TestFormat(CheckableTestSuite):
         value = format_model.generate_value(data_type=data_type)
         assert value is not None
         assert isinstance(value, expect_type)
-        if isinstance(value, Decimal):
-            assert value.compare(Decimal(expect_value_range.min)) in [Decimal("1"), Decimal("0")]
-            assert value.compare(Decimal(expect_value_range.max)) in [Decimal("-1"), Decimal("0")]
-        else:
-            assert expect_value_range.min <= value <= expect_value_range.max
+        Verify.numerical_value_should_be_in_range(value=value, expect_range=expect_value_range)
 
     @pytest.mark.parametrize("strategy", [s for s in FormatStrategy])
     def test_valid_expect_format_log_msg(self, strategy: FormatStrategy):

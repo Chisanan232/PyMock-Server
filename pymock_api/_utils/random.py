@@ -5,6 +5,9 @@ from collections import namedtuple
 from decimal import Decimal
 from typing import Any, Sequence
 
+ValueSize = namedtuple("ValueSize", ("min", "max"), defaults=(-127, 128))
+DigitRange = namedtuple("DigitRange", ("integer", "decimal"))
+
 
 class BaseRandomGenerator(metaclass=ABCMeta):
 
@@ -19,24 +22,21 @@ class BaseRandomGenerator(metaclass=ABCMeta):
 
 class RandomString(BaseRandomGenerator):
     @staticmethod
-    def generate(size: int = 10) -> str:
-        return "".join([random.choice(string.ascii_letters) for _ in range(size)])
-
-
-ValueRange = namedtuple("ValueRange", ("min", "max"), defaults=(-127, 128))
-DigitRange = namedtuple("DigitRange", ("integer", "decimal"))
+    def generate(size: ValueSize = ValueSize()) -> str:
+        string_size = random.randint(size.min, size.max)
+        return "".join([random.choice(string.ascii_letters) for _ in range(string_size)])
 
 
 class RandomInteger(BaseRandomGenerator):
     @staticmethod
-    def generate(value_range: ValueRange = ValueRange()) -> int:
+    def generate(value_range: ValueSize = ValueSize()) -> int:
         return random.randint(value_range.min, value_range.max)
 
 
 class RandomBigDecimal(BaseRandomGenerator):
     @staticmethod
     def generate(
-        integer_range: ValueRange = ValueRange(), decimal_range: ValueRange = ValueRange(min=0, max=128)
+        integer_range: ValueSize = ValueSize(), decimal_range: ValueSize = ValueSize(min=0, max=128)
     ) -> Decimal:
         integer = RandomInteger.generate(value_range=integer_range)
         decimal = RandomInteger.generate(value_range=decimal_range)
