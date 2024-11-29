@@ -395,7 +395,7 @@ class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
                     strategy=FormatStrategy.CUSTOMIZE,
                     customize="<test_var>",
                     variables=[
-                        Variable(name="test_var", value_format=ValueFormat.String, value=None, range=None, enum=None)
+                        Variable(name="test_var", value_format=ValueFormat.String, digit=None, range=None, enum=None)
                     ],
                 ),
                 str,
@@ -407,7 +407,7 @@ class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
                     strategy=FormatStrategy.CUSTOMIZE,
                     customize="<test_var>",
                     variables=[
-                        Variable(name="test_var", value_format=ValueFormat.Integer, value=None, range=None, enum=None)
+                        Variable(name="test_var", value_format=ValueFormat.Integer, digit=None, range=None, enum=None)
                     ],
                 ),
                 str,
@@ -420,7 +420,7 @@ class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
                     customize="<test_var>",
                     variables=[
                         Variable(
-                            name="test_var", value_format=ValueFormat.BigDecimal, value=None, range=None, enum=None
+                            name="test_var", value_format=ValueFormat.BigDecimal, digit=None, range=None, enum=None
                         )
                     ],
                 ),
@@ -433,7 +433,7 @@ class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
                     strategy=FormatStrategy.CUSTOMIZE,
                     customize="<test_var>",
                     variables=[
-                        Variable(name="test_var", value_format=ValueFormat.Boolean, value=None, range=None, enum=None)
+                        Variable(name="test_var", value_format=ValueFormat.Boolean, digit=None, range=None, enum=None)
                     ],
                 ),
                 str,
@@ -448,7 +448,7 @@ class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
                         Variable(
                             name="test_var",
                             value_format=ValueFormat.Enum,
-                            value=None,
+                            digit=None,
                             range=None,
                             enum=["VALUE_ENUM_1", "VALUE_ENUM_2"],
                         )

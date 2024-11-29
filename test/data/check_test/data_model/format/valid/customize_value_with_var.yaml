@@ -3,9 +3,13 @@ customize: '<big_decimal_usd> <currency_code>\n<big_decimal_twd> <currency_code>
 variables:
   - name: big_decimal_usd
     value_format: big_decimal
-    value: 30:3
+    digit:
+      integer: 30
+      decimal: 3
   - name: big_decimal_twd
-    value: 30:0
+    digit:
+      integer: 30
+      decimal: 0
     value_format: big_decimal
     range: 0-100
   - name: currency_code

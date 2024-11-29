@@ -2,10 +2,11 @@ import re
 from abc import ABCMeta, abstractmethod
 from decimal import Decimal
 from enum import Enum
-from typing import Any, List, Type, Union
+from typing import Any, List, Optional, Type, Union
 
 import pytest
 
+from pymock_api._utils.random import DigitRange, ValueRange
 from pymock_api.model.enums import (
     ConfigLoadingOrder,
     FormatStrategy,
@@ -814,12 +815,54 @@ class TestValueFormat(EnumTestSuite):
             (ValueFormat.Enum, ["ENUM_1", "ENUM_2", "ENUM_3"], str),
         ],
     )
-    def test_generate_not_customize_value(self, formatter: ValueFormat, enums: List[str], expect_type: object):
+    def test_generate_value(self, formatter: ValueFormat, enums: List[str], expect_type: object):
         value = formatter.generate_value(enums=enums)
         assert value is not None
         assert isinstance(value, expect_type)
         if enums:
             assert value in enums
+
+    @pytest.mark.parametrize(
+        ("formatter", "digit_range", "expect_type", "expect_range"),
+        [
+            (ValueFormat.Integer, DigitRange(integer=1, decimal=0), int, ValueRange(min=-9, max=9)),
+            (ValueFormat.Integer, DigitRange(integer=3, decimal=0), int, ValueRange(min=-999, max=999)),
+            (ValueFormat.Integer, DigitRange(integer=1, decimal=2), int, ValueRange(min=-9, max=9)),
+            (ValueFormat.BigDecimal, DigitRange(integer=1, decimal=0), Decimal, ValueRange(min=-9, max=9)),
+            (ValueFormat.BigDecimal, DigitRange(integer=3, decimal=0), Decimal, ValueRange(min=-999, max=999)),
+            (ValueFormat.BigDecimal, DigitRange(integer=3, decimal=2), Decimal, ValueRange(min=-999.99, max=999.99)),
+            (ValueFormat.BigDecimal, DigitRange(integer=0, decimal=3), Decimal, ValueRange(min=-0.999, max=0.999)),
+        ],
+    )
+    def test_generate_numerical_value(
+        self, formatter: ValueFormat, digit_range: DigitRange, expect_type: object, expect_range: ValueRange
+    ):
+        value = formatter.generate_value(digit=digit_range)
+        assert value is not None
+        assert isinstance(value, expect_type)
+        if isinstance(value, Decimal):
+            assert value.compare(Decimal(expect_range.min)) == Decimal("1")
+            assert value.compare(Decimal(expect_range.max)) == Decimal("-1")
+        else:
+            assert expect_range.min < value < expect_range.max
+
+    @pytest.mark.parametrize(
+        ("formatter", "enums", "digit_range", "expect_regex"),
+        [
+            (ValueFormat.Integer, [], DigitRange(integer=3, decimal=0), r"\d{1,3}"),
+            (ValueFormat.Integer, [], DigitRange(integer=3, decimal=2), r"\d{1,3}"),
+            (ValueFormat.Integer, [], DigitRange(integer=10, decimal=2), r"\d{1,10}"),
+            (ValueFormat.BigDecimal, [], DigitRange(integer=4, decimal=0), r"\d{1,4}\.?\d{0,0}"),
+            (ValueFormat.BigDecimal, [], DigitRange(integer=4, decimal=2), r"\d{1,4}\.?\d{0,2}"),
+            (ValueFormat.BigDecimal, [], DigitRange(integer=10, decimal=3), r"\d{1,10}\.?\d{0,3}"),
+            (ValueFormat.Enum, ["ENUM_1", "ENUM_2", "ENUM_3"], None, r"(ENUM_1|ENUM_2|ENUM_3)"),
+        ],
+    )
+    def test_generate_regex(
+        self, formatter: ValueFormat, enums: List[str], digit_range: Optional[DigitRange], expect_regex: str
+    ):
+        regex = formatter.generate_regex(enums=enums, digit=digit_range)
+        assert regex == expect_regex
 
 
 class TestFormatStrategy(EnumTestSuite):
@@ -863,7 +906,7 @@ class TestFormatStrategy(EnumTestSuite):
             FormatStrategy.CUSTOMIZE,
         ],
     )
-    def test_to_value_format(self, format_strategy: FormatStrategy):
+    def test_failure_to_value_format(self, format_strategy: FormatStrategy):
         with pytest.raises(RuntimeError):
             format_strategy.to_value_format(data_type="any data type")
 
@@ -885,6 +928,81 @@ class TestFormatStrategy(EnumTestSuite):
         assert isinstance(value, expect_type)
         if enums:
             assert value in enums
+
+    @pytest.mark.parametrize(
+        ("strategy", "data_type", "digit_range", "expect_type", "expect_range"),
+        [
+            (FormatStrategy.BY_DATA_TYPE, int, DigitRange(integer=1, decimal=0), int, ValueRange(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, int, DigitRange(integer=3, decimal=0), int, ValueRange(min=-999, max=999)),
+            (FormatStrategy.BY_DATA_TYPE, int, DigitRange(integer=1, decimal=2), int, ValueRange(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, float, DigitRange(integer=1, decimal=0), Decimal, ValueRange(min=-9, max=9)),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                float,
+                DigitRange(integer=3, decimal=0),
+                Decimal,
+                ValueRange(min=-999, max=999),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                float,
+                DigitRange(integer=3, decimal=2),
+                Decimal,
+                ValueRange(min=-999.99, max=999.99),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                float,
+                DigitRange(integer=0, decimal=3),
+                Decimal,
+                ValueRange(min=-0.999, max=0.999),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                "big_decimal",
+                DigitRange(integer=1, decimal=0),
+                Decimal,
+                ValueRange(min=-9, max=9),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                "big_decimal",
+                DigitRange(integer=3, decimal=0),
+                Decimal,
+                ValueRange(min=-999, max=999),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                "big_decimal",
+                DigitRange(integer=3, decimal=2),
+                Decimal,
+                ValueRange(min=-999.99, max=999.99),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                "big_decimal",
+                DigitRange(integer=0, decimal=3),
+                Decimal,
+                ValueRange(min=-0.999, max=0.999),
+            ),
+        ],
+    )
+    def test_generate_numerical_value(
+        self,
+        strategy: FormatStrategy,
+        data_type: Union[None, str, object],
+        digit_range: DigitRange,
+        expect_type: object,
+        expect_range: ValueRange,
+    ):
+        value = strategy.generate_not_customize_value(data_type=data_type, digit=digit_range)
+        assert value is not None
+        assert isinstance(value, expect_type)
+        if isinstance(value, Decimal):
+            assert value.compare(Decimal(expect_range.min)) == Decimal("1")
+            assert value.compare(Decimal(expect_range.max)) == Decimal("-1")
+        else:
+            assert expect_range.min < value < expect_range.max
 
     @pytest.mark.parametrize("strategy", [FormatStrategy.CUSTOMIZE])
     def test_failure_generate_not_customize_value(self, strategy: FormatStrategy):

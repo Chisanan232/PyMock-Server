@@ -6,11 +6,13 @@ from pydoc import locate
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from pymock_api._utils.random import (
+    DigitRange,
     RandomBigDecimal,
     RandomBoolean,
     RandomFromSequence,
     RandomInteger,
     RandomString,
+    ValueRange,
 )
 from pymock_api.model.openapi._js_handlers import convert_js_type
 
@@ -688,6 +690,9 @@ class OpenAPIVersion(Enum):
             return v
 
 
+Default_Digit_Range = DigitRange(integer=128, decimal=128)
+
+
 class ValueFormat(Enum):
     String: str = "str"
     Integer: str = "int"
@@ -713,16 +718,26 @@ class ValueFormat(Enum):
         else:
             return v
 
-    def generate_value(self, enums: List[str] = []) -> Union[str, int, bool, Decimal]:
+    def generate_value(
+        self, enums: List[str] = [], digit: DigitRange = Default_Digit_Range
+    ) -> Union[str, int, bool, Decimal]:
+
+        def _generate_max_value(digit_number: int) -> int:
+            return int("".join(["9" for _ in range(digit_number)])) if digit_number > 0 else 0
+
         if self is ValueFormat.String:
             # TODO: Add setting about the string size or string detail format, i.e., integer format string?
             return RandomString.generate()
         elif self is ValueFormat.Integer:
-            # TODO: Add setting about the range?
-            return RandomInteger.generate()
+            max_value = _generate_max_value(digit.integer)
+            return RandomInteger.generate(value_range=ValueRange(min=0 - max_value, max=max_value))
         elif self is ValueFormat.BigDecimal:
-            # TODO: Add setting about the range?
-            return RandomBigDecimal.generate()
+            max_integer_value = _generate_max_value(digit.integer)
+            max_decimal_value = _generate_max_value(digit.decimal)
+            return RandomBigDecimal.generate(
+                integer_range=ValueRange(min=0 - max_integer_value, max=max_integer_value),
+                decimal_range=ValueRange(min=0, max=max_decimal_value),
+            )
         elif self is ValueFormat.Boolean:
             return RandomBoolean.generate()
         elif self is ValueFormat.Enum:
@@ -730,16 +745,16 @@ class ValueFormat(Enum):
         else:
             raise ValueError("This is program bug, please report this issue.")
 
-    def generate_regex(self, enums: List[str] = []) -> str:
+    def generate_regex(self, enums: List[str] = [], digit: DigitRange = Default_Digit_Range) -> str:
         if self is ValueFormat.String:
             # TODO: Set the string type value size?
             return r"[@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.\w\s]{1,128}"
         elif self is ValueFormat.Integer:
-            # TODO: Add setting about the range?
-            return r"\d{1,128}"
+            integer_digit = 1 if digit.integer <= 0 else digit.integer
+            return r"\d{1," + re.escape(str(integer_digit)) + "}"
         elif self is ValueFormat.BigDecimal:
-            # TODO: Add setting about the range?
-            return r"\d{1,128}\.?\d{0,128}?"
+            integer_digit = 1 if digit.integer <= 0 else digit.integer
+            return r"\d{1," + re.escape(str(integer_digit)) + "}\.?\d{0," + re.escape(str(digit.decimal)) + "}"
         elif self is ValueFormat.Boolean:
             return r"(true|false|True|False)"
         elif self is ValueFormat.Enum:
@@ -766,11 +781,11 @@ class FormatStrategy(Enum):
         return ValueFormat.to_enum(data_type)
 
     def generate_not_customize_value(
-        self, data_type: Optional[type] = None, enums: List[str] = []
+        self, data_type: Optional[type] = None, enums: List[str] = [], digit: DigitRange = Default_Digit_Range
     ) -> Union[str, int, bool, Decimal]:
         if self in [FormatStrategy.BY_DATA_TYPE, FormatStrategy.FROM_ENUMS]:
             assert data_type is not None, "Format setting require *data_type* must not be empty."
             if self is FormatStrategy.FROM_ENUMS:
                 data_type = "enum"  # type: ignore[assignment]
-            return self.to_value_format(data_type=data_type).generate_value(enums=enums)
+            return self.to_value_format(data_type=data_type).generate_value(enums=enums, digit=digit)
         raise ValueError(f"This function doesn't support *{self}* currently.")

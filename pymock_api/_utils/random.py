@@ -24,6 +24,7 @@ class RandomString(BaseRandomGenerator):
 
 
 ValueRange = namedtuple("ValueRange", ("min", "max"), defaults=(-127, 128))
+DigitRange = namedtuple("DigitRange", ("integer", "decimal"))
 
 
 class RandomInteger(BaseRandomGenerator):
