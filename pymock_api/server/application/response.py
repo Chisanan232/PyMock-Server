@@ -124,7 +124,7 @@ class HTTPResponse:
             elif locate(v.value_type) is dict:
 
                 def _insert_callback(init_value: dict, item: dict) -> dict:  # type: ignore[misc]
-                    init_value = item
+                    init_value.update(item)
                     return init_value
 
                 value = _process_collection_data(v, init_data={}, insert_callback=_insert_callback)  # type: ignore[arg-type,assignment]
