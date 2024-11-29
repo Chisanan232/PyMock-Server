@@ -9,7 +9,10 @@ from pymock_api.model.api_config.apis._format import Format
 from pymock_api.model.api_config.variable import Digit, Variable
 from pymock_api.model.enums import FormatStrategy, ValueFormat
 
-from ....._values import _Customize_Format_With_Self_Vars
+from ....._values import (
+    _Customize_Format_With_Self_Vars,
+    _Test_Variables_BigDecimal_USD,
+)
 from .._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
 
 
@@ -21,6 +24,7 @@ class TestFormat(CheckableTestSuite):
     def sut(self) -> Format:
         return Format(
             strategy=_Customize_Format_With_Self_Vars["strategy"],
+            digit=_Test_Variables_BigDecimal_USD["digit"],
             enums=_Customize_Format_With_Self_Vars["enums"],
             customize=_Customize_Format_With_Self_Vars["customize"],
             variables=_Customize_Format_With_Self_Vars["variables"],
@@ -34,7 +38,9 @@ class TestFormat(CheckableTestSuite):
         self._verify_props_value(sut)
 
     def _expected_serialize_value(self) -> Any:
-        return _Customize_Format_With_Self_Vars
+        expect_value = _Customize_Format_With_Self_Vars
+        expect_value["digit"] = _Test_Variables_BigDecimal_USD["digit"]
+        return expect_value
 
     def _expected_deserialize_value(self, obj: Format) -> None:
         assert isinstance(obj, Format)
