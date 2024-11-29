@@ -72,7 +72,8 @@ class HTTPRequestProcess(BaseHTTPProcess):
                 return self._generate_http_response(f"Miss required parameter *{param_info.name}*.", status_code=400)
             if one_req_param_value:
                 # Check the data type of parameter
-                value_py_data_type = locate(param_info.value_type)  # type: ignore[arg-type]
+                assert param_info.value_type, "It must cannot miss the value type value of each parameters."
+                value_py_data_type: type = locate(param_info.value_type)  # type: ignore[assignment]
                 if value_py_data_type in [int, float, "big_decimal"] and self._request.int_type_value_is_string:
                     # For the Flask part. It would always be string type of each API parameter.
                     if re.search(r"\d{1,128}", str(one_req_param_value)) is None:
@@ -82,7 +83,7 @@ class HTTPRequestProcess(BaseHTTPProcess):
                             status_code=400,
                         )
                 else:
-                    if param_info.value_type and not isinstance(one_req_param_value, value_py_data_type):  # type: ignore[arg-type]
+                    if param_info.value_type and not isinstance(one_req_param_value, value_py_data_type):
                         return self._generate_http_response(
                             f"The type of data from Font-End site (*{type(one_req_param_value)}*) is different with the "
                             f"implementation of Back-End site (*{value_py_data_type}*).",
