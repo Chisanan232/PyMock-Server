@@ -331,6 +331,12 @@ class TestFormat(CheckableTestSuite):
         if expect_value_format:
             assert re.search(expect_value_format, str(value), re.IGNORECASE) is not None
 
+    @pytest.mark.parametrize("strategy", [s for s in FormatStrategy])
+    def test_valid_expect_format_log_msg(self, strategy: FormatStrategy):
+        non_strategy_format = Format(strategy=strategy)
+        msg = non_strategy_format.expect_format_log_msg(data_type="any data type")
+        assert msg and isinstance(msg, str)
+
     def test_invalid_expect_format_log_msg(self):
         non_strategy_format = Format(strategy=None)
         with pytest.raises(ValueError):
