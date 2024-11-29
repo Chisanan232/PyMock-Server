@@ -3,7 +3,7 @@ from typing import Type
 
 import pytest
 
-from pymock_api.model.api_config.template import TemplateConfigPathSetting
+from pymock_api.model.api_config.template.file import TemplateConfigPathSetting
 
 from .._base import ConfigTestSpec
 

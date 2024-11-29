@@ -1,20 +1,21 @@
 activate: true
-load_config:
-  includes_apis: True
-  order:
-    - 'apply'
-    - 'file'
-config_path_values:
-  base_file_path: './test/data/divide_test/has-base-info_and_tags_has_mocked_apis_with_divide_http_test/'    # Default value should be current path './'
-  api:
-    config_path_format: '**-api'    # ex. ./foo/get_foo.yaml
-  http:
-    config_path_format: '**-http'
-  request:
-    config_path_format: '**-request'
-  response:
-    config_path_format: '**-response'
-apply:    # Which mocked APIs should apply template values
-  api:    # Which mocked APIs should apply template values to its entire settings includes URL, request and response
-    - get_foo
-    - get_foo-boo_export
+file:
+  load_config:
+    includes_apis: True
+    order:
+      - 'apply'
+      - 'file'
+  config_path_values:
+    base_file_path: './test/data/divide_test/has-base-info_and_tags_has_mocked_apis_with_divide_http_test/'    # Default value should be current path './'
+    api:
+      config_path_format: '**-api'    # ex. ./foo/get_foo.yaml
+    http:
+      config_path_format: '**-http'
+    request:
+      config_path_format: '**-request'
+    response:
+      config_path_format: '**-response'
+  apply:    # Which mocked APIs should apply template values
+    api:    # Which mocked APIs should apply template values to its entire settings includes URL, request and response
+      - get_foo
+      - get_foo-boo_export

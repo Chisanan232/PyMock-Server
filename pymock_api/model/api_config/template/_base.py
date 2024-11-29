@@ -7,7 +7,8 @@ from typing import Any, Dict, Optional, Type
 from ...._utils import YAML
 from ...._utils.file_opt import _BaseFileOperation
 from .._base import SelfType, _Config
-from . import TemplateConfig, TemplateConfigPathSetting
+from . import TemplateConfig
+from .file import TemplateConfigPathSetting
 
 
 @dataclass(eq=False)
@@ -68,7 +69,7 @@ class _BaseTemplatableConfig(_Config, ABC):
     def _get_dividing_config(self, data: dict) -> dict:
         base_file_path = (
             self.base_file_path
-            or self._current_template.config_path_values.base_file_path
+            or self._current_template.file.config_path_values.base_file_path
             or self._default_base_file_path
         )
         dividing_config_path = str(pathlib.Path(base_file_path, self.config_path))
@@ -83,13 +84,13 @@ class _BaseTemplatableConfig(_Config, ABC):
         pass
 
     def _deserialize_as(
-        self, data_model: Type["_BaseTemplatableConfig"], with_data: dict
+        self,
+        data_model: Type["_BaseTemplatableConfig"],
+        with_data: dict = {},
     ) -> Optional["_BaseTemplatableConfig"]:
-        if with_data:
-            config = data_model(_current_template=self._current_template)
-            config.base_file_path = self.base_file_path
-            config.config_path = self.config_path.replace(self.config_file_tail, config.config_file_tail)
-            config.absolute_model_key = self.key
-            return config.deserialize(data=with_data)
-        else:
-            return None
+        with_data = {} if with_data is None else with_data
+        config = data_model(_current_template=self._current_template)
+        config.base_file_path = self.base_file_path
+        config.config_path = self.config_path.replace(self.config_file_tail, config.config_file_tail)
+        config.absolute_model_key = self.key
+        return config.deserialize(data=with_data)
