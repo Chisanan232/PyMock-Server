@@ -63,6 +63,13 @@ class TestFormatWithGeneralStrategy(ConfigTestSpec):
                 assert var.size.min_value == expect_var_value[0]["size"]["min"]
             assert var.enum == expect_var_value[0]["enum"]
 
+    def test_default_value(self, sut_with_nothing: Format):
+        sut_with_nothing.strategy = FormatStrategy.BY_DATA_TYPE
+        assert sut_with_nothing.digit is None
+        assert sut_with_nothing.size is None
+
+        assert sut_with_nothing.value_format_is_match(data_type="big_decimal", value="123.123") is True
+
 
 class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTestSuite):
     test_data_dir = "format"
