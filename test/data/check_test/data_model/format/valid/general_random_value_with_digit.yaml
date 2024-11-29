@@ -1,0 +1,5 @@
+strategy: 'by_data_type'
+digit:
+  integer: 30
+  decimal: 3
+range: 0-100

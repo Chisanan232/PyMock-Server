@@ -4,11 +4,15 @@ from typing import Any, List, Optional, Union
 
 import pytest
 
+from pymock_api._utils.random import ValueRange
 from pymock_api.model.api_config.apis._format import Format
-from pymock_api.model.api_config.variable import Variable
+from pymock_api.model.api_config.variable import Digit, Variable
 from pymock_api.model.enums import FormatStrategy, ValueFormat
 
-from ....._values import _Customize_Format_With_Self_Vars
+from ....._values import (
+    _Customize_Format_With_Self_Vars,
+    _Test_Variables_BigDecimal_USD,
+)
 from .._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
 
 
@@ -20,6 +24,7 @@ class TestFormat(CheckableTestSuite):
     def sut(self) -> Format:
         return Format(
             strategy=_Customize_Format_With_Self_Vars["strategy"],
+            digit=_Test_Variables_BigDecimal_USD["digit"],
             enums=_Customize_Format_With_Self_Vars["enums"],
             customize=_Customize_Format_With_Self_Vars["customize"],
             variables=_Customize_Format_With_Self_Vars["variables"],
@@ -33,7 +38,9 @@ class TestFormat(CheckableTestSuite):
         self._verify_props_value(sut)
 
     def _expected_serialize_value(self) -> Any:
-        return _Customize_Format_With_Self_Vars
+        expect_value = _Customize_Format_With_Self_Vars
+        expect_value["digit"] = _Test_Variables_BigDecimal_USD["digit"]
+        return expect_value
 
     def _expected_deserialize_value(self, obj: Format) -> None:
         assert isinstance(obj, Format)
@@ -50,7 +57,9 @@ class TestFormat(CheckableTestSuite):
             assert expect_var_value and len(expect_var_value) == 1
             assert var.name == expect_var_value[0]["name"]
             assert var.value_format.value == expect_var_value[0]["value_format"]
-            assert var.value == expect_var_value[0]["value"]
+            if expect_var_value[0]["digit"]:
+                assert var.digit.integer == expect_var_value[0]["digit"]["integer"]
+                assert var.digit.decimal == expect_var_value[0]["digit"]["decimal"]
             assert var.range == expect_var_value[0]["range"]
             assert var.enum == expect_var_value[0]["enum"]
 
@@ -95,12 +104,12 @@ class TestFormat(CheckableTestSuite):
                 Format(
                     strategy=FormatStrategy.CUSTOMIZE,
                     customize="customize with var",
-                    variables=[Variable(name="sample var", value="20")],
+                    variables=[Variable(name="sample var", digit=Digit(integer=20))],
                 ),
                 Format(
                     strategy=FormatStrategy.CUSTOMIZE,
                     customize="customize with var",
-                    variables=[Variable(name="sample var", value="30:2")],
+                    variables=[Variable(name="sample var", digit=Digit(integer=30, decimal=2))],
                 ),
             ),
         ],
@@ -109,22 +118,28 @@ class TestFormat(CheckableTestSuite):
         assert ut_obj != other_obj
 
     @pytest.mark.parametrize(
-        ("strategy", "data_type", "value", "enums", "customize", "variables"),
+        ("strategy", "data_type", "value", "digit", "enums", "customize", "variables"),
         [
-            (FormatStrategy.BY_DATA_TYPE, str, "random_string", [], "", []),
-            (FormatStrategy.BY_DATA_TYPE, str, "123", [], "", []),
-            (FormatStrategy.BY_DATA_TYPE, int, 123, [], "", []),
-            (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, [], "", []),
-            (FormatStrategy.BY_DATA_TYPE, bool, True, [], "", []),
-            (FormatStrategy.BY_DATA_TYPE, bool, False, [], "", []),
-            (FormatStrategy.BY_DATA_TYPE, bool, "True", [], "", []),
-            (FormatStrategy.BY_DATA_TYPE, bool, "False", [], "", []),
-            (FormatStrategy.FROM_ENUMS, str, "ENUM_2", ["ENUM_1", "ENUM_2", "ENUM_3"], "", []),
-            (FormatStrategy.CUSTOMIZE, str, "sample_format", [], "sample_format", []),
+            (FormatStrategy.BY_DATA_TYPE, str, "random_string", None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, str, "123", None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, str, "@\-_!#$%^&+*()\[\]<>?=/\\|`'\"}{~:;,.", None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, int, 123, None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, int, 123, Digit(integer=3, decimal=0), [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, int, 123, Digit(integer=5, decimal=2), [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, Digit(integer=3, decimal=3), [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, Digit(integer=5, decimal=4), [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, bool, True, None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, bool, False, None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, bool, "True", None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, bool, "False", None, [], "", []),
+            (FormatStrategy.FROM_ENUMS, str, "ENUM_2", None, ["ENUM_1", "ENUM_2", "ENUM_3"], "", []),
+            (FormatStrategy.CUSTOMIZE, str, "sample_format", None, [], "sample_format", []),
             (
                 FormatStrategy.CUSTOMIZE,
                 str,
                 "sample_format",
+                None,
                 [],
                 "<string_check>",
                 [Variable(name="string_check", value_format=ValueFormat.String)],
@@ -133,6 +148,7 @@ class TestFormat(CheckableTestSuite):
                 FormatStrategy.CUSTOMIZE,
                 str,
                 "true",
+                None,
                 [],
                 "<boolean_check>",
                 [Variable(name="boolean_check", value_format=ValueFormat.Boolean)],
@@ -141,6 +157,7 @@ class TestFormat(CheckableTestSuite):
                 FormatStrategy.CUSTOMIZE,
                 str,
                 "ENUM_3",
+                None,
                 [],
                 "<enum_check>",
                 [
@@ -155,6 +172,7 @@ class TestFormat(CheckableTestSuite):
                 FormatStrategy.CUSTOMIZE,
                 str,
                 "123.123 USD",
+                None,
                 [],
                 "<decimal_price> <fiat_currency_code>",
                 [
@@ -165,7 +183,24 @@ class TestFormat(CheckableTestSuite):
             (
                 FormatStrategy.CUSTOMIZE,
                 str,
+                "123.123 USD",
+                None,
+                [],
+                "<decimal_price_with_digit> <fiat_currency_code>",
+                [
+                    Variable(
+                        name="decimal_price_with_digit",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(integer=3, decimal=3),
+                    ),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
                 "123.123 USD\n 135789 JPY",
+                None,
                 [],
                 "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>",
                 [
@@ -176,7 +211,24 @@ class TestFormat(CheckableTestSuite):
             (
                 FormatStrategy.CUSTOMIZE,
                 str,
+                "123.123 USD\n 135789 JPY",
+                None,
+                [],
+                "<decimal_price_with_digit> <fiat_currency_code>\n <decimal_price_with_digit> <fiat_currency_code>",
+                [
+                    Variable(
+                        name="decimal_price_with_digit",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(integer=10, decimal=4),
+                    ),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
                 "123.123 USD\n 135789 JPY\n the lowest value",
+                None,
                 [],
                 "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>\n <string_value>",
                 [
@@ -192,25 +244,30 @@ class TestFormat(CheckableTestSuite):
         strategy: FormatStrategy,
         data_type: Union[str, object],
         value: Any,
+        digit: Optional[Digit],
         enums: List[str],
         customize: str,
         variables: List[Variable],
     ):
-        format_model = Format(strategy=strategy, enums=enums, customize=customize, variables=variables)
+        format_model = Format(strategy=strategy, digit=digit, enums=enums, customize=customize, variables=variables)
         assert format_model.value_format_is_match(data_type=data_type, value=value) is True
 
     @pytest.mark.parametrize(
-        ("strategy", "data_type", "value", "enums", "customize", "variables"),
+        ("strategy", "data_type", "value", "digit", "enums", "customize", "variables"),
         [
-            (FormatStrategy.BY_DATA_TYPE, int, "not int value", [], "", []),
-            (FormatStrategy.BY_DATA_TYPE, "big_decimal", "not int or float value", [], "", []),
-            (FormatStrategy.BY_DATA_TYPE, bool, "not bool value", [], "", []),
-            (FormatStrategy.FROM_ENUMS, str, "not in enums", ["ENUM_1", "ENUM_2", "ENUM_3"], "", []),
-            (FormatStrategy.CUSTOMIZE, str, "different_format", [], "sample_format", []),
+            (FormatStrategy.BY_DATA_TYPE, int, "not int value", None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, int, 123, Digit(integer=1, decimal=0), [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", "not int or float value", None, [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, Digit(integer=2, decimal=3), [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", 123.123, Digit(integer=3, decimal=1), [], "", []),
+            (FormatStrategy.BY_DATA_TYPE, bool, "not bool value", None, [], "", []),
+            (FormatStrategy.FROM_ENUMS, str, "not in enums", None, ["ENUM_1", "ENUM_2", "ENUM_3"], "", []),
+            (FormatStrategy.CUSTOMIZE, str, "different_format", None, [], "sample_format", []),
             (
                 FormatStrategy.CUSTOMIZE,
                 int,
                 "not integer",
+                None,
                 [],
                 "<integer_check>",
                 [Variable(name="integer_check", value_format=ValueFormat.Integer)],
@@ -219,6 +276,7 @@ class TestFormat(CheckableTestSuite):
                 FormatStrategy.CUSTOMIZE,
                 bool,
                 "not boolean",
+                None,
                 [],
                 "<boolean_check>",
                 [Variable(name="boolean_check", value_format=ValueFormat.Boolean)],
@@ -227,6 +285,7 @@ class TestFormat(CheckableTestSuite):
                 FormatStrategy.CUSTOMIZE,
                 str,
                 "ENUM_NOT_EXIST",
+                None,
                 [],
                 "<enum_check>",
                 [
@@ -241,6 +300,7 @@ class TestFormat(CheckableTestSuite):
                 FormatStrategy.CUSTOMIZE,
                 str,
                 "123.123 EUR",
+                None,
                 [],
                 "<decimal_price> <fiat_currency_code>",
                 [
@@ -252,6 +312,7 @@ class TestFormat(CheckableTestSuite):
                 FormatStrategy.CUSTOMIZE,
                 str,
                 "123.123 USD\n 135789 JPY",
+                None,
                 [],
                 "<decimal_price> <fiat_currency_code> <decimal_price> <fiat_currency_code>",
                 [
@@ -263,6 +324,7 @@ class TestFormat(CheckableTestSuite):
                 FormatStrategy.CUSTOMIZE,
                 str,
                 "123.123 USD\n incorrect_value JPY\n the lowest value",
+                None,
                 [],
                 "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>\n <string_value>",
                 [
@@ -278,11 +340,12 @@ class TestFormat(CheckableTestSuite):
         strategy: FormatStrategy,
         data_type: Union[str, object],
         value: Any,
+        digit: Optional[Digit],
         enums: List[str],
         customize: str,
         variables: List[Variable],
     ):
-        format_model = Format(strategy=strategy, enums=enums, customize=customize, variables=variables)
+        format_model = Format(strategy=strategy, digit=digit, enums=enums, customize=customize, variables=variables)
         assert format_model.value_format_is_match(data_type=data_type, value=value) is False
 
     @pytest.mark.parametrize(
@@ -303,7 +366,7 @@ class TestFormat(CheckableTestSuite):
             ),
         ],
     )
-    def test_generate_not_customize_value(
+    def test_generate_value(
         self,
         strategy: FormatStrategy,
         data_type: Union[None, str, object],
@@ -317,9 +380,15 @@ class TestFormat(CheckableTestSuite):
             enums=enums,
             customize=customize,
             variables=[
-                Variable(name="big_decimal_price", value_format=ValueFormat.BigDecimal, value="", range="", enum=[]),
                 Variable(
-                    name="fiat_currency_code", value_format=ValueFormat.Enum, value="", range="", enum=["USD", "TWD"]
+                    name="big_decimal_price", value_format=ValueFormat.BigDecimal, digit=Digit(), range="", enum=[]
+                ),
+                Variable(
+                    name="fiat_currency_code",
+                    value_format=ValueFormat.Enum,
+                    digit=Digit(),
+                    range="",
+                    enum=["USD", "TWD"],
                 ),
             ],
         )
@@ -330,6 +399,85 @@ class TestFormat(CheckableTestSuite):
             assert value in enums
         if expect_value_format:
             assert re.search(expect_value_format, str(value), re.IGNORECASE) is not None
+
+    @pytest.mark.parametrize(
+        ("strategy", "data_type", "digit", "expect_type", "expect_value_range"),
+        [
+            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=1, decimal=0), int, ValueRange(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=3, decimal=0), int, ValueRange(min=-999, max=999)),
+            (FormatStrategy.BY_DATA_TYPE, int, Digit(integer=1, decimal=2), int, ValueRange(min=-9, max=9)),
+            (FormatStrategy.BY_DATA_TYPE, float, Digit(integer=1, decimal=0), Decimal, ValueRange(min=-9, max=9)),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                float,
+                Digit(integer=3, decimal=0),
+                Decimal,
+                ValueRange(min=-999, max=999),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                float,
+                Digit(integer=3, decimal=2),
+                Decimal,
+                ValueRange(min=-999.99, max=999.99),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                float,
+                Digit(integer=0, decimal=3),
+                Decimal,
+                ValueRange(min=-0.999, max=0.999),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                "big_decimal",
+                Digit(integer=1, decimal=0),
+                Decimal,
+                ValueRange(min=-9, max=9),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                "big_decimal",
+                Digit(integer=3, decimal=0),
+                Decimal,
+                ValueRange(min=-999, max=999),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                "big_decimal",
+                Digit(integer=3, decimal=2),
+                Decimal,
+                ValueRange(min=-999.99, max=999.99),
+            ),
+            (
+                FormatStrategy.BY_DATA_TYPE,
+                "big_decimal",
+                Digit(integer=0, decimal=3),
+                Decimal,
+                ValueRange(min=-0.999, max=0.999),
+            ),
+        ],
+    )
+    def test_generate_numerical_value(
+        self,
+        strategy: FormatStrategy,
+        data_type: Union[None, str, object],
+        digit: Digit,
+        expect_type: type,
+        expect_value_range: ValueRange,
+    ):
+        format_model = Format(
+            strategy=strategy,
+            digit=digit,
+        )
+        value = format_model.generate_value(data_type=data_type)
+        assert value is not None
+        assert isinstance(value, expect_type)
+        if isinstance(value, Decimal):
+            assert value.compare(Decimal(expect_value_range.min)) in [Decimal("1"), Decimal("0")]
+            assert value.compare(Decimal(expect_value_range.max)) in [Decimal("-1"), Decimal("0")]
+        else:
+            assert expect_value_range.min <= value <= expect_value_range.max
 
     @pytest.mark.parametrize("strategy", [s for s in FormatStrategy])
     def test_valid_expect_format_log_msg(self, strategy: FormatStrategy):

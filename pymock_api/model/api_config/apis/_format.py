@@ -6,28 +6,42 @@ from decimal import Decimal
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
-from ...enums import FormatStrategy
+from ...enums import FormatStrategy, ValueFormat
 from .._base import _BaseConfig, _Checkable, _Config
-from ..variable import Variable
+from ..variable import Digit, Variable
 
 
 @dataclass(eq=False)
 class Format(_Config, _Checkable):
 
     strategy: Optional[FormatStrategy] = None
+
+    # For general --- by data type strategy
+    digit: Optional[Digit] = None
+    range: Optional[str] = None
+
+    # For enum strategy
     enums: List[str] = field(default_factory=list)
+
+    # For customize strategy
     customize: str = field(default_factory=str)
     variables: List[Variable] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         if self.strategy is not None:
             self._convert_strategy()
+        if self.digit is not None:
+            self._convert_digit()
         if self.variables is not None:
             self._convert_variables()
 
     def _convert_strategy(self) -> None:
         if isinstance(self.strategy, str):
             self.strategy = FormatStrategy.to_enum(self.strategy)
+
+    def _convert_digit(self) -> None:
+        if isinstance(self.digit, dict):
+            self.digit = Digit().deserialize(self.digit)
 
     def _convert_variables(self) -> None:
         if not isinstance(self.variables, list):
@@ -65,6 +79,8 @@ class Format(_Config, _Checkable):
 
         return (
             self.strategy == other.strategy
+            and self.digit == other.digit
+            and self.range == other.range
             and self.enums == other.enums
             and self.customize == other.customize
             and variables_prop_is_same
@@ -80,6 +96,11 @@ class Format(_Config, _Checkable):
     @_Config._clean_empty_value
     def serialize(self, data: Optional["Format"] = None) -> Optional[Dict[str, Any]]:
         strategy: FormatStrategy = self.strategy or FormatStrategy.to_enum(self._get_prop(data, prop="strategy"))
+
+        digit_data_model: Digit = (self or data).digit  # type: ignore[union-attr,assignment]
+        digit: dict = digit_data_model.serialize() if digit_data_model else None  # type: ignore[assignment]
+
+        range_value: str = self._get_prop(data, prop="range")
         enums: List[str] = self._get_prop(data, prop="enums")
         customize: str = self._get_prop(data, prop="customize")
         variables: List[Variable] = self._get_prop(data, prop="variables")
@@ -87,6 +108,8 @@ class Format(_Config, _Checkable):
             return None
         serialized_data = {
             "strategy": strategy.value,
+            "digit": digit,
+            "range": range_value,
             "enums": enums,
             "customize": customize,
             "variables": [var.serialize() if isinstance(var, Variable) else var for var in variables],
@@ -104,6 +127,13 @@ class Format(_Config, _Checkable):
         self.strategy = FormatStrategy.to_enum(data.get("strategy", None))
         if not self.strategy:
             raise ValueError("Schema key *strategy* cannot be empty.")
+
+        if data.get("digit", None):
+            digit_data_model = Digit()
+            digit_data_model.absolute_model_key = self.key
+            self.digit = digit_data_model.deserialize(data=data.get("digit", None) or {})
+
+        self.range = data.get("range", None)
         self.enums = data.get("enums", [])
         self.customize = data.get("customize", "")
         self.variables = [_deserialize_variable(var) for var in (data.get("variables", []) or [])]
@@ -125,6 +155,11 @@ class Format(_Config, _Checkable):
             accept_empty=False,
         ):
             return False
+
+        if self.digit is not None:
+            self.digit.stop_if_fail = self.stop_if_fail
+            if self.digit.is_work() is False:
+                return False
         return True
 
     def value_format_is_match(self, data_type: Union[str, type], value: Any) -> bool:
@@ -132,8 +167,15 @@ class Format(_Config, _Checkable):
         if self.strategy is FormatStrategy.BY_DATA_TYPE:
             data_type = "big_decimal" if isinstance(data_type, float) else data_type
             data_type = locate(data_type) if (data_type != "big_decimal" and isinstance(data_type, str)) else data_type  # type: ignore[assignment]
-            regex = self.strategy.to_value_format(data_type).generate_regex()
-            return re.search(regex, str(value)) is not None
+            digit = self.digit
+            if digit is None:
+                digit = Digit(integer=128, decimal=128) if data_type == "big_decimal" else Digit()
+            regex = self.strategy.to_value_format(data_type).generate_regex(digit=digit.to_digit_range())
+            search_result = re.search(regex, str(value))
+            if search_result is None:
+                # Cannot find any mapping format string
+                return False
+            return len(str(value)) == len(search_result.group(0))
         elif self.strategy is FormatStrategy.FROM_ENUMS:
             return isinstance(value, str) and value in self.enums
         elif self.strategy is FormatStrategy.CUSTOMIZE:
@@ -144,7 +186,16 @@ class Format(_Config, _Checkable):
                 find_result: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
                 assert len(find_result) == 1, "Cannot find the mapping name of variable setting."
                 assert find_result[0].value_format
-                one_var_regex = find_result[0].value_format.generate_regex(enums=find_result[0].enum or [])
+                digit = find_result[0].digit
+                if digit is None:
+                    digit = (
+                        Digit(integer=128, decimal=128)
+                        if find_result[0].value_format is ValueFormat.BigDecimal
+                        else Digit()
+                    )
+                one_var_regex = find_result[0].value_format.generate_regex(
+                    enums=find_result[0].enum or [], digit=digit.to_digit_range()
+                )
                 regex = regex.replace(var, one_var_regex)
             return re.search(regex, str(value), re.IGNORECASE) is not None
         else:
@@ -160,11 +211,21 @@ class Format(_Config, _Checkable):
                 find_result: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
                 assert len(find_result) == 1, "Cannot find the mapping name of variable setting."
                 assert find_result[0].value_format
-                new_value = find_result[0].value_format.generate_value(enums=find_result[0].enum or [])
+                digit = find_result[0].digit
+                if digit is None:
+                    digit = Digit()
+                new_value = find_result[0].value_format.generate_value(
+                    enums=find_result[0].enum or [], digit=digit.to_digit_range()
+                )
                 value = value.replace(var, str(new_value))
             return value
         else:
-            return self.strategy.generate_not_customize_value(data_type=data_type, enums=self.enums)
+            digit = self.digit
+            if digit is None:
+                digit = Digit()
+            return self.strategy.generate_not_customize_value(
+                data_type=data_type, enums=self.enums, digit=digit.to_digit_range()
+            )
 
     def expect_format_log_msg(self, data_type: type) -> str:
         if self.strategy is FormatStrategy.BY_DATA_TYPE:
