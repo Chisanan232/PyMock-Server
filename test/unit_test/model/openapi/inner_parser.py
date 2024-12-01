@@ -3,7 +3,7 @@ from typing import List, Type, Union
 
 import pytest
 
-from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
+from pymock_api.model.enums import OpenAPIVersion
 from pymock_api.model.openapi._base import (
     get_schema_parser_factory_with_openapi_version,
     set_openapi_version,
@@ -14,9 +14,11 @@ from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2PathSchemaParser,
     OpenAPIV2SchemaParser,
     _ReferenceObjectParser,
+)
+from pymock_api.model.openapi._tmp_data_model import (
+    TmpAPIParameterModel,
     set_component_definition,
 )
-from pymock_api.model.openapi._tmp_data_model import TmpAPIParameterModel
 from pymock_api.model.openapi.config import APIParameter
 
 from ._test_case import DeserializeV2OpenAPIConfigTestCaseFactory
@@ -30,7 +32,7 @@ PARSE_V2_OPENAPI_REQUEST_PARAMETERS_WITH_REFERENCE_INFO_TEST_CASE = (
     DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.general_api_http_request_parameters
 )
 PARSE_V2_OPENAPI_REQUEST_PARAMETERS_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.entire_api_http_request_parameters
-PARSE_V2_OPENAPI_RESPONSES_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.entire_api_http_response_with_strategy
+PARSE_V2_OPENAPI_RESPONSES_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.entire_api_http_response
 
 
 class DummyPathSchemaParser(OpenAPIV2PathSchemaParser):
@@ -174,17 +176,15 @@ class TestAPIParser:
         # Verify
         assert re.search(r".{1,64}no ref.{1,64}", str(exc_info.value), re.IGNORECASE)
 
-    @pytest.mark.parametrize(("strategy", "api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
-    def test__process_http_response(
-        self, parser: Type[APIParser], strategy: ResponseStrategy, api_detail: dict, entire_config: dict
-    ):
+    @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
+    def test__process_http_response(self, parser: Type[APIParser], api_detail: dict, entire_config: dict):
         # Pre-process
         set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
 
         # Run target function under test
         print(f"[DEBUG in test] api_detail: {api_detail}")
         parser_instance = parser(parser=OpenAPIV2PathSchemaParser(data=api_detail))
-        response_data = parser_instance.process_responses(strategy=strategy)
+        response_data = parser_instance.process_responses()
         print(f"[DEBUG in test] response_data: {response_data}")
 
         # Verify
@@ -201,44 +201,44 @@ class TestAPIParser:
                 should_check_name = True
         print(f"[DEBUG in test] should_check_name: {should_check_name}")
 
-        assert response_data and isinstance(response_data, dict)
-        data_details = response_data["data"]
-        if strategy is ResponseStrategy.OBJECT:
-            assert data_details is not None and isinstance(data_details, list)
-            for d in data_details:
-                if should_check_name:
-                    assert d["name"]
-                    assert d["type"]
-                assert d["required"] is not None
-                assert d["format"] is None  # FIXME: Should activate this verify after support this feature
-                if d["type"] == "list":
-                    assert d["items"] is not None
-                    for item in d["items"]:
-                        assert item["name"]
-                        assert item["type"]
-                        assert item["required"] is not None
-        else:
-            assert data_details is not None and isinstance(data_details, dict)
-            for v in data_details.values():
-                if isinstance(v, str):
-                    if should_check_name:
-                        assert v in [
-                            "random string value",
-                            "random integer value",
-                            "random boolean value",
-                            "random file output stream",
-                            "FIXME: Handle the reference",
-                        ]
-                    else:
-                        assert v == "empty value"
-                else:
-                    for item in v:
-                        for item_value in item.values():
-                            if should_check_name:
-                                assert item_value in [
-                                    "random string value",
-                                    "random integer value",
-                                    "random boolean value",
-                                ]
-                            else:
-                                assert item_value == "empty value"
+        # assert isinstance(response_data, ResponseProperty)
+        data_details = response_data.data
+        assert data_details is not None and isinstance(data_details, list)
+        for d in data_details:
+            if should_check_name:
+                assert d.name
+                assert d.type
+            assert d.required is not None
+            assert d.format is None  # FIXME: Should activate this verify after support this feature
+            if d.type == "list":
+                assert d.items is not None
+                for item in d.items:
+                    assert item.name
+                    assert item.type
+                    assert item.required is not None
+        # assert False
+        # else:
+        #     assert data_details is not None and isinstance(data_details, dict)
+        #     for v in data_details.values():
+        #         if isinstance(v, str):
+        #             if should_check_name:
+        #                 assert v in [
+        #                     "random string value",
+        #                     "random integer value",
+        #                     "random boolean value",
+        #                     "random file output stream",
+        #                     "FIXME: Handle the reference",
+        #                 ]
+        #             else:
+        #                 assert v == "empty value"
+        #         else:
+        #             for item in v:
+        #                 for item_value in item.values():
+        #                     if should_check_name:
+        #                         assert item_value in [
+        #                             "random string value",
+        #                             "random integer value",
+        #                             "random boolean value",
+        #                         ]
+        #                     else:
+        #                         assert item_value == "empty value"

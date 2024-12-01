@@ -8,8 +8,12 @@ from ..api_config.apis import APIParameter as PyMockAPIParameter
 from ..enums import ResponseStrategy
 from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
 from ._parser import APIParameterParser, APIParser, OpenAPIDocumentConfigParser
-from ._schema_parser import set_component_definition
-from ._tmp_data_model import TmpAPIParameterModel, TmpItemModel
+from ._tmp_data_model import (
+    ResponseProperty,
+    TmpAPIParameterModel,
+    TmpRequestItemModel,
+    set_component_definition,
+)
 
 
 @dataclass
@@ -34,7 +38,7 @@ class BaseProperty(BaseOpenAPIDataModel, ABC):
     required: bool = False
     value_type: str = field(default_factory=str)
     default: Any = None
-    items: Optional[List[Union[TmpAPIParameterModel, TmpItemModel]]] = None
+    items: Optional[List[Union[TmpAPIParameterModel, TmpRequestItemModel]]] = None
 
 
 @dataclass
@@ -61,7 +65,7 @@ class APIParameter(BaseProperty, Transferable):
 
     def to_api_config(self) -> PyMockAPIParameter:  # type: ignore[override]
 
-        def to_items(item_data: Union[TmpAPIParameterModel, TmpItemModel]) -> IteratorItem:
+        def to_items(item_data: Union[TmpAPIParameterModel, TmpRequestItemModel]) -> IteratorItem:
             if isinstance(item_data, TmpAPIParameterModel):
                 return IteratorItem(
                     name=item_data.name,
@@ -69,7 +73,7 @@ class APIParameter(BaseProperty, Transferable):
                     value_type=item_data.value_type,
                     items=[to_items(i) for i in (item_data.items or [])],
                 )
-            elif isinstance(item_data, TmpItemModel):
+            elif isinstance(item_data, TmpRequestItemModel):
                 return IteratorItem(
                     name="",
                     required=True,
@@ -96,10 +100,8 @@ class API(Transferable):
     path: str = field(default_factory=str)
     http_method: str = field(default_factory=str)
     parameters: List[APIParameter] = field(default_factory=list)
-    response: Dict = field(default_factory=dict)
+    response: ResponseProperty = field(default_factory=ResponseProperty)
     tags: List[str] = field(default_factory=list)
-
-    process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
 
     @classmethod
     def generate(cls, api_path: str, http_method: str, detail: dict) -> "API":
@@ -110,15 +112,12 @@ class API(Transferable):
         return api
 
     def deserialize(self, data: Dict) -> "API":
-        # FIXME: Does it have better way to set the HTTP response strategy?
-        if not self.process_response_strategy:
-            raise ValueError("Please set the strategy how it should process HTTP response.")
         parser = APIParser(parser=self.schema_parser_factory.path(data=data))
 
         self.parameters = list(
             map(lambda pd: APIParameter.generate(pd), parser.process_api_parameters(http_method=self.http_method))
         )
-        self.response = parser.process_responses(strategy=self.process_response_strategy)
+        self.response = parser.process_responses()
         self.tags = parser.process_tags()
 
         return self
@@ -129,16 +128,13 @@ class API(Transferable):
             method=self.http_method.upper(),
             parameters=list(map(lambda p: p.to_api_config(), self.parameters)),
         )
-        resp_strategy = self.response["strategy"]
-        if resp_strategy is ResponseStrategy.OBJECT:
-            if list(filter(lambda p: p["name"] == "", self.response["data"])):
-                values = []
-            else:
-                values = self.response["data"]
-            print(f"[DEBUG in to_api_config] values: {values}")
-            mock_api.set_response(strategy=resp_strategy, iterable_value=values)
+        print(f"[DEBUG in src] self.response: {self.response}")
+        if list(filter(lambda p: p.name == "", self.response.data)):
+            values = []
         else:
-            mock_api.set_response(strategy=resp_strategy, value=self.response["data"])
+            values = self.response.data
+        print(f"[DEBUG in to_api_config] values: {values}")
+        mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=values)
         return mock_api
 
 

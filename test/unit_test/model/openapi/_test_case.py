@@ -2,12 +2,11 @@ import json
 from collections import namedtuple
 from typing import List, Tuple
 
-from pymock_api.model.enums import ResponseStrategy
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     _ReferenceObjectParser,
-    set_component_definition,
 )
+from pymock_api.model.openapi._tmp_data_model import set_component_definition
 
 from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 
@@ -17,8 +16,8 @@ OPENAPI_ONE_API_JSON: List[tuple] = []
 OPENAPI_API_PARAMETERS_JSON: List[tuple] = []
 OPENAPI_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
 OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
-OPENAPI_API_RESPONSES_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
-OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[ResponseStrategy, dict, dict]] = []
+OPENAPI_API_RESPONSES_FOR_API: List[Tuple[dict, dict]] = []
+OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[dict, dict]] = []
 
 # For version 3 OpenAPI
 OPENAPI_API_DOC_WITH_DIFFERENT_VERSION_JSON: List[tuple] = []
@@ -32,8 +31,8 @@ V2OpenAPIDocConfigTestCase = namedtuple(
         "entire_api_http_request_parameters",
         "general_api_http_request_parameters",
         "reference_api_http_request_parameters",
-        "entire_api_http_response_with_strategy",
-        "each_api_http_response_with_strategy",
+        "entire_api_http_response",
+        "each_api_http_response",
     ),
 )
 
@@ -52,8 +51,8 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
             entire_api_http_request_parameters=OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API,
             general_api_http_request_parameters=OPENAPI_API_PARAMETERS_JSON_FOR_API,
             reference_api_http_request_parameters=OPENAPI_API_PARAMETERS_JSON,
-            entire_api_http_response_with_strategy=OPENAPI_API_RESPONSES_FOR_API,
-            each_api_http_response_with_strategy=OPENAPI_API_RESPONSES_PROPERTY_FOR_API,
+            entire_api_http_response=OPENAPI_API_RESPONSES_FOR_API,
+            each_api_http_response=OPENAPI_API_RESPONSES_PROPERTY_FOR_API,
         )
 
     @classmethod
@@ -75,8 +74,8 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                         OPENAPI_ONE_API_JSON.append((api_detail, openapi_api_docs))
 
                         # For testing API response
-                        for strategy in ResponseStrategy:
-                            OPENAPI_API_RESPONSES_FOR_API.append((strategy, api_detail, openapi_api_docs))
+                        # for strategy in ResponseStrategy:
+                        OPENAPI_API_RESPONSES_FOR_API.append((api_detail, openapi_api_docs))
 
                         # For testing API response properties
                         status_200_response = api_detail.get("responses", {}).get("200", {})
@@ -86,8 +85,8 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                             response_schema_properties = response_schema.get("properties", None)
                             if response_schema_properties:
                                 for k, v in response_schema_properties.items():
-                                    for strategy in ResponseStrategy:
-                                        OPENAPI_API_RESPONSES_PROPERTY_FOR_API.append((strategy, v, openapi_api_docs))
+                                    # for strategy in ResponseStrategy:
+                                    OPENAPI_API_RESPONSES_PROPERTY_FOR_API.append((v, openapi_api_docs))
 
                         # For testing API request parameters
                         OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API.append((api_detail["parameters"], openapi_api_docs))

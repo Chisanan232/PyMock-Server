@@ -17,6 +17,6 @@ def convert_js_type(t: str) -> str:
 
 # TODO: Should clean the parsing process
 def ensure_type_is_python_type(t: str) -> str:
-    if t in ["string", "integer", "number", "boolean", "array"]:
+    if t in ["string", "integer", "number", "boolean", "array", "object"]:
         return convert_js_type(t)
     return t
