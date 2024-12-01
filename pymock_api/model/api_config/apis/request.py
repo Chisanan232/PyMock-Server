@@ -109,6 +109,7 @@ class HTTPRequest(_DividableOnlyTemplatableConfig, _Checkable):
         def _deserialize_parameter(parameter: dict) -> APIParameter:
             api_parameter = APIParameter()
             api_parameter.absolute_model_key = self.key
+            api_parameter._current_template = self._current_template
             return api_parameter.deserialize(data=parameter)
 
         super().deserialize(data)

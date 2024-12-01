@@ -963,9 +963,11 @@ class TestFormatStrategy(EnumTestSuite):
             FormatStrategy.BY_DATA_TYPE,
             FormatStrategy.FROM_ENUMS,
             FormatStrategy.CUSTOMIZE,
+            FormatStrategy.FROM_TEMPLATE,
             "by_data_type",
             "from_enums",
             "customize",
+            "from_template",
         ],
     )
     def test_to_enum(self, value: Union[str, FormatStrategy], enum_obj: Type[FormatStrategy]):
@@ -991,6 +993,7 @@ class TestFormatStrategy(EnumTestSuite):
         "format_strategy",
         [
             FormatStrategy.CUSTOMIZE,
+            FormatStrategy.FROM_TEMPLATE,
         ],
     )
     def test_failure_to_value_format(self, format_strategy: FormatStrategy):

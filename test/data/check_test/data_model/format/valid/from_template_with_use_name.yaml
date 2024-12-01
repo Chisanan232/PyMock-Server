@@ -1,0 +1,2 @@
+strategy: 'from_template'
+use_name: 'sample_price_with_currency_code'

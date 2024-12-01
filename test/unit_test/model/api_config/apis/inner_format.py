@@ -1,3 +1,4 @@
+import copy
 import re
 from decimal import Decimal
 from typing import Any, List, Optional, Union
@@ -5,7 +6,13 @@ from typing import Any, List, Optional, Union
 import pytest
 
 from pymock_api._utils.random import ValueSize
-from pymock_api.model.api_config.apis._format import Format
+from pymock_api.model import TemplateConfig
+from pymock_api.model.api_config.format import Format
+from pymock_api.model.api_config.template import TemplateCommonConfig
+from pymock_api.model.api_config.template.common import (
+    TemplateFormatConfig,
+    TemplateFormatEntity,
+)
 from pymock_api.model.api_config.variable import Digit, Size, Variable
 from pymock_api.model.enums import FormatStrategy, ValueFormat
 
@@ -288,6 +295,277 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
         assert format_model.value_format_is_match(data_type=data_type, value=value) is True
 
     @pytest.mark.parametrize(
+        ("strategy", "use_name", "data_type", "value", "customize", "variables_in_format", "variables_in_template"),
+        [
+            # *CUSTOMIZE* with template variables
+            (FormatStrategy.CUSTOMIZE, "", str, "sample_format", "sample_format", [], []),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "sample_format",
+                "<string_check>",
+                [],
+                [Variable(name="string_check", value_format=ValueFormat.String)],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "true",
+                "<boolean_check>",
+                [],
+                [Variable(name="boolean_check", value_format=ValueFormat.Boolean)],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "ENUM_3",
+                "<enum_check>",
+                [],
+                [
+                    Variable(
+                        name="enum_check",
+                        value_format=ValueFormat.Enum,
+                        enum=["ENUM_1", "ENUM_2", "ENUM_3", "ENUM_4", "ENUM_5"],
+                    )
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "123.123 USD",
+                "<decimal_price> <fiat_currency_code>",
+                [],
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "123.123 USD",
+                "<decimal_price_with_digit> <fiat_currency_code>",
+                [],
+                [
+                    Variable(
+                        name="decimal_price_with_digit",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(integer=3, decimal=3),
+                    ),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "123.123 USD\n 135789 JPY",
+                "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>",
+                [],
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "123.123 USD\n 135789 JPY",
+                "<decimal_price_with_digit> <fiat_currency_code>\n <decimal_price_with_digit> <fiat_currency_code>",
+                [],
+                [
+                    Variable(
+                        name="decimal_price_with_digit",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(integer=10, decimal=4),
+                    ),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "123.123 USD\n 135789 JPY\n the lowest value",
+                "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>\n <string_value>",
+                [],
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                    Variable(name="string_value", value_format=ValueFormat.String),
+                ],
+            ),
+            # *CUSTOMIZE* with template variables and override variable settings
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "ENUM_2",
+                "<boolean_check>",
+                [
+                    Variable(
+                        name="boolean_check",
+                        value_format=ValueFormat.Enum,
+                        enum=["ENUM_1", "ENUM_2", "ENUM_3", "ENUM_4", "ENUM_5"],
+                    ),
+                ],
+                [Variable(name="boolean_check", value_format=ValueFormat.Boolean)],
+            ),
+            # *FROM_TEMPLATE* with template variables
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_str_format",
+                str,
+                "sample_format",
+                "<string_check>",
+                [],
+                [Variable(name="string_check", value_format=ValueFormat.String)],
+            ),
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_bool_format",
+                str,
+                "true",
+                "<boolean_check>",
+                [],
+                [Variable(name="boolean_check", value_format=ValueFormat.Boolean)],
+            ),
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_enum_format",
+                str,
+                "ENUM_3",
+                "<enum_check>",
+                [],
+                [
+                    Variable(
+                        name="enum_check",
+                        value_format=ValueFormat.Enum,
+                        enum=["ENUM_1", "ENUM_2", "ENUM_3", "ENUM_4", "ENUM_5"],
+                    )
+                ],
+            ),
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_customize_format",
+                str,
+                "123.123 USD",
+                "<decimal_price> <fiat_currency_code>",
+                [],
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_customize_format",
+                str,
+                "123.123 USD",
+                "<decimal_price_with_digit> <fiat_currency_code>",
+                [],
+                [
+                    Variable(
+                        name="decimal_price_with_digit",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(integer=3, decimal=3),
+                    ),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_customize_format",
+                str,
+                "123.123 USD\n 135789 JPY",
+                "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>",
+                [],
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_customize_format",
+                str,
+                "123.123 USD\n 135789 JPY",
+                "<decimal_price_with_digit> <fiat_currency_code>\n <decimal_price_with_digit> <fiat_currency_code>",
+                [],
+                [
+                    Variable(
+                        name="decimal_price_with_digit",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(integer=10, decimal=4),
+                    ),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_customize_format",
+                str,
+                "123.123 USD\n 135789 JPY\n the lowest value",
+                "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>\n <string_value>",
+                [],
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                    Variable(name="string_value", value_format=ValueFormat.String),
+                ],
+            ),
+            # *FROM_TEMPLATE* with partial template variables
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_customize_format",
+                str,
+                "123.123 USD\n 135789 JPY\n the lowest value",
+                "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>\n <string_value>",
+                [
+                    Variable(name="string_value", value_format=ValueFormat.String),
+                ],
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+        ],
+    )
+    def test_chk_format_is_match_with_template_config(
+        self,
+        strategy: FormatStrategy,
+        use_name: str,
+        data_type: Union[str, object],
+        value: Any,
+        customize: str,
+        variables_in_format: List[Variable],
+        variables_in_template: List[Variable],
+    ):
+        # Given under test format
+        format_model = self._given_format_config(
+            strategy=strategy,
+            customize=customize,
+            use_name=use_name,
+            variables=variables_in_format,
+        )
+
+        # Given under test template
+        format_model = self._given_template_format_setting(
+            format_model=format_model,
+            customize=customize,
+            use_name=use_name,
+            variables_in_template=variables_in_template,
+        )
+
+        assert format_model.value_format_is_match(data_type=data_type, value=value) is True
+
+    @pytest.mark.parametrize(
         ("strategy", "data_type", "value", "digit", "enums", "customize", "variables"),
         [
             (FormatStrategy.BY_DATA_TYPE, str, "".join(["a" for _ in range(6)]), None, [], "", []),
@@ -392,18 +670,375 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
         assert format_model.value_format_is_match(data_type=data_type, value=value) is False
 
     @pytest.mark.parametrize(
-        ("strategy", "data_type", "enums", "customize", "expect_type", "expect_value_format"),
+        ("strategy", "use_name", "data_type", "value", "customize", "variables_in_format", "variables_in_template"),
         [
-            (FormatStrategy.BY_DATA_TYPE, str, [], "", str, None),
-            (FormatStrategy.BY_DATA_TYPE, int, [], "", int, None),
-            (FormatStrategy.BY_DATA_TYPE, "big_decimal", [], "", Decimal, None),
-            (FormatStrategy.BY_DATA_TYPE, bool, [], "", bool, None),
-            (FormatStrategy.FROM_ENUMS, str, ["ENUM_1", "ENUM_2", "ENUM_3"], "", str, None),
+            # *CUSTOMIZE* with template variables
+            (FormatStrategy.CUSTOMIZE, "", str, "different_format", "sample_format", [], []),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                int,
+                "not integer",
+                "<integer_check>",
+                [],
+                [Variable(name="integer_check", value_format=ValueFormat.Integer)],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                bool,
+                "not boolean",
+                "<boolean_check>",
+                [],
+                [Variable(name="boolean_check", value_format=ValueFormat.Boolean)],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "ENUM_NOT_EXIST",
+                "<enum_check>",
+                [],
+                [
+                    Variable(
+                        name="enum_check",
+                        value_format=ValueFormat.Enum,
+                        enum=["ENUM_1", "ENUM_2", "ENUM_3", "ENUM_4", "ENUM_5"],
+                    )
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "123.123 EUR",
+                "<decimal_price> <fiat_currency_code>",
+                [],
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "123.123 USD\n 135789 JPY",
+                "<decimal_price> <fiat_currency_code> <decimal_price> <fiat_currency_code>",
+                [],
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "123.123 USD\n incorrect_value JPY\n the lowest value",
+                "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>\n <string_value>",
+                [],
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                    Variable(name="string_value", value_format=ValueFormat.String),
+                ],
+            ),
+            # *CUSTOMIZE* with template variables and override variable settings
+            (
+                FormatStrategy.CUSTOMIZE,
+                "",
+                str,
+                "ENUM_2",
+                "<boolean_check>",
+                [Variable(name="boolean_check", value_format=ValueFormat.Boolean)],
+                [
+                    Variable(
+                        name="boolean_check",
+                        value_format=ValueFormat.Enum,
+                        enum=["ENUM_1", "ENUM_2", "ENUM_3", "ENUM_4", "ENUM_5"],
+                    ),
+                ],
+            ),
+            # *FROM_TEMPLATE* with template variables
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_str_format",
+                str,
+                "sample_format",
+                "<string_check>",
+                [],
+                [Variable(name="string_check", value_format=ValueFormat.Boolean)],
+            ),
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_bool_format",
+                str,
+                "true",
+                "<boolean_check>",
+                [],
+                [Variable(name="boolean_check", value_format=ValueFormat.Integer)],
+            ),
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_enum_format",
+                str,
+                "ENUM_NOT_EXIST",
+                "<enum_check>",
+                [],
+                [
+                    Variable(
+                        name="enum_check",
+                        value_format=ValueFormat.Enum,
+                        enum=["ENUM_1", "ENUM_2", "ENUM_3", "ENUM_4", "ENUM_5"],
+                    )
+                ],
+            ),
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_customize_format",
+                str,
+                "123.123 EUR",
+                "<decimal_price> <fiat_currency_code>",
+                [],
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.Integer),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+            # *FROM_TEMPLATE* with partial template variables
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                "template_customize_format",
+                str,
+                "123.123 USD\n 135789 EUR\n the lowest value",
+                "<decimal_price> <fiat_currency_code>\n <decimal_price> <fiat_currency_code>\n <string_value>",
+                [
+                    Variable(name="string_value", value_format=ValueFormat.String),
+                ],
+                [
+                    Variable(name="decimal_price", value_format=ValueFormat.BigDecimal),
+                    Variable(name="fiat_currency_code", value_format=ValueFormat.Enum, enum=["USD", "TWD", "JPY"]),
+                ],
+            ),
+        ],
+    )
+    def test_failure_chk_format_is_match_with_template_config(
+        self,
+        strategy: FormatStrategy,
+        use_name: str,
+        data_type: Union[str, object],
+        value: Any,
+        customize: str,
+        variables_in_format: List[Variable],
+        variables_in_template: List[Variable],
+    ):
+        # Given under test format
+        format_model = self._given_format_config(
+            strategy=strategy,
+            customize=customize,
+            use_name=use_name,
+            variables=variables_in_format,
+        )
+
+        # Given under test template
+        format_model = self._given_template_format_setting(
+            format_model=format_model,
+            customize=customize,
+            use_name=use_name,
+            variables_in_template=variables_in_template,
+        )
+
+        assert format_model.value_format_is_match(data_type=data_type, value=value) is False
+
+    def _given_format_config(
+        self, strategy: FormatStrategy, customize: str, variables: List[Variable], use_name: str, enums: List[str] = []
+    ) -> Format:
+        return Format(
+            strategy=strategy,
+            size=Size(max_value=64, min_value=0),
+            enums=enums,
+            customize=customize if strategy is FormatStrategy.CUSTOMIZE else "",
+            variables=variables,
+            use_name=use_name,
+        )
+
+    def _given_template_format_setting(
+        self,
+        format_model: Format,
+        use_name: str,
+        customize: str,
+        variables_in_template: List[Variable],
+    ) -> Format:
+        # Given the format instance will be saved in *template.common_config.format.entities*
+        format_model_in_template = copy.copy(format_model)
+        format_model_in_template.strategy = FormatStrategy.CUSTOMIZE
+        format_model_in_template.customize = customize
+
+        # Given the template configuration
+        format_model._current_template = TemplateConfig(
+            activate=True,
+            common_config=TemplateCommonConfig(
+                activate=True,
+                format=TemplateFormatConfig(
+                    entities=[TemplateFormatEntity(name=use_name, config=format_model_in_template)],
+                    variables=variables_in_template,
+                ),
+            ),
+        )
+        return format_model
+
+    @pytest.mark.parametrize(
+        (
+            "strategy",
+            "data_type",
+            "enums",
+            "customize",
+            "use_name",
+            "variables_in_format",
+            "variables_in_template",
+            "expect_type",
+            "expect_value_format",
+        ),
+        [
+            (FormatStrategy.BY_DATA_TYPE, str, [], "", "", [], [], str, None),
+            (FormatStrategy.BY_DATA_TYPE, int, [], "", "", [], [], int, None),
+            (FormatStrategy.BY_DATA_TYPE, "big_decimal", [], "", "", [], [], Decimal, None),
+            (FormatStrategy.BY_DATA_TYPE, bool, [], "", "", [], [], bool, None),
+            (FormatStrategy.FROM_ENUMS, str, ["ENUM_1", "ENUM_2", "ENUM_3"], "", "", [], [], str, None),
+            # General customize
             (
                 FormatStrategy.CUSTOMIZE,
                 str,
                 [],
                 "<big_decimal_price> <fiat_currency_code>",
+                "",
+                [
+                    Variable(
+                        name="big_decimal_price",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=[],
+                    ),
+                    Variable(
+                        name="fiat_currency_code",
+                        value_format=ValueFormat.Enum,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=["USD", "TWD"],
+                    ),
+                ],
+                [],
+                str,
+                r"\d{0,64}(\.)\d{0,64} \w{0,10}",
+            ),
+            # General from_template (format case)
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                str,
+                [],
+                "<big_decimal_price> <fiat_currency_code>",
+                "sample_customize",
+                [],
+                [
+                    Variable(
+                        name="big_decimal_price",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=[],
+                    ),
+                    Variable(
+                        name="fiat_currency_code",
+                        value_format=ValueFormat.Enum,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=["USD", "TWD"],
+                    ),
+                ],
+                str,
+                r"\d{0,64}(\.)\d{0,64} \w{0,10}",
+            ),
+            # General from_template (variable case)
+            (
+                FormatStrategy.FROM_TEMPLATE,
+                str,
+                [],
+                "<big_decimal_price> <fiat_currency_code>",
+                "",
+                [],
+                [
+                    Variable(
+                        name="big_decimal_price",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=[],
+                    ),
+                    Variable(
+                        name="fiat_currency_code",
+                        value_format=ValueFormat.Enum,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=["USD", "TWD"],
+                    ),
+                ],
+                str,
+                r"\d{0,64}(\.)\d{0,64} \w{0,10}",
+            ),
+            # General customize with template configuration
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                [],
+                "<big_decimal_price> <fiat_currency_code>",
+                "",
+                [],
+                [
+                    Variable(
+                        name="big_decimal_price",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=[],
+                    ),
+                    Variable(
+                        name="fiat_currency_code",
+                        value_format=ValueFormat.Enum,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=["USD", "TWD"],
+                    ),
+                ],
+                str,
+                r"\d{0,64}(\.)\d{0,64} \w{0,10}",
+            ),
+            # General customize with partial template configuration
+            (
+                FormatStrategy.CUSTOMIZE,
+                str,
+                [],
+                "<big_decimal_price> <fiat_currency_code>",
+                "",
+                [
+                    Variable(
+                        name="big_decimal_price",
+                        value_format=ValueFormat.BigDecimal,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=[],
+                    ),
+                ],
+                [
+                    Variable(
+                        name="fiat_currency_code",
+                        value_format=ValueFormat.Enum,
+                        digit=Digit(),
+                        size=Size(),
+                        enum=["USD", "TWD"],
+                    ),
+                ],
                 str,
                 r"\d{0,64}(\.)\d{0,64} \w{0,10}",
             ),
@@ -415,26 +1050,29 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
         data_type: Union[None, str, object],
         enums: List[str],
         customize: str,
+        use_name: str,
+        variables_in_format: List[Variable],
+        variables_in_template: List[Variable],
         expect_type: type,
         expect_value_format: Optional[str],
     ):
-        format_model = Format(
+        # Given under test format
+        format_model = self._given_format_config(
             strategy=strategy,
             enums=enums,
             customize=customize,
-            variables=[
-                Variable(
-                    name="big_decimal_price", value_format=ValueFormat.BigDecimal, digit=Digit(), size=Size(), enum=[]
-                ),
-                Variable(
-                    name="fiat_currency_code",
-                    value_format=ValueFormat.Enum,
-                    digit=Digit(),
-                    size=Size(),
-                    enum=["USD", "TWD"],
-                ),
-            ],
+            use_name=use_name,
+            variables=variables_in_format,
         )
+
+        # Given under test template
+        format_model = self._given_template_format_setting(
+            format_model=format_model,
+            customize=customize,
+            use_name=use_name,
+            variables_in_template=variables_in_template,
+        )
+
         value = format_model.generate_value(data_type=data_type)
         assert value is not None
         assert isinstance(value, expect_type)

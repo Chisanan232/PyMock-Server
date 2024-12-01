@@ -6,9 +6,9 @@ from decimal import Decimal
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
-from ...enums import FormatStrategy, ValueFormat
-from .._base import _BaseConfig, _Checkable, _Config
-from ..variable import Digit, Size, Variable
+from ..enums import FormatStrategy, ValueFormat
+from ._base import _BaseConfig, _Checkable, _Config
+from .variable import Digit, Size, Variable
 
 
 @dataclass(eq=False)
@@ -26,6 +26,10 @@ class Format(_Config, _Checkable):
     # For customize strategy
     customize: str = field(default_factory=str)
     variables: List[Variable] = field(default_factory=list)
+
+    # For from template strategy
+    use_name: str = field(default_factory=str)
+    _current_template: Any = None  # Type is *TemplateConfig*, but it has circular import issue currently.
 
     def __post_init__(self) -> None:
         if self.strategy is not None:
@@ -112,6 +116,7 @@ class Format(_Config, _Checkable):
         enums: List[str] = self._get_prop(data, prop="enums")
         customize: str = self._get_prop(data, prop="customize")
         variables: List[Variable] = self._get_prop(data, prop="variables")
+        use_name: str = self._get_prop(data, prop="use_name")
         if not strategy:
             return None
         serialized_data = {
@@ -121,6 +126,7 @@ class Format(_Config, _Checkable):
             "enums": enums,
             "customize": customize,
             "variables": [var.serialize() if isinstance(var, Variable) else var for var in variables],
+            "use_name": use_name,
         }
         return serialized_data
 
@@ -149,6 +155,7 @@ class Format(_Config, _Checkable):
         self.enums = data.get("enums", [])
         self.customize = data.get("customize", "")
         self.variables = [_deserialize_variable(var) for var in (data.get("variables", []) or [])]
+        self.use_name = data.get("use_name", "")
         return self
 
     def is_work(self) -> bool:
@@ -163,6 +170,11 @@ class Format(_Config, _Checkable):
             condition=(
                 not isinstance(self.customize, str) or (self.customize is not None and len(self.customize) == 0)
             ),
+        ):
+            return False
+        if self.strategy is FormatStrategy.FROM_TEMPLATE and not self.condition_should_be_true(
+            config_key=f"{self.absolute_model_key}.use_name",
+            condition=(not isinstance(self.use_name, str) or (self.use_name is not None and len(self.use_name) == 0)),
         ):
             return False
 
@@ -204,8 +216,7 @@ class Format(_Config, _Checkable):
             regex = re.escape(copy.copy(self.customize))
             for var in all_vars_in_customize:
                 pure_var = var.replace("<", "").replace(">", "")
-                find_result: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
-                assert len(find_result) == 1, "Cannot find the mapping name of variable setting."
+                find_result = self._get_format_config(pure_var)
                 assert find_result[0].value_format
                 digit = find_result[0].digit
                 if digit is None:
@@ -222,6 +233,10 @@ class Format(_Config, _Checkable):
                 )
                 regex = regex.replace(var, one_var_regex)
             return re.search(regex, str(value), re.IGNORECASE) is not None
+        elif self.strategy is FormatStrategy.FROM_TEMPLATE:
+            format_config: Format = self._current_template.common_config.format.get_format(self.use_name)
+            format_config._current_template = self._current_template
+            return format_config.value_format_is_match(data_type=data_type, value=value)
         else:
             raise ValueError("This is program bug, please report this issue.")
 
@@ -232,8 +247,7 @@ class Format(_Config, _Checkable):
             value = copy.copy(self.customize)
             for var in all_vars_in_customize:
                 pure_var = var.replace("<", "").replace(">", "")
-                find_result: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
-                assert len(find_result) == 1, "Cannot find the mapping name of variable setting."
+                find_result = self._get_format_config(pure_var)
                 assert find_result[0].value_format
                 digit = find_result[0].digit
                 if digit is None:
@@ -246,6 +260,10 @@ class Format(_Config, _Checkable):
                 )
                 value = value.replace(var, str(new_value))
             return value
+        elif self.strategy is FormatStrategy.FROM_TEMPLATE:
+            format_config: Format = self._current_template.common_config.format.get_format(self.use_name)
+            format_config._current_template = self._current_template
+            return format_config.generate_value(data_type=data_type)
         else:
             digit = self.digit
             if digit is None:
@@ -256,6 +274,15 @@ class Format(_Config, _Checkable):
             return self.strategy.generate_not_customize_value(
                 data_type=data_type, enums=self.enums, size=size.to_value_size(), digit=digit.to_digit_range()
             )
+
+    def _get_format_config(self, pure_var: str) -> List[Variable]:
+        format_config_in_template: Optional[Variable] = None
+        if self._current_template and self._current_template.common_config:
+            format_config_in_template = self._current_template.common_config.format.get_variable(pure_var)
+        find_result_in_format: List[Variable] = list(filter(lambda v: pure_var == v.name, self.variables))
+        find_result = find_result_in_format if find_result_in_format else [format_config_in_template]  # type: ignore[list-item]
+        assert len(find_result) == 1 and None not in find_result, "Cannot find the mapping name of variable setting."
+        return find_result
 
     def expect_format_log_msg(self, data_type: type) -> str:
         if self.strategy is FormatStrategy.BY_DATA_TYPE:
@@ -303,6 +330,10 @@ class _HasFormatPropConfig(_BaseConfig, _Checkable, ABC):
         self.value_format = col_format
 
         super().deserialize(data)  # type: ignore[safe-super]
+
+        # Set section *template* configuration for format feature
+        if self.value_format and hasattr(self, "_current_template"):
+            self.value_format._current_template = self._current_template
         return self
 
     def is_work(self) -> bool:
