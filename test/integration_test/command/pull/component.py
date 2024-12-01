@@ -8,11 +8,11 @@ from pymock_api.command.options import SubCommand
 from pymock_api.command.pull.component import SubCmdPullComponent
 from pymock_api.model import (
     SubcmdPullArguments,
-    deserialize_openapi_doc_config,
+    deserialize_api_doc_config,
     load_config,
 )
 from pymock_api.model.api_config import DivideStrategy, TemplateConfig
-from pymock_api.model.openapi._tmp_data_model import set_component_definition
+from pymock_api.model.openapi.base_config import set_component_definition
 
 from ...._values import _API_Doc_Source, _API_Doc_Source_File, _Test_Request_With_Https
 from ._test_case import (
@@ -237,7 +237,7 @@ class TestSubCmdPullComponent:
     def test_command_line_argument_setting(self, sub_cmd: SubCmdPullComponent, cmd_args: SubcmdPullArguments):
         # Mock function and its return value if it needs
         with patch.object(sub_cmd, "_get_openapi_doc_config") as mock_get_openapi_doc_config:
-            openapi_doc_config = deserialize_openapi_doc_config(data=_OpenAPI_Doc_Config)
+            openapi_doc_config = deserialize_api_doc_config(data=_OpenAPI_Doc_Config)
             mock_get_openapi_doc_config.return_value = openapi_doc_config
             with patch(
                 "pymock_api.command._common.component.SavingConfigComponent._dry_run_final_process"

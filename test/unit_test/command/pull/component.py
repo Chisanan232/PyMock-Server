@@ -9,7 +9,7 @@ import pytest
 from pymock_api.command.pull.component import SubCmdPullComponent
 
 ExpectResult = namedtuple(
-    "ExpectResult", ("should_run_client_request", "should_run_json_read", "should_run_deserialize_openapi_doc_config")
+    "ExpectResult", ("should_run_client_request", "should_run_json_read", "should_run_deserialize_api_doc_config")
 )
 
 
@@ -38,8 +38,8 @@ class TestSubCmdPullComponent:
         with patch("pymock_api.command.pull.component.URLLibHTTPClient.request") as mock_client_request:
             with patch("pymock_api.command.pull.component.JSON.read") as mock_json_read:
                 with patch(
-                    "pymock_api.command.pull.component.deserialize_openapi_doc_config"
-                ) as mock_deserialize_openapi_doc_config:
+                    "pymock_api.command.pull.component.deserialize_api_doc_config"
+                ) as mock_deserialize_api_doc_config:
                     # Run target function
                     component._get_openapi_doc_config(url=url, config_file=config_file)
 
@@ -54,10 +54,10 @@ class TestSubCmdPullComponent:
                     else:
                         mock_json_read.assert_not_called()
 
-                    if expect_result.should_run_deserialize_openapi_doc_config:
-                        mock_deserialize_openapi_doc_config.assert_called_once()
+                    if expect_result.should_run_deserialize_api_doc_config:
+                        mock_deserialize_api_doc_config.assert_called_once()
                     else:
-                        mock_deserialize_openapi_doc_config.assert_not_called()
+                        mock_deserialize_api_doc_config.assert_not_called()
 
     @pytest.mark.parametrize(
         ("url", "config_file"),
@@ -78,8 +78,8 @@ class TestSubCmdPullComponent:
         with patch("pymock_api.command.pull.component.URLLibHTTPClient.request") as mock_client_request:
             with patch("pymock_api.command.pull.component.JSON.read") as mock_json_read:
                 with patch(
-                    "pymock_api.command.pull.component.deserialize_openapi_doc_config"
-                ) as mock_deserialize_openapi_doc_config:
+                    "pymock_api.command.pull.component.deserialize_api_doc_config"
+                ) as mock_deserialize_api_doc_config:
                     # Run target function
                     with pytest.raises(ValueError) as exc_info:
                         component._get_openapi_doc_config(url=url, config_file=config_file)
@@ -89,4 +89,4 @@ class TestSubCmdPullComponent:
 
                     mock_client_request.assert_not_called()
                     mock_json_read.assert_not_called()
-                    mock_deserialize_openapi_doc_config.assert_not_called()
+                    mock_deserialize_api_doc_config.assert_not_called()
