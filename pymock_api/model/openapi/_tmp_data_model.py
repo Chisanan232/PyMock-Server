@@ -1087,5 +1087,5 @@ class API(Transferable):
             values = self.response.data
         print(f"[DEBUG in to_api_config] values: {values}")
         resp_props_values = [p.to_pymock_api_config() for p in values] if values else values
-        mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=resp_props_values)  # type: ignore[arg-type]
+        mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=resp_props_values)
         return mock_api
