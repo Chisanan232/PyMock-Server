@@ -1,5 +1,5 @@
 import re
-from typing import List, Type
+from typing import List, Type, Union
 
 import pytest
 
@@ -16,6 +16,7 @@ from pymock_api.model.openapi._schema_parser import (
     _ReferenceObjectParser,
     set_component_definition,
 )
+from pymock_api.model.openapi._tmp_data_model import TmpAPIParameterModel
 from pymock_api.model.openapi.config import APIParameter
 
 from ._test_case import DeserializeV2OpenAPIConfigTestCaseFactory
@@ -49,6 +50,65 @@ class TestAPIParameterParser:
             parser_instance.process_parameter(invalid_values, accept_no_schema=False)
         assert re.search(r".{0,64}doesn't have key 'schema'.{0,64}", str(exc_info.value), re.IGNORECASE)
 
+    @pytest.mark.parametrize(
+        ("ut_data", "expect_data"),
+        [
+            # General case (list type value)
+            (
+                [
+                    {
+                        "name": "value",
+                        "required": True,
+                        "type": "number",
+                        "default": "None",
+                    },
+                    {
+                        "name": "id",
+                        "required": True,
+                        "type": "integer",
+                        "default": "None",
+                    },
+                ],
+                [
+                    {
+                        "name": "value",
+                        "required": True,
+                        "type": "int",
+                        "default": "None",
+                    },
+                    {
+                        "name": "id",
+                        "required": True,
+                        "type": "int",
+                        "default": "None",
+                    },
+                ],
+            ),
+            # General case (dict type value)
+            (
+                {
+                    "type": "string",
+                    "enum": [
+                        "ENUM1",
+                        "ENUM2",
+                    ],
+                },
+                [
+                    {
+                        "type": "str",
+                        "enum": [
+                            "ENUM1",
+                            "ENUM2",
+                        ],
+                    },
+                ],
+            ),
+        ],
+    )
+    def test__ensure_data_type_is_pythonic_type_in_items(self, ut_data: Union[list, dict], expect_data: List[dict]):
+        parser = APIParameterParser(parser="Dummy parser")
+        assert parser._ensure_data_type_is_pythonic_type_in_items(ut_data) == expect_data
+
 
 class TestAPIParser:
 
@@ -70,7 +130,9 @@ class TestAPIParser:
         set_parser_factory(get_schema_parser_factory_with_openapi_version())
 
         # Run target function
-        parameters = parser_instance.process_api_parameters(data_modal=APIParameter, http_method="HTTP method")
+        parameters = [
+            APIParameter.generate(pd) for pd in parser_instance.process_api_parameters(http_method="HTTP method")
+        ]
 
         # Verify
         assert parameters and isinstance(parameters, list)
@@ -99,7 +161,7 @@ class TestAPIParser:
         # Verify
         assert parameters and isinstance(parameters, list)
         assert len(parameters) == len(entire_openapi_config["definitions"]["UpdateFooRequest"]["properties"].keys())
-        type_checksum = list(map(lambda p: isinstance(p, dict), parameters))
+        type_checksum = list(map(lambda p: isinstance(p, TmpAPIParameterModel), parameters))
         assert False not in type_checksum
 
     @pytest.mark.parametrize("openapi_doc_data", PARSE_FAIL_V2_OPENAPI_REQUEST_PARAMETERS_NO_REFERENCE_INFO_TEST_CASE)

@@ -1,20 +1,21 @@
-from typing import Any, Dict, List, Optional, cast
+from abc import ABC
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Union, cast
 
 from .. import APIConfig, MockAPI, MockAPIs
-from ..api_config import BaseConfig
+from ..api_config import BaseConfig, IteratorItem
 from ..api_config.apis import APIParameter as PyMockAPIParameter
 from ..enums import ResponseStrategy
 from ._base import BaseOpenAPIDataModel, Transferable, set_openapi_version
-from ._js_handlers import convert_js_type
 from ._parser import APIParameterParser, APIParser, OpenAPIDocumentConfigParser
 from ._schema_parser import set_component_definition
+from ._tmp_data_model import TmpAPIParameterModel, TmpItemModel
 
 
+@dataclass
 class Tag(BaseOpenAPIDataModel):
-    def __init__(self):
-        super().__init__()
-        self.name: str = ""
-        self.description: str = ""
+    name: str = field(default_factory=str)
+    description: str = field(default_factory=str)
 
     @classmethod
     def generate(cls, detail: dict) -> "Tag":
@@ -27,52 +28,78 @@ class Tag(BaseOpenAPIDataModel):
         return self
 
 
-class APIParameter(Transferable):
-    def __init__(self):
-        super().__init__()
-        self.name: str = ""
-        self.required: bool = False
-        self.value_type: str = ""
-        self.default: Any = None
-        self.items: Optional[list] = None
+@dataclass
+class BaseProperty(BaseOpenAPIDataModel, ABC):
+    name: str = field(default_factory=str)
+    required: bool = False
+    value_type: str = field(default_factory=str)
+    default: Any = None
+    items: Optional[List[Union[TmpAPIParameterModel, TmpItemModel]]] = None
+
+
+@dataclass
+class APIParameter(BaseProperty, Transferable):
 
     @classmethod
-    def generate(cls, detail: dict) -> "APIParameter":
+    def generate(cls, detail: Union[dict, TmpAPIParameterModel]) -> "APIParameter":
         return APIParameter().deserialize(data=detail)
 
-    def deserialize(self, data: Dict) -> "APIParameter":
-        parser = APIParameterParser(self.schema_parser_factory.request_parameters(data))
-        handled_data = parser.process_parameter(data)
-        self.name = handled_data.name  # type: ignore[attr-defined]
-        self.required = handled_data.required  # type: ignore[attr-defined]
-        self.value_type = convert_js_type(handled_data.type)  # type: ignore[attr-defined]
-        self.default = handled_data.default  # type: ignore[attr-defined]
-        items = handled_data.items  # type: ignore[attr-defined]
+    def deserialize(self, data: Union[Dict, TmpAPIParameterModel]) -> "APIParameter":
+        if isinstance(data, dict):
+            parser = APIParameterParser(self.schema_parser_factory.request_parameters(data))
+            handled_data = parser.process_parameter(data)
+        else:
+            handled_data = data
+        self.name = handled_data.name
+        self.required = handled_data.required
+        self.value_type = handled_data.value_type
+        self.default = handled_data.default
+        items = handled_data.items
         if items is not None:
-            self.items = items if isinstance(items, list) else [items]
+            self.items = items if isinstance(items, list) else [items]  # type: ignore[list-item]
         return self
 
     def to_api_config(self) -> PyMockAPIParameter:  # type: ignore[override]
+
+        def to_items(item_data: Union[TmpAPIParameterModel, TmpItemModel]) -> IteratorItem:
+            if isinstance(item_data, TmpAPIParameterModel):
+                return IteratorItem(
+                    name=item_data.name,
+                    required=item_data.required,
+                    value_type=item_data.value_type,
+                    items=[to_items(i) for i in (item_data.items or [])],
+                )
+            elif isinstance(item_data, TmpItemModel):
+                return IteratorItem(
+                    name="",
+                    required=True,
+                    value_type=item_data.value_type,
+                    items=[],
+                )
+            else:
+                raise TypeError(
+                    f"The data model must be *TmpAPIParameterModel* or *TmpItemModel*. But it get *{item_data}*. Please check it."
+                )
+
         return PyMockAPIParameter(
             name=self.name,
             required=self.required,
             value_type=self.value_type,
             default=self.default,
             value_format=None,
-            items=self.items,
+            items=[to_items(i) for i in (self.items or [])],
         )
 
 
+@dataclass
 class API(Transferable):
-    def __init__(self):
-        super().__init__()
-        self.path: str = ""
-        self.http_method: str = ""
-        self.parameters: List[APIParameter] = []
-        self.response: Dict = {}
-        self.tags: List[str] = []
+    path: str = field(default_factory=str)
+    http_method: str = field(default_factory=str)
+    parameters: List[APIParameter] = field(default_factory=list)
+    response: Dict = field(default_factory=dict)
+    tags: List[str] = field(default_factory=list)
 
-        self.process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
+    process_response_strategy: ResponseStrategy = ResponseStrategy.OBJECT
 
     @classmethod
     def generate(cls, api_path: str, http_method: str, detail: dict) -> "API":
@@ -88,8 +115,8 @@ class API(Transferable):
             raise ValueError("Please set the strategy how it should process HTTP response.")
         parser = APIParser(parser=self.schema_parser_factory.path(data=data))
 
-        self.parameters = cast(
-            List[APIParameter], parser.process_api_parameters(data_modal=APIParameter, http_method=self.http_method)
+        self.parameters = list(
+            map(lambda pd: APIParameter.generate(pd), parser.process_api_parameters(http_method=self.http_method))
         )
         self.response = parser.process_responses(strategy=self.process_response_strategy)
         self.tags = parser.process_tags()
@@ -115,11 +142,10 @@ class API(Transferable):
         return mock_api
 
 
+@dataclass
 class OpenAPIDocumentConfig(Transferable):
-    def __init__(self):
-        super().__init__()
-        self.paths: List[API] = []
-        self.tags: List[Tag] = []
+    paths: List[API] = field(default_factory=list)
+    tags: List[Tag] = field(default_factory=list)
 
     def deserialize(self, data: Dict) -> "OpenAPIDocumentConfig":
         self._chk_version_and_load_parser(data)
