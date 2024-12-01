@@ -1,28 +1,15 @@
-import copy
-import json
-import pathlib
-from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional
 
-
-class BaseSchemaParser(metaclass=ABCMeta):
-    def __init__(self, data: dict):
-        self._data = copy.copy(data)
-
-    @property
-    def current_data(self) -> dict:
-        return self._data
-
-
-class BaseOpenAPIObjectSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_required(self, default: Any = None) -> List[str]:
-        pass
-
-    @abstractmethod
-    def get_properties(self, default: Any = None) -> Dict[str, dict]:
-        pass
+from ._base_schema_parser import (
+    BaseOpenAPIObjectSchemaParser,
+    BaseOpenAPIPathSchemaParser,
+    BaseOpenAPIRequestParameterItemSchemaParser,
+    BaseOpenAPIRequestParametersSchemaParser,
+    BaseOpenAPIResponseSchemaParser,
+    BaseOpenAPISchemaParser,
+    BaseOpenAPITagSchemaParser,
+)
+from ._tmp_data_model import get_component_definition
 
 
 class OpenAPIObjectSchemaParser(BaseOpenAPIObjectSchemaParser):
@@ -40,17 +27,6 @@ class OpenAPIObjectSchemaParser(BaseOpenAPIObjectSchemaParser):
             return self._data["properties"]
 
 
-class BaseOpenAPIResponseSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_content(self, value_format: str) -> Dict[str, dict]:
-        pass
-
-    @abstractmethod
-    def exist_in_content(self, value_format: str) -> bool:
-        pass
-
-
 class OpenAPIResponseSchemaParser(BaseOpenAPIResponseSchemaParser):
 
     def get_content(self, value_format: str) -> Dict[str, dict]:
@@ -58,40 +34,6 @@ class OpenAPIResponseSchemaParser(BaseOpenAPIResponseSchemaParser):
 
     def exist_in_content(self, value_format: str) -> bool:
         return value_format in self._data["content"].keys()
-
-
-class BaseOpenAPIRequestParametersSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_name(self) -> str:
-        pass
-
-    @abstractmethod
-    def get_required(self) -> str:
-        pass
-
-    @abstractmethod
-    def get_type(self) -> str:
-        pass
-
-    @abstractmethod
-    def get_default(self) -> Optional[str]:
-        pass
-
-    @abstractmethod
-    def get_items(self):
-        pass
-
-
-class BaseOpenAPIRequestParameterItemSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_items_type(self) -> Optional[str]:
-        pass
-
-    @abstractmethod
-    def set_items_type(self, value_type: str) -> None:
-        pass
 
 
 class OpenAPIRequestParameterItemSchemaParser(BaseOpenAPIRequestParameterItemSchemaParser):
@@ -119,28 +61,6 @@ class OpenAPIRequestParametersSchemaParser(BaseOpenAPIRequestParametersSchemaPar
 
     def get_items(self):
         return self._data.get("items", None)
-
-
-class BaseOpenAPIPathSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_request_parameters(self) -> List[dict]:
-        pass
-
-    def get_request_body(self, value_format: str = "application/json") -> dict:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_response(self, status_code: str) -> dict:
-        pass
-
-    @abstractmethod
-    def exist_in_response(self, status_code: str) -> bool:
-        pass
-
-    @abstractmethod
-    def get_all_tags(self) -> List[str]:
-        pass
 
 
 class OpenAPIV2PathSchemaParser(BaseOpenAPIPathSchemaParser):
@@ -178,17 +98,6 @@ class OpenAPIV3PathSchemaParser(BaseOpenAPIPathSchemaParser):
         return self._data.get("tags", [])
 
 
-class BaseOpenAPITagSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_name(self):
-        pass
-
-    @abstractmethod
-    def get_description(self):
-        pass
-
-
 class OpenAPITagSchemaParser(BaseOpenAPITagSchemaParser):
 
     def get_name(self):
@@ -196,33 +105,6 @@ class OpenAPITagSchemaParser(BaseOpenAPITagSchemaParser):
 
     def get_description(self):
         return self._data["description"]
-
-
-class BaseOpenAPISchemaParser(BaseSchemaParser):
-
-    def __init__(self, file: str = "", data: Dict = {}):
-        super().__init__(data=data)
-
-        if file:
-            file_path = pathlib.Path(file)
-            if not file_path.exists():
-                raise FileNotFoundError(f"Cannot find the OpenAPI format configuration at file path *{file_path}*.")
-            with open(str(file_path), "r", encoding="utf-8") as io_stream:
-                self._data = json.load(io_stream)
-
-        assert self._data, "No any data. Parse OpenAPI config fail."
-
-    @abstractmethod
-    def get_paths(self) -> Dict[str, Dict]:
-        pass
-
-    @abstractmethod
-    def get_tags(self) -> List[dict]:
-        pass
-
-    @abstractmethod
-    def get_objects(self) -> Dict[str, dict]:
-        pass
 
 
 class OpenAPIV2SchemaParser(BaseOpenAPISchemaParser):
@@ -248,19 +130,6 @@ class OpenAPIV3SchemaParser(BaseOpenAPISchemaParser):
 
     def get_objects(self) -> Dict[str, dict]:
         return self._data.get("components", {})
-
-
-ComponentDefinition: Dict[str, dict] = {}
-
-
-def get_component_definition() -> Dict:
-    global ComponentDefinition
-    return ComponentDefinition
-
-
-def set_component_definition(openapi_parser: BaseOpenAPISchemaParser) -> None:
-    global ComponentDefinition
-    ComponentDefinition = openapi_parser.get_objects()
 
 
 class _ReferenceObjectParser:

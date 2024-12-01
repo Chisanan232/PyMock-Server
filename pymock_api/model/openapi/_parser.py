@@ -1,22 +1,28 @@
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, List, Optional, Type, Union, cast
 
-from ..enums import OpenAPIVersion, ResponseStrategy
+from ..enums import OpenAPIVersion
 from ._base import (
     BaseOpenAPIDataModel,
     ensure_get_schema_parser_factory,
     get_openapi_version,
 )
+from ._base_schema_parser import BaseSchemaParser
 from ._js_handlers import ensure_type_is_python_type
 from ._parser_factory import BaseOpenAPISchemaParserFactory
 from ._schema_parser import (
     BaseOpenAPIPathSchemaParser,
     BaseOpenAPIRequestParametersSchemaParser,
     BaseOpenAPISchemaParser,
-    BaseSchemaParser,
     _ReferenceObjectParser,
 )
-from ._tmp_data_model import TmpAPIParameterModel, TmpItemModel
+from ._tmp_data_model import (
+    ResponseProperty,
+    TmpAPIParameterModel,
+    TmpRequestItemModel,
+    TmpResponsePropertyModel,
+    TmpResponseSchema,
+)
 
 
 class BaseParser(metaclass=ABCMeta):
@@ -56,7 +62,7 @@ class APIParameterParser(BaseParser):
             value_type=ensure_type_is_python_type(data["type"]),
             default=data.get("default", None),
             items=[
-                TmpItemModel.deserialize(i)
+                TmpRequestItemModel.deserialize(i)
                 for i in (self._ensure_data_type_is_pythonic_type_in_items(data.get("items", None)) or [])
             ],
         )
@@ -68,7 +74,7 @@ class APIParameterParser(BaseParser):
             value_type=ensure_type_is_python_type(self.parser.get_type()),
             default=self.parser.get_default(),
             items=[
-                TmpItemModel().deserialize(i)
+                TmpRequestItemModel().deserialize(i)
                 for i in (self._ensure_data_type_is_pythonic_type_in_items(self.parser.get_items()) or [])
             ],
         )
@@ -185,7 +191,6 @@ class APIParser(BaseParser):
                         TmpAPIParameterModel(
                             name="",
                             required=True,
-                            # "type": convert_js_type(items["type"]),
                             value_type=item_type,
                             default=items.get("default", None),
                             items=[],
@@ -204,37 +209,42 @@ class APIParser(BaseParser):
         print(f"[DEBUG in APIParser._process_has_ref_parameters] parameters: {parameters}")
         return parameters
 
-    def process_responses(self, strategy: ResponseStrategy) -> dict:
+    def process_responses(self) -> ResponseProperty:
+        # TODO: It may need to add one more data object about outside reference
+        # TODO: Replace all *dict* type as tmp object *TmpResponseModel*
         assert self.parser.exist_in_response(status_code="200") is True
         status_200_response = self.parser.get_response(status_code="200")
-        response_data = strategy.initial_response_data()
         print(f"[DEBUG] status_200_response: {status_200_response}")
-        if _ReferenceObjectParser.has_schema(status_200_response):
-            response_data = strategy.process_response_from_reference(
-                init_response=response_data,
-                data=status_200_response,
-                get_schema_parser_factory=ensure_get_schema_parser_factory,
-            )
+        tmp_resp_config = TmpResponseSchema.deserialize(status_200_response)
+        print(f"[DEBUG] tmp_resp_config: {tmp_resp_config}")
+        if not tmp_resp_config.is_empty():
+            # NOTE: This parsing way for Swagger API (OpenAPI version 2)
+            response_data = tmp_resp_config.process_response_from_reference()
         else:
-            resp_parser = self.schema_parser_factory.response(status_200_response)
-            resp_value_format = list(
-                filter(lambda vf: resp_parser.exist_in_content(value_format=vf), self.Response_Content_Type)
-            )
-            response_schema = resp_parser.get_content(value_format=resp_value_format[0])
-            if _ReferenceObjectParser.has_ref(response_schema):
-                response_data = strategy.process_response_from_reference(
-                    init_response=response_data,
-                    data=response_schema,
-                    get_schema_parser_factory=ensure_get_schema_parser_factory,
-                )
+            # FIXME: New implementation to parse configuration will let v2 OpenAPI config come here
+            if get_openapi_version() is OpenAPIVersion.V2:
+                response_schema = status_200_response.get("schema", {})
+                tmp_resp_config = TmpResponseSchema.deserialize(status_200_response)
+                has_ref = not tmp_resp_config.is_empty()
             else:
-                print(f"[DEBUG] response_schema: {response_schema}")
-                # Data may '{}' or '{ "type": "integer", "title": "Id" }'
-                response_data = strategy.process_response_from_data(
-                    init_response=response_data,
-                    data=response_schema,
-                    get_schema_parser_factory=ensure_get_schema_parser_factory,
+                # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
+                resp_parser = self.schema_parser_factory.response(status_200_response)
+                resp_value_format = list(
+                    filter(lambda vf: resp_parser.exist_in_content(value_format=vf), self.Response_Content_Type)
                 )
+                print(f"[DEBUG] has content, resp_value_format: {resp_value_format}")
+                response_schema = resp_parser.get_content(value_format=resp_value_format[0])
+                print(f"[DEBUG] has content, response_schema: {response_schema}")
+                tmp_resp_config = TmpResponsePropertyModel.deserialize(response_schema)  # type: ignore[assignment]
+                has_ref = True if tmp_resp_config.has_ref() else False
+            print(f"[DEBUG] has content, tmp_resp_config: {tmp_resp_config}")
+            print(f"[DEBUG] response_schema: {response_schema}")
+            if has_ref:
+                response_data = tmp_resp_config.process_response_from_reference()
+            else:
+                # Data may '{}' or '{ "type": "integer", "title": "Id" }'
+                tmp_resp_model = TmpResponsePropertyModel.deserialize(response_schema)
+                response_data = tmp_resp_model.process_response_from_data()
                 print(f"[DEBUG] response_data: {response_data}")
         return response_data
 
