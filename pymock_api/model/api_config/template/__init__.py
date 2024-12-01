@@ -23,7 +23,9 @@ class TemplateConfig(_Config, _Checkable):
     def serialize(self, data: Optional["TemplateConfig"] = None) -> Optional[Dict[str, Any]]:
         activate: bool = self.activate or self._get_prop(data, prop="activate")
         template_file_config: TemplateFileConfig = self.file or self._get_prop(data, prop="file")
-        template_common_config: TemplateCommonConfig = self.common_config or self._get_prop(data, prop="common_config")
+        template_common_config: Optional[TemplateCommonConfig] = self.common_config or self._get_prop(
+            data, prop="common_config"
+        )
         if not (activate is not None and template_file_config and template_common_config):
             return None
         serialized_data = {
