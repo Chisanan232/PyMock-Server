@@ -18,20 +18,21 @@ from pymock_api.model.api_config import (
     BeDividedableAsTemplatableConfig,
     ResponseProperty,
     TemplatableConfigDividable,
-    TemplateConfig,
     _Checkable,
     _Config,
 )
 from pymock_api.model.api_config._base import _HasItemsPropConfig
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
 from pymock_api.model.api_config.apis._format import Format, _HasFormatPropConfig
-from pymock_api.model.api_config.template import (
+from pymock_api.model.api_config.template import TemplateConfig
+from pymock_api.model.api_config.template.file import (
     LoadConfig,
     TemplateApply,
     TemplateConfigPathAPI,
     TemplateConfigPathRequest,
     TemplateConfigPathResponse,
     TemplateConfigPathValues,
+    TemplateFileConfig,
 )
 from pymock_api.model.api_config.variable import Variable
 from pymock_api.model.enums import FormatStrategy, ResponseStrategy, ValueFormat
@@ -89,12 +90,19 @@ class MockModel:
         )
 
     @property
-    def template_config(self) -> TemplateConfig:
-        return TemplateConfig(
+    def template_file_config(self) -> TemplateFileConfig:
+        return TemplateFileConfig(
             activate=_Mock_Template_Config_Activate,
             load_config=self.template_load_config,
             config_path_values=self.template_values,
             apply=self.template_apply,
+        )
+
+    @property
+    def template_config(self) -> TemplateConfig:
+        return TemplateConfig(
+            activate=_Mock_Template_Config_Activate,
+            file=self.template_file_config,
         )
 
     @property

@@ -119,5 +119,7 @@ def load_config(path: str, is_pull: bool = False, base_file_path: str = "") -> O
 
 def generate_empty_config(name: str = "", description: str = "") -> APIConfig:
     return APIConfig(
-        name=name, description=description, apis=MockAPIs(template=TemplateConfig(), base=BaseConfig(url=""), apis={})
+        name=name,
+        description=description,
+        apis=MockAPIs(template=TemplateConfig(), base=BaseConfig(url=""), apis={}),
     )

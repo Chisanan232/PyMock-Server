@@ -4,24 +4,26 @@ description: ''
 mocked_apis:
   template:
     activate: true
-    load_config:
-      includes_apis: True
-      order:
-        - 'apis'
-        - 'apply'
-        - 'file'
-    config_path_values:
-      base_file_path: './test/data/divide_test_load/has-base-info_test/'
-      api:
-        config_path_format: '**-api.yaml'    # ex. ./foo/get_foo.yaml
-      http:
-        config_path_format: '**-http.yaml'
-      request:
-        config_path_format: '**-request.yaml'
-      response:
-        config_path_format: '**-response.yaml'
-    apply:
-      api:
-        - get_foo
+    file:
+      activate: true
+      load_config:
+        includes_apis: True
+        order:
+          - 'apis'
+          - 'apply'
+          - 'file'
+      config_path_values:
+        base_file_path: './test/data/divide_test_load/has-base-info_test/'
+        api:
+          config_path_format: '**-api.yaml'    # ex. ./foo/get_foo.yaml
+        http:
+          config_path_format: '**-http.yaml'
+        request:
+          config_path_format: '**-request.yaml'
+        response:
+          config_path_format: '**-response.yaml'
+      apply:
+        api:
+          - get_foo
   base:
     url: '/api/v1/test'
