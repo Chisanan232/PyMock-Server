@@ -1,8 +1,14 @@
 from argparse import Namespace
+from typing import Dict, Type
 from unittest.mock import Mock, patch
 
+import pytest
+
 from pymock_api.model import (
+    BaseOpenAPIDocumentConfig,
     DeserializeParsedArgs,
+    OpenAPIDocumentConfig,
+    SwaggerAPIDocumentConfig,
     deserialize_args,
     deserialize_openapi_doc_config,
 )
@@ -94,7 +100,18 @@ def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
-def test_deserialize_openapi_doc_config():
-    with patch("pymock_api.model.OpenAPIDocumentConfig.deserialize") as mock_deserialize_swagger_config_function:
-        deserialize_openapi_doc_config(data={"some key": "some value"})
-        mock_deserialize_swagger_config_function.assert_called_once_with(data={"some key": "some value"})
+@pytest.mark.parametrize(
+    ("expect_running_data_model", "data"),
+    [
+        (SwaggerAPIDocumentConfig, {"swagger": "version info", "some key": "some value"}),
+        (OpenAPIDocumentConfig, {"openapi": "version info", "some key": "some value"}),
+    ],
+)
+def test_deserialize_openapi_doc_config(
+    expect_running_data_model: Type[BaseOpenAPIDocumentConfig], data: Dict[str, str]
+):
+    with patch(
+        f"pymock_api.model.{expect_running_data_model.__name__}.deserialize"
+    ) as mock_deserialize_api_doc_config_function:
+        deserialize_openapi_doc_config(data)
+        mock_deserialize_api_doc_config_function.assert_called_once_with(data)

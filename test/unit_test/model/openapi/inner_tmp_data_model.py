@@ -6,10 +6,6 @@ import pytest
 
 from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
 from pymock_api.model.openapi._base import set_openapi_version
-from pymock_api.model.openapi._schema_parser import (
-    OpenAPIV2SchemaParser,
-    OpenAPIV3SchemaParser,
-)
 from pymock_api.model.openapi._tmp_data_model import (
     BaseTmpDataModel,
     BaseTmpRefDataModel,
@@ -17,16 +13,22 @@ from pymock_api.model.openapi._tmp_data_model import (
     RequestParameter,
     ResponseProperty,
     TmpAPIDtailConfigV2,
+    TmpAPIDtailConfigV3,
     TmpConfigReferenceModel,
     TmpHttpConfigV2,
+    TmpHttpConfigV3,
     TmpReferenceConfigPropertyModel,
     TmpRequestParameterModel,
     TmpRequestSchemaModel,
     _BaseTmpAPIDtailConfig,
     set_component_definition,
 )
+from pymock_api.model.openapi.content_type import ContentType
 
-from ...model.openapi._test_case import DeserializeV2OpenAPIConfigTestCaseFactory
+from ...model.openapi._test_case import (
+    DeserializeV2OpenAPIConfigTestCaseFactory,
+    DeserializeV3OpenAPIConfigTestCaseFactory,
+)
 
 DeserializeV2OpenAPIConfigTestCaseFactory.load()
 DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE = DeserializeV2OpenAPIConfigTestCaseFactory.get_test_case()
@@ -41,6 +43,12 @@ PARSE_V2_OPENAPI_REQUEST_PARAMETERS_WITH_REFERENCE_INFO_TEST_CASE = (
     DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.general_api_http_request_parameters
 )
 PARSE_V2_OPENAPI_RESPONSES_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.entire_api_http_response
+
+DeserializeV3OpenAPIConfigTestCaseFactory.load()
+V3_OPENAPI_API_DOC_CONFIG_TEST_CASE = DeserializeV3OpenAPIConfigTestCaseFactory.get_test_case()
+DESERIALIZE_V3_OPENAPI_ENTIRE_CONFIG_TEST_CASE = V3_OPENAPI_API_DOC_CONFIG_TEST_CASE.entire_config
+PARSE_V3_OPENAPI_ENTIRE_APIS_TEST_CASE = V3_OPENAPI_API_DOC_CONFIG_TEST_CASE.each_apis
+PARSE_V3_OPENAPI_RESPONSES_TEST_CASE = V3_OPENAPI_API_DOC_CONFIG_TEST_CASE.entire_api_http_response
 
 
 class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
@@ -60,7 +68,7 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
         entire_config: dict,
     ):
         # Pre-process
-        set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
+        set_component_definition(entire_config.get("definitions", {}))
 
         # Run target function under test
         response_prop_data = under_test._generate_response(
@@ -311,65 +319,61 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
         # Pre-process
         if test_response_data.get("type", "array") == "array":
             set_component_definition(
-                OpenAPIV3SchemaParser(
-                    data={
-                        "components": {
-                            "schemas": {
-                                # For general test
-                                "FooResponse": {
-                                    "type": "object",
-                                    "required": ["id"],
-                                    "properties": {
-                                        "id": {"type": "integer", "format": "int64"},
-                                        "name": {"type": "string"},
-                                        "value1": {"type": "string"},
-                                        "value2": {"type": "string"},
-                                    },
-                                    "title": "FooResponse",
-                                },
-                                # For special case test about nested detail data
-                                "NestedFooResponse": {
-                                    "type": "object",
-                                    "required": ["id"],
-                                    "properties": {
-                                        "id": {"type": "integer", "format": "int64"},
-                                        "name": {"type": "string"},
-                                        "data": {
-                                            "type": "array",
-                                            "items": {"$ref": "#/components/schemas/FooDetailResponse"},
-                                        },
-                                    },
-                                },
-                                "FooDetailResponse": {
-                                    "type": "object",
-                                    "required": ["id"],
-                                    "properties": {
-                                        "id": {"type": "integer", "format": "int64"},
-                                        "value": {"type": "string"},
-                                        "url": {"type": "string", "format": "uri"},
-                                        "urlProperties": {"$ref": "#/components/schemas/UrlProperties"},
-                                    },
-                                },
-                                "UrlProperties": {
-                                    "type": "object",
-                                    "required": ["homePage", "detailInfo"],
-                                    "properties": {
-                                        "homePage": {"$ref": "#/components/schemas/DomainProperty"},
-                                        "detailInfo": {"$ref": "#/components/schemas/DomainProperty"},
-                                    },
-                                },
-                                "DomainProperty": {
-                                    "type": "object",
-                                    "required": ["homePage", "needAuth"],
-                                    "properties": {
-                                        "domain": {"type": "string"},
-                                        "needAuth": {"type": "boolean"},
-                                    },
+                {
+                    "schemas": {
+                        # For general test
+                        "FooResponse": {
+                            "type": "object",
+                            "required": ["id"],
+                            "properties": {
+                                "id": {"type": "integer", "format": "int64"},
+                                "name": {"type": "string"},
+                                "value1": {"type": "string"},
+                                "value2": {"type": "string"},
+                            },
+                            "title": "FooResponse",
+                        },
+                        # For special case test about nested detail data
+                        "NestedFooResponse": {
+                            "type": "object",
+                            "required": ["id"],
+                            "properties": {
+                                "id": {"type": "integer", "format": "int64"},
+                                "name": {"type": "string"},
+                                "data": {
+                                    "type": "array",
+                                    "items": {"$ref": "#/components/schemas/FooDetailResponse"},
                                 },
                             },
                         },
-                    }
-                )
+                        "FooDetailResponse": {
+                            "type": "object",
+                            "required": ["id"],
+                            "properties": {
+                                "id": {"type": "integer", "format": "int64"},
+                                "value": {"type": "string"},
+                                "url": {"type": "string", "format": "uri"},
+                                "urlProperties": {"$ref": "#/components/schemas/UrlProperties"},
+                            },
+                        },
+                        "UrlProperties": {
+                            "type": "object",
+                            "required": ["homePage", "detailInfo"],
+                            "properties": {
+                                "homePage": {"$ref": "#/components/schemas/DomainProperty"},
+                                "detailInfo": {"$ref": "#/components/schemas/DomainProperty"},
+                            },
+                        },
+                        "DomainProperty": {
+                            "type": "object",
+                            "required": ["homePage", "needAuth"],
+                            "properties": {
+                                "domain": {"type": "string"},
+                                "needAuth": {"type": "boolean"},
+                            },
+                        },
+                    },
+                }
             )
         test_response_data_model = TmpReferenceConfigPropertyModel.deserialize(test_response_data)
 
@@ -632,7 +636,7 @@ class TestTmpRequestParameterModel(BaseTmpRefDataModelTestSuite):
         self, under_test: TmpRequestParameterModel, openapi_doc_data: dict, entire_openapi_config: dict
     ):
         # Pre-process
-        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
+        set_component_definition(entire_openapi_config.get("definitions", {}))
 
         # Run target function
         openapi_doc_data_model = under_test.deserialize(openapi_doc_data)
@@ -696,14 +700,24 @@ class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
 
 class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
 
-    @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), PARSE_V2_OPENAPI_ENTIRE_APIS_TEST_CASE)
+    @pytest.mark.parametrize(
+        ("openapi_doc_data", "entire_openapi_config", "doc_version", "schema_key", "api_data_model"),
+        [],
+    )
+    @abstractmethod
     def test_process_api_parameters(
-        self, under_test: _BaseTmpAPIDtailConfig, openapi_doc_data: dict, entire_openapi_config: dict
+        self,
+        under_test: _BaseTmpAPIDtailConfig,
+        openapi_doc_data: dict,
+        entire_openapi_config: dict,
+        doc_version: OpenAPIVersion,
+        schema_key: str,
+        api_data_model: _BaseTmpAPIDtailConfig,
     ):
         print(f"[DEBUG in test__process_api_params] ")
         # Pre-process
-        set_openapi_version(OpenAPIVersion.V2)
-        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
+        set_openapi_version(doc_version)
+        set_component_definition(entire_openapi_config.get(schema_key, {}))
 
         under_test = under_test.deserialize(openapi_doc_data)
 
@@ -711,19 +725,20 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
         parameters = under_test.process_api_parameters(http_method="HTTP method")
 
         # Verify
-        assert parameters and isinstance(parameters, list)
-        assert len(parameters) == len(openapi_doc_data["parameters"])
-        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
-        assert False not in type_checksum
+        self._verify_req_parameter(openapi_doc_data, parameters)
 
         # Finally
         set_openapi_version(OpenAPIVersion.V3)
 
-    @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
+    @abstractmethod
+    def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameter]) -> None:
+        pass
+
+    @pytest.mark.parametrize(("api_detail", "entire_config"), [])
     def test_process_responses(self, under_test: _BaseTmpAPIDtailConfig, api_detail: dict, entire_config: dict):
         # Pre-process
-        set_openapi_version(OpenAPIVersion.V2)
-        set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
+        set_openapi_version(self._api_doc_version)
+        set_component_definition(entire_config.get(self._common_objects_yaml_schema, {}))
 
         # Run target function under test
         print(f"[DEBUG in test] api_detail: {api_detail}")
@@ -734,8 +749,8 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
 
         # Verify
         resp_200 = api_detail["responses"]["200"]
-        resp_200_model = TmpHttpConfigV2.deserialize(resp_200)
-        if hasattr(resp_200_model, "has_ref") and resp_200_model.has_ref():
+        resp_200_model = self._deserialize_as_response_model(resp_200)
+        if resp_200_model.has_ref():
             should_check_name = True
         else:
             should_check_name = False
@@ -790,12 +805,154 @@ class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
         #                     else:
         #                         assert item_value == "empty value"
 
+    @abstractmethod
+    def _deserialize_as_response_model(self, resp_200: dict) -> TmpHttpConfigV2:
+        pass
+
+    @property
+    @abstractmethod
+    def _common_objects_yaml_schema(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def _api_doc_version(self) -> OpenAPIVersion:
+        pass
+
 
 class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
 
     @pytest.fixture(scope="function")
     def under_test(self) -> TmpAPIDtailConfigV2:
         return TmpAPIDtailConfigV2()
+
+    @pytest.mark.parametrize(
+        ("openapi_doc_data", "entire_openapi_config", "doc_version", "schema_key", "api_data_model"),
+        PARSE_V2_OPENAPI_ENTIRE_APIS_TEST_CASE,
+    )
+    def test_process_api_parameters(
+        self,
+        under_test: TmpAPIDtailConfigV2,
+        openapi_doc_data: dict,
+        entire_openapi_config: dict,
+        doc_version: OpenAPIVersion,
+        schema_key: str,
+        api_data_model: TmpAPIDtailConfigV2,
+    ):
+        super().test_process_api_parameters(
+            under_test=under_test,
+            openapi_doc_data=openapi_doc_data,
+            entire_openapi_config=entire_openapi_config,
+            doc_version=doc_version,
+            schema_key=schema_key,
+            api_data_model=api_data_model,
+        )
+
+    def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameter]) -> None:
+        assert parameters and isinstance(parameters, list)
+        assert len(parameters) == len(openapi_doc_data["parameters"])
+        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
+        assert False not in type_checksum
+
+    @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
+    def test_process_responses(self, under_test: _BaseTmpAPIDtailConfig, api_detail: dict, entire_config: dict):
+        super().test_process_responses(
+            under_test=under_test,
+            api_detail=api_detail,
+            entire_config=entire_config,
+        )
+
+    @property
+    def _api_doc_version(self) -> OpenAPIVersion:
+        return OpenAPIVersion.V2
+
+    @property
+    def _common_objects_yaml_schema(self) -> str:
+        return "definitions"
+
+    def _deserialize_as_response_model(self, resp_200: dict) -> TmpHttpConfigV2:
+        return TmpHttpConfigV2.deserialize(resp_200)
+
+
+class TestTmpAPIDetailConfigV3(BaseTmpAPIDetailConfigTestSuite):
+
+    @pytest.fixture(scope="function")
+    def under_test(self) -> TmpAPIDtailConfigV3:
+        return TmpAPIDtailConfigV3()
+
+    @pytest.mark.parametrize(
+        ("openapi_doc_data", "entire_openapi_config", "doc_version", "schema_key", "api_data_model"),
+        PARSE_V3_OPENAPI_ENTIRE_APIS_TEST_CASE,
+    )
+    def test_process_api_parameters(
+        self,
+        under_test: TmpAPIDtailConfigV3,
+        openapi_doc_data: dict,
+        entire_openapi_config: dict,
+        doc_version: OpenAPIVersion,
+        schema_key: str,
+        api_data_model: TmpAPIDtailConfigV3,
+    ):
+        super().test_process_api_parameters(
+            under_test=under_test,
+            openapi_doc_data=openapi_doc_data,
+            entire_openapi_config=entire_openapi_config,
+            doc_version=doc_version,
+            schema_key=schema_key,
+            api_data_model=api_data_model,
+        )
+
+    def _verify_req_parameter(self, openapi_doc_data: dict, parameters: List[RequestParameter]) -> None:
+        assert isinstance(parameters, list)
+        print(f"[DEBUG in test] openapi_doc_data: {openapi_doc_data}")
+        if parameters:
+            if "requestBody" in openapi_doc_data.keys():
+                request_body = openapi_doc_data.get("requestBody", {})
+                data_format = list(filter(lambda b: b in request_body["content"].keys(), ["application/json", "*/*"]))
+                assert len(data_format) == 1
+                req_body_model = TmpRequestParameterModel().deserialize(request_body["content"][data_format[0]])
+                assert len(parameters) == len(req_body_model.get_schema_ref().properties.keys())
+            elif "parameters" in openapi_doc_data.keys():
+                all_params = []
+                for param in openapi_doc_data["parameters"]:
+                    req_body_model = TmpRequestParameterModel().deserialize(param)
+                    if req_body_model.has_ref():
+                        all_params.extend(list(req_body_model.get_schema_ref().properties.keys()))
+                    else:
+                        all_params.append(param)
+                assert len(parameters) == len(all_params)
+            else:
+                raise ValueError("")
+            type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
+            assert False not in type_checksum
+
+    @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V3_OPENAPI_RESPONSES_TEST_CASE)
+    def test_process_responses(self, under_test: _BaseTmpAPIDtailConfig, api_detail: dict, entire_config: dict):
+        super().test_process_responses(
+            under_test=under_test,
+            api_detail=api_detail,
+            entire_config=entire_config,
+        )
+
+    @property
+    def _api_doc_version(self) -> OpenAPIVersion:
+        return OpenAPIVersion.V3
+
+    @property
+    def _common_objects_yaml_schema(self) -> str:
+        return "components"
+
+    def _deserialize_as_response_model(self, resp_200: dict) -> TmpHttpConfigV2:
+        v3_http_config = TmpHttpConfigV3.deserialize(resp_200)
+        resp_format: List[ContentType] = list(
+            filter(
+                lambda ct: v3_http_config.exist_setting(content_type=ct) is not None,
+                ContentType,
+            )
+        )
+        print(f"[DEBUG] has content, resp_format: {resp_format}")
+        status_200_response_setting = v3_http_config.get_setting(content_type=resp_format[0])
+        return status_200_response_setting
 
 
 class TestPropertyDetail:
