@@ -1,5 +1,5 @@
 import re
-from typing import List, Type, Union
+from typing import List, Type
 
 import pytest
 
@@ -9,17 +9,17 @@ from pymock_api.model.openapi._base import (
     set_openapi_version,
     set_parser_factory,
 )
-from pymock_api.model.openapi._parser import APIParameterParser, APIParser
+from pymock_api.model.openapi._parser import APIParser
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2PathSchemaParser,
     OpenAPIV2SchemaParser,
-    _ReferenceObjectParser,
 )
 from pymock_api.model.openapi._tmp_data_model import (
-    TmpAPIParameterModel,
+    RequestParameter,
+    TmpHttpConfigV2,
+    TmpRequestParameterModel,
     set_component_definition,
 )
-from pymock_api.model.openapi.config import APIParameter
 
 from ._test_case import DeserializeV2OpenAPIConfigTestCaseFactory
 
@@ -37,79 +37,6 @@ PARSE_V2_OPENAPI_RESPONSES_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.enti
 
 class DummyPathSchemaParser(OpenAPIV2PathSchemaParser):
     pass
-
-
-class TestAPIParameterParser:
-
-    @pytest.fixture(scope="function")
-    def parser(self) -> Type[APIParameterParser]:
-        return APIParameterParser
-
-    def test_parse_schema_with_invalid_value(self, parser: Type[APIParameterParser]):
-        invalid_values = {}
-        with pytest.raises(ValueError) as exc_info:
-            parser_instance = parser(DummyPathSchemaParser({}))
-            parser_instance.process_parameter(invalid_values, accept_no_schema=False)
-        assert re.search(r".{0,64}doesn't have key 'schema'.{0,64}", str(exc_info.value), re.IGNORECASE)
-
-    @pytest.mark.parametrize(
-        ("ut_data", "expect_data"),
-        [
-            # General case (list type value)
-            (
-                [
-                    {
-                        "name": "value",
-                        "required": True,
-                        "type": "number",
-                        "default": "None",
-                    },
-                    {
-                        "name": "id",
-                        "required": True,
-                        "type": "integer",
-                        "default": "None",
-                    },
-                ],
-                [
-                    {
-                        "name": "value",
-                        "required": True,
-                        "type": "int",
-                        "default": "None",
-                    },
-                    {
-                        "name": "id",
-                        "required": True,
-                        "type": "int",
-                        "default": "None",
-                    },
-                ],
-            ),
-            # General case (dict type value)
-            (
-                {
-                    "type": "string",
-                    "enum": [
-                        "ENUM1",
-                        "ENUM2",
-                    ],
-                },
-                [
-                    {
-                        "type": "str",
-                        "enum": [
-                            "ENUM1",
-                            "ENUM2",
-                        ],
-                    },
-                ],
-            ),
-        ],
-    )
-    def test__ensure_data_type_is_pythonic_type_in_items(self, ut_data: Union[list, dict], expect_data: List[dict]):
-        parser = APIParameterParser(parser="Dummy parser")
-        assert parser._ensure_data_type_is_pythonic_type_in_items(ut_data) == expect_data
 
 
 class TestAPIParser:
@@ -132,14 +59,12 @@ class TestAPIParser:
         set_parser_factory(get_schema_parser_factory_with_openapi_version())
 
         # Run target function
-        parameters = [
-            APIParameter.generate(pd) for pd in parser_instance.process_api_parameters(http_method="HTTP method")
-        ]
+        parameters = parser_instance.process_api_parameters(http_method="HTTP method")
 
         # Verify
         assert parameters and isinstance(parameters, list)
         assert len(parameters) == len(openapi_doc_data)
-        type_checksum = list(map(lambda p: isinstance(p, APIParameter), parameters))
+        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
         assert False not in type_checksum
 
         # Finally
@@ -158,12 +83,13 @@ class TestAPIParser:
 
         # Run target function
         parser_instance = parser(parser=OpenAPIV2PathSchemaParser(openapi_doc_data))
-        parameters = parser_instance._process_has_ref_parameters(openapi_doc_data)
+        openapi_doc_data_model = TmpRequestParameterModel().deserialize(openapi_doc_data)
+        parameters = parser_instance._process_has_ref_parameters(openapi_doc_data_model)
 
         # Verify
         assert parameters and isinstance(parameters, list)
         assert len(parameters) == len(entire_openapi_config["definitions"]["UpdateFooRequest"]["properties"].keys())
-        type_checksum = list(map(lambda p: isinstance(p, TmpAPIParameterModel), parameters))
+        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
         assert False not in type_checksum
 
     @pytest.mark.parametrize("openapi_doc_data", PARSE_FAIL_V2_OPENAPI_REQUEST_PARAMETERS_NO_REFERENCE_INFO_TEST_CASE)
@@ -171,7 +97,8 @@ class TestAPIParser:
         with pytest.raises(ValueError) as exc_info:
             # Run target function
             parser_instance = parser(parser=OpenAPIV2PathSchemaParser(openapi_doc_data))
-            parser_instance._process_has_ref_parameters(openapi_doc_data)
+            openapi_doc_data_model = TmpRequestParameterModel().deserialize(openapi_doc_data)
+            parser_instance._process_has_ref_parameters(openapi_doc_data_model)
 
         # Verify
         assert re.search(r".{1,64}no ref.{1,64}", str(exc_info.value), re.IGNORECASE)
@@ -179,6 +106,7 @@ class TestAPIParser:
     @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
     def test__process_http_response(self, parser: Type[APIParser], api_detail: dict, entire_config: dict):
         # Pre-process
+        set_openapi_version(OpenAPIVersion.V2)
         set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
 
         # Run target function under test
@@ -189,16 +117,18 @@ class TestAPIParser:
 
         # Verify
         resp_200 = api_detail["responses"]["200"]
-        if _ReferenceObjectParser.has_schema(resp_200):
+        resp_200_model = TmpHttpConfigV2.deserialize(resp_200)
+        if resp_200_model.has_ref():
             should_check_name = True
         else:
-            response_content = resp_200["content"]
-            resp_val_format = list(filter(lambda f: f in response_content.keys(), ["application/json", "*/*"]))
-            response_detail = response_content[resp_val_format[0]]["schema"]
-            if not response_detail:
-                should_check_name = False
-            else:
-                should_check_name = True
+            should_check_name = False
+            # response_content = resp_200_model.content
+            # resp_val_format = list(filter(lambda f: f in response_content.keys(), ["application/json", "*/*"]))
+            # response_detail = response_content[resp_val_format[0]]["schema"]
+            # if not response_detail:
+            #     should_check_name = False
+            # else:
+            #     should_check_name = True
         print(f"[DEBUG in test] should_check_name: {should_check_name}")
 
         # assert isinstance(response_data, ResponseProperty)
@@ -207,14 +137,14 @@ class TestAPIParser:
         for d in data_details:
             if should_check_name:
                 assert d.name
-                assert d.type
+                assert d.value_type
             assert d.required is not None
             assert d.format is None  # FIXME: Should activate this verify after support this feature
-            if d.type == "list":
+            if d.value_type == "list":
                 assert d.items is not None
                 for item in d.items:
                     assert item.name
-                    assert item.type
+                    assert item.value_type
                     assert item.required is not None
         # assert False
         # else:

@@ -7,10 +7,8 @@ import pytest
 from pymock_api import APIConfig
 from pymock_api.model import MockAPI
 from pymock_api.model.api_config import _Config
-from pymock_api.model.api_config.apis import APIParameter as PyMockAPIParameter
 from pymock_api.model.enums import OpenAPIVersion
 from pymock_api.model.openapi._base import Transferable, set_openapi_version
-from pymock_api.model.openapi._js_handlers import convert_js_type
 from pymock_api.model.openapi._parser_factory import (
     BaseOpenAPISchemaParserFactory,
     OpenAPIV2SchemaParserFactory,
@@ -19,14 +17,15 @@ from pymock_api.model.openapi._parser_factory import (
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     OpenAPIV3SchemaParser,
-    _ReferenceObjectParser,
 )
 from pymock_api.model.openapi._tmp_data_model import (
     PropertyDetail,
+    RequestParameter,
     ResponseProperty,
+    TmpRequestParameterModel,
     set_component_definition,
 )
-from pymock_api.model.openapi.config import API, APIParameter, OpenAPIDocumentConfig
+from pymock_api.model.openapi.config import API, OpenAPIDocumentConfig
 
 from ._test_case import (
     DeserializeV2OpenAPIConfigTestCaseFactory,
@@ -119,45 +118,6 @@ class _OpenAPIDocumentDataModelTestSuite(metaclass=ABCMeta):
         assert isinstance(data_model.schema_parser_factory, expected_parser_factory)
 
 
-class TestAPIParameters(_OpenAPIDocumentDataModelTestSuite):
-    @pytest.fixture(scope="function")
-    def data_model(self) -> APIParameter:
-        return APIParameter()
-
-    @pytest.mark.parametrize("openapi_doc_data", DESERIALIZE_V2_OPENAPI_API_REQUEST_PARAMETERS_TEST_CASE)
-    def test_deserialize(self, openapi_doc_data: dict, data_model: Transferable):
-        super().test_deserialize(openapi_doc_data, data_model)
-
-    def _initial(self, data: APIParameter) -> None:
-        data.name = ""
-        data.required = False
-        data.value_type = ""
-        data.default = None
-
-    def _verify_result(self, data: APIParameter, og_data: dict) -> None:
-        assert data is not None
-        assert data.required == og_data["required"]
-        if "schema" in og_data.keys():
-            assert data.value_type == convert_js_type(og_data["schema"]["type"])
-            assert data.default == og_data["schema"]["default"]
-        else:
-            assert data.value_type == convert_js_type(og_data["type"])
-            assert data.default == og_data.get("default", None)
-
-    def _given_props(self, data_model: APIParameter) -> None:
-        data_model.name = "arg1"
-        data_model.required = False
-        data_model.value_type = "string"
-        data_model.default = "default_value_pytest"
-
-    def _verify_api_config_model(self, under_test: PyMockAPIParameter, data_from: APIParameter) -> None:
-        assert under_test.name == data_from.name
-        assert under_test.required == data_from.required
-        assert under_test.value_type == data_from.value_type
-        assert under_test.default == data_from.default
-        assert under_test.value_format is None
-
-
 class TestAPI(_OpenAPIDocumentDataModelTestSuite):
     @pytest.fixture(scope="function")
     def data_model(self) -> API:
@@ -209,7 +169,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         #         assert api_param.default == one_swagger_api_param.get("default", None)
 
     def _given_props(self, data_model: API) -> None:
-        params = APIParameter()
+        params = RequestParameter()
         params.name = "arg1"
         params.required = False
         params.value_type = "string"
@@ -220,7 +180,7 @@ class TestAPI(_OpenAPIDocumentDataModelTestSuite):
         data_model.parameters = [params]
         data_model.response = ResponseProperty(
             data=[
-                PropertyDetail(name="key1", type="str", required=True),
+                PropertyDetail(name="key1", value_type="str", required=True),
             ],
         )
         data_model.tags = ["first tag", "second tag"]
@@ -282,7 +242,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             #     assert api_param.default == one_swagger_api_param["schema"]["default"]
 
     def _given_props(self, data_model: OpenAPIDocumentConfig) -> None:
-        params = APIParameter()
+        params = RequestParameter()
         params.name = "arg1"
         params.required = False
         params.value_type = "string"
@@ -294,7 +254,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
         api.parameters = [params]
         api.response = ResponseProperty(
             data=[
-                PropertyDetail(name="key1", type="str", required=True),
+                PropertyDetail(name="key1", value_type="str", required=True),
             ],
         )
 
@@ -383,9 +343,12 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             api_http_details = og_data["paths"][api.path][api.http_method]
             if api.http_method.upper() == "GET":
                 expected_parameters = 0
-                for param in api_http_details.get("parameters", []):
-                    if _ReferenceObjectParser.has_ref(param):
-                        expected_parameters += len(_ReferenceObjectParser.get_schema_ref(param)["properties"].keys())
+                api_req_params_data_model = list(
+                    map(lambda e: TmpRequestParameterModel().deserialize(e), api_http_details.get("parameters", []))
+                )
+                for param in api_req_params_data_model:
+                    if param.has_ref():
+                        expected_parameters += len(param.get_schema_ref().properties.keys())
                     else:
                         expected_parameters += 1
                 assert len(api.parameters) == expected_parameters
@@ -396,18 +359,16 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
                         filter(lambda b: b in request_body["content"].keys(), ["application/json", "*/*"])
                     )
                     assert len(data_format) == 1
-                    assert len(api.parameters) == len(
-                        _ReferenceObjectParser.get_schema_ref(request_body["content"][data_format[0]])[
-                            "properties"
-                        ].keys()
-                    )
+                    req_body_model = TmpRequestParameterModel().deserialize(request_body["content"][data_format[0]])
+                    assert len(api.parameters) == len(req_body_model.get_schema_ref().properties.keys())
                 else:
                     expected_parameters = 0
-                    for param in api_http_details["parameters"]:
-                        if _ReferenceObjectParser.has_ref(param):
-                            expected_parameters += len(
-                                _ReferenceObjectParser.get_schema_ref(param)["properties"].keys()
-                            )
+                    api_req_params_data_model = list(
+                        map(lambda e: TmpRequestParameterModel().deserialize(e), api_http_details["parameters"])
+                    )
+                    for param in api_req_params_data_model:
+                        if param.has_ref():
+                            expected_parameters += len(param.get_schema_ref().properties.keys())
                         else:
                             expected_parameters += 1
                     assert len(api.parameters) == expected_parameters

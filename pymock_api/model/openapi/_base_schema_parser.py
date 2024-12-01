@@ -2,7 +2,7 @@ import copy
 import json
 import pathlib
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Dict, List
 
 
 class BaseSchemaParser(metaclass=ABCMeta):
@@ -14,17 +14,6 @@ class BaseSchemaParser(metaclass=ABCMeta):
         return self._data
 
 
-class BaseOpenAPIObjectSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_required(self, default: Any = None) -> List[str]:
-        pass
-
-    @abstractmethod
-    def get_properties(self, default: Any = None) -> Dict[str, dict]:
-        pass
-
-
 class BaseOpenAPIResponseSchemaParser(BaseSchemaParser):
 
     @abstractmethod
@@ -33,40 +22,6 @@ class BaseOpenAPIResponseSchemaParser(BaseSchemaParser):
 
     @abstractmethod
     def exist_in_content(self, value_format: str) -> bool:
-        pass
-
-
-class BaseOpenAPIRequestParametersSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_name(self) -> str:
-        pass
-
-    @abstractmethod
-    def get_required(self) -> str:
-        pass
-
-    @abstractmethod
-    def get_type(self) -> str:
-        pass
-
-    @abstractmethod
-    def get_default(self) -> Optional[str]:
-        pass
-
-    @abstractmethod
-    def get_items(self):
-        pass
-
-
-class BaseOpenAPIRequestParameterItemSchemaParser(BaseSchemaParser):
-
-    @abstractmethod
-    def get_items_type(self) -> Optional[str]:
-        pass
-
-    @abstractmethod
-    def set_items_type(self, value_type: str) -> None:
         pass
 
 

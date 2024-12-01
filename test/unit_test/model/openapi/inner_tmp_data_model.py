@@ -14,8 +14,8 @@ from pymock_api.model.openapi._tmp_data_model import (
     BaseTmpRefDataModel,
     PropertyDetail,
     ResponseProperty,
-    TmpResponsePropertyModel,
-    TmpResponseRefModel,
+    TmpConfigReferenceModel,
+    TmpReferenceConfigPropertyModel,
     set_component_definition,
 )
 
@@ -39,17 +39,16 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
     def test_generate_response(
         self,
         under_test: BaseTmpRefDataModel,
-        api_response_detail: dict,
+        api_response_detail: TmpReferenceConfigPropertyModel,
         entire_config: dict,
     ):
         # Pre-process
         set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
-        tmp_data_model = TmpResponsePropertyModel.deserialize(api_response_detail)
 
         # Run target function under test
         response_prop_data = under_test._generate_response(
             init_response=ResponseProperty(),
-            property_value=tmp_data_model,
+            property_value=api_response_detail,
         )
 
         # Verify
@@ -355,7 +354,7 @@ class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
                     }
                 )
             )
-        test_response_data_model = TmpResponsePropertyModel.deserialize(test_response_data)
+        test_response_data_model = TmpReferenceConfigPropertyModel.deserialize(test_response_data)
 
         # Run target
         resp = under_test._generate_response_from_data(
@@ -399,21 +398,21 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
         ("ut_response_config", "expect_result"),
         [
             (
-                [PropertyDetail(name="THIS_IS_EMPTY", required=True, type=None, format=None, items=None)],
-                [PropertyDetail(name="", required=True, type=None, format=None, is_empty=True, items=None)],
+                [PropertyDetail(name="THIS_IS_EMPTY", required=True, value_type=None, format=None, items=None)],
+                [PropertyDetail(name="", required=True, value_type=None, format=None, is_empty=True, items=None)],
             ),
             (
                 [
                     PropertyDetail(
                         name="sample_list",
                         required=True,
-                        type="list",
+                        value_type="list",
                         format=None,
                         items=[
                             PropertyDetail(
                                 name="THIS_IS_EMPTY",
                                 required=True,
-                                type=None,
+                                value_type=None,
                                 format=None,
                                 items=None,
                             ),
@@ -424,7 +423,7 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
                     PropertyDetail(
                         name="sample_list",
                         required=True,
-                        type="list",
+                        value_type="list",
                         format=None,
                         is_empty=True,
                         items=[],
@@ -436,32 +435,38 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
                     PropertyDetail(
                         name="sample_list",
                         required=True,
-                        type="list",
+                        value_type="list",
                         format=None,
                         items=[
                             PropertyDetail(
                                 name="sample_nested_list",
                                 required=True,
-                                type="list",
+                                value_type="list",
                                 format=None,
                                 items=[
                                     PropertyDetail(
                                         name="sample_nested_list",
                                         required=True,
-                                        type="list",
+                                        value_type="list",
                                         format=None,
                                         items=[
-                                            PropertyDetail(name="", required=True, type="str", format=None, items=None),
+                                            PropertyDetail(
+                                                name="", required=True, value_type="str", format=None, items=None
+                                            ),
                                         ],
                                     ),
                                     PropertyDetail(
                                         name="sample_nested_dict",
                                         required=True,
-                                        type="dict",
+                                        value_type="dict",
                                         format=None,
                                         items=[
                                             PropertyDetail(
-                                                name="THIS_IS_EMPTY", required=True, type=None, format=None, items=None
+                                                name="THIS_IS_EMPTY",
+                                                required=True,
+                                                value_type=None,
+                                                format=None,
+                                                items=None,
                                             ),
                                         ],
                                     ),
@@ -474,28 +479,30 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
                     PropertyDetail(
                         name="sample_list",
                         required=True,
-                        type="list",
+                        value_type="list",
                         format=None,
                         items=[
                             PropertyDetail(
                                 name="sample_nested_list",
                                 required=True,
-                                type="list",
+                                value_type="list",
                                 format=None,
                                 items=[
                                     PropertyDetail(
                                         name="sample_nested_list",
                                         required=True,
-                                        type="list",
+                                        value_type="list",
                                         format=None,
                                         items=[
-                                            PropertyDetail(name="", required=True, type="str", format=None, items=None),
+                                            PropertyDetail(
+                                                name="", required=True, value_type="str", format=None, items=None
+                                            ),
                                         ],
                                     ),
                                     PropertyDetail(
                                         name="sample_nested_dict",
                                         required=True,
-                                        type="dict",
+                                        value_type="dict",
                                         format=None,
                                         is_empty=True,
                                         items=[],
@@ -521,19 +528,21 @@ class BaseTmpRefDataModelTestSuite(BaseTmpDataModelTestSuite):
 class TestTmpResponsePropertyModel(BaseTmpRefDataModelTestSuite):
 
     @pytest.fixture(scope="function")
-    def under_test(self) -> TmpResponsePropertyModel:
-        return TmpResponsePropertyModel()
+    def under_test(self) -> TmpReferenceConfigPropertyModel:
+        return TmpReferenceConfigPropertyModel()
 
     @pytest.mark.parametrize(
         ("under_test", "expect_result"),
         [
-            (TmpResponsePropertyModel(ref=None), ""),
-            (TmpResponsePropertyModel(ref=""), ""),
-            (TmpResponsePropertyModel(ref="reference value"), "ref"),
-            (TmpResponsePropertyModel(additionalProperties=TmpResponsePropertyModel(ref=None)), ""),
-            (TmpResponsePropertyModel(additionalProperties=TmpResponsePropertyModel(ref="")), ""),
+            (TmpReferenceConfigPropertyModel(ref=None), ""),
+            (TmpReferenceConfigPropertyModel(ref=""), ""),
+            (TmpReferenceConfigPropertyModel(ref="reference value"), "ref"),
+            (TmpReferenceConfigPropertyModel(additionalProperties=TmpReferenceConfigPropertyModel(ref=None)), ""),
+            (TmpReferenceConfigPropertyModel(additionalProperties=TmpReferenceConfigPropertyModel(ref="")), ""),
             (
-                TmpResponsePropertyModel(additionalProperties=TmpResponsePropertyModel(ref="reference value")),
+                TmpReferenceConfigPropertyModel(
+                    additionalProperties=TmpReferenceConfigPropertyModel(ref="reference value")
+                ),
                 "additionalProperties",
             ),
         ],
@@ -544,9 +553,11 @@ class TestTmpResponsePropertyModel(BaseTmpRefDataModelTestSuite):
     @pytest.mark.parametrize(
         ("under_test", "expect_result"),
         [
-            (TmpResponsePropertyModel(ref="reference value"), "reference value"),
+            (TmpReferenceConfigPropertyModel(ref="reference value"), "reference value"),
             (
-                TmpResponsePropertyModel(additionalProperties=TmpResponsePropertyModel(ref="reference value")),
+                TmpReferenceConfigPropertyModel(
+                    additionalProperties=TmpReferenceConfigPropertyModel(ref="reference value")
+                ),
                 "reference value",
             ),
         ],
@@ -557,24 +568,24 @@ class TestTmpResponsePropertyModel(BaseTmpRefDataModelTestSuite):
     @pytest.mark.parametrize(
         ("under_test", "expect_result"),
         [
-            (TmpResponsePropertyModel(), True),
-            (TmpResponsePropertyModel(value_type=None), True),
-            (TmpResponsePropertyModel(ref=None), True),
-            (TmpResponsePropertyModel(value_type=""), True),
-            (TmpResponsePropertyModel(ref=""), True),
-            (TmpResponsePropertyModel(value_type="data type", ref=""), False),
-            (TmpResponsePropertyModel(value_type=None, ref="reference value"), False),
+            (TmpReferenceConfigPropertyModel(), True),
+            (TmpReferenceConfigPropertyModel(value_type=None), True),
+            (TmpReferenceConfigPropertyModel(ref=None), True),
+            (TmpReferenceConfigPropertyModel(value_type=""), True),
+            (TmpReferenceConfigPropertyModel(ref=""), True),
+            (TmpReferenceConfigPropertyModel(value_type="data type", ref=""), False),
+            (TmpReferenceConfigPropertyModel(value_type=None, ref="reference value"), False),
         ],
     )
-    def test_is_empty(self, under_test: TmpResponsePropertyModel, expect_result: str):
+    def test_is_empty(self, under_test: TmpReferenceConfigPropertyModel, expect_result: str):
         assert under_test.is_empty() == expect_result
 
 
 class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
 
     @pytest.fixture(scope="function")
-    def under_test(self) -> TmpResponseRefModel:
-        return TmpResponseRefModel()
+    def under_test(self) -> TmpConfigReferenceModel:
+        return TmpConfigReferenceModel()
 
     @pytest.mark.parametrize(
         ("strategy", "test_response_data", "expected_value"),
@@ -586,10 +597,10 @@ class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
             # ),
             (
                 ResponseStrategy.OBJECT,
-                TmpResponseRefModel(value_type="object"),
+                TmpConfigReferenceModel(value_type="object"),
                 # {"type": "object"},
                 ResponseProperty(
-                    data=[PropertyDetail(name="THIS_IS_EMPTY", required=False, type=None, format=None, items=[])],
+                    data=[PropertyDetail(name="THIS_IS_EMPTY", required=False, value_type=None, format=None, items=[])],
                 ),
                 # {
                 #     "strategy": ResponseStrategy.OBJECT,
@@ -599,7 +610,7 @@ class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
         ],
     )
     def test__process_reference_object_with_empty_body_response(
-        self, strategy: ResponseStrategy, test_response_data: TmpResponseRefModel, expected_value: ResponseProperty
+        self, strategy: ResponseStrategy, test_response_data: TmpConfigReferenceModel, expected_value: ResponseProperty
     ):
         response_config = test_response_data.process_reference_object(
             init_response=ResponseProperty.initial_response_data(),

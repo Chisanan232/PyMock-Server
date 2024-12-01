@@ -4,10 +4,14 @@ from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from dataclasses import dataclass, field
 from pydoc import locate
-from typing import Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
+from ..api_config import IteratorItem
+from ..api_config.apis.request import APIParameter as PyMockRequestProperty
+from ..api_config.apis.response import ResponseProperty as PyMockResponseProperty
 from ._base_schema_parser import BaseOpenAPISchemaParser
 from ._js_handlers import ensure_type_is_python_type
+from .content_type import ContentType
 
 ComponentDefinition: Dict[str, dict] = {}
 
@@ -45,7 +49,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
     def _generate_response(
         self,
         init_response: "ResponseProperty",
-        property_value: "TmpResponsePropertyModel",
+        property_value: "TmpReferenceConfigPropertyModel",
     ) -> Union["PropertyDetail", List["PropertyDetail"]]:
         if property_value.is_empty():
             return PropertyDetail.generate_empty_response()
@@ -64,11 +68,11 @@ class BaseTmpDataModel(metaclass=ABCMeta):
     def _generate_response_from_data(
         self,
         init_response: "ResponseProperty",
-        resp_prop_data: Union["TmpResponsePropertyModel", "TmpResponseRefModel", "TmpRequestItemModel"],
+        resp_prop_data: Union["TmpReferenceConfigPropertyModel", "TmpConfigReferenceModel"],
     ) -> Union["PropertyDetail", List["PropertyDetail"]]:
 
         def _handle_list_type_data(
-            data: TmpResponsePropertyModel,
+            data: TmpReferenceConfigPropertyModel,
             noref_val_process_callback: Callable,
             ref_val_process_callback: Callable,
             response: PropertyDetail = PropertyDetail(),
@@ -93,7 +97,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                 response = PropertyDetail(
                     name="",
                     required=_Default_Required.general,
-                    type="list",
+                    value_type="list",
                     # TODO: Set the *format* property correctly
                     format=None,
                     items=items,
@@ -103,28 +107,28 @@ class BaseTmpDataModel(metaclass=ABCMeta):
 
         def _handle_reference_object(
             response: PropertyDetail,
-            items_data: TmpResponsePropertyModel,
+            items_data: TmpReferenceConfigPropertyModel,
             noref_val_process_callback: Callable[
                 # item_k, item_v, response
-                [str, TmpResponsePropertyModel, PropertyDetail],
+                [str, TmpReferenceConfigPropertyModel, PropertyDetail],
                 PropertyDetail,
             ],
             ref_val_process_callback: Callable[
                 [
                     # item_k, item_v, response, single_response, noref_val_process_callback
                     str,
-                    TmpResponsePropertyModel,
+                    TmpReferenceConfigPropertyModel,
                     PropertyDetail,
-                    TmpResponseRefModel,
+                    TmpConfigReferenceModel,
                     Callable[
-                        [str, TmpResponsePropertyModel, PropertyDetail],
+                        [str, TmpReferenceConfigPropertyModel, PropertyDetail],
                         PropertyDetail,
                     ],
                 ],
                 PropertyDetail,
             ],
         ) -> PropertyDetail:
-            single_response: Optional[TmpResponseRefModel] = items_data.get_schema_ref()
+            single_response: Optional[TmpConfigReferenceModel] = items_data.get_schema_ref()
             assert single_response
             for item_k, item_v in (single_response.properties or {}).items():
                 print(f"[DEBUG in nested data issue at _handle_list_type_data] item_v: {item_v}")
@@ -138,21 +142,23 @@ class BaseTmpDataModel(metaclass=ABCMeta):
             return response
 
         def _handle_list_type_value_with_object_strategy(
-            data: TmpResponsePropertyModel,
+            data: TmpReferenceConfigPropertyModel,
         ) -> PropertyDetail:
 
             def _ref_process_callback(
                 item_k: str,
-                item_v: TmpResponsePropertyModel,
+                item_v: TmpReferenceConfigPropertyModel,
                 response: PropertyDetail,
-                ref_single_response: TmpResponseRefModel,
-                noref_val_process_callback: Callable[[str, TmpResponsePropertyModel, PropertyDetail], PropertyDetail],
+                ref_single_response: TmpConfigReferenceModel,
+                noref_val_process_callback: Callable[
+                    [str, TmpReferenceConfigPropertyModel, PropertyDetail], PropertyDetail
+                ],
             ) -> PropertyDetail:
                 assert ref_single_response.required
                 item_k_data_prop = PropertyDetail(
                     name=item_k,
                     required=item_k in ref_single_response.required,
-                    type=item_v.value_type or "dict",
+                    value_type=item_v.value_type or "dict",
                     # TODO: Set the *format* property correctly
                     format=None,
                     items=[],
@@ -183,14 +189,14 @@ class BaseTmpDataModel(metaclass=ABCMeta):
 
             def _noref_process_callback(
                 item_k: str,
-                item_v: TmpResponsePropertyModel,
+                item_v: TmpReferenceConfigPropertyModel,
                 response_data_prop: PropertyDetail,
             ) -> PropertyDetail:
                 item_type = item_v.value_type
                 item = PropertyDetail(
                     name=item_k,
                     required=_Default_Required.general,
-                    type=item_type,
+                    value_type=item_type,
                 )
                 assert isinstance(response_data_prop.items, list), "The data type of property *items* must be *list*."
                 response_data_prop.items.append(item)
@@ -199,7 +205,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
             response_data_prop = PropertyDetail(
                 name="",
                 required=_Default_Required.general,
-                type=v_type,
+                value_type=v_type,
                 # TODO: Set the *format* property correctly
                 format=None,
                 items=[],
@@ -213,25 +219,24 @@ class BaseTmpDataModel(metaclass=ABCMeta):
             return response_data_prop
 
         def _handle_object_type_value_with_object_strategy(
-            data: Union[TmpResponsePropertyModel, TmpResponseRefModel, TmpRequestItemModel]
+            data: Union[TmpReferenceConfigPropertyModel, TmpConfigReferenceModel]
         ) -> Union[PropertyDetail, List[PropertyDetail]]:
             print(f"[DEBUG in _handle_object_type_value_with_object_strategy] data: {data}")
             data_title = data.title
             if data_title:
-                # TODO: It should also consider the scenario about input stream part (download file)
                 # Example data: {'type': 'object', 'title': 'InputStream'}
                 if re.search(data_title, "InputStream", re.IGNORECASE):
                     return PropertyDetail(
                         name="",
                         required=_Default_Required.general,
-                        type="file",
+                        value_type="file",
                         # TODO: Set the *format* property correctly
                         format=None,
                         items=None,
                     )
 
             # Check reference first
-            assert not isinstance(data, TmpResponseRefModel)
+            assert not isinstance(data, TmpConfigReferenceModel)
             has_ref = data.has_ref()
             if has_ref:
                 # Process reference
@@ -244,7 +249,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                     return PropertyDetail(
                         name="additionalKey",
                         required=_Default_Required.general,
-                        type="dict",
+                        value_type="dict",
                         # TODO: Set the *format* property correctly
                         format=None,
                         items=resp.data,
@@ -252,7 +257,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                 return resp.data
             else:
                 # Handle the schema *additionalProperties*
-                assert isinstance(data, TmpResponsePropertyModel)
+                assert isinstance(data, TmpReferenceConfigPropertyModel)
                 additional_properties = data.additionalProperties
                 assert additional_properties
                 additional_properties_type = additional_properties.value_type
@@ -269,14 +274,14 @@ class BaseTmpDataModel(metaclass=ABCMeta):
                     return PropertyDetail(
                         name="",
                         required=_Default_Required.general,
-                        type="dict",
+                        value_type="dict",
                         # TODO: Set the *format* property correctly
                         format=None,
                         items=[
                             PropertyDetail(
                                 name="additionalKey",
                                 required=_Default_Required.general,
-                                type=additional_properties_type,
+                                value_type=additional_properties_type,
                                 # TODO: Set the *format* property correctly
                                 format=None,
                                 items=None,
@@ -288,17 +293,17 @@ class BaseTmpDataModel(metaclass=ABCMeta):
             return PropertyDetail(
                 name="",
                 required=_Default_Required.general,
-                type=v_type,
+                value_type=v_type,
                 # TODO: Set the *format* property correctly
                 format=None,
                 items=None,
             )
 
         def _handle_each_data_types_response_with_object_strategy(
-            data: Union[TmpResponsePropertyModel, TmpResponseRefModel, TmpRequestItemModel], v_type: str
+            data: Union[TmpReferenceConfigPropertyModel, TmpConfigReferenceModel], v_type: str
         ) -> Union[PropertyDetail, List[PropertyDetail]]:
             if locate(v_type) == list:
-                assert isinstance(data, TmpResponsePropertyModel)
+                assert isinstance(data, TmpReferenceConfigPropertyModel)
                 return _handle_list_type_value_with_object_strategy(data)
             elif locate(v_type) == dict:
                 return _handle_object_type_value_with_object_strategy(data)
@@ -309,7 +314,7 @@ class BaseTmpDataModel(metaclass=ABCMeta):
 
         print(f"[DEBUG in _handle_not_ref_data] resp_prop_data: {resp_prop_data}")
         if not resp_prop_data.value_type:
-            assert not isinstance(resp_prop_data, TmpResponseRefModel)
+            assert not isinstance(resp_prop_data, TmpConfigReferenceModel)
             assert resp_prop_data.has_ref()
             return _handle_each_data_types_response_with_object_strategy(resp_prop_data, "dict")
         v_type = resp_prop_data.value_type
@@ -327,7 +332,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
     def get_ref(self) -> str:
         pass
 
-    def get_schema_ref(self) -> "TmpResponseRefModel":
+    def get_schema_ref(self) -> "TmpConfigReferenceModel":
         def _get_schema(component_def_data: dict, paths: List[str], i: int) -> dict:
             if i == len(paths) - 1:
                 return component_def_data[paths[i]]
@@ -342,7 +347,7 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
         schema_path = self.get_ref().replace("#/", "").split("/")[1:]
         print(f"[DEBUG in get_schema_ref] schema_path: {schema_path}")
         # Operate the component definition object
-        return TmpResponseRefModel.deserialize(_get_schema(get_component_definition(), schema_path, 0))
+        return TmpConfigReferenceModel.deserialize(_get_schema(get_component_definition(), schema_path, 0))
 
     def process_response_from_reference(
         self,
@@ -383,80 +388,101 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
 
 
 @dataclass
-class TmpRequestItemModel(BaseTmpRefDataModel):
+class TmpRequestSchemaModel(BaseTmpRefDataModel):
     title: Optional[str] = None
     value_type: Optional[str] = None
-    format: Optional[str] = None
-    enums: List[str] = field(default_factory=list)
+    default: Optional[Any] = None
     ref: Optional[str] = None
 
-    @classmethod
-    def deserialize(cls, data: Dict) -> "TmpRequestItemModel":
-        print(f"[DEBUG in TmpRequestItemModel.deserialize] data: {data}")
-        return TmpRequestItemModel(
-            title=data.get("title", None),
-            value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else None,
-            format="",  # TODO: Support in next PR
-            enums=[],  # TODO: Support in next PR
-            ref=data.get("$ref", None),
-        )
+    def deserialize(self, data: dict) -> "TmpRequestSchemaModel":
+        self.title = data.get("title", None)
+        self.value_type = ensure_type_is_python_type(data["type"]) if data.get("type", None) else None
+        self.default = data.get("default", None)
+        self.ref = data.get("$ref", None)
+        return self
 
     def has_ref(self) -> str:
         return "ref" if self.ref else ""
 
     def get_ref(self) -> str:
-        assert self.has_ref()
         assert self.ref
         return self.ref
 
 
 @dataclass
-class TmpAPIParameterModel(BaseTmpDataModel):
+class TmpRequestParameterModel(BaseTmpRefDataModel):
     name: str = field(default_factory=str)
     required: bool = False
-    value_type: str = field(default_factory=str)
-    default: Optional[str] = None
-    items: Optional[List[Union["TmpAPIParameterModel", TmpRequestItemModel]]] = None
+    value_type: Optional[str] = None
+    format: Optional[dict] = None
+    default: Optional[Any] = None
+    items: Optional[List["TmpRequestParameterModel"]] = None
+    schema: Optional["TmpRequestSchemaModel"] = None
 
-    def __post_init__(self) -> None:
-        if self.items is not None:
+    def _convert_items(self) -> List[Union["TmpRequestParameterModel"]]:
+        assert self.items
+        if True in list(  # type: ignore[comparison-overlap]
+            filter(lambda e: not isinstance(e, (dict, TmpRequestParameterModel)), self.items)
+        ):
+            raise ValueError(
+                f"There are some invalid data type item in the property *items*. Current *items*: {self.items}"
+            )
+        return [TmpRequestParameterModel().deserialize(i) if isinstance(i, dict) else i for i in (self.items or [])]  # type: ignore[arg-type]
+
+    def deserialize(self, data: dict) -> "TmpRequestParameterModel":
+        print(f"[DEBUG in TmpRequestParameterModel.deserialize] data: {data}")
+        self.name = data.get("name", "")
+        self.required = data.get("required", True)
+
+        items = data.get("items", [])
+        if items:
+            self.items = items if isinstance(items, list) else [items]
             self.items = self._convert_items()
-        if self.value_type:
-            self.value_type = self._convert_value_type()
 
-    def _convert_items(self) -> List[Union["TmpAPIParameterModel", TmpRequestItemModel]]:
-        items: List[Union[TmpAPIParameterModel, TmpRequestItemModel]] = []
-        for item in self.items or []:
-            assert isinstance(item, (TmpAPIParameterModel, TmpRequestItemModel))
-            items.append(item)
-        return items
+        schema = data.get("schema", {})
+        if schema:
+            self.schema = TmpRequestSchemaModel().deserialize(schema)
 
-    def _convert_value_type(self) -> str:
-        return ensure_type_is_python_type(self.value_type)
+        print(f"[DEBUG in TmpRequestParameterModel.deserialize] self.schema: {self.schema}")
+        self.value_type = ensure_type_is_python_type(data.get("type", "")) or (
+            self.schema.value_type if self.schema else ""
+        )
+        self.default = data.get("default", None) or (self.schema.default if self.schema else None)
+        print(f"[DEBUG in TmpRequestParameterModel.deserialize] self: {self}")
+        return self
+
+    def has_ref(self) -> str:
+        return "schema" if self.schema and self.schema.has_ref() else ""
+
+    def get_ref(self) -> str:
+        assert self.schema
+        return self.schema.get_ref()
 
 
 @dataclass
-class TmpResponsePropertyModel(BaseTmpRefDataModel):
+class TmpReferenceConfigPropertyModel(BaseTmpRefDataModel):
     title: Optional[str] = None
     value_type: Optional[str] = None
     format: Optional[str] = None  # For OpenAPI v3
+    default: Optional[str] = None  # For OpenAPI v3 request part
     enums: List[str] = field(default_factory=list)
     ref: Optional[str] = None
-    items: Optional["TmpResponsePropertyModel"] = None
-    additionalProperties: Optional["TmpResponsePropertyModel"] = None
+    items: Optional["TmpReferenceConfigPropertyModel"] = None
+    additionalProperties: Optional["TmpReferenceConfigPropertyModel"] = None
 
     @classmethod
-    def deserialize(cls, data: Dict) -> "TmpResponsePropertyModel":
+    def deserialize(cls, data: Dict) -> "TmpReferenceConfigPropertyModel":
         print(f"[DEBUG in TmpResponsePropertyModel.deserialize] data: {data}")
-        return TmpResponsePropertyModel(
+        return TmpReferenceConfigPropertyModel(
             title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else None,
             format="",  # TODO: Support in next PR
+            default=data.get("default", None),
             enums=[],  # TODO: Support in next PR
             ref=data.get("$ref", None),
-            items=TmpResponsePropertyModel.deserialize(data["items"]) if data.get("items", None) else None,
+            items=TmpReferenceConfigPropertyModel.deserialize(data["items"]) if data.get("items", None) else None,
             additionalProperties=(
-                TmpResponsePropertyModel.deserialize(data["additionalProperties"])
+                TmpReferenceConfigPropertyModel.deserialize(data["additionalProperties"])
                 if data.get("additionalProperties", None)
                 else None
             ),
@@ -499,21 +525,21 @@ class TmpResponsePropertyModel(BaseTmpRefDataModel):
 
 
 @dataclass
-class TmpResponseRefModel(BaseTmpDataModel):
+class TmpConfigReferenceModel(BaseTmpDataModel):
     title: Optional[str] = None
     value_type: str = field(default_factory=str)  # unused
     required: Optional[list[str]] = None
-    properties: Dict[str, TmpResponsePropertyModel] = field(default_factory=dict)
+    properties: Dict[str, TmpReferenceConfigPropertyModel] = field(default_factory=dict)
 
     @classmethod
-    def deserialize(cls, data: Dict) -> "TmpResponseRefModel":
+    def deserialize(cls, data: Dict) -> "TmpConfigReferenceModel":
         print(f"[DEBUG in TmpResponseModel.deserialize] data: {data}")
         properties = {}
         properties_config: dict = data.get("properties", {})
         if properties_config:
             for k, v in properties_config.items():
-                properties[k] = TmpResponsePropertyModel.deserialize(v)
-        return TmpResponseRefModel(
+                properties[k] = TmpReferenceConfigPropertyModel.deserialize(v)
+        return TmpConfigReferenceModel(
             title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else "",
             required=data.get("required", None),
@@ -526,7 +552,7 @@ class TmpResponseRefModel(BaseTmpDataModel):
         empty_body_key: str = "",
     ) -> "ResponseProperty":
         # assert response_schema_ref
-        response_schema_properties: Dict[str, TmpResponsePropertyModel] = self.properties or {}
+        response_schema_properties: Dict[str, TmpReferenceConfigPropertyModel] = self.properties or {}
         print(f"[DEBUG in process_response_from_reference] response_schema_ref: {self}")
         print(f"[DEBUG in process_response_from_reference] response_schema_properties: {response_schema_properties}")
         if response_schema_properties:
@@ -541,14 +567,14 @@ class TmpResponseRefModel(BaseTmpDataModel):
                     )
                     print(f"[DEBUG in process_response_from_reference] before asserion, response_prop: {response_prop}")
                     # TODO: It should have better way to handle output streaming
-                    if len(list(filter(lambda d: d.type == "file", response_prop.data))) != 0:
+                    if len(list(filter(lambda d: d.value_type == "file", response_prop.data))) != 0:
                         # It's file inputStream
                         response_config = response_prop.data[0]
                     else:
                         response_config = PropertyDetail(
                             name="",
                             required=_Default_Required.empty,
-                            type="dict",
+                            value_type="dict",
                             format=None,
                             items=response_prop.data,
                         )
@@ -570,7 +596,7 @@ class TmpResponseRefModel(BaseTmpDataModel):
             # The section which doesn't have setting body
             response_config = PropertyDetail.generate_empty_response()
             if self.title == "InputStream":
-                response_config.type = "file"
+                response_config.value_type = "file"
 
                 response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
                 print(
@@ -595,50 +621,96 @@ class TmpResponseRefModel(BaseTmpDataModel):
 
 
 @dataclass
-class TmpResponseSchema(BaseTmpRefDataModel):
-    schema: Optional[TmpResponsePropertyModel] = None
+class TmpHttpConfigV2(BaseTmpRefDataModel):
+    schema: Optional[TmpReferenceConfigPropertyModel] = None
 
     @classmethod
-    def deserialize(cls, data: dict) -> "TmpResponseSchema":
+    def deserialize(cls, data: dict) -> "TmpHttpConfigV2":
+        print(f"[DEBUG in TmpHttpConfigV2.deserialize] data: {data}")
         assert data is not None and isinstance(data, dict)
-        return TmpResponseSchema(schema=TmpResponsePropertyModel.deserialize(data.get("schema", {})))
+        return TmpHttpConfigV2(
+            schema=TmpReferenceConfigPropertyModel.deserialize(data.get("schema", {})),
+            # content=data.get("content", None),
+        )
 
     def has_ref(self) -> str:
-        return "schema" if self.schema and self.schema.has_ref else ""  # type: ignore[truthy-function]
+        return "schema" if self.schema and self.schema.has_ref() else ""
 
     def get_ref(self) -> str:
         assert self.has_ref()
         assert self.schema.ref  # type: ignore[union-attr]
         return self.schema.ref  # type: ignore[union-attr]
 
-    def is_empty(self) -> bool:
-        return not self.schema or self.schema.is_empty()
 
-
-# The data models for final result which would be converted as the data models of PyMock-API configuration
 @dataclass
-class PropertyDetail:
+class TmpHttpConfigV3(BaseTmpDataModel):
+    content: Optional[Dict[ContentType, TmpHttpConfigV2]] = None
+
+    @classmethod
+    def deserialize(cls, data: dict) -> "TmpHttpConfigV3":
+        print(f"[DEBUG in TmpHttpConfigV3.deserialize] data: {data}")
+        assert data is not None and isinstance(data, dict)
+        content_config: Dict[ContentType, TmpHttpConfigV2] = {}
+        for content_type, config in data.get("content", {}).items() or {}:
+            content_config[ContentType.to_enum(content_type)] = TmpHttpConfigV2.deserialize(config)
+        return TmpHttpConfigV3(content=content_config)
+
+    def exist_setting(self, content_type: Union[str, ContentType]) -> Optional[ContentType]:
+        content_type = ContentType.to_enum(content_type) if isinstance(content_type, str) else content_type
+        if content_type in (self.content or {}).keys():
+            return content_type
+        else:
+            return None
+
+    def get_setting(self, content_type: Union[str, ContentType]) -> TmpHttpConfigV2:
+        content_type = self.exist_setting(content_type=content_type)  # type: ignore[assignment]
+        assert content_type is not None
+        if self.content and len(self.content.values()) > 0:
+            return self.content[content_type]  # type: ignore[index]
+        raise ValueError("Cannot find the mapping setting of content type.")
+
+
+# The base data model for request and response
+@dataclass
+class BasePropertyDetail(metaclass=ABCMeta):
     name: str = field(default_factory=str)
     required: bool = False
-    type: Optional[str] = None
+    value_type: Optional[str] = None
     format: Optional[dict] = None
-    items: Optional[List["PropertyDetail"]] = None
-    is_empty: Optional[bool] = None
+    items: Optional[List["BasePropertyDetail"]] = None
 
     def serialize(self) -> dict:
         data = {
             "name": self.name,
             "required": self.required,
-            "type": self.type,
+            "type": self.value_type,
             "format": self.format,
-            "is_empty": self.is_empty,
             "items": [item.serialize() for item in self.items] if self.items else None,
         }
+        return self._clear_empty_values(data)
+
+    def _clear_empty_values(self, data):
         new_data = {}
         for k, v in data.items():
             if v is not None:
                 new_data[k] = v
         return new_data
+
+    @abstractmethod
+    def to_pymock_api_config(self) -> Union[PyMockRequestProperty, PyMockResponseProperty]:
+        pass
+
+
+# The data models for final result which would be converted as the data models of PyMock-API configuration
+@dataclass
+class PropertyDetail(BasePropertyDetail):
+    items: Optional[List["PropertyDetail"]] = None  # type: ignore[assignment]
+    is_empty: Optional[bool] = None
+
+    def serialize(self) -> dict:
+        data = super().serialize()
+        data["is_empty"] = self.is_empty
+        return self._clear_empty_values(data)
 
     @staticmethod
     def generate_empty_response() -> "PropertyDetail":
@@ -646,9 +718,81 @@ class PropertyDetail:
         return PropertyDetail(
             name="",
             required=_Default_Required.empty,
-            type=None,
+            value_type=None,
             format=None,
             items=[],
+        )
+
+    def to_pymock_api_config(self) -> PyMockResponseProperty:
+        return PyMockResponseProperty().deserialize(self.serialize())
+
+
+# The tmp data model for final result to convert as PyMock-API
+@dataclass
+class RequestParameter(BasePropertyDetail):
+    items: Optional[List[Union["RequestParameter", TmpRequestParameterModel]]] = None  # type: ignore[assignment]
+    default: Optional[Any] = None
+
+    def __post_init__(self) -> None:
+        if self.items is not None:
+            self.items = self._convert_items()
+        if self.value_type:
+            self.value_type = self._convert_value_type()
+
+    def _convert_items(self) -> List[Union["RequestParameter", TmpRequestParameterModel]]:
+        items: List[Union["RequestParameter", TmpRequestParameterModel]] = []
+        print(f"[DEBUG in RequestParameter._convert_items] items: {items}")
+        for item in self.items or []:
+            print(f"[DEBUG in RequestParameter._convert_items] item: {item}")
+            assert isinstance(item, (RequestParameter, TmpRequestParameterModel))
+            items.append(item)
+        return items
+
+    def _convert_value_type(self) -> str:
+        assert self.value_type
+        return ensure_type_is_python_type(self.value_type)
+
+    @classmethod
+    def deserialize_by_prps(
+        cls, name: str = "", required: bool = True, value_type: str = "", default: Any = None, items: List = []
+    ) -> "RequestParameter":
+        return RequestParameter(
+            name=name,
+            required=required,
+            value_type=ensure_type_is_python_type(value_type) if value_type else None,
+            default=default,
+            items=items,
+        )
+
+    def to_pymock_api_config(self) -> PyMockRequestProperty:
+
+        def to_items(item_data: Union[RequestParameter, TmpRequestParameterModel]) -> IteratorItem:
+            if isinstance(item_data, RequestParameter):
+                return IteratorItem(
+                    name=item_data.name,
+                    required=item_data.required,
+                    value_type=item_data.value_type,
+                    items=[to_items(i) for i in (item_data.items or [])],
+                )
+            elif isinstance(item_data, TmpRequestParameterModel):
+                return IteratorItem(
+                    name=item_data.name,
+                    required=item_data.required,
+                    value_type=item_data.value_type,
+                    items=[to_items(i) for i in (item_data.items or [])],
+                )
+            else:
+                raise TypeError(
+                    f"The data model must be *TmpAPIParameterModel* or *TmpItemModel*. But it get *{item_data}*. Please check it."
+                )
+
+        return PyMockRequestProperty(
+            name=self.name,
+            required=self.required,
+            value_type=self.value_type,
+            default=self.default,
+            value_format=None,
+            items=[to_items(i) for i in (self.items or [])],
         )
 
 

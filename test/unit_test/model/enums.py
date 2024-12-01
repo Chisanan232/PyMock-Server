@@ -17,11 +17,6 @@ from pymock_api.model.enums import (
 )
 
 from ..._test_utils import Verify
-from ..model.openapi._test_case import DeserializeV2OpenAPIConfigTestCaseFactory
-
-DeserializeV2OpenAPIConfigTestCaseFactory.load()
-DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE = DeserializeV2OpenAPIConfigTestCaseFactory.get_test_case()
-GENERATE_RESPONSE_CONFIG_FROM_V2_OPENAPI_CONFIG_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.each_api_http_response
 
 
 def test_set_loading_function():
