@@ -13,7 +13,6 @@ from ..api_config.apis.request import APIParameter as PyMockRequestProperty
 from ..api_config.apis.response import ResponseProperty as PyMockResponseProperty
 from ..enums import OpenAPIVersion, ResponseStrategy
 from ._base import Transferable, get_openapi_version
-from ._base_schema_parser import BaseOpenAPISchemaParser
 from ._js_handlers import ensure_type_is_python_type
 from .content_type import ContentType
 
@@ -25,9 +24,9 @@ def get_component_definition() -> Dict:
     return ComponentDefinition
 
 
-def set_component_definition(openapi_parser: BaseOpenAPISchemaParser) -> None:
+def set_component_definition(openapi_common_objects: Dict) -> None:
     global ComponentDefinition
-    ComponentDefinition = openapi_parser.get_objects()
+    ComponentDefinition = openapi_common_objects
 
 
 _PropertyDefaultRequired = namedtuple("_PropertyDefaultRequired", ("empty", "general"))
@@ -1088,5 +1087,5 @@ class API(Transferable):
             values = self.response.data
         print(f"[DEBUG in to_api_config] values: {values}")
         resp_props_values = [p.to_pymock_api_config() for p in values] if values else values
-        mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=resp_props_values)  # type: ignore[arg-type]
+        mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=resp_props_values)
         return mock_api

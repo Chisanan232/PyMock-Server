@@ -12,10 +12,6 @@ from pymock_api.model import (
     load_config,
 )
 from pymock_api.model.api_config import DivideStrategy, TemplateConfig
-from pymock_api.model.openapi._schema_parser import (
-    OpenAPIV2SchemaParser,
-    OpenAPIV3SchemaParser,
-)
 from pymock_api.model.openapi._tmp_data_model import set_component_definition
 
 from ...._values import _API_Doc_Source, _API_Doc_Source_File, _Test_Request_With_Https
@@ -329,12 +325,8 @@ class TestSubCmdPullComponent:
             mock_mock_apis_template.return_value = template_config
 
             # Set the Swagger API reference data for testing
-            openapi_schema_parser = (
-                OpenAPIV3SchemaParser(data=swagger_api_resp)
-                if "v3" in swagger_api_resp_path
-                else OpenAPIV2SchemaParser(data=swagger_api_resp)
-            )
-            set_component_definition(openapi_schema_parser)
+            openapi_schema_key = "components" if "v3" in swagger_api_resp_path else "definitions"
+            set_component_definition(swagger_api_resp.get(openapi_schema_key, {}))
             # Mock the HTTP request result as the Swagger API documentation data
             with patch(
                 "pymock_api.command.pull.component.URLLibHTTPClient.request", return_value=swagger_api_resp
