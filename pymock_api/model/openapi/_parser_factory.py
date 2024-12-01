@@ -3,15 +3,10 @@ from typing import Dict, Union
 
 from ..enums import OpenAPIVersion
 from ._schema_parser import (
-    BaseOpenAPIPathSchemaParser,
-    BaseOpenAPIResponseSchemaParser,
     BaseOpenAPISchemaParser,
     BaseOpenAPITagSchemaParser,
-    OpenAPIResponseSchemaParser,
     OpenAPITagSchemaParser,
-    OpenAPIV2PathSchemaParser,
     OpenAPIV2SchemaParser,
-    OpenAPIV3PathSchemaParser,
     OpenAPIV3SchemaParser,
 )
 
@@ -28,14 +23,6 @@ class BaseOpenAPISchemaParserFactory(metaclass=ABCMeta):
     def tag(self, data: Dict) -> BaseOpenAPITagSchemaParser:
         raise NotImplementedError
 
-    @abstractmethod
-    def path(self, data: Dict) -> BaseOpenAPIPathSchemaParser:
-        pass
-
-    @abstractmethod
-    def response(self, data: Dict) -> BaseOpenAPIResponseSchemaParser:
-        pass
-
 
 class OpenAPIV2SchemaParserFactory(BaseOpenAPISchemaParserFactory):
     def chk_version(self, version: OpenAPIVersion) -> bool:
@@ -47,12 +34,6 @@ class OpenAPIV2SchemaParserFactory(BaseOpenAPISchemaParserFactory):
     def tag(self, data: Dict) -> OpenAPITagSchemaParser:
         return OpenAPITagSchemaParser(data=data)
 
-    def path(self, data: Dict) -> OpenAPIV2PathSchemaParser:
-        return OpenAPIV2PathSchemaParser(data=data)
-
-    def response(self, data: Dict) -> OpenAPIResponseSchemaParser:
-        return OpenAPIResponseSchemaParser(data=data)
-
 
 class OpenAPIV3SchemaParserFactory(BaseOpenAPISchemaParserFactory):
     def chk_version(self, version: OpenAPIVersion) -> bool:
@@ -60,12 +41,6 @@ class OpenAPIV3SchemaParserFactory(BaseOpenAPISchemaParserFactory):
 
     def entire_config(self, file: str = "", data: Dict = {}) -> OpenAPIV3SchemaParser:
         return OpenAPIV3SchemaParser(file=file, data=data)
-
-    def path(self, data: Dict) -> OpenAPIV3PathSchemaParser:
-        return OpenAPIV3PathSchemaParser(data=data)
-
-    def response(self, data: Dict) -> OpenAPIResponseSchemaParser:
-        return OpenAPIResponseSchemaParser(data=data)
 
 
 def get_schema_parser_factory(version: Union[str, OpenAPIVersion]) -> BaseOpenAPISchemaParserFactory:
