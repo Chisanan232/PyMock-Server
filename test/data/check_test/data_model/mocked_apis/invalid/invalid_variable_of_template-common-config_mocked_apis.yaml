@@ -58,10 +58,7 @@ template:    # Optional
             integer: 30
             decimal: 0
         - name: 'currency_code'
+          # Miss enum values
           value_format: 'enum'
-          enum:
-            - 'TWD'
-            - 'USD'
-            - 'EUR'
 base:
   url: '/api/v1/test'

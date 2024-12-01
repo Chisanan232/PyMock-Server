@@ -1,5 +1,5 @@
 template:    # Optional
-  activate: true
+  activate: 'invalid data type'
   file:
     activate: true
     load_config:

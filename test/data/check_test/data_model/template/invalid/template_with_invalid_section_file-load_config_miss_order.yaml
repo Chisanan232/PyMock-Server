@@ -18,3 +18,8 @@ file:
     api:    # Which mocked APIs should apply template values to its entire settings includes URL, request and response
       - get_foo
       - get_foo-boo_export
+common_config:
+  activate: true
+  format:
+    entity: []
+    variables: []

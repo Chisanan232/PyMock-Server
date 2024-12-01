@@ -44,8 +44,8 @@ template:    # Optional
               - 'ENUM3'
         - name: 'customize_format'
           config:
+            # Miss customize
             strategy: 'customize'
-            customize: '<big_decimal_usd> <currency_code>\n<big_decimal_twd> <currency_code>'
       variables:
         - name: 'big_decimal_usd'
           value_format: 'big_decimal'

@@ -74,22 +74,6 @@ _Mock_Load_Config: dict = {
     "order": ["apis", "file"],
 }
 
-_Mock_Template_File_Setting: dict = {
-    "activate": _Mock_Template_Config_Activate,
-    "load_config": _Mock_Load_Config,
-    "config_path_values": _Mock_Template_Values_Setting,
-    "apply": _Mock_Template_Apply_Has_Tag_Setting,
-}
-
-_Mock_Template_Setting: dict = {
-    "activate": _Mock_Template_Config_Activate,
-    "file": _Mock_Template_File_Setting,
-}
-
-_Mock_Templatable_Setting: dict = {
-    "apply_template_props": False,
-}
-
 # Test variable
 _Test_Size_In_Format: dict = {
     "max": 8,
@@ -605,6 +589,51 @@ _Test_Home_With_Customize_Format_Req_Param: dict = {
 }
 
 
+# # Template section
+# *template.file* section
+_Mock_Template_File_Setting: dict = {
+    "activate": _Mock_Template_Config_Activate,
+    "load_config": _Mock_Load_Config,
+    "config_path_values": _Mock_Template_Values_Setting,
+    "apply": _Mock_Template_Apply_Has_Tag_Setting,
+}
+
+# *template.common_config.format* section
+_Mock_Template_Common_Config_Format_Entity: dict = {
+    "name": "sample_customize_format",
+    "config": _Customize_Format_With_Self_Vars,
+}
+
+_Mock_Template_Common_Config_Format_Config: dict = {
+    "entities": [
+        {"name": "general_format", "config": _General_Format},
+        {"name": "general_enum_format", "config": _General_Enum_Format},
+        {"name": "customize_format", "config": _Customize_Format},
+        {"name": "customize_format_with_self_vars", "config": _Customize_Format_With_Self_Vars},
+    ],
+    "variables": [
+        _Test_Variables_BigDecimal_USD,
+        _Test_Variables_BigDecimal_TWD,
+        _Test_Variables_Currency_Code,
+    ],
+}
+
+_Mock_Template_Common_Config: dict = {
+    "activate": _Mock_Template_Config_Activate,
+    "format": _Mock_Template_Common_Config_Format_Config,
+}
+
+_Mock_Template_Setting: dict = {
+    "activate": _Mock_Template_Config_Activate,
+    "file": _Mock_Template_File_Setting,
+    "common_config": _Mock_Template_Common_Config,
+}
+
+_Mock_Templatable_Setting: dict = {
+    "apply_template_props": False,
+}
+
+# # Entire configuration
 _Mocked_APIs: dict = {
     "template": {
         "activate": _Mock_Template_Config_Activate,
@@ -649,6 +678,7 @@ class _TestConfig:
         "template": {
             "activate": _Mock_Template_Config_Activate,
             "file": _Mock_Template_File_Setting,
+            "common_config": _Mock_Template_Common_Config,
         },
         "base": Base,
         "apis": {

@@ -1,9 +1,9 @@
-activate:
+activate: true
 file:
+  activate: true
   load_config:
-    includes_apis: True
+    includes_apis: true
     order:
-      - 'apis'
       - 'apply'
       - 'file'
   config_path_values:
@@ -16,14 +16,24 @@ file:
       config_path_format: '**-request'
     response:
       config_path_format: '**-response'
-  apply:    # Which mocked APIs should apply template values
-    api:    # Which mocked APIs should apply template values to its entire settings includes URL, request and response
-      - foo:    # If it has tag, it could set the tag name as key and set the target APIs as list type value of the key
-        - get_foo
-      - foo-boo:
-        - get_foo-boo_export
 common_config:
   activate: true
   format:
-    entity: []
-    variables: []
+    entities: []
+    variables:
+      - name: 'big_decimal_usd'
+        value_format: 'big_decimal'
+        digit:
+          integer: 30
+          decimal: 3
+      - name: 'big_decimal_twd'
+        value_format: 'big_decimal'
+        digit:
+          integer: 30
+          decimal: 0
+      - name: 'currency_code'
+        value_format: 'enum'
+        enum:
+          - 'TWD'
+          - 'USD'
+          - 'EUR'

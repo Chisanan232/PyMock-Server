@@ -3,12 +3,19 @@ from typing import Type
 
 import pytest
 
+from pymock_api.model.api_config import _Config
 from pymock_api.model.api_config.template.file import TemplateConfigPathSetting
 
 from .._base import ConfigTestSpec
 
 
-class TemplateSettingTestSuite(ConfigTestSpec, ABC):
+class HasDefaultValueTestSuite(ConfigTestSpec, ABC):
+
+    def test_deserialize_with_invalid_data(self, sut_with_nothing: _Config):
+        assert sut_with_nothing.deserialize(data={}) == sut_with_nothing
+
+
+class TemplateSettingTestSuite(HasDefaultValueTestSuite, ABC):
     @property
     @abstractmethod
     def under_test_data(self) -> dict:

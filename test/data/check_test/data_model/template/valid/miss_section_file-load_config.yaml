@@ -1,11 +1,7 @@
-activate:
+activate: true
 file:
+  activate: true
   load_config:
-    includes_apis: True
-    order:
-      - 'apis'
-      - 'apply'
-      - 'file'
   config_path_values:
     base_file_path: './test/data/divide_test/has-base-info_and_tags_has_mocked_apis_with_divide_http_test/'    # Default value should be current path './'
     api:

@@ -1,0 +1,21 @@
+activate: 'invalid data type'
+format:
+  entities:
+    - name: 'general_format'
+      config:
+        strategy: 'by_data_type'
+        digit:
+          integer: 5
+          decimal: 3
+        size:
+          max: 64
+          min: 2
+  variables:
+    - name: 'big_decimal_usd'
+      value_format: 'big_decimal'
+      digit:
+        integer: 'invalid data type'
+        decimal: 3
+      size:
+        max: 64
+        min: 2
