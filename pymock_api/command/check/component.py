@@ -13,8 +13,8 @@ from ...model import (
 )
 from ...model.api_config.apis import APIParameter as MockedAPIParameter
 from ...model.enums import ResponseStrategy
+from ...model.openapi._tmp_data_model import RequestParameter as SwaggerAPIParameter
 from ...model.openapi.config import API as SwaggerAPI
-from ...model.openapi.config import APIParameter as SwaggerAPIParameter
 from ..component import BaseSubCmdComponent
 
 
