@@ -1,0 +1,16 @@
+activate: true
+format:
+  entities:
+    - name: 123
+      config:
+        strategy: 'by_data_type'
+        digit:
+          integer: 5
+          decimal: 3
+        size:
+          max: 64
+          min: 2
+  variables:
+    - name: 'big_decimal_usd'
+      value_format: 'enum'
+      enum:

@@ -25,6 +25,10 @@ from pymock_api.model.api_config._base import _HasItemsPropConfig
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
 from pymock_api.model.api_config.apis._format import Format, _HasFormatPropConfig
 from pymock_api.model.api_config.template import TemplateConfig
+from pymock_api.model.api_config.template.common import (
+    TemplateCommonConfig,
+    TemplateFormatConfig,
+)
 from pymock_api.model.api_config.template.file import (
     LoadConfig,
     TemplateApply,
@@ -41,6 +45,7 @@ from ...._values import (
     _Base_URL,
     _Mock_Load_Config,
     _Mock_Template_Apply_Has_Tag_Setting,
+    _Mock_Template_Common_Config_Format_Config,
     _Mock_Template_Config_Activate,
     _Test_API_Parameter,
     _Test_HTTP_Resp,
@@ -99,10 +104,25 @@ class MockModel:
         )
 
     @property
+    def template_format_config(self) -> TemplateFormatConfig:
+        return TemplateFormatConfig(
+            entities=_Mock_Template_Common_Config_Format_Config["entities"],
+            variables=_Mock_Template_Common_Config_Format_Config["variables"],
+        )
+
+    @property
+    def template_common_config(self) -> TemplateCommonConfig:
+        return TemplateCommonConfig(
+            activate=_Mock_Template_Config_Activate,
+            format=self.template_format_config,
+        )
+
+    @property
     def template_config(self) -> TemplateConfig:
         return TemplateConfig(
             activate=_Mock_Template_Config_Activate,
             file=self.template_file_config,
+            common_config=self.template_common_config,
         )
 
     @property
@@ -222,7 +242,9 @@ class ConfigTestSpec(metaclass=ABCMeta):
 _TEST_DATA: List[tuple] = []
 
 
-def _set_test_data(is_valid: bool, data_model: str, opt_globals_callback: Optional[Callable] = None) -> None:
+def _set_test_data(
+    is_valid: bool, data_model: Union[str, tuple], opt_globals_callback: Optional[Callable] = None
+) -> None:
     def _operate_default_global_var(test_scenario: tuple) -> None:
         global _TEST_DATA
         _TEST_DATA.append(test_scenario)
@@ -235,21 +257,30 @@ def _set_test_data(is_valid: bool, data_model: str, opt_globals_callback: Option
     else:
         config_type = "invalid"
         expected_is_work = False
-    yaml_dir = os.path.join(
+    path = [
         str(pathlib.Path(__file__).parent.parent.parent.parent),
         "data",
         "check_test",
         "data_model",
-        f"{data_model}",
         f"{config_type}",
         "*.yaml",
-    )
+    ]
+    insert_index = path.index(f"{config_type}")
+    if isinstance(data_model, tuple):
+        for dm in data_model:
+            path.insert(insert_index, dm)
+            insert_index += 1
+    else:
+        assert isinstance(data_model, str), f"If parameter *data_model* is not *tuple* type, it must be *str* type."
+        path.insert(insert_index, data_model)
+    path = tuple(path)
+    yaml_dir = os.path.join(*path)
     for yaml_config_path in glob.glob(yaml_dir):
         global_var_operation((yaml_config_path, expected_is_work))
 
 
 def set_checking_test_data(
-    data_modal_dir: str,
+    data_modal_dir: Union[str, tuple],
     reset: bool = True,
     reset_callback: Optional[Callable] = None,
     opt_globals_callback: Optional[Callable] = None,
@@ -259,7 +290,7 @@ def set_checking_test_data(
     init_checking_test_data(data_modal_dir, opt_globals_callback)
 
 
-def init_checking_test_data(data_modal_dir: str, opt_globals_callback: Optional[Callable] = None) -> None:
+def init_checking_test_data(data_modal_dir: Union[str, tuple], opt_globals_callback: Optional[Callable] = None) -> None:
     _set_test_data(is_valid=True, data_model=data_modal_dir, opt_globals_callback=opt_globals_callback)
     _set_test_data(is_valid=False, data_model=data_modal_dir, opt_globals_callback=opt_globals_callback)
 

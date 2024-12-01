@@ -23,7 +23,7 @@ template:    # Optional
         - foo-boo:
           - get_foo-boo_export
   common_config:
-    activate: true
+    activate: 'invalid data type'
     format:
       entities:
         - name: 'general_format'

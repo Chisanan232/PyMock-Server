@@ -2,7 +2,7 @@ import sys
 from abc import ABC, ABCMeta, abstractmethod
 from copy import copy
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar
 
 # The truly semantically is more near like following:
 #
@@ -19,7 +19,7 @@ SelfType = Any
 
 
 class _Config(metaclass=ABCMeta):
-    _absolute_key: str = field(init=False, repr=False)
+    _absolute_key: str = field(init=False, repr=False, default_factory=str)
 
     def __eq__(self, other: SelfType) -> bool:
         if other is None:
@@ -74,6 +74,14 @@ class _Config(metaclass=ABCMeta):
         def _(self, data: Dict[str, Any]) -> Optional[SelfType]:
             if not data:
                 return data
+            return function(self, data)
+
+        return _
+
+    @staticmethod
+    def _ensure_process_with_not_none_value(function: Callable) -> Callable:
+        def _(self, data: Dict[str, Any]) -> Optional[SelfType]:
+            data = {} if data is None else data
             return function(self, data)
 
         return _
@@ -283,3 +291,13 @@ class _HasItemsPropConfig(_BaseConfig, _Checkable, ABC):
         if is_work is False:
             return False
         return True
+
+
+class _CheckableConfig(_Config, _Checkable):
+    pass
+
+
+_ConfigType = TypeVar("_ConfigType", bound=_Config)
+_CheckableType = TypeVar("_CheckableType", bound=_Checkable)
+_CheckableConfigType = TypeVar("_CheckableConfigType", bound=_CheckableConfig)
+_HasItemsPropConfigType = TypeVar("_HasItemsPropConfigType", bound=_HasItemsPropConfig)

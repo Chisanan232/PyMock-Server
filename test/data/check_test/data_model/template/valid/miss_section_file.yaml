@@ -1,0 +1,7 @@
+activate: true
+file:
+common_config:
+  activate: true
+  format:
+    entity: []
+    variables: []

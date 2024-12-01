@@ -1,0 +1,12 @@
+entities:
+  - name: 'general_format'
+    config:
+variables:
+  - name: 'big_decimal_usd'
+    value_format: 'big_decimal'
+    digit:
+      integer: 5
+      decimal: 3
+    size:
+      max: 64
+      min: 2

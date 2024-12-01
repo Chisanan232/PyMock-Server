@@ -21,3 +21,8 @@ file:
       - foo:
         - get_foo
       - get_foo-boo_export
+common_config:
+  activate: true
+  format:
+    entity: []
+    variables: []

@@ -37,6 +37,8 @@ from .template._load import (
 class MockAPIs(_OperatingTemplatableConfig, _Checkable):
     """*The **mocked_apis** section*"""
 
+    _absolute_key: str = "mocked_apis"
+
     _template: TemplateConfig
     _base: Optional[BaseConfig]
     _apis: Dict[str, Optional[MockAPI]]
@@ -357,6 +359,8 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
 
 class APIConfig(_Config, _Checkable):
     """*The entire configuration*"""
+
+    _absolute_key: str = ""
 
     _name: str = ""
     _description: str = ""
