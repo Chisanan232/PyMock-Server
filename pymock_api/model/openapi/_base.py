@@ -1,5 +1,6 @@
-from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Union
+from abc import ABC, ABCMeta, abstractmethod
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Union
 
 from ..api_config import _Config
 from ..enums import OpenAPIVersion
@@ -39,6 +40,7 @@ def get_schema_parser_factory_with_openapi_version() -> BaseOpenAPISchemaParserF
     return get_schema_parser_factory(version=OpenAPI_Document_Version)
 
 
+@dataclass
 class BaseOpenAPIDataModel(metaclass=ABCMeta):
 
     @property
@@ -63,7 +65,17 @@ class BaseOpenAPIDataModel(metaclass=ABCMeta):
         pass
 
 
+@dataclass
 class Transferable(BaseOpenAPIDataModel):
     @abstractmethod
     def to_api_config(self, **kwargs) -> _Config:
         pass
+
+
+@dataclass
+class BaseProperty(BaseOpenAPIDataModel, ABC):
+    name: str = field(default_factory=str)
+    required: bool = False
+    value_type: str = field(default_factory=str)
+    default: Any = None
+    items: Optional[List[BaseOpenAPIDataModel]] = None
