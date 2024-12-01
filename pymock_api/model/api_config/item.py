@@ -3,7 +3,7 @@ from pydoc import locate
 from typing import Any, Dict, List, Optional, Type
 
 from ._base import _Config, _HasItemsPropConfig
-from .apis._format import _HasFormatPropConfig
+from .format import _HasFormatPropConfig
 
 
 @dataclass(eq=False)

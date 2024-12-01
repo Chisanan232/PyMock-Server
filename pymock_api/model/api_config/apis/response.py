@@ -198,6 +198,7 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
         def _deserialize_response_property(prop: dict) -> ResponseProperty:
             response_property = ResponseProperty()
             response_property.absolute_model_key = self.key
+            response_property._current_template = self._current_template
             return response_property.deserialize(prop)
 
         super().deserialize(data)

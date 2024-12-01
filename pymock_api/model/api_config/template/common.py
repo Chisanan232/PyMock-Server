@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional
 
 from .._base import _Checkable, _CheckableConfigType, _Config, _ConfigType
-from ..apis._format import Format
+from ..format import Format
 from ..variable import Variable
 
 
@@ -222,6 +222,18 @@ class TemplateFormatConfig(_Config, _Checkable):
                 return False
 
         return True
+
+    def get_format(self, name: str) -> Optional[Format]:
+        find_result: List[TemplateFormatEntity] = list(filter(lambda e: e.name == name, self.entities))
+        if len(find_result) == 0:
+            return None
+        return find_result[0].config
+
+    def get_variable(self, name: str) -> Optional[Variable]:
+        find_result: List[Variable] = list(filter(lambda e: e.name == name, self.variables))
+        if len(find_result) == 0:
+            return None
+        return find_result[0]
 
 
 @dataclass(eq=False)

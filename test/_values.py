@@ -635,10 +635,7 @@ _Mock_Templatable_Setting: dict = {
 
 # # Entire configuration
 _Mocked_APIs: dict = {
-    "template": {
-        "activate": _Mock_Template_Config_Activate,
-        "file": _Mock_Template_File_Setting,
-    },
+    "template": _Mock_Template_Setting,
     "base": {"url": _Base_URL},
     "apis": {
         "google_home": _Google_Home_Value,

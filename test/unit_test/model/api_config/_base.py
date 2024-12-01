@@ -23,7 +23,7 @@ from pymock_api.model.api_config import (
 )
 from pymock_api.model.api_config._base import _HasItemsPropConfig
 from pymock_api.model.api_config.apis import APIParameter, HTTPRequest, HTTPResponse
-from pymock_api.model.api_config.apis._format import Format, _HasFormatPropConfig
+from pymock_api.model.api_config.format import Format, _HasFormatPropConfig
 from pymock_api.model.api_config.template import TemplateConfig
 from pymock_api.model.api_config.template.common import (
     TemplateCommonConfig,
