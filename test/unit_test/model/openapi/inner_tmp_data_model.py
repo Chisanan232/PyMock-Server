@@ -1,10 +1,11 @@
 import re
-from abc import ABCMeta, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from typing import List, Type, Union
 
 import pytest
 
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.enums import OpenAPIVersion, ResponseStrategy
+from pymock_api.model.openapi._base import set_openapi_version
 from pymock_api.model.openapi._schema_parser import (
     OpenAPIV2SchemaParser,
     OpenAPIV3SchemaParser,
@@ -13,9 +14,15 @@ from pymock_api.model.openapi._tmp_data_model import (
     BaseTmpDataModel,
     BaseTmpRefDataModel,
     PropertyDetail,
+    RequestParameter,
     ResponseProperty,
+    TmpAPIDtailConfigV2,
     TmpConfigReferenceModel,
+    TmpHttpConfigV2,
     TmpReferenceConfigPropertyModel,
+    TmpRequestParameterModel,
+    TmpRequestSchemaModel,
+    _BaseTmpAPIDtailConfig,
     set_component_definition,
 )
 
@@ -24,6 +31,16 @@ from ...model.openapi._test_case import DeserializeV2OpenAPIConfigTestCaseFactor
 DeserializeV2OpenAPIConfigTestCaseFactory.load()
 DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE = DeserializeV2OpenAPIConfigTestCaseFactory.get_test_case()
 GENERATE_RESPONSE_CONFIG_FROM_V2_OPENAPI_CONFIG_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.each_api_http_response
+
+PARSE_V2_OPENAPI_ENTIRE_APIS_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.each_apis
+
+PARSE_FAIL_V2_OPENAPI_REQUEST_PARAMETERS_NO_REFERENCE_INFO_TEST_CASE = (
+    DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.reference_api_http_request_parameters
+)
+PARSE_V2_OPENAPI_REQUEST_PARAMETERS_WITH_REFERENCE_INFO_TEST_CASE = (
+    DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.general_api_http_request_parameters
+)
+PARSE_V2_OPENAPI_RESPONSES_TEST_CASE = DESERIALIZE_V2_OPENAPI_DOC_TEST_CASE.entire_api_http_response
 
 
 class BaseTmpDataModelTestSuite(metaclass=ABCMeta):
@@ -581,6 +598,65 @@ class TestTmpResponsePropertyModel(BaseTmpRefDataModelTestSuite):
         assert under_test.is_empty() == expect_result
 
 
+class TestTmpRequestParameterModel(BaseTmpRefDataModelTestSuite):
+
+    @pytest.fixture(scope="function")
+    def under_test(self) -> TmpRequestParameterModel:
+        return TmpRequestParameterModel()
+
+    @pytest.mark.parametrize(
+        ("under_test", "expect_result"),
+        [
+            (TmpRequestParameterModel(schema=None), ""),
+            (TmpRequestParameterModel(schema=TmpRequestSchemaModel(ref=None)), ""),
+            (TmpRequestParameterModel(schema=TmpRequestSchemaModel(ref="")), ""),
+            (TmpRequestParameterModel(schema=TmpRequestSchemaModel(ref="reference value")), "schema"),
+        ],
+    )
+    def test_has_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+        super().test_has_ref(under_test, expect_result)
+
+    @pytest.mark.parametrize(
+        ("under_test", "expect_result"),
+        [
+            (TmpRequestParameterModel(schema=TmpRequestSchemaModel(ref="reference value")), "reference value"),
+        ],
+    )
+    def test_get_ref(self, under_test: BaseTmpRefDataModel, expect_result: str):
+        super().test_get_ref(under_test, expect_result)
+
+    @pytest.mark.parametrize(
+        ("openapi_doc_data", "entire_openapi_config"), PARSE_V2_OPENAPI_REQUEST_PARAMETERS_WITH_REFERENCE_INFO_TEST_CASE
+    )
+    def test_process_has_ref_request_parameters_with_valid_value(
+        self, under_test: TmpRequestParameterModel, openapi_doc_data: dict, entire_openapi_config: dict
+    ):
+        # Pre-process
+        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
+
+        # Run target function
+        openapi_doc_data_model = under_test.deserialize(openapi_doc_data)
+        parameters = openapi_doc_data_model.process_has_ref_request_parameters()
+
+        # Verify
+        assert parameters and isinstance(parameters, list)
+        assert len(parameters) == len(entire_openapi_config["definitions"]["UpdateFooRequest"]["properties"].keys())
+        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
+        assert False not in type_checksum
+
+    @pytest.mark.parametrize("openapi_doc_data", PARSE_FAIL_V2_OPENAPI_REQUEST_PARAMETERS_NO_REFERENCE_INFO_TEST_CASE)
+    def test_process_has_ref_request_parameters_with_invalid_value(
+        self, under_test: TmpRequestParameterModel, openapi_doc_data: dict
+    ):
+        with pytest.raises(ValueError) as exc_info:
+            # Run target function
+            openapi_doc_data_model = under_test.deserialize(openapi_doc_data)
+            openapi_doc_data_model.process_has_ref_request_parameters()
+
+        # Verify
+        assert re.search(r".{1,64}no ref.{1,64}", str(exc_info.value), re.IGNORECASE)
+
+
 class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
 
     @pytest.fixture(scope="function")
@@ -616,6 +692,110 @@ class TestTmpResponseRefModel(BaseTmpDataModelTestSuite):
             init_response=ResponseProperty.initial_response_data(),
         )
         assert response_config == expected_value
+
+
+class BaseTmpAPIDetailConfigTestSuite(BaseTmpDataModelTestSuite, ABC):
+
+    @pytest.mark.parametrize(("openapi_doc_data", "entire_openapi_config"), PARSE_V2_OPENAPI_ENTIRE_APIS_TEST_CASE)
+    def test_process_api_parameters(
+        self, under_test: _BaseTmpAPIDtailConfig, openapi_doc_data: dict, entire_openapi_config: dict
+    ):
+        print(f"[DEBUG in test__process_api_params] ")
+        # Pre-process
+        set_openapi_version(OpenAPIVersion.V2)
+        set_component_definition(OpenAPIV2SchemaParser(data=entire_openapi_config))
+
+        under_test = under_test.deserialize(openapi_doc_data)
+
+        # Run target function
+        parameters = under_test.process_api_parameters(http_method="HTTP method")
+
+        # Verify
+        assert parameters and isinstance(parameters, list)
+        assert len(parameters) == len(openapi_doc_data["parameters"])
+        type_checksum = list(map(lambda p: isinstance(p, RequestParameter), parameters))
+        assert False not in type_checksum
+
+        # Finally
+        set_openapi_version(OpenAPIVersion.V3)
+
+    @pytest.mark.parametrize(("api_detail", "entire_config"), PARSE_V2_OPENAPI_RESPONSES_TEST_CASE)
+    def test_process_responses(self, under_test: _BaseTmpAPIDtailConfig, api_detail: dict, entire_config: dict):
+        # Pre-process
+        set_openapi_version(OpenAPIVersion.V2)
+        set_component_definition(OpenAPIV2SchemaParser(data=entire_config))
+
+        # Run target function under test
+        print(f"[DEBUG in test] api_detail: {api_detail}")
+        # parser_instance = parser(parser=OpenAPIV2PathSchemaParser(data=api_detail))
+        under_test = under_test.deserialize(api_detail)
+        response_data = under_test.process_responses()
+        print(f"[DEBUG in test] response_data: {response_data}")
+
+        # Verify
+        resp_200 = api_detail["responses"]["200"]
+        resp_200_model = TmpHttpConfigV2.deserialize(resp_200)
+        if hasattr(resp_200_model, "has_ref") and resp_200_model.has_ref():
+            should_check_name = True
+        else:
+            should_check_name = False
+            # response_content = resp_200_model.content
+            # resp_val_format = list(filter(lambda f: f in response_content.keys(), ["application/json", "*/*"]))
+            # response_detail = response_content[resp_val_format[0]]["schema"]
+            # if not response_detail:
+            #     should_check_name = False
+            # else:
+            #     should_check_name = True
+        print(f"[DEBUG in test] should_check_name: {should_check_name}")
+
+        # assert isinstance(response_data, ResponseProperty)
+        data_details = response_data.data
+        assert data_details is not None and isinstance(data_details, list)
+        for d in data_details:
+            if should_check_name:
+                assert d.name
+                assert d.value_type
+            assert d.required is not None
+            assert d.format is None  # FIXME: Should activate this verify after support this feature
+            if d.value_type == "list":
+                assert d.items is not None
+                for item in d.items:
+                    assert item.name
+                    assert item.value_type
+                    assert item.required is not None
+        # assert False
+        # else:
+        #     assert data_details is not None and isinstance(data_details, dict)
+        #     for v in data_details.values():
+        #         if isinstance(v, str):
+        #             if should_check_name:
+        #                 assert v in [
+        #                     "random string value",
+        #                     "random integer value",
+        #                     "random boolean value",
+        #                     "random file output stream",
+        #                     "FIXME: Handle the reference",
+        #                 ]
+        #             else:
+        #                 assert v == "empty value"
+        #         else:
+        #             for item in v:
+        #                 for item_value in item.values():
+        #                     if should_check_name:
+        #                         assert item_value in [
+        #                             "random string value",
+        #                             "random integer value",
+        #                             "random boolean value",
+        #                         ]
+        #                     else:
+        #                         assert item_value == "empty value"
+
+
+class TestTmpAPIDetailConfigV2(BaseTmpAPIDetailConfigTestSuite):
+
+    @pytest.fixture(scope="function")
+    def under_test(self) -> TmpAPIDtailConfigV2:
+        return TmpAPIDtailConfigV2()
 
 
 class TestPropertyDetail:

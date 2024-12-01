@@ -1,14 +1,18 @@
 import copy
 import re
-from abc import ABCMeta, abstractmethod
+from abc import ABC, ABCMeta, abstractmethod
 from collections import namedtuple
 from dataclasses import dataclass, field
+from http import HTTPMethod, HTTPStatus
 from pydoc import locate
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, cast
 
+from .. import MockAPI
 from ..api_config import IteratorItem
 from ..api_config.apis.request import APIParameter as PyMockRequestProperty
 from ..api_config.apis.response import ResponseProperty as PyMockResponseProperty
+from ..enums import OpenAPIVersion, ResponseStrategy
+from ._base import Transferable, get_openapi_version
 from ._base_schema_parser import BaseOpenAPISchemaParser
 from ._js_handlers import ensure_type_is_python_type
 from .content_type import ContentType
@@ -349,6 +353,50 @@ class BaseTmpRefDataModel(BaseTmpDataModel):
         # Operate the component definition object
         return TmpConfigReferenceModel.deserialize(_get_schema(get_component_definition(), schema_path, 0))
 
+    def process_has_ref_request_parameters(self) -> List["RequestParameter"]:
+        request_body_params = self.get_schema_ref()
+        parameters: List[RequestParameter] = []
+        for param_name, param_props in request_body_params.properties.items():
+            items: Optional[TmpReferenceConfigPropertyModel] = param_props.items
+            items_props = []
+            if items:
+                if items.has_ref():
+                    # Sample data:
+                    # {
+                    #     'type': 'object',
+                    #     'required': ['values', 'id'],
+                    #     'properties': {
+                    #         'values': {'type': 'number', 'example': 23434, 'description': 'value'},
+                    #         'id': {'type': 'integer', 'format': 'int64', 'example': 1, 'description': 'ID'}
+                    #     },
+                    #     'title': 'UpdateOneFooDto'
+                    # }
+                    item = items.process_has_ref_request_parameters()
+                    items_props.extend(item)
+                else:
+                    assert items.value_type
+                    items_props.append(
+                        RequestParameter.deserialize_by_prps(
+                            name="",
+                            required=True,
+                            value_type=items.value_type,
+                            default=items.default,
+                            items=[],
+                        ),
+                    )
+
+            parameters.append(
+                RequestParameter.deserialize_by_prps(
+                    name=param_name,
+                    required=param_name in (request_body_params.required or []),
+                    value_type=param_props.value_type or "",
+                    default=param_props.default,
+                    items=items_props if items is not None else items,  # type: ignore[arg-type]
+                ),
+            )
+        print(f"[DEBUG in APIParser._process_has_ref_parameters] parameters: {parameters}")
+        return parameters
+
     def process_response_from_reference(
         self,
         init_response: Optional["ResponseProperty"] = None,
@@ -457,6 +505,15 @@ class TmpRequestParameterModel(BaseTmpRefDataModel):
     def get_ref(self) -> str:
         assert self.schema
         return self.schema.get_ref()
+
+    def to_adapter_data_model(self) -> "RequestParameter":
+        return RequestParameter(
+            name=self.name,
+            required=(self.required or False),
+            value_type=self.value_type,
+            default=self.default,
+            items=self.items,  # type: ignore[arg-type]
+        )
 
 
 @dataclass
@@ -670,6 +727,188 @@ class TmpHttpConfigV3(BaseTmpDataModel):
         raise ValueError("Cannot find the mapping setting of content type.")
 
 
+@dataclass
+class _BaseTmpAPIDtailConfig(BaseTmpDataModel, ABC):
+    tags: Optional[List[str]] = None
+    summary: Optional[str] = None
+    description: Optional[str] = None
+    operationId: str = field(default_factory=str)
+    parameters: List[TmpRequestParameterModel] = field(default_factory=list)
+    responses: Dict[HTTPStatus, BaseTmpDataModel] = field(default_factory=dict)
+
+    @classmethod
+    def deserialize(cls, data: dict) -> "_BaseTmpAPIDtailConfig":
+        request_config = [cls._deserialize_request(param) for param in data.get("parameters", [])]
+
+        response = data.get("responses", {})
+        print(f"[DEBUG in src.deserialize] response: {response}")
+        response_config: Dict[HTTPStatus, BaseTmpDataModel] = {}
+        for status_code, resp_config in response.items():
+            response_config[HTTPStatus(int(status_code))] = cls._deserialize_response(resp_config)
+        print(f"[DEBUG in src.deserialize] response_config: {response_config}")
+
+        return cls(
+            tags=data.get("tags", []),
+            summary=data.get("summary", ""),
+            description=data.get("description", ""),
+            operationId=data.get("operationId", ""),
+            parameters=request_config,
+            responses=response_config,
+        )
+
+    @staticmethod
+    def _deserialize_request(data: dict) -> TmpRequestParameterModel:
+        return TmpRequestParameterModel().deserialize(data)
+
+    @staticmethod
+    @abstractmethod
+    def _deserialize_response(data: dict) -> BaseTmpDataModel:
+        pass
+
+    @abstractmethod
+    def process_api_parameters(self, http_method: str) -> List["RequestParameter"]:
+        pass
+
+    def _initial_request_parameters_model(
+        self,
+        _data: List[Union[TmpRequestParameterModel, TmpHttpConfigV2]],
+        not_ref_data: List[TmpRequestParameterModel],
+    ) -> List["RequestParameter"]:
+        has_ref_in_schema_param = list(filter(lambda p: p.has_ref() != "", _data))
+        if has_ref_in_schema_param:
+            # TODO: Ensure the value maps this condition is really only one
+            handled_parameters = []
+            for d in _data:
+                handled_parameters.extend(d.process_has_ref_request_parameters())
+        else:
+            handled_parameters = [p.to_adapter_data_model() for p in not_ref_data]
+        return handled_parameters
+
+    def process_responses(self) -> "ResponseProperty":
+        print(f"[DEBUG in src.process_responses] self.responses: {self.responses}")
+        assert self.exist_in_response(status_code=200) is True
+        status_200_response = self.get_response(status_code=200)
+        print(f"[DEBUG] status_200_response: {status_200_response}")
+        tmp_resp_config = self._get_http_config(status_200_response)
+        print(f"[DEBUG] has content, tmp_resp_config: {tmp_resp_config}")
+        # Handle response config
+        if tmp_resp_config.has_ref():
+            response_data = tmp_resp_config.process_response_from_reference()
+        else:
+            # Data may '{}' or '{ "type": "integer", "title": "Id" }'
+            tmp_resp_model = TmpReferenceConfigPropertyModel.deserialize({})
+            response_data = tmp_resp_model.process_response_from_data()
+        return response_data
+
+    def exist_in_response(self, status_code: Union[int, HTTPStatus]) -> bool:
+        return self._get_http_status(status_code) in self.responses.keys()
+
+    def get_response(self, status_code: Union[int, HTTPStatus]) -> BaseTmpDataModel:
+        return self.responses[self._get_http_status(status_code)]
+
+    def _get_http_status(self, status_code: Union[int, HTTPStatus]) -> HTTPStatus:
+        return HTTPStatus(status_code) if isinstance(status_code, int) else status_code
+
+    @abstractmethod
+    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> BaseTmpRefDataModel:
+        pass
+
+
+@dataclass
+class TmpAPIDtailConfigV2(_BaseTmpAPIDtailConfig):
+    produces: List[str] = field(default_factory=list)
+    responses: Dict[HTTPStatus, TmpHttpConfigV2] = field(default_factory=dict)  # type: ignore[assignment]
+
+    @classmethod
+    def deserialize(cls, data: dict) -> "TmpAPIDtailConfigV2":
+        deserialized_data = cast(TmpAPIDtailConfigV2, super().deserialize(data))
+        deserialized_data.produces = data.get("produces", [])
+        return deserialized_data
+
+    @staticmethod
+    def _deserialize_response(data: dict) -> TmpHttpConfigV2:
+        return TmpHttpConfigV2.deserialize(data)
+
+    def process_api_parameters(self, http_method: str) -> List["RequestParameter"]:
+        return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type]
+
+    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> TmpHttpConfigV2:
+        # tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
+        assert isinstance(status_200_response, TmpHttpConfigV2)
+        return status_200_response
+
+
+@dataclass
+class TmpAPIDtailConfigV3(_BaseTmpAPIDtailConfig):
+    request_body: Optional[TmpHttpConfigV3] = None
+    responses: Dict[HTTPStatus, TmpHttpConfigV3] = field(default_factory=dict)  # type: ignore[assignment]
+
+    @classmethod
+    def deserialize(cls, data: dict) -> "TmpAPIDtailConfigV3":
+        deserialized_data = cast(TmpAPIDtailConfigV3, super().deserialize(data))
+        deserialized_data.request_body = (
+            TmpHttpConfigV3().deserialize(data["requestBody"]) if data.get("requestBody", {}) else None
+        )
+        return deserialized_data
+
+    @staticmethod
+    def _deserialize_response(data: dict) -> TmpHttpConfigV3:
+        return TmpHttpConfigV3.deserialize(data)
+
+    def process_api_parameters(self, http_method: str) -> List["RequestParameter"]:
+        if http_method.upper() == "GET":
+            return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type]
+        else:
+            if self.request_body:
+                req_body_content_type: List[ContentType] = list(
+                    filter(lambda ct: self.request_body.exist_setting(content_type=ct) is not None, ContentType)  # type: ignore[arg-type]
+                )
+                print(f"[DEBUG] has content, req_body_content_type: {req_body_content_type}")
+                req_body_config = self.request_body.get_setting(content_type=req_body_content_type[0])
+                return self._initial_request_parameters_model([req_body_config], self.parameters)
+            else:
+                return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type]
+
+    def _get_http_config(self, status_200_response: BaseTmpDataModel) -> TmpHttpConfigV2:
+        # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
+        # status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
+        assert isinstance(status_200_response, TmpHttpConfigV3)
+        status_200_response_model = status_200_response
+        resp_value_format: List[ContentType] = list(
+            filter(lambda ct: status_200_response_model.exist_setting(content_type=ct) is not None, ContentType)
+        )
+        print(f"[DEBUG] has content, resp_value_format: {resp_value_format}")
+        return status_200_response_model.get_setting(content_type=resp_value_format[0])
+
+
+@dataclass
+class TmpAPIConfig(BaseTmpDataModel):
+    api: Dict[HTTPMethod, _BaseTmpAPIDtailConfig] = field(default_factory=dict)
+
+    def __len__(self):
+        return len(self.api.keys())
+
+    def deserialize(self, data: dict) -> "TmpAPIConfig":
+        initial_api_config: _BaseTmpAPIDtailConfig
+        if get_openapi_version() is OpenAPIVersion.V2:
+            initial_api_config = TmpAPIDtailConfigV2()
+        else:
+            initial_api_config = TmpAPIDtailConfigV3()
+
+        for http_method, config in data.items():
+            assert http_method.upper() in HTTPMethod
+            self.api[HTTPMethod(http_method.upper())] = initial_api_config.deserialize(config)
+
+        return self
+
+    def to_adapter_api(self, path: str) -> List["API"]:
+        apis: List[API] = []
+        for http_method, http_config in self.api.items():
+            api = API.generate(api_path=path, http_method=http_method.name, detail=http_config)
+            apis.append(api)
+        return apis
+
+
 # The base data model for request and response
 @dataclass
 class BasePropertyDetail(metaclass=ABCMeta):
@@ -804,3 +1043,50 @@ class ResponseProperty:
     @staticmethod
     def initial_response_data() -> "ResponseProperty":
         return ResponseProperty(data=[])
+
+
+# The tmp data model for final result to convert as PyMock-API
+@dataclass
+class API(Transferable):
+    path: str = field(default_factory=str)
+    http_method: str = field(default_factory=str)
+    parameters: List[RequestParameter] = field(default_factory=list)
+    response: ResponseProperty = field(default_factory=ResponseProperty)
+    tags: Optional[List[str]] = None
+
+    @classmethod
+    def generate(cls, api_path: str, http_method: str, detail: _BaseTmpAPIDtailConfig) -> "API":
+        api = API()
+        api.path = api_path
+        api.http_method = http_method
+        api.deserialize(data=detail)
+        return api
+
+    def deserialize(self, data: _BaseTmpAPIDtailConfig) -> "API":  # type: ignore[override]
+        api_config: _BaseTmpAPIDtailConfig
+        api_config = data
+        self.parameters = api_config.process_api_parameters(http_method=self.http_method)
+        self.response = api_config.process_responses()
+        self.tags = api_config.tags
+
+        return self
+
+    def to_api_config(self, base_url: str = "") -> MockAPI:  # type: ignore[override]
+        mock_api = MockAPI(url=self.path.replace(base_url, ""), tag=self.tags[0] if self.tags else "")
+
+        # Handle request config
+        mock_api.set_request(
+            method=self.http_method.upper(),
+            parameters=list(map(lambda p: p.to_pymock_api_config(), self.parameters)),
+        )
+
+        # Handle response config
+        print(f"[DEBUG in src] self.response: {self.response}")
+        if list(filter(lambda p: p.name == "", self.response.data or [])):
+            values = []
+        else:
+            values = self.response.data
+        print(f"[DEBUG in to_api_config] values: {values}")
+        resp_props_values = [p.to_pymock_api_config() for p in values] if values else values
+        mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=resp_props_values)  # type: ignore[arg-type]
+        return mock_api
