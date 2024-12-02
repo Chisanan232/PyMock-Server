@@ -508,7 +508,7 @@ class BaseReferenceConfigProperty(BaseReferencialConfig):
 class BaseReferenceConfig(BaseAPIDocConfig):
     title: Optional[str] = None
     value_type: str = field(default_factory=str)  # unused
-    required: Optional[list[str]] = None
+    required: Optional[List[str]] = None
     properties: Dict[str, BaseReferenceConfigProperty] = field(default_factory=dict)
 
     @classmethod
