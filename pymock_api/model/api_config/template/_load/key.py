@@ -45,7 +45,6 @@ class ConfigLoadingOrder(Enum):
         return ConfigLoadingFunction[data_modal_key][self.value]
 
     def get_loading_function_args(self, *args) -> Optional[tuple]:
-        if self is ConfigLoadingOrder.APIs:
-            if args:
-                return args
+        if self is ConfigLoadingOrder.APIs and len(args) > 0:
+            return args
         return ()
