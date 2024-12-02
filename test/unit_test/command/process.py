@@ -12,7 +12,7 @@ import pytest
 from yaml import load as yaml_load
 
 from pymock_api.command._common.component import SavingConfigComponent
-from pymock_api.model.openapi.base_config import set_component_definition
+from pymock_api.model.api_doc_config.base_config import set_component_definition
 
 from ._test_case import SubCmdGetTestCaseFactory, SubCmdPullTestCaseFactory
 

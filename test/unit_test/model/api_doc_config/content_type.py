@@ -2,7 +2,7 @@ from typing import Type, Union
 
 import pytest
 
-from pymock_api.model.openapi.content_type import ContentType
+from pymock_api.model.api_doc_config.content_type import ContentType
 
 from .._enums import EnumTestSuite
 
