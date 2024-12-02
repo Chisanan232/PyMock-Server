@@ -12,6 +12,13 @@ from .api_config import APIConfig, MockAPIs
 from .api_config.apis import HTTP, APIParameter, HTTPRequest, HTTPResponse, MockAPI
 from .api_config.base import BaseConfig
 from .api_config.template import TemplateConfig
+from .api_doc_config.config import (
+    BaseAPIDocumentConfig,
+    OpenAPIDocumentConfig,
+    SwaggerAPIDocumentConfig,
+    get_api_doc_version,
+)
+from .api_doc_config.version import OpenAPIVersion
 from .cmd_args import (
     DeserializeParsedArgs,
     ParserArguments,
@@ -22,13 +29,6 @@ from .cmd_args import (
     SubcmdRunArguments,
     SubcmdSampleArguments,
 )
-from .openapi.config import (
-    BaseAPIDocumentConfig,
-    OpenAPIDocumentConfig,
-    SwaggerAPIDocumentConfig,
-    get_api_doc_version,
-)
-from .openapi.version import OpenAPIVersion
 
 
 class deserialize_args:

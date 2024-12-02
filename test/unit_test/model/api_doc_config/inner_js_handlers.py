@@ -1,6 +1,6 @@
 import pytest
 
-from pymock_api.model.openapi._js_handlers import convert_js_type
+from pymock_api.model.api_doc_config._js_handlers import convert_js_type
 
 
 @pytest.mark.parametrize(
