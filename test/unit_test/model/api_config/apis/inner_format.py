@@ -1174,7 +1174,19 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
 
     @pytest.mark.parametrize("strategy", [s for s in FormatStrategy])
     def test_valid_expect_format_log_msg(self, strategy: FormatStrategy):
-        non_strategy_format = Format(strategy=strategy)
+        non_strategy_format = Format(strategy=strategy, use_name="test_err_msg")
+        non_strategy_format._current_template = TemplateConfig(
+            common_config=TemplateCommonConfig(
+                format=TemplateFormatConfig(
+                    entities=[
+                        TemplateFormatEntity(
+                            name="test_err_msg",
+                            config=Format(strategy=FormatStrategy.BY_DATA_TYPE),
+                        ),
+                    ]
+                )
+            )
+        )
         msg = non_strategy_format.expect_format_log_msg(data_type="any data type")
         assert msg and isinstance(msg, str)
 
