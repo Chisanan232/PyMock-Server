@@ -28,3 +28,16 @@ class NoValidWebLibrary(RuntimeError):
 class InvalidAppType(ValueError):
     def __str__(self):
         return "Invalid value at argument *app-type*. It only supports 'auto', 'flask' or 'fastapi' currently."
+
+
+class CannotParsingAPIDocumentVersion(ValueError):
+    def __str__(self):
+        return "Cannot parsing the configuration to get the specific property to identify which version it is."
+
+
+class NotSupportAPIDocumentVersion(ValueError):
+    def __init__(self, version: str):
+        self._version = version
+
+    def __str__(self):
+        return f"Currently, it doesn't support processing the configuration of API document version {self._version}."

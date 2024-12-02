@@ -4,7 +4,7 @@ from typing import Dict
 import pytest
 
 from pymock_api import APIConfig
-from pymock_api.model import deserialize_openapi_doc_config, load_config
+from pymock_api.model import deserialize_api_doc_config, load_config
 
 from ..._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
 from ..._spec import run_test
@@ -98,7 +98,7 @@ class TestInitFunctions:
             openapi_config_json = json.load(io_stream)
 
         # Run target
-        openapi_config = deserialize_openapi_doc_config(data=openapi_config_json)
+        openapi_config = deserialize_api_doc_config(data=openapi_config_json)
 
         # Verify
         assert openapi_config is not None

@@ -3,13 +3,13 @@ from collections import namedtuple
 from typing import List, Tuple
 
 from pymock_api.model import OpenAPIVersion
-from pymock_api.model.openapi._tmp_data_model import (
-    TmpAPIDtailConfigV2,
-    TmpAPIDtailConfigV3,
-    TmpHttpConfigV2,
-    TmpHttpConfigV3,
-    TmpReferenceConfigPropertyModel,
-    set_component_definition,
+from pymock_api.model.openapi.base_config import set_component_definition
+from pymock_api.model.openapi.config import (
+    APIConfigWithMethodV2,
+    APIConfigWithMethodV3,
+    HttpConfigV2,
+    HttpConfigV3,
+    ReferenceConfigProperty,
 )
 from pymock_api.model.openapi.content_type import ContentType
 
@@ -24,7 +24,7 @@ V2_SWAGGER_API_PARAMETERS_JSON: List[tuple] = []
 V2_SWAGGER_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
 V2_SWAGGER_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
 V2_SWAGGER_API_RESPONSES_FOR_API: List[Tuple[dict, dict]] = []
-V2_SWAGGER_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[TmpReferenceConfigPropertyModel, dict]] = []
+V2_SWAGGER_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[ReferenceConfigProperty, dict]] = []
 
 # For version 3 OpenAPI
 V3_OPENAPI_API_DOC_JSON: List[tuple] = []
@@ -35,7 +35,7 @@ V3_OPENAPI_API_PARAMETERS_JSON: List[tuple] = []
 V3_OPENAPI_API_PARAMETERS_JSON_FOR_API: List[Tuple[dict, dict]] = []
 V3_OPENAPI_API_PARAMETERS_LIST_JSON_FOR_API: List[Tuple[dict, dict]] = []
 V3_OPENAPI_API_RESPONSES_FOR_API: List[Tuple[dict, dict]] = []
-V3_OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[TmpReferenceConfigPropertyModel, dict]] = []
+V3_OPENAPI_API_RESPONSES_PROPERTY_FOR_API: List[Tuple[ReferenceConfigProperty, dict]] = []
 
 
 V2OpenAPIDocConfigTestCase = namedtuple(
@@ -102,7 +102,7 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                     for api_detail in api_props.values():
                         # For testing API details
                         V2_SWAGGER_API_ONE_API_JSON.append(
-                            (api_detail, openapi_api_docs, OpenAPIVersion.V2, "definitions", TmpAPIDtailConfigV2)
+                            (api_detail, openapi_api_docs, OpenAPIVersion.V2, "definitions", APIConfigWithMethodV2)
                         )
 
                         # For testing API response
@@ -112,7 +112,7 @@ class DeserializeV2OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                         # For testing API response properties
                         status_200_response = api_detail.get("responses", {}).get("200", {})
                         set_component_definition(openapi_api_docs.get("definitions", {}))
-                        status_200_response_model = TmpHttpConfigV2.deserialize(status_200_response)
+                        status_200_response_model = HttpConfigV2.deserialize(status_200_response)
                         if status_200_response_model.has_ref():
                             response_schema = status_200_response_model.get_schema_ref()
                             response_schema_properties = response_schema.properties
@@ -178,7 +178,7 @@ class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                     for api_detail in api_props.values():
                         # For testing API details
                         V3_OPENAPI_ONE_API_JSON.append(
-                            (api_detail, openapi_api_docs, OpenAPIVersion.V3, "components", TmpAPIDtailConfigV3)
+                            (api_detail, openapi_api_docs, OpenAPIVersion.V3, "components", APIConfigWithMethodV3)
                         )
 
                         # For testing API response
@@ -188,7 +188,7 @@ class DeserializeV3OpenAPIConfigTestCaseFactory(BaseTestCaseFactory):
                         # For testing API response properties
                         set_component_definition(openapi_api_docs.get("components", {}))
                         status_200_response = api_detail.get("responses", {}).get("200", {})
-                        status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
+                        status_200_response_model = HttpConfigV3.deserialize(status_200_response)
 
                         req_param_format: List[ContentType] = list(
                             filter(

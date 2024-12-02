@@ -6,15 +6,17 @@ from typing import Any, Optional
 from ... import APIConfig
 from ..._utils.api_client import URLLibHTTPClient
 from ...model import (
-    BaseOpenAPIDocumentConfig,
+    BaseAPIDocumentConfig,
     SubcmdCheckArguments,
-    deserialize_openapi_doc_config,
+    deserialize_api_doc_config,
     load_config,
 )
 from ...model.api_config.apis import APIParameter as MockedAPIParameter
 from ...model.enums import ResponseStrategy
-from ...model.openapi._tmp_data_model import API as SwaggerAPI
-from ...model.openapi._tmp_data_model import RequestParameter as SwaggerAPIParameter
+from ...model.openapi._base_model_adapter import BaseAPIAdapter as SwaggerAPI
+from ...model.openapi._base_model_adapter import (
+    BaseRequestParameterAdapter as SwaggerAPIParameter,
+)
 from ..component import BaseSubCmdComponent
 
 
@@ -151,7 +153,7 @@ class SwaggerDiffChecking(_BaseChecking):
             mocked_apis_path = list(map(lambda p: p.url, mocked_apis_info.values()))
         swagger_api_doc_model = self._get_swagger_config(swagger_url=args.swagger_doc_url)
         for path, swagger_api_config in swagger_api_doc_model.paths.items():
-            apis = swagger_api_config.to_adapter_api(path)
+            apis = swagger_api_config.to_adapter(path)
             for one_swagger_api_config in apis:
                 # Check API path
                 if args.check_api_path and one_swagger_api_config.path not in mocked_apis_path:
@@ -219,9 +221,9 @@ class SwaggerDiffChecking(_BaseChecking):
 
         return api_config
 
-    def _get_swagger_config(self, swagger_url: str) -> BaseOpenAPIDocumentConfig:
+    def _get_swagger_config(self, swagger_url: str) -> BaseAPIDocumentConfig:
         swagger_api_doc: dict = self._api_client.request(method="GET", url=swagger_url)
-        return deserialize_openapi_doc_config(data=swagger_api_doc)
+        return deserialize_api_doc_config(data=swagger_api_doc)
 
     def _chk_api_params_error_log(
         self,
