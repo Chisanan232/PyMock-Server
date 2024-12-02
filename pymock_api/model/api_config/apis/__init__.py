@@ -1,4 +1,5 @@
 import copy
+import logging
 import re
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -20,6 +21,8 @@ from ..template.file import TemplateConfigPathAPI, TemplateConfigPathHTTP
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 from .response_strategy import ResponseStrategy
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(eq=False)
@@ -418,10 +421,10 @@ class MockAPI(_GeneralTemplatableConfig, _Checkable):
         valid_url = re.findall(r"\/[\w,\-,\_,\{,\}]{1,32}", self.url)
         url_copy = copy.copy(self.url)
         if not valid_url:
-            print("URL is invalid.")
+            logger.error("URL is invalid.")
             return False
         if url_copy.replace("".join(valid_url), ""):
-            print("URL is invalid.")
+            logger.error("URL is invalid.")
             return False
 
         assert self.http is not None

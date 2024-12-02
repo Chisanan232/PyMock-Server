@@ -1,4 +1,5 @@
 import json
+import logging
 import pathlib
 import re
 from dataclasses import dataclass, field
@@ -9,6 +10,8 @@ from ..template._base_wrapper import _DividableOnlyTemplatableConfig
 from ..template.file import TemplateConfigPathResponse
 from ._property import BaseProperty
 from .response_strategy import ResponseStrategy
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(eq=False)
@@ -125,7 +128,6 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
             self.strategy = ResponseStrategy(self.strategy)
 
     def _convert_properties(self):
-        print(f"[DEBUG in HTTPResponse._convert_properties] self.properties: {self.properties}")
         if False in list(map(lambda i: isinstance(i, (dict, ResponseProperty)), self.properties)):
             raise TypeError("The data type of key *properties* must be dict or ResponseProperty.")
         self.properties = [ResponseProperty().deserialize(i) if isinstance(i, dict) else i for i in self.properties]
@@ -262,7 +264,7 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
                 try:
                     json.loads(config_value)
                 except:
-                    print(
+                    logger.error(
                         "If HTTP response strategy is *string* and its value seems like JSON format, its format is not a valid JSON format."
                     )
                     self._config_is_wrong = True
@@ -275,7 +277,7 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
                 config_value, str
             ), "If HTTP response strategy is *file*, the data type of response value must be *str*."
             if not pathlib.Path(config_value).exists():
-                print("The file which is the response content doesn't exist.")
+                logger.error("The file which is the response content doesn't exist.")
                 self._config_is_wrong = True
                 if self._stop_if_fail:
                     self._exit_program(1)
