@@ -1,7 +1,12 @@
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from http import HTTPMethod, HTTPStatus
 from typing import Any, Dict, List, Optional, Type, Union, cast
+
+try:
+    from http import HTTPMethod, HTTPStatus
+except ImportError:
+    from http import HTTPStatus
+    from pymock_api.model.http import HTTPMethod  # type: ignore[assignment]
 
 from ...exceptions import CannotParsingAPIDocumentVersion
 from ..api_config import APIConfig as PyMockAPI_APIConfig
@@ -228,7 +233,7 @@ class ReferenceConfigProperty(BaseReferenceConfigProperty):
 class ReferenceConfig(BaseReferenceConfig):
     title: Optional[str] = None
     value_type: str = field(default_factory=str)  # unused
-    required: Optional[list[str]] = None
+    required: Optional[List[str]] = None
     properties: Dict[str, BaseReferenceConfigProperty] = field(default_factory=dict)
 
     _adapter_factory = AdapterFactory()
@@ -484,7 +489,6 @@ class APIConfig(BaseAPIConfig):
             initial_api_config = APIConfigWithMethodV3()
 
         for http_method, config in data.items():
-            assert http_method.upper() in HTTPMethod
             self.api[HTTPMethod(http_method.upper())] = initial_api_config.deserialize(config)
 
         return self

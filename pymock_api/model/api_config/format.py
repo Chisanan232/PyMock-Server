@@ -287,6 +287,10 @@ class Format(_Config, _Checkable):
             return f"oen of the enums value *{self.enums}*"
         elif self.strategy is FormatStrategy.CUSTOMIZE:
             return f"like format as *{self.customize}*. Please refer to the property *variables* to know the details of variable settings."
+        elif self.strategy is FormatStrategy.FROM_TEMPLATE:
+            temp_format: Optional[Format] = self._current_template.common_config.format.get_format(self.use_name)
+            assert temp_format is not None
+            return temp_format.expect_format_log_msg(data_type=data_type)
         else:
             raise ValueError("Unsupported FormatStrategy")
 
