@@ -11,7 +11,7 @@ except ImportError:
     from http import HTTPStatus
     from pymock_api.model.http import HTTPMethod
 
-from pymock_api import APIConfig
+from pymock_api import APIConfig as PyMockAPI_APIConfig
 from pymock_api.exceptions import CannotParsingAPIDocumentVersion
 from pymock_api.model import MockAPI, OpenAPIVersion
 from pymock_api.model.api_config import _Config
@@ -1275,7 +1275,7 @@ class TestSwaggerAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
 
         data_model.paths = {"/test/v1/foo-home": apis}
 
-    def _verify_api_config_model(self, under_test: APIConfig, data_from: OpenAPIDocumentConfig) -> None:
+    def _verify_api_config_model(self, under_test: PyMockAPI_APIConfig, data_from: OpenAPIDocumentConfig) -> None:
         assert len(under_test.apis.apis.keys()) == len(data_from.paths)
         for api_path, api_details in under_test.apis.apis.items():
             print(f"[DEBUG in test] api_path: {api_path}")
@@ -1411,7 +1411,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
 
         data_model.paths = {"/test/v1/foo-home": apis}
 
-    def _verify_api_config_model(self, under_test: APIConfig, data_from: OpenAPIDocumentConfig) -> None:
+    def _verify_api_config_model(self, under_test: PyMockAPI_APIConfig, data_from: OpenAPIDocumentConfig) -> None:
         assert len(under_test.apis.apis.keys()) == len(data_from.paths)
         for api_path, api_details in under_test.apis.apis.items():
             print(f"[DEBUG in test] api_path: {api_path}")
