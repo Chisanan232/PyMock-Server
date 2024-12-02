@@ -1,10 +1,9 @@
 import re
-from collections import namedtuple
 from decimal import Decimal
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Union
+from typing import List, Optional, Union
 
-from .._utils.random import (
+from ..._utils.random import (
     DigitRange,
     RandomBigDecimal,
     RandomBoolean,
@@ -13,110 +12,6 @@ from .._utils.random import (
     RandomString,
     ValueSize,
 )
-
-
-class Format(Enum):
-    TEXT: str = "text"
-    YAML: str = "yaml"
-    JSON: str = "json"
-
-
-class SampleType(Enum):
-    ALL: str = "response_all"
-    RESPONSE_AS_STR: str = "response_as_str"
-    RESPONSE_AS_JSON: str = "response_as_json"
-    RESPONSE_WITH_FILE: str = "response_with_file"
-
-
-_PropertyDefaultRequired = namedtuple("_PropertyDefaultRequired", ("empty", "general"))
-_Default_Required: _PropertyDefaultRequired = _PropertyDefaultRequired(empty=False, general=True)
-
-
-class ResponseStrategy(Enum):
-    STRING: str = "string"
-    FILE: str = "file"
-    OBJECT: str = "object"
-
-    @staticmethod
-    def to_enum(v: Union[str, "ResponseStrategy"]) -> "ResponseStrategy":
-        if isinstance(v, str):
-            return ResponseStrategy(v.lower())
-        else:
-            return v
-
-
-class ConfigLoadingOrderKey(Enum):
-    APIs: str = "apis"
-    APPLY: str = "apply"
-    FILE: str = "file"
-
-
-"""
-Data structure sample:
-{
-    "MockAPI": {
-        ConfigLoadingOrderKey.APIs.value: <Callable at memory xxxxa>,
-        ConfigLoadingOrderKey.APPLY.value: <Callable at memory xxxxb>,
-        ConfigLoadingOrderKey.FILE.value: <Callable at memory xxxxc>,
-    },
-    "HTTP": {
-        ConfigLoadingOrderKey.APIs.value: <Callable at memory xxxxd>,
-        ConfigLoadingOrderKey.APPLY.value: <Callable at memory xxxxe>,
-        ConfigLoadingOrderKey.FILE.value: <Callable at memory xxxxf>,
-    },
-}
-"""
-ConfigLoadingFunction: Dict[str, Dict[str, Callable]] = {}
-
-
-def set_loading_function(data_model_key: str, **kwargs) -> None:
-    global ConfigLoadingFunction
-    if False in [str(k).lower() in [str(o.value).lower() for o in ConfigLoadingOrder] for k in kwargs.keys()]:
-        raise KeyError("The arguments only have *apis*, *file* and *apply* for setting loading function data.")
-    if data_model_key not in ConfigLoadingFunction.keys():
-        ConfigLoadingFunction[data_model_key] = {}
-    ConfigLoadingFunction[data_model_key].update(**kwargs)
-
-
-class ConfigLoadingOrder(Enum):
-    APIs: str = ConfigLoadingOrderKey.APIs.value
-    APPLY: str = ConfigLoadingOrderKey.APPLY.value
-    FILE: str = ConfigLoadingOrderKey.FILE.value
-
-    @staticmethod
-    def to_enum(v: Union[str, "ConfigLoadingOrder"]) -> "ConfigLoadingOrder":
-        if isinstance(v, str):
-            return ConfigLoadingOrder(v.lower())
-        else:
-            return v
-
-    def get_loading_function(self, data_modal_key: str) -> Callable:
-        return ConfigLoadingFunction[data_modal_key][self.value]
-
-    def get_loading_function_args(self, *args) -> Optional[tuple]:
-        if self is ConfigLoadingOrder.APIs:
-            if args:
-                return args
-        return ()
-
-
-class OpenAPIVersion(Enum):
-    V2: str = "OpenAPI V2"
-    V3: str = "OpenAPI V3"
-
-    @staticmethod
-    def to_enum(v: Union[str, "OpenAPIVersion"]) -> "OpenAPIVersion":
-        if isinstance(v, str):
-            if re.search(r"OpenAPI V[2-3]", v):
-                return OpenAPIVersion(v)
-            if re.search(r"2\.\d(\.\d)?.{0,8}", v):
-                return OpenAPIVersion.V2
-            if re.search(r"3\.\d(\.\d)?.{0,8}", v):
-                return OpenAPIVersion.V3
-            raise NotImplementedError(f"PyMock-API doesn't support parsing OpenAPI configuration with version '{v}'.")
-        else:
-            return v
-
 
 Default_Value_Size = ValueSize(max=10, min=1)
 Default_Digit_Range = DigitRange(integer=128, decimal=128)
@@ -172,7 +67,7 @@ class ValueFormat(Enum):
         elif self is ValueFormat.Enum:
             return RandomFromSequence.generate(enums)
         else:
-            raise ValueError("This is program bug, please report this issue.")
+            raise NotImplementedError(f"Doesn't implement how to generate the value by format {self}.")
 
     def generate_regex(
         self, enums: List[str] = [], size: ValueSize = Default_Value_Size, digit: DigitRange = Default_Digit_Range
@@ -197,7 +92,7 @@ class ValueFormat(Enum):
         elif self is ValueFormat.Enum:
             return r"(" + r"|".join([re.escape(e) for e in enums]) + r")"
         else:
-            raise ValueError("This is program bug, please report this issue.")
+            raise NotImplementedError(f"Doesn't implement what the regex expression should be with format {self}.")
 
     def _ensure_setting_value_is_valid(self, enums: List[str], size: ValueSize, digit: DigitRange) -> None:
         if self is ValueFormat.String:
@@ -227,13 +122,6 @@ class FormatStrategy(Enum):
     FROM_ENUMS: str = "from_enums"
     CUSTOMIZE: str = "customize"
     FROM_TEMPLATE: str = "from_template"
-
-    @staticmethod
-    def to_enum(v: Union[str, "FormatStrategy"]) -> "FormatStrategy":
-        if isinstance(v, str):
-            return FormatStrategy(v.lower())
-        else:
-            return v
 
     def to_value_format(self, data_type: Union[type, str]) -> ValueFormat:
         if self in [FormatStrategy.CUSTOMIZE, FormatStrategy.FROM_TEMPLATE]:

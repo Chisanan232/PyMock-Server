@@ -6,8 +6,8 @@ from decimal import Decimal
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
-from ..enums import FormatStrategy, ValueFormat
 from ._base import _BaseConfig, _Checkable, _Config
+from .value import FormatStrategy, ValueFormat
 from .variable import Digit, Size, Variable
 
 
@@ -43,7 +43,7 @@ class Format(_Config, _Checkable):
 
     def _convert_strategy(self) -> None:
         if isinstance(self.strategy, str):
-            self.strategy = FormatStrategy.to_enum(self.strategy)
+            self.strategy = FormatStrategy(self.strategy)
 
     def _convert_digit(self) -> None:
         if isinstance(self.digit, dict):
@@ -105,7 +105,7 @@ class Format(_Config, _Checkable):
 
     @_Config._clean_empty_value
     def serialize(self, data: Optional["Format"] = None) -> Optional[Dict[str, Any]]:
-        strategy: FormatStrategy = self.strategy or FormatStrategy.to_enum(self._get_prop(data, prop="strategy"))
+        strategy: FormatStrategy = self.strategy or FormatStrategy(self._get_prop(data, prop="strategy"))
 
         digit_data_model: Digit = self._get_prop(data, prop="digit")
         digit: dict = digit_data_model.serialize() if digit_data_model else None  # type: ignore[assignment]
@@ -117,8 +117,6 @@ class Format(_Config, _Checkable):
         customize: str = self._get_prop(data, prop="customize")
         variables: List[Variable] = self._get_prop(data, prop="variables")
         use_name: str = self._get_prop(data, prop="use_name")
-        if not strategy:
-            return None
         serialized_data = {
             "strategy": strategy.value,
             "digit": digit,
@@ -138,9 +136,7 @@ class Format(_Config, _Checkable):
             variable.absolute_model_key = self.key
             return variable.deserialize(d)
 
-        self.strategy = FormatStrategy.to_enum(data.get("strategy", None))
-        if not self.strategy:
-            raise ValueError("Schema key *strategy* cannot be empty.")
+        self.strategy = FormatStrategy(data.get("strategy", None))
 
         if data.get("digit", None):
             digit_data_model = Digit()
@@ -198,9 +194,7 @@ class Format(_Config, _Checkable):
             digit = self.digit
             if digit is None:
                 digit = Digit(integer=128, decimal=128) if data_type == "big_decimal" else Digit()
-            size = self.size
-            if size is None:
-                size = Size()
+            size = Size() if self.size is None else self.size
             regex = self.strategy.to_value_format(data_type).generate_regex(
                 size=size.to_value_size(), digit=digit.to_digit_range()
             )
@@ -225,7 +219,7 @@ class Format(_Config, _Checkable):
                         if find_result[0].value_format is ValueFormat.BigDecimal
                         else Digit()
                     )
-                size = find_result[0].size
+                size = find_result[0].size  # type: ignore[assignment]
                 if size is None:
                     size = Size()
                 one_var_regex = find_result[0].value_format.generate_regex(
@@ -238,7 +232,9 @@ class Format(_Config, _Checkable):
             format_config._current_template = self._current_template
             return format_config.value_format_is_match(data_type=data_type, value=value)
         else:
-            raise ValueError("This is program bug, please report this issue.")
+            raise NotImplementedError(
+                f"Doesn't implement how it should generate the response setting by strategy {self}."
+            )
 
     def generate_value(self, data_type: type) -> Union[str, int, bool, Decimal]:
         assert self.strategy

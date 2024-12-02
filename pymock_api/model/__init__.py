@@ -22,13 +22,13 @@ from .cmd_args import (
     SubcmdRunArguments,
     SubcmdSampleArguments,
 )
-from .enums import OpenAPIVersion
 from .openapi.config import (
     BaseAPIDocumentConfig,
     OpenAPIDocumentConfig,
     SwaggerAPIDocumentConfig,
     get_api_doc_version,
 )
+from .openapi.version import OpenAPIVersion
 
 
 class deserialize_args:

@@ -6,8 +6,9 @@ content ...
 import os
 from typing import Any, Dict, List, Optional, Union
 
+from pymock_api._utils.file.operation import _BaseFileOperation
+
 from ..._utils import YAML
-from ..._utils.file_opt import _BaseFileOperation
 from ._base import _Checkable, _Config
 from .apis import (
     HTTP,
@@ -27,7 +28,7 @@ from .template._divide import (
     DivideStrategy,
     TemplatableConfigDividable,
 )
-from .template._load import (
+from .template._load.process import (
     TemplatableConfigLoadable,
     TemplateConfigLoader,
     _BaseTemplateConfigLoader,

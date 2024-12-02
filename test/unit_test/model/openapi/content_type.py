@@ -4,7 +4,7 @@ import pytest
 
 from pymock_api.model.openapi.content_type import ContentType
 
-from ..enums import EnumTestSuite
+from .._enums import EnumTestSuite
 
 
 class TestContentType(EnumTestSuite):

@@ -4,11 +4,11 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from ...enums import ResponseStrategy
 from .._base import _Checkable, _Config
 from ..template._base_wrapper import _DividableOnlyTemplatableConfig
 from ..template.file import TemplateConfigPathResponse
 from ._property import BaseProperty
+from .response_strategy import ResponseStrategy
 
 
 @dataclass(eq=False)
@@ -105,11 +105,11 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
             raise ValueError("Miss necessary argument *strategy*.")
         if self.strategy is not other.strategy:
             raise TypeError("Different HTTP response strategy cannot compare with each other.")
-        if ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.STRING:
+        if ResponseStrategy(self.strategy) is ResponseStrategy.STRING:
             return templatable_config and self.value == other.value
-        elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.FILE:
+        elif ResponseStrategy(self.strategy) is ResponseStrategy.FILE:
             return templatable_config and self.path == other.path
-        elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.OBJECT:
+        elif ResponseStrategy(self.strategy) is ResponseStrategy.OBJECT:
             return templatable_config and self.properties == other.properties
         else:
             raise NotImplementedError
@@ -122,7 +122,7 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
 
     def _convert_strategy(self) -> None:
         if isinstance(self.strategy, str):
-            self.strategy = ResponseStrategy.to_enum(self.strategy)
+            self.strategy = ResponseStrategy(self.strategy)
 
     def _convert_properties(self):
         print(f"[DEBUG in HTTPResponse._convert_properties] self.properties: {self.properties}")
@@ -137,9 +137,7 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
     def serialize(self, data: Optional["HTTPResponse"] = None) -> Optional[Dict[str, Any]]:
         serialized_data = super().serialize(data)
         assert serialized_data is not None
-        strategy: ResponseStrategy = self.strategy or ResponseStrategy.to_enum(self._get_prop(data, prop="strategy"))
-        if not strategy:
-            raise ValueError("Necessary argument *strategy* is missing.")
+        strategy: ResponseStrategy = self.strategy or ResponseStrategy(self._get_prop(data, prop="strategy"))
         if not isinstance(strategy, ResponseStrategy):
             raise TypeError("Argument *strategy* data type is invalid. It only accepts *ResponseStrategy* type value.")
         if strategy is ResponseStrategy.STRING:
@@ -204,9 +202,7 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
 
         super().deserialize(data)
 
-        self.strategy = ResponseStrategy.to_enum(data.get("strategy", None))
-        if not self.strategy:
-            raise ValueError("Schema key *strategy* cannot be empty.")
+        self.strategy = ResponseStrategy(data.get("strategy", None))
         if self.strategy is ResponseStrategy.STRING:
             self.value = data.get("value", None)
         elif self.strategy is ResponseStrategy.FILE:
@@ -226,20 +222,20 @@ class HTTPResponse(_DividableOnlyTemplatableConfig, _Checkable):
 
     def is_work(self) -> bool:
         assert self.strategy is not None
-        if ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.STRING:
+        if ResponseStrategy(self.strategy) is ResponseStrategy.STRING:
             return self.should_not_be_none(
                 config_key=f"{self.absolute_model_key}.value",
                 config_value=self.value,
                 valid_callback=self._chk_response_value_validity,
             )
-        elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.FILE:
+        elif ResponseStrategy(self.strategy) is ResponseStrategy.FILE:
             return self.should_not_be_none(
                 config_key=f"{self.absolute_model_key}.path",
                 config_value=self.path,
                 accept_empty=False,
                 valid_callback=self._chk_response_value_validity,
             )
-        elif ResponseStrategy.to_enum(self.strategy) is ResponseStrategy.OBJECT:
+        elif ResponseStrategy(self.strategy) is ResponseStrategy.OBJECT:
             if not self.should_not_be_none(
                 config_key=f"{self.absolute_model_key}.properties",
                 config_value=self.properties,

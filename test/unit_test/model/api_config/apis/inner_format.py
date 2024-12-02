@@ -13,8 +13,8 @@ from pymock_api.model.api_config.template.common import (
     TemplateFormatConfig,
     TemplateFormatEntity,
 )
+from pymock_api.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_api.model.api_config.variable import Digit, Size, Variable
-from pymock_api.model.enums import FormatStrategy, ValueFormat
 
 from ....._test_utils import Verify
 from ....._values import _Customize_Format_With_Self_Vars, _General_Format
@@ -38,6 +38,10 @@ class TestFormatWithGeneralStrategy(ConfigTestSpec):
     @pytest.fixture(scope="function")
     def sut_with_nothing(self) -> Format:
         return Format()
+
+    def test_serialize_with_none(self, sut_with_nothing: Format):
+        with pytest.raises(ValueError):
+            sut_with_nothing.serialize()
 
     def test_value_attributes(self, sut: Format):
         self._verify_props_value(sut, self._expected_serialize_value())
@@ -107,9 +111,8 @@ class TestFormatWithCustomizeStrategy(TestFormatWithGeneralStrategy, CheckableTe
         )
 
     def test_set_with_invalid_value(self, sut_with_nothing: Format):
-        with pytest.raises(ValueError) as exc_info:
-            sut_with_nothing.deserialize(data={"strategy": None})
-        assert re.search(r"(.,*){0,32}strategy(.,*){0,32}cannot be empty", str(exc_info.value), re.IGNORECASE)
+        with pytest.raises(ValueError):
+            sut_with_nothing.deserialize(data={"strategy": "invalid value"})
 
     @pytest.mark.parametrize(
         ("ut_obj", "other_obj"),

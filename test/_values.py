@@ -2,7 +2,7 @@ from collections import namedtuple
 from typing import Dict, List, Tuple, Union
 from unittest.mock import Mock
 
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.api_config.apis import ResponseStrategy
 
 
 class APIConfigValue:

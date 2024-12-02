@@ -2,14 +2,16 @@ from typing import List
 
 import pytest
 
-from pymock_api.model.api_config import APIConfig
-from pymock_api.model.api_config.template._load import (
+from pymock_api.model.api_config import (
+    APIConfig,
     TemplatableConfigLoadable,
-    TemplateConfigOpts,
     _BaseTemplateConfigLoader,
 )
+from pymock_api.model.api_config.template._load.process import TemplateConfigOpts
 
-from ._test_case import DeserializeAPIConfigFromYamlTestCaseFactory as test_case_factory
+from .._test_case import (
+    DeserializeAPIConfigFromYamlTestCaseFactory as test_case_factory,
+)
 
 test_case_factory.load()
 _Test_Data: List[str] = test_case_factory.get_test_case()

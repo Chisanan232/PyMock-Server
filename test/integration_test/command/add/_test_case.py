@@ -2,7 +2,7 @@ import pathlib
 from collections import namedtuple
 from typing import List, Tuple
 
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.api_config.apis import ResponseStrategy
 
 from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 from ...._values import _generate_response_for_add, _Test_Tag

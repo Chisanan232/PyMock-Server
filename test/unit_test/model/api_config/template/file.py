@@ -11,7 +11,12 @@ from pymock_api.model.api_config import (
     _Config,
 )
 from pymock_api.model.api_config.template import TemplateConfig
-from pymock_api.model.api_config.template._load import (
+from pymock_api.model.api_config.template._load.key import (
+    ConfigLoadingOrder,
+    ConfigLoadingOrderKey,
+    set_loading_function,
+)
+from pymock_api.model.api_config.template._load.process import (
     TemplateConfigLoaderByApply,
     TemplateConfigLoaderByScanFile,
     TemplateConfigLoaderWithAPIConfig,
@@ -27,11 +32,6 @@ from pymock_api.model.api_config.template.file import (
     TemplateConfigPathSetting,
     TemplateConfigPathValues,
     TemplateFileConfig,
-)
-from pymock_api.model.enums import (
-    ConfigLoadingOrder,
-    ConfigLoadingOrderKey,
-    set_loading_function,
 )
 
 from ....._values import (
@@ -382,7 +382,7 @@ class TestTemplateConfigLoadable:
                 criteria = getattr(call, f"{obj[0]}_load_config")()
             criteria_order.append(criteria)
 
-        # Pre-process of setting loading function
+        # Pre-process of setting load function
         set_loading_function(data_model_key="data_modal", **mock_load_config_data)
         template_config = TemplateConfig(
             activate=True,

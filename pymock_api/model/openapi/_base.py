@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
 from ..api_config import _Config
-from ..enums import OpenAPIVersion
+from .version import OpenAPIVersion
 
 Self = Any
 

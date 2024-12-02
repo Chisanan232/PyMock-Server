@@ -4,10 +4,8 @@ from http import HTTPMethod, HTTPStatus
 from typing import Any, Dict, List, Optional, Type, Union, cast
 
 from ...exceptions import CannotParsingAPIDocumentVersion
-from .. import APIConfig as PyMockAPI_APIConfig
-from .. import MockAPIs
-from ..api_config import BaseConfig
-from ..enums import OpenAPIVersion
+from ..api_config import APIConfig as PyMockAPI_APIConfig
+from ..api_config import BaseConfig, MockAPIs
 from ._base import (
     BaseOpenAPIDataModel,
     Transferable,
@@ -44,6 +42,7 @@ from .base_config import (
     set_component_definition,
 )
 from .content_type import ContentType
+from .version import OpenAPIVersion
 
 
 class AdapterFactory(_BaseAdapterFactory):

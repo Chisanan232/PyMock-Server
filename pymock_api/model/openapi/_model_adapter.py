@@ -5,7 +5,7 @@ from .. import MockAPI
 from ..api_config import IteratorItem
 from ..api_config.apis.request import APIParameter as PyMockRequestProperty
 from ..api_config.apis.response import ResponseProperty as PyMockResponseProperty
-from ..enums import ResponseStrategy
+from ..api_config.apis.response_strategy import ResponseStrategy
 from ._base_model_adapter import (
     BaseAPIAdapter,
     BaseRefPropertyDetailAdapter,

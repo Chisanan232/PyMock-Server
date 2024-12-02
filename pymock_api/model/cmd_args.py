@@ -3,7 +3,9 @@ from argparse import Namespace
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
-from ..model.enums import Format, ResponseStrategy, SampleType
+from .._utils.file import Format
+from ._sample import SampleType
+from .api_config.apis import ResponseStrategy
 
 
 @dataclass(frozen=True)
@@ -105,7 +107,7 @@ class DeserializeParsedArgs:
 
     @classmethod
     def subcommand_add(cls, args: Namespace) -> SubcmdAddArguments:
-        args.response_strategy = ResponseStrategy.to_enum(args.response_strategy)
+        args.response_strategy = ResponseStrategy(args.response_strategy)
         if args.parameters:
             args.parameters = list(map(lambda p: json.loads(p), args.parameters))
         if args.response_value:

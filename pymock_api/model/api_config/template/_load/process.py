@@ -5,12 +5,12 @@ import pathlib
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Optional
 
-from ...._utils import YAML
-from ...._utils.file_opt import _BaseFileOperation
-from ...enums import ConfigLoadingOrder, ConfigLoadingOrderKey, set_loading_function
-from .._base import _Config
-from . import TemplateConfig
-from ._base import _BaseTemplatableConfig
+from pymock_api._utils import YAML
+from pymock_api._utils.file.operation import _BaseFileOperation
+
+from .. import TemplateConfig
+from .._base import _BaseTemplatableConfig, _Config
+from .key import ConfigLoadingOrder, ConfigLoadingOrderKey, set_loading_function
 
 
 class TemplateConfigOpts(metaclass=ABCMeta):

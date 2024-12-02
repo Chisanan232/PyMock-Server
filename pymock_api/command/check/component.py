@@ -12,7 +12,7 @@ from ...model import (
     load_config,
 )
 from ...model.api_config.apis import APIParameter as MockedAPIParameter
-from ...model.enums import ResponseStrategy
+from ...model.api_config.apis.response_strategy import ResponseStrategy
 from ...model.openapi._base_model_adapter import BaseAPIAdapter as SwaggerAPI
 from ...model.openapi._base_model_adapter import (
     BaseRequestParameterAdapter as SwaggerAPIParameter,
