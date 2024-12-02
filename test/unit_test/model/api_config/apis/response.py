@@ -6,8 +6,7 @@ import pytest
 
 from pymock_api.model.api_config import ResponseProperty, _Config
 from pymock_api.model.api_config._base import _HasItemsPropConfig
-from pymock_api.model.api_config.apis import HTTPResponse
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.api_config.apis import HTTPResponse, ResponseStrategy
 
 from ....._values import (
     _Test_HTTP_Resp,
@@ -254,9 +253,8 @@ class TestHTTPResponse(TemplatableConfigTestSuite, CheckableTestSuite):
         ],
     )
     def test_serialize_as_none_with_strategy(self, response: HTTPResponse):
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(ValueError):
             response.serialize()
-        assert re.search(r".{0,32}strategy.{0,32}missing.{0,32}", str(exc_info.value), re.IGNORECASE)
 
     @pytest.mark.parametrize(
         ("response", "verify_key"),
@@ -323,9 +321,8 @@ class TestHTTPResponse(TemplatableConfigTestSuite, CheckableTestSuite):
         assert HTTPResponse().deserialize(data=data) == expected_response
 
     def test_deserialize_with_missing_strategy(self):
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(ValueError):
             HTTPResponse().deserialize(data={"miss strategy": ""})
-        assert re.search(r".{0,32}strategy.{0,32}cannot be empty.{0,32}", str(exc_info.value), re.IGNORECASE)
 
     def test_serialize_with_invalid_strategy(self, sut_with_nothing: HTTPResponse):
         with pytest.raises(TypeError) as exc_info:

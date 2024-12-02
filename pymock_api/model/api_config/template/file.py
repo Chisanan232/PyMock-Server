@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
-from ...enums import ConfigLoadingOrder
 from .._base import _Checkable, _Config
+from ._load.key import ConfigLoadingOrder
 
 
 @dataclass(eq=False)
@@ -22,7 +22,7 @@ class LoadConfig(_Config, _Checkable):
         if self.order:
             is_str = list(map(lambda e: isinstance(e, str), self.order))
             if True in is_str:
-                self.order = [ConfigLoadingOrder.to_enum(o) for o in self.order]
+                self.order = [ConfigLoadingOrder(o) for o in self.order]
         else:
             self.order = self._default_order
 
@@ -44,7 +44,7 @@ class LoadConfig(_Config, _Checkable):
     @_Config._ensure_process_with_not_none_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["LoadConfig"]:
         self.includes_apis = data.get("includes_apis", True)
-        self.order = [ConfigLoadingOrder.to_enum(o) for o in (data.get("order", self._default_order) or [])]
+        self.order = [ConfigLoadingOrder(o) for o in (data.get("order", self._default_order) or [])]
         return self
 
     def is_work(self) -> bool:

@@ -12,7 +12,7 @@ from pymock_api.model import (
     deserialize_api_doc_config,
     load_config,
 )
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.api_config.apis import ResponseStrategy
 
 from ...._values import (
     _Dummy_Add_Arg_Parameter,

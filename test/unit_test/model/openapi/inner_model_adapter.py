@@ -2,7 +2,7 @@ from typing import Type, Union
 
 import pytest
 
-from pymock_api.model.enums import ResponseStrategy
+from pymock_api.model.api_config.apis import ResponseStrategy
 from pymock_api.model.openapi._model_adapter import PropertyDetailAdapter
 
 

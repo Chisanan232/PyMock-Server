@@ -8,16 +8,16 @@ try:
 except ImportError:
     from yaml import Dumper  # type: ignore
 
-from pymock_api._utils.file_opt import JSON, YAML, _BaseFileOperation
+from pymock_api._utils.file.operation import JSON, YAML, _BaseFileOperation
 
-from ..._file_utils import (
+from ...._file_utils import (
     MockAPI_Config_Json_Path,
     MockAPI_Config_Yaml_Path,
     json_factory,
     yaml_factory,
 )
-from ..._spec import run_test
-from ..._values import _Test_Config_Value
+from ...._spec import run_test
+from ...._values import _Test_Config_Value
 
 
 class _BaseTestSuite(metaclass=ABCMeta):

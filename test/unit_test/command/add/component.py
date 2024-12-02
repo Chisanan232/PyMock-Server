@@ -8,8 +8,8 @@ from pymock_api import APIConfig
 from pymock_api.command._common.component import SavingConfigComponent
 from pymock_api.command.add.component import SubCmdAddComponent
 from pymock_api.model import generate_empty_config
+from pymock_api.model.api_config.apis import ResponseStrategy
 from pymock_api.model.cmd_args import SubcmdAddArguments
-from pymock_api.model.enums import ResponseStrategy
 
 from ...._values import (
     _Test_Config,

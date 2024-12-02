@@ -9,7 +9,7 @@ from typing import Optional
 
 import pytest
 
-from pymock_api._utils.file_opt import YAML
+from pymock_api._utils.file.operation import YAML
 from pymock_api.model._sample import Mocked_APIs, Sample_Config_Value
 
 from .._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
