@@ -3,9 +3,14 @@ import re
 from abc import ABC, ABCMeta, abstractmethod
 from collections import namedtuple
 from dataclasses import dataclass, field
-from http import HTTPMethod, HTTPStatus
 from pydoc import locate
 from typing import Any, Callable, Dict, List, Optional, Type, Union
+
+try:
+    from http import HTTPMethod, HTTPStatus
+except ImportError:
+    from http import HTTPStatus
+    from pymock_api.model.http import HTTPMethod  # type: ignore[assignment]
 
 from ._base_model_adapter import (
     BaseAPIAdapter,

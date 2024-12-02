@@ -1,10 +1,15 @@
 import random
 import re
 from abc import ABC, ABCMeta, abstractmethod
-from http import HTTPMethod, HTTPStatus
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 
 import pytest
+
+try:
+    from http import HTTPMethod, HTTPStatus
+except ImportError:
+    from http import HTTPStatus
+    from pymock_api.model.http import HTTPMethod
 
 from pymock_api import APIConfig
 from pymock_api.exceptions import CannotParsingAPIDocumentVersion
@@ -1279,7 +1284,7 @@ class TestSwaggerAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             def _find_path(_http_method: HTTPMethod) -> bool:
                 return api_path == f'{_http_method.name.lower()}{path.replace("/", "_")}'
 
-            expect_api_setting = None
+            expect_api_setting: Optional[Tuple[str, HTTPMethod, _BaseAPIConfigWithMethod]] = None
             for path, api_config in data_from.paths.items():
                 expect_apis = list(filter(lambda _http_method: _find_path(_http_method), api_config.api.keys()))
                 if len(expect_apis):
@@ -1293,7 +1298,7 @@ class TestSwaggerAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             expect_api_config = expect_api_setting[2]
 
             assert api_details.url == expect_path
-            assert api_details.http.request.method == expect_http_method
+            assert api_details.http.request.method == expect_http_method.value
             for api_param in api_details.http.request.parameters:
                 api_param_in_data_from = list(
                     filter(lambda _p: _p.name == api_param.name, expect_api_config.parameters)
@@ -1415,7 +1420,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             def _find_path(_http_method: HTTPMethod) -> bool:
                 return api_path == f'{_http_method.name.lower()}{path.replace("/", "_")}'
 
-            expect_api_setting = None
+            expect_api_setting: Optional[Tuple[str, HTTPMethod, _BaseAPIConfigWithMethod]] = None
             for path, api_config in data_from.paths.items():
                 expect_apis = list(filter(lambda _http_method: _find_path(_http_method), api_config.api.keys()))
                 if len(expect_apis):
@@ -1429,7 +1434,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
             expect_api_config = expect_api_setting[2]
 
             assert api_details.url == expect_path
-            assert api_details.http.request.method == expect_http_method
+            assert api_details.http.request.method == expect_http_method.value
             for api_param in api_details.http.request.parameters:
                 api_param_in_data_from = list(
                     filter(lambda _p: _p.name == api_param.name, expect_api_config.parameters)
