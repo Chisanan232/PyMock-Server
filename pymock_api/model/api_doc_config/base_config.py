@@ -446,7 +446,7 @@ class _BaseRequestParameter(BaseReferencialConfig):
         pass
 
     @abstractmethod
-    def to_adapter(self) -> BaseRequestParameterAdapter:
+    def to_adapter(self) -> Optional[BaseRequestParameterAdapter]:
         pass
 
 
@@ -574,13 +574,16 @@ class _BaseAPIConfigWithMethod(BaseAPIDocConfig, ABC):
         not_ref_data: List[_BaseRequestParameter],
     ) -> List[BaseRequestParameterAdapter]:
         has_ref_in_schema_param = list(filter(lambda p: p.has_ref() != "", _data))
+        handled_parameters = []
         if has_ref_in_schema_param:
             # TODO: Ensure the value maps this condition is really only one
-            handled_parameters = []
             for d in _data:
                 handled_parameters.extend(d.process_has_ref_request_parameters())
         else:
-            handled_parameters = [p.to_adapter() for p in not_ref_data]
+            for p in not_ref_data:
+                adapter = p.to_adapter()
+                if adapter:
+                    handled_parameters.append(adapter)
         return handled_parameters
 
     def to_responses_adapter(self) -> BaseResponsePropertyAdapter:
