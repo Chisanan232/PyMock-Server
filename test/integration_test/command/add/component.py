@@ -298,7 +298,7 @@ class TestSubCmdAddComponent:
                         cmd_args=cmd_args, api_config=new_api_config
                     )
                     if cmd_args.dry_run:
-                        mock_dry_run_final_process.assert_called_once_with(api_config_serialize_data)
+                        mock_dry_run_final_process.assert_called_once_with(cmd_args, api_config_serialize_data)
                         mock_final_process.assert_not_called()
                     else:
                         mock_dry_run_final_process.assert_not_called()
@@ -315,7 +315,6 @@ class TestSubCmdAddComponent:
         expected_yaml_config_path: str,
     ):
         # Given command line argument
-        print(f"[DEBUG in test] cmd_arg: {cmd_arg}")
         under_test_dir = pathlib.Path(under_test_api_config_dir)
         # under_test_dir = "v3_openapi" if "v3" in under_test_api_config else "v2_openapi"
         # ut_dir = pathlib.Path(test_scenario_dir, "under_test", under_test_dir)

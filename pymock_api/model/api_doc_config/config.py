@@ -116,7 +116,6 @@ class RequestParameter(_BaseRequestParameter):
         ]
 
     def deserialize(self, data: dict) -> "RequestParameter":
-        print(f"[DEBUG in TmpRequestParameterModel.deserialize] data: {data}")
         self.name = data.get("name", "")
         self.required = data.get("required", True)
 
@@ -129,12 +128,10 @@ class RequestParameter(_BaseRequestParameter):
         if schema:
             self.schema = RequestSchema().deserialize(schema)
 
-        print(f"[DEBUG in TmpRequestParameterModel.deserialize] self.schema: {self.schema}")
         self.value_type = ensure_type_is_python_type(data.get("type", "")) or (
             self.schema.value_type if self.schema else ""
         )
         self.default = data.get("default", None) or (self.schema.default if self.schema else None)
-        print(f"[DEBUG in TmpRequestParameterModel.deserialize] self: {self}")
         return self
 
     def has_ref(self) -> str:
@@ -173,7 +170,6 @@ class ReferenceConfigProperty(BaseReferenceConfigProperty):
 
     @classmethod
     def deserialize(cls, data: Dict) -> "ReferenceConfigProperty":
-        print(f"[DEBUG in TmpResponsePropertyModel.deserialize] data: {data}")
         return ReferenceConfigProperty(
             title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else None,
@@ -240,7 +236,6 @@ class ReferenceConfig(BaseReferenceConfig):
 
     @classmethod
     def deserialize(cls, data: Dict) -> "ReferenceConfig":
-        print(f"[DEBUG in TmpResponseModel.deserialize] data: {data}")
         properties = {}
         properties_config: dict = data.get("properties", {})
         if properties_config:
@@ -260,19 +255,14 @@ class ReferenceConfig(BaseReferenceConfig):
     ) -> "ResponsePropertyAdapter":
         # assert response_schema_ref
         response_schema_properties: Dict[str, BaseReferenceConfigProperty] = self.properties or {}
-        print(f"[DEBUG in process_response_from_reference] response_schema_ref: {self}")
-        print(f"[DEBUG in process_response_from_reference] response_schema_properties: {response_schema_properties}")
         if response_schema_properties:
             for k, v in response_schema_properties.items():
-                print(f"[DEBUG in process_response_from_reference] k: {k}")
-                print(f"[DEBUG in process_response_from_reference] v: {v}")
                 # Check reference again
                 if v.has_ref():
                     response_prop = v.get_schema_ref().process_reference_object(
                         init_response=ResponsePropertyAdapter.initial_response_data(),
                         empty_body_key=k,
                     )
-                    print(f"[DEBUG in process_response_from_reference] before asserion, response_prop: {response_prop}")
                     # TODO: It should have better way to handle output streaming
                     if len(list(filter(lambda d: d.value_type == "file", response_prop.data))) != 0:
                         # It's file inputStream
@@ -290,15 +280,10 @@ class ReferenceConfig(BaseReferenceConfig):
                         init_response=init_response,
                         property_value=v,
                     )
-                print(f"[DEBUG in process_response_from_reference] response_config: {response_config}")
                 response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
-                print(
-                    f"[DEBUG in process_response_from_reference] has properties, response_data_prop: {response_data_prop}"
-                )
                 response_data_prop.name = k
                 response_data_prop.required = k in (self.required or [k])
                 init_response.data.append(response_data_prop)  # type: ignore[arg-type]
-            print(f"[DEBUG in process_response_from_reference] parse with body, init_response: {init_response}")
         else:
             # The section which doesn't have setting body
             response_config = PropertyDetailAdapter.generate_empty_response()
@@ -306,24 +291,14 @@ class ReferenceConfig(BaseReferenceConfig):
                 response_config.value_type = "file"
 
                 response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
-                print(
-                    f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
-                )
                 response_data_prop.name = empty_body_key
                 response_data_prop.required = empty_body_key in (self.required or [empty_body_key])
                 init_response.data.append(response_data_prop)  # type: ignore[arg-type]
             else:
                 response_data_prop = self._ensure_data_structure_when_object_strategy(init_response, response_config)
-                print(
-                    f"[DEBUG in process_response_from_reference] doesn't have properties, response_data_prop: {response_data_prop}"
-                )
                 response_data_prop.name = "THIS_IS_EMPTY"
                 response_data_prop.required = False
                 init_response.data.append(response_data_prop)  # type: ignore[arg-type]
-                print(f"[DEBUG in process_response_from_reference] empty_body_key: {empty_body_key}")
-                print(
-                    f"[DEBUG in process_response_from_reference] parse with empty body, init_response: {init_response}"
-                )
         return init_response
 
 
@@ -335,7 +310,6 @@ class HttpConfigV2(BaseHttpConfigV2):
 
     @classmethod
     def deserialize(cls, data: dict) -> "HttpConfigV2":
-        print(f"[DEBUG in TmpHttpConfigV2.deserialize] data: {data}")
         assert data is not None and isinstance(data, dict)
         return HttpConfigV2(
             schema=ReferenceConfigProperty.deserialize(data.get("schema", {})),
@@ -363,7 +337,6 @@ class HttpConfigV3(BaseHttpConfigV3):
 
     @classmethod
     def deserialize(cls, data: dict) -> "HttpConfigV3":
-        print(f"[DEBUG in TmpHttpConfigV3.deserialize] data: {data}")
         assert data is not None and isinstance(data, dict)
         content_config: Dict[ContentType, BaseHttpConfigV2] = {}
         for content_type, config in data.get("content", {}).items() or {}:
@@ -449,7 +422,6 @@ class APIConfigWithMethodV3(BaseAPIConfigWithMethodV3):
                 req_body_content_type: List[ContentType] = list(
                     filter(lambda ct: self.request_body.exist_setting(content_type=ct) is not None, ContentType)  # type: ignore[arg-type]
                 )
-                print(f"[DEBUG] has content, req_body_content_type: {req_body_content_type}")
                 req_body_config = self.request_body.get_setting(content_type=req_body_content_type[0])
                 return self._initial_request_parameters_model([req_body_config], self.parameters)  # type: ignore[return-value]
             else:
@@ -468,7 +440,6 @@ class APIConfigWithMethodV3(BaseAPIConfigWithMethodV3):
         resp_value_format: List[ContentType] = list(
             filter(lambda ct: status_200_response_model.exist_setting(content_type=ct) is not None, ContentType)
         )
-        print(f"[DEBUG] has content, resp_value_format: {resp_value_format}")
         return status_200_response_model.get_setting(content_type=resp_value_format[0])
 
 

@@ -1,4 +1,5 @@
 import glob
+import logging
 import os
 import pathlib
 import re
@@ -58,6 +59,8 @@ from ...._values import (
     _Test_URL,
     _TestConfig,
 )
+
+logger = logging.getLogger(__name__)
 
 _assertion_msg = "Its property's value should be same as we set."
 MOCK_RETURN_VALUE: Mock = Mock()
@@ -323,6 +326,31 @@ class CheckableTestSuite(ConfigTestSpec, ABC):
             is_valid_to_work = data_model.is_work()
             assert is_valid_to_work is criteria
 
+    @pytest.mark.parametrize(
+        ("exit_code", "expect_level"),
+        [
+            # normal exit
+            (0, logging.INFO),
+            # un-normal exit
+            (1, logging.ERROR),
+            (127, logging.ERROR),
+        ],
+    )
+    def test__exit_program(self, sut_with_nothing: _Checkable, exit_code: int, expect_level: int):
+        test_msg = "just a message"
+        with patch("logging.info") as info_log:
+            with patch("logging.error") as error_log:
+                with pytest.raises(SystemExit) as system_exit:
+                    sut_with_nothing._exit_program(msg=test_msg, exit_code=exit_code)
+
+                    assert system_exit.value == exit_code
+                    if expect_level == logging.INFO:
+                        assert info_log.assert_called_once_with(test_msg)
+                        assert error_log.assert_not_called()
+                    else:
+                        assert info_log.assert_not_called()
+                        assert error_log.assert_called_once_with(test_msg)
+
 
 class HasItemsPropConfigTestSuite(ConfigTestSpec, ABC):
 
@@ -508,7 +536,7 @@ class HasFormatPropConfigTestSuite(metaclass=ABCMeta):
         formatter = self._data_model_not_instantiate_yet()
         assert hasattr(formatter, "value_type")
         setattr(formatter, "value_type", data_type)
-        print(f"[DEBUG] formatter: {getattr(formatter, 'value_type')}")
+        logger.debug(f"formatter: {getattr(formatter, 'value_type')}")
         formatter.value_format = value_format
         kwarg = {"data_type": data_type, "default": default} if default else {"data_type": data_type}
         value = formatter.generate_value_by_format(**kwarg)
