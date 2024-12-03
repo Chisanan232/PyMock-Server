@@ -96,6 +96,7 @@ class RequestSchema(BaseRequestSchema):
 @dataclass
 class RequestParameter(_BaseRequestParameter):
     name: str = field(default_factory=str)
+    query_in: Optional[str] = None
     required: bool = False
     value_type: Optional[str] = None
     format: Optional[dict] = None
@@ -117,6 +118,7 @@ class RequestParameter(_BaseRequestParameter):
 
     def deserialize(self, data: dict) -> "RequestParameter":
         self.name = data.get("name", "")
+        self.query_in = data.get("in", None)
         self.required = data.get("required", True)
 
         items = data.get("items", [])
@@ -141,14 +143,22 @@ class RequestParameter(_BaseRequestParameter):
         assert self.schema
         return self.schema.get_ref()
 
-    def to_adapter(self) -> "RequestParameterAdapter":
-        return RequestParameterAdapter(
-            name=self.name,
-            required=(self.required or False),
-            value_type=self.value_type,
-            default=self.default,
-            items=[item.to_adapter() for item in self.items] if self.items else None,
-        )
+    def to_adapter(self) -> Optional["RequestParameterAdapter"]:
+        if (self.query_in is None) or (self.query_in and self.query_in.lower() != "path"):
+            items = []
+            if self.items:
+                for item in self.items:
+                    adapter = item.to_adapter()
+                    if adapter:
+                        items.append(adapter)
+            return RequestParameterAdapter(
+                name=self.name,
+                required=(self.required or False),
+                value_type=self.value_type,
+                default=self.default,
+                items=items,
+            )
+        return None
 
     @property
     def _reference_object_type(self) -> Type["ReferenceConfig"]:
