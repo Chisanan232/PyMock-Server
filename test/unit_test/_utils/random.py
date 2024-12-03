@@ -2,7 +2,6 @@ import re
 from typing import Type
 
 import pytest
-
 from pymock_api._utils.random import (
     BaseRandomGenerator,
     RandomBigDecimal,
