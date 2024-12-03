@@ -24,7 +24,7 @@ class SubCmdAddComponent(BaseSubCmdComponent):
         # TODO: Add logic about using mapping file operation by the file extension.
         assert args.config_path, _option_cannot_be_empty_assertion("-o, --output")
         if not args.api_info_is_complete():
-            logger.error(f"❌  API info is not enough to add new API.")
+            logger.error("❌  API info is not enough to add new API.")
             sys.exit(1)
         # yaml: YAML = YAML()
         api_config = self._get_api_config(args)
