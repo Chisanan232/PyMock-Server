@@ -11,7 +11,7 @@ def init_logger_config(
     level: int = logging.INFO,
     encoding: str = "utf-8",
 ) -> None:
-    if level is logging.DEBUG:
+    if level == logging.DEBUG:
         format = DEBUG_LEVEL_LOG_FORMAT
         datefmt = DEBUG_LEVEL_LOG_DATETIME_FORMAT
 
