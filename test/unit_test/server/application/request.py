@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_api.server.application.request import (
+from pymock_server.server.application.request import (
     BaseCurrentRequest,
     FastAPIRequest,
     FlaskRequest,

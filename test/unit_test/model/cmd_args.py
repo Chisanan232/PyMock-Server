@@ -4,9 +4,9 @@ from typing import Type
 
 import pytest
 
-from pymock_api._utils.file import Format
-from pymock_api.model._sample import SampleType
-from pymock_api.model.cmd_args import (
+from pymock_server._utils.file import Format
+from pymock_server.model._sample import SampleType
+from pymock_server.model.cmd_args import (
     DeserializeParsedArgs,
     SubcmdAddArguments,
     SubcmdCheckArguments,

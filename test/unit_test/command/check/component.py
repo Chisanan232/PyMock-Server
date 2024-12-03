@@ -5,12 +5,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pymock_api.command.check.component import (
+from pymock_server.command.check.component import (
     SubCmdCheckComponent,
     SwaggerDiffChecking,
     ValidityChecking,
 )
-from pymock_api.model import (
+from pymock_server.model import (
     ParserArguments,
     SubcmdAddArguments,
     SubcmdCheckArguments,
@@ -127,7 +127,7 @@ class TestSubCmdCheckComponent:
         mock_parser_arg = _given_parser_args(
             subcommand=_Test_SubCommand_Check, swagger_doc_url=_Swagger_API_Document_URL, stop_if_fail=stop_if_fail
         )
-        with patch("pymock_api.command.check.component.load_config") as mock_load_config:
+        with patch("pymock_server.command.check.component.load_config") as mock_load_config:
             mock_load_config.return_value = load_config(dummy_yaml_path)
             with patch.object(SwaggerDiffChecking, "_get_swagger_config") as mock_get_swagger_config:
                 with open(api_resp_path, "r", encoding="utf-8") as file_stream:
@@ -153,7 +153,7 @@ class TestSubCmdCheckComponent:
             subcommand=_Test_SubCommand_Check, swagger_doc_url=_Swagger_API_Document_URL, stop_if_fail=stop_if_fail
         )
         MagicMock()
-        with patch("pymock_api.command.check.component.load_config", side_effect=mock_exception) as mock_load_config:
+        with patch("pymock_server.command.check.component.load_config", side_effect=mock_exception) as mock_load_config:
             with pytest.raises(Exception):
                 subcmd.process(mock_parser_arg)
             mock_load_config.assert_called_once()
@@ -197,7 +197,7 @@ class TestSwaggerDiffChecking:
 
     @pytest.mark.parametrize("swagger_config_response", SWAGGER_DIFF_CHECKER_TEST_CASE)
     def test__get_swagger_config(self, swagger_config_response: str, checking: SwaggerDiffChecking):
-        with patch("pymock_api.command.check.component.URLLibHTTPClient.request") as mock_api_client_request:
+        with patch("pymock_server.command.check.component.URLLibHTTPClient.request") as mock_api_client_request:
             with open(swagger_config_response, "r", encoding="utf-8") as file_stream:
                 mock_api_client_request.return_value = json.loads(file_stream.read())
 

@@ -5,16 +5,16 @@ from typing import Any, List, Optional, Union
 
 import pytest
 
-from pymock_api._utils.random import ValueSize
-from pymock_api.model import TemplateConfig
-from pymock_api.model.api_config.format import Format
-from pymock_api.model.api_config.template import TemplateCommonConfig
-from pymock_api.model.api_config.template.common import (
+from pymock_server._utils.random import ValueSize
+from pymock_server.model import TemplateConfig
+from pymock_server.model.api_config.format import Format
+from pymock_server.model.api_config.template import TemplateCommonConfig
+from pymock_server.model.api_config.template.common import (
     TemplateFormatConfig,
     TemplateFormatEntity,
 )
-from pymock_api.model.api_config.value import FormatStrategy, ValueFormat
-from pymock_api.model.api_config.variable import Digit, Size, Variable
+from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
+from pymock_server.model.api_config.variable import Digit, Size, Variable
 
 from ....._test_utils import Verify
 from ....._values import _Customize_Format_With_Self_Vars, _General_Format

@@ -2,7 +2,7 @@ import re
 
 import pytest
 
-from pymock_api.model._sample import SampleType, get_sample_by_type
+from pymock_server.model._sample import SampleType, get_sample_by_type
 
 
 @pytest.mark.parametrize("st", SampleType)

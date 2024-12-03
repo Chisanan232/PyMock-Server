@@ -2,12 +2,12 @@ from typing import List
 
 import pytest
 
-from pymock_api.model.api_config import (
+from pymock_server.model.api_config import (
     APIConfig,
     TemplatableConfigLoadable,
     _BaseTemplateConfigLoader,
 )
-from pymock_api.model.api_config.template._load.process import TemplateConfigOpts
+from pymock_server.model.api_config.template._load.process import TemplateConfigOpts
 
 from .._test_case import (
     DeserializeAPIConfigFromYamlTestCaseFactory as test_case_factory,

@@ -46,6 +46,41 @@ def make_options() -> List["CommandOption"]:
     return mock_api_cmd_options
 
 
+@dataclass
+class SysArg:
+    subcmd: str
+    pre_subcmd: Optional["SysArg"] = None
+
+    @staticmethod
+    def parse(args: List[str]) -> "SysArg":
+        if not args:
+            return SysArg(subcmd="base")
+
+        no_pyfile_subcmds = list(filter(lambda a: not re.search(r".{1,1024}.py", a), args))
+        subcmds = []
+        for subcmd_or_options in no_pyfile_subcmds:
+            search_subcmd = re.search(r"-.{1,256}", subcmd_or_options)
+            if search_subcmd and len(search_subcmd.group(0)) == len(subcmd_or_options):
+                break
+            subcmds.append(subcmd_or_options)
+
+        if len(subcmds) == 0:
+            return SysArg(subcmd="base")
+        elif len(subcmds) == 1:
+            return SysArg(
+                pre_subcmd=SysArg(
+                    pre_subcmd=None,
+                    subcmd="base",
+                ),
+                subcmd=subcmds[0],
+            )
+        else:
+            return SysArg(
+                pre_subcmd=SysArg.parse(subcmds[:-1]),
+                subcmd=subcmds[-1],
+            )
+
+
 class MockAPICommandParser:
     """*The parser of PyMock-API command line*
 
@@ -55,7 +90,7 @@ class MockAPICommandParser:
 
     def __init__(self):
         self._prog = "pymock-api"
-        self._usage = "mock-api" if self.is_running_subcmd else "mock-api [SUBCOMMAND] [OPTIONS]"
+        self._usage = "mock-server" if self.is_running_subcmd else "mock-server [SUBCOMMAND] [OPTIONS]"
         self._description = """
         A Python tool for mocking APIs by set up an application easily. PyMock-API bases on Python web framework to set
         up application, i.e., you could select using *flask* to set up application to mock APIs.
@@ -75,8 +110,8 @@ class MockAPICommandParser:
         return self._parser
 
     @property
-    def subcommand(self) -> Optional[str]:
-        return sys.argv[1] if self.is_running_subcmd else None
+    def subcommand(self) -> Optional[SysArg]:
+        return SysArg.parse(sys.argv) if self.is_running_subcmd else None
 
     @property
     def is_running_subcmd(self) -> bool:
@@ -137,8 +172,55 @@ class MetaCommandOption(type):
         return new_class
 
 
+@dataclass
+class SubCmdParserAction:
+    subcmd_name: str
+    subcmd_parser: argparse._SubParsersAction
+
+
+@dataclass
+class SubCmdParser:
+    in_subcmd: str
+    parser: argparse.ArgumentParser
+    sub_parser: List["SubCmdParser"]
+
+    def find(self, subcmd: str) -> Optional[argparse.ArgumentParser]:
+        if subcmd == self.in_subcmd:
+            return self.parser
+        else:
+            if self.sub_parser:
+                all_subcmd_parser = list(map(lambda sp: sp.find(subcmd), self.sub_parser))
+                exist_subcmd_parser = list(filter(lambda sp: sp is not None, all_subcmd_parser))
+                if exist_subcmd_parser:
+                    return exist_subcmd_parser[0]
+                return None
+            else:
+                return None
+
+
+SUBCOMMAND_PARSER: List[SubCmdParser] = []
+
+
+@dataclass
+class SubCommandSection:
+    Base: str = "subcommands"
+    ServerType: str = "server types"
+
+
+@dataclass
+class SubCommand:
+    Base: str = "subcommand"
+    Run: str = "run"
+    Add: str = "add"
+    Check: str = "check"
+    Get: str = "get"
+    Sample: str = "sample"
+    Pull: str = "pull"
+
+
 class CommandOption:
     sub_cmd: Optional[SubCommandAttr] = None
+    in_sub_cmd: str = SubCommand.Base
     sub_parser: Optional[SubParserAttr] = None
     cli_option: str
     name: Optional[str] = None
@@ -148,8 +230,8 @@ class CommandOption:
     action: Optional[str] = None
     _options: Optional[List[str]] = None
 
-    _subparser: List[argparse._SubParsersAction] = []
-    _parser_of_subparser: Dict[str, argparse.ArgumentParser] = {}
+    _subparser: List[SubCmdParserAction] = []
+    # _parser_of_subparser: List[SubCmdParser] = []    # Deprecated and use object *SUBCOMMAND_PARSER* to replace it
 
     @property
     def cli_option_name(self) -> Tuple[str, ...]:
@@ -205,37 +287,94 @@ class CommandOption:
 
     def _dispatch_parser(self, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         if self.sub_cmd and self.sub_parser:
-            if not self._subparser:
+
+            # initial the sub-command line parser collection first if it's empty.
+            if self._find_subcmd_parser_action(SubCommand.Base) is None:
+                sub_cmd: SubCommandAttr = SubCommandAttr(
+                    title=SubCommandSection.Base,
+                    dest=SubCommand.Base,
+                    description="",
+                    help="",
+                )
                 self._subparser.append(
-                    parser.add_subparsers(
-                        title=self.sub_cmd.title,
-                        dest=self.sub_cmd.dest,
-                        description=self.sub_cmd.description,
-                        help=self.sub_cmd.help,
+                    SubCmdParserAction(
+                        subcmd_name=SubCommand.Base,
+                        subcmd_parser=parser.add_subparsers(
+                            title=sub_cmd.title,
+                            dest=sub_cmd.dest,
+                            description=sub_cmd.description,
+                            help=sub_cmd.help,
+                        ),
+                    ),
+                )
+
+            subcmd_parser_action = self._find_subcmd_parser_action(self.in_sub_cmd)
+
+            def _add_new_subcommand_line() -> None:
+                # Add parser first
+                _base_subcmd_parser_action = subcmd_parser_action
+                if _base_subcmd_parser_action is None:
+                    _base_subcmd_parser_action = self._find_subcmd_parser_action(SubCommand.Base)
+                _parser = _base_subcmd_parser_action.subcmd_parser.add_parser(  # type: ignore[union-attr]
+                    name=self.sub_cmd.dest, help=self.sub_cmd.help  # type: ignore[union-attr]
+                )
+                global SUBCOMMAND_PARSER
+                SUBCOMMAND_PARSER.append(
+                    SubCmdParser(
+                        in_subcmd=self.sub_cmd.dest,  # type: ignore[union-attr]
+                        parser=_parser,
+                        sub_parser=[],
                     )
                 )
-            if self.sub_parser.name not in self._parser_of_subparser.keys():
-                self._parser_of_subparser[self.sub_parser.name] = self._subparser[0].add_parser(
+
+                # Add sub-command line parser
+                self._subparser.append(
+                    SubCmdParserAction(
+                        subcmd_name=self.in_sub_cmd,
+                        subcmd_parser=_parser.add_subparsers(
+                            title=self.sub_cmd.title,  # type: ignore[union-attr]
+                            dest=self.sub_cmd.dest,  # type: ignore[union-attr]
+                            description=self.sub_cmd.description,  # type: ignore[union-attr]
+                            help=self.sub_cmd.help,  # type: ignore[union-attr]
+                        ),
+                    ),
+                )
+
+            if self.in_sub_cmd and subcmd_parser_action is None:
+                _add_new_subcommand_line()
+                subcmd_parser_action = self._find_subcmd_parser_action(self.in_sub_cmd)
+
+            subcmd_parser_model = self._find_subcmd_parser(self.sub_parser.name)
+            if subcmd_parser_model is None:
+                parser = subcmd_parser_action.subcmd_parser.add_parser(  # type: ignore[union-attr]
                     name=self.sub_parser.name, help=self.sub_parser.help
                 )
-            parser = self._parser_of_subparser[self.sub_parser.name]
+                global SUBCOMMAND_PARSER
+                SUBCOMMAND_PARSER.append(
+                    SubCmdParser(
+                        in_subcmd=self.sub_parser.name,
+                        parser=parser,
+                        sub_parser=[],
+                    )
+                )
+            else:
+                parser = subcmd_parser_model.parser
         return parser
 
+    def _find_subcmd_parser(self, subcmd_name: str) -> Optional[SubCmdParser]:
+        mapping_subcmd_parser = list(filter(lambda e: e.find(subcmd_name) is not None, SUBCOMMAND_PARSER))
+        return mapping_subcmd_parser[0] if mapping_subcmd_parser else None
 
-@dataclass
-class SubCommand:
-    Base: str = "subcommand"
-    Run: str = "run"
-    Add: str = "add"
-    Check: str = "check"
-    Get: str = "get"
-    Sample: str = "sample"
-    Pull: str = "pull"
+    def _find_subcmd_parser_action(self, subcmd_name: str = "") -> Optional[SubCmdParserAction]:
+        mapping_subcmd_parser_action = list(
+            filter(lambda e: e.subcmd_name == (subcmd_name if subcmd_name else self.in_sub_cmd), self._subparser)
+        )
+        return mapping_subcmd_parser_action[0] if mapping_subcmd_parser_action else None
 
 
 class BaseSubCommand(CommandOption):
     sub_cmd: SubCommandAttr = SubCommandAttr(
-        title="Subcommands",
+        title=SubCommandSection.Base,
         dest=SubCommand.Base,
         description="",
         help="",

@@ -4,9 +4,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from pymock_api._utils.file.operation import JSON
-
-from ...._utils import YAML
+from ...._utils import JSON, YAML
 from ...._utils.file import Format
 from .._base import _Checkable, _Config
 from ..template import TemplateConfig

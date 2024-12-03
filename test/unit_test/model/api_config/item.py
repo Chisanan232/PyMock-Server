@@ -3,8 +3,8 @@ from typing import Any, Type
 
 import pytest
 
-from pymock_api.model.api_config import IteratorItem
-from pymock_api.model.api_config._base import _HasItemsPropConfig
+from pymock_server.model.api_config import IteratorItem
+from pymock_server.model.api_config._base import _HasItemsPropConfig
 
 from ...._values import (
     _Test_Response_Property_Details_Dict,

@@ -4,8 +4,8 @@ from typing import Any, List, Optional, Type, Union
 
 import pytest
 
-from pymock_api._utils.random import DigitRange, ValueSize
-from pymock_api.model.api_config.value import FormatStrategy, ValueFormat
+from pymock_server._utils.random import DigitRange, ValueSize
+from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
 
 from ...._test_utils import Verify
 from .._enums import EnumTestSuite

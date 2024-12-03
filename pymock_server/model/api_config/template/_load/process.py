@@ -5,9 +5,8 @@ import pathlib
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Optional
 
-from pymock_api._utils import YAML
-from pymock_api._utils.file.operation import _BaseFileOperation
-
+from ....._utils import YAML
+from ....._utils.file.operation import _BaseFileOperation
 from .. import TemplateConfig
 from .._base import _BaseTemplatableConfig, _Config
 from .key import ConfigLoadingOrder, ConfigLoadingOrderKey, set_loading_function

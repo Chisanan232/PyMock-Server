@@ -3,14 +3,14 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "PyMock-API"
+name = "PyMock-Server"
 version = "0.2.0"
-description = "🕸🤖👺 A Python tool to mock API easily and humanly without any coding."
+description = "🕸🤖👺 A Python tool to mock server, e.g., API server, easily and humanly without any coding."
 authors = ["Liu, Bryant <chi10211201@cycu.org.tw>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "pymock_api"}]
-keywords = ["mock", "API", "mock API", "web", "server"]
+packages = [{include = "pymock_server"}]
+keywords = ["mock", "API", "mock server", "mock API server", "web", "server"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -75,4 +75,4 @@ mkdocstrings = ">=0.24.1,<0.27.0"
 mkdocstrings-python = "^1.9.0"
 
 [tool.poetry.scripts]
-mock-api = "pymock_api.runner:run"
+mock-server = "pymock_server.runner:run"

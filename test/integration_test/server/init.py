@@ -7,7 +7,7 @@ import fastapi
 import flask
 import pytest
 
-import pymock_api.server as mock_server
+import pymock_server.server as mock_server
 
 from ..._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
 from ..._spec import run_test

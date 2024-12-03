@@ -17,7 +17,7 @@ jobs:
       github_auth_token: ${{ secrets.GITHUB_TOKEN }}
     with:
       project_type: python-package
-      project_name: pymock_api
+      project_name: pymock_server
       software_version_format: general-3
 
 

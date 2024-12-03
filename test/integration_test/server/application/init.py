@@ -9,11 +9,11 @@ from fastapi.testclient import TestClient as FastAPITestClient
 from flask.app import Response as FlaskResponse
 from httpx import Response as FastAPIResponse
 
-from pymock_api import APIConfig
-from pymock_api.model import MockAPI, load_config
-from pymock_api.model.api_config.apis import APIParameter
-from pymock_api.server.application import BaseAppServer, FastAPIServer, FlaskServer
-from pymock_api.server.application.response import HTTPResponse as _HTTPResponse
+from pymock_server import APIConfig
+from pymock_server.model import MockAPI, load_config
+from pymock_server.model.api_config.apis import APIParameter
+from pymock_server.server.application import BaseAppServer, FastAPIServer, FlaskServer
+from pymock_server.server.application.response import HTTPResponse as _HTTPResponse
 
 from ...._file_utils import MockAPI_Config_Yaml_Path, file, yaml_factory
 from ...._values import (

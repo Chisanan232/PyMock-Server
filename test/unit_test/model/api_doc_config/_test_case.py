@@ -3,16 +3,16 @@ import logging
 from collections import namedtuple
 from typing import List, Tuple
 
-from pymock_api.model import OpenAPIVersion
-from pymock_api.model.api_doc_config.base_config import set_component_definition
-from pymock_api.model.api_doc_config.config import (
+from pymock_server.model import OpenAPIVersion
+from pymock_server.model.api_doc_config.base_config import set_component_definition
+from pymock_server.model.api_doc_config.config import (
     APIConfigWithMethodV2,
     APIConfigWithMethodV3,
     HttpConfigV2,
     HttpConfigV3,
     ReferenceConfigProperty,
 )
-from pymock_api.model.api_doc_config.content_type import ContentType
+from pymock_server.model.api_doc_config.content_type import ContentType
 
 from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 

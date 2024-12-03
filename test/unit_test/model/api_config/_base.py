@@ -12,9 +12,9 @@ from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 
-from pymock_api._utils import YAML
-from pymock_api.model import HTTP, MockAPI, MockAPIs
-from pymock_api.model.api_config import (
+from pymock_server._utils import YAML
+from pymock_server.model import HTTP, MockAPI, MockAPIs
+from pymock_server.model.api_config import (
     BaseConfig,
     BeDividedableAsTemplatableConfig,
     ResponseProperty,
@@ -22,20 +22,20 @@ from pymock_api.model.api_config import (
     _Checkable,
     _Config,
 )
-from pymock_api.model.api_config._base import _HasItemsPropConfig
-from pymock_api.model.api_config.apis import (
+from pymock_server.model.api_config._base import _HasItemsPropConfig
+from pymock_server.model.api_config.apis import (
     APIParameter,
     HTTPRequest,
     HTTPResponse,
     ResponseStrategy,
 )
-from pymock_api.model.api_config.format import Format, _HasFormatPropConfig
-from pymock_api.model.api_config.template import TemplateConfig
-from pymock_api.model.api_config.template.common import (
+from pymock_server.model.api_config.format import Format, _HasFormatPropConfig
+from pymock_server.model.api_config.template import TemplateConfig
+from pymock_server.model.api_config.template.common import (
     TemplateCommonConfig,
     TemplateFormatConfig,
 )
-from pymock_api.model.api_config.template.file import (
+from pymock_server.model.api_config.template.file import (
     LoadConfig,
     TemplateApply,
     TemplateConfigPathAPI,
@@ -44,8 +44,8 @@ from pymock_api.model.api_config.template.file import (
     TemplateConfigPathValues,
     TemplateFileConfig,
 )
-from pymock_api.model.api_config.value import FormatStrategy, ValueFormat
-from pymock_api.model.api_config.variable import Variable
+from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
+from pymock_server.model.api_config.variable import Variable
 
 from ...._values import (
     _Base_URL,
@@ -659,7 +659,7 @@ class DividableTestSuite(ConfigTestSpec, ABC):
                     f"{_get_abs_module(self._lower_layer_data_modal_for_divide)}.tag", new_callable=PropertyMock
                 ) as mock_prop_tag:
                     mock_prop_tag.return_value = "pytest-mocked-api"
-                    with patch("pymock_api.model.api_config.template._divide.YAML.write") as mock_yaml_write:
+                    with patch("pymock_server.model.api_config.template._divide.YAML.write") as mock_yaml_write:
                         with patch.object(sut, "serialize_lower_layer") as mock_serialize_lower_layer:
                             with patch(
                                 "os.path.exists", return_value=test_data.tag_directory_exist

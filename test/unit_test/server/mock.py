@@ -3,16 +3,16 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_api import APIConfig
-from pymock_api.model import MockAPI, MockAPIs
-from pymock_api.server.application import (
+from pymock_server import APIConfig
+from pymock_server.model import MockAPI, MockAPIs
+from pymock_server.server.application import (
     BaseAppServer,
     BaseWebServerCodeGenerator,
     FlaskServer,
     HTTPRequestProcess,
     HTTPResponseProcess,
 )
-from pymock_api.server.mock import MockHTTPServer
+from pymock_server.server.mock import MockHTTPServer
 
 from ..._values import _Test_Config
 
@@ -95,14 +95,14 @@ class TestMockHTTPServer:
         class InvalidServer:
             pass
 
-        with patch("pymock_api.server.mock.load_config") as mock_load_config:
+        with patch("pymock_server.server.mock.load_config") as mock_load_config:
             invalid_server = InvalidServer()
             with pytest.raises(TypeError) as exc_info:
                 # Run target function to test
                 MockHTTPServer(app_server=invalid_server)
                 # Verify result
                 expected_err_msg = (
-                    f"The instance {invalid_server} must be *pymock_api.application.BaseAppServer* type object."
+                    f"The instance {invalid_server} must be *pymock_server.application.BaseAppServer* type object."
                 )
                 assert str(exc_info) == expected_err_msg, f"The error message should be same as '{expected_err_msg}'."
                 mock_load_config.assert_called_once_with(path="api.yaml")
@@ -115,7 +115,7 @@ class TestMockHTTPServer:
             instantiate_callback=_instantiate, assert_config_path="api.yaml", auto_setup=True
         )
 
-    @patch("pymock_api.server.mock.load_config", return_value=mock_api_config)
+    @patch("pymock_server.server.mock.load_config", return_value=mock_api_config)
     @patch.object(FakeWebServer, "create_api")
     def test_create_apis(self, mock_create_apis: Mock, mock_load_config: Mock):
         apis = Mock(MockAPIs(base=Mock(), apis=Mock()))
@@ -156,7 +156,7 @@ class TestMockHTTPServer:
         # Note: About patch to the function in __init__ module of sub-package
         # pylint: disable=line-too-long
         # Refer: https://stackoverflow.com/questions/55723133/patching-a-function-inside-a-package-init-and-use-it-within-a-module-inside
-        with patch("pymock_api.server.mock.load_config", return_value=mock_api_config) as mock_load_config:
+        with patch("pymock_server.server.mock.load_config", return_value=mock_api_config) as mock_load_config:
             if assert_app_server:
                 _run_test(
                     mock_load_config=mock_load_config,
@@ -164,7 +164,7 @@ class TestMockHTTPServer:
                     instantiate_flask_app_server=False,
                 )
             else:
-                with patch("pymock_api.server.mock.FlaskServer") as mock_flask_server_obj:
+                with patch("pymock_server.server.mock.FlaskServer") as mock_flask_server_obj:
                     _run_test(
                         mock_load_config=mock_load_config,
                         mock_app_server=mock_flask_server_obj,
