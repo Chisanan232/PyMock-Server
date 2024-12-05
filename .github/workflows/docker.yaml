@@ -9,7 +9,7 @@
 #     3. Push the Docker image to Docker hub
 #
 # Trigger condition:
-#     This CI workflow only be triggered by changing the package info module (__pkg_info__.py) of *PyMock-API*.
+#     This CI workflow only be triggered by changing the package info module (__pkg_info__.py) of *PyMock-Server*.
 #
 
 name: docker
@@ -25,7 +25,7 @@ on:
 
 env:
   DOCKER_ACCOUNT: chisanan232
-  DOCKER_IMAGE_NAME: pymock-api
+  DOCKER_IMAGE_NAME: pymock-server
 #  DOCKER_IMAGE_NAME: test    # For testing
   RELEASE_TYPE: python-package
   PYTHON_PACKAGE_NAME: pymock_server
