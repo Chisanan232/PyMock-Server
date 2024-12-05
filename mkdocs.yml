@@ -1,12 +1,12 @@
-site_name: PyMock-API
-#site_url: https://bryantliu.github.io/pymock-api/
+site_name: PyMock-Server
+#site_url: https://bryantliu.github.io/pymock-server/
 site_author: Bryant Liu
 site_description: >-
-  Mock your APIs by YAML configuration and set up an application in minutes
+  Mock your API server, e.g., HTTP API server, by YAML configuration and set up an application in minutes
 
 # Repository
-repo_name: Chisanan232/PyMock-API
-repo_url: https://github.com/Chisanan232/PyMock-API
+repo_name: Chisanan232/PyMock-Server
+repo_url: https://github.com/Chisanan232/PyMock-Server
 
 # Copyright
 copyright: Copyright &copy; 2023 - 2023 Bryant Liu

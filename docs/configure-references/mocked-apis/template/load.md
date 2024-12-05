@@ -16,7 +16,7 @@ to load configuration, and vice versa.
 
 ### ``order``
 
-It accepts a list type value. It could adjust the loading order. In **_PyMock-API_** realm, it has 3 ways to load configuration:
+It accepts a list type value. It could adjust the loading order. In **_PyMock-Server_** realm, it has 3 ways to load configuration:
 
 * ``apis``
 

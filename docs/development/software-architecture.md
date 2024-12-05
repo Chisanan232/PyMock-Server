@@ -3,7 +3,7 @@
 Software architecture is very important in a production because it's relative the flexibility and extensibility of the production.
 So it must have some designs applies to core functions codes.
 
-In **_PyMock-API_** realm, it can divide to several sections to parse its software architecture:
+In **_PyMock-Server_** realm, it can divide to several sections to parse its software architecture:
 
 * Entry point of entire program
     * Runner of command line
@@ -21,7 +21,7 @@ Above all are some parts which have value or more complex to explain their detai
 
 ## Program entry point - command line runner
 
-The entry point of **_PyMock-API_** command line tool. Its actually entry point is calling the function ``run`` in module
+The entry point of **_PyMock-Server_** command line tool. Its actually entry point is calling the function ``run`` in module
 ``pymock_api.runner``.
 
 ### UML
@@ -332,7 +332,7 @@ You'll have 4 things:
 
 * Add new attribute of data object **SubCommand**
 
-Object ``SubCommand`` is the standard for **_PyMock-API_** to recognize which sub-command it has. So let's add one new sub-command
+Object ``SubCommand`` is the standard for **_PyMock-Server_** to recognize which sub-command it has. So let's add one new sub-command
 line here:
 
 ```python hl_lines="9"
@@ -405,7 +405,7 @@ class SubCmdNewProcess(BaseCommandProcessor):
     # ... some code
 ```
 
-Now, let's try to run the **_PyMock-API_** with new sub-command:
+Now, let's try to run the **_PyMock-Server_** with new sub-command:
 
 ```console
 >>> mock-api new-ps --arg-1 test_value
@@ -487,7 +487,7 @@ Finally, we could use JSON type file as our configuration formatter.
 
 ### ``run`` - web server
 
-This is the core feature of **_PyMock-API_**. It does 2 things:
+This is the core feature of **_PyMock-Server_**. It does 2 things:
 
 * Set up web application with the API from the detail settings of configuration.
 * Run the web application by SGI server.
@@ -499,7 +499,7 @@ This is the core feature of **_PyMock-API_**. It does 2 things:
 [software architecture - web server with sgi server]: ../../images/development/server_software_architecture.drawio.png
 
 * The sub-command line processor ``SubCmdRun`` would use function ``setup_wsgi`` or ``setup_asgi`` to run the web application.
-* All the way to run web application by factory pattern in **_PyMock-API_**.
+* All the way to run web application by factory pattern in **_PyMock-Server_**.
 * The functions as factory callee to set up web application is ``create_flask_app`` and ``create_fastapi_app``.
 * Functions ``create_flask_app`` or ``create_fastapi_app`` would use adapter ``MockHTTPServer`` to set up all APIs as Python
 code with Python web framework **_Flask_** or **_FastAPI_**.
@@ -524,7 +524,7 @@ They mean you should extend all below classes to implement:
     * ``BaseSGIServer``
     * ``BaseCommandOption``
 
-Don't forget it also needs to import the Python web framework into **_PyMock-API_** to let it could generate Python code about
+Don't forget it also needs to import the Python web framework into **_PyMock-Server_** to let it could generate Python code about
 APIs with configuration.
 
 * Import web library
@@ -557,7 +557,7 @@ class import_web_lib:
 
 * ``BaseAppServer``
 
-Extend the web application feature about how PyMock-API should set up it? How to initial the web application by the customized
+Extend the web application feature about how PyMock-Server should set up it? How to initial the web application by the customized
 Python web framework? How to add new API by the customized web framework?
 
 ```python
