@@ -518,7 +518,7 @@ class BaseAPIDocumentConfig(Transferable):
         # Set version info
         assert doc_config_version and isinstance(
             doc_config_version, str
-        ), "PyMock-API cannot get the OpenAPI document version."
+        ), "PyMock-Server cannot get the OpenAPI document version."
         set_openapi_version(doc_config_version)
 
     @abstractmethod

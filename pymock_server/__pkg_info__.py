@@ -8,9 +8,9 @@
 #            |___/
 #
 
-__title__ = "PyMock-API"
+__title__ = "PyMock-Server"
 __description__ = "🕸🤖👺 A Python tool to mock API easily and humanly."
-__url__ = "https://chisanan232.github.io/PyMock-API/"
+__url__ = "https://chisanan232.github.io/PyMock-Server/"
 __version__ = "0.2.0"
 __author__ = "Liu, Bryant"
 __author_email__ = "chi10211201@cycu.org.tw"

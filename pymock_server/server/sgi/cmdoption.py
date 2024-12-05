@@ -4,7 +4,7 @@ from typing import Optional, TypeVar
 
 
 class BaseCommandOption(metaclass=ABCMeta):
-    """*Define what command line options it would have be converted from the arguments by PyMock-API command*"""
+    """*Define what command line options it would have be converted from the arguments by PyMock-Server command*"""
 
     def help(self) -> str:
         """Option *-h* or *--help* of target command.

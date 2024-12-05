@@ -16,6 +16,8 @@ class OpenAPIVersion(Enum):
                 return OpenAPIVersion.V2
             if re.search(r"3\.\d(\.\d)?.{0,8}", v):
                 return OpenAPIVersion.V3
-            raise NotImplementedError(f"PyMock-API doesn't support parsing OpenAPI configuration with version '{v}'.")
+            raise NotImplementedError(
+                f"PyMock-Server doesn't support parsing OpenAPI configuration with version '{v}'."
+            )
         else:
             return v
