@@ -4,7 +4,7 @@ If your configuration be ready to mock, it's time to set up a web server to mock
 
 ## Run by CLI
 
-It's very easy to set up and run the web server by **_PyMock-API_**. With default setting, namely using default value ``auto``
+It's very easy to set up and run the web server by **_PyMock-Server_**. With default setting, namely using default value ``auto``
 of option ``--app-type``, it would automatically detect which the Python web framework it can use in the current runtime
 environment. Therefore, the running server log message would be different with different Python web framework.
 
@@ -42,7 +42,7 @@ Although Docker is easy, but we should be careful to use it with options. It has
 * ``-v``
 
     Mount the configuration of mocked APIs into container. By Docker's rule, you need to use absolute path here. For the
-    target path it would mount to, it must be in directory ``/mit-pymock-api/`` because where is the command line works 
+    target path it would mount to, it must be in directory ``/mit-pymock-server/`` because where is the command line works 
     at.
 
 * ``-e``
@@ -52,7 +52,7 @@ Although Docker is easy, but we should be careful to use it with options. It has
     * CONFIG_PATH
 
         The configuration path. By default, it would try to use file ``api.yaml`` in the root directory where it works at.
-        In the other words, it would try to find the file ``/mit-pymock-api/api.yaml`` in Docker container in default.
+        In the other words, it would try to find the file ``/mit-pymock-server/api.yaml`` in Docker container in default.
     
     * WEB_FRAMEWORK
 
@@ -74,10 +74,10 @@ Let's give you a sample command line to set up mock server by **Docker**:
 
 ```console
 >>> docker run --name mock-server \
-               -v <configuration root directory>:/mit-pymock-api/<configuration root directory> \
+               -v <configuration root directory>:/mit-pymock-server/<configuration root directory> \
                -e CONFIG_PATH=<configuration path>
                -p 9672:9672 \
-               pymock-api:v0.1.0
+               pymock-server:v0.1.0
 ```
 
 ??? tip "Hint: Still being confused about the configuration path setting? Let's demonstrate some usage scenarios to you."
@@ -101,18 +101,18 @@ Let's give you a sample command line to set up mock server by **Docker**:
     
     ```console
     >>> docker run --name mock-server \
-                   -v /User/foo/mock-api-demo:/mit-pymock-api \
+                   -v /User/foo/mock-api-demo:/mit-pymock-server \
                    -p 9672:9672 \
-                   pymock-api:v0.1.0
+                   pymock-server:v0.1.0
     ```
     
     You can mount the all files in folder ``/User/foo/mock-api-demo`` into folder
-    ``/mit-pymock-api`` of container. And the file tree in container would be as
+    ``/mit-pymock-server`` of container. And the file tree in container would be as
     below:
     
     ```console
     container root directory (/)
-    ├── mit-pymock-api
+    ├── mit-pymock-server
     │   ├── file1
     │   ├── file2
     │   ├── api.yaml
@@ -122,9 +122,9 @@ Let's give you a sample command line to set up mock server by **Docker**:
     │       └── beta-api.yaml
     ```
     
-    Do you remember the command line working directory is ``mit-pymock-api`` and
+    Do you remember the command line working directory is ``mit-pymock-server`` and
     the default value is ``api.yaml`` of environment ``CONFIG_PATH``? And it exactly
-    has a file at path ``mit-pymock-api/api.yaml`` so it would set up server successfully!
+    has a file at path ``mit-pymock-server/api.yaml`` so it would set up server successfully!
 
     * **Scenario 2: Use the configuration ``beta-api.yaml``**
 
@@ -133,22 +133,22 @@ Let's give you a sample command line to set up mock server by **Docker**:
     
     ```console
     >>> docker run --name mock-server \
-                   -v /User/foo/mock-api-demo:/mit-pymock-api \
+                   -v /User/foo/mock-api-demo:/mit-pymock-server \
                    -e CONFIG_PATH=./folder1/beta-api.yaml
                    -p 9672:9672 \
-                   pymock-api:v0.1.0
+                   pymock-server:v0.1.0
     ```
     
     The mount setting is the same as previous scenario so the file tree also be the
-    same as previous one. And the command line working directory is ``mit-pymock-api``.
+    same as previous one. And the command line working directory is ``mit-pymock-server``.
     So we just need to give it a relative path in working directory. Therefore, the
     value would be ``./folder1/beta-api.yaml``.
 
-!!! note "What the detail usage of **_PyMock-API_** by **Docker**?"
+!!! note "What the detail usage of **_PyMock-Server_** by **Docker**?"
 
-    Please refer to [PyMock-API's image overview in Docker hub] to get more details.
+    Please refer to [PyMock-Server's image overview in Docker hub] to get more details.
 
-    [PyMock-API's image overview in Docker hub]: https://hub.docker.com/r/chisanan232/pymock-api
+    [PyMock-Server's image overview in Docker hub]: https://hub.docker.com/r/chisanan232/pymock-server
 
 Great! Now the web server for mocking your API has done, and it would start to provide this service for other projects or
 services.

@@ -11,7 +11,7 @@ Please verify the PR header should be satisfied below format:
 * commit scope: The scope in project of modify. It could have multiple scopes, e.g., (config + test).
 * commit summary: Summary of the commits. It should be clear that the target, the KEY POINT why you modify it or what you resolve, etc.
 
-Please refer to [GCR (Git Commit Rules) of PyMock-API](../../.gitcommitrules) to get more detail about it.
+Please refer to [GCR (Git Commit Rules) of PyMock-Server](../../.gitcommitrules) to get more detail about it.
 
 <hr>
 

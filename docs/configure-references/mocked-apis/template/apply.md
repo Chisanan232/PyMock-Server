@@ -2,7 +2,7 @@
 
 ## ``mocked_apis.template.apply``
 
-The section about detail settings of applying which mocked APIs into entire **_PyMock-API_** configuration.
+The section about detail settings of applying which mocked APIs into entire **_PyMock-Server_** configuration.
 
 
 ### ``api``

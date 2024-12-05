@@ -58,4 +58,4 @@
         pull                Pull the API details from one specific source, e.g., Swagger API documentation.
     ```
 
-2. Provide [documentation](https://chisanan232.github.io/PyMock-API/) for details of the project.
+2. Provide [documentation](https://chisanan232.github.io/PyMock-Server/) for details of the project.

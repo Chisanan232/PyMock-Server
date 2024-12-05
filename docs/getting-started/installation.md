@@ -1,27 +1,27 @@
 ## With pip <small>for general usage</small> { #with-pip data-toc-label="with pip" }
 
 [**_pip_**](https://pip.pypa.io/en/stable/) is a Python package management tool. We could install all the Python packages
-which be managed in [**PyPI**](https://pypi.org/) platform. So we also could install **_PyMock-API_** via pip as below command:
+which be managed in [**PyPI**](https://pypi.org/) platform. So we also could install **_PyMock-Server_** via pip as below command:
 
 ```console
-pip install pymock-api
+pip install pymock-server
 ```
 
 However, it may have something problems:
 
 * It would install all the dependencies which may includes something you don't need. 
 
-So it recommends that installs **_PyMock-API_** by pip with option to install the necessary dependencies only.
+So it recommends that installs **_PyMock-Server_** by pip with option to install the necessary dependencies only.
 
 ```console
-pip install "pymock-api[<web framework>]"
+pip install "pymock-server[<web framework>]"
 ```
 
 The dependencies which are necessary to install decreases greatly.
 
 !!! note "What the option _web framework_ we could use?"
 
-    **_PyMock-API_** uses the Python web framework to implement the API feature. It means that it would also depend on other
+    **_PyMock-Server_** uses the Python web framework to implement the API feature. It means that it would also depend on other
     Python package which for web development. Currrently, it supports 2 frameworks of all popular Python web framerworks
     --- [**_Flask_**] and [**_FastAPI_**]. So the options value we could use are: ``auto``, ``flask`` or ``fastapi``. The 
     option ``auto`` means that it would automatically scan which Python web framework it would use in the current Python 
@@ -88,28 +88,28 @@ How clear it is! So Poetry is a very powerful tool for manage your Python projec
 The installing command is little different with ``pip`` but be similar:
 
 ```console
-poetry add pymock-api
+poetry add pymock-server
 ```
 
 It also could install necessary parts of dependencies only.
 
 ```console
-poetry add "pymock-api[<web framework>]"
+poetry add "pymock-server[<web framework>]"
 ```
 
-It should add one more dependency **_PyMock-API_** in your configuration _pyproject.toml_.
+It should add one more dependency **_PyMock-Server_** in your configuration _pyproject.toml_.
 
 ## With git
 
-If you want to use the latest features of **_PyMock-API_**, you could use ``git`` to clone the project's source code first.
+If you want to use the latest features of **_PyMock-Server_**, you could use ``git`` to clone the project's source code first.
 
 ```console
-git clone https://github.com/Chisanan232/PyMock-API.git ./pymock-api -b <git branch>
+git clone https://github.com/Chisanan232/PyMock-Server.git ./pymock-server -b <git branch>
 ```
 
 !!! note "The dividing rule of git branch"
 
-    It apply Trunk-base developmenet at **_PyMock-API_** project and its trunk branch is **_master_**.:
+    It apply Trunk-base developmenet at **_PyMock-Server_** project and its trunk branch is **_master_**.:
 
     ![demonstration](../images/project_process_stages.png)
     
@@ -126,23 +126,23 @@ git clone https://github.com/Chisanan232/PyMock-API.git ./pymock-api -b <git bra
 After source code be ready, you could install it by ``pip``.
 
 ```console
-pip install -e pymock-api
+pip install -e pymock-server
 ```
 
 ## With _Docker_ <small>for general usage without Python runtime environment</small> { #with-docker data-toc-label="with Docker" }
 
 If your runtime environment has not installed Python and you won't use Python temporarily, you also could use **Docker** to
-enjoy **_PyMock-API_**.
+enjoy **_PyMock-Server_**.
 
-Download **_PyMock-API_** official image as below:
+Download **_PyMock-Server_** official image as below:
 
 ```console
-docker pull pymock-api:v0.1.0
+docker pull pymock-server:v0.1.0
 ```
 
 ??? tip "Recommended: Use the tag to manage your Docker image"
 
-    You could use command line ``docker pull pymock-api`` without tag
+    You could use command line ``docker pull pymock-server`` without tag
     absolutely. But the default tag is ``latest``. That means you cannot
     clear what version you have currently. So it recommends using tag
     to manage it and clear what version it use currently by yourself.
@@ -150,13 +150,13 @@ docker pull pymock-api:v0.1.0
 Verify the Docker image has been exactly installed:
 
 ```console
-docker images pymock-api
+docker images pymock-server
 ```
 
 
 ## Verify the command line feature
 
-No matter which way to install **_PyMock-API_**, it must verify whether the command line tool is ready for working or not.
+No matter which way to install **_PyMock-Server_**, it must verify whether the command line tool is ready for working or not.
 
 ```console
 mock-api --help

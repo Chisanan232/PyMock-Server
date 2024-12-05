@@ -7,7 +7,7 @@ from ..api_config import ResponseProperty as PyMockResponseProperty
 from ._base import Transferable
 
 
-# The tmp data model for final result to convert as PyMock-API
+# The tmp data model for final result to convert as PyMock-Server
 @dataclass
 class BasePropertyDetailAdapter(metaclass=ABCMeta):
     name: str = field(default_factory=str)
@@ -38,7 +38,7 @@ class BasePropertyDetailAdapter(metaclass=ABCMeta):
         pass
 
 
-# The data models for final result which would be converted as the data models of PyMock-API configuration
+# The data models for final result which would be converted as the data models of PyMock-Server configuration
 @dataclass
 class BaseRequestParameterAdapter(BasePropertyDetailAdapter, ABC):
     items: Optional[List["BaseRequestParameterAdapter"]] = None  # type: ignore[assignment]
@@ -75,7 +75,7 @@ class BaseResponsePropertyAdapter(metaclass=ABCMeta):
         pass
 
 
-# The tmp data model for final result to convert as PyMock-API
+# The tmp data model for final result to convert as PyMock-Server
 @dataclass
 class BaseAPIAdapter(Transferable, ABC):
     path: str = field(default_factory=str)

@@ -54,7 +54,7 @@ def make_command_chain() -> List["CommandProcessor"]:
 
 
 class MetaCommand(type):
-    """*The metaclass for options of PyMock-API command*
+    """*The metaclass for options of PyMock-Server command*
 
     content ...
     """

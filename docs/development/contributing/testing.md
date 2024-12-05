@@ -1,12 +1,12 @@
 # Testing
 
-About the testing, **_PyMock-API_** has some prerequisites or rules of it. **_PyMock-API_** has 2 types test: unit test and
+About the testing, **_PyMock-Server_** has some prerequisites or rules of it. **_PyMock-Server_** has 2 types test: unit test and
 integration test. Unit test are in directory _test/unit_test_ and integration test are in directory _test/integration_test_.
 
 
 ## Requirements for testing
 
-**_PyMock-API_** uses test framework [**_PyTest_**]. So please make sure its tool ``pytest`` could work finely in your current
+**_PyMock-Server_** uses test framework [**_PyTest_**]. So please make sure its tool ``pytest`` could work finely in your current
 runtime environment for development.
 
 [**_PyTest_**]: https://docs.pytest.org/
@@ -23,7 +23,7 @@ runtime environment for development.
     pytest --version
     ```
 
-Apart from **_PyTest_**, **_PyMock-API_** also use another dependencies and some of them is **_PyTest_** plugin.
+Apart from **_PyTest_**, **_PyMock-Server_** also use another dependencies and some of them is **_PyTest_** plugin.
 
 * **_coverage_**
 
@@ -39,12 +39,12 @@ Apart from **_PyTest_**, **_PyMock-API_** also use another dependencies and some
 
 Please refer to the configuration [_pyproject.toml_] if you need.
 
-[_pyproject.toml_]: https://github.com/Chisanan232/PyMock-API/blob/master/pyproject.toml
+[_pyproject.toml_]: https://github.com/Chisanan232/PyMock-Server/blob/master/pyproject.toml
 
 
 ## Run test
 
-It has 2 ways to run test when you develop **_PyMock-API_**.
+It has 2 ways to run test when you develop **_PyMock-Server_**.
 
 ### Specific test module
 
@@ -79,7 +79,7 @@ If you just want to one specific test item, you could use option ``-k``.
 
 !!! note "Run test more efficiency"
 
-    In default from the **_PyTest_** configuration of **_PyMock-API_**, it would
+    In default from the **_PyTest_** configuration of **_PyMock-Server_**, it would
     re-run the test 3 times if it get fail at running the test. For being convenience
     at developing, you could set value as ``0`` at option ``--reruns``.
 

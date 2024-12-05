@@ -1,12 +1,12 @@
-"""*The command attributes of PyMock-API*
+"""*The command attributes of PyMock-Server*
 
-This module processes the features about command to let *PyMock-API* could be used and run through command line. In
+This module processes the features about command to let *PyMock-Server* could be used and run through command line. In
 briefly, It has below major features:
 
-* Parser of *PyMock-API* command line
+* Parser of *PyMock-Server* command line
   Handling parsing the arguments of command line.
 
-* Options of *PyMock-API* command
+* Options of *PyMock-Server* command
   Handling all the details of command options, i.e., what the option format should be used in command line, the help
   description of what this option does, etc.
 
@@ -82,17 +82,17 @@ class SysArg:
 
 
 class MockAPICommandParser:
-    """*The parser of PyMock-API command line*
+    """*The parser of PyMock-Server command line*
 
-    Handling the command line about options includes what options PyMock-API could use and what values of entry command
+    Handling the command line about options includes what options PyMock-Server could use and what values of entry command
     line.
     """
 
     def __init__(self):
-        self._prog = "pymock-api"
+        self._prog = "pymock-server"
         self._usage = "mock-server" if self.is_running_subcmd else "mock-server [SUBCOMMAND] [OPTIONS]"
         self._description = """
-        A Python tool for mocking APIs by set up an application easily. PyMock-API bases on Python web framework to set
+        A Python tool for mocking APIs by set up an application easily. PyMock-Server bases on Python web framework to set
         up application, i.e., you could select using *flask* to set up application to mock APIs.
         """
         self._parser_args: Dict[str, Any] = {
@@ -142,7 +142,7 @@ _ClsNamingFormat.tail = "Option"
 
 
 class MetaCommandOption(type):
-    """*The metaclass for options of PyMock-API command*
+    """*The metaclass for options of PyMock-Server command*
 
     content ...
     """
@@ -400,7 +400,7 @@ class SubCommandAddOption(BaseSubCommand):
 class SubCommandCheckOption(BaseSubCommand):
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommand.Check,
-        help="Check the validity of *PyMock-API* configuration.",
+        help="Check the validity of *PyMock-Server* configuration.",
     )
 
 
@@ -437,7 +437,7 @@ BaseSubCmdPullOption: type = MetaCommandOption("BaseSubCmdPullOption", (SubComma
 class Version(BaseCmdOption):
     cli_option: str = "-v, --version"
     name: str = "version"
-    help_description: str = "The version info of PyMock-API."
+    help_description: str = "The version info of PyMock-Server."
     default_value: Any = argparse.SUPPRESS
     action: str = "version"
     _version_output: str = "%(prog)s (version " + __version__ + ")\n"
@@ -474,7 +474,7 @@ class WebAppType(BaseSubCmdRunOption):
 class Config(BaseSubCmdRunOption):
     cli_option: str = "-c, --config"
     name: str = "config"
-    help_description: str = "The configuration of tool PyMock-API."
+    help_description: str = "The configuration of tool PyMock-Server."
     default_value: str = "api.yaml"
 
 

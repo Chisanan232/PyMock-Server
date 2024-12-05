@@ -10,7 +10,7 @@ from .api_config.apis import ResponseStrategy
 
 @dataclass(frozen=True)
 class ParserArguments:
-    """*The data object for the arguments from parsing the command line of PyMock-API program*"""
+    """*The data object for the arguments from parsing the command line of PyMock-Server program*"""
 
     subparser_name: Optional[str]
 

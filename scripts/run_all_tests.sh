@@ -18,7 +18,7 @@
 
 set -exm
 testing_type=$1
-echo "⚙️ It would run the '$testing_type' of the Python package PyMock-API."
+echo "⚙️ It would run the '$testing_type' of the Python package PyMock-Server."
 
 echo "🔍 Get the testing items ... ⏳"
 

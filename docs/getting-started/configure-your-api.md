@@ -1,6 +1,6 @@
 # Configure your APIs
 
-It configures the detail settings of **_PyMock-API_** by YAML syntax, and must have either a ``.yml`` or ``.yaml`` file
+It configures the detail settings of **_PyMock-Server_** by YAML syntax, and must have either a ``.yml`` or ``.yaml`` file
 extension. If you're new to YAML and want to learn more, see "[Learn YAML in Y minutes.]"
 
 [Learn YAML in Y minutes.]: https://learnxinyminutes.com/docs/yaml/
@@ -125,7 +125,7 @@ service!
 
 ## Check configuration validation
 
-If you're meticulous in configuring and developing, **_PyMock-API_** also provide a command line to help you check your
+If you're meticulous in configuring and developing, **_PyMock-Server_** also provide a command line to help you check your
 configuration validation:
 
 ```console
