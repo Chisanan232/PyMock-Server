@@ -1,8 +1,8 @@
-# PyMock-API
+# PyMock-Server
 
-[**_PyMock-API_**] is a tool for mocking APIs easily and quickly by configuration only.
+[**_PyMock-Server_**] is a tool for mocking APIs easily and quickly by configuration only.
 
-[**_PyMock-API_**]: https://github.com/Chisanan232/PyMock-API/tree/master
+[**_PyMock-Server**]: https://github.com/Chisanan232/PyMock-Server/tree/master
 
 ## How to use it?
 
@@ -31,10 +31,10 @@ Let's set up an instance to provide service:
 
 ```console
 docker run --name mock-server \
-           -v /User/foo/mock-api-demo:/mit-pymock-api \
+           -v /User/foo/mock-api-demo:/mit-pymock-server \
            -p 9672:9672 \
            -d \
-           pymock-api:v0.1.0
+           pymock-server:v0.1.0
 ```
 
 Try to send a HTTP request to the service:
@@ -47,7 +47,7 @@ Congratulations! You successfully configure and set up a web server for mocking 
 
 ## Environment variables
 
-When you set up a **_PyMock-API_** instance by Docker, you can pass one or more environment variables to set its settings.
+When you set up a **_PyMock-Server_** instance by Docker, you can pass one or more environment variables to set its settings.
 
 `CONFIG_PATH`
 
@@ -56,12 +56,12 @@ In default, its value is ``api.yaml``.
 
 `WEB_FRAMEWORK`
 
-This is an option variable. The web framework **_PyMock-API_** would use to set up web server to mock APIs. It only accepts
+This is an option variable. The web framework **_PyMock-Server_** would use to set up web server to mock APIs. It only accepts
 3 type values:
 
 * ``auto``:
 
-    This is the default value. It would automatically detect which web framework **_PyMock-API_** could use in current
+    This is the default value. It would automatically detect which web framework **_PyMock-Server_** could use in current
     runtime environment.
 
 * ``flask``:
@@ -91,10 +91,10 @@ its value is ``info``.
 * [More details] of configuring mocked API.
 * Find something works incorrectly? [Report a bug] to us.
 * Have some great idea? Share with us and [request new feature or change].
-* Want to know [entire knowledge of tool **_PyMock-API_**].
+* Want to know [entire knowledge of tool **_PyMock-Server_**].
 
-[Getting started to configure your APIs]: https://chisanan232.github.io/PyMock-API/getting-started/configure-your-api/
-[More details]: https://chisanan232.github.io/PyMock-API/configure-references/mocked-apis/
-[Report a bug]: https://github.com/Chisanan232/PyMock-API/issues/new?assignees=&labels=&projects=&template=reporting-a-bug.yaml
-[request new feature or change]: https://github.com/Chisanan232/PyMock-API/issues/new?assignees=&labels=&projects=&template=request-a-feature-or-change.yaml
-[entire knowledge of tool **_PyMock-API_**]: https://chisanan232.github.io/PyMock-API/
+[Getting started to configure your APIs]: https://chisanan232.github.io/PyMock-Server/getting-started/configure-your-api/
+[More details]: https://chisanan232.github.io/PyMock-Server/configure-references/mocked-apis/
+[Report a bug]: https://github.com/Chisanan232/PyMock-Server/issues/new?assignees=&labels=&projects=&template=reporting-a-bug.yaml
+[request new feature or change]: https://github.com/Chisanan232/PyMock-Server/issues/new?assignees=&labels=&projects=&template=request-a-feature-or-change.yaml
+[entire knowledge of tool **_PyMock-Server**]: https://chisanan232.github.io/PyMock-Server/

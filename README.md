@@ -1,12 +1,12 @@
-# PyMock-API
+# PyMock-Server
 
-[![PyPI](https://img.shields.io/pypi/v/PyMock-API?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white)](https://pypi.org/project/PyMock-API)
-[![Release](https://img.shields.io/github/release/Chisanan232/PyMock-API.svg?label=Release&logo=github)](https://github.com/Chisanan232/PyMock-API/releases)
-[![CI](https://github.com/Chisanan232/PyMock-API/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Chisanan232/PyMock-API/actions/workflows/ci-cd.yml)
-[![codecov](https://codecov.io/gh/Chisanan232/PyMock-API/graph/badge.svg?token=r5HJxg9KhN)](https://codecov.io/gh/Chisanan232/PyMock-API)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Chisanan232/PyMock-API/master.svg)](https://results.pre-commit.ci/latest/github/Chisanan232/PyMock-API/master)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyMock-API&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-API)
-[![documentation](https://github.com/Chisanan232/PyMock-API/actions/workflows/documentation.yaml/badge.svg)](https://chisanan232.github.io/PyMock-API/)
+[![PyPI](https://img.shields.io/pypi/v/PyMock-Server?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white)](https://pypi.org/project/PyMock-Server)
+[![Release](https://img.shields.io/github/release/Chisanan232/PyMock-Server.svg?label=Release&logo=github)](https://github.com/Chisanan232/PyMock-Server/releases)
+[![CI](https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci-cd.yml)
+[![codecov](https://codecov.io/gh/Chisanan232/PyMock-Server/graph/badge.svg?token=r5HJxg9KhN)](https://codecov.io/gh/Chisanan232/PyMock-Server)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Chisanan232/PyMock-Server/master.svg)](https://results.pre-commit.ci/latest/github/Chisanan232/PyMock-Server/master)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyMock-Server&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-Server)
+[![documentation](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml/badge.svg)](https://chisanan232.github.io/PyMock-Server/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A Python tool to mock API easily and humanly without any coding.
@@ -18,22 +18,22 @@ A Python tool to mock API easily and humanly without any coding.
 ## Overview
 
 Do you ever have experience about needing to set up a very simple application and write some APIs with hardcode response again and again
-for developing Font-End site? **_PyMock-API_** provides a command line tool to let developers could quickly and easily set up application
+for developing Font-End site? **_PyMock-Server_** provides a command line tool to let developers could quickly and easily set up application
 to mock APIs with configuration only.
 
 
 ## Python versions support
 
-The code base of **_PyMock-API_** to set up an application still depends on third party Python package, i.e., **_Flask_**, **_FastAPI_**,
+The code base of **_PyMock-Server_** to set up an application still depends on third party Python package, i.e., **_Flask_**, **_FastAPI_**,
 etc. So the Python versions it supports also be affected by them, e.g., **_Flask_** only supports Python version 3.8 up currently. So
-**_PyMock-API_** also only supports version Python 3.8 up.
+**_PyMock-Server_** also only supports version Python 3.8 up.
 
-[![Supported Versions](https://img.shields.io/pypi/pyversions/PyMock-API.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/PyMock-API)
+[![Supported Versions](https://img.shields.io/pypi/pyversions/PyMock-Server.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/PyMock-Server)
 
 
 ## Quickly Start
 
-Here section would lead you quickly start to set up your first one application by **_PyMock-API_** for mocking APIs easily.
+Here section would lead you quickly start to set up your first one application by **_PyMock-Server_** for mocking APIs easily.
 
 In basically, it has 3 steps: install the package, configure settings about the APIs for mocking and run command.
 
@@ -46,14 +46,14 @@ In basically, it has 3 steps: install the package, configure settings about the 
 First of all, we need to install the command line tool and the way to install is same as installing Python package by ``pip``.
 
 ```console
->>> pip install pymock-api
+>>> pip install pymock-server
 ```
 
-If the runtime environment has installed some Python web framework, e.g., **_Flask_**, you also could install **_Pymock-API_**
+If the runtime environment has installed some Python web framework, e.g., **_Flask_**, you also could install **_Pymock-Server_**
 with one specific option as following:
 
 ```console
->>> pip install "pymock-api[flask]"
+>>> pip install "pymock-server[flask]"
 ```
 
 Then it would only install the lowest Python dependencies you need.
@@ -67,14 +67,14 @@ After you done above step, please make sure the command line tool feature should
 > **Note**
 >
 > Please take a look at option _--app-type_ (this option is in subcommand **_mock-api run_**) of the command line tool. Its option
-> value could be ``auto``, ``flask`` or ``fastapi``. It means that **_PyMock-API_** only supports 2 Python web frameworks: **_Flask_**
+> value could be ``auto``, ``flask`` or ``fastapi``. It means that **_PyMock-Server_** only supports 2 Python web frameworks: **_Flask_**
 > and **_FastAPI_**.
 
 ### Configure setting to mock target APIs
 
 Now, we have the command line tool. Let's configure the settings it needs to set up application to mock API.
 
-The configuration format of **_PyMock-API_** to use is **YAML**. So let's write below settings in YAML file:
+The configuration format of **_PyMock-Server_** to use is **YAML**. So let's write below settings in YAML file:
 
 ```yaml
 mocked_apis:
@@ -114,7 +114,7 @@ Currently, it won't have documentation. But it would have soon.
 
 ## Coding style and following rules
 
-**_PyMock-API_** follows coding styles **_black_** and **_PyLint_** to control code quality.
+**_PyMock-Server_** follows coding styles **_black_** and **_PyLint_** to control code quality.
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://github.com/pylint-dev/pylint)
@@ -122,10 +122,10 @@ Currently, it won't have documentation. But it would have soon.
 
 ## Downloading state
 
-**_PyMock-API_** still a young open source which keep growing. Here's its download state:
+**_PyMock-Server_** still a young open source which keep growing. Here's its download state:
 
-[![Downloads](https://pepy.tech/badge/PyMock-API)](https://pepy.tech/project/PyMock-API)
-[![Downloads](https://pepy.tech/badge/PyMock-API/month)](https://pepy.tech/project/PyMock-API)
+[![Downloads](https://pepy.tech/badge/PyMock-Server)](https://pepy.tech/project/PyMock-Server)
+[![Downloads](https://pepy.tech/badge/PyMock-Server/month)](https://pepy.tech/project/PyMock-Server)
 
 
 ## License
