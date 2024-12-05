@@ -1,4 +1,5 @@
 import logging
+from argparse import ArgumentParser
 from pathlib import Path
 from typing import Union
 
@@ -18,7 +19,7 @@ class SubCmdPullComponent(BaseSubCmdComponent):
 
         self._saving_config_component = SavingConfigComponent()
 
-    def process(self, args: SubcmdPullArguments) -> None:  # type: ignore[override]
+    def process(self, parser: ArgumentParser, args: SubcmdPullArguments) -> None:  # type: ignore[override]
         openapi_doc_url: str = ""
         openapi_doc_config_file: str = ""
         source_info_log: str = ""

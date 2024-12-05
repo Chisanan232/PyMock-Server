@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
+from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.command.run.component import SubCmdRunComponent
 from pymock_server.model.cmd_args import SubcmdRunArguments
 
@@ -37,6 +38,7 @@ class TestSubCmdRunComponent:
 
         invalid_args = SubcmdRunArguments(
             subparser_name=_Test_SubCommand_Run,
+            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Run]),
             app_type="",
             config=_Test_Config,
             bind=_Bind_Host_And_Port.value,
@@ -46,7 +48,7 @@ class TestSubCmdRunComponent:
 
         # Run target function to test
         with pytest.raises(AssertionError) as exc_info:
-            component.process(invalid_args)
+            component.process(parser=Mock(), args=invalid_args)
 
         # Verify result
         assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)

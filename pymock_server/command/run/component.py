@@ -1,5 +1,6 @@
 import os
 import re
+from argparse import ArgumentParser
 
 from ..._utils import import_web_lib
 from ...exceptions import InvalidAppType, NoValidWebLibrary
@@ -17,7 +18,7 @@ class SubCmdRunComponent(BaseSubCmdComponent):
         super().__init__()
         self._server_gateway: BaseSGIServer = None
 
-    def process(self, args: SubcmdRunArguments) -> None:  # type: ignore[override]
+    def process(self, parser: ArgumentParser, args: SubcmdRunArguments) -> None:  # type: ignore[override]
         self._process_option(args)
         self._server_gateway.run(args)
 

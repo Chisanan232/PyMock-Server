@@ -2,6 +2,7 @@ import logging
 import re
 import sys
 from abc import ABCMeta, abstractmethod
+from argparse import ArgumentParser
 from typing import Any, Optional
 
 from ... import APIConfig
@@ -28,7 +29,7 @@ class SubCmdCheckComponent(BaseSubCmdComponent):
         super().__init__()
         self._check_config: _BaseCheckingFactory = ConfigCheckingFactory()
 
-    def process(self, args: SubcmdCheckArguments) -> None:  # type: ignore[override]
+    def process(self, parser: ArgumentParser, args: SubcmdCheckArguments) -> None:  # type: ignore[override]
         try:
             api_config: Optional[APIConfig] = load_config(path=args.config_path)
         except ValueError as e:

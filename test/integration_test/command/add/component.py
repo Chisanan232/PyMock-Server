@@ -1,11 +1,11 @@
 import pathlib
-from unittest.mock import PropertyMock, patch
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 
 from pymock_server.command._common.component import SavingConfigComponent
 from pymock_server.command.add.component import SubCmdAddComponent
-from pymock_server.command.options import SubCommand
+from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.model import (
     SubcmdAddArguments,
     TemplateConfig,
@@ -111,6 +111,7 @@ class TestSubCmdAddComponent:
             # Doesn't include template section config
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./api.yaml",
                 # new mock API
                 tag="",
@@ -131,6 +132,7 @@ class TestSubCmdAddComponent:
             ),
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./test_dir/api.yaml",
                 # new mock API
                 tag="",
@@ -153,6 +155,7 @@ class TestSubCmdAddComponent:
             # Include template section config
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./api.yaml",
                 # new mock API
                 tag="",
@@ -173,6 +176,7 @@ class TestSubCmdAddComponent:
             ),
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./test_dir/api.yaml",
                 # new mock API
                 tag="",
@@ -195,6 +199,7 @@ class TestSubCmdAddComponent:
             # Doesn't include template section config
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./api.yaml",
                 # new mock API
                 tag="",
@@ -215,6 +220,7 @@ class TestSubCmdAddComponent:
             ),
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./test_dir/api.yaml",
                 # new mock API
                 tag="",
@@ -237,6 +243,7 @@ class TestSubCmdAddComponent:
             # Include template section config
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./api.yaml",
                 # new mock API
                 tag="",
@@ -257,6 +264,7 @@ class TestSubCmdAddComponent:
             ),
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./test_dir/api.yaml",
                 # new mock API
                 tag="",
@@ -290,7 +298,7 @@ class TestSubCmdAddComponent:
                     "pymock_server.command._common.component.SavingConfigComponent._final_process"
                 ) as mock_final_process:
                     # Run target function
-                    sub_cmd.process(args=cmd_args)
+                    sub_cmd.process(parser=Mock(), args=cmd_args)
 
                     # Verify
                     new_api_config = sub_cmd._generate_api_config(api_config=api_config, args=cmd_args)
@@ -323,6 +331,7 @@ class TestSubCmdAddComponent:
         ut_config_path = str(pathlib.Path(under_test_dir, "api.yaml"))
         cmd_args = SubcmdAddArguments(
             subparser_name=SubCommand.Add,
+            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
             config_path=ut_config_path,
             # new mock API
             tag=cmd_arg.tag,
@@ -362,7 +371,7 @@ class TestSubCmdAddComponent:
             #     "pymock_server.command.pull.component.URLLibHTTPClient.request", return_value=new_api_config_has_new_api
             # ) as mock_swagger_request:
             # Run target function
-            sub_cmd.process(args=cmd_args)
+            sub_cmd.process(parser=Mock(), args=cmd_args)
 
             # Expected values
             expected_config_data_modal = load_config(expected_yaml_config_path, is_pull=True)

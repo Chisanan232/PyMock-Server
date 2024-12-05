@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from pymock_server.command.options import SysArg
 from pymock_server.model.cmd_args import ParserArguments
 from pymock_server.runner import CommandRunner, run
 
@@ -14,7 +15,7 @@ class TestEntryPoint:
         return CommandRunner()
 
     def test_run(self, runner: CommandRunner):
-        mock_parser_arg = ParserArguments(subparser_name=None)
+        mock_parser_arg = ParserArguments(subparser_name=None, subparser_structure=SysArg.parse([]))
         with patch("pymock_server.runner.CommandRunner", return_value=runner) as mock_runner_instance:
             with patch.object(runner, "parse", return_value=mock_parser_arg) as mock_parse:
                 with patch.object(runner, "run") as mock_run:
