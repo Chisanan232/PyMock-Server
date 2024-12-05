@@ -3,7 +3,7 @@ from typing import Any, Type
 
 import pytest
 
-from pymock_api.model import OpenAPIVersion
+from pymock_server.model import OpenAPIVersion
 
 from .._enums import EnumTestSuite
 

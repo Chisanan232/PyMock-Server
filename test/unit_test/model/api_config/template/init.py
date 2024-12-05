@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from pymock_api.model.api_config.template import TemplateConfig
+from pymock_server.model.api_config.template import TemplateConfig
 
 from ....._values import _Mock_Template_Config_Activate, _Mock_Template_Setting
 from .._base import MOCK_MODEL, CheckableTestSuite, set_checking_test_data

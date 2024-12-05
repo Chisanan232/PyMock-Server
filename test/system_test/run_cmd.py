@@ -9,8 +9,8 @@ from typing import Optional
 
 import pytest
 
-from pymock_api._utils.file.operation import YAML
-from pymock_api.model._sample import Mocked_APIs, Sample_Config_Value
+from pymock_server._utils.file.operation import YAML
+from pymock_server.model._sample import Mocked_APIs, Sample_Config_Value
 
 from .._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
 from .._spec import run_test
@@ -25,7 +25,7 @@ from .._values import (
 
 
 class CommandTestSpec(metaclass=ABCMeta):
-    Server_Running_Entry_Point: str = "pymock_api/runner.py"
+    Server_Running_Entry_Point: str = "pymock_server/runner.py"
     Terminate_Command_Running_When_Sniff_IP_Info: bool = True
 
     @property
@@ -87,7 +87,7 @@ class TestSubCommandRun(CommandTestSpec):
         return "run --help"
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "mock-api run [-h]")
+        self._should_contains_chars_in_result(cmd_running_result, "mock-server run [-h]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "--app-type APP_TYPE")
         self._should_contains_chars_in_result(cmd_running_result, "-c CONFIG, --config CONFIG")

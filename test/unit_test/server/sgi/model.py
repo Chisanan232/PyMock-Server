@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_api.server.sgi._model import Command, CommandOptions
+from pymock_server.server.sgi._model import Command, CommandOptions
 
 from ...._values import (
     _Bind_Host_And_Port,

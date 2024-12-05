@@ -3,7 +3,7 @@ from typing import Any, Type
 
 import pytest
 
-from pymock_api.model.api_config.template._load.key import (
+from pymock_server.model.api_config.template._load.key import (
     ConfigLoadingOrder,
     set_loading_function,
 )

@@ -6,7 +6,7 @@ try:
     from http import HTTPMethod, HTTPStatus
 except ImportError:
     from http import HTTPStatus
-    from pymock_api.model.http import HTTPMethod  # type: ignore[assignment]
+    from pymock_server.model.http import HTTPMethod  # type: ignore[assignment]
 
 from ...exceptions import CannotParsingAPIDocumentVersion
 from ..api_config import APIConfig as PyMockAPI_APIConfig

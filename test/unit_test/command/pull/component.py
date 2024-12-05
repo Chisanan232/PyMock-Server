@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from pymock_api.command.pull.component import SubCmdPullComponent
+from pymock_server.command.pull.component import SubCmdPullComponent
 
 ExpectResult = namedtuple(
     "ExpectResult", ("should_run_client_request", "should_run_json_read", "should_run_deserialize_api_doc_config")
@@ -35,10 +35,10 @@ class TestSubCmdPullComponent:
         expect_result: ExpectResult,
     ):
         # Mock
-        with patch("pymock_api.command.pull.component.URLLibHTTPClient.request") as mock_client_request:
-            with patch("pymock_api.command.pull.component.JSON.read") as mock_json_read:
+        with patch("pymock_server.command.pull.component.URLLibHTTPClient.request") as mock_client_request:
+            with patch("pymock_server.command.pull.component.JSON.read") as mock_json_read:
                 with patch(
-                    "pymock_api.command.pull.component.deserialize_api_doc_config"
+                    "pymock_server.command.pull.component.deserialize_api_doc_config"
                 ) as mock_deserialize_api_doc_config:
                     # Run target function
                     component._get_openapi_doc_config(url=url, config_file=config_file)
@@ -75,10 +75,10 @@ class TestSubCmdPullComponent:
         config_file: Union[str, Path],
     ):
         # Mock
-        with patch("pymock_api.command.pull.component.URLLibHTTPClient.request") as mock_client_request:
-            with patch("pymock_api.command.pull.component.JSON.read") as mock_json_read:
+        with patch("pymock_server.command.pull.component.URLLibHTTPClient.request") as mock_client_request:
+            with patch("pymock_server.command.pull.component.JSON.read") as mock_json_read:
                 with patch(
-                    "pymock_api.command.pull.component.deserialize_api_doc_config"
+                    "pymock_server.command.pull.component.deserialize_api_doc_config"
                 ) as mock_deserialize_api_doc_config:
                     # Run target function
                     with pytest.raises(ValueError) as exc_info:

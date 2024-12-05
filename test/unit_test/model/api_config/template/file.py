@@ -4,25 +4,25 @@ from unittest.mock import MagicMock, Mock, call
 
 import pytest
 
-from pymock_api.model.api_config import (
+from pymock_server.model.api_config import (
     TemplateConfigLoader,
     _BaseTemplatableConfig,
     _BaseTemplateConfigLoader,
     _Config,
 )
-from pymock_api.model.api_config.template import TemplateConfig
-from pymock_api.model.api_config.template._load.key import (
+from pymock_server.model.api_config.template import TemplateConfig
+from pymock_server.model.api_config.template._load.key import (
     ConfigLoadingOrder,
     ConfigLoadingOrderKey,
     set_loading_function,
 )
-from pymock_api.model.api_config.template._load.process import (
+from pymock_server.model.api_config.template._load.process import (
     TemplateConfigLoaderByApply,
     TemplateConfigLoaderByScanFile,
     TemplateConfigLoaderWithAPIConfig,
     TemplateConfigOpts,
 )
-from pymock_api.model.api_config.template.file import (
+from pymock_server.model.api_config.template.file import (
     LoadConfig,
     TemplateApply,
     TemplateConfigPathAPI,

@@ -12,14 +12,14 @@ from fastapi import Response as LibFastAPIResponse
 from flask import Flask
 from flask import Response as LibFlaskResponse
 
-from pymock_api.model import MockAPI
-from pymock_api.server.application.process import BaseHTTPProcess, HTTPRequestProcess
-from pymock_api.server.application.request import (
+from pymock_server.model import MockAPI
+from pymock_server.server.application.process import BaseHTTPProcess, HTTPRequestProcess
+from pymock_server.server.application.request import (
     BaseCurrentRequest,
     FastAPIRequest,
     FlaskRequest,
 )
-from pymock_api.server.application.response import (
+from pymock_server.server.application.response import (
     BaseResponse,
     FastAPIResponse,
     FlaskResponse,

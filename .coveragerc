@@ -1,11 +1,11 @@
 [run]
 parallel = True
 relative_files = True
-include=./pymock_api
+include=./pymock_server
 
 omit =
 #    */__init__.py
-    ./pymock_api/__main__.py
+    ./pymock_server/__main__.py
 
 
 [report]
