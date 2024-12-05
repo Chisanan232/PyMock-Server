@@ -30,8 +30,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
-homepage = "https://github.com/Chisanan232/PyMock-API"
-documentation = "https://chisanan232.github.io/PyMock-API/"
+homepage = "https://github.com/Chisanan232/PyMock-Server"
+documentation = "https://chisanan232.github.io/PyMock-Server/"
 
 [tool.poetry.dependencies]
 python = "^3.8"
