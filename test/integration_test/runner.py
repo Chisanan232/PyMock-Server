@@ -67,5 +67,5 @@ class TestVersion(CommandFunctionTestSpec):
     def verify_running_output(self, cmd_running_result: str) -> None:
         software_version_format = r".{0,32}([0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4}).{0,8}"
         self._should_contains_chars_in_result(
-            cmd_running_result, re.escape("pymock-api") + software_version_format, translate=False
+            cmd_running_result, re.escape("pymock-server") + software_version_format, translate=False
         )
