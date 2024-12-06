@@ -108,7 +108,7 @@ class TestSubCmdPullComponent:
             # Doesn't include template section config
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -124,7 +124,7 @@ class TestSubCmdPullComponent:
             ),
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -142,7 +142,7 @@ class TestSubCmdPullComponent:
             # Include template section config
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -158,7 +158,7 @@ class TestSubCmdPullComponent:
             ),
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -176,7 +176,7 @@ class TestSubCmdPullComponent:
             # Doesn't include template section config
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -192,7 +192,7 @@ class TestSubCmdPullComponent:
             ),
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -210,7 +210,7 @@ class TestSubCmdPullComponent:
             # Include template section config
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -226,7 +226,7 @@ class TestSubCmdPullComponent:
             ),
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -305,7 +305,7 @@ class TestSubCmdPullComponent:
         ut_config_path = str(pathlib.Path(ut_dir, "api.yaml"))
         cmd_args = SubcmdPullArguments(
             subparser_name=SubCommand.Pull,
-            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
+            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
             request_with_https=_Test_Request_With_Https,
             source=_API_Doc_Source,
             source_file=_API_Doc_Source_File,

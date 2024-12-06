@@ -28,7 +28,7 @@ class TestSubCmdSampleComponent:
 
         invalid_args = SubcmdSampleArguments(
             subparser_name=_Test_SubCommand_Add,
-            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
             print_sample=False,
             generate_sample=True,
             sample_output_path="",

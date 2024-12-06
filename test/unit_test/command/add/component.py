@@ -36,7 +36,7 @@ class TestSubCmdAddComponent:
 
         invalid_args = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
-            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
             config_path="",
             tag="",
             api_path="",
@@ -80,7 +80,7 @@ class TestSubCmdAddComponent:
                 with patch("os.path.exists", return_value=file_exist) as mock_path_exist:
                     args = SubcmdAddArguments(
                         subparser_name=_Test_SubCommand_Add,
-                        subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+                        subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                         config_path=_Test_Config,
                         tag="",
                         api_path=_Test_URL,
@@ -147,7 +147,7 @@ class TestSubCmdAddComponent:
         with patch("os.path.exists", return_value=False) as mock_path_exist:
             args = SubcmdAddArguments(
                 subparser_name=_Test_SubCommand_Add,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                 config_path=_Test_Config,
                 tag="",
                 api_path=_Test_URL,
@@ -224,7 +224,7 @@ class TestSubCmdAddComponent:
         with patch("os.path.exists", return_value=False) as mock_path_exist:
             args = SubcmdAddArguments(
                 subparser_name=_Test_SubCommand_Add,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                 config_path=_Test_Config,
                 tag="",
                 api_path=url_path,

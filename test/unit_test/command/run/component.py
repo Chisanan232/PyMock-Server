@@ -38,7 +38,7 @@ class TestSubCmdRunComponent:
 
         invalid_args = SubcmdRunArguments(
             subparser_name=_Test_SubCommand_Run,
-            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Run]),
+            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Run]),
             app_type="",
             config=_Test_Config,
             bind=_Bind_Host_And_Port.value,

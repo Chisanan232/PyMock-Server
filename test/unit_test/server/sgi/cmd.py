@@ -28,7 +28,7 @@ BaseSGICmdType = TypeVar("BaseSGICmdType", bound=BaseSGIServer)
 app_path: str = "application instance path"
 mock_parser_arg_obj = SubcmdRunArguments(
     subparser_name=_Test_SubCommand_Run,
-    subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Run]),
+    subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Run]),
     config=_Test_Config,
     app_type="python web library name",
     bind=_Bind_Host_And_Port.value,

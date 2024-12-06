@@ -50,9 +50,9 @@ class TestHelp(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "subcommands:")
         self._should_contains_chars_in_result(
             cmd_running_result,
-            f"{SubCommand.RestServer}",
+            f"{SubCommand.Rest_Server}",
         )
-        self._should_contains_chars_in_result(cmd_running_result, SubCommand.RestServer)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Rest_Server)
 
 
 class TestVersion(CommandFunctionTestSpec):

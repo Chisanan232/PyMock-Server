@@ -111,7 +111,7 @@ class TestSubCmdAddComponent:
             # Doesn't include template section config
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                 config_path="./api.yaml",
                 # new mock API
                 tag="",
@@ -132,7 +132,7 @@ class TestSubCmdAddComponent:
             ),
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                 config_path="./test_dir/api.yaml",
                 # new mock API
                 tag="",
@@ -155,7 +155,7 @@ class TestSubCmdAddComponent:
             # Include template section config
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                 config_path="./api.yaml",
                 # new mock API
                 tag="",
@@ -176,7 +176,7 @@ class TestSubCmdAddComponent:
             ),
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                 config_path="./test_dir/api.yaml",
                 # new mock API
                 tag="",
@@ -199,7 +199,7 @@ class TestSubCmdAddComponent:
             # Doesn't include template section config
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                 config_path="./api.yaml",
                 # new mock API
                 tag="",
@@ -220,7 +220,7 @@ class TestSubCmdAddComponent:
             ),
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                 config_path="./test_dir/api.yaml",
                 # new mock API
                 tag="",
@@ -243,7 +243,7 @@ class TestSubCmdAddComponent:
             # Include template section config
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                 config_path="./api.yaml",
                 # new mock API
                 tag="",
@@ -264,7 +264,7 @@ class TestSubCmdAddComponent:
             ),
             SubcmdAddArguments(
                 subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                 config_path="./test_dir/api.yaml",
                 # new mock API
                 tag="",
@@ -331,7 +331,7 @@ class TestSubCmdAddComponent:
         ut_config_path = str(pathlib.Path(under_test_dir, "api.yaml"))
         cmd_args = SubcmdAddArguments(
             subparser_name=SubCommand.Add,
-            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
+            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
             config_path=ut_config_path,
             # new mock API
             tag=cmd_arg.tag,

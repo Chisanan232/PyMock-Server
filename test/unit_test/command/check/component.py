@@ -64,7 +64,7 @@ def _given_parser_args(
     elif subcommand == "check":
         return SubcmdCheckArguments(
             subparser_name=subcommand,
-            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Check]),
+            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Check]),
             config_path=(config_path or _Test_Config),
             swagger_doc_url=swagger_doc_url,
             stop_if_fail=stop_if_fail,

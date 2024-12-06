@@ -56,7 +56,7 @@ class TestSubCmdGetComponent:
                 with pytest.raises(SystemExit) as exc_info:
                     subcmd_get_args = SubcmdGetArguments(
                         subparser_name=SubCommand.Get,
-                        subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),
+                        subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Get]),
                         config_path="config path",
                         show_detail=True,
                         show_as_format=display_as_format,
@@ -74,7 +74,7 @@ class TestSubCmdGetComponent:
             with pytest.raises(SystemExit) as exc_info:
                 subcmd_get_args = SubcmdGetArguments(
                     subparser_name=SubCommand.Get,
-                    subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),
+                    subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Get]),
                     config_path="config path",
                     show_detail=True,
                     show_as_format="invalid format",
@@ -96,7 +96,7 @@ class TestSubCmdGetComponent:
             with pytest.raises(SystemExit) as exc_info:
                 subcmd_get_args = SubcmdGetArguments(
                     subparser_name=SubCommand.Get,
-                    subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),
+                    subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Get]),
                     config_path="config path",
                     show_detail=True,
                     show_as_format=Format.YAML,

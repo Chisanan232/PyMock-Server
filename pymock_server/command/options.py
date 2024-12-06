@@ -204,13 +204,13 @@ SUBCOMMAND_PARSER: List[SubCmdParser] = []
 @dataclass
 class SubCommandSection:
     Base: str = "subcommands"
-    ApiServer: str = "API server subcommands"
+    Api_Server: str = "API server subcommands"
 
 
 @dataclass
 class SubCommand:
     Base: str = "subcommand"
-    RestServer: str = "rest-server"
+    Rest_Server: str = "rest-server"
     Run: str = "run"
     Add: str = "add"
     Check: str = "check"
@@ -384,12 +384,12 @@ class BaseSubCommand(CommandOption):
 
 class BaseSubCommandRestServer(CommandOption):
     sub_cmd: SubCommandAttr = SubCommandAttr(
-        title=SubCommandSection.ApiServer,
-        dest=SubCommand.RestServer,
+        title=SubCommandSection.Api_Server,
+        dest=SubCommand.Rest_Server,
         description="Some operations for mocking REST API server.",
         help="Set up an application to mock HTTP server which adopts REST API to communicate between client and server.",
     )
-    in_sub_cmd = SubCommand.RestServer
+    in_sub_cmd = SubCommand.Rest_Server
 
 
 class SubCommandRunOption(BaseSubCommandRestServer):
