@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from ..__pkg_info__ import __version__
 
-SUBCOMMAND: List[str] = []
+SUBCOMMAND: List[str] = ["rest-server"]
 COMMAND_OPTIONS: List["MetaCommandOption"] = []
 
 

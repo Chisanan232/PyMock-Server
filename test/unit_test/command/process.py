@@ -95,7 +95,6 @@ _Fake_SubCmd: str = "pytest-subcmd"
 _Fake_SubCmd_Obj: SysArg = SysArg(subcmd=_Fake_SubCmd)
 _Fake_Duplicated_SubCmd: str = "pytest-duplicated"
 _Fake_Duplicated_SubCmd_Obj: SysArg = SysArg(pre_subcmd=None, subcmd=_Fake_Duplicated_SubCmd)
-_Major_SubCmd_Amt: int = 1  # *rest-server*
 _No_SubCmd_Amt: int = 1
 _Fake_Amt: int = 1
 
@@ -1043,7 +1042,7 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
 
 
 def test_make_command_chain():
-    assert len(get_all_subcommands()) == len(make_command_chain()) - _Major_SubCmd_Amt - _No_SubCmd_Amt - _Fake_Amt
+    assert len(get_all_subcommands()) == len(make_command_chain()) - _No_SubCmd_Amt - _Fake_Amt
 
 
 def test_make_command_chain_if_duplicated_subcmd():

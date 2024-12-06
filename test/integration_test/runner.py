@@ -1,5 +1,7 @@
 import re
+import sys
 from abc import ABCMeta, abstractmethod
+from unittest.mock import patch
 
 import pytest
 
@@ -65,6 +67,34 @@ class TestVersion(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(
             cmd_running_result, re.escape("pymock-server") + software_version_format, translate=False
         )
+
+
+class TestSubCmdRestServer(CommandFunctionTestSpec):
+    @property
+    def options(self) -> str:
+        return "rest-server"
+
+    def test_command(self, runner: CommandRunner):
+        with Capturing() as output:
+            with pytest.raises(SystemExit):
+                with patch.object(sys, "argv", ["rest-server"]):
+                    args = runner.parse(cmd_args=self.options.split())
+                    runner.run(cmd_args=args)
+        self.verify_running_output(" ".join(output))
+
+    def verify_running_output(self, cmd_running_result: str) -> None:
+        self._should_contains_chars_in_result(cmd_running_result, "mock-server [SUBCOMMAND] [OPTIONS]")
+        self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
+        self._should_contains_chars_in_result(cmd_running_result, "API server subcommands:")
+        self._should_contains_chars_in_result(
+            cmd_running_result,
+            f"{SubCommand.Run},{SubCommand.Sample},{SubCommand.Add},{SubCommand.Check},{SubCommand.Get}",
+        )
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Run)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Check)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Add)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Get)
+        self._should_contains_chars_in_result(cmd_running_result, SubCommand.Sample)
 
 
 class TestSubCmdRestServerHelp(CommandFunctionTestSpec):
