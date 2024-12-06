@@ -22,7 +22,20 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from ..__pkg_info__ import __version__
 
-SUBCOMMAND: List[str] = ["rest-server"]
+
+@dataclass
+class SubCommand:
+    Base: str = "subcommand"
+    Rest_Server: str = "rest-server"
+    Run: str = "run"
+    Add: str = "add"
+    Check: str = "check"
+    Get: str = "get"
+    Sample: str = "sample"
+    Pull: str = "pull"
+
+
+SUBCOMMAND: List[str] = [SubCommand.Rest_Server]
 COMMAND_OPTIONS: List["MetaCommandOption"] = []
 
 
@@ -90,7 +103,7 @@ class MockAPICommandParser:
 
     def __init__(self):
         self._prog = "pymock-server"
-        self._usage = "mock-server" if self.is_running_subcmd else "mock-server [SUBCOMMAND] [OPTIONS]"
+        self._usage = "mock" if self.is_running_subcmd else "mock [SUBCOMMAND] [OPTIONS]"
         self._description = """
         A Python tool for mocking APIs by set up an application easily. PyMock-Server bases on Python web framework to set
         up application, i.e., you could select using *flask* to set up application to mock APIs.
@@ -205,18 +218,6 @@ SUBCOMMAND_PARSER: List[SubCmdParser] = []
 class SubCommandSection:
     Base: str = "subcommands"
     Api_Server: str = "API server subcommands"
-
-
-@dataclass
-class SubCommand:
-    Base: str = "subcommand"
-    Rest_Server: str = "rest-server"
-    Run: str = "run"
-    Add: str = "add"
-    Check: str = "check"
-    Get: str = "get"
-    Sample: str = "sample"
-    Pull: str = "pull"
 
 
 class CommandOption:
