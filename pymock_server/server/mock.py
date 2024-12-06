@@ -7,7 +7,7 @@ from typing import Any, Optional
 
 from .. import APIConfig
 from ..model import MockAPIs, load_config
-from .application import BaseAppServer, FlaskServer
+from .rest.application import BaseAppServer, FlaskServer
 
 
 class MockHTTPServer:

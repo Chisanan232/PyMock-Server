@@ -6,12 +6,14 @@ Interface) tool, e.g., *gunicorn*, etc.
 
 import os
 
+from pymock_server.server.rest.sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
+
 from .._utils.importing import ensure_importing, import_web_lib
-from .application import BaseAppServer, FastAPIServer, FlaskServer
 from .mock import MockHTTPServer
-from .sgi import setup_server_gateway
-from .sgi._model import Command, CommandOptions
-from .sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
+from .rest.application import BaseAppServer, FastAPIServer, FlaskServer
+from .rest.sgi import setup_server_gateway
+from .rest.sgi._model import Command, CommandOptions
+from .rest.sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
 
 flask_app: "flask.Flask" = None  # type: ignore
 fastapi_app: "fastapi.FastAPI" = None  # type: ignore

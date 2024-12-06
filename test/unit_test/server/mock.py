@@ -5,14 +5,14 @@ import pytest
 
 from pymock_server import APIConfig
 from pymock_server.model import MockAPI, MockAPIs
-from pymock_server.server.application import (
+from pymock_server.server.mock import MockHTTPServer
+from pymock_server.server.rest.application import (
     BaseAppServer,
     BaseWebServerCodeGenerator,
     FlaskServer,
     HTTPRequestProcess,
     HTTPResponseProcess,
 )
-from pymock_server.server.mock import MockHTTPServer
 
 from ..._values import _Test_Config
 

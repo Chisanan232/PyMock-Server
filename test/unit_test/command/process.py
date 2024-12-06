@@ -13,7 +13,7 @@ import pytest
 from yaml import load as yaml_load
 
 from pymock_server.command._common.component import SavingConfigComponent
-from pymock_server.model.api_doc_config.base_config import set_component_definition
+from pymock_server.model.rest_api_doc_config.base_config import set_component_definition
 
 from ._test_case import SubCmdGetTestCaseFactory, SubCmdPullTestCaseFactory
 
@@ -535,7 +535,8 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
         cmd_parser = Mock()
 
         with patch(
-            "pymock_server.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent
+            "pymock_server.command.rest_server.add.component.SavingConfigComponent",
+            return_value=FakeSavingConfigComponent,
         ) as mock_saving_config_component:
             cmd_ps(cmd_parser, mock_parser_arg)
 
@@ -804,12 +805,14 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
         )
         cmd_parser = Mock()
 
-        with patch("pymock_server.command.sample.component.logger", autospec=True, side_effect=logging) as mock_logging:
+        with patch(
+            "pymock_server.command.rest_server.sample.component.logger", autospec=True, side_effect=logging
+        ) as mock_logging:
             with patch(
-                "pymock_server.command.sample.component.get_sample_by_type", return_value=sample_config
+                "pymock_server.command.rest_server.sample.component.get_sample_by_type", return_value=sample_config
             ) as mock_get_sample_by_type:
                 with patch(
-                    "pymock_server.command.sample.component.YAML", return_value=FakeYAML
+                    "pymock_server.command.rest_server.sample.component.YAML", return_value=FakeYAML
                 ) as mock_instantiate_writer:
                     cmd_ps(cmd_parser, mock_parser_arg)
 
@@ -942,7 +945,8 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         set_component_definition(swagger_json_data.get("definitions", {}))
         with patch("pymock_server.command._common.component.YAML", return_value=FakeYAML) as mock_instantiate_writer:
             with patch(
-                "pymock_server.command.pull.component.URLLibHTTPClient.request", return_value=swagger_json_data
+                "pymock_server.command.rest_server.pull.component.URLLibHTTPClient.request",
+                return_value=swagger_json_data,
             ) as mock_swagger_request:
                 # Run target function
                 logger.debug(f"run target function: {cmd_ps}")
