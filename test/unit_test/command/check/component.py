@@ -1,7 +1,7 @@
 import json
 import logging
 from typing import Union
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -10,6 +10,7 @@ from pymock_server.command.check.component import (
     SwaggerDiffChecking,
     ValidityChecking,
 )
+from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.model import (
     ParserArguments,
     SubcmdAddArguments,
@@ -63,6 +64,7 @@ def _given_parser_args(
     elif subcommand == "check":
         return SubcmdCheckArguments(
             subparser_name=subcommand,
+            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Check]),
             config_path=(config_path or _Test_Config),
             swagger_doc_url=swagger_doc_url,
             stop_if_fail=stop_if_fail,
@@ -134,7 +136,7 @@ class TestSubCmdCheckComponent:
                     mock_get_swagger_config.return_value = deserialize_api_doc_config(json.loads(file_stream.read()))
 
                 with pytest.raises(SystemExit) as exc_info:
-                    subcmd.process(mock_parser_arg)
+                    subcmd.process(parser=Mock(), args=mock_parser_arg)
                 assert expected_exit_code in str(exc_info.value)
 
     @pytest.mark.parametrize(
@@ -155,7 +157,7 @@ class TestSubCmdCheckComponent:
         MagicMock()
         with patch("pymock_server.command.check.component.load_config", side_effect=mock_exception) as mock_load_config:
             with pytest.raises(Exception):
-                subcmd.process(mock_parser_arg)
+                subcmd.process(parser=Mock(), args=mock_parser_arg)
             mock_load_config.assert_called_once()
 
 

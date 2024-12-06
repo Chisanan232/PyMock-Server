@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from ..__pkg_info__ import __version__
 
-SUBCOMMAND: List[str] = []
+SUBCOMMAND: List[str] = ["rest-server"]
 COMMAND_OPTIONS: List["MetaCommandOption"] = []
 
 
@@ -204,12 +204,13 @@ SUBCOMMAND_PARSER: List[SubCmdParser] = []
 @dataclass
 class SubCommandSection:
     Base: str = "subcommands"
-    ServerType: str = "server types"
+    Api_Server: str = "API server subcommands"
 
 
 @dataclass
 class SubCommand:
     Base: str = "subcommand"
+    Rest_Server: str = "rest-server"
     Run: str = "run"
     Add: str = "add"
     Check: str = "check"
@@ -381,7 +382,17 @@ class BaseSubCommand(CommandOption):
     )
 
 
-class SubCommandRunOption(BaseSubCommand):
+class BaseSubCommandRestServer(CommandOption):
+    sub_cmd: SubCommandAttr = SubCommandAttr(
+        title=SubCommandSection.Api_Server,
+        dest=SubCommand.Rest_Server,
+        description="Some operations for mocking REST API server.",
+        help="Set up an application to mock HTTP server which adopts REST API to communicate between client and server.",
+    )
+    in_sub_cmd = SubCommand.Rest_Server
+
+
+class SubCommandRunOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommand.Run,
         help="Set up APIs with configuration and run a web application to mock them.",
@@ -389,7 +400,7 @@ class SubCommandRunOption(BaseSubCommand):
     option_value_type: type = str
 
 
-class SubCommandAddOption(BaseSubCommand):
+class SubCommandAddOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommand.Add,
         help="Something processing about configuration, i.e., generate a sample configuration or validate configuration"
@@ -397,28 +408,28 @@ class SubCommandAddOption(BaseSubCommand):
     )
 
 
-class SubCommandCheckOption(BaseSubCommand):
+class SubCommandCheckOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommand.Check,
         help="Check the validity of *PyMock-Server* configuration.",
     )
 
 
-class SubCommandGetOption(BaseSubCommand):
+class SubCommandGetOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommand.Get,
         help="Do some comprehensive inspection for configuration.",
     )
 
 
-class SubCommandSampleOption(BaseSubCommand):
+class SubCommandSampleOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommand.Sample,
         help="Quickly display or generate a sample configuration helps to use this tool.",
     )
 
 
-class SubCommandPullOption(BaseSubCommand):
+class SubCommandPullOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommand.Pull,
         help="Pull the API details from one specific source, e.g., Swagger API documentation.",

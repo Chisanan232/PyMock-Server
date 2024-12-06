@@ -1,10 +1,10 @@
 import json
 import pathlib
-from unittest.mock import PropertyMock, patch
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 
-from pymock_server.command.options import SubCommand
+from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.command.pull.component import SubCmdPullComponent
 from pymock_server.model import (
     SubcmdPullArguments,
@@ -108,6 +108,7 @@ class TestSubCmdPullComponent:
             # Doesn't include template section config
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -123,6 +124,7 @@ class TestSubCmdPullComponent:
             ),
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -140,6 +142,7 @@ class TestSubCmdPullComponent:
             # Include template section config
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -155,6 +158,7 @@ class TestSubCmdPullComponent:
             ),
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -172,6 +176,7 @@ class TestSubCmdPullComponent:
             # Doesn't include template section config
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -187,6 +192,7 @@ class TestSubCmdPullComponent:
             ),
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -204,6 +210,7 @@ class TestSubCmdPullComponent:
             # Include template section config
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -219,6 +226,7 @@ class TestSubCmdPullComponent:
             ),
             SubcmdPullArguments(
                 subparser_name=SubCommand.Pull,
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -246,7 +254,7 @@ class TestSubCmdPullComponent:
                     "pymock_server.command._common.component.SavingConfigComponent._final_process"
                 ) as mock_final_process:
                     # Run target function
-                    sub_cmd.process(args=cmd_args)
+                    sub_cmd.process(parser=Mock(), args=cmd_args)
 
                     # Verify
                     http_proto = "https" if cmd_args.request_with_https else "http"
@@ -297,6 +305,7 @@ class TestSubCmdPullComponent:
         ut_config_path = str(pathlib.Path(ut_dir, "api.yaml"))
         cmd_args = SubcmdPullArguments(
             subparser_name=SubCommand.Pull,
+            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
             request_with_https=_Test_Request_With_Https,
             source=_API_Doc_Source,
             source_file=_API_Doc_Source_File,
@@ -331,7 +340,7 @@ class TestSubCmdPullComponent:
                 "pymock_server.command.pull.component.URLLibHTTPClient.request", return_value=swagger_api_resp
             ) as mock_swagger_request:
                 # Run target function
-                sub_cmd.process(args=cmd_args)
+                sub_cmd.process(parser=Mock(), args=cmd_args)
 
                 # Expected values
                 expected_config_data_modal = load_config(expected_yaml_config_path, is_pull=True)

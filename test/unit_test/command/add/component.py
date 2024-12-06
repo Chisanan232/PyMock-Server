@@ -1,12 +1,13 @@
 import re
 from typing import List, Optional
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
 from pymock_server import APIConfig
 from pymock_server.command._common.component import SavingConfigComponent
 from pymock_server.command.add.component import SubCmdAddComponent
+from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.model import generate_empty_config
 from pymock_server.model.api_config.apis import ResponseStrategy
 from pymock_server.model.cmd_args import SubcmdAddArguments
@@ -35,6 +36,7 @@ class TestSubCmdAddComponent:
 
         invalid_args = SubcmdAddArguments(
             subparser_name=_Test_SubCommand_Add,
+            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
             config_path="",
             tag="",
             api_path="",
@@ -54,7 +56,7 @@ class TestSubCmdAddComponent:
 
         # Run target function to test
         with pytest.raises(AssertionError) as exc_info:
-            component.process(invalid_args)
+            component.process(parser=Mock(), args=invalid_args)
 
         # Verify result
         assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)
@@ -78,6 +80,7 @@ class TestSubCmdAddComponent:
                 with patch("os.path.exists", return_value=file_exist) as mock_path_exist:
                     args = SubcmdAddArguments(
                         subparser_name=_Test_SubCommand_Add,
+                        subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                         config_path=_Test_Config,
                         tag="",
                         api_path=_Test_URL,
@@ -144,6 +147,7 @@ class TestSubCmdAddComponent:
         with patch("os.path.exists", return_value=False) as mock_path_exist:
             args = SubcmdAddArguments(
                 subparser_name=_Test_SubCommand_Add,
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                 config_path=_Test_Config,
                 tag="",
                 api_path=_Test_URL,
@@ -160,7 +164,7 @@ class TestSubCmdAddComponent:
                 divide_http_request=False,
                 divide_http_response=False,
             )
-            component.process(args)
+            component.process(parser=Mock(), args=args)
 
             api_config = generate_empty_config()
             api_config = component._generate_api_config(api_config=api_config, args=args)
@@ -220,6 +224,7 @@ class TestSubCmdAddComponent:
         with patch("os.path.exists", return_value=False) as mock_path_exist:
             args = SubcmdAddArguments(
                 subparser_name=_Test_SubCommand_Add,
+                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
                 config_path=_Test_Config,
                 tag="",
                 api_path=url_path,
@@ -237,7 +242,7 @@ class TestSubCmdAddComponent:
                 divide_http_response=False,
             )
             with pytest.raises(SystemExit) as exc_info:
-                component.process(args)
+                component.process(parser=Mock(), args=args)
             assert str(exc_info.value) == "1"
 
             if url_path:

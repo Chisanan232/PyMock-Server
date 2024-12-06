@@ -2,7 +2,7 @@ import copy
 import logging
 import sys
 from argparse import ArgumentParser, Namespace
-from typing import List, Optional, Tuple, Type
+from typing import List, Optional, Tuple, Type, Union
 
 from ..log import init_logger_config
 from ..model import (
@@ -21,6 +21,7 @@ from .component import BaseSubCmdComponent, NoSubCmdComponent
 from .get import SubCmdGetComponent
 from .options import MockAPICommandParser, SubCommand, SysArg
 from .pull.component import SubCmdPullComponent
+from .rest_server import SubCmdRestServerComponent
 from .run import SubCmdRunComponent
 from .sample.component import SubCmdSampleComponent
 
@@ -35,10 +36,10 @@ def dispatch_command_processor() -> "CommandProcessor":
     return cmd_chain[0].distribute()
 
 
-def run_command_chain(args: ParserArguments) -> None:
+def run_command_chain(parser: ArgumentParser, args: ParserArguments) -> None:
     cmd_chain = make_command_chain()
     assert len(cmd_chain) > 0, "It's impossible that command line processors list is empty."
-    cmd_chain[0].process(args)
+    cmd_chain[0].process(parser=parser, args=args)
 
 
 def make_command_chain() -> List["CommandProcessor"]:
@@ -71,6 +72,7 @@ class MetaCommand(type):
 
 class CommandProcessor:
     responsible_subcommand: Optional[SysArg] = None
+    deserialize_args: deserialize_args = deserialize_args()
 
     def __init__(self):
         self.mock_api_parser = MockAPICommandParser()
@@ -88,15 +90,17 @@ class CommandProcessor:
     def _subcmd_component(self) -> BaseSubCmdComponent:
         raise NotImplementedError
 
-    def distribute(self, args: Optional[ParserArguments] = None, cmd_index: int = 0) -> "CommandProcessor":
+    def distribute(
+        self, args: Optional[Union[Namespace, ParserArguments]] = None, cmd_index: int = 0
+    ) -> "CommandProcessor":
         if self._is_responsible(subcmd=self.mock_api_parser.subcommand, args=args):
             return self
         else:
             self._current_index = cmd_index
             return self._next.distribute(args=args, cmd_index=self._current_index)
 
-    def process(self, args: ParserArguments, cmd_index: int = 0) -> None:
-        self.distribute(args=args, cmd_index=cmd_index)._run(args)
+    def process(self, parser: ArgumentParser, args: ParserArguments, cmd_index: int = 0) -> None:
+        self.distribute(args=args, cmd_index=cmd_index)._run(parser=parser, args=args)
 
     def parse(
         self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None, cmd_index: int = 0
@@ -109,14 +113,19 @@ class CommandProcessor:
     def copy(self) -> "CommandProcessor":
         return copy.copy(self)
 
-    def _is_responsible(self, subcmd: Optional[SysArg] = None, args: Optional[ParserArguments] = None) -> bool:
+    def _is_responsible(
+        self, subcmd: Optional[SysArg] = None, args: Optional[Union[Namespace, ParserArguments]] = None
+    ) -> bool:
         if args:
-            return args.subparser_name == (self.responsible_subcommand.subcmd if self.responsible_subcommand else None)
-        return subcmd == self.responsible_subcommand
+            subcmd_key = args.subparser_structure.subcmd if isinstance(args, ParserArguments) else args.subcommand
+            return subcmd_key == (self.responsible_subcommand.subcmd if self.responsible_subcommand else None)
+        return (subcmd == self.responsible_subcommand) or (
+            subcmd is None and self.responsible_subcommand == SysArg(subcmd="base")
+        )
 
-    def _run(self, args: ParserArguments) -> None:
+    def _run(self, parser: ArgumentParser, args: ParserArguments) -> None:
         init_logger_config()
-        self._subcmd_component.process(args)
+        self._subcmd_component.process(parser=parser, args=args)
 
     def _parse_cmd_arguments(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> Namespace:
         return parser.parse_args(cmd_args)
@@ -126,7 +135,7 @@ BaseCommandProcessor: type = MetaCommand("BaseCommandProcessor", (CommandProcess
 
 
 class NoSubCmd(BaseCommandProcessor):
-    responsible_subcommand: Optional[SysArg] = None
+    responsible_subcommand: SysArg = SysArg(subcmd="base")
 
     @property
     def _subcmd_component(self) -> NoSubCmdComponent:
@@ -136,8 +145,21 @@ class NoSubCmd(BaseCommandProcessor):
         return self._parse_cmd_arguments(parser, cmd_args)
 
 
+class SubCmdRestServer(BaseCommandProcessor):
+    responsible_subcommand: SysArg = SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server)
+
+    @property
+    def _subcmd_component(self) -> SubCmdRestServerComponent:
+        return SubCmdRestServerComponent()
+
+    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
+        return self._parse_cmd_arguments(parser, cmd_args)
+
+
 class SubCmdRun(BaseCommandProcessor):
-    responsible_subcommand: SysArg = SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Run)
+    responsible_subcommand: SysArg = SysArg(
+        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server), subcmd=SubCommand.Run
+    )
 
     @property
     def _subcmd_component(self) -> SubCmdRunComponent:
@@ -148,7 +170,9 @@ class SubCmdRun(BaseCommandProcessor):
 
 
 class SubCmdAdd(BaseCommandProcessor):
-    responsible_subcommand: SysArg = SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Add)
+    responsible_subcommand: SysArg = SysArg(
+        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server), subcmd=SubCommand.Add
+    )
 
     @property
     def _subcmd_component(self) -> SubCmdAddComponent:
@@ -159,7 +183,9 @@ class SubCmdAdd(BaseCommandProcessor):
 
 
 class SubCmdCheck(BaseCommandProcessor):
-    responsible_subcommand: SysArg = SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Check)
+    responsible_subcommand: SysArg = SysArg(
+        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server), subcmd=SubCommand.Check
+    )
 
     @property
     def _subcmd_component(self) -> SubCmdCheckComponent:
@@ -170,7 +196,9 @@ class SubCmdCheck(BaseCommandProcessor):
 
 
 class SubCmdGet(BaseCommandProcessor):
-    responsible_subcommand: SysArg = SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Get)
+    responsible_subcommand: SysArg = SysArg(
+        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server), subcmd=SubCommand.Get
+    )
 
     @property
     def _subcmd_component(self) -> SubCmdGetComponent:
@@ -181,7 +209,9 @@ class SubCmdGet(BaseCommandProcessor):
 
 
 class SubCmdSample(BaseCommandProcessor):
-    responsible_subcommand: SysArg = SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Sample)
+    responsible_subcommand: SysArg = SysArg(
+        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server), subcmd=SubCommand.Sample
+    )
 
     @property
     def _subcmd_component(self) -> SubCmdSampleComponent:
@@ -197,7 +227,9 @@ class SubCmdSample(BaseCommandProcessor):
 
 
 class SubCmdPull(BaseCommandProcessor):
-    responsible_subcommand: SysArg = SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Pull)
+    responsible_subcommand: SysArg = SysArg(
+        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server), subcmd=SubCommand.Pull
+    )
 
     @property
     def _subcmd_component(self) -> SubCmdPullComponent:

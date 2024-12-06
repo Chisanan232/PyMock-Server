@@ -1,4 +1,5 @@
 import logging
+from argparse import ArgumentParser
 
 from ..._utils import YAML
 from ...model._sample import get_sample_by_type
@@ -13,7 +14,7 @@ def _option_cannot_be_empty_assertion(cmd_option: str) -> str:
 
 
 class SubCmdSampleComponent(BaseSubCmdComponent):
-    def process(self, args: SubcmdSampleArguments) -> None:  # type: ignore[override]
+    def process(self, parser: ArgumentParser, args: SubcmdSampleArguments) -> None:  # type: ignore[override]
         # TODO: Add logic about using mapping file operation by the file extension.
         yaml: YAML = YAML()
         sample_config = get_sample_by_type(args.sample_config_type)

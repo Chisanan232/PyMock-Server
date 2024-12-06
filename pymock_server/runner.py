@@ -27,7 +27,7 @@ class CommandRunner:
         self.cmd_parser: ArgumentParser = self._cmd_processor.mock_api_parser.parse()
 
     def run(self, cmd_args: ParserArguments) -> None:
-        self._cmd_processor.process(cmd_args)
+        self._cmd_processor.process(parser=self.cmd_parser, args=cmd_args)
 
     def parse(self, cmd_args: Optional[List[str]] = None) -> ParserArguments:
         return self._cmd_processor.parse(parser=self.cmd_parser, cmd_args=cmd_args)

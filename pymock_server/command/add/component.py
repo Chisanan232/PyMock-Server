@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from argparse import ArgumentParser
 
 from ... import APIConfig
 from ...model import MockAPI, generate_empty_config, load_config
@@ -20,7 +21,7 @@ class SubCmdAddComponent(BaseSubCmdComponent):
     def __init__(self):
         self._saving_config_component = SavingConfigComponent()
 
-    def process(self, args: SubcmdAddArguments) -> None:  # type: ignore[override]
+    def process(self, parser: ArgumentParser, args: SubcmdAddArguments) -> None:  # type: ignore[override]
         # TODO: Add logic about using mapping file operation by the file extension.
         assert args.config_path, _option_cannot_be_empty_assertion("-o, --output")
         if not args.api_info_is_complete():

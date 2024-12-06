@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 from abc import ABCMeta, abstractmethod
+from argparse import ArgumentParser
 from typing import Dict, Optional, cast
 
 from ..._utils.file import Format
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class SubCmdGetComponent(BaseSubCmdComponent):
-    def process(self, args: SubcmdGetArguments) -> None:  # type: ignore[override]
+    def process(self, parser: ArgumentParser, args: SubcmdGetArguments) -> None:  # type: ignore[override]
         current_api_config = load_config(path=args.config_path)
         if current_api_config is None:
             logger.error("❌  Empty content in configuration file.")

@@ -1,9 +1,10 @@
 import re
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
 from pymock_server._utils.file.operation import YAML
+from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.command.sample.component import SubCmdSampleComponent
 from pymock_server.model._sample import SampleType
 from pymock_server.model.cmd_args import SubcmdSampleArguments
@@ -27,6 +28,7 @@ class TestSubCmdSampleComponent:
 
         invalid_args = SubcmdSampleArguments(
             subparser_name=_Test_SubCommand_Add,
+            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
             print_sample=False,
             generate_sample=True,
             sample_output_path="",
@@ -39,7 +41,7 @@ class TestSubCmdSampleComponent:
                 "pymock_server.command.sample.component.get_sample_by_type", return_value=FakeYAML
             ) as mock_get_sample_by_type:
                 with pytest.raises(AssertionError) as exc_info:
-                    component.process(invalid_args)
+                    component.process(parser=Mock(), args=invalid_args)
 
                 # Verify result
                 assert re.search(r"Option '.{1,20}' value cannot be empty.", str(exc_info.value), re.IGNORECASE)

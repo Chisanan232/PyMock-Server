@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.model.cmd_args import SubcmdRunArguments
 from pymock_server.server.sgi._model import Command, CommandOptions
 from pymock_server.server.sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
@@ -27,6 +28,7 @@ BaseSGICmdType = TypeVar("BaseSGICmdType", bound=BaseSGIServer)
 app_path: str = "application instance path"
 mock_parser_arg_obj = SubcmdRunArguments(
     subparser_name=_Test_SubCommand_Run,
+    subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Run]),
     config=_Test_Config,
     app_type="python web library name",
     bind=_Bind_Host_And_Port.value,
