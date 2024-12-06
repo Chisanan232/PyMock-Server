@@ -1,25 +1,37 @@
-# Subcommand ``add`` usage
+# Subcommand ``pull`` usage
 
-Doing something operations about configuration or its content.
+If it has already had API documentation, e.g., OpenAPI format (aka Swagger API), provides the API details, you could use
+``pull`` feature to fetch it as **_PyMock-Server_** format configuration and set up HTTP server for mocking API easily and 
+quickly.
+
+??? note "Why we need sub-command line ``pull``?"
+
+    Let's consider one scenario, the system has already provide service for a while 
+    and it has so many APIs which have already be used awhile. However, you want to 
+    import this tool for Font-End site development, but it's too hard to configure 
+    all existing APIs into **_PyMock-Server_** configuration. At this time, ``pull`` 
+    feature could give you a hand to handle it easily and quickly.
+
 
 ```console
->>> mock-api add <option>
+>>> mock rest-server pull <option>
 ```
 
 
-## ``--api-config-path`` <API configuration file path\>
+## ``--source`` or ``-s`` <API document URL\>
 
-Set the configuration file path to let this subcommand to operate with it.
+Set the source that is the endpoint of OpenAPI document it would try to get the API documentation configuration and 
+convert it as **_PyMock-Server_** format configuration.
 
-It receives a value which is the configuration file path and default value is ``api.yaml``. It would face some scenarios:
+It receives a string value about the host address or URL path.
 
-* File exists
 
-    No matter it has valid content or not, it would add the new API into the existed configuration.
+## ``--source-file`` or ``-f`` <API document configuration file\>
 
-* File doesn't exist
+Set the source file that is the specific file it would try to get the API documentation configuration and convert it 
+as **_PyMock-Server_** format configuration.
 
-    It would generate a new configuration file add the new API to it.
+It receives a string value about the configuration file path.
 
 
 ## ``--base-url`` <base API path\>
@@ -29,9 +41,18 @@ Set the base URL for deserialization of API documentation configuration.
 It receives a string value about the base URL path.
 
 
-## ``--include-template-config``
+## ``--config-path`` or ``-c`` <config file path\>
 
-If it's ``True``, it would set the template settings in the output configuration.
+The file path for saving configuration which be fetched and be deserialized from the API documentation configuration to 
+**_PyMock-Server_** format.
+
+It receives a string value about the configuration file path.
+
+
+## ``--request-with-https``
+
+If it's ``True``, it would find the Swagger API documentation host through ``HTTPS``, or it does through ``HTTP``
+directly.
 
 It doesn't accept any value and default is ``False``. It's ``True`` if set this option.
 
@@ -43,200 +64,18 @@ The path which would be used as root path to find the other files.
 It receives a string value about the base path.
 
 
-## ``--dry-run``
+## ``--include-template-config``
 
-If it's ``True``, it would run the ``add`` feature without result.
+If it's ``True``, it would set the template settings in the output configuration.
 
 It doesn't accept any value and default is ``False``. It's ``True`` if set this option.
 
 
-## ``--api-path`` <URL\>
+## ``--dry-run``
 
-Set the URL path of mocking API.
+If it's ``True``, it would run the ``pull`` feature without result.
 
-It receives a string value and this is required option.
-
-=== "Set by command line"
-    
-    ```console
-    --api-path '/foo-home'
-    ```
-
-=== "Set by YAML syntax"
-    
-    ```yaml hl_lines="2"
-    mocked_apis:
-      foo_home:
-        # some settings of API
-    ```
-
-
-## ``--http-method`` <HTTP method\>
-
-Set the HTTP method in request of mocking API.
-
-It receives a string value which should satisfy the value of HTTP method which be defined in [RFC-2616](https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.1).
-
-=== "Set by command line"
-    
-    ```console
-    --http-method 'POST'
-    ```
-
-=== "Set by YAML syntax"
-    
-    ```yaml hl_lines="3-4"
-    mocked_apis:
-      foo_home:
-        request:
-          method: 'POST'
-    ```
-
-
-## ``--parameters`` <JSON format string value\>
-
-Set the HTTP request parameters of mocking API.
-
-It receives a string value and default value is empty string. This option could be used multiple times.
-
-=== "Set by command line"
-    
-    ```console
-    --parameters '{"name": "arg1", "required": true, "type": "str"}' --parameters '{"name": "arg2", "required": false, "type": "int", "default": 0}'
-    ```
-
-=== "Set by YAML syntax"
-    
-    ```yaml hl_lines="5-12"
-    mocked_apis:
-      foo_home:
-        request:
-          method: 'POST'
-          parameters:
-            - name: 'arg1'
-              required: true
-              type: str
-            - name: 'arg2'
-              required: false
-              type: int
-              default: 0
-    ```
-
-
-## ``--response-strategy`` <String value\>
-
-About setting the response part, it needs to set 2 values: strategy and properties. This option sets the strategy part.
-
-For the details of each strategy, please refer to the section [HTTP response in Configuration references](/configure-references/mocked-apis/apis/http/response/#strategy).
-
-=== "Set by command line"
-    
-    ```console
-    --response-strategy 'string'
-    ```
-
-=== "Set by YAML syntax"
-    
-    ```yaml hl_lines="13-14"
-    mocked_apis:
-      foo_home:
-        request:
-          method: 'POST'
-          parameters:
-            - name: 'arg1'
-              required: true
-              type: str
-            - name: 'arg2'
-              required: false
-              type: int
-              default: 0
-        response:
-          strategy: string
-          value: 'This is PyTest demo.'
-    ```
-
-
-## ``--response-value`` <String value\>
-
-About setting the response part, it needs to set 2 values: strategy and properties. This option sets the properties part
-which is the HTTP response value of mocking API.
-
-It receives a string value and default value is ``OK.``.
-
-* Set the value as string directly
-
-If the response strategy is ``string`` or ``file``, it should use this option with that. It would set the option value
-as the setting value directly.
-
-=== "Set by command line"
-    
-    ```console
-    --response-value 'This is foo.'
-    ```
-
-=== "Set by YAML syntax"
-    
-    ```yaml hl_lines="15"
-    mocked_apis:
-      foo_home:
-        request:
-          method: 'POST'
-          parameters:
-            - name: 'arg1'
-              required: true
-              type: str
-            - name: 'arg2'
-              required: false
-              type: int
-              default: 0
-        response:
-          strategy: string
-          value: 'This is foo.'
-    ```
-
-* Set the value with some special properties
-
-If the response strategy is ``object``, it should use this option with that. It should use JSON format string value to
-set its settings.
-
-=== "Set by command line"
-    
-    ```console
-    --response-value '{"name": "responseCode", "required": True, "type": "str"}' --response-value '{"name": "responseData", "required": False, "type": "str"}'
-    ```
-
-=== "Set by YAML syntax"
-    
-    ```yaml hl_lines="15-24"
-    mocked_apis:
-      foo_home:
-        request:
-          method: 'POST'
-          parameters:
-            - name: 'arg1'
-              required: true
-              type: str
-            - name: 'arg2'
-              required: false
-              type: int
-              default: 0
-        response:
-          strategy: object
-          properties:
-            - name: responseCode
-              required: True
-              type: str
-              format:
-            - name: responseData
-              required: True
-              type: str
-              format:
-    ```
-
-!!! hint "Use command line or operate configuration directly?"
-
-    In general usage scenarios, it's okay to use any one of these 2 ways. However, if the 
-    response properties are complex, it's better to set the value in configuration directly.
+It doesn't accept any value and default is ``False``. It's ``True`` if set this option.
 
 
 ## ``--divide-api``
