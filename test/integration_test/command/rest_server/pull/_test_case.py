@@ -1,6 +1,10 @@
 from collections import namedtuple
-from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 from typing import List, Tuple
+
+# isort: off
+from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath
+
+# isort: on
 
 # [(swagger_api_config_path, cmd_arg, expected_path)]
 DIVIDING_YAML_PATHS: List[tuple] = []

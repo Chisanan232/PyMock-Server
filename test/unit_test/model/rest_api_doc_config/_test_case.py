@@ -1,7 +1,6 @@
 import json
 import logging
 from collections import namedtuple
-from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 from typing import List, Tuple
 
 from pymock_server.model import OpenAPIVersion
@@ -14,6 +13,11 @@ from pymock_server.model.rest_api_doc_config.config import (
     ReferenceConfigProperty,
 )
 from pymock_server.model.rest_api_doc_config.content_type import ContentType
+
+# isort: off
+from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath
+
+# isort: on
 
 logger = logging.getLogger(__name__)
 

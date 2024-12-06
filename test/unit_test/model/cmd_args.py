@@ -1,5 +1,23 @@
 from argparse import Namespace
 from collections import namedtuple
+from typing import Type
+
+import pytest
+
+from pymock_server._utils.file import Format
+from pymock_server.command.options import SubCommand, SysArg
+from pymock_server.model._sample import SampleType
+from pymock_server.model.cmd_args import (
+    DeserializeParsedArgs,
+    SubcmdAddArguments,
+    SubcmdCheckArguments,
+    SubcmdGetArguments,
+    SubcmdPullArguments,
+    SubcmdRunArguments,
+    SubcmdSampleArguments,
+)
+
+# isort: off
 from test._values import (
     _API_Doc_Source,
     _API_Doc_Source_File,
@@ -37,22 +55,8 @@ from test._values import (
     _Test_URL,
     _Workers_Amount,
 )
-from typing import Type
 
-import pytest
-
-from pymock_server._utils.file import Format
-from pymock_server.command.options import SubCommand, SysArg
-from pymock_server.model._sample import SampleType
-from pymock_server.model.cmd_args import (
-    DeserializeParsedArgs,
-    SubcmdAddArguments,
-    SubcmdCheckArguments,
-    SubcmdGetArguments,
-    SubcmdPullArguments,
-    SubcmdRunArguments,
-    SubcmdSampleArguments,
-)
+# isort: on
 
 check_attrs = namedtuple("check_attrs", ("entire_check", "api_path", "http_method", "api_parameters"))
 expected_check_attrs = namedtuple("expected_check_attrs", ("entire_check", "api_path", "http_method", "api_parameters"))

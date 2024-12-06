@@ -1,5 +1,14 @@
 import random
 import re
+from typing import Any, Type
+
+import pytest
+
+from pymock_server.model.api_config import ResponseProperty, _Config
+from pymock_server.model.api_config._base import _HasItemsPropConfig
+from pymock_server.model.api_config.apis import HTTPResponse, ResponseStrategy
+
+# isort: off
 from test._values import (
     _Test_HTTP_Resp,
     _Test_Response_Property_Dict,
@@ -16,13 +25,8 @@ from test.unit_test.model.api_config._base import (
     set_checking_test_data,
 )
 from test.unit_test.model.api_config.template._base import TemplatableConfigTestSuite
-from typing import Any, Type
 
-import pytest
-
-from pymock_server.model.api_config import ResponseProperty, _Config
-from pymock_server.model.api_config._base import _HasItemsPropConfig
-from pymock_server.model.api_config.apis import HTTPResponse, ResponseStrategy
+# isort: on
 
 
 class TestResponseProperty(ConfigTestSpec, HasFormatPropConfigTestSuite):

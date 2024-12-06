@@ -5,19 +5,16 @@ from unittest.mock import Mock, patch
 
 from yaml import dump
 
-from pymock_server.command.options import SubCommand, SysArg
-
 try:
     from yaml import CDumper as Dumper
 except ImportError:
     from yaml import Dumper  # type: ignore
 
-from test._values import _Test_HTTP_Method, _Test_URL, _TestConfig
-
 import pytest
 
 from pymock_server import APIConfig
 from pymock_server._utils.file import Format
+from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.command.rest_server.get.component import (
     APIInfoDisplayChain,
     DisplayAsJsonFormat,
@@ -28,6 +25,11 @@ from pymock_server.command.rest_server.get.component import (
 )
 from pymock_server.model import MockAPI
 from pymock_server.model.cmd_args import SubcmdGetArguments
+
+# isort: off
+from test._values import _Test_HTTP_Method, _Test_URL, _TestConfig
+
+# isort: on
 
 
 class TestSubCmdGetComponent:

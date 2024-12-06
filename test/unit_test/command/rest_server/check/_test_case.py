@@ -1,5 +1,9 @@
-from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 from typing import List, Union
+
+# isort: off
+from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath
+
+# isort: on
 
 # [("api_resp_path", "dummy_yaml_path", "stop_if_fail", "expected_exit_code")]
 RESPONSE_JSON_PATHS_WITH_EX_CODE: List[tuple] = []

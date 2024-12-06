@@ -1,6 +1,5 @@
 import json
 import pathlib
-from test._values import _API_Doc_Source, _API_Doc_Source_File, _Test_Request_With_Https
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
@@ -15,10 +14,14 @@ from pymock_server.model import (
 from pymock_server.model.api_config import DivideStrategy, TemplateConfig
 from pymock_server.model.rest_api_doc_config.base_config import set_component_definition
 
+# isort: off
+from test._values import _API_Doc_Source, _API_Doc_Source_File, _Test_Request_With_Https
 from ._test_case import (
     PullOpenAPIDocConfigAsDividingConfigTestCaseFactory,
     SubCmdPullTestArgs,
 )
+
+# isort: on
 
 PullOpenAPIDocConfigAsDividingConfigTestCaseFactory.load()
 PULL_OPENAPI_DOC_AS_DIVIDING_CONFIG_TEST_CASE = PullOpenAPIDocConfigAsDividingConfigTestCaseFactory.get_test_case()

@@ -1,5 +1,17 @@
 import copy
 import re
+from typing import Any, List, Union
+
+import pytest
+
+from pymock_server.model.api_config.template.common import (
+    TemplateCommonConfig,
+    TemplateFormatConfig,
+    TemplateFormatEntity,
+)
+from pymock_server.model.api_config.variable import Variable
+
+# isort: off
 from test._values import (
     _Customize_Format,
     _Customize_Format_With_Self_Vars,
@@ -18,16 +30,8 @@ from test.unit_test.model.api_config._base import (
     _assertion_msg,
     set_checking_test_data,
 )
-from typing import Any, List, Union
 
-import pytest
-
-from pymock_server.model.api_config.template.common import (
-    TemplateCommonConfig,
-    TemplateFormatConfig,
-    TemplateFormatEntity,
-)
-from pymock_server.model.api_config.variable import Variable
+# isort: on
 
 _Template_Format_Config_Test_Data: List[tuple] = []
 _Template_Common_Config_Test_Data: List[tuple] = []

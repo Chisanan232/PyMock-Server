@@ -1,4 +1,13 @@
 import re
+from typing import Type
+
+import pytest
+
+from pymock_server.model.api_config import IteratorItem
+from pymock_server.model.api_config._base import _HasItemsPropConfig
+from pymock_server.model.api_config.apis import APIParameter, HTTPRequest
+
+# isort: off
 from test._values import (
     _Test_API_Parameter,
     _Test_Iterable_Parameter_Item_Name,
@@ -15,13 +24,8 @@ from test.unit_test.model.api_config._base import (
     set_checking_test_data,
 )
 from test.unit_test.model.api_config.template._base import TemplatableConfigTestSuite
-from typing import Type
 
-import pytest
-
-from pymock_server.model.api_config import IteratorItem
-from pymock_server.model.api_config._base import _HasItemsPropConfig
-from pymock_server.model.api_config.apis import APIParameter, HTTPRequest
+# isort: on
 
 
 class TestHTTPReqeust(TemplatableConfigTestSuite, CheckableTestSuite):

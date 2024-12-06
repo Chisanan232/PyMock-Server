@@ -1,9 +1,13 @@
-from test.unit_test.model._enums import EnumTestSuite
 from typing import Type, Union
 
 import pytest
 
 from pymock_server.model.rest_api_doc_config.content_type import ContentType
+
+# isort: off
+from test.unit_test.model._enums import EnumTestSuite
+
+# isort: on
 
 
 class TestContentType(EnumTestSuite):

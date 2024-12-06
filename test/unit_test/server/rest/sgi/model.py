@@ -1,3 +1,10 @@
+from unittest.mock import Mock, patch
+
+import pytest
+
+from pymock_server.server.rest.sgi._model import Command, CommandOptions
+
+# isort: off
 from test._values import (
     _Bind_Host_And_Port,
     _Cmd_Option,
@@ -5,11 +12,8 @@ from test._values import (
     _Test_Entry_Point,
     _Workers_Amount,
 )
-from unittest.mock import Mock, patch
 
-import pytest
-
-from pymock_server.server.rest.sgi._model import Command, CommandOptions
+# isort: on
 
 
 def _generate_cmd_option(option: _Cmd_Option) -> str:

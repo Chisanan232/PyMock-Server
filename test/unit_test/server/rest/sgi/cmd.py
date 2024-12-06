@@ -1,12 +1,5 @@
 import re
 from abc import ABCMeta, abstractmethod
-from test._values import (
-    _Bind_Host_And_Port,
-    _Log_Level,
-    _Test_Config,
-    _Test_SubCommand_Run,
-    _Workers_Amount,
-)
 from typing import Generic, Optional, Type, TypeVar
 from unittest.mock import Mock, patch
 
@@ -21,6 +14,18 @@ from pymock_server.server.rest.sgi.cmdoption import (
     BaseCommandOption,
     WSGICmdOption,
 )
+
+# isort: off
+from test._values import (
+    _Bind_Host_And_Port,
+    _Log_Level,
+    _Test_Config,
+    _Test_SubCommand_Run,
+    _Workers_Amount,
+)
+
+# isort: on
+
 
 BaseSGICmdType = TypeVar("BaseSGICmdType", bound=BaseSGIServer)
 

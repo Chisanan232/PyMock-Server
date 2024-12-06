@@ -1,13 +1,4 @@
 import re
-from test._values import (
-    _Base_URL,
-    _Config_Description,
-    _Config_Name,
-    _Test_Config,
-    _Test_HTTP_Resp,
-    _Test_URL,
-    _TestConfig,
-)
 from typing import Any, List, Union
 from unittest.mock import Mock, patch
 
@@ -17,6 +8,16 @@ from pymock_server import APIConfig
 from pymock_server.model import BaseConfig, MockAPI, MockAPIs
 from pymock_server.model.api_config import TemplateConfig
 
+# isort: off
+from test._values import (
+    _Base_URL,
+    _Config_Description,
+    _Config_Name,
+    _Test_Config,
+    _Test_HTTP_Resp,
+    _Test_URL,
+    _TestConfig,
+)
 from ._base import (
     MOCK_MODEL,
     MOCK_RETURN_VALUE,
@@ -25,6 +26,8 @@ from ._base import (
     _assertion_msg,
     set_checking_test_data,
 )
+
+# isort: on
 
 _APIConfig_Test_Data: List[tuple] = []
 _MockAPIs_Test_Data: List[tuple] = []

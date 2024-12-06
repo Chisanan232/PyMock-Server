@@ -1,5 +1,4 @@
 import re
-from test.unit_test.model._enums import EnumTestSuite
 from typing import Any, Type
 
 import pytest
@@ -8,6 +7,11 @@ from pymock_server.model.api_config.template._load.key import (
     ConfigLoadingOrder,
     set_loading_function,
 )
+
+# isort: off
+from test.unit_test.model._enums import EnumTestSuite
+
+# isort: on
 
 
 def test_set_loading_function():

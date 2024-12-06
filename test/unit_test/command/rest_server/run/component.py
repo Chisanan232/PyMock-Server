@@ -1,4 +1,13 @@
 import re
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
+
+from pymock_server.command.options import SubCommand, SysArg
+from pymock_server.command.rest_server.run.component import SubCmdRunComponent
+from pymock_server.model.cmd_args import SubcmdRunArguments
+
+# isort: off
 from test._values import (
     _Bind_Host_And_Port,
     _Log_Level,
@@ -7,13 +16,8 @@ from test._values import (
     _Test_SubCommand_Run,
     _Workers_Amount,
 )
-from unittest.mock import MagicMock, Mock, patch
 
-import pytest
-
-from pymock_server.command.options import SubCommand, SysArg
-from pymock_server.command.rest_server.run.component import SubCmdRunComponent
-from pymock_server.model.cmd_args import SubcmdRunArguments
+# isort: on
 
 
 class TestSubCmdRunComponent:

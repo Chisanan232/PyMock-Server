@@ -1,10 +1,12 @@
-from test._values import _Base_URL, _TestConfig
-
 import pytest
 
 from pymock_server.model.api_config import BaseConfig
 
+# isort: off
+from test._values import _Base_URL, _TestConfig
 from ._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
+
+# isort: on
 
 
 class TestBaseConfig(CheckableTestSuite):

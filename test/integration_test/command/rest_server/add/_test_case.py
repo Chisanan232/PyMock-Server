@@ -1,10 +1,14 @@
 import pathlib
 from collections import namedtuple
-from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath
-from test._values import _generate_response_for_add, _Test_Tag
 from typing import List, Tuple
 
 from pymock_server.model.api_config.apis import ResponseStrategy
+
+# isort: off
+from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath
+from test._values import _generate_response_for_add, _Test_Tag
+
+# isort: on
 
 # [(swagger_api_config_path, cmd_arg, expected_path)]
 ADD_AS_DIVIDING_YAML_PATHS: List[tuple] = []

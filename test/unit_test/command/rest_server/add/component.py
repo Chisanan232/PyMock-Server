@@ -1,10 +1,4 @@
 import re
-from test._values import (
-    _Test_Config,
-    _Test_Response_Strategy,
-    _Test_SubCommand_Add,
-    _Test_URL,
-)
 from typing import List, Optional
 from unittest.mock import MagicMock, Mock, patch
 
@@ -17,6 +11,16 @@ from pymock_server.command.rest_server.add.component import SubCmdAddComponent
 from pymock_server.model import generate_empty_config
 from pymock_server.model.api_config.apis import ResponseStrategy
 from pymock_server.model.cmd_args import SubcmdAddArguments
+
+# isort: off
+from test._values import (
+    _Test_Config,
+    _Test_Response_Strategy,
+    _Test_SubCommand_Add,
+    _Test_URL,
+)
+
+# isort: on
 
 
 class FakeSavingConfigComponent(SavingConfigComponent):

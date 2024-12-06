@@ -7,18 +7,6 @@ from abc import ABC, ABCMeta, abstractmethod
 from collections import namedtuple
 from copy import copy
 from decimal import Decimal
-from test._values import (
-    _Base_URL,
-    _Mock_Load_Config,
-    _Mock_Template_Apply_Has_Tag_Setting,
-    _Mock_Template_Common_Config_Format_Config,
-    _Mock_Template_Config_Activate,
-    _Test_API_Parameter,
-    _Test_HTTP_Resp,
-    _Test_Tag,
-    _Test_URL,
-    _TestConfig,
-)
 from typing import Callable, Dict, List, Optional, Type, Union
 from unittest.mock import Mock, PropertyMock, patch
 
@@ -58,6 +46,22 @@ from pymock_server.model.api_config.template.file import (
 )
 from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_server.model.api_config.variable import Variable
+
+# isort: off
+from test._values import (
+    _Base_URL,
+    _Mock_Load_Config,
+    _Mock_Template_Apply_Has_Tag_Setting,
+    _Mock_Template_Common_Config_Format_Config,
+    _Mock_Template_Config_Activate,
+    _Test_API_Parameter,
+    _Test_HTTP_Resp,
+    _Test_Tag,
+    _Test_URL,
+    _TestConfig,
+)
+
+# isort: on
 
 logger = logging.getLogger(__name__)
 
