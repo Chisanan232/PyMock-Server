@@ -1,6 +1,5 @@
+from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 from typing import List
-
-from ....._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 
 # _Test_Data: str = "./test/data/check_test/data_model/entire_api/valid/has-base-info_and_tags.yaml"
 _Test_Data: List[str] = []

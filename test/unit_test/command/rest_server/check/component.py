@@ -21,7 +21,8 @@ from pymock_server.model import (
     load_config,
 )
 
-from ....._values import (
+# isort: off
+from test._values import (
     _Bind_Host_And_Port,
     _Generate_Sample,
     _Log_Level,
@@ -36,6 +37,8 @@ from ._test_case import (
     SubCmdCheckComponentTestCaseFactory,
     SwaggerDiffCheckTestCaseFactory,
 )
+
+# isort: on
 
 
 def _given_parser_args(

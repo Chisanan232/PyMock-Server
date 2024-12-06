@@ -3,8 +3,9 @@ from argparse import Namespace
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
-from .._utils.file import Format
-from ..command.options import SysArg
+from pymock_server._utils.file import Format
+from pymock_server.command.options import SysArg
+
 from ._sample import SampleType
 from .api_config.apis import ResponseStrategy
 

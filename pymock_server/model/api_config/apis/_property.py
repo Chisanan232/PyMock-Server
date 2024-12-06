@@ -2,10 +2,10 @@ from abc import ABC
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Type
 
-from .._base import _Config, _HasItemsPropConfig
-from ..format import _HasFormatPropConfig
-from ..item import IteratorItem
-from ..template import _BaseTemplateAccessable
+from pymock_server.model.api_config._base import _Config, _HasItemsPropConfig
+from pymock_server.model.api_config.format import _HasFormatPropConfig
+from pymock_server.model.api_config.item import IteratorItem
+from pymock_server.model.api_config.template import _BaseTemplateAccessable
 
 
 @dataclass(eq=False)

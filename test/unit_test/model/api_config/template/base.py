@@ -1,5 +1,6 @@
 import copy
 from abc import ABCMeta, abstractmethod
+from test._values import _Mock_Template_Setting, _Test_Config_Value
 from typing import TypeVar
 
 import pytest
@@ -15,8 +16,6 @@ from pymock_server.model import (
 )
 from pymock_server.model.api_config import ResponseProperty
 from pymock_server.model.api_config.template import _BaseTemplateAccessable
-
-from ....._values import _Mock_Template_Setting, _Test_Config_Value
 
 _BaseTemplateAccessableType = TypeVar("_BaseTemplateAccessableType", bound=_BaseTemplateAccessable)
 

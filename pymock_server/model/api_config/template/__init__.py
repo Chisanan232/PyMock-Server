@@ -2,7 +2,8 @@ from abc import ABCMeta
 from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 
-from .._base import _Checkable, _Config
+from pymock_server.model.api_config._base import _Checkable, _Config
+
 from .common import TemplateCommonConfig
 from .file import TemplateFileConfig
 

@@ -3,7 +3,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import List, Optional, Union
 
-from ..._utils.random import (
+from pymock_server._utils.random import (
     DigitRange,
     RandomBigDecimal,
     RandomBoolean,

@@ -1,16 +1,15 @@
-from unittest.mock import Mock, patch
-
-import pytest
-
-from pymock_server.server.rest.sgi._model import Command, CommandOptions
-
-from ....._values import (
+from test._values import (
     _Bind_Host_And_Port,
     _Cmd_Option,
     _Log_Level,
     _Test_Entry_Point,
     _Workers_Amount,
 )
+from unittest.mock import Mock, patch
+
+import pytest
+
+from pymock_server.server.rest.sgi._model import Command, CommandOptions
 
 
 def _generate_cmd_option(option: _Cmd_Option) -> str:

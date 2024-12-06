@@ -1,4 +1,10 @@
 import pathlib
+from test._values import (
+    _Dummy_Add_Arg_Parameter,
+    _generate_response_for_add,
+    _Test_HTTP_Method,
+    _Test_URL,
+)
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
@@ -14,12 +20,6 @@ from pymock_server.model import (
 )
 from pymock_server.model.api_config.apis import ResponseStrategy
 
-from ....._values import (
-    _Dummy_Add_Arg_Parameter,
-    _generate_response_for_add,
-    _Test_HTTP_Method,
-    _Test_URL,
-)
 from ._test_case import AddMockAPIAsDividingConfigTestCaseFactory, SubCmdAddTestArgs
 
 _OpenAPI_Doc_Config: dict = {

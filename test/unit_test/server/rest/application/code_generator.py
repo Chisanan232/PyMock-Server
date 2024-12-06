@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
+from test._values import _Test_API_Parameters
 from typing import Dict, List, Optional, Union
 from unittest.mock import Mock, patch
 
@@ -12,8 +13,6 @@ from pymock_server.server.rest.application.code_generator import (
     FastAPICodeGenerator,
     FlaskCodeGenerator,
 )
-
-from ....._values import _Test_API_Parameters
 
 
 class WebServerCodeGeneratorTestSpec(metaclass=ABCMeta):

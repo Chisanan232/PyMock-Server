@@ -1,4 +1,8 @@
 import re
+from test._values import (
+    _Test_Response_Property_Details_Dict,
+    _Test_Response_Property_Str,
+)
 from typing import Any, Type
 
 import pytest
@@ -6,10 +10,6 @@ import pytest
 from pymock_server.model.api_config import IteratorItem
 from pymock_server.model.api_config._base import _HasItemsPropConfig
 
-from ...._values import (
-    _Test_Response_Property_Details_Dict,
-    _Test_Response_Property_Str,
-)
 from ._base import (
     CheckableTestSuite,
     HasFormatPropConfigTestSuite,

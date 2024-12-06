@@ -1,8 +1,7 @@
 import glob
 import os
+from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 from typing import List
-
-from ..._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 
 # [(under_test_path, expected_path)]
 DIVIDING_YAML_PATHS: List[tuple] = []

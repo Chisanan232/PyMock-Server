@@ -1,7 +1,6 @@
 import os
+from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 from typing import List, Union
-
-from ..._base_test_case import BaseTestCaseFactory, TestCaseDirPath
 
 # [("yaml_config_path", "get_api_path", "expected_exit_code")]
 GET_YAML_PATHS_WITH_EX_CODE: List[tuple] = []

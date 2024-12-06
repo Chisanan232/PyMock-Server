@@ -6,9 +6,9 @@ Interface) tool, e.g., *gunicorn*, etc.
 
 import os
 
+from pymock_server._utils.importing import ensure_importing, import_web_lib
 from pymock_server.server.rest.sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer
 
-from .._utils.importing import ensure_importing, import_web_lib
 from .mock import MockHTTPServer
 from .rest.application import BaseAppServer, FastAPIServer, FlaskServer
 from .rest.sgi import setup_server_gateway

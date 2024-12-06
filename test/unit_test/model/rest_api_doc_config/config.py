@@ -12,6 +12,11 @@ except ImportError:
     from http import HTTPStatus
     from pymock_server.model.http import HTTPMethod
 
+from test.unit_test.model.rest_api_doc_config._test_case import (
+    DeserializeV2OpenAPIConfigTestCaseFactory,
+    DeserializeV3OpenAPIConfigTestCaseFactory,
+)
+
 from pymock_server.exceptions import CannotParsingAPIDocumentVersion
 from pymock_server.model import MockAPI, OpenAPIVersion
 from pymock_server.model.api_config import APIConfig as PyMockEntireAPIConfig
@@ -50,11 +55,6 @@ from pymock_server.model.rest_api_doc_config.config import (
     get_api_doc_version,
 )
 from pymock_server.model.rest_api_doc_config.content_type import ContentType
-
-from ...model.rest_api_doc_config._test_case import (
-    DeserializeV2OpenAPIConfigTestCaseFactory,
-    DeserializeV3OpenAPIConfigTestCaseFactory,
-)
 
 logger = logging.getLogger(__name__)
 

@@ -1,20 +1,12 @@
 import random
 import re
-from typing import Any, Type
-
-import pytest
-
-from pymock_server.model.api_config import ResponseProperty, _Config
-from pymock_server.model.api_config._base import _HasItemsPropConfig
-from pymock_server.model.api_config.apis import HTTPResponse, ResponseStrategy
-
-from ....._values import (
+from test._values import (
     _Test_HTTP_Resp,
     _Test_Response_Property_Dict,
     _Test_Response_Property_List,
     _TestConfig,
 )
-from .._base import (
+from test.unit_test.model.api_config._base import (
     CheckableTestSuite,
     ConfigTestSpec,
     HasFormatPropConfigTestSuite,
@@ -23,7 +15,14 @@ from .._base import (
     _assertion_msg,
     set_checking_test_data,
 )
-from ..template._base import TemplatableConfigTestSuite
+from test.unit_test.model.api_config.template._base import TemplatableConfigTestSuite
+from typing import Any, Type
+
+import pytest
+
+from pymock_server.model.api_config import ResponseProperty, _Config
+from pymock_server.model.api_config._base import _HasItemsPropConfig
+from pymock_server.model.api_config.apis import HTTPResponse, ResponseStrategy
 
 
 class TestResponseProperty(ConfigTestSpec, HasFormatPropConfigTestSuite):

@@ -1,4 +1,5 @@
 import re
+from test._values import _Test_SubCommand_Add
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -8,8 +9,6 @@ from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.command.rest_server.sample.component import SubCmdSampleComponent
 from pymock_server.model._sample import SampleType
 from pymock_server.model.cmd_args import SubcmdSampleArguments
-
-from ....._values import _Test_SubCommand_Add
 
 
 class FakeYAML(YAML):
