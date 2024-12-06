@@ -22,7 +22,20 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from ..__pkg_info__ import __version__
 
-SUBCOMMAND: List[str] = ["rest-server"]
+
+@dataclass
+class SubCommand:
+    Base: str = "subcommand"
+    Rest_Server: str = "rest-server"
+    Run: str = "run"
+    Add: str = "add"
+    Check: str = "check"
+    Get: str = "get"
+    Sample: str = "sample"
+    Pull: str = "pull"
+
+
+SUBCOMMAND: List[str] = [SubCommand.Rest_Server]
 COMMAND_OPTIONS: List["MetaCommandOption"] = []
 
 
@@ -205,18 +218,6 @@ SUBCOMMAND_PARSER: List[SubCmdParser] = []
 class SubCommandSection:
     Base: str = "subcommands"
     Api_Server: str = "API server subcommands"
-
-
-@dataclass
-class SubCommand:
-    Base: str = "subcommand"
-    Rest_Server: str = "rest-server"
-    Run: str = "run"
-    Add: str = "add"
-    Check: str = "check"
-    Get: str = "get"
-    Sample: str = "sample"
-    Pull: str = "pull"
 
 
 class CommandOption:
