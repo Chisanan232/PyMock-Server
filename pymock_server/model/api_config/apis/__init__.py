@@ -4,18 +4,26 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from ...._utils import JSON, YAML
-from ...._utils.file import Format
-from .._base import _Checkable, _Config
-from ..template import TemplateConfig
-from ..template._base import _BaseTemplatableConfig
-from ..template._base_wrapper import _GeneralTemplatableConfig
-from ..template._divide import BeDividedableAsTemplatableConfig
-from ..template._load.process import (
+from pymock_server._utils import JSON, YAML
+from pymock_server._utils.file import Format
+from pymock_server.model.api_config._base import _Checkable, _Config
+from pymock_server.model.api_config.template import TemplateConfig
+from pymock_server.model.api_config.template._base import _BaseTemplatableConfig
+from pymock_server.model.api_config.template._base_wrapper import (
+    _GeneralTemplatableConfig,
+)
+from pymock_server.model.api_config.template._divide import (
+    BeDividedableAsTemplatableConfig,
+)
+from pymock_server.model.api_config.template._load.process import (
     TemplateConfigLoaderByScanFile,
     _BaseTemplateConfigLoader,
 )
-from ..template.file import TemplateConfigPathAPI, TemplateConfigPathHTTP
+from pymock_server.model.api_config.template.file import (
+    TemplateConfigPathAPI,
+    TemplateConfigPathHTTP,
+)
+
 from .request import APIParameter, HTTPRequest
 from .response import HTTPResponse, ResponseProperty
 from .response_strategy import ResponseStrategy

@@ -11,7 +11,8 @@ from pymock_server.model.api_config.template.common import (
 )
 from pymock_server.model.api_config.variable import Variable
 
-from ....._values import (
+# isort: off
+from test._values import (
     _Customize_Format,
     _Customize_Format_With_Self_Vars,
     _General_Enum_Format,
@@ -23,12 +24,14 @@ from ....._values import (
     _Test_Variables_BigDecimal_USD,
     _Test_Variables_Currency_Code,
 )
-from .._base import (
+from test.unit_test.model.api_config._base import (
     CheckableTestSuite,
     ConfigTestSpec,
     _assertion_msg,
     set_checking_test_data,
 )
+
+# isort: on
 
 _Template_Format_Config_Test_Data: List[tuple] = []
 _Template_Common_Config_Test_Data: List[tuple] = []

@@ -16,14 +16,15 @@ from pymock_server.model.api_config.apis import (
     ResponseStrategy,
 )
 
-from ....._values import (
+# isort: off
+from test._values import (
     _Test_Response_Properties,
     _Test_Response_Property_Dict,
     _Test_Tag,
     _Test_URL,
     _TestConfig,
 )
-from .._base import (
+from test.unit_test.model.api_config._base import (
     MOCK_MODEL,
     MOCK_RETURN_VALUE,
     CheckableTestSuite,
@@ -32,7 +33,9 @@ from .._base import (
     _assertion_msg,
     set_checking_test_data,
 )
-from ..template._base import TemplatableConfigTestSuite
+from test.unit_test.model.api_config.template._base import TemplatableConfigTestSuite
+
+# isort: on
 
 _MockAPI_Test_Data: List[tuple] = []
 _HTTP_Test_Data: List[tuple] = []

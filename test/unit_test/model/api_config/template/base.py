@@ -16,7 +16,10 @@ from pymock_server.model import (
 from pymock_server.model.api_config import ResponseProperty
 from pymock_server.model.api_config.template import _BaseTemplateAccessable
 
-from ....._values import _Mock_Template_Setting, _Test_Config_Value
+# isort: off
+from test._values import _Mock_Template_Setting, _Test_Config_Value
+
+# isort: on
 
 _BaseTemplateAccessableType = TypeVar("_BaseTemplateAccessableType", bound=_BaseTemplateAccessable)
 

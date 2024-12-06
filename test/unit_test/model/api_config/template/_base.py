@@ -2,8 +2,11 @@ from abc import ABC
 
 from pymock_server.model.api_config import _BaseTemplatableConfig
 
-from ....._values import _Mock_Templatable_Setting
-from .._base import ConfigTestSpec
+# isort: off
+from test._values import _Mock_Templatable_Setting
+from test.unit_test.model.api_config._base import ConfigTestSpec
+
+# isort: on
 
 
 class TemplatableConfigTestSuite(ConfigTestSpec, ABC):

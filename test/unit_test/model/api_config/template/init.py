@@ -4,8 +4,15 @@ import pytest
 
 from pymock_server.model.api_config.template import TemplateConfig
 
-from ....._values import _Mock_Template_Config_Activate, _Mock_Template_Setting
-from .._base import MOCK_MODEL, CheckableTestSuite, set_checking_test_data
+# isort: off
+from test._values import _Mock_Template_Config_Activate, _Mock_Template_Setting
+from test.unit_test.model.api_config._base import (
+    MOCK_MODEL,
+    CheckableTestSuite,
+    set_checking_test_data,
+)
+
+# isort: on
 
 _Template_Config_Test_Data: List[tuple] = []
 

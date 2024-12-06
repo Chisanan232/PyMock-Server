@@ -14,7 +14,10 @@ from pymock_server.model.rest_api_doc_config.config import (
 )
 from pymock_server.model.rest_api_doc_config.content_type import ContentType
 
-from ...._base_test_case import BaseTestCaseFactory, TestCaseDirPath
+# isort: off
+from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath
+
+# isort: on
 
 logger = logging.getLogger(__name__)
 

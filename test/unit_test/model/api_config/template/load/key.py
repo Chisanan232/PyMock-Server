@@ -8,7 +8,10 @@ from pymock_server.model.api_config.template._load.key import (
     set_loading_function,
 )
 
-from ...._enums import EnumTestSuite
+# isort: off
+from test.unit_test.model._enums import EnumTestSuite
+
+# isort: on
 
 
 def test_set_loading_function():

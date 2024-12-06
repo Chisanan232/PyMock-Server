@@ -14,13 +14,16 @@ from pymock_server.model import (
 )
 from pymock_server.model.api_config.apis import ResponseStrategy
 
-from ....._values import (
+# isort: off
+from test._values import (
     _Dummy_Add_Arg_Parameter,
     _generate_response_for_add,
     _Test_HTTP_Method,
     _Test_URL,
 )
 from ._test_case import AddMockAPIAsDividingConfigTestCaseFactory, SubCmdAddTestArgs
+
+# isort: on
 
 _OpenAPI_Doc_Config: dict = {
     "openapi": "3.0.2",

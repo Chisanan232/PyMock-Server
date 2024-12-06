@@ -34,7 +34,8 @@ from pymock_server.model.api_config.template.file import (
     TemplateFileConfig,
 )
 
-from ....._values import (
+# isort: off
+from test._values import (
     _Mock_Base_File_Path,
     _Mock_Load_Config,
     _Mock_Template_API_Request_Setting,
@@ -46,13 +47,15 @@ from ....._values import (
     _Mock_Template_HTTP_Setting,
     _Mock_Template_Values_Setting,
 )
-from .._base import (
+from test.unit_test.model.api_config._base import (
     MOCK_MODEL,
     CheckableTestSuite,
     ConfigTestSpec,
     set_checking_test_data,
 )
 from . import HasDefaultValueTestSuite, TemplateSettingTestSuite
+
+# isort: on
 
 _Template_File_Config_Test_Data: List[tuple] = []
 

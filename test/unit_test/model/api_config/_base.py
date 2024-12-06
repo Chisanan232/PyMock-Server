@@ -47,7 +47,8 @@ from pymock_server.model.api_config.template.file import (
 from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_server.model.api_config.variable import Variable
 
-from ...._values import (
+# isort: off
+from test._values import (
     _Base_URL,
     _Mock_Load_Config,
     _Mock_Template_Apply_Has_Tag_Setting,
@@ -59,6 +60,8 @@ from ...._values import (
     _Test_URL,
     _TestConfig,
 )
+
+# isort: on
 
 logger = logging.getLogger(__name__)
 

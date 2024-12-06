@@ -14,7 +14,8 @@ from pymock_server.model import (
     deserialize_args,
 )
 
-from ..._values import (
+# isort: off
+from test._values import (
     _API_Doc_Source,
     _Base_URL,
     _Bind_Host_And_Port,
@@ -32,6 +33,8 @@ from ..._values import (
     _Test_SubCommand_Run,
     _Workers_Amount,
 )
+
+# isort: on
 
 
 @patch.object(DeserializeParsedArgs, "subcommand_run")

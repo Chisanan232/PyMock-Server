@@ -51,10 +51,13 @@ from pymock_server.model.rest_api_doc_config.config import (
 )
 from pymock_server.model.rest_api_doc_config.content_type import ContentType
 
-from ...model.rest_api_doc_config._test_case import (
+# isort: off
+from test.unit_test.model.rest_api_doc_config._test_case import (
     DeserializeV2OpenAPIConfigTestCaseFactory,
     DeserializeV3OpenAPIConfigTestCaseFactory,
 )
+
+# isort: on
 
 logger = logging.getLogger(__name__)
 

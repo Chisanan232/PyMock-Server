@@ -9,7 +9,10 @@ from pymock_server.server.rest.sgi.cmdoption import (
     WSGICmdOption,
 )
 
-from ....._values import _Bind_Host_And_Port, _Log_Level, _Workers_Amount
+# isort: off
+from test._values import _Bind_Host_And_Port, _Log_Level, _Workers_Amount
+
+# isort: on
 
 
 class BaseCommandOptionTest(metaclass=ABCMeta):

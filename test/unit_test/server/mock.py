@@ -14,7 +14,10 @@ from pymock_server.server.rest.application import (
     HTTPResponseProcess,
 )
 
-from ..._values import _Test_Config
+# isort: off
+from test._values import _Test_Config
+
+# isort: on
 
 mock_api_config = Mock(APIConfig(name=Mock(), description=Mock(), apis=Mock(MockAPIs(base=Mock(), apis=Mock()))))
 

@@ -6,13 +6,16 @@ import pytest
 from pymock_server._utils.random import ValueSize
 from pymock_server.model.api_config.variable import Digit, Size, Variable
 
-from ...._values import (
+# isort: off
+from test._values import (
     _Test_Digit_In_Format,
     _Test_Size_In_Format,
     _Test_Variables_BigDecimal_USD,
     _Test_Variables_Currency_Code,
 )
 from ._base import CheckableTestSuite, _assertion_msg, set_checking_test_data
+
+# isort: on
 
 _Size_Test_Data: List[tuple] = []
 _Digit_Test_Data: List[tuple] = []

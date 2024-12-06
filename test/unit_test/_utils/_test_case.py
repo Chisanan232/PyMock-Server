@@ -1,6 +1,9 @@
 from typing import List
 
-from ..._base_test_case import BaseTestCaseFactory, TestCaseDirPath
+# isort: off
+from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath
+
+# isort: on
 
 RESPONSE_JSON_PATHS: List[str] = []
 

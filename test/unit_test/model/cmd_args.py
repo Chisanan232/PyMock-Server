@@ -17,7 +17,8 @@ from pymock_server.model.cmd_args import (
     SubcmdSampleArguments,
 )
 
-from ..._values import (
+# isort: off
+from test._values import (
     _API_Doc_Source,
     _API_Doc_Source_File,
     _Base_URL,
@@ -54,6 +55,8 @@ from ..._values import (
     _Test_URL,
     _Workers_Amount,
 )
+
+# isort: on
 
 check_attrs = namedtuple("check_attrs", ("entire_check", "api_path", "http_method", "api_parameters"))
 expected_check_attrs = namedtuple("expected_check_attrs", ("entire_check", "api_path", "http_method", "api_parameters"))

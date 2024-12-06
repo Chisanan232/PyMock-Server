@@ -5,7 +5,10 @@ import pytest
 
 from pymock_server.model import OpenAPIVersion
 
-from .._enums import EnumTestSuite
+# isort: off
+from test.unit_test.model._enums import EnumTestSuite
+
+# isort: on
 
 
 class TestOpenAPIVersion(EnumTestSuite):

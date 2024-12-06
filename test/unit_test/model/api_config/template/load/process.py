@@ -9,9 +9,12 @@ from pymock_server.model.api_config import (
 )
 from pymock_server.model.api_config.template._load.process import TemplateConfigOpts
 
-from .._test_case import (
+# isort: off
+from test.unit_test.model.api_config.template._test_case import (
     DeserializeAPIConfigFromYamlTestCaseFactory as test_case_factory,
 )
+
+# isort: on
 
 test_case_factory.load()
 _Test_Data: List[str] = test_case_factory.get_test_case()

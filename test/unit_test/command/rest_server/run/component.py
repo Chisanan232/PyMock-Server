@@ -7,7 +7,8 @@ from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.command.rest_server.run.component import SubCmdRunComponent
 from pymock_server.model.cmd_args import SubcmdRunArguments
 
-from ....._values import (
+# isort: off
+from test._values import (
     _Bind_Host_And_Port,
     _Log_Level,
     _Test_Auto_Type,
@@ -15,6 +16,8 @@ from ....._values import (
     _Test_SubCommand_Run,
     _Workers_Amount,
 )
+
+# isort: on
 
 
 class TestSubCmdRunComponent:

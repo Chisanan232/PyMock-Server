@@ -3,11 +3,11 @@ import os
 import sys
 from argparse import ArgumentParser
 
-from ....model import APIConfig, MockAPI, generate_empty_config, load_config
-from ....model.api_config.apis.response_strategy import ResponseStrategy
-from ....model.cmd_args import SubcmdAddArguments
-from ..._common.component import SavingConfigComponent
-from ..component import BaseSubCmdComponent
+from pymock_server.command._common.component import SavingConfigComponent
+from pymock_server.command.component import BaseSubCmdComponent
+from pymock_server.model import APIConfig, MockAPI, generate_empty_config, load_config
+from pymock_server.model.api_config.apis.response_strategy import ResponseStrategy
+from pymock_server.model.cmd_args import SubcmdAddArguments
 
 logger = logging.getLogger(__name__)
 

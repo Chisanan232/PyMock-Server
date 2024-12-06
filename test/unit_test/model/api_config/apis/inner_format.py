@@ -16,14 +16,17 @@ from pymock_server.model.api_config.template.common import (
 from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_server.model.api_config.variable import Digit, Size, Variable
 
-from ....._test_utils import Verify
-from ....._values import _Customize_Format_With_Self_Vars, _General_Format
-from .._base import (
+# isort: off
+from test._test_utils import Verify
+from test._values import _Customize_Format_With_Self_Vars, _General_Format
+from test.unit_test.model.api_config._base import (
     CheckableTestSuite,
     ConfigTestSpec,
     _assertion_msg,
     set_checking_test_data,
 )
+
+# isort: on
 
 
 class TestFormatWithGeneralStrategy(ConfigTestSpec):

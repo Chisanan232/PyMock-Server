@@ -7,8 +7,11 @@ import pytest
 from pymock_server._utils.random import DigitRange, ValueSize
 from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
 
-from ...._test_utils import Verify
-from .._enums import EnumTestSuite
+# isort: off
+from test._test_utils import Verify
+from test.unit_test.model._enums import EnumTestSuite
+
+# isort: on
 
 
 class TestValueFormat(EnumTestSuite):

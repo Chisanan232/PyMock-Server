@@ -4,7 +4,10 @@ import pytest
 
 from pymock_server.model.api_config.apis import ResponseStrategy
 
-from ..._enums import EnumTestSuite
+# isort: off
+from test.unit_test.model._enums import EnumTestSuite
+
+# isort: on
 
 
 class TestResponseStrategy(EnumTestSuite):

@@ -8,7 +8,8 @@ from pymock_server import APIConfig
 from pymock_server.model import BaseConfig, MockAPI, MockAPIs
 from pymock_server.model.api_config import TemplateConfig
 
-from ...._values import (
+# isort: off
+from test._values import (
     _Base_URL,
     _Config_Description,
     _Config_Name,
@@ -25,6 +26,8 @@ from ._base import (
     _assertion_msg,
     set_checking_test_data,
 )
+
+# isort: on
 
 _APIConfig_Test_Data: List[tuple] = []
 _MockAPIs_Test_Data: List[tuple] = []

@@ -7,8 +7,9 @@ import logging
 import os
 from typing import Any, Dict, List, Optional, Union
 
-from ..._utils import YAML
-from ..._utils.file.operation import _BaseFileOperation
+from pymock_server._utils import YAML
+from pymock_server._utils.file.operation import _BaseFileOperation
+
 from ._base import _Checkable, _Config
 from .apis import (
     HTTP,

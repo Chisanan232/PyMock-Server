@@ -1,10 +1,10 @@
 import logging
 from argparse import ArgumentParser
 
-from ...._utils import YAML
-from ....model._sample import get_sample_by_type
-from ....model.cmd_args import SubcmdSampleArguments
-from ..component import BaseSubCmdComponent
+from pymock_server._utils import YAML
+from pymock_server.command.component import BaseSubCmdComponent
+from pymock_server.model._sample import get_sample_by_type
+from pymock_server.model.cmd_args import SubcmdSampleArguments
 
 logger = logging.getLogger(__name__)
 

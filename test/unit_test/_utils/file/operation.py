@@ -3,11 +3,6 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-try:
-    pass
-except ImportError:
-    pass
-
 from pymock_server._utils.file.operation import JSON, YAML, _BaseFileOperation
 
 

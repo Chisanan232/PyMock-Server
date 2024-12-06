@@ -2,10 +2,13 @@ from dataclasses import dataclass, field
 from pydoc import locate
 from typing import Any, Dict, List, Optional, Union
 
-from ...._utils.file.operation import YAML, _BaseFileOperation
-from .._base import _Checkable, _Config
-from ..template._base_wrapper import _DividableOnlyTemplatableConfig
-from ..template.file import TemplateConfigPathRequest
+from pymock_server._utils.file.operation import YAML, _BaseFileOperation
+from pymock_server.model.api_config._base import _Checkable, _Config
+from pymock_server.model.api_config.template._base_wrapper import (
+    _DividableOnlyTemplatableConfig,
+)
+from pymock_server.model.api_config.template.file import TemplateConfigPathRequest
+
 from ._property import BaseProperty
 
 

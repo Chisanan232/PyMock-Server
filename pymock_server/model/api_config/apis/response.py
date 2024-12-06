@@ -5,9 +5,12 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from .._base import _Checkable, _Config
-from ..template._base_wrapper import _DividableOnlyTemplatableConfig
-from ..template.file import TemplateConfigPathResponse
+from pymock_server.model.api_config._base import _Checkable, _Config
+from pymock_server.model.api_config.template._base_wrapper import (
+    _DividableOnlyTemplatableConfig,
+)
+from pymock_server.model.api_config.template.file import TemplateConfigPathResponse
+
 from ._property import BaseProperty
 from .response_strategy import ResponseStrategy
 
