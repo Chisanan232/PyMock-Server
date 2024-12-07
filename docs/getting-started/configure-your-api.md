@@ -129,7 +129,7 @@ If you're meticulous in configuring and developing, **_PyMock-Server_** also pro
 configuration validation:
 
 ```console
-mock-api check -p <configuration path>
+mock rest-server check -p <configuration path>
 ```
 
 It would check everywhere of configuration and make sure your configuration is valid for running.
