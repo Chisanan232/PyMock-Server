@@ -25,13 +25,13 @@ From above settings, it means setting an API:
 * Allow HTTP request method _GET_ without parameters
 * If request successfully, it would return value ``This is Foo home API.``.
 
-And save above setting as file ``/User/foo/mock-api-demo/api.yaml``.
+And save above setting as file ``/User/foo/mock-server-demo/api.yaml``.
 
 Let's set up an instance to provide service:
 
 ```console
 docker run --name mock-server \
-           -v /User/foo/mock-api-demo:/mit-pymock-server \
+           -v /User/foo/mock-server-demo:/mit-pymock-server \
            -p 9672:9672 \
            -d \
            pymock-server:v0.1.0

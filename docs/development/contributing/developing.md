@@ -165,13 +165,13 @@ Run the command line directly to be closer in usage as a developers:
 === "Out of Poetry shell"
     
     ```console
-    poetry run mock-api --help
+    poetry run mock --help
     ```
 
 === "Within Poetry shell"
     
     ```console
-    mock-api --help
+    mock --help
     ```
 
 ??? question "How to access into **Poetry** shell"

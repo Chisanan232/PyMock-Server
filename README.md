@@ -61,12 +61,12 @@ Then it would only install the lowest Python dependencies you need.
 After you done above step, please make sure the command line tool feature should work finely by below command:
 
 ```console
->>> mock-api --help
+>>> mock --help
 ```
 
 > **Note**
 >
-> Please take a look at option _--app-type_ (this option is in subcommand **_mock-api run_**) of the command line tool. Its option
+> Please take a look at option _--app-type_ (this option is in subcommand **_mock run_**) of the command line tool. Its option
 > value could be ``auto``, ``flask`` or ``fastapi``. It means that **_PyMock-Server_** only supports 2 Python web frameworks: **_Flask_**
 > and **_FastAPI_**.
 
@@ -93,7 +93,7 @@ mocked_apis:
 Now, both of the command line tool and configuration have been already. So let's try to run the command to set up application!
 
 ```console
->>> mock-api run -c <your configuration path>
+>>> mock rest-server run -c <your configuration path>
 ```
 
 You would see some log messages in terminal and that is the log of web server by one specific Python web framework.

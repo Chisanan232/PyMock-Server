@@ -159,8 +159,8 @@ docker images pymock-server
 No matter which way to install **_PyMock-Server_**, it must verify whether the command line tool is ready for working or not.
 
 ```console
-mock-api --help
+mock --help
 ```
 
-If it outputs some usage info about the command ``mock-api``, congratulation! You could start to enjoy easily and quickly
+If it outputs some usage info about the command ``mock``, congratulation! You could start to enjoy easily and quickly
 mock API.
