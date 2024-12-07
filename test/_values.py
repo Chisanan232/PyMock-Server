@@ -1,4 +1,5 @@
 from collections import namedtuple
+from dataclasses import dataclass
 from typing import Dict, List, Tuple, Union
 from unittest.mock import Mock
 
@@ -753,3 +754,15 @@ _Test_Divide_Api: bool = False
 _Test_Divide_Http: bool = False
 _Test_Divide_Http_Request: bool = False
 _Test_Divide_Http_Response: bool = False
+
+
+@dataclass
+class SubCommand:
+    Base: str = "subcommand"
+    RestServer: str = "rest-server"
+    Run: str = "run"
+    Add: str = "add"
+    Check: str = "check"
+    Get: str = "get"
+    Sample: str = "sample"
+    Pull: str = "pull"

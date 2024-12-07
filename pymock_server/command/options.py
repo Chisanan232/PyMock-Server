@@ -17,25 +17,20 @@ import copy
 import re
 import sys
 from collections import namedtuple
-from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
 
-from ..__pkg_info__ import __version__
+from pymock_server.__pkg_info__ import __version__
 
+from ..model.subcmd_common import (
+    SubCmdParser,
+    SubCmdParserAction,
+    SubCommandAttr,
+    SubParserAttr,
+    SysArg,
+)
+from .subcommand import SubCommandLine, SubCommandSection
 
-@dataclass
-class SubCommand:
-    Base: str = "subcommand"
-    Rest_Server: str = "rest-server"
-    Run: str = "run"
-    Add: str = "add"
-    Check: str = "check"
-    Get: str = "get"
-    Sample: str = "sample"
-    Pull: str = "pull"
-
-
-SUBCOMMAND: List[str] = [SubCommand.Rest_Server]
+SUBCOMMAND: List[str] = [SubCommandLine.RestServer.value]
 COMMAND_OPTIONS: List["MetaCommandOption"] = []
 
 
@@ -57,41 +52,6 @@ def make_options() -> List["CommandOption"]:
             raise ValueError(f"The object {option.__class__}'s attribute *cli_option* cannot be None or empty value.")
         mock_api_cmd_options.append(option.copy())
     return mock_api_cmd_options
-
-
-@dataclass
-class SysArg:
-    subcmd: str
-    pre_subcmd: Optional["SysArg"] = None
-
-    @staticmethod
-    def parse(args: List[str]) -> "SysArg":
-        if not args:
-            return SysArg(subcmd="base")
-
-        no_pyfile_subcmds = list(filter(lambda a: not re.search(r".{1,1024}.py", a), args))
-        subcmds = []
-        for subcmd_or_options in no_pyfile_subcmds:
-            search_subcmd = re.search(r"-.{1,256}", subcmd_or_options)
-            if search_subcmd and len(search_subcmd.group(0)) == len(subcmd_or_options):
-                break
-            subcmds.append(subcmd_or_options)
-
-        if len(subcmds) == 0:
-            return SysArg(subcmd="base")
-        elif len(subcmds) == 1:
-            return SysArg(
-                pre_subcmd=SysArg(
-                    pre_subcmd=None,
-                    subcmd="base",
-                ),
-                subcmd=subcmds[0],
-            )
-        else:
-            return SysArg(
-                pre_subcmd=SysArg.parse(subcmds[:-1]),
-                subcmd=subcmds[-1],
-            )
 
 
 class MockAPICommandParser:
@@ -146,9 +106,6 @@ class MockAPICommandParser:
         return self.parser
 
 
-SubCommandAttr = namedtuple("SubCommandAttr", ["title", "dest", "description", "help"])
-SubParserAttr = namedtuple("SubParserAttr", ["name", "help"])
-
 _ClsNamingFormat = namedtuple("_ClsNamingFormat", ["ahead", "tail"])
 _ClsNamingFormat.ahead = "BaseSubCmd"
 _ClsNamingFormat.tail = "Option"
@@ -185,44 +142,12 @@ class MetaCommandOption(type):
         return new_class
 
 
-@dataclass
-class SubCmdParserAction:
-    subcmd_name: str
-    subcmd_parser: argparse._SubParsersAction
-
-
-@dataclass
-class SubCmdParser:
-    in_subcmd: str
-    parser: argparse.ArgumentParser
-    sub_parser: List["SubCmdParser"]
-
-    def find(self, subcmd: str) -> Optional[argparse.ArgumentParser]:
-        if subcmd == self.in_subcmd:
-            return self.parser
-        else:
-            if self.sub_parser:
-                all_subcmd_parser = list(map(lambda sp: sp.find(subcmd), self.sub_parser))
-                exist_subcmd_parser = list(filter(lambda sp: sp is not None, all_subcmd_parser))
-                if exist_subcmd_parser:
-                    return exist_subcmd_parser[0]
-                return None
-            else:
-                return None
-
-
 SUBCOMMAND_PARSER: List[SubCmdParser] = []
-
-
-@dataclass
-class SubCommandSection:
-    Base: str = "subcommands"
-    Api_Server: str = "API server subcommands"
 
 
 class CommandOption:
     sub_cmd: Optional[SubCommandAttr] = None
-    in_sub_cmd: str = SubCommand.Base
+    in_sub_cmd: SubCommandLine = SubCommandLine.Base
     sub_parser: Optional[SubParserAttr] = None
     cli_option: str
     name: Optional[str] = None
@@ -291,19 +216,19 @@ class CommandOption:
         if self.sub_cmd and self.sub_parser:
 
             # initial the sub-command line parser collection first if it's empty.
-            if self._find_subcmd_parser_action(SubCommand.Base) is None:
+            if self._find_subcmd_parser_action(SubCommandLine.Base) is None:
                 sub_cmd: SubCommandAttr = SubCommandAttr(
                     title=SubCommandSection.Base,
-                    dest=SubCommand.Base,
+                    dest=SubCommandLine.Base,
                     description="",
                     help="",
                 )
                 self._subparser.append(
                     SubCmdParserAction(
-                        subcmd_name=SubCommand.Base,
+                        subcmd_name=SubCommandLine.Base,
                         subcmd_parser=parser.add_subparsers(
-                            title=sub_cmd.title,
-                            dest=sub_cmd.dest,
+                            title=sub_cmd.title.value,
+                            dest=sub_cmd.dest.value,
                             description=sub_cmd.description,
                             help=sub_cmd.help,
                         ),
@@ -316,9 +241,9 @@ class CommandOption:
                 # Add parser first
                 _base_subcmd_parser_action = subcmd_parser_action
                 if _base_subcmd_parser_action is None:
-                    _base_subcmd_parser_action = self._find_subcmd_parser_action(SubCommand.Base)
+                    _base_subcmd_parser_action = self._find_subcmd_parser_action(SubCommandLine.Base)
                 _parser = _base_subcmd_parser_action.subcmd_parser.add_parser(  # type: ignore[union-attr]
-                    name=self.sub_cmd.dest, help=self.sub_cmd.help  # type: ignore[union-attr]
+                    name=self.sub_cmd.dest.value, help=self.sub_cmd.help  # type: ignore[union-attr]
                 )
                 global SUBCOMMAND_PARSER
                 SUBCOMMAND_PARSER.append(
@@ -330,14 +255,15 @@ class CommandOption:
                 )
 
                 # Add sub-command line parser
+                assert self.sub_cmd is not None
                 self._subparser.append(
                     SubCmdParserAction(
                         subcmd_name=self.in_sub_cmd,
                         subcmd_parser=_parser.add_subparsers(
-                            title=self.sub_cmd.title,  # type: ignore[union-attr]
-                            dest=self.sub_cmd.dest,  # type: ignore[union-attr]
-                            description=self.sub_cmd.description,  # type: ignore[union-attr]
-                            help=self.sub_cmd.help,  # type: ignore[union-attr]
+                            title=self.sub_cmd.title.value,
+                            dest=self.sub_cmd.dest.value,
+                            description=self.sub_cmd.description,
+                            help=self.sub_cmd.help,
                         ),
                     ),
                 )
@@ -348,8 +274,9 @@ class CommandOption:
 
             subcmd_parser_model = self._find_subcmd_parser(self.sub_parser.name)
             if subcmd_parser_model is None:
-                parser = subcmd_parser_action.subcmd_parser.add_parser(  # type: ignore[union-attr]
-                    name=self.sub_parser.name, help=self.sub_parser.help
+                assert subcmd_parser_action is not None
+                parser = subcmd_parser_action.subcmd_parser.add_parser(
+                    name=self.sub_parser.name.value, help=self.sub_parser.help
                 )
                 global SUBCOMMAND_PARSER
                 SUBCOMMAND_PARSER.append(
@@ -363,13 +290,13 @@ class CommandOption:
                 parser = subcmd_parser_model.parser
         return parser
 
-    def _find_subcmd_parser(self, subcmd_name: str) -> Optional[SubCmdParser]:
+    def _find_subcmd_parser(self, subcmd_name: SubCommandLine) -> Optional[SubCmdParser]:
         mapping_subcmd_parser = list(filter(lambda e: e.find(subcmd_name) is not None, SUBCOMMAND_PARSER))
         return mapping_subcmd_parser[0] if mapping_subcmd_parser else None
 
-    def _find_subcmd_parser_action(self, subcmd_name: str = "") -> Optional[SubCmdParserAction]:
-        mapping_subcmd_parser_action = list(
-            filter(lambda e: e.subcmd_name == (subcmd_name if subcmd_name else self.in_sub_cmd), self._subparser)
+    def _find_subcmd_parser_action(self, subcmd_name: SubCommandLine) -> Optional[SubCmdParserAction]:
+        mapping_subcmd_parser_action: List[SubCmdParserAction] = list(
+            filter(lambda e: e.subcmd_name is subcmd_name, self._subparser)
         )
         return mapping_subcmd_parser_action[0] if mapping_subcmd_parser_action else None
 
@@ -377,7 +304,7 @@ class CommandOption:
 class BaseSubCommand(CommandOption):
     sub_cmd: SubCommandAttr = SubCommandAttr(
         title=SubCommandSection.Base,
-        dest=SubCommand.Base,
+        dest=SubCommandLine.Base,
         description="",
         help="",
     )
@@ -385,17 +312,17 @@ class BaseSubCommand(CommandOption):
 
 class BaseSubCommandRestServer(CommandOption):
     sub_cmd: SubCommandAttr = SubCommandAttr(
-        title=SubCommandSection.Api_Server,
-        dest=SubCommand.Rest_Server,
+        title=SubCommandSection.ApiServer,
+        dest=SubCommandLine.RestServer,
         description="Some operations for mocking REST API server.",
         help="Set up an application to mock HTTP server which adopts REST API to communicate between client and server.",
     )
-    in_sub_cmd = SubCommand.Rest_Server
+    in_sub_cmd = SubCommandLine.RestServer
 
 
 class SubCommandRunOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Run,
+        name=SubCommandLine.Run,
         help="Set up APIs with configuration and run a web application to mock them.",
     )
     option_value_type: type = str
@@ -403,7 +330,7 @@ class SubCommandRunOption(BaseSubCommandRestServer):
 
 class SubCommandAddOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Add,
+        name=SubCommandLine.Add,
         help="Something processing about configuration, i.e., generate a sample configuration or validate configuration"
         " content.",
     )
@@ -411,28 +338,28 @@ class SubCommandAddOption(BaseSubCommandRestServer):
 
 class SubCommandCheckOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Check,
+        name=SubCommandLine.Check,
         help="Check the validity of *PyMock-Server* configuration.",
     )
 
 
 class SubCommandGetOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Get,
+        name=SubCommandLine.Get,
         help="Do some comprehensive inspection for configuration.",
     )
 
 
 class SubCommandSampleOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Sample,
+        name=SubCommandLine.Sample,
         help="Quickly display or generate a sample configuration helps to use this tool.",
     )
 
 
 class SubCommandPullOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
-        name=SubCommand.Pull,
+        name=SubCommandLine.Pull,
         help="Pull the API details from one specific source, e.g., Swagger API documentation.",
     )
 

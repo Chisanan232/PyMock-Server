@@ -4,13 +4,13 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 
 from pymock_server._utils.file.operation import YAML
-from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.command.rest_server.sample.component import SubCmdSampleComponent
 from pymock_server.model._sample import SampleType
 from pymock_server.model.cmd_args import SubcmdSampleArguments
+from pymock_server.model.subcmd_common import SysArg
 
 # isort: off
-from test._values import _Test_SubCommand_Add
+from test._values import SubCommand
 
 # isort: on
 
@@ -30,8 +30,7 @@ class TestSubCmdSampleComponent:
         FakeYAML.write = MagicMock()
 
         invalid_args = SubcmdSampleArguments(
-            subparser_name=_Test_SubCommand_Add,
-            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
+            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
             print_sample=False,
             generate_sample=True,
             sample_output_path="",

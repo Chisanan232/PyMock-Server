@@ -3,17 +3,17 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.command.rest_server.run.component import SubCmdRunComponent
 from pymock_server.model.cmd_args import SubcmdRunArguments
+from pymock_server.model.subcmd_common import SysArg
 
 # isort: off
 from test._values import (
+    SubCommand,
     _Bind_Host_And_Port,
     _Log_Level,
     _Test_Auto_Type,
     _Test_Config,
-    _Test_SubCommand_Run,
     _Workers_Amount,
 )
 
@@ -40,8 +40,7 @@ class TestSubCmdRunComponent:
         component._server_gateway = mock_server_gateway
 
         invalid_args = SubcmdRunArguments(
-            subparser_name=_Test_SubCommand_Run,
-            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Run]),
+            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Run]),
             app_type="",
             config=_Test_Config,
             bind=_Bind_Host_And_Port.value,

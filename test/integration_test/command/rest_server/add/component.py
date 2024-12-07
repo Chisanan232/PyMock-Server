@@ -4,7 +4,6 @@ from unittest.mock import Mock, PropertyMock, patch
 import pytest
 
 from pymock_server.command._common.component import SavingConfigComponent
-from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.command.rest_server.add.component import SubCmdAddComponent
 from pymock_server.model import (
     SubcmdAddArguments,
@@ -13,9 +12,11 @@ from pymock_server.model import (
     load_config,
 )
 from pymock_server.model.api_config.apis import ResponseStrategy
+from pymock_server.model.subcmd_common import SysArg
 
 # isort: off
 from test._values import (
+    SubCommand,
     _Dummy_Add_Arg_Parameter,
     _generate_response_for_add,
     _Test_HTTP_Method,
@@ -113,8 +114,7 @@ class TestSubCmdAddComponent:
             # Not dry run
             # Doesn't include template section config
             SubcmdAddArguments(
-                subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./api.yaml",
                 # new mock API
                 tag="",
@@ -134,8 +134,7 @@ class TestSubCmdAddComponent:
                 dry_run=False,
             ),
             SubcmdAddArguments(
-                subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./test_dir/api.yaml",
                 # new mock API
                 tag="",
@@ -157,8 +156,7 @@ class TestSubCmdAddComponent:
             # Not dry run
             # Include template section config
             SubcmdAddArguments(
-                subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./api.yaml",
                 # new mock API
                 tag="",
@@ -178,8 +176,7 @@ class TestSubCmdAddComponent:
                 dry_run=False,
             ),
             SubcmdAddArguments(
-                subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./test_dir/api.yaml",
                 # new mock API
                 tag="",
@@ -201,8 +198,7 @@ class TestSubCmdAddComponent:
             # Dry run
             # Doesn't include template section config
             SubcmdAddArguments(
-                subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./api.yaml",
                 # new mock API
                 tag="",
@@ -222,8 +218,7 @@ class TestSubCmdAddComponent:
                 dry_run=True,
             ),
             SubcmdAddArguments(
-                subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./test_dir/api.yaml",
                 # new mock API
                 tag="",
@@ -245,8 +240,7 @@ class TestSubCmdAddComponent:
             # Dry run
             # Include template section config
             SubcmdAddArguments(
-                subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./api.yaml",
                 # new mock API
                 tag="",
@@ -266,8 +260,7 @@ class TestSubCmdAddComponent:
                 dry_run=True,
             ),
             SubcmdAddArguments(
-                subparser_name=SubCommand.Add,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
                 config_path="./test_dir/api.yaml",
                 # new mock API
                 tag="",
@@ -333,8 +326,7 @@ class TestSubCmdAddComponent:
             under_test_dir.mkdir(parents=True)
         ut_config_path = str(pathlib.Path(under_test_dir, "api.yaml"))
         cmd_args = SubcmdAddArguments(
-            subparser_name=SubCommand.Add,
-            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Add]),
+            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
             config_path=ut_config_path,
             # new mock API
             tag=cmd_arg.tag,
