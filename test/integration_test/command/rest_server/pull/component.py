@@ -4,7 +4,6 @@ from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 
-from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.command.rest_server.pull.component import SubCmdPullComponent
 from pymock_server.model import (
     SubcmdPullArguments,
@@ -13,9 +12,15 @@ from pymock_server.model import (
 )
 from pymock_server.model.api_config import DivideStrategy, TemplateConfig
 from pymock_server.model.rest_api_doc_config.base_config import set_component_definition
+from pymock_server.model.subcmd_common import SysArg
 
 # isort: off
-from test._values import _API_Doc_Source, _API_Doc_Source_File, _Test_Request_With_Https
+from test._values import (
+    SubCommand,
+    _API_Doc_Source,
+    _API_Doc_Source_File,
+    _Test_Request_With_Https,
+)
 from ._test_case import (
     PullOpenAPIDocConfigAsDividingConfigTestCaseFactory,
     SubCmdPullTestArgs,
@@ -110,8 +115,7 @@ class TestSubCmdPullComponent:
             # Not dry run
             # Doesn't include template section config
             SubcmdPullArguments(
-                subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -126,8 +130,7 @@ class TestSubCmdPullComponent:
                 divide_http_response=False,
             ),
             SubcmdPullArguments(
-                subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -144,8 +147,7 @@ class TestSubCmdPullComponent:
             # Not dry run
             # Include template section config
             SubcmdPullArguments(
-                subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -160,8 +162,7 @@ class TestSubCmdPullComponent:
                 divide_http_response=False,
             ),
             SubcmdPullArguments(
-                subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -178,8 +179,7 @@ class TestSubCmdPullComponent:
             # Dry run
             # Doesn't include template section config
             SubcmdPullArguments(
-                subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -194,8 +194,7 @@ class TestSubCmdPullComponent:
                 divide_http_response=False,
             ),
             SubcmdPullArguments(
-                subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -212,8 +211,7 @@ class TestSubCmdPullComponent:
             # Dry run
             # Include template section config
             SubcmdPullArguments(
-                subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -228,8 +226,7 @@ class TestSubCmdPullComponent:
                 divide_http_response=False,
             ),
             SubcmdPullArguments(
-                subparser_name=SubCommand.Pull,
-                subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
+                subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
                 request_with_https=_Test_Request_With_Https,
                 source=_API_Doc_Source,
                 source_file=_API_Doc_Source_File,
@@ -307,8 +304,7 @@ class TestSubCmdPullComponent:
             ut_dir.mkdir(parents=True)
         ut_config_path = str(pathlib.Path(ut_dir, "api.yaml"))
         cmd_args = SubcmdPullArguments(
-            subparser_name=SubCommand.Pull,
-            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Pull]),
+            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Pull]),
             request_with_https=_Test_Request_With_Https,
             source=_API_Doc_Source,
             source_file=_API_Doc_Source_File,

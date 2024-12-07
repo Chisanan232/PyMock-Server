@@ -14,7 +14,6 @@ import pytest
 
 from pymock_server import APIConfig
 from pymock_server._utils.file import Format
-from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.command.rest_server.get.component import (
     APIInfoDisplayChain,
     DisplayAsJsonFormat,
@@ -25,9 +24,10 @@ from pymock_server.command.rest_server.get.component import (
 )
 from pymock_server.model import MockAPI
 from pymock_server.model.cmd_args import SubcmdGetArguments
+from pymock_server.model.subcmd_common import SysArg
 
 # isort: off
-from test._values import _Test_HTTP_Method, _Test_URL, _TestConfig
+from test._values import SubCommand, _Test_HTTP_Method, _Test_URL, _TestConfig
 
 # isort: on
 
@@ -57,8 +57,7 @@ class TestSubCmdGetComponent:
             with patch.object(expected_object, "display") as mock_formatter_display:
                 with pytest.raises(SystemExit) as exc_info:
                     subcmd_get_args = SubcmdGetArguments(
-                        subparser_name=SubCommand.Get,
-                        subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Get]),
+                        subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),
                         config_path="config path",
                         show_detail=True,
                         show_as_format=display_as_format,
@@ -75,8 +74,7 @@ class TestSubCmdGetComponent:
             mock_load_config.return_value = APIConfig().deserialize(data=_TestConfig.API_Config)
             with pytest.raises(SystemExit) as exc_info:
                 subcmd_get_args = SubcmdGetArguments(
-                    subparser_name=SubCommand.Get,
-                    subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Get]),
+                    subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),
                     config_path="config path",
                     show_detail=True,
                     show_as_format="invalid format",
@@ -97,8 +95,7 @@ class TestSubCmdGetComponent:
             mock_load_config.return_value = APIConfig().deserialize(data=no_mocked_apis_config)
             with pytest.raises(SystemExit) as exc_info:
                 subcmd_get_args = SubcmdGetArguments(
-                    subparser_name=SubCommand.Get,
-                    subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Get]),
+                    subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),
                     config_path="config path",
                     show_detail=True,
                     show_as_format=Format.YAML,

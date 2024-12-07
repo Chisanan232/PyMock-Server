@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from pymock_server.command.options import SubCommand, SysArg
 from pymock_server.command.rest_server.check.component import (
     SubCmdCheckComponent,
     SwaggerDiffChecking,
@@ -20,9 +19,11 @@ from pymock_server.model import (
     deserialize_api_doc_config,
     load_config,
 )
+from pymock_server.model.subcmd_common import SysArg
 
 # isort: off
 from test._values import (
+    SubCommand,
     _Bind_Host_And_Port,
     _Generate_Sample,
     _Log_Level,
@@ -50,7 +51,7 @@ def _given_parser_args(
 ) -> Union[SubcmdRunArguments, SubcmdAddArguments, SubcmdCheckArguments, SubcmdGetArguments, ParserArguments]:
     if subcommand == "run":
         return SubcmdRunArguments(
-            subparser_name=subcommand,
+            # subparser_name=subcommand,
             app_type=app_type,
             config=_Test_Config,
             bind=_Bind_Host_And_Port.value,
@@ -59,15 +60,15 @@ def _given_parser_args(
         )
     elif subcommand == "config":
         return SubcmdAddArguments(
-            subparser_name=subcommand,
+            # subparser_name=subcommand,
             print_sample=_Print_Sample,
             generate_sample=_Generate_Sample,
             sample_output_path=_Sample_File_Path,
         )
     elif subcommand == "check":
         return SubcmdCheckArguments(
-            subparser_name=subcommand,
-            subparser_structure=SysArg.parse([SubCommand.Rest_Server, SubCommand.Check]),
+            # subparser_name=subcommand,
+            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Check]),
             config_path=(config_path or _Test_Config),
             swagger_doc_url=swagger_doc_url,
             stop_if_fail=stop_if_fail,
@@ -77,12 +78,12 @@ def _given_parser_args(
         )
     elif subcommand == "inspect":
         return SubcmdGetArguments(
-            subparser_name=subcommand,
+            # subparser_name=subcommand,
             config_path=(config_path or _Test_Config),
         )
     else:
         return ParserArguments(
-            subparser_name=None,
+            # subparser_name=None,
         )
 
 

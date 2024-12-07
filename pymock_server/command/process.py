@@ -2,7 +2,7 @@ import copy
 import logging
 import sys
 from argparse import ArgumentParser, Namespace
-from typing import List, Optional, Tuple, Type, Union
+from typing import List, Optional, Tuple, Type
 
 from pymock_server.log import init_logger_config
 from pymock_server.model import (
@@ -15,9 +15,10 @@ from pymock_server.model import (
     SubcmdSampleArguments,
     deserialize_args,
 )
+from pymock_server.model.subcmd_common import SysArg
 
 from .component import BaseSubCmdComponent, NoSubCmdComponent
-from .options import MockAPICommandParser, SubCommand, SysArg
+from .options import MockAPICommandParser
 from .rest_server import SubCmdRestServerComponent
 from .rest_server.add import SubCmdAddComponent
 from .rest_server.check import SubCmdCheckComponent
@@ -25,6 +26,7 @@ from .rest_server.get import SubCmdGetComponent
 from .rest_server.pull.component import SubCmdPullComponent
 from .rest_server.run import SubCmdRunComponent
 from .rest_server.sample.component import SubCmdSampleComponent
+from .subcommand import SubCommandLine
 
 logger = logging.getLogger(__name__)
 
@@ -91,17 +93,15 @@ class CommandProcessor:
     def _subcmd_component(self) -> BaseSubCmdComponent:
         raise NotImplementedError
 
-    def distribute(
-        self, args: Optional[Union[Namespace, ParserArguments]] = None, cmd_index: int = 0
-    ) -> "CommandProcessor":
-        if self._is_responsible(subcmd=self.mock_api_parser.subcommand, args=args):
+    def distribute(self, cmd_index: int = 0) -> "CommandProcessor":
+        if self._is_responsible(subcmd=self.mock_api_parser.subcommand):
             return self
         else:
             self._current_index = cmd_index
-            return self._next.distribute(args=args, cmd_index=self._current_index)
+            return self._next.distribute(cmd_index=self._current_index)
 
     def process(self, parser: ArgumentParser, args: ParserArguments, cmd_index: int = 0) -> None:
-        self.distribute(args=args, cmd_index=cmd_index)._run(parser=parser, args=args)
+        self.distribute(cmd_index=cmd_index)._run(parser=parser, args=args)
 
     def parse(
         self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None, cmd_index: int = 0
@@ -114,14 +114,9 @@ class CommandProcessor:
     def copy(self) -> "CommandProcessor":
         return copy.copy(self)
 
-    def _is_responsible(
-        self, subcmd: Optional[SysArg] = None, args: Optional[Union[Namespace, ParserArguments]] = None
-    ) -> bool:
-        if args:
-            subcmd_key = args.subparser_structure.subcmd if isinstance(args, ParserArguments) else args.subcommand
-            return subcmd_key == (self.responsible_subcommand.subcmd if self.responsible_subcommand else None)
+    def _is_responsible(self, subcmd: Optional[SysArg] = None) -> bool:
         return (subcmd == self.responsible_subcommand) or (
-            subcmd is None and self.responsible_subcommand == SysArg(subcmd="base")
+            subcmd is None and self.responsible_subcommand == SysArg(subcmd=SubCommandLine.Base)
         )
 
     def _run(self, parser: ArgumentParser, args: ParserArguments) -> None:
@@ -136,7 +131,7 @@ BaseCommandProcessor: type = MetaCommand("BaseCommandProcessor", (CommandProcess
 
 
 class NoSubCmd(BaseCommandProcessor):
-    responsible_subcommand: SysArg = SysArg(subcmd="base")
+    responsible_subcommand: SysArg = SysArg(subcmd=SubCommandLine.Base)
 
     @property
     def _subcmd_component(self) -> NoSubCmdComponent:
@@ -147,7 +142,9 @@ class NoSubCmd(BaseCommandProcessor):
 
 
 class SubCmdRestServer(BaseCommandProcessor):
-    responsible_subcommand: SysArg = SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server)
+    responsible_subcommand: SysArg = SysArg(
+        pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer
+    )
 
     @property
     def _subcmd_component(self) -> SubCmdRestServerComponent:
@@ -159,7 +156,8 @@ class SubCmdRestServer(BaseCommandProcessor):
 
 class SubCmdRun(BaseCommandProcessor):
     responsible_subcommand: SysArg = SysArg(
-        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server), subcmd=SubCommand.Run
+        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
+        subcmd=SubCommandLine.Run,
     )
 
     @property
@@ -172,7 +170,8 @@ class SubCmdRun(BaseCommandProcessor):
 
 class SubCmdAdd(BaseCommandProcessor):
     responsible_subcommand: SysArg = SysArg(
-        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server), subcmd=SubCommand.Add
+        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
+        subcmd=SubCommandLine.Add,
     )
 
     @property
@@ -185,7 +184,8 @@ class SubCmdAdd(BaseCommandProcessor):
 
 class SubCmdCheck(BaseCommandProcessor):
     responsible_subcommand: SysArg = SysArg(
-        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server), subcmd=SubCommand.Check
+        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
+        subcmd=SubCommandLine.Check,
     )
 
     @property
@@ -198,7 +198,8 @@ class SubCmdCheck(BaseCommandProcessor):
 
 class SubCmdGet(BaseCommandProcessor):
     responsible_subcommand: SysArg = SysArg(
-        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server), subcmd=SubCommand.Get
+        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
+        subcmd=SubCommandLine.Get,
     )
 
     @property
@@ -211,7 +212,8 @@ class SubCmdGet(BaseCommandProcessor):
 
 class SubCmdSample(BaseCommandProcessor):
     responsible_subcommand: SysArg = SysArg(
-        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server), subcmd=SubCommand.Sample
+        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
+        subcmd=SubCommandLine.Sample,
     )
 
     @property
@@ -229,7 +231,8 @@ class SubCmdSample(BaseCommandProcessor):
 
 class SubCmdPull(BaseCommandProcessor):
     responsible_subcommand: SysArg = SysArg(
-        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd="base"), subcmd=SubCommand.Rest_Server), subcmd=SubCommand.Pull
+        pre_subcmd=SysArg(pre_subcmd=SysArg(subcmd=SubCommandLine.Base), subcmd=SubCommandLine.RestServer),
+        subcmd=SubCommandLine.Pull,
     )
 
     @property
