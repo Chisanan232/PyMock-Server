@@ -16,7 +16,7 @@ class MockAPICommandParser:
     """
 
     def __init__(self):
-        self._prog = "pymock-api"
+        self._prog = "pymock-server"
         self._usage = "mock" if self.is_running_subcmd else "mock [SUBCOMMAND] [OPTIONS]"
         self._description = """
         A Python tool for mocking APIs by set up an application easily. PyMock-API bases on Python framework to set
