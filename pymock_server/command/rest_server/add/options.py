@@ -110,7 +110,7 @@ class AddDivideApi(BaseSubCmdAddOption):
     cli_option: str = "--divide-api"
     name: str = "divide_api"
     help_description: str = (
-        "If it's true, it would divide the setting values of mocked API section " "(mocked_apis.apis.<mock API>)."
+        "If it's true, it would divide the setting values of mocked API section (mocked_apis.apis.<mock API>)."
     )
     action: str = "store_true"
     option_value_type: Optional[type] = None
@@ -121,7 +121,7 @@ class AddDivideHttp(BaseSubCmdAddOption):
     cli_option: str = "--divide-http"
     name: str = "divide_http"
     help_description: str = (
-        "If it's true, it would divide the setting values of HTTP part section " "(mocked_apis.apis.<mock API>.http)."
+        "If it's true, it would divide the setting values of HTTP part section (mocked_apis.apis.<mock API>.http)."
     )
     action: str = "store_true"
     option_value_type: Optional[type] = None
