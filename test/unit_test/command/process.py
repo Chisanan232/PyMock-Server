@@ -48,6 +48,7 @@ from pymock_server.model import (
 )
 from pymock_server.model._sample import SampleType
 from pymock_server.model.api_config.apis import ResponseStrategy
+from pymock_server.model.rest_api_doc_config.base_config import set_component_definition
 from pymock_server.model.subcmd_common import SysArg
 from pymock_server.server import ASGIServer, Command, CommandOptions, WSGIServer
 
