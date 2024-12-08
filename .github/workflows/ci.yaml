@@ -147,4 +147,4 @@ jobs:
       build-type: poetry
       python_package_name: pymock-server
       test_shell_in_python: from pymock_server.model import APIConfig
-      test_shell: mock-server --help
+      test_shell: mock --help
