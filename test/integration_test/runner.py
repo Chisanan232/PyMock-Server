@@ -37,8 +37,6 @@ class CommandFunctionTestSpec(metaclass=ABCMeta):
 
     @classmethod
     def _should_contains_chars_in_result(cls, target: str, expected_char, translate: bool = True) -> None:
-        print(f"[DEBUG] expected_char: {expected_char}")
-        print(f"[DEBUG] target: {target}")
         if translate:
             assert re.search(re.escape(expected_char), target, re.IGNORECASE)
         else:
@@ -91,10 +89,7 @@ class TestSubCmdRestServer(CommandFunctionTestSpec):
         self._should_contains_chars_in_result(cmd_running_result, "mock [SUBCOMMAND] [OPTIONS]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "API server subcommands:")
-        self._should_contains_chars_in_result(
-            cmd_running_result,
-            f"{SubCommandLine.Run.value},{SubCommandLine.Sample.value},{SubCommandLine.Add.value},{SubCommandLine.Check.value},{SubCommandLine.Get.value}",
-        )
+        self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.Pull.value)
         self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.Run.value)
         self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.Check.value)
         self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.Add.value)
