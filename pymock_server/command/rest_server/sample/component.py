@@ -2,7 +2,7 @@ import logging
 from argparse import ArgumentParser
 
 from pymock_server._utils import YAML
-from pymock_server.command.component import BaseSubCmdComponent
+from pymock_server.command._base.component import BaseSubCmdComponent
 from pymock_server.model._sample import get_sample_by_type
 from pymock_server.model.cmd_args import SubcmdSampleArguments
 

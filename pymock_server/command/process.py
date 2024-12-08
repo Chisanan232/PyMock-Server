@@ -1,42 +1,25 @@
-import glob
-import pathlib
 from argparse import ArgumentParser
 from typing import List, Optional
 
 from pymock_server.model import ParserArguments
 from pymock_server.model.subcmd_common import SysArg
 
-from ._base_process import BaseCommandProcessor, CommandProcessChain, CommandProcessor
+from ._base import BaseAutoLoad
+from ._base.process import BaseCommandProcessor, CommandProcessChain, CommandProcessor
 from .component import NoSubCmdComponent
 from .subcommand import SubCommandLine
 
 _Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 
 
-def import_subcommand_processor() -> None:
-    for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
-        cmd_module_path = pathlib.Path(__file__).parent.absolute()
-        subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "**", "process.py")
-        for subcmd_ps_module in glob.glob(str(subcmd_inf_pkg_path), recursive=True):
-            # convert the file path as Python importing
-            # module path
-            import_style = subcmd_ps_module.replace(".py", "").replace("/", ".")
-            lib_name = "pymock_server"
-            import_abs_path = ".".join([lib_name, import_style.split(f"{lib_name}.")[1]])
+class AutoLoadProcessor(BaseAutoLoad):
+    _current_module: str = __file__
 
-            # object
-            subcmd_dir = pathlib.Path(subcmd_ps_module).parent.name
-            subcmd_sub_pkg_name = pathlib.Path(subcmd_dir).name
-            subcmd_sub_pkg_name_parts = subcmd_sub_pkg_name.split("_")
-            subcmd_option_obj: str = "SubCmd"
-            for part in subcmd_sub_pkg_name_parts:
-                subcmd_option_obj += part[0].upper() + part[1:]
-
-            # import the object from the module path
-            exec(f"from {import_abs_path} import {subcmd_option_obj}")
+    def _wrap_as_object_name(self, subcmd_object: str) -> str:
+        return f"SubCmd{subcmd_object}"
 
 
-import_subcommand_processor()
+AutoLoadProcessor().import_all()
 
 
 def dispatch_command_processor() -> "CommandProcessor":

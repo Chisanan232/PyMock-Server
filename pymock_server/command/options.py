@@ -13,15 +13,14 @@ briefly, It has below major features:
 """
 
 import argparse
-import glob
 import logging
-import pathlib
 from typing import Any, List
 
 from pymock_server.__pkg_info__ import __version__
 from pymock_server.model.subcmd_common import SubCommandAttr
 
-from ._base_options import (
+from ._base import BaseAutoLoad
+from ._base.options import (
     CommandLineOptions,
     CommandOption,
     MetaCommandOption,
@@ -34,25 +33,14 @@ logger = logging.getLogger(__name__)
 _Subcommand_Interface: List[SubCommandLine] = [SubCommandLine.RestServer]
 
 
-def import_subcommand_option() -> None:
-    for subcmd_inf in list(map(lambda e: e.value.replace("-", "_"), _Subcommand_Interface)):
-        cmd_module_path = pathlib.Path(__file__).parent.absolute()
-        subcmd_inf_pkg_path = pathlib.Path(cmd_module_path, subcmd_inf, "*", "options.py")
-        for subcmd_option_module in glob.glob(str(subcmd_inf_pkg_path), recursive=True):
-            # module path
-            import_style = str(subcmd_option_module).replace(".py", "").replace("/", ".")
-            lib_name = "pymock_server"
-            import_abs_path = ".".join([lib_name, import_style.split(f"{lib_name}.")[1]])
+class AutoLoadOptions(BaseAutoLoad):
+    _current_module: str = __file__
 
-            # option object
-            subcmd_sub_pkg_name = pathlib.Path(subcmd_option_module).parent.name
-            subcmd_option_obj = f"SubCommand{subcmd_sub_pkg_name[0].upper() + subcmd_sub_pkg_name[1:]}Option"
-
-            # import the option object by the module path
-            exec(f"from {import_abs_path} import {subcmd_option_obj}")
+    def _wrap_as_object_name(self, subcmd_object: str) -> str:
+        return f"SubCommand{subcmd_object}Option"
 
 
-import_subcommand_option()
+AutoLoadOptions().import_all()
 
 """
 Common functon about command line option

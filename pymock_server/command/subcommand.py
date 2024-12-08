@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Union
+from typing import List, Union
 
 
 class SubCommandLine(Enum):
@@ -20,6 +20,12 @@ class SubCommandLine(Enum):
             if subcmd.value.lower() == v.lower():
                 return subcmd
         raise ValueError(f"Cannot map anyone subcommand line with value '{v}'.")
+
+    @staticmethod
+    def major_cli() -> List["SubCommandLine"]:
+        return [
+            SubCommandLine.RestServer,
+        ]
 
 
 class SubCommandSection(Enum):
