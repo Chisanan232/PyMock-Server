@@ -66,7 +66,7 @@ class AddResponse(BaseSubCmdAddOption):
     default_value: str = "OK."
 
 
-class AddBaseFilePath(BaseSubCmdAddOption):
+class BaseFilePath(BaseSubCmdAddOption):
     cli_option: str = "--base-file-path"
     name: str = "base_file_path"
     help_description: str = (
@@ -76,7 +76,7 @@ class AddBaseFilePath(BaseSubCmdAddOption):
     )
 
 
-class AddIncludeTemplateConfig(BaseSubCmdAddOption):
+class IncludeTemplateConfig(BaseSubCmdAddOption):
     cli_option: str = "--include-template-config"
     name: str = "include_template_config"
     help_description: str = "If it's true, it would also configure *template* section setting in result configuration."
@@ -97,7 +97,7 @@ class AddTag(BaseSubCmdAddOption):
     help_description: str = "Set tag at the new mock API."
 
 
-class AddDryRun(BaseSubCmdAddOption):
+class DryRun(BaseSubCmdAddOption):
     cli_option: str = "--dry-run"
     name: str = "dry_run"
     help_description: str = "If it's true, it would run pulling process without saving result configuration."
@@ -106,7 +106,7 @@ class AddDryRun(BaseSubCmdAddOption):
     default_value: bool = False
 
 
-class AddDivideApi(BaseSubCmdAddOption):
+class DivideApi(BaseSubCmdAddOption):
     cli_option: str = "--divide-api"
     name: str = "divide_api"
     help_description: str = (
@@ -117,7 +117,7 @@ class AddDivideApi(BaseSubCmdAddOption):
     default_value: bool = False
 
 
-class AddDivideHttp(BaseSubCmdAddOption):
+class DivideHttp(BaseSubCmdAddOption):
     cli_option: str = "--divide-http"
     name: str = "divide_http"
     help_description: str = (
@@ -128,7 +128,7 @@ class AddDivideHttp(BaseSubCmdAddOption):
     default_value: bool = False
 
 
-class AddDivideHttpRequest(BaseSubCmdAddOption):
+class DivideHttpRequest(BaseSubCmdAddOption):
     cli_option: str = "--divide-http-request"
     name: str = "divide_http_request"
     help_description: str = (
@@ -140,7 +140,7 @@ class AddDivideHttpRequest(BaseSubCmdAddOption):
     default_value: bool = False
 
 
-class AddDivideHttpResponse(BaseSubCmdAddOption):
+class DivideHttpResponse(BaseSubCmdAddOption):
     cli_option: str = "--divide-http-response"
     name: str = "divide_http_response"
     help_description: str = (

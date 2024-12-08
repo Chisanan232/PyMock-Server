@@ -50,13 +50,13 @@ class PullToConfigPath(BaseSubCmdPullOption):
     )
 
 
-class PullBaseURL(BaseSubCmdPullOption):
+class BaseURL(BaseSubCmdPullOption):
     cli_option: str = "--base-url"
     name: str = "base_url"
     help_description: str = "The base URL which must be the part of path all the APIs begin with."
 
 
-class PullBaseFilePath(BaseSubCmdPullOption):
+class BaseFilePath(BaseSubCmdPullOption):
     cli_option: str = "--base-file-path"
     name: str = "base_file_path"
     help_description: str = (
@@ -66,7 +66,7 @@ class PullBaseFilePath(BaseSubCmdPullOption):
     )
 
 
-class PullIncludeTemplateConfig(BaseSubCmdPullOption):
+class IncludeTemplateConfig(BaseSubCmdPullOption):
     cli_option: str = "--include-template-config"
     name: str = "include_template_config"
     help_description: str = "If it's true, it would also configure *template* section setting in result configuration."
@@ -75,7 +75,7 @@ class PullIncludeTemplateConfig(BaseSubCmdPullOption):
     default_value: bool = False
 
 
-class PullDryRun(BaseSubCmdPullOption):
+class DryRun(BaseSubCmdPullOption):
     cli_option: str = "--dry-run"
     name: str = "dry_run"
     help_description: str = "If it's true, it would run pulling process without saving result configuration."
@@ -84,7 +84,7 @@ class PullDryRun(BaseSubCmdPullOption):
     default_value: bool = False
 
 
-class PullDivideApi(BaseSubCmdPullOption):
+class DivideApi(BaseSubCmdPullOption):
     cli_option: str = "--divide-api"
     name: str = "divide_api"
     help_description: str = (
@@ -95,7 +95,7 @@ class PullDivideApi(BaseSubCmdPullOption):
     default_value: bool = False
 
 
-class PullDivideHttp(BaseSubCmdPullOption):
+class DivideHttp(BaseSubCmdPullOption):
     cli_option: str = "--divide-http"
     name: str = "divide_http"
     help_description: str = (
@@ -106,7 +106,7 @@ class PullDivideHttp(BaseSubCmdPullOption):
     default_value: bool = False
 
 
-class PullDivideHttpRequest(BaseSubCmdPullOption):
+class DivideHttpRequest(BaseSubCmdPullOption):
     cli_option: str = "--divide-http-request"
     name: str = "divide_http_request"
     help_description: str = (
@@ -118,7 +118,7 @@ class PullDivideHttpRequest(BaseSubCmdPullOption):
     default_value: bool = False
 
 
-class PullDivideHttpResponse(BaseSubCmdPullOption):
+class DivideHttpResponse(BaseSubCmdPullOption):
     cli_option: str = "--divide-http-response"
     name: str = "divide_http_response"
     help_description: str = (
