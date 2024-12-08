@@ -21,20 +21,20 @@ except ImportError:
 
 from pymock_server._utils.file import Format
 from pymock_server._utils.file.operation import YAML
+from pymock_server.command._base_process import BaseCommandProcessor
 from pymock_server.command._common.component import SavingConfigComponent
 from pymock_server.command.options import get_all_subcommands
 from pymock_server.command.process import (
-    BaseCommandProcessor,
     NoSubCmd,
-    SubCmdAdd,
-    SubCmdCheck,
-    SubCmdGet,
-    SubCmdPull,
-    SubCmdRun,
-    SubCmdSample,
     make_command_chain,
     run_command_chain,
 )
+from pymock_server.command.rest_server.add.process import SubCmdAdd
+from pymock_server.command.rest_server.check.process import SubCmdCheck
+from pymock_server.command.rest_server.get.process import SubCmdGet
+from pymock_server.command.rest_server.pull.process import SubCmdPull
+from pymock_server.command.rest_server.run.process import SubCmdRun
+from pymock_server.command.rest_server.sample.process import SubCmdSample
 from pymock_server.command.subcommand import SubCommandLine
 from pymock_server.model import (
     ParserArguments,
@@ -1112,6 +1112,6 @@ def test_make_command_chain_if_duplicated_subcmd():
     assert re.search(r"subcommand.{1,64}has been used", str(exc_info.value), re.IGNORECASE)
 
     # Remove the invalid object for test could run finely.
-    from pymock_server.command.process import _COMMAND_CHAIN
+    from pymock_server.command._base_process import CommandProcessChain
 
-    _COMMAND_CHAIN.pop(-1)
+    CommandProcessChain.pop(-1)
