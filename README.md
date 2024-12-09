@@ -11,6 +11,11 @@
 
 A Python tool to mock API easily and humanly without any coding.
 
+> [!NOTE]
+> It names **_PyMock-API_** before version **0.2.0**.
+>
+> [![PyPI](https://img.shields.io/pypi/v/PyMock-API?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white)](https://pypi.org/project/PyMock-API)
+
 [Overview](#overview) | [Python versions support](#Python-versions-support) | [Quickly Start](#quickly-start) | [Documentation](#documentation)
 <hr>
 
