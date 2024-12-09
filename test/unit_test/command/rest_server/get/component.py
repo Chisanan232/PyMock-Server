@@ -157,11 +157,11 @@ class DisplayFormatTestSpec(metaclass=ABCMeta):
         pass
 
     def test_format(self, formatter: _BaseDisplayFormat):
-        assert formatter.format == self._expected_format
+        assert formatter.format is self._expected_format
 
     @property
     @abstractmethod
-    def _expected_format(self) -> str:
+    def _expected_format(self) -> Format:
         pass
 
     def test_display(self, formatter: _BaseDisplayFormat):
@@ -185,7 +185,7 @@ class TestDisplayAsYamlFormat(DisplayFormatTestSpec):
         return DisplayAsYamlFormat()
 
     @property
-    def _expected_format(self) -> str:
+    def _expected_format(self) -> Format:
         return Format.YAML
 
     @property
@@ -199,7 +199,7 @@ class TestDisplayAsJsonFormat(DisplayFormatTestSpec):
         return DisplayAsJsonFormat()
 
     @property
-    def _expected_format(self) -> str:
+    def _expected_format(self) -> Format:
         return Format.JSON
 
     @property

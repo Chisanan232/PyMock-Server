@@ -31,8 +31,7 @@ class TestLoadApp:
         load_app: Type[mock_server.load_app],
     ):
         load_app.by_flask()
-        # FIXME: Strange error.
-        # mock_get_os_env.assert_called_once_with("MockAPI_Config", "api.yaml")
+        mock_get_os_env.assert_called_once_with("MockAPI_Config", "api.yaml")
         mock_flask_server_obj.assert_called_once()
         mock_http_server.assert_called_once_with(
             config_path=_Test_Config, app_server=mock_flask_server, auto_setup=True
@@ -49,8 +48,7 @@ class TestLoadApp:
         load_app: Type[mock_server.load_app],
     ):
         load_app.by_fastapi()
-        # FIXME: Strange error.
-        # mock_get_os_env.assert_called_once_with("MockAPI_Config", "api.yaml")
+        mock_get_os_env.assert_called_once_with("MockAPI_Config", "api.yaml")
         mock_fastapi_server_obj.assert_called_once()
         mock_http_server.assert_called_once_with(
             config_path=_Test_Config, app_server=mock_fastapi_server, auto_setup=True
