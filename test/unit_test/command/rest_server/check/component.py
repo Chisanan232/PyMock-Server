@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Union
+from typing import Optional
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -11,11 +11,7 @@ from pymock_server.command.rest_server.check.component import (
     ValidityChecking,
 )
 from pymock_server.model import (
-    ParserArguments,
-    SubcmdAddArguments,
     SubcmdCheckArguments,
-    SubcmdGetArguments,
-    SubcmdRunArguments,
     deserialize_api_doc_config,
     load_config,
 )
@@ -24,68 +20,16 @@ from pymock_server.model.subcmd_common import SysArg
 # isort: off
 from test._values import (
     SubCommand,
-    _Bind_Host_And_Port,
-    _Generate_Sample,
-    _Log_Level,
-    _Print_Sample,
-    _Sample_File_Path,
     _Swagger_API_Document_URL,
     _Test_Config,
-    _Test_SubCommand_Check,
-    _Workers_Amount,
 )
+
 from ._test_case import (
     SubCmdCheckComponentTestCaseFactory,
     SwaggerDiffCheckTestCaseFactory,
 )
 
 # isort: on
-
-
-def _given_parser_args(
-    subcommand: str = None,
-    app_type: str = None,
-    config_path: str = None,
-    swagger_doc_url: str = None,
-    stop_if_fail: bool = True,
-) -> Union[SubcmdRunArguments, SubcmdAddArguments, SubcmdCheckArguments, SubcmdGetArguments, ParserArguments]:
-    if subcommand == "run":
-        return SubcmdRunArguments(
-            # subparser_name=subcommand,
-            app_type=app_type,
-            config=_Test_Config,
-            bind=_Bind_Host_And_Port.value,
-            workers=_Workers_Amount.value,
-            log_level=_Log_Level.value,
-        )
-    elif subcommand == "config":
-        return SubcmdAddArguments(
-            # subparser_name=subcommand,
-            print_sample=_Print_Sample,
-            generate_sample=_Generate_Sample,
-            sample_output_path=_Sample_File_Path,
-        )
-    elif subcommand == "check":
-        return SubcmdCheckArguments(
-            # subparser_name=subcommand,
-            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Check]),
-            config_path=(config_path or _Test_Config),
-            swagger_doc_url=swagger_doc_url,
-            stop_if_fail=stop_if_fail,
-            check_api_path=True,
-            check_api_parameters=True,
-            check_api_http_method=True,
-        )
-    elif subcommand == "inspect":
-        return SubcmdGetArguments(
-            # subparser_name=subcommand,
-            config_path=(config_path or _Test_Config),
-        )
-    else:
-        return ParserArguments(
-            # subparser_name=None,
-        )
-
 
 SubCmdCheckComponentTestCaseFactory.load(has_base_info=False, config_type="valid", exit_code=0)
 SubCmdCheckComponentTestCaseFactory.load(has_base_info=True, config_type="valid", exit_code=0)
@@ -130,9 +74,7 @@ class TestSubCmdCheckComponent:
         subcmd: SubCmdCheckComponent,
         stop_if_fail: bool,
     ):
-        mock_parser_arg = _given_parser_args(
-            subcommand=_Test_SubCommand_Check, swagger_doc_url=_Swagger_API_Document_URL, stop_if_fail=stop_if_fail
-        )
+        mock_parser_arg = self._given_parser_args(swagger_doc_url=_Swagger_API_Document_URL, stop_if_fail=stop_if_fail)
         with patch("pymock_server.command.rest_server.check.component.load_config") as mock_load_config:
             mock_load_config.return_value = load_config(dummy_yaml_path)
             with patch.object(SwaggerDiffChecking, "_get_swagger_config") as mock_get_swagger_config:
@@ -155,9 +97,7 @@ class TestSubCmdCheckComponent:
     def test_process_raise_unexpected_exception(
         self, mock_exception: Exception, stop_if_fail: bool, subcmd: SubCmdCheckComponent
     ):
-        mock_parser_arg = _given_parser_args(
-            subcommand=_Test_SubCommand_Check, swagger_doc_url=_Swagger_API_Document_URL, stop_if_fail=stop_if_fail
-        )
+        mock_parser_arg = self._given_parser_args(swagger_doc_url=_Swagger_API_Document_URL, stop_if_fail=stop_if_fail)
         MagicMock()
         with patch(
             "pymock_server.command.rest_server.check.component.load_config", side_effect=mock_exception
@@ -165,6 +105,19 @@ class TestSubCmdCheckComponent:
             with pytest.raises(Exception):
                 subcmd.process(parser=Mock(), args=mock_parser_arg)
             mock_load_config.assert_called_once()
+
+    def _given_parser_args(
+        self, config_path: Optional[str] = None, swagger_doc_url: Optional[str] = None, stop_if_fail: bool = True
+    ) -> SubcmdCheckArguments:
+        return SubcmdCheckArguments(
+            subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Check]),
+            config_path=(config_path or _Test_Config),
+            swagger_doc_url=swagger_doc_url,
+            stop_if_fail=stop_if_fail,
+            check_api_path=True,
+            check_api_parameters=True,
+            check_api_http_method=True,
+        )
 
 
 class TestValidityChecking:
