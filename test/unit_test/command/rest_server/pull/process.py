@@ -5,10 +5,10 @@ from typing import Callable, List, Optional, Type
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from yaml import load as yaml_load
 
 try:
     from yaml import CLoader as Loader
-    from yaml import load as yaml_load
 except ImportError:
     from yaml import Dumper, Loader  # type: ignore
 
