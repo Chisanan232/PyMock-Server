@@ -20,7 +20,7 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
         """
         [Generating code]
         """
-        initial_global_server = f"""global SERVER\nSERVER = self\n"""
+        initial_global_server = """global SERVER\nSERVER = self\n"""
         define_function_for_api = self._define_api_function_pycode(api_name, api_config)
         return initial_global_server + define_function_for_api
 
@@ -75,7 +75,7 @@ class BaseWebServerCodeGenerator(metaclass=ABCMeta):
         """
         [Generating code]
         """
-        return f"""
+        return """
         return SERVER._response_process()
         """
 
@@ -181,7 +181,7 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
         import_fastapi = "from fastapi import Query, Request as FastAPIRequest\n"
         import_typing = "from typing import List, Union\n"
         import_typing_ext = "from typing_extensions import Annotated\n"
-        initial_global_server = f"""global SERVER\nSERVER = self\n"""
+        initial_global_server = """global SERVER\nSERVER = self\n"""
         define_params_model = self._annotate_api_parameters_model_pycode(api_name, api_config)
         define_function_for_api = self._define_api_function_pycode(api_name, api_config)
         return (
@@ -325,7 +325,7 @@ class FastAPICodeGenerator(BaseWebServerCodeGenerator):
         )
 
     def _generate_response_pycode(self) -> str:
-        return f"""
+        return """
         return SERVER._response_process(request=request)
         """
 
