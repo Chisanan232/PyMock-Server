@@ -8,7 +8,7 @@ try:
     from pymock_server.command._base.process import CommandProcessor
     from pymock_server.command.process import dispatch_command_processor
     from pymock_server.model import ParserArguments
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     runner_dir = os.path.dirname(os.path.abspath(__file__))
     path = str(Path(runner_dir).parent.absolute())
     sys.path.append(path)
