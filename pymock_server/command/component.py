@@ -5,5 +5,5 @@ from ._base.component import BaseSubCmdComponent, ParserArgumentsType
 
 class NoSubCmdComponent(BaseSubCmdComponent):
     def process(self, parser: ArgumentParser, args: ParserArgumentsType) -> None:
-        # FIXME: Should be fix this issue as rest-server
-        pass
+        print("⚠️ warn: please operate on this command with one more options or subcommand line you need.")
+        parser.parse_args(args=["--help"])

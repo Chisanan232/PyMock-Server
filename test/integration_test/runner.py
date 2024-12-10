@@ -43,6 +43,27 @@ class CommandFunctionTestSpec(metaclass=ABCMeta):
             assert re.search(expected_char, target, re.IGNORECASE)
 
 
+class TestCmdMock(CommandFunctionTestSpec):
+    @property
+    def options(self) -> str:
+        return ""
+
+    def test_command(self, runner: CommandRunner):
+        with Capturing() as output:
+            with pytest.raises(SystemExit):
+                with patch.object(sys, "argv", [""]):
+                    args = runner.parse(cmd_args=self.options.split())
+                    runner.run(cmd_args=args)
+        self.verify_running_output(" ".join(output))
+
+    def verify_running_output(self, cmd_running_result: str) -> None:
+        self._should_contains_chars_in_result(cmd_running_result, "mock [SUBCOMMAND] [OPTIONS]")
+        self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
+        self._should_contains_chars_in_result(cmd_running_result, "-v, --version")
+        self._should_contains_chars_in_result(cmd_running_result, "subcommands:")
+        self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.RestServer.value)
+
+
 class TestHelp(CommandFunctionTestSpec):
     @property
     def options(self) -> str:
