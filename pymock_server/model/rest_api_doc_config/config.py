@@ -423,19 +423,21 @@ class APIConfigWithMethodV3(BaseAPIConfigWithMethodV3):
         return HttpConfigV3.deserialize(data)
 
     def to_request_adapter(self, http_method: str) -> List["RequestParameterAdapter"]:  # type: ignore[override]
+        _data: List[Union[_BaseRequestParameter, BaseHttpConfigV2]] = []
+        no_ref_data: List[_BaseRequestParameter] = []
         if http_method.upper() == "GET":
-            return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type, return-value]
+            _data = no_ref_data = self.parameters  # type: ignore[assignment]
         else:
             if self.request_body:
                 req_body_content_type: List[ContentType] = list(
                     filter(lambda ct: self.request_body.exist_setting(content_type=ct) is not None, ContentType)  # type: ignore[arg-type]
                 )
                 req_body_config = self.request_body.get_setting(content_type=req_body_content_type[0])
-                return self._initial_request_parameters_model([req_body_config], self.parameters)  # type: ignore[return-value]
+                _data = [req_body_config]
+                no_ref_data = self.parameters
             else:
-                return self._initial_request_parameters_model(  # type: ignore[return-value]
-                    self.parameters, self.parameters  # type: ignore[arg-type]
-                )
+                _data = no_ref_data = self.parameters  # type: ignore[assignment]
+        return self._initial_request_parameters_model(_data, no_ref_data)  # type: ignore[return-value]
 
     def _deserialize_empty_reference_config_properties(self) -> BaseReferenceConfigProperty:
         return ReferenceConfigProperty.deserialize({})
