@@ -264,7 +264,6 @@ class ReferenceConfig(BaseReferenceConfig):
         init_response: "ResponsePropertyAdapter",  # type: ignore[override]
         empty_body_key: str = "",
     ) -> "ResponsePropertyAdapter":
-        # assert response_schema_ref
         response_schema_properties: Dict[str, BaseReferenceConfigProperty] = self.properties or {}
         if response_schema_properties:
             for k, v in response_schema_properties.items():
@@ -324,7 +323,6 @@ class HttpConfigV2(BaseHttpConfigV2):
         assert data is not None and isinstance(data, dict)
         return HttpConfigV2(
             schema=ReferenceConfigProperty.deserialize(data.get("schema", {})),
-            # content=data.get("content", None),
         )
 
     def has_ref(self) -> str:
@@ -397,7 +395,6 @@ class APIConfigWithMethodV2(BaseAPIConfigWithMethodV2):
         return ReferenceConfigProperty.deserialize({})
 
     def _get_http_config(self, status_200_response: BaseAPIDocConfig) -> BaseHttpConfigV2:
-        # tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
         assert isinstance(status_200_response, BaseHttpConfigV2)
         return status_200_response
 
@@ -445,7 +442,6 @@ class APIConfigWithMethodV3(BaseAPIConfigWithMethodV3):
 
     def _get_http_config(self, status_200_response: BaseAPIDocConfig) -> BaseHttpConfigV2:
         # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
-        # status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
         assert isinstance(status_200_response, BaseHttpConfigV3)
         status_200_response_model = status_200_response
         resp_value_format: List[ContentType] = list(
