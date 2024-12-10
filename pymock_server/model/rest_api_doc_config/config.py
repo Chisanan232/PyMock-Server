@@ -264,7 +264,6 @@ class ReferenceConfig(BaseReferenceConfig):
         init_response: "ResponsePropertyAdapter",  # type: ignore[override]
         empty_body_key: str = "",
     ) -> "ResponsePropertyAdapter":
-        # assert response_schema_ref
         response_schema_properties: Dict[str, BaseReferenceConfigProperty] = self.properties or {}
         if response_schema_properties:
             for k, v in response_schema_properties.items():
@@ -324,7 +323,6 @@ class HttpConfigV2(BaseHttpConfigV2):
         assert data is not None and isinstance(data, dict)
         return HttpConfigV2(
             schema=ReferenceConfigProperty.deserialize(data.get("schema", {})),
-            # content=data.get("content", None),
         )
 
     def has_ref(self) -> str:
@@ -397,7 +395,6 @@ class APIConfigWithMethodV2(BaseAPIConfigWithMethodV2):
         return ReferenceConfigProperty.deserialize({})
 
     def _get_http_config(self, status_200_response: BaseAPIDocConfig) -> BaseHttpConfigV2:
-        # tmp_resp_config = TmpHttpConfigV2.deserialize(status_200_response)
         assert isinstance(status_200_response, BaseHttpConfigV2)
         return status_200_response
 
@@ -426,26 +423,27 @@ class APIConfigWithMethodV3(BaseAPIConfigWithMethodV3):
         return HttpConfigV3.deserialize(data)
 
     def to_request_adapter(self, http_method: str) -> List["RequestParameterAdapter"]:  # type: ignore[override]
+        _data: List[Union[_BaseRequestParameter, BaseHttpConfigV2]] = []
+        no_ref_data: List[_BaseRequestParameter] = []
         if http_method.upper() == "GET":
-            return self._initial_request_parameters_model(self.parameters, self.parameters)  # type: ignore[arg-type, return-value]
+            _data = no_ref_data = self.parameters  # type: ignore[assignment]
         else:
             if self.request_body:
                 req_body_content_type: List[ContentType] = list(
                     filter(lambda ct: self.request_body.exist_setting(content_type=ct) is not None, ContentType)  # type: ignore[arg-type]
                 )
                 req_body_config = self.request_body.get_setting(content_type=req_body_content_type[0])
-                return self._initial_request_parameters_model([req_body_config], self.parameters)  # type: ignore[return-value]
+                _data = [req_body_config]
+                no_ref_data = self.parameters
             else:
-                return self._initial_request_parameters_model(  # type: ignore[return-value]
-                    self.parameters, self.parameters  # type: ignore[arg-type]
-                )
+                _data = no_ref_data = self.parameters  # type: ignore[assignment]
+        return self._initial_request_parameters_model(_data, no_ref_data)  # type: ignore[return-value]
 
     def _deserialize_empty_reference_config_properties(self) -> BaseReferenceConfigProperty:
         return ReferenceConfigProperty.deserialize({})
 
     def _get_http_config(self, status_200_response: BaseAPIDocConfig) -> BaseHttpConfigV2:
         # NOTE: This parsing way for OpenAPI (OpenAPI version 3)
-        # status_200_response_model = TmpHttpConfigV3.deserialize(status_200_response)
         assert isinstance(status_200_response, BaseHttpConfigV3)
         status_200_response_model = status_200_response
         resp_value_format: List[ContentType] = list(
