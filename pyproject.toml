@@ -35,7 +35,7 @@ documentation = "https://chisanan232.github.io/PyMock-Server/"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-PyYAML = "^6.0"
+PyYAML = {version = "^6.0", extras = ["mini", "all"]}
 # Extra dependency of web framework *Flask* with WSGI server *Gunicorn*
 Flask = {version = "^3.0.2", extras = ["flask", "all"]}
 gunicorn = {version = ">=21.2,<24.0", extras = ["flask", "all"]}
