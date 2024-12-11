@@ -21,11 +21,20 @@ The dependencies which are necessary to install decreases greatly.
 
 !!! note "What the option _web framework_ we could use?"
 
-    **_PyMock-Server_** uses the Python web framework to implement the API feature. It means that it would also depend on other
-    Python package which for web development. Currrently, it supports 2 frameworks of all popular Python web framerworks
-    --- [**_Flask_**] and [**_FastAPI_**]. So the options value we could use are: ``auto``, ``flask`` or ``fastapi``. The 
-    option ``auto`` means that it would automatically scan which Python web framework it would use in the current Python 
-    runtime environment where the command line tool runs in.
+    **_PyMock-Server_** uses the Python web framework to implement the API feature. It means that it would also depend 
+    on other Python package which for web development. Currrently, it supports 2 frameworks of all popular Python web 
+    framerworks --- [**_Flask_**] and [**_FastAPI_**]. So the options value we could use are: ``mini``, ``auto``, 
+    ``flask`` or ``fastapi``.
+    
+    * ``mini``
+
+        It would install the minimum level depdendency of Python package. It also means it won't install both of web 
+        frameworks **_Flask_** or **_FastAPI_**.
+
+    * ``auto``
+
+        The option ``auto`` means that it would automatically scan which Python web framework it would use in the current 
+        Python runtime environment where the command line tool runs in.
 
   [**_Flask_**]: https://flask.palletsprojects.com/en/2.3.x/
   [**_FastAPI_**]: https://fastapi.tiangolo.com
