@@ -134,6 +134,22 @@ class _Checkable(metaclass=ABCMeta):
                 return valid_callback(config_key, config_value)
             return True
 
+    def should_be_none(
+        self,
+        config_key: str,
+        config_value: Any,
+        accept_empty: bool = True,
+        err_msg: Optional[str] = None,
+    ) -> bool:
+        if (config_value is not None) or (accept_empty and config_value):
+            logger.error(err_msg if err_msg else f"Configuration *{config_key}* content should be None or empty.")
+            self._config_is_wrong = True
+            if self._stop_if_fail:
+                self._exit_program(1)
+            return False
+        else:
+            return True
+
     def props_should_not_be_none(
         self,
         under_check: dict,
@@ -147,6 +163,22 @@ class _Checkable(metaclass=ABCMeta):
                 config_value=v,
                 accept_empty=accept_empty,
                 valid_callback=valid_callback,
+                err_msg=err_msg,
+            ):
+                return False
+        return True
+
+    def props_should_be_none(
+        self,
+        under_check: dict,
+        accept_empty: bool = True,
+        err_msg: Optional[str] = None,
+    ) -> bool:
+        for k, v in under_check.items():
+            if not self.should_be_none(
+                config_key=k,
+                config_value=v,
+                accept_empty=accept_empty,
                 err_msg=err_msg,
             ):
                 return False
