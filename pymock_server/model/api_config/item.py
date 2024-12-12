@@ -100,6 +100,13 @@ class IteratorItem(_HasFormatPropConfig, _HasItemsPropConfig):
             ):
                 return False
 
+            if not self.props_should_be_none(
+                under_check={
+                    f"{self.absolute_model_key}.format": self.value_format,
+                },
+            ):
+                return False
+
         # check 'items'
         items_chk = super().is_work()
         if items_chk is False:
