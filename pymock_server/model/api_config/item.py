@@ -91,13 +91,14 @@ class IteratorItem(_HasFormatPropConfig, _HasItemsPropConfig):
         ):
             return False
         assert self.value_type
-        if locate(self.value_type) in [list, dict] and not self.props_should_not_be_none(
-            under_check={
-                f"{self.absolute_model_key}.items": self.items,
-            },
-            accept_empty=False,
-        ):
-            return False
+        if locate(self.value_type) in [list, dict]:
+            if not self.props_should_not_be_none(
+                under_check={
+                    f"{self.absolute_model_key}.items": self.items,
+                },
+                accept_empty=False,
+            ):
+                return False
 
         # check 'items'
         items_chk = super().is_work()
