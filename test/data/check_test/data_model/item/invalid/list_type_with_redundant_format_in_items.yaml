@@ -1,0 +1,9 @@
+name: "value"
+required: true
+type: list
+format:
+  strategy: 'by_data_type'
+items:
+  - name: "column"
+    required: true
+    type: str

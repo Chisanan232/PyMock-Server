@@ -1,0 +1,12 @@
+method: 'PUT'
+parameters:
+  - name: 'arg1'
+    required: false
+    default: []
+    type: list
+    format:
+      strategy: 'by_data_type'
+    items:
+      - name: "column"
+        required: true
+        type: str
