@@ -103,8 +103,6 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                     name="",
                     required=_Default_Required.general,
                     value_type="list",
-                    # TODO: Set the *format* property correctly
-                    format=None,
                     items=items,
                 )
             return response
@@ -241,8 +239,6 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                         name="additionalKey",
                         required=_Default_Required.general,
                         value_type="dict",
-                        # TODO: Set the *format* property correctly
-                        format=None,
                         items=resp.data,
                     )
                 return resp.data
@@ -263,8 +259,6 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                         name="",
                         required=_Default_Required.general,
                         value_type="dict",
-                        # TODO: Set the *format* property correctly
-                        format=None,
                         items=[
                             self._adapter_factory.generate_property_details(
                                 name="additionalKey",
