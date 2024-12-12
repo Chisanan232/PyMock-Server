@@ -1,5 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass, field
+from pydoc import locate
 from typing import Any, Dict, List, Optional, Type
 
 from pymock_server.model.api_config._base import _Config, _HasItemsPropConfig
@@ -95,6 +96,13 @@ class BaseProperty(_HasItemsPropConfig, _HasFormatPropConfig, _BaseTemplateAcces
         if not self._prop_items_is_work():
             return False
 
+        assert self.value_type
+        if locate(self.value_type) in [list, dict] and not self.props_should_be_none(
+            under_check={
+                f"{self.absolute_model_key}.format": self.value_format,
+            },
+        ):
+            return False
         # check 'format' and 'items'
         format_and_items_chk = super().is_work()
         if format_and_items_chk is False:
