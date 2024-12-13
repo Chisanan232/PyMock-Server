@@ -57,23 +57,24 @@ class RandomFromSequence(BaseRandomGenerator):
 
 
 class RandomDate(BaseRandomGenerator):
-    _Date_Format: str = "%Y-%m-%d"
+    _DateTime_Format: str = "%Y-%m-%d"
 
     @classmethod
     def generate(cls) -> str:
-        return RandomFromSequence.generate(
-            [(datetime.datetime.now() - datetime.timedelta(days=d)).strftime(cls._Date_Format) for d in range(0, 30)]
-        )
+        return RandomFromSequence.generate([cls._generate_and_format_value(d) for d in range(0, 30)])
+
+    @classmethod
+    def _generate_and_format_value(cls, days: int) -> str:
+        return cls._generate_value_from_now(days=days).strftime(cls._DateTime_Format)
+
+    @classmethod
+    def _generate_value_from_now(cls, days: int) -> datetime.datetime:
+        return datetime.datetime.now() - datetime.timedelta(days=days)
 
 
-class RandomDateTime(BaseRandomGenerator):
+class RandomDateTime(RandomDate):
     _DateTime_Format: str = "%Y-%m-%dT%H:%M:%SZ"
 
     @classmethod
     def generate(cls) -> str:
-        return RandomFromSequence.generate(
-            [
-                (datetime.datetime.now() - datetime.timedelta(days=d)).strftime(cls._DateTime_Format)
-                for d in range(0, 30)
-            ]
-        )
+        return RandomFromSequence.generate([cls._generate_and_format_value(d) for d in range(0, 30)])
