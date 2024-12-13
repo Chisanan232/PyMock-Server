@@ -1,3 +1,4 @@
+import datetime
 import random
 import string
 from abc import ABCMeta, abstractmethod
@@ -53,3 +54,22 @@ class RandomFromSequence(BaseRandomGenerator):
     @staticmethod
     def generate(sequence: Sequence) -> bool:
         return random.choice(sequence)
+
+
+class RandomDate(BaseRandomGenerator):
+    @staticmethod
+    def generate() -> bool:
+        return RandomFromSequence.generate(
+            [(datetime.datetime.now() - datetime.timedelta(days=d)).strftime("%Y-%m-%d") for d in range(0, 30)]
+        )
+
+
+class RandomDateTime(BaseRandomGenerator):
+    @staticmethod
+    def generate() -> bool:
+        return RandomFromSequence.generate(
+            [
+                (datetime.datetime.now() - datetime.timedelta(days=d)).strftime("%Y-%m-%dT%H:%M:%SZ")
+                for d in range(0, 30)
+            ]
+        )
