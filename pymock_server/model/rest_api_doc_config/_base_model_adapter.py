@@ -7,11 +7,12 @@ from pymock_server.model.api_config import ResponseProperty as PyMockResponsePro
 from pymock_server.model.api_config.format import Format as PyMockFormat
 
 from ._base import Transferable
+from ._js_handlers import ApiDocValueFormat
 
 
 @dataclass
 class BaseFormatModelAdapter:
-    formatter: Optional[str] = None
+    formatter: Optional[ApiDocValueFormat] = None
     enum: Optional[List[str]] = None
 
     @abstractmethod

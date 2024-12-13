@@ -4,6 +4,7 @@ import pytest
 
 from pymock_server.model.api_config.apis import ResponseStrategy
 from pymock_server.model.api_config.value import FormatStrategy
+from pymock_server.model.rest_api_doc_config._js_handlers import ApiDocValueFormat
 from pymock_server.model.rest_api_doc_config._model_adapter import (
     FormatAdapter,
     PropertyDetailAdapter,
@@ -18,9 +19,12 @@ class TestFormatAdapter:
     @pytest.mark.parametrize(
         ("formatter", "enum", "expected_strategy"),
         [
-            ("date-time", [], FormatStrategy.BY_DATA_TYPE),
-            ("int32", [], FormatStrategy.BY_DATA_TYPE),
-            ("int64", [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.DateTime, [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.Int32, [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.Int64, [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.Float, [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.Double, [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.Password, [], FormatStrategy.BY_DATA_TYPE),
             ("", ["ENUM_1", "ENUM_2", "ENUM_3"], FormatStrategy.FROM_ENUMS),
             ("", [], None),
         ],
@@ -28,7 +32,7 @@ class TestFormatAdapter:
     def test_to_pymock_api_config(
         self,
         sut: FormatAdapter,
-        formatter: Optional[str],
+        formatter: Optional[ApiDocValueFormat],
         enum: Optional[List[str]],
         expected_strategy: Optional[FormatStrategy],
     ):
