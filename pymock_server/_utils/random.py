@@ -15,29 +15,29 @@ class BaseRandomGenerator(metaclass=ABCMeta):
     def __init__(self):
         raise RuntimeError("Please don't instantiate this object.")
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def generate(*args, **kwargs) -> Any:
+    def generate(cls, *args, **kwargs) -> Any:
         pass
 
 
 class RandomString(BaseRandomGenerator):
-    @staticmethod
-    def generate(size: ValueSize = ValueSize()) -> str:
+    @classmethod
+    def generate(cls, size: ValueSize = ValueSize()) -> str:
         string_size = random.randint(size.min, size.max)
         return "".join([random.choice(string.ascii_letters) for _ in range(string_size)])
 
 
 class RandomInteger(BaseRandomGenerator):
-    @staticmethod
-    def generate(value_range: ValueSize = ValueSize()) -> int:
+    @classmethod
+    def generate(cls, value_range: ValueSize = ValueSize()) -> int:
         return random.randint(value_range.min, value_range.max)
 
 
 class RandomBigDecimal(BaseRandomGenerator):
-    @staticmethod
+    @classmethod
     def generate(
-        integer_range: ValueSize = ValueSize(), decimal_range: ValueSize = ValueSize(min=0, max=128)
+        cls, integer_range: ValueSize = ValueSize(), decimal_range: ValueSize = ValueSize(min=0, max=128)
     ) -> Decimal:
         integer = RandomInteger.generate(value_range=integer_range)
         decimal = RandomInteger.generate(value_range=decimal_range)
@@ -45,28 +45,28 @@ class RandomBigDecimal(BaseRandomGenerator):
 
 
 class RandomBoolean(BaseRandomGenerator):
-    @staticmethod
-    def generate() -> bool:
+    @classmethod
+    def generate(cls) -> bool:
         return random.choice([True, False])
 
 
 class RandomFromSequence(BaseRandomGenerator):
-    @staticmethod
-    def generate(sequence: Sequence) -> Any:
+    @classmethod
+    def generate(cls, sequence: Sequence) -> Any:
         return random.choice(sequence)
 
 
 class RandomDate(BaseRandomGenerator):
-    @staticmethod
-    def generate() -> str:
+    @classmethod
+    def generate(cls) -> str:
         return RandomFromSequence.generate(
             [(datetime.datetime.now() - datetime.timedelta(days=d)).strftime("%Y-%m-%d") for d in range(0, 30)]
         )
 
 
 class RandomDateTime(BaseRandomGenerator):
-    @staticmethod
-    def generate() -> str:
+    @classmethod
+    def generate(cls) -> str:
         return RandomFromSequence.generate(
             [
                 (datetime.datetime.now() - datetime.timedelta(days=d)).strftime("%Y-%m-%dT%H:%M:%SZ")
