@@ -11,9 +11,13 @@ from pymock_server.model.api_config.apis.response import (
     ResponseProperty as PyMockResponseProperty,
 )
 from pymock_server.model.api_config.apis.response_strategy import ResponseStrategy
+from pymock_server.model.api_config.format import Format as PyMockFormat
 
+from ..api_config.value import FormatStrategy
+from ..api_config.variable import Digit, Size
 from ._base_model_adapter import (
     BaseAPIAdapter,
+    BaseFormatModelAdapter,
     BaseRefPropertyDetailAdapter,
     BaseRequestParameterAdapter,
     BaseResponsePropertyAdapter,
@@ -22,6 +26,28 @@ from ._js_handlers import ensure_type_is_python_type
 from .base_config import _BaseAPIConfigWithMethod, _Default_Required
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class FormatAdapter(BaseFormatModelAdapter):
+
+    def to_pymock_api_config(self) -> Optional[PyMockFormat]:
+        if self.enum:
+            return PyMockFormat(
+                strategy=FormatStrategy.FROM_ENUMS,
+                enums=self.enum,
+            )
+        elif self.formatter:
+            _digit: Optional[Digit] = None
+            _size: Optional[Size] = None
+            return PyMockFormat(
+                strategy=FormatStrategy.BY_DATA_TYPE,
+                # general setting
+                digit=_digit,
+                size=_size,
+            )
+        else:
+            return None
 
 
 @dataclass
@@ -84,6 +110,7 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
             name=name,
             required=required,
             value_type=ensure_type_is_python_type(value_type) if value_type else None,
+            format=None,  # TODO: implement this parameter setting
             default=default,
             items=items,
         )
@@ -103,7 +130,7 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
             required=self.required,
             value_type=self.value_type,
             default=self.default,
-            value_format=None,
+            value_format=None,  # TODO: implement this parameter setting
             items=[to_items(i) for i in (self.items or [])],
         )
 
