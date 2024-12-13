@@ -46,8 +46,10 @@ class FormatAdapter(BaseFormatModelAdapter):
 
             formatter = self.formatter.to_pymock_value_format()
             if formatter is ValueFormat.Integer:
+                # TODO: It should have setting to configure this setting
                 _size = Size(max_value=sys.maxsize, min_value=-sys.maxsize - 1)
             elif formatter is ValueFormat.BigDecimal:
+                # TODO: It should have setting to configure this setting
                 _digit = Digit(integer=100, decimal=50)
             elif formatter is ValueFormat.Date:
                 _customize = "date_value"
