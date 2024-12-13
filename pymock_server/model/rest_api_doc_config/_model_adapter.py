@@ -1,4 +1,5 @@
 import logging
+import sys
 from dataclasses import dataclass, field
 from typing import Any, List, Optional
 
@@ -13,8 +14,8 @@ from pymock_server.model.api_config.apis.response import (
 from pymock_server.model.api_config.apis.response_strategy import ResponseStrategy
 from pymock_server.model.api_config.format import Format as PyMockFormat
 
-from ..api_config.value import FormatStrategy
-from ..api_config.variable import Digit, Size
+from ..api_config.value import FormatStrategy, ValueFormat
+from ..api_config.variable import Digit, Size, Variable
 from ._base_model_adapter import (
     BaseAPIAdapter,
     BaseFormatModelAdapter,
@@ -40,11 +41,31 @@ class FormatAdapter(BaseFormatModelAdapter):
         elif self.formatter:
             _digit: Optional[Digit] = None
             _size: Optional[Size] = None
+            _customize: str = ""
+            _variables: List[Variable] = []
+
+            formatter = self.formatter.to_pymock_value_format()
+            if formatter is ValueFormat.Integer:
+                _size = Size(max_value=sys.maxsize, min_value=-sys.maxsize - 1)
+            elif formatter is ValueFormat.BigDecimal:
+                _digit = Digit(integer=100, decimal=50)
+            elif formatter is ValueFormat.Date:
+                _customize = "date_value"
+                _variables = [Variable(name=_customize, value_format=ValueFormat.Date)]
+            elif formatter is ValueFormat.DateTime:
+                _customize = "datetime_value"
+                _variables = [Variable(name=_customize, value_format=ValueFormat.DateTime)]
+            else:
+                raise NotImplementedError
+
             return PyMockFormat(
                 strategy=FormatStrategy.BY_DATA_TYPE,
                 # general setting
                 digit=_digit,
                 size=_size,
+                # customize
+                customize=_customize,
+                variables=_variables,
             )
         else:
             return None

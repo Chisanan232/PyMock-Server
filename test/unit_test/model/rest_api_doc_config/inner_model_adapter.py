@@ -3,7 +3,7 @@ from typing import List, Optional, Type, Union
 import pytest
 
 from pymock_server.model.api_config.apis import ResponseStrategy
-from pymock_server.model.api_config.value import FormatStrategy
+from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_server.model.rest_api_doc_config._js_handlers import ApiDocValueFormat
 from pymock_server.model.rest_api_doc_config._model_adapter import (
     FormatAdapter,
@@ -50,7 +50,21 @@ class TestFormatAdapter:
         else:
             assert pymock_config.strategy and pymock_config.strategy is expected_strategy
             if pymock_config.strategy is FormatStrategy.BY_DATA_TYPE:
-                assert pymock_config
+                if formatter is ApiDocValueFormat.Date:
+                    assert pymock_config.customize == "date_value"
+                    assert pymock_config.variables
+                    assert pymock_config.variables[0].name == "date_value"
+                    assert pymock_config.variables[0].value_format == ValueFormat.Date
+                elif formatter is ApiDocValueFormat.DateTime:
+                    assert pymock_config.customize == "datetime_value"
+                    assert pymock_config.variables
+                    assert pymock_config.variables[0].name == "datetime_value"
+                    assert pymock_config.variables[0].value_format == ValueFormat.DateTime
+                elif formatter in [ApiDocValueFormat.Int32, ApiDocValueFormat.Int64]:
+                    assert pymock_config.size
+                elif formatter in [ApiDocValueFormat.Double, ApiDocValueFormat.Float]:
+                    assert pymock_config.digit
+
             elif pymock_config.strategy is FormatStrategy.FROM_ENUMS:
                 assert pymock_config.enums
                 assert pymock_config.digit is None
