@@ -29,6 +29,7 @@ def ensure_type_is_python_type(t: str) -> str:
 
 
 class ApiDocValueFormat(Enum):
+    Date: str = "date"
     DateTime: str = "date-time"
     Int32: str = "int32"
     Int64: str = "int64"
@@ -46,9 +47,10 @@ class ApiDocValueFormat(Enum):
         raise ValueError(f"Cannot map anyone format with value '{v}'.")
 
     def to_pymock_value_format(self) -> ValueFormat:
-        if self is ApiDocValueFormat.DateTime:
-            # TODO: Support to generate datetime format value
-            raise NotImplementedError
+        if self is ApiDocValueFormat.Date:
+            return ValueFormat.Date
+        elif self is ApiDocValueFormat.DateTime:
+            return ValueFormat.DateTime
         elif self in [ApiDocValueFormat.Int32, ApiDocValueFormat.Int64]:
             return ValueFormat.Integer
         elif self in [ApiDocValueFormat.Float, ApiDocValueFormat.Double]:

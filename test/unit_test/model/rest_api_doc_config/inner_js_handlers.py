@@ -36,6 +36,7 @@ class TestApiDocValueFormat:
     @pytest.mark.parametrize(
         ("under_test_value", "expected_value"),
         [
+            ("date", ApiDocValueFormat.Date),
             (ApiDocValueFormat.DateTime, ApiDocValueFormat.DateTime),
             (ApiDocValueFormat.Int32, ApiDocValueFormat.Int32),
             (ApiDocValueFormat.Int64, ApiDocValueFormat.Int64),
@@ -60,7 +61,8 @@ class TestApiDocValueFormat:
     @pytest.mark.parametrize(
         ("api_doc_format", "pymock_format"),
         [
-            # (ApiDocValueFormat.DateTime, ValueFormat.DateTime),
+            (ApiDocValueFormat.Date, ValueFormat.Date),
+            (ApiDocValueFormat.DateTime, ValueFormat.DateTime),
             (ApiDocValueFormat.Int32, ValueFormat.Integer),
             (ApiDocValueFormat.Int64, ValueFormat.Integer),
             (ApiDocValueFormat.Float, ValueFormat.BigDecimal),
