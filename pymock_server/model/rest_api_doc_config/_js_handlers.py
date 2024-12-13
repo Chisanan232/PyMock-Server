@@ -35,7 +35,6 @@ class ApiDocValueFormat(Enum):
     Int64: str = "int64"
     Float: str = "float"
     Double: str = "double"
-    Password: str = "password"
 
     @staticmethod
     def to_enum(v: Union[str, "ApiDocValueFormat"]) -> "ApiDocValueFormat":
@@ -55,8 +54,5 @@ class ApiDocValueFormat(Enum):
             return ValueFormat.Integer
         elif self in [ApiDocValueFormat.Float, ApiDocValueFormat.Double]:
             return ValueFormat.BigDecimal
-        elif self is ApiDocValueFormat.Password:
-            # TODO: Support to generate password format value
-            raise NotImplementedError
         else:
             raise NotImplementedError

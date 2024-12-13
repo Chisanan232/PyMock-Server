@@ -25,7 +25,6 @@ class TestFormatAdapter:
             (ApiDocValueFormat.Int64, [], FormatStrategy.BY_DATA_TYPE),
             (ApiDocValueFormat.Float, [], FormatStrategy.BY_DATA_TYPE),
             (ApiDocValueFormat.Double, [], FormatStrategy.BY_DATA_TYPE),
-            # (ApiDocValueFormat.Password, [], FormatStrategy.BY_DATA_TYPE),
             ("", ["ENUM_1", "ENUM_2", "ENUM_3"], FormatStrategy.FROM_ENUMS),
             ("", [], None),
         ],

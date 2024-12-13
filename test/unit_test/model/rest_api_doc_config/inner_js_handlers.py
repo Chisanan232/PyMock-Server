@@ -42,7 +42,6 @@ class TestApiDocValueFormat:
             (ApiDocValueFormat.Int64, ApiDocValueFormat.Int64),
             (ApiDocValueFormat.Float, ApiDocValueFormat.Float),
             (ApiDocValueFormat.Double, ApiDocValueFormat.Double),
-            (ApiDocValueFormat.Password, ApiDocValueFormat.Password),
             ("date-time", ApiDocValueFormat.DateTime),
             ("date-Time", ApiDocValueFormat.DateTime),
             ("int64", ApiDocValueFormat.Int64),
@@ -67,7 +66,6 @@ class TestApiDocValueFormat:
             (ApiDocValueFormat.Int64, ValueFormat.Integer),
             (ApiDocValueFormat.Float, ValueFormat.BigDecimal),
             (ApiDocValueFormat.Double, ValueFormat.BigDecimal),
-            # (ApiDocValueFormat.Password, ValueFormat.Password),
         ],
     )
     def test_to_pymock_value_format(self, api_doc_format: ApiDocValueFormat, pymock_format: ValueFormat):
