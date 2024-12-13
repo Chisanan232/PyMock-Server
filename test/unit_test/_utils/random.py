@@ -47,7 +47,7 @@ class TestRandomDate(BaseRandomGeneratorTestSuite):
         random_date = generator.generate()
         assert re.search(r"\d{4}-\d{1,2}-\d{1,2}", random_date)
         now = datetime.datetime.now()
-        random_date_obj = datetime.datetime.strptime(random_date, generator._Date_Format)
+        random_date_obj = datetime.datetime.strptime(random_date, generator._DateTime_Format)
         assert now - datetime.timedelta(days=30) <= random_date_obj <= now + datetime.timedelta(days=0)
 
 
