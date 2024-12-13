@@ -22,11 +22,15 @@ class TestValueFormat(EnumTestSuite):
     @pytest.mark.parametrize(
         "value",
         [
+            ValueFormat.Date,
+            ValueFormat.DateTime,
             ValueFormat.String,
             ValueFormat.Integer,
             ValueFormat.BigDecimal,
             ValueFormat.Boolean,
             ValueFormat.Enum,
+            "date",
+            "date-time",
             "str",
             "int",
             "big_decimal",
@@ -50,6 +54,8 @@ class TestValueFormat(EnumTestSuite):
     @pytest.mark.parametrize(
         ("formatter", "enums", "expect_type"),
         [
+            (ValueFormat.Date, [], str),
+            (ValueFormat.DateTime, [], str),
             (ValueFormat.String, [], str),
             (ValueFormat.Integer, [], int),
             (ValueFormat.BigDecimal, [], Decimal),
@@ -129,6 +135,8 @@ class TestValueFormat(EnumTestSuite):
     @pytest.mark.parametrize(
         ("formatter", "enums", "size", "digit_range", "expect_regex"),
         [
+            (ValueFormat.Date, [], None, None, r"\d{4}-\d{1,2}-\d{1,2}"),
+            (ValueFormat.DateTime, [], None, None, r"\d{4}-\d{1,2}-\d{1,2}T\d{1,2}:\d{1,2}:\d{1,2}Z"),
             (
                 ValueFormat.String,
                 [],

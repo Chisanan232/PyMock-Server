@@ -7,6 +7,8 @@ from pymock_server._utils.random import (
     DigitRange,
     RandomBigDecimal,
     RandomBoolean,
+    RandomDate,
+    RandomDateTime,
     RandomFromSequence,
     RandomInteger,
     RandomString,
@@ -22,6 +24,8 @@ class ValueFormat(Enum):
     Integer: str = "int"
     BigDecimal: str = "big_decimal"
     Boolean: str = "bool"
+    Date: str = "date"
+    DateTime: str = "date-time"
     Enum: str = "enum"
 
     @staticmethod
@@ -64,6 +68,10 @@ class ValueFormat(Enum):
             )
         elif self is ValueFormat.Boolean:
             return RandomBoolean.generate()
+        elif self is ValueFormat.Date:
+            return RandomDate.generate()
+        elif self is ValueFormat.DateTime:
+            return RandomDateTime.generate()
         elif self is ValueFormat.Enum:
             return RandomFromSequence.generate(enums)
         else:
@@ -89,6 +97,10 @@ class ValueFormat(Enum):
             return r"\d{1," + re.escape(str(integer_digit)) + "}\.?\d{0," + re.escape(str(digit.decimal)) + "}"
         elif self is ValueFormat.Boolean:
             return r"(true|false|True|False)"
+        elif self is ValueFormat.Date:
+            return r"\d{4}-\d{1,2}-\d{1,2}"
+        elif self is ValueFormat.DateTime:
+            return r"\d{4}-\d{1,2}-\d{1,2}T\d{1,2}:\d{1,2}:\d{1,2}Z"
         elif self is ValueFormat.Enum:
             return r"(" + r"|".join([re.escape(e) for e in enums]) + r")"
         else:
@@ -110,6 +122,12 @@ class ValueFormat(Enum):
             assert (
                 digit.decimal >= 0
             ), f"The digit number of decimal part must be greater or equal to 0. digit.decimal: {digit.decimal}."
+        elif self is ValueFormat.Date:
+            # TODO: Add some settings for datetime value
+            assert True, "The digit must not be empty."
+        elif self is ValueFormat.DateTime:
+            # TODO: Add some settings for datetime value
+            assert True, "The digit must not be empty."
         elif self is ValueFormat.Enum:
             assert enums is not None and len(enums) > 0, "The enums must not be empty."
             assert (
