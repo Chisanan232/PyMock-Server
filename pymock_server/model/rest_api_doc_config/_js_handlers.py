@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Union
 
+from pymock_server.model.api_config.value import ValueFormat
+
 
 def convert_js_type(t: str) -> str:
     if t == "string":
@@ -42,3 +44,17 @@ class ApiDocValueFormat(Enum):
             if formatter.value.lower() == v.lower():
                 return formatter
         raise ValueError(f"Cannot map anyone format with value '{v}'.")
+
+    def to_pymock_value_format(self) -> ValueFormat:
+        if self is ApiDocValueFormat.DateTime:
+            # TODO: Support to generate datetime format value
+            raise NotImplementedError
+        elif self in [ApiDocValueFormat.Int32, ApiDocValueFormat.Int64]:
+            return ValueFormat.Integer
+        elif self in [ApiDocValueFormat.Float, ApiDocValueFormat.Double]:
+            return ValueFormat.BigDecimal
+        elif self is ApiDocValueFormat.Password:
+            # TODO: Support to generate password format value
+            raise NotImplementedError
+        else:
+            raise NotImplementedError
