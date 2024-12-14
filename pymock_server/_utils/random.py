@@ -1,6 +1,7 @@
 import datetime
 import random
 import string
+import uuid
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from decimal import Decimal
@@ -90,3 +91,9 @@ class RandomEMail(BaseRandomGenerator):
             mail_user_name = RandomFromSequence.generate(sequence)
         mail_server = RandomFromSequence.generate(cls._EMail_Service)
         return f"{mail_user_name}@{mail_server}.com"
+
+
+class RandomUUID(BaseRandomGenerator):
+    @classmethod
+    def generate(cls) -> str:
+        return str(uuid.uuid1())

@@ -16,6 +16,7 @@ from pymock_server._utils.random import (
     RandomFromSequence,
     RandomInteger,
     RandomString,
+    RandomUUID,
 )
 
 logger = logging.getLogger(__name__)
@@ -77,3 +78,13 @@ class TestRandomEMail(BaseRandomGeneratorTestSuite):
         random_email = generator.generate()
         logger.info(f"the randomly e-mail: {random_email}")
         assert re.search(r"\w{1,124}@(gmail|outlook|yahoo).com", random_email)
+
+
+class TestRandomUUID(BaseRandomGeneratorTestSuite):
+    @pytest.fixture(scope="function")
+    def generator(self) -> Type[RandomUUID]:
+        return RandomUUID
+
+    def test_generate(self, generator: Type[RandomUUID]):
+        random_uuid = generator.generate()
+        assert re.search(r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}", random_uuid)
