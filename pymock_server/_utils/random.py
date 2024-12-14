@@ -4,7 +4,7 @@ import string
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from decimal import Decimal
-from typing import Any, Sequence
+from typing import Any, List, Optional, Sequence
 
 ValueSize = namedtuple("ValueSize", ("min", "max"), defaults=(-127, 128))
 DigitRange = namedtuple("DigitRange", ("integer", "decimal"))
@@ -23,7 +23,7 @@ class BaseRandomGenerator(metaclass=ABCMeta):
 
 class RandomString(BaseRandomGenerator):
     @classmethod
-    def generate(cls, size: ValueSize = ValueSize()) -> str:
+    def generate(cls, size: ValueSize = ValueSize(min=1)) -> str:
         string_size = random.randint(size.min, size.max)
         return "".join([random.choice(string.ascii_letters) for _ in range(string_size)])
 
@@ -78,3 +78,15 @@ class RandomDateTime(RandomDate):
     @classmethod
     def generate(cls) -> str:
         return RandomFromSequence.generate([cls._generate_and_format_value(d) for d in range(0, 30)])
+
+
+class RandomEMail(BaseRandomGenerator):
+    _EMail_Service: List[str] = ["gmail", "outlook", "yahoo"]
+
+    @classmethod
+    def generate(cls, size: ValueSize = ValueSize(min=1), sequence: Optional[Sequence] = None) -> str:
+        mail_user_name = RandomString.generate(size)
+        if sequence:
+            mail_user_name = RandomFromSequence.generate(sequence)
+        mail_server = RandomFromSequence.generate(cls._EMail_Service)
+        return f"{mail_user_name}@{mail_server}.com"
