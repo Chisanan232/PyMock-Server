@@ -1,4 +1,5 @@
 import datetime
+import logging
 import re
 from abc import abstractmethod
 from typing import Type
@@ -11,10 +12,13 @@ from pymock_server._utils.random import (
     RandomBoolean,
     RandomDate,
     RandomDateTime,
+    RandomEMail,
     RandomFromSequence,
     RandomInteger,
     RandomString,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.mark.parametrize(
@@ -62,3 +66,14 @@ class TestRandomDateTime(BaseRandomGeneratorTestSuite):
         now = datetime.datetime.now()
         random_date_obj = datetime.datetime.strptime(random_date, generator._DateTime_Format)
         assert now - datetime.timedelta(days=30) <= random_date_obj <= now + datetime.timedelta(days=0)
+
+
+class TestRandomEMail(BaseRandomGeneratorTestSuite):
+    @pytest.fixture(scope="function")
+    def generator(self) -> Type[RandomEMail]:
+        return RandomEMail
+
+    def test_generate(self, generator: Type[RandomEMail]):
+        random_email = generator.generate()
+        logger.info(f"the randomly e-mail: {random_email}")
+        assert re.search(r"\w{1,124}@(gmail|outlook|yahoo).com", random_email)
