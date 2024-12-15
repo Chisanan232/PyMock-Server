@@ -46,6 +46,11 @@ class TestApiDocValueFormat:
             ("date-Time", ApiDocValueFormat.DateTime),
             ("int64", ApiDocValueFormat.Int64),
             ("INT32", ApiDocValueFormat.Int32),
+            ("email", ApiDocValueFormat.EMail),
+            ("UUID", ApiDocValueFormat.UUID),
+            ("Uri", ApiDocValueFormat.URI),
+            ("ipv4", ApiDocValueFormat.IPv4),
+            ("IPv6", ApiDocValueFormat.IPv6),
         ],
     )
     def test_to_enum(
@@ -66,6 +71,11 @@ class TestApiDocValueFormat:
             (ApiDocValueFormat.Int64, ValueFormat.Integer),
             (ApiDocValueFormat.Float, ValueFormat.BigDecimal),
             (ApiDocValueFormat.Double, ValueFormat.BigDecimal),
+            (ApiDocValueFormat.EMail, ValueFormat.EMail),
+            (ApiDocValueFormat.UUID, ValueFormat.UUID),
+            (ApiDocValueFormat.URI, ValueFormat.URI),
+            (ApiDocValueFormat.IPv4, ValueFormat.IPv4),
+            (ApiDocValueFormat.IPv6, ValueFormat.IPv6),
         ],
     )
     def test_to_pymock_value_format(self, api_doc_format: ApiDocValueFormat, pymock_format: ValueFormat):
