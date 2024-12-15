@@ -1,7 +1,7 @@
 import logging
 import sys
 from dataclasses import dataclass, field
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 
 from pymock_server.model import MockAPI
 from pymock_server.model.api_config import IteratorItem
@@ -33,6 +33,12 @@ logger = logging.getLogger(__name__)
 class FormatAdapter(BaseFormatModelAdapter):
 
     def to_pymock_api_config(self) -> Optional[PyMockFormat]:
+
+        def _configure_customize(customize: str, value_format: ValueFormat) -> Tuple[str, List[Variable]]:
+            cust = customize
+            var = [Variable(name=cust, value_format=value_format)]
+            return cust, var
+
         if self.enum:
             return PyMockFormat(
                 strategy=FormatStrategy.FROM_ENUMS,
@@ -52,11 +58,9 @@ class FormatAdapter(BaseFormatModelAdapter):
                 # TODO: It should have setting to configure this setting
                 _digit = Digit(integer=100, decimal=50)
             elif formatter is ValueFormat.Date:
-                _customize = "date_value"
-                _variables = [Variable(name=_customize, value_format=ValueFormat.Date)]
+                (_customize, _variables) = _configure_customize("date_value", ValueFormat.Date)
             elif formatter is ValueFormat.DateTime:
-                _customize = "datetime_value"
-                _variables = [Variable(name=_customize, value_format=ValueFormat.DateTime)]
+                (_customize, _variables) = _configure_customize("datetime_value", ValueFormat.DateTime)
             else:
                 raise NotImplementedError
 
