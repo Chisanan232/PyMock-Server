@@ -61,6 +61,11 @@ class TestValueFormat(EnumTestSuite):
             (ValueFormat.BigDecimal, [], Decimal),
             (ValueFormat.Boolean, [], bool),
             (ValueFormat.Enum, ["ENUM_1", "ENUM_2", "ENUM_3"], str),
+            (ValueFormat.EMail, [], str),
+            (ValueFormat.UUID, [], str),
+            (ValueFormat.URI, [], str),
+            (ValueFormat.IPv4, [], str),
+            (ValueFormat.IPv6, [], str),
         ],
     )
     def test_generate_value(self, formatter: ValueFormat, enums: List[str], expect_type: object):
@@ -158,6 +163,17 @@ class TestValueFormat(EnumTestSuite):
             (ValueFormat.BigDecimal, [], None, DigitRange(integer=4, decimal=2), r"\d{1,4}\.?\d{0,2}"),
             (ValueFormat.BigDecimal, [], None, DigitRange(integer=10, decimal=3), r"\d{1,10}\.?\d{0,3}"),
             (ValueFormat.Enum, ["ENUM_1", "ENUM_2", "ENUM_3"], None, None, r"(ENUM_1|ENUM_2|ENUM_3)"),
+            (ValueFormat.EMail, [], None, None, r"\w{1,124}@(gmail|outlook|yahoo).com"),
+            (ValueFormat.UUID, [], None, None, r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"),
+            (ValueFormat.URI, [], None, None, r"https://www\.(\w{1,24}|\.){1,7}\.(com|org)"),
+            (ValueFormat.IPv4, [], None, None, r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"),
+            (
+                ValueFormat.IPv6,
+                [],
+                None,
+                None,
+                r"(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}",
+            ),
         ],
     )
     def test_generate_regex(

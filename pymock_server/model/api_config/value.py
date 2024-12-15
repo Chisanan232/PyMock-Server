@@ -9,17 +9,23 @@ from pymock_server._utils.random import (
     RandomBoolean,
     RandomDate,
     RandomDateTime,
+    RandomEMail,
     RandomFromSequence,
     RandomInteger,
+    RandomIP,
     RandomString,
+    RandomURI,
+    RandomUUID,
     ValueSize,
 )
+from pymock_server._utils.uri_protocol import IPVersion, URISchema
 
 Default_Value_Size = ValueSize(max=10, min=1)
 Default_Digit_Range = DigitRange(integer=128, decimal=128)
 
 
 class ValueFormat(Enum):
+    # general format
     String: str = "str"
     Integer: str = "int"
     BigDecimal: str = "big_decimal"
@@ -27,6 +33,14 @@ class ValueFormat(Enum):
     Date: str = "date"
     DateTime: str = "date-time"
     Enum: str = "enum"
+
+    # specific format
+    EMail: str = "email"
+    UUID: str = "uuid"
+    URI: str = "uri"
+    # Hostname: str = "hostname"
+    IPv4: str = "ipv4"
+    IPv6: str = "ipv6"
 
     @staticmethod
     def to_enum(v: Union[str, type, "ValueFormat"]) -> "ValueFormat":
@@ -74,6 +88,17 @@ class ValueFormat(Enum):
             return RandomDateTime.generate()
         elif self is ValueFormat.Enum:
             return RandomFromSequence.generate(enums)
+        elif self is ValueFormat.EMail:
+            return RandomEMail.generate()
+        elif self is ValueFormat.UUID:
+            return RandomUUID.generate()
+        elif self is ValueFormat.URI:
+            # TODO: It should has setting to configure URI schema
+            return RandomURI.generate(schema=URISchema.HTTPS)
+        elif self is ValueFormat.IPv4:
+            return RandomIP.generate(IPVersion.IPv4)
+        elif self is ValueFormat.IPv6:
+            return RandomIP.generate(IPVersion.IPv4)
         else:
             raise NotImplementedError(f"Doesn't implement how to generate the value by format {self}.")
 
@@ -103,6 +128,17 @@ class ValueFormat(Enum):
             return r"\d{4}-\d{1,2}-\d{1,2}T\d{1,2}:\d{1,2}:\d{1,2}Z"
         elif self is ValueFormat.Enum:
             return r"(" + r"|".join([re.escape(e) for e in enums]) + r")"
+        elif self is ValueFormat.EMail:
+            return r"\w{1,124}@(gmail|outlook|yahoo).com"
+        elif self is ValueFormat.UUID:
+            return r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
+        elif self is ValueFormat.URI:
+            # TODO: It should has setting to configure URI schema
+            return URISchema.HTTPS.generate_value_regex()
+        elif self is ValueFormat.IPv4:
+            return r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+        elif self is ValueFormat.IPv6:
+            return r"(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}"
         else:
             raise NotImplementedError(f"Doesn't implement what the regex expression should be with format {self}.")
 
@@ -126,6 +162,21 @@ class ValueFormat(Enum):
             # TODO: Add some settings for datetime value
             assert True, "The digit must not be empty."
         elif self is ValueFormat.DateTime:
+            # TODO: Add some settings for datetime value
+            assert True, "The digit must not be empty."
+        elif self is ValueFormat.EMail:
+            # TODO: Add some settings for datetime value
+            assert True, "The digit must not be empty."
+        elif self is ValueFormat.UUID:
+            # TODO: Add some settings for datetime value
+            assert True, "The digit must not be empty."
+        elif self is ValueFormat.URI:
+            # TODO: Add some settings for datetime value
+            assert True, "The digit must not be empty."
+        elif self is ValueFormat.IPv4:
+            # TODO: Add some settings for datetime value
+            assert True, "The digit must not be empty."
+        elif self is ValueFormat.IPv6:
             # TODO: Add some settings for datetime value
             assert True, "The digit must not be empty."
         elif self is ValueFormat.Enum:
