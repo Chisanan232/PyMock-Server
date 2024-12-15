@@ -23,3 +23,8 @@ class URISchema(Enum):
                 if schema.value.lower() == str(v).lower():
                     return schema
             raise ValueError(f"Cannot find the URI schema '{v}'.")
+
+
+class IPVersion(Enum):
+    IPv4: str = "ipv4"
+    IPv6: str = "ipv6"
