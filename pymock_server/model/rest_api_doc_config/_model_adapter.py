@@ -61,6 +61,18 @@ class FormatAdapter(BaseFormatModelAdapter):
                 (_customize, _variables) = _configure_customize("date_value", ValueFormat.Date)
             elif formatter is ValueFormat.DateTime:
                 (_customize, _variables) = _configure_customize("datetime_value", ValueFormat.DateTime)
+            elif formatter is ValueFormat.EMail:
+                (_customize, _variables) = _configure_customize("email_value", ValueFormat.Enum)
+            elif formatter is ValueFormat.UUID:
+                (_customize, _variables) = _configure_customize("uuid_value", ValueFormat.UUID)
+            elif formatter is ValueFormat.URI:
+                (_customize, _variables) = _configure_customize("uri_value", ValueFormat.URI)
+            elif formatter is ValueFormat.URL:
+                (_customize, _variables) = _configure_customize("url_value", ValueFormat.URL)
+            elif formatter is ValueFormat.IPv4:
+                (_customize, _variables) = _configure_customize("ipv4_value", ValueFormat.IPv4)
+            elif formatter is ValueFormat.IPv6:
+                (_customize, _variables) = _configure_customize("ipv6_value", ValueFormat.IPv6)
             else:
                 raise NotImplementedError
 

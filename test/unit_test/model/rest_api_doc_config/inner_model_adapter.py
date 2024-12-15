@@ -19,14 +19,20 @@ class TestFormatAdapter:
     @pytest.mark.parametrize(
         ("formatter", "enum", "expected_strategy"),
         [
-            (ApiDocValueFormat.Date, [], FormatStrategy.BY_DATA_TYPE),
-            (ApiDocValueFormat.DateTime, [], FormatStrategy.BY_DATA_TYPE),
             (ApiDocValueFormat.Int32, [], FormatStrategy.BY_DATA_TYPE),
             (ApiDocValueFormat.Int64, [], FormatStrategy.BY_DATA_TYPE),
             (ApiDocValueFormat.Float, [], FormatStrategy.BY_DATA_TYPE),
             (ApiDocValueFormat.Double, [], FormatStrategy.BY_DATA_TYPE),
             ("", ["ENUM_1", "ENUM_2", "ENUM_3"], FormatStrategy.FROM_ENUMS),
             ("", [], None),
+            (ApiDocValueFormat.Date, [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.DateTime, [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.EMail, [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.UUID, [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.URI, [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.URL, [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.IPv4, [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.IPv6, [], FormatStrategy.BY_DATA_TYPE),
         ],
     )
     def test_to_pymock_api_config(
