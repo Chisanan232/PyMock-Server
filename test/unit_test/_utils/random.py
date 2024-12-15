@@ -19,7 +19,7 @@ from pymock_server._utils.random import (
     RandomURI,
     RandomUUID,
 )
-from pymock_server._utils.uri_protocol import URISchema
+from pymock_server._utils.uri_protocol import IPVersion, URISchema
 
 logger = logging.getLogger(__name__)
 
@@ -116,3 +116,22 @@ class TestRandomURI(BaseRandomGeneratorTestSuite):
         random_uri = generator.generate(schema)
         logger.info(f"The random URI value is: {random_uri}")
         assert re.search(expect_regex, random_uri)
+
+    @pytest.mark.parametrize(
+        ("ip_version", "expect_regex"),
+        [
+            (IPVersion.IPv4, r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"),
+            (
+                IPVersion.IPv6,
+                r"(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}:(\d|[a-f]){4}",
+            ),
+        ],
+    )
+    def test__generate_ip_address(self, generator: RandomURI, ip_version: IPVersion, expect_regex: str):
+        random_ip_address = generator._generate_ip_address(version=ip_version)
+        logger.info(f"The random IP address is: {random_ip_address}")
+        assert re.search(expect_regex, random_ip_address)
+
+    def test__generate_ip_address_with_invalid_version(self, generator: RandomURI):
+        with pytest.raises(NotImplementedError):
+            generator._generate_ip_address(version="invalid IP protocol version")
