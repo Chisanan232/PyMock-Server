@@ -72,4 +72,4 @@ class TemplateConfig(_Config, _Checkable):
 
 @dataclass(eq=False)
 class _BaseTemplateAccessable(metaclass=ABCMeta):
-    _current_template: TemplateConfig = field(default_factory=TemplateConfig)
+    _current_template: TemplateConfig = field(default_factory=TemplateConfig, repr=False)
