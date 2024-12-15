@@ -7,6 +7,8 @@ from collections import namedtuple
 from decimal import Decimal
 from typing import Any, List, Optional, Sequence
 
+from pymock_server._utils.uri_protocol import IPVersion, URISchema
+
 ValueSize = namedtuple("ValueSize", ("min", "max"), defaults=(-127, 128))
 DigitRange = namedtuple("DigitRange", ("integer", "decimal"))
 
@@ -97,3 +99,152 @@ class RandomUUID(BaseRandomGenerator):
     @classmethod
     def generate(cls) -> str:
         return str(uuid.uuid1())
+
+
+class RandomURI(BaseRandomGenerator):
+    @classmethod
+    def generate(cls, schema: URISchema = URISchema.HTTPS) -> str:
+        return cls._generate_uri_by_schema(schema)
+
+    @classmethod
+    def _generate_uri_by_schema(cls, schema: URISchema) -> str:
+        if schema in (URISchema.HTTP, URISchema.HTTPS):
+            # ex: http://www.ietf.org/rfc/rfc2396.txt
+            authority = cls._generate_domain(prefix="www", suffix=["com", "org"])
+            query = cls._generate_query(use_equal=True)
+            fragment = RandomString.generate()
+            return f"{schema.value}://{authority}?{query}#{fragment}"
+        elif schema is URISchema.File:
+            # ex: file://username/wow/Download/test.txt
+            path = cls._generate_file_path(only_file=False)
+            return f"{schema.value}://{path}"
+        elif schema is URISchema.FTP:
+            # ex: ftp://ftp.is.co.za/rfc/rfc1808.txt
+            authority = cls._generate_domain(
+                prefix="ftp", body_size=ValueSize(min=3, max=4), body_ele_size=ValueSize(min=2, max=3)
+            )
+            path = cls._generate_file_path(only_file=True)
+            return f"{schema.value}://{authority}/{path}"
+        elif schema is URISchema.Mail_To:
+            # ex: mailto:John.Doe@example.com
+            return f"{schema.value}://{RandomEMail.generate()}"
+        elif schema is URISchema.LDAP:
+            # ex: ldap://[2001:db8::7]/c=GB?objectClass?one
+            authority = cls._generate_domain(prefix="ldap")
+            path = "c=GB"
+            query = cls._generate_query(use_equal=False)
+            return f"{schema.value}://{authority}/{path}?{query}"
+        elif schema is URISchema.NEWS:
+            # ex: news:comp.infosystems.www.servers.unix
+            path = cls._generate_domain(prefix="www", suffix=["com"], reverse=True)
+            return f"{schema.value}://{path}.servers.unix"
+        elif schema is URISchema.TEL:
+            # ex: tel:+1-816-555-1212
+            path = cls._generate_phone_number()
+            return f"{schema.value}:{path}"
+        elif schema is URISchema.TELNET:
+            # ex: telnet://192.0.2.16:80/
+            ip_address = cls._generate_ip_address(version=IPVersion.IPv4)
+            port = RandomInteger.generate(value_range=ValueSize(min=10, max=10000))
+            authority = f"{ip_address}:{port}"
+            return f"{schema.value}://{authority}/"
+        elif schema is URISchema.URN:
+            # ex: urn:oasis:names:specification:docbook:dtd:xml:4.1.2
+            path = cls._generate_urn()
+            return f"{schema.value}:{path}"
+        else:
+            raise ValueError(f"Not support generate the URI with schema *{schema}*.")
+
+    @classmethod
+    def _generate_domain(
+        cls,
+        prefix: str = "",
+        suffix: List[str] = [],
+        body_size: ValueSize = ValueSize(min=1, max=4),
+        body_ele_size: ValueSize = ValueSize(min=2, max=24),
+        reverse: bool = False,
+    ) -> str:
+        # note: https://datatracker.ietf.org/doc/html/rfc1035
+        # note: https://datatracker.ietf.org/doc/html/rfc2255
+        domain_eles = [prefix] if prefix else []
+
+        body_size_val = RandomInteger.generate(body_size)
+        domain_body = [RandomString.generate(size=body_ele_size) for _ in range(body_size_val)]
+        domain_eles.extend(domain_body)
+        if suffix:
+            domain_suffix = RandomFromSequence.generate(suffix)
+            domain_eles.append(domain_suffix)
+
+        if reverse:
+            domain_eles.reverse()
+
+        domain = ".".join(domain_eles)
+        return domain
+
+    @classmethod
+    def _generate_query(cls, use_equal: bool = True) -> str:
+        condition_name = RandomString.generate(size=ValueSize(min=2, max=12))
+        condition_value = RandomString.generate(size=ValueSize(min=2, max=12))
+        query = f"{condition_name}={condition_value}" if use_equal else f"{condition_name}?{condition_value}"
+        return query
+
+    @classmethod
+    def _generate_file_path(cls, only_file: bool) -> str:
+        file_extensions: List = [".jpg", ".jpeg", ".png", ".text", ".txt", ".py", ".md"]
+        file_extension = RandomFromSequence.generate(file_extensions)
+
+        path_depth: ValueSize
+        if only_file:
+            path_depth = ValueSize(min=1, max=2)
+        else:
+            path_depth = ValueSize(min=1, max=6)
+        path_depth_int = RandomInteger.generate(path_depth)
+        file_path_eles = [RandomString.generate(size=ValueSize(min=1, max=10)) for _ in range(path_depth_int)]
+        file_name = f"{file_path_eles[-1]}{file_extension}"
+        file_path_eles.pop(-1)
+        file_path_eles.append(file_name)
+        return "/".join(file_path_eles)
+
+    @classmethod
+    def _generate_phone_number(cls) -> str:
+        internal_number = "886"
+
+        def _randomly_int() -> int:
+            return RandomInteger.generate(value_range=ValueSize(min=1, max=9))
+
+        prefix_number = "".join([str(_randomly_int()) for _ in range(3)])
+        suffix_number = "".join([str(_randomly_int()) for _ in range(4)])
+
+        return f"+1-{internal_number}-{prefix_number}-{suffix_number}"
+
+    @classmethod
+    def _generate_ip_address(cls, version: IPVersion) -> str:
+        def _randomly_int() -> int:
+            return RandomInteger.generate(value_range=ValueSize(min=1, max=256))
+
+        if version is IPVersion.IPv4:
+            ip_address = ".".join([str(_randomly_int()) for _ in range(4)])
+        elif version is IPVersion.IPv6:
+
+            def _random_hex_string() -> str:
+                return hex(RandomInteger.generate(value_range=ValueSize(min=0, max=16)))[-1]
+
+            def _random_one_part() -> str:
+                return "".join([_random_hex_string() for _ in range(4)])
+
+            ip_address = ":".join([_random_one_part() for _ in range(8)])
+        else:
+            raise NotImplementedError(f"Not support the IP version *{version}*.")
+
+        return ip_address
+
+    @classmethod
+    def _generate_urn(
+        cls, body_size: ValueSize = ValueSize(min=1, max=4), body_ele_size: ValueSize = ValueSize(min=2, max=24)
+    ) -> str:
+        domain_eles = []
+        body_size_val = RandomInteger.generate(body_size)
+        domain_body = [RandomString.generate(size=body_ele_size) for _ in range(body_size_val)]
+        domain_eles.extend(domain_body)
+        urn = ":".join(domain_eles)
+        return urn
