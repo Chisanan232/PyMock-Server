@@ -15,6 +15,7 @@ from pymock_server._utils.random import (
     RandomEMail,
     RandomFromSequence,
     RandomInteger,
+    RandomIP,
     RandomString,
     RandomURI,
     RandomUUID,
@@ -117,6 +118,12 @@ class TestRandomURI(BaseRandomGeneratorTestSuite):
         logger.info(f"The random URI value is: {random_uri}")
         assert re.search(expect_regex, random_uri)
 
+
+class TestRandomIP(BaseRandomGeneratorTestSuite):
+    @pytest.fixture(scope="function")
+    def generator(self) -> Type[RandomIP]:
+        return RandomIP
+
     @pytest.mark.parametrize(
         ("ip_version", "expect_regex"),
         [
@@ -127,11 +134,11 @@ class TestRandomURI(BaseRandomGeneratorTestSuite):
             ),
         ],
     )
-    def test__generate_ip_address(self, generator: RandomURI, ip_version: IPVersion, expect_regex: str):
-        random_ip_address = generator._generate_ip_address(version=ip_version)
+    def test_generate(self, generator: Type[RandomIP], ip_version: IPVersion, expect_regex: str) -> None:
+        random_ip_address = generator.generate(ip_version)
         logger.info(f"The random IP address is: {random_ip_address}")
         assert re.search(expect_regex, random_ip_address)
 
-    def test__generate_ip_address_with_invalid_version(self, generator: RandomURI):
+    def test_generate_with_invalid_version(self, generator: RandomURI):
         with pytest.raises(NotImplementedError):
-            generator._generate_ip_address(version="invalid IP protocol version")
+            generator.generate(version="invalid IP protocol version")
