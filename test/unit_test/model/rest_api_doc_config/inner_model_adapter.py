@@ -25,14 +25,14 @@ class TestFormatAdapter:
             (ApiDocValueFormat.Double, [], FormatStrategy.BY_DATA_TYPE),
             ("", ["ENUM_1", "ENUM_2", "ENUM_3"], FormatStrategy.FROM_ENUMS),
             ("", [], None),
-            (ApiDocValueFormat.Date, [], FormatStrategy.BY_DATA_TYPE),
-            (ApiDocValueFormat.DateTime, [], FormatStrategy.BY_DATA_TYPE),
-            (ApiDocValueFormat.EMail, [], FormatStrategy.BY_DATA_TYPE),
-            (ApiDocValueFormat.UUID, [], FormatStrategy.BY_DATA_TYPE),
-            (ApiDocValueFormat.URI, [], FormatStrategy.BY_DATA_TYPE),
-            (ApiDocValueFormat.URL, [], FormatStrategy.BY_DATA_TYPE),
-            (ApiDocValueFormat.IPv4, [], FormatStrategy.BY_DATA_TYPE),
-            (ApiDocValueFormat.IPv6, [], FormatStrategy.BY_DATA_TYPE),
+            (ApiDocValueFormat.Date, [], FormatStrategy.CUSTOMIZE),
+            (ApiDocValueFormat.DateTime, [], FormatStrategy.CUSTOMIZE),
+            (ApiDocValueFormat.EMail, [], FormatStrategy.CUSTOMIZE),
+            (ApiDocValueFormat.UUID, [], FormatStrategy.CUSTOMIZE),
+            (ApiDocValueFormat.URI, [], FormatStrategy.CUSTOMIZE),
+            (ApiDocValueFormat.URL, [], FormatStrategy.CUSTOMIZE),
+            (ApiDocValueFormat.IPv4, [], FormatStrategy.CUSTOMIZE),
+            (ApiDocValueFormat.IPv6, [], FormatStrategy.CUSTOMIZE),
         ],
     )
     def test_to_pymock_api_config(
@@ -55,6 +55,17 @@ class TestFormatAdapter:
         else:
             assert pymock_config.strategy and pymock_config.strategy is expected_strategy
             if pymock_config.strategy is FormatStrategy.BY_DATA_TYPE:
+                if formatter in [ApiDocValueFormat.Int32, ApiDocValueFormat.Int64]:
+                    assert pymock_config.size
+                elif formatter in [ApiDocValueFormat.Double, ApiDocValueFormat.Float]:
+                    assert pymock_config.digit
+
+            elif pymock_config.strategy is FormatStrategy.FROM_ENUMS:
+                assert pymock_config.enums
+                assert pymock_config.digit is None
+                assert pymock_config.size is None
+
+            elif pymock_config.strategy is FormatStrategy.CUSTOMIZE:
                 if formatter is ApiDocValueFormat.Date:
                     assert pymock_config.customize == "date_value"
                     assert pymock_config.variables
@@ -65,15 +76,37 @@ class TestFormatAdapter:
                     assert pymock_config.variables
                     assert pymock_config.variables[0].name == "datetime_value"
                     assert pymock_config.variables[0].value_format == ValueFormat.DateTime
-                elif formatter in [ApiDocValueFormat.Int32, ApiDocValueFormat.Int64]:
-                    assert pymock_config.size
-                elif formatter in [ApiDocValueFormat.Double, ApiDocValueFormat.Float]:
-                    assert pymock_config.digit
+                elif formatter is ApiDocValueFormat.EMail:
+                    assert pymock_config.customize == "email_value"
+                    assert pymock_config.variables
+                    assert pymock_config.variables[0].name == "email_value"
+                    assert pymock_config.variables[0].value_format == ValueFormat.EMail
+                elif formatter is ApiDocValueFormat.UUID:
+                    assert pymock_config.customize == "uuid_value"
+                    assert pymock_config.variables
+                    assert pymock_config.variables[0].name == "uuid_value"
+                    assert pymock_config.variables[0].value_format == ValueFormat.UUID
+                elif formatter is ApiDocValueFormat.URI:
+                    assert pymock_config.customize == "uri_value"
+                    assert pymock_config.variables
+                    assert pymock_config.variables[0].name == "uri_value"
+                    assert pymock_config.variables[0].value_format == ValueFormat.URI
+                elif formatter is ApiDocValueFormat.URL:
+                    assert pymock_config.customize == "url_value"
+                    assert pymock_config.variables
+                    assert pymock_config.variables[0].name == "url_value"
+                    assert pymock_config.variables[0].value_format == ValueFormat.URL
+                elif formatter is ApiDocValueFormat.IPv4:
+                    assert pymock_config.customize == "ipv4_value"
+                    assert pymock_config.variables
+                    assert pymock_config.variables[0].name == "ipv4_value"
+                    assert pymock_config.variables[0].value_format == ValueFormat.IPv4
+                elif formatter is ApiDocValueFormat.IPv6:
+                    assert pymock_config.customize == "ipv6_value"
+                    assert pymock_config.variables
+                    assert pymock_config.variables[0].name == "ipv6_value"
+                    assert pymock_config.variables[0].value_format == ValueFormat.IPv6
 
-            elif pymock_config.strategy is FormatStrategy.FROM_ENUMS:
-                assert pymock_config.enums
-                assert pymock_config.digit is None
-                assert pymock_config.size is None
             else:
                 raise NotImplementedError
 

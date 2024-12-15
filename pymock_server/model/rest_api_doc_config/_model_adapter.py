@@ -45,6 +45,7 @@ class FormatAdapter(BaseFormatModelAdapter):
                 enums=self.enum,
             )
         elif self.formatter:
+            _strategy: FormatStrategy
             _digit: Optional[Digit] = None
             _size: Optional[Size] = None
             _customize: str = ""
@@ -52,32 +53,42 @@ class FormatAdapter(BaseFormatModelAdapter):
 
             formatter = self.formatter.to_pymock_value_format()
             if formatter is ValueFormat.Integer:
+                _strategy = FormatStrategy.BY_DATA_TYPE
                 # TODO: It should have setting to configure this setting
                 _size = Size(max_value=sys.maxsize, min_value=-sys.maxsize - 1)
             elif formatter is ValueFormat.BigDecimal:
+                _strategy = FormatStrategy.BY_DATA_TYPE
                 # TODO: It should have setting to configure this setting
                 _digit = Digit(integer=100, decimal=50)
             elif formatter is ValueFormat.Date:
+                _strategy = FormatStrategy.CUSTOMIZE
                 (_customize, _variables) = _configure_customize("date_value", ValueFormat.Date)
             elif formatter is ValueFormat.DateTime:
+                _strategy = FormatStrategy.CUSTOMIZE
                 (_customize, _variables) = _configure_customize("datetime_value", ValueFormat.DateTime)
             elif formatter is ValueFormat.EMail:
-                (_customize, _variables) = _configure_customize("email_value", ValueFormat.Enum)
+                _strategy = FormatStrategy.CUSTOMIZE
+                (_customize, _variables) = _configure_customize("email_value", ValueFormat.EMail)
             elif formatter is ValueFormat.UUID:
+                _strategy = FormatStrategy.CUSTOMIZE
                 (_customize, _variables) = _configure_customize("uuid_value", ValueFormat.UUID)
             elif formatter is ValueFormat.URI:
+                _strategy = FormatStrategy.CUSTOMIZE
                 (_customize, _variables) = _configure_customize("uri_value", ValueFormat.URI)
             elif formatter is ValueFormat.URL:
+                _strategy = FormatStrategy.CUSTOMIZE
                 (_customize, _variables) = _configure_customize("url_value", ValueFormat.URL)
             elif formatter is ValueFormat.IPv4:
+                _strategy = FormatStrategy.CUSTOMIZE
                 (_customize, _variables) = _configure_customize("ipv4_value", ValueFormat.IPv4)
             elif formatter is ValueFormat.IPv6:
+                _strategy = FormatStrategy.CUSTOMIZE
                 (_customize, _variables) = _configure_customize("ipv6_value", ValueFormat.IPv6)
             else:
                 raise NotImplementedError
 
             return PyMockFormat(
-                strategy=FormatStrategy.BY_DATA_TYPE,
+                strategy=_strategy,
                 # general setting
                 digit=_digit,
                 size=_size,
