@@ -41,6 +41,7 @@ class ApiDocValueFormat(Enum):
     EMail: str = "email"
     UUID: str = "uuid"
     URI: str = "uri"
+    URL: str = "url"
     # Hostname: str = "hostname"
     IPv4: str = "ipv4"
     IPv6: str = "ipv6"
@@ -69,6 +70,8 @@ class ApiDocValueFormat(Enum):
             return ValueFormat.UUID
         elif self is ApiDocValueFormat.URI:
             return ValueFormat.URI
+        elif self is ApiDocValueFormat.URL:
+            return ValueFormat.URL
         elif self is ApiDocValueFormat.IPv4:
             return ValueFormat.IPv4
         elif self is ApiDocValueFormat.IPv6:

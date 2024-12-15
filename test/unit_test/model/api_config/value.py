@@ -64,6 +64,7 @@ class TestValueFormat(EnumTestSuite):
             (ValueFormat.EMail, [], str),
             (ValueFormat.UUID, [], str),
             (ValueFormat.URI, [], str),
+            (ValueFormat.URL, [], str),
             (ValueFormat.IPv4, [], str),
             (ValueFormat.IPv6, [], str),
         ],
@@ -166,6 +167,7 @@ class TestValueFormat(EnumTestSuite):
             (ValueFormat.EMail, [], None, None, r"\w{1,124}@(gmail|outlook|yahoo).com"),
             (ValueFormat.UUID, [], None, None, r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"),
             (ValueFormat.URI, [], None, None, r"https://www\.(\w{1,24}|\.){1,7}\.(com|org)"),
+            (ValueFormat.URL, [], None, None, r"https://www\.(\w{1,24}|\.){1,7}\.(com|org)"),
             (ValueFormat.IPv4, [], None, None, r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"),
             (
                 ValueFormat.IPv6,

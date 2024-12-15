@@ -38,6 +38,7 @@ class ValueFormat(Enum):
     EMail: str = "email"
     UUID: str = "uuid"
     URI: str = "uri"
+    URL: str = "url"
     # Hostname: str = "hostname"
     IPv4: str = "ipv4"
     IPv6: str = "ipv6"
@@ -50,6 +51,7 @@ class ValueFormat(Enum):
             ValueFormat.EMail,
             ValueFormat.UUID,
             ValueFormat.URI,
+            ValueFormat.URL,
             ValueFormat.IPv4,
             ValueFormat.IPv6,
         ]
@@ -107,6 +109,8 @@ class ValueFormat(Enum):
         elif self is ValueFormat.URI:
             # TODO: It should has setting to configure URI schema
             return RandomURI.generate(schema=URISchema.HTTPS)
+        elif self is ValueFormat.URL:
+            return RandomURI.generate(schema=URISchema.HTTPS)
         elif self is ValueFormat.IPv4:
             return RandomIP.generate(IPVersion.IPv4)
         elif self is ValueFormat.IPv6:
@@ -146,6 +150,8 @@ class ValueFormat(Enum):
             return r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
         elif self is ValueFormat.URI:
             # TODO: It should has setting to configure URI schema
+            return URISchema.HTTPS.generate_value_regex()
+        elif self is ValueFormat.URL:
             return URISchema.HTTPS.generate_value_regex()
         elif self is ValueFormat.IPv4:
             return r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"
