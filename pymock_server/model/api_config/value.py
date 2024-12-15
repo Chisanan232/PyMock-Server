@@ -42,6 +42,18 @@ class ValueFormat(Enum):
     IPv4: str = "ipv4"
     IPv6: str = "ipv6"
 
+    @property
+    def _nothin_need_to_check(self) -> List["ValueFormat"]:
+        return [
+            ValueFormat.Date,
+            ValueFormat.DateTime,
+            ValueFormat.EMail,
+            ValueFormat.UUID,
+            ValueFormat.URI,
+            ValueFormat.IPv4,
+            ValueFormat.IPv6,
+        ]
+
     @staticmethod
     def to_enum(v: Union[str, type, "ValueFormat"]) -> "ValueFormat":
         if isinstance(v, str):
@@ -158,27 +170,9 @@ class ValueFormat(Enum):
             assert (
                 digit.decimal >= 0
             ), f"The digit number of decimal part must be greater or equal to 0. digit.decimal: {digit.decimal}."
-        elif self is ValueFormat.Date:
+        elif self in self._nothin_need_to_check:
             # TODO: Add some settings for datetime value
-            assert True, "The digit must not be empty."
-        elif self is ValueFormat.DateTime:
-            # TODO: Add some settings for datetime value
-            assert True, "The digit must not be empty."
-        elif self is ValueFormat.EMail:
-            # TODO: Add some settings for datetime value
-            assert True, "The digit must not be empty."
-        elif self is ValueFormat.UUID:
-            # TODO: Add some settings for datetime value
-            assert True, "The digit must not be empty."
-        elif self is ValueFormat.URI:
-            # TODO: Add some settings for datetime value
-            assert True, "The digit must not be empty."
-        elif self is ValueFormat.IPv4:
-            # TODO: Add some settings for datetime value
-            assert True, "The digit must not be empty."
-        elif self is ValueFormat.IPv6:
-            # TODO: Add some settings for datetime value
-            assert True, "The digit must not be empty."
+            assert True
         elif self is ValueFormat.Enum:
             assert enums is not None and len(enums) > 0, "The enums must not be empty."
             assert (
