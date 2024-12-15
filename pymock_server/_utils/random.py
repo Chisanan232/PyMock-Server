@@ -101,6 +101,29 @@ class RandomUUID(BaseRandomGenerator):
         return str(uuid.uuid1())
 
 
+class RandomIP(BaseRandomGenerator):
+    @classmethod
+    def generate(cls, version: IPVersion) -> str:
+        def _randomly_int() -> int:
+            return RandomInteger.generate(value_range=ValueSize(min=1, max=256))
+
+        if version is IPVersion.IPv4:
+            ip_address = ".".join([str(_randomly_int()) for _ in range(4)])
+        elif version is IPVersion.IPv6:
+
+            def _random_hex_string() -> str:
+                return hex(RandomInteger.generate(value_range=ValueSize(min=0, max=16)))[-1]
+
+            def _random_one_part() -> str:
+                return "".join([_random_hex_string() for _ in range(4)])
+
+            ip_address = ":".join([_random_one_part() for _ in range(8)])
+        else:
+            raise NotImplementedError(f"Not support the IP version *{version}*.")
+
+        return ip_address
+
+
 class RandomURI(BaseRandomGenerator):
     @classmethod
     def generate(cls, schema: URISchema = URISchema.HTTPS) -> str:
@@ -219,24 +242,7 @@ class RandomURI(BaseRandomGenerator):
 
     @classmethod
     def _generate_ip_address(cls, version: IPVersion) -> str:
-        def _randomly_int() -> int:
-            return RandomInteger.generate(value_range=ValueSize(min=1, max=256))
-
-        if version is IPVersion.IPv4:
-            ip_address = ".".join([str(_randomly_int()) for _ in range(4)])
-        elif version is IPVersion.IPv6:
-
-            def _random_hex_string() -> str:
-                return hex(RandomInteger.generate(value_range=ValueSize(min=0, max=16)))[-1]
-
-            def _random_one_part() -> str:
-                return "".join([_random_hex_string() for _ in range(4)])
-
-            ip_address = ":".join([_random_one_part() for _ in range(8)])
-        else:
-            raise NotImplementedError(f"Not support the IP version *{version}*.")
-
-        return ip_address
+        return RandomIP.generate(version=version)
 
     @classmethod
     def _generate_urn(
