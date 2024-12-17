@@ -28,6 +28,7 @@ from ._factory import _BaseAdapterFactory
 from ._js_handlers import ensure_type_is_python_type
 from ._model_adapter import (
     APIAdapter,
+    FormatAdapter,
     PropertyDetailAdapter,
     RequestParameterAdapter,
     ResponsePropertyAdapter,
@@ -52,6 +53,8 @@ from .version import OpenAPIVersion
 
 
 class AdapterFactory(_BaseAdapterFactory):
+    def generate_value_format(self, **kwargs) -> FormatAdapter:
+        return FormatAdapter(**kwargs)
 
     def generate_property_details(self, **kwargs) -> BaseRefPropertyDetailAdapter:
         return PropertyDetailAdapter(**kwargs)
