@@ -1,4 +1,5 @@
 import copy
+import logging
 import re
 from abc import ABC
 from dataclasses import dataclass, field
@@ -9,6 +10,8 @@ from typing import Any, Dict, List, Optional, Union
 from ._base import _BaseConfig, _Checkable, _Config
 from .value import FormatStrategy, ValueFormat
 from .variable import Digit, Size, Variable
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(eq=False)
@@ -325,7 +328,8 @@ class _HasFormatPropConfig(_BaseConfig, _Checkable, ABC):
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["_HasFormatPropConfig"]:
-        col_format = data.get("format", None)
+        # FIXME: the adapter model's serialization is using property *value_format*. This is an issue needs to fix.
+        col_format = data.get("format", None) or data.get("value_format", None)
         if col_format is not None:
             col_format = Format().deserialize(col_format)
         self.value_format = col_format

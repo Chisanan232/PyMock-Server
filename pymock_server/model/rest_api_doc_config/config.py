@@ -1,3 +1,4 @@
+import logging
 from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Type, Union, cast
@@ -25,7 +26,7 @@ from ._base_model_adapter import (
     BaseResponsePropertyAdapter,
 )
 from ._factory import _BaseAdapterFactory
-from ._js_handlers import ensure_type_is_python_type
+from ._js_handlers import ApiDocValueFormat, ensure_type_is_python_type
 from ._model_adapter import (
     APIAdapter,
     FormatAdapter,
@@ -50,6 +51,8 @@ from .base_config import (
 )
 from .content_type import ContentType
 from .version import OpenAPIVersion
+
+logger = logging.getLogger(__name__)
 
 
 class AdapterFactory(_BaseAdapterFactory):
@@ -103,7 +106,7 @@ class RequestParameter(_BaseRequestParameter):
     query_in: Optional[str] = None
     required: bool = False
     value_type: Optional[str] = None
-    format: Optional[dict] = None
+    format: Optional[ApiDocValueFormat] = None
     default: Optional[Any] = None
     items: Optional[List["RequestParameter"]] = None  # type: ignore[assignment]
     schema: Optional["RequestSchema"] = None  # type: ignore[assignment]
@@ -124,6 +127,10 @@ class RequestParameter(_BaseRequestParameter):
         self.name = data.get("name", "")
         self.query_in = data.get("in", None)
         self.required = data.get("required", True)
+        formatter = data.get("format", None)
+        if formatter:
+            self.format = ApiDocValueFormat.to_enum(formatter)
+        self.enum = data.get("enum", None)
 
         items = data.get("items", [])
         if items:
@@ -160,6 +167,10 @@ class RequestParameter(_BaseRequestParameter):
                 required=(self.required or False),
                 value_type=self.value_type,
                 default=self.default,
+                format=FormatAdapter(
+                    formatter=self.format,
+                    enum=self.enum,
+                ),  # TODO: implement this parameter setting
                 items=items,
             )
         return None
@@ -173,7 +184,7 @@ class RequestParameter(_BaseRequestParameter):
 class ReferenceConfigProperty(BaseReferenceConfigProperty):
     title: Optional[str] = None
     value_type: Optional[str] = None
-    format: Optional[str] = None  # For OpenAPI v3
+    format: Optional[ApiDocValueFormat] = None  # For OpenAPI v3
     default: Optional[str] = None  # For OpenAPI v3 request part
     enums: List[str] = field(default_factory=list)
     ref: Optional[str] = None
@@ -184,12 +195,13 @@ class ReferenceConfigProperty(BaseReferenceConfigProperty):
 
     @classmethod
     def deserialize(cls, data: Dict) -> "ReferenceConfigProperty":
+        formatter = data.get("format", None)
         return ReferenceConfigProperty(
             title=data.get("title", None),
             value_type=ensure_type_is_python_type(data["type"]) if data.get("type", None) else None,
-            format="",  # TODO: Support in next PR
+            format=ApiDocValueFormat.to_enum(formatter) if formatter else None,
             default=data.get("default", None),
-            enums=[],  # TODO: Support in next PR
+            enums=data.get("enum", []),
             ref=data.get("$ref", None),
             items=ReferenceConfigProperty.deserialize(data["items"]) if data.get("items", None) else None,
             additionalProperties=(
