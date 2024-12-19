@@ -114,11 +114,7 @@
                                 "ENUM2"
                             ]
                         },
-                        "collectionFormat": "multi",
-                        "enum": [
-                            "ENUM1",
-                            "ENUM2"
-                        ]
+                        "collectionFormat": "multi"
                     },
                     {
                         "name": "arg2",
@@ -391,7 +387,8 @@
                         "type": "string"
                     },
                     "url": {
-                        "type": "string"
+                        "type": "string",
+                        "format": "url"
                     }
                 },
                 "title": "UrlProperties"

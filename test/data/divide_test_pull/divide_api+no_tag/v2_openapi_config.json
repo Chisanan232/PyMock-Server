@@ -67,7 +67,7 @@
           "title": "Detail",
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/ValidationError"
+            "$ref": "#/definitions/ValidationError"
           }
         }
       }
