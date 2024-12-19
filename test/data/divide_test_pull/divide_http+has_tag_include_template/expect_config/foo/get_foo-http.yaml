@@ -4,9 +4,20 @@ request:
     - name: 'date'
       required: true
       type: str
+      format:
+        strategy: customize
+        customize: datetime_value
+        variables:
+          - name: datetime_value
+            value_format: "date-time"
     - name: 'fooType'
       required: true
       type: str
+      format:
+        strategy: from_enums
+        enums:
+          - ENUM1
+          - ENUM2
 response:
   strategy: object
   properties:
@@ -23,6 +34,11 @@ response:
         - name: id
           required: True
           type: int
+          format:
+            strategy: by_data_type
+            size:
+              max: 9223372036854775807
+              min: -9223372036854775808
         - name: name
           required: True
           type: str

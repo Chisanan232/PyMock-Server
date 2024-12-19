@@ -10,12 +10,28 @@ http:
         items:
           - required: true
             type: str
+            format:
+              strategy: from_enums
+              enums:
+                - ENUM1
+                - ENUM2
       - name: 'arg2'
         required: false
         type: str
+        format:
+          strategy: from_enums
+          enums:
+            - ENUM1
+            - ENUM2
       - name: 'datetime'
         required: false
         type: str
+        format:
+          strategy: customize
+          customize: "datetime_value"
+          variables:
+            - name: datetime_value
+              value_format: date-time
   response:
     strategy: object
     properties:
@@ -42,6 +58,18 @@ http:
       - name: uri
         required: True
         type: str
+        format:
+          strategy: customize
+          customize: "uri_value"
+          variables:
+            - name: uri_value
+              value_format: uri
       - name: url
         required: True
         type: str
+        format:
+          strategy: customize
+          customize: "url_value"
+          variables:
+            - name: url_value
+              value_format: url

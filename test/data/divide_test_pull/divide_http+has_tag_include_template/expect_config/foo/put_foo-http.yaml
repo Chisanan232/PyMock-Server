@@ -11,6 +11,11 @@ request:
         - required: true
           type: int
           name: "id"
+          format:
+            strategy: by_data_type
+            size:
+              max: 9223372036854775807
+              min: -9223372036854775808
 response:
   strategy: object
   properties:
