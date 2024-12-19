@@ -1,5 +1,6 @@
 import json
 import pathlib
+import shutil
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
@@ -301,6 +302,9 @@ class TestSubCmdPullComponent:
         under_test_dir = "v3_openapi" if "v3" in swagger_api_resp_path else "v2_openapi"
         ut_dir = pathlib.Path(test_scenario_dir, "under_test", under_test_dir)
         if not ut_dir.exists():
+            ut_dir.mkdir(parents=True)
+        else:
+            shutil.rmtree(ut_dir)
             ut_dir.mkdir(parents=True)
         ut_config_path = str(pathlib.Path(ut_dir, "api.yaml"))
         cmd_args = SubcmdPullArguments(
