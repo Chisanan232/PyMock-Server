@@ -2,7 +2,7 @@ import datetime
 import logging
 import re
 from abc import abstractmethod
-from typing import Type
+from typing import List, Type
 
 import pytest
 
@@ -81,6 +81,16 @@ class TestRandomEMail(BaseRandomGeneratorTestSuite):
         random_email = generator.generate()
         logger.info(f"the randomly e-mail: {random_email}")
         assert re.search(r"\w{1,124}@(gmail|outlook|yahoo).com", random_email)
+
+    def test_generate_with_multiple_usernames(self, generator: Type[RandomEMail]):
+        usernames: List[str] = ["user1", "test", "wow"]
+
+        random_email = generator.generate(usernames=usernames)
+        logger.info(f"the randomly e-mail: {random_email}")
+
+        email_username_regex = f"({'|'.join(usernames)})"
+        email_service_regex = f"({'|'.join(generator._EMail_Service)})"
+        assert re.search(email_username_regex + r"@" + email_service_regex + ".com", random_email)
 
 
 class TestRandomUUID(BaseRandomGeneratorTestSuite):
