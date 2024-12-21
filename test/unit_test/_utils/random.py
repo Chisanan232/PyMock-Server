@@ -105,6 +105,10 @@ class TestRandomURI(BaseRandomGeneratorTestSuite):
         expect_regex = schema.generate_value_regex()
         assert re.search(expect_regex, random_uri)
 
+    def test_generate_with_invalid_schema(self, generator: RandomURI):
+        with pytest.raises(ValueError):
+            generator.generate(schema="invalid URI schema")
+
 
 class TestRandomIP(BaseRandomGeneratorTestSuite):
     @pytest.fixture(scope="function")
