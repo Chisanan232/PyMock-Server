@@ -170,7 +170,7 @@ class RequestParameter(_BaseRequestParameter):
                 format=FormatAdapter(
                     formatter=self.format,
                     enum=self.enum,
-                ),  # TODO: implement this parameter setting
+                ),
                 items=items,
             )
         return None
