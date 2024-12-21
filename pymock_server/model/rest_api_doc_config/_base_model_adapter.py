@@ -4,8 +4,20 @@ from typing import Any, List, Optional, Union
 
 from pymock_server.model import APIParameter as PyMockRequestProperty
 from pymock_server.model.api_config import ResponseProperty as PyMockResponseProperty
+from pymock_server.model.api_config.format import Format as PyMockFormat
 
 from ._base import Transferable
+from ._js_handlers import ApiDocValueFormat
+
+
+@dataclass
+class BaseFormatModelAdapter:
+    formatter: Optional[ApiDocValueFormat] = None
+    enum: Optional[List[str]] = None
+
+    @abstractmethod
+    def to_pymock_api_config(self) -> Optional[PyMockFormat]:
+        pass
 
 
 # The tmp data model for final result to convert as PyMock-Server

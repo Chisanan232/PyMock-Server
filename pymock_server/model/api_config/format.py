@@ -29,7 +29,8 @@ class Format(_Config, _Checkable):
 
     # For from template strategy
     use_name: str = field(default_factory=str)
-    _current_template: Any = None  # Type is *TemplateConfig*, but it has circular import issue currently.
+    # Type is *TemplateConfig*, but it has circular import issue currently.
+    _current_template: Any = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
         if self.strategy is not None:

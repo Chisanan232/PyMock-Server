@@ -1,6 +1,7 @@
 import logging
+import sys
 from dataclasses import dataclass, field
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 
 from pymock_server.model import MockAPI
 from pymock_server.model.api_config import IteratorItem
@@ -11,9 +12,13 @@ from pymock_server.model.api_config.apis.response import (
     ResponseProperty as PyMockResponseProperty,
 )
 from pymock_server.model.api_config.apis.response_strategy import ResponseStrategy
+from pymock_server.model.api_config.format import Format as PyMockFormat
 
+from ..api_config.value import FormatStrategy, ValueFormat
+from ..api_config.variable import Digit, Size, Variable
 from ._base_model_adapter import (
     BaseAPIAdapter,
+    BaseFormatModelAdapter,
     BaseRefPropertyDetailAdapter,
     BaseRequestParameterAdapter,
     BaseResponsePropertyAdapter,
@@ -22,6 +27,77 @@ from ._js_handlers import ensure_type_is_python_type
 from .base_config import _BaseAPIConfigWithMethod, _Default_Required
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class FormatAdapter(BaseFormatModelAdapter):
+
+    def to_pymock_api_config(self) -> Optional[PyMockFormat]:
+
+        def _configure_customize(customize: str, value_format: ValueFormat) -> Tuple[str, List[Variable]]:
+            cust = customize
+            var = [Variable(name=cust, value_format=value_format)]
+            return cust, var
+
+        if self.enum:
+            return PyMockFormat(
+                strategy=FormatStrategy.FROM_ENUMS,
+                enums=self.enum,
+            )
+        elif self.formatter:
+            _strategy: FormatStrategy
+            _digit: Optional[Digit] = None
+            _size: Optional[Size] = None
+            _customize: str = ""
+            _variables: List[Variable] = []
+
+            formatter = self.formatter.to_pymock_value_format()
+            if formatter is ValueFormat.Integer:
+                _strategy = FormatStrategy.BY_DATA_TYPE
+                # TODO: It should have setting to configure this setting
+                _size = Size(max_value=sys.maxsize, min_value=-sys.maxsize - 1)
+            elif formatter is ValueFormat.BigDecimal:
+                _strategy = FormatStrategy.BY_DATA_TYPE
+                # TODO: It should have setting to configure this setting
+                _digit = Digit(integer=100, decimal=50)
+            elif formatter is ValueFormat.Date:
+                _strategy = FormatStrategy.CUSTOMIZE
+                (_customize, _variables) = _configure_customize("date_value", ValueFormat.Date)
+            elif formatter is ValueFormat.DateTime:
+                _strategy = FormatStrategy.CUSTOMIZE
+                (_customize, _variables) = _configure_customize("datetime_value", ValueFormat.DateTime)
+            elif formatter is ValueFormat.EMail:
+                _strategy = FormatStrategy.CUSTOMIZE
+                (_customize, _variables) = _configure_customize("email_value", ValueFormat.EMail)
+            elif formatter is ValueFormat.UUID:
+                _strategy = FormatStrategy.CUSTOMIZE
+                (_customize, _variables) = _configure_customize("uuid_value", ValueFormat.UUID)
+            elif formatter is ValueFormat.URI:
+                _strategy = FormatStrategy.CUSTOMIZE
+                (_customize, _variables) = _configure_customize("uri_value", ValueFormat.URI)
+            elif formatter is ValueFormat.URL:
+                _strategy = FormatStrategy.CUSTOMIZE
+                (_customize, _variables) = _configure_customize("url_value", ValueFormat.URL)
+            elif formatter is ValueFormat.IPv4:
+                _strategy = FormatStrategy.CUSTOMIZE
+                (_customize, _variables) = _configure_customize("ipv4_value", ValueFormat.IPv4)
+            elif formatter is ValueFormat.IPv6:
+                _strategy = FormatStrategy.CUSTOMIZE
+                (_customize, _variables) = _configure_customize("ipv6_value", ValueFormat.IPv6)
+            else:
+                raise NotImplementedError
+
+            return PyMockFormat(
+                strategy=_strategy,
+                # general setting
+                digit=_digit,
+                size=_size,
+                # customize
+                customize=_customize,
+                variables=_variables,
+            )
+        else:
+            return None
 
 
 @dataclass
@@ -84,6 +160,7 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
             name=name,
             required=required,
             value_type=ensure_type_is_python_type(value_type) if value_type else None,
+            format=None,  # TODO: implement this parameter setting
             default=default,
             items=items,
         )
@@ -103,7 +180,7 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
             required=self.required,
             value_type=self.value_type,
             default=self.default,
-            value_format=None,
+            value_format=None,  # TODO: implement this parameter setting
             items=[to_items(i) for i in (self.items or [])],
         )
 

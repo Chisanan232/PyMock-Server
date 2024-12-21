@@ -108,24 +108,11 @@ class TestRandomURI(BaseRandomGeneratorTestSuite):
     def generator(self) -> Type[RandomURI]:
         return RandomURI
 
-    @pytest.mark.parametrize(
-        ("schema", "expect_regex"),
-        [
-            (URISchema.HTTP, r"http://www\.(\w{1,24}|\.){1,7}\.(com|org)"),
-            (URISchema.HTTPS, r"https://www\.(\w{1,24}|\.){1,7}\.(com|org)"),
-            (URISchema.File, r"file://(\w{1,10}|/){1,11}\.(jpg|jpeg|png|text|txt|py|md)"),
-            (URISchema.FTP, r"ftp://ftp\.(\w{2,3}|\.){5,7}/(\w{1,10}|/){1,3}\.(jpg|jpeg|png|text|txt|py|md)"),
-            (URISchema.Mail_To, r"mailto://\w{1,124}@(gmail|outlook|yahoo).com"),
-            (URISchema.LDAP, r"ldap://ldap\.(\w{1,24}|\.){1,7}/c=GB"),
-            (URISchema.NEWS, r"news://com\.(\w{1,24}|\.){1,7}\.www.servers.unix"),
-            (URISchema.TEL, r"tel:\+1-886-\d{3}-\d{4}"),
-            (URISchema.TELNET, r"telnet://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{2,4}/"),
-            (URISchema.URN, r"urn:(\w{1,24}|:){1,7}"),
-        ],
-    )
-    def test_generate(self, generator: Type[RandomURI], schema: URISchema, expect_regex: str) -> None:
+    @pytest.mark.parametrize("schema", [s for s in URISchema])
+    def test_generate(self, generator: Type[RandomURI], schema: URISchema) -> None:
         random_uri = generator.generate(schema)
         logger.info(f"The random URI value is: {random_uri}")
+        expect_regex = schema.generate_value_regex()
         assert re.search(expect_regex, random_uri)
 
     def test_generate_with_invalid_schema(self, generator: RandomURI):
