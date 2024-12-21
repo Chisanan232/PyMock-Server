@@ -1,11 +1,8 @@
-import logging
 from typing import List, Tuple, Union
 
 import pytest
 
 from pymock_server._utils.uri_protocol import URISchema
-
-logger = logging.getLogger(__name__)
 
 _Test_Data: List[Tuple[Union[str, URISchema], str]] = []
 uri_enum = [(uri, uri) for uri in URISchema]
@@ -40,5 +37,4 @@ class TestURISchema:
     )
     def test_generate_value_regex(self, schema: URISchema, expect_regex: str) -> None:
         random_uri_regex = schema.generate_value_regex()
-        logger.info(f"The random URI format regular expression is: {random_uri_regex}")
         assert expect_regex == random_uri_regex
