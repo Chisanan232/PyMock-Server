@@ -87,10 +87,10 @@ class RandomEMail(BaseRandomGenerator):
     _EMail_Service: List[str] = ["gmail", "outlook", "yahoo"]
 
     @classmethod
-    def generate(cls, size: ValueSize = ValueSize(min=1), sequence: Optional[Sequence] = None) -> str:
+    def generate(cls, size: ValueSize = ValueSize(min=1), usernames: Optional[Sequence] = None) -> str:
         mail_user_name = RandomString.generate(size)
-        if sequence:
-            mail_user_name = RandomFromSequence.generate(sequence)
+        if usernames:
+            mail_user_name = RandomFromSequence.generate(usernames)
         mail_server = RandomFromSequence.generate(cls._EMail_Service)
         return f"{mail_user_name}@{mail_server}.com"
 
