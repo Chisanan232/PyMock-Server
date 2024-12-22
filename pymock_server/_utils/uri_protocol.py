@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Union
 
 
-class URISchema(Enum):
+class URIScheme(Enum):
     HTTP: str = "http"
     HTTPS: str = "https"
     File: str = "file"
@@ -15,38 +15,38 @@ class URISchema(Enum):
     URN: str = "urn"
 
     @staticmethod
-    def to_enum(v: Union[str, "URISchema"]):
-        if isinstance(v, URISchema):
+    def to_enum(v: Union[str, "URIScheme"]):
+        if isinstance(v, URIScheme):
             return v
         else:
-            for schema in URISchema:
+            for schema in URIScheme:
                 if schema.value.lower() == str(v).lower():
                     return schema
-            raise ValueError(f"Cannot find the URI schema '{v}'.")
+            raise ValueError(f"Cannot find the URI scheme '{v}'.")
 
     def generate_value_regex(self) -> str:
-        if self is URISchema.HTTP:
+        if self is URIScheme.HTTP:
             return r"http://www\.(\w{1,24}|\.){1,7}\.(com|org)"
-        elif self is URISchema.HTTPS:
+        elif self is URIScheme.HTTPS:
             return r"https://www\.(\w{1,24}|\.){1,7}\.(com|org)"
-        elif self is URISchema.File:
+        elif self is URIScheme.File:
             return r"file://(\w{1,10}|/){1,11}\.(jpg|jpeg|png|text|txt|py|md)"
-        elif self is URISchema.FTP:
+        elif self is URIScheme.FTP:
             return r"ftp://ftp\.(\w{2,3}|\.){5,7}/(\w{1,10}|/){1,3}\.(jpg|jpeg|png|text|txt|py|md)"
-        elif self is URISchema.Mail_To:
+        elif self is URIScheme.Mail_To:
             return r"mailto://\w{1,124}@(gmail|outlook|yahoo).com"
-        elif self is URISchema.LDAP:
+        elif self is URIScheme.LDAP:
             return r"ldap://ldap\.(\w{1,24}|\.){1,7}/c=GB"
-        elif self is URISchema.NEWS:
+        elif self is URIScheme.NEWS:
             return r"news://com\.(\w{1,24}|\.){1,7}\.www.servers.unix"
-        elif self is URISchema.TEL:
+        elif self is URIScheme.TEL:
             return r"tel:\+1-886-\d{3}-\d{4}"
-        elif self is URISchema.TELNET:
+        elif self is URIScheme.TELNET:
             return r"telnet://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{2,4}/"
-        elif self is URISchema.URN:
+        elif self is URIScheme.URN:
             return r"urn:(\w{1,24}|:){1,7}"
         else:
-            raise ValueError(f"Not support generate the URI with schema *{self}*.")
+            raise ValueError(f"Not support generate the URI with scheme *{self}*.")
 
 
 class IPVersion(Enum):

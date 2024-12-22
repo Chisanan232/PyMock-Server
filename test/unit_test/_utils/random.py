@@ -20,7 +20,7 @@ from pymock_server._utils.random import (
     RandomURI,
     RandomUUID,
 )
-from pymock_server._utils.uri_protocol import IPVersion, URISchema
+from pymock_server._utils.uri_protocol import IPVersion, URIScheme
 
 logger = logging.getLogger(__name__)
 
@@ -108,16 +108,16 @@ class TestRandomURI(BaseRandomGeneratorTestSuite):
     def generator(self) -> Type[RandomURI]:
         return RandomURI
 
-    @pytest.mark.parametrize("schema", [s for s in URISchema])
-    def test_generate(self, generator: Type[RandomURI], schema: URISchema) -> None:
-        random_uri = generator.generate(schema)
+    @pytest.mark.parametrize("scheme", [s for s in URIScheme])
+    def test_generate(self, generator: Type[RandomURI], scheme: URIScheme) -> None:
+        random_uri = generator.generate(scheme)
         logger.info(f"The random URI value is: {random_uri}")
-        expect_regex = schema.generate_value_regex()
+        expect_regex = scheme.generate_value_regex()
         assert re.search(expect_regex, random_uri)
 
-    def test_generate_with_invalid_schema(self, generator: RandomURI):
+    def test_generate_with_invalid_scheme(self, generator: RandomURI):
         with pytest.raises(ValueError):
-            generator.generate(schema="invalid URI schema")
+            generator.generate(scheme="invalid URI scheme")
 
 
 class TestRandomIP(BaseRandomGeneratorTestSuite):
