@@ -50,6 +50,11 @@ mocked_apis:
                 - name: id
                   required: True
                   type: int
+                  format:
+                    strategy: by_data_type
+                    size:
+                      max: 9223372036854775807
+                      min: -9223372036854775808
                 - name: name
                   required: True
                   type: str
@@ -105,6 +110,18 @@ mocked_apis:
             - name: uri
               required: True
               type: str
+              format:
+                strategy: customize
+                customize: uri_value
+                variables:
+                  - name: uri_value
+                    value_format: "uri"
             - name: url
               required: True
               type: str
+              format:
+                strategy: customize
+                customize: url_value
+                variables:
+                  - name: url_value
+                    value_format: "url"

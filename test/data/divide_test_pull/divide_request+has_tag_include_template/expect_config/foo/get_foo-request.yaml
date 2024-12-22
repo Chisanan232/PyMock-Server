@@ -3,6 +3,17 @@ parameters:
   - name: 'date'
     required: true
     type: str
+    format:
+      strategy: customize
+      customize: datetime_value
+      variables:
+        - name: datetime_value
+          value_format: "date-time"
   - name: 'fooType'
     required: true
     type: str
+    format:
+      strategy: from_enums
+      enums:
+        - ENUM1
+        - ENUM2

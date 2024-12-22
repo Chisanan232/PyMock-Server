@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, List, Optional, Union
@@ -9,11 +10,16 @@ from pymock_server.model.api_config.format import Format as PyMockFormat
 from ._base import Transferable
 from ._js_handlers import ApiDocValueFormat
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass
 class BaseFormatModelAdapter:
     formatter: Optional[ApiDocValueFormat] = None
     enum: Optional[List[str]] = None
+
+    def is_none(self) -> bool:
+        return self.formatter is None and not self.enum
 
     @abstractmethod
     def to_pymock_api_config(self) -> Optional[PyMockFormat]:
@@ -26,15 +32,17 @@ class BasePropertyDetailAdapter(metaclass=ABCMeta):
     name: str = field(default_factory=str)
     required: bool = False
     value_type: Optional[str] = None
-    format: Optional[dict] = None
+    format: Optional[BaseFormatModelAdapter] = None
     items: Optional[List["BasePropertyDetailAdapter"]] = None
 
     def serialize(self) -> dict:
+        _format = self.format.to_pymock_api_config() if self.format else None
+        _format_params = _format.serialize() if _format else None
         data = {
             "name": self.name,
             "required": self.required,
             "type": self.value_type,
-            "format": self.format,
+            "value_format": _format_params,
             "items": [item.serialize() for item in self.items] if self.items else None,
         }
         return self._clear_empty_values(data)
@@ -60,7 +68,14 @@ class BaseRequestParameterAdapter(BasePropertyDetailAdapter, ABC):
     @classmethod
     @abstractmethod
     def deserialize_by_prps(
-        cls, name: str = "", required: bool = True, value_type: str = "", default: Any = None, items: List = []
+        cls,
+        name: str = "",
+        required: bool = True,
+        value_type: str = "",
+        formatter: Optional[ApiDocValueFormat] = None,
+        enum: Optional[List[str]] = None,
+        default: Any = None,
+        items: List = [],
     ) -> "BaseRequestParameterAdapter":
         pass
 

@@ -13,6 +13,11 @@ properties:
       - name: id
         required: True
         type: int
+        format:
+          strategy: by_data_type
+          size:
+            max: 9223372036854775807
+            min: -9223372036854775808
       - name: name
         required: True
         type: str

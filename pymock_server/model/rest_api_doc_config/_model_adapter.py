@@ -23,7 +23,7 @@ from ._base_model_adapter import (
     BaseRequestParameterAdapter,
     BaseResponsePropertyAdapter,
 )
-from ._js_handlers import ensure_type_is_python_type
+from ._js_handlers import ApiDocValueFormat, ensure_type_is_python_type
 from .base_config import _BaseAPIConfigWithMethod, _Default_Required
 
 logger = logging.getLogger(__name__)
@@ -153,6 +153,8 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
         name: str = "",
         required: bool = True,
         value_type: str = "",
+        formatter: Optional[ApiDocValueFormat] = None,
+        enum: Optional[List[str]] = None,
         default: Any = None,
         items: List["RequestParameterAdapter"] = [],
     ) -> "BaseRequestParameterAdapter":
@@ -160,7 +162,10 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
             name=name,
             required=required,
             value_type=ensure_type_is_python_type(value_type) if value_type else None,
-            format=None,  # TODO: implement this parameter setting
+            format=FormatAdapter(
+                formatter=formatter,
+                enum=enum,
+            ),
             default=default,
             items=items,
         )
@@ -172,6 +177,7 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
                 name=item_data.name,
                 required=item_data.required,
                 value_type=item_data.value_type,
+                value_format=item_data.format.to_pymock_api_config() if self.format else None,  # type: ignore[union-attr]
                 items=[to_items(i) for i in (item_data.items or [])],
             )
 
@@ -180,7 +186,7 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
             required=self.required,
             value_type=self.value_type,
             default=self.default,
-            value_format=None,  # TODO: implement this parameter setting
+            value_format=self.format.to_pymock_api_config() if self.format else None,
             items=[to_items(i) for i in (self.items or [])],
         )
 

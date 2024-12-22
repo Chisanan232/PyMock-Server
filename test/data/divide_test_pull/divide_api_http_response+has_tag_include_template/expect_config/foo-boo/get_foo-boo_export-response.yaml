@@ -23,6 +23,18 @@ properties:
   - name: uri
     required: True
     type: str
+    format:
+      strategy: customize
+      customize: uri_value
+      variables:
+        - name: uri_value
+          value_format: "uri"
   - name: url
     required: True
     type: str
+    format:
+      strategy: customize
+      customize: url_value
+      variables:
+        - name: url_value
+          value_format: "url"

@@ -21,6 +21,7 @@ from pymock_server.model.rest_api_doc_config._base_model_adapter import (
     BaseRequestParameterAdapter,
 )
 from pymock_server.model.rest_api_doc_config._model_adapter import (
+    FormatAdapter,
     PropertyDetailAdapter,
     ResponsePropertyAdapter,
 )
@@ -97,7 +98,6 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                     "name": "",
                     "required": True,
                     "type": "list",
-                    # "format": None,
                     "items": [{"name": "", "required": True, "type": "int"}],
                 },
             ),
@@ -108,9 +108,16 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                     "name": "",
                     "required": True,
                     "type": "list",
-                    # "format": None,
                     "items": [
-                        {"name": "id", "required": True, "type": "int"},
+                        {
+                            "name": "id",
+                            "required": True,
+                            "type": "int",
+                            "value_format": {
+                                "strategy": "by_data_type",
+                                "size": {"max": 9223372036854775807, "min": -9223372036854775808},
+                            },
+                        },
                         {"name": "name", "required": True, "type": "str"},
                         {"name": "value1", "required": True, "type": "str"},
                         {"name": "value2", "required": True, "type": "str"},
@@ -135,7 +142,6 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                     "name": "",
                     "required": True,
                     "type": "dict",
-                    # "format": None,
                     "items": [{"name": "additionalKey", "required": True, "type": "str"}],
                 },
             ),
@@ -152,9 +158,13 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                     "name": "",
                     "required": True,
                     "type": "list",
-                    # "format": None,
                     "items": [
-                        {"name": "", "required": True, "type": "str"},
+                        {
+                            "name": "",
+                            "required": True,
+                            "type": "str",
+                            "value_format": {"strategy": "from_enums", "enums": ["TYPE_1", "TYPE_2"]},
+                        },
                     ],
                 },
             ),
@@ -170,9 +180,16 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                     "name": "additionalKey",
                     "required": True,
                     "type": "dict",
-                    # "format": None,
                     "items": [
-                        {"name": "id", "required": True, "type": "int"},
+                        {
+                            "name": "id",
+                            "required": True,
+                            "type": "int",
+                            "value_format": {
+                                "strategy": "by_data_type",
+                                "size": {"max": 9223372036854775807, "min": -9223372036854775808},
+                            },
+                        },
                         {"name": "name", "required": False, "type": "str"},
                         {"name": "value1", "required": False, "type": "str"},
                         {"name": "value2", "required": False, "type": "str"},
@@ -191,19 +208,42 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                     "name": "additionalKey",
                     "required": True,
                     "type": "dict",
-                    # "format": None,
                     "items": [
-                        {"name": "id", "required": True, "type": "int"},
+                        {
+                            "name": "id",
+                            "required": True,
+                            "type": "int",
+                            "value_format": {
+                                "strategy": "by_data_type",
+                                "size": {"max": 9223372036854775807, "min": -9223372036854775808},
+                            },
+                        },
                         {"name": "name", "required": False, "type": "str"},
                         {
                             "name": "data",
                             "required": False,
-                            # "format": None,
                             "type": "list",
                             "items": [
-                                {"name": "id", "required": True, "type": "int"},
+                                {
+                                    "name": "id",
+                                    "required": True,
+                                    "type": "int",
+                                    "value_format": {
+                                        "strategy": "by_data_type",
+                                        "size": {"max": 9223372036854775807, "min": -9223372036854775808},
+                                    },
+                                },
                                 {"name": "value", "required": True, "type": "str"},
-                                {"name": "url", "required": True, "type": "str"},
+                                {
+                                    "name": "url",
+                                    "required": True,
+                                    "type": "str",
+                                    "value_format": {
+                                        "strategy": "customize",
+                                        "customize": "uri_value",
+                                        "variables": [{"name": "uri_value", "value_format": "uri"}],
+                                    },
+                                },
                                 {
                                     "name": "urlProperties",
                                     "required": False,
@@ -214,7 +254,6 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                                             "name": "homePage",
                                             "required": True,
                                             "type": "dict",
-                                            # "format": None,
                                             "items": [
                                                 {"name": "domain", "required": True, "type": "str"},
                                                 {"name": "needAuth", "required": True, "type": "bool"},
@@ -224,7 +263,6 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                                             "name": "detailInfo",
                                             "required": True,
                                             "type": "dict",
-                                            # "format": None,
                                             "items": [
                                                 {"name": "domain", "required": True, "type": "str"},
                                                 {"name": "needAuth", "required": True, "type": "bool"},
@@ -243,28 +281,50 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                     "$ref": "#/components/schemas/NestedFooResponse",
                 },
                 [
-                    {"name": "id", "required": True, "type": "int"},
+                    {
+                        "name": "id",
+                        "required": True,
+                        "type": "int",
+                        "value_format": {
+                            "strategy": "by_data_type",
+                            "size": {"max": 9223372036854775807, "min": -9223372036854775808},
+                        },
+                    },
                     {"name": "name", "required": False, "type": "str"},
                     {
                         "name": "data",
                         "required": False,
-                        # "format": None,
                         "type": "list",
                         "items": [
-                            {"name": "id", "required": True, "type": "int"},
+                            {
+                                "name": "id",
+                                "required": True,
+                                "type": "int",
+                                "value_format": {
+                                    "strategy": "by_data_type",
+                                    "size": {"max": 9223372036854775807, "min": -9223372036854775808},
+                                },
+                            },
                             {"name": "value", "required": True, "type": "str"},
-                            {"name": "url", "required": True, "type": "str"},
+                            {
+                                "name": "url",
+                                "required": True,
+                                "type": "str",
+                                "value_format": {
+                                    "strategy": "customize",
+                                    "customize": "uri_value",
+                                    "variables": [{"name": "uri_value", "value_format": "uri"}],
+                                },
+                            },
                             {
                                 "name": "urlProperties",
                                 "required": False,
-                                # "format": None,
                                 "type": "dict",
                                 "items": [
                                     {
                                         "name": "homePage",
                                         "required": True,
                                         "type": "dict",
-                                        # "format": None,
                                         "items": [
                                             {"name": "domain", "required": True, "type": "str"},
                                             {"name": "needAuth", "required": True, "type": "bool"},
@@ -274,7 +334,6 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                                         "name": "detailInfo",
                                         "required": True,
                                         "type": "dict",
-                                        # "format": None,
                                         "items": [
                                             {"name": "domain", "required": True, "type": "str"},
                                             {"name": "needAuth", "required": True, "type": "bool"},
@@ -289,7 +348,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
         ],
     )
     def test_generate_response_from_data(
-        self, under_test: BaseReferencialConfig, test_response_data: dict, expected_value: str
+        self, under_test: BaseReferencialConfig, test_response_data: dict, expected_value: Union[dict, list]
     ):
         # Pre-process
         if test_response_data.get("type", "array") == "array":
@@ -365,6 +424,8 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
             resp = [r.serialize() for r in resp]
         else:
             resp = resp.serialize()
+        logger.info(f"resp: {resp}")
+        logger.info(f"expected_value: {expected_value}")
         assert resp == expected_value
 
 
@@ -588,7 +649,10 @@ class BaseAPIConfigWithMethodTestSuite(BaseAPIDocConfigTestSuite, ABC):
                 assert d.name
                 assert d.value_type
             assert d.required is not None
-            assert d.format is None  # FIXME: Should activate this verify after support this feature
+            if d.format:
+                assert isinstance(d.format, FormatAdapter)
+                if not d.format.is_none():
+                    assert d.value_type not in ("list", "dict")
             if d.value_type in ("list", "dict"):
                 assert d.items is not None
                 for item in d.items:

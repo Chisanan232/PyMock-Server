@@ -1,10 +1,13 @@
 import copy
+import logging
 import re
 from abc import ABC, ABCMeta, abstractmethod
 from collections import namedtuple
 from dataclasses import dataclass, field
 from pydoc import locate
 from typing import Any, Callable, Dict, List, Optional, Type, Union
+
+from ._js_handlers import ApiDocValueFormat
 
 try:
     from http import HTTPMethod, HTTPStatus
@@ -20,6 +23,8 @@ from ._base_model_adapter import (
 )
 from ._factory import _BaseAdapterFactory
 from .content_type import ContentType
+
+logger = logging.getLogger(__name__)
 
 ComponentDefinition: Dict[str, dict] = {}
 
@@ -160,8 +165,10 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                     name=item_k,
                     required=item_k in ref_single_response.required,
                     value_type=item_v.value_type or "dict",
-                    # TODO: Set the *format* property correctly
-                    format=None,
+                    format=self._adapter_factory.generate_value_format(
+                        formatter=item_v.format,
+                        enum=item_v.enums,
+                    ),
                     items=[],
                 )
                 ref_item_v_response = _handle_reference_object(
@@ -189,6 +196,10 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                     name=item_k,
                     required=_Default_Required.general,
                     value_type=item_type,
+                    format=self._adapter_factory.generate_value_format(
+                        formatter=item_v.format,
+                        enum=item_v.enums,
+                    ),
                 )
                 assert isinstance(response_data_prop.items, list), "The data type of property *items* must be *list*."
                 response_data_prop.items.append(item)
@@ -264,20 +275,30 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                                 name="additionalKey",
                                 required=_Default_Required.general,
                                 value_type=additional_properties_type,
-                                # TODO: Set the *format* property correctly
-                                format=None,
+                                format=self._adapter_factory.generate_value_format(
+                                    formatter=additional_properties.format,
+                                    enum=additional_properties.enums,
+                                ),
                                 items=None,
                             ),
                         ],
                     )
 
-        def _handle_other_types_value_with_object_strategy(v_type: str) -> BaseRefPropertyDetailAdapter:
+        def _handle_other_types_value_with_object_strategy(
+            data: Union[BaseReferenceConfigProperty, BaseReferenceConfig], v_type: str
+        ) -> BaseRefPropertyDetailAdapter:
             return self._adapter_factory.generate_property_details(
                 name="",
                 required=_Default_Required.general,
                 value_type=v_type,
-                # TODO: Set the *format* property correctly
-                format=None,
+                format=(
+                    self._adapter_factory.generate_value_format(
+                        formatter=data.format,
+                        enum=data.enums,
+                    )
+                    if isinstance(data, BaseReferenceConfigProperty)
+                    else None
+                ),
                 items=None,
             )
 
@@ -290,7 +311,7 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
             elif locate(v_type) == dict:
                 return _handle_object_type_value_with_object_strategy(data)
             else:
-                return _handle_other_types_value_with_object_strategy(v_type)
+                return _handle_other_types_value_with_object_strategy(data, v_type)
 
         if not resp_prop_data.value_type:
             assert not isinstance(resp_prop_data, BaseReferenceConfig)
@@ -357,6 +378,8 @@ class BaseReferencialConfig(BaseAPIDocConfig):
                             name="",
                             required=True,
                             value_type=items.value_type,
+                            formatter=None if items.value_type in ["dict", "list"] else items.format,
+                            enum=items.enums,
                             default=items.default,
                             items=[],
                         ),
@@ -367,6 +390,8 @@ class BaseReferencialConfig(BaseAPIDocConfig):
                     name=param_name,
                     required=param_name in (request_body_params.required or []),
                     value_type=param_props.value_type or "",
+                    formatter=param_props.format,
+                    enum=param_props.enums,
                     default=param_props.default,
                     items=items_props if items is not None else items,  # type: ignore[arg-type]
                 ),
@@ -430,7 +455,8 @@ class _BaseRequestParameter(BaseReferencialConfig):
     name: str = field(default_factory=str)
     required: bool = False
     value_type: Optional[str] = None
-    format: Optional[dict] = None
+    format: Optional[ApiDocValueFormat] = None
+    enum: Optional[List[str]] = None
     default: Optional[Any] = None
     items: Optional[List["_BaseRequestParameter"]] = None
     schema: Optional["_BaseRequestParameter"] = None
@@ -448,7 +474,7 @@ class _BaseRequestParameter(BaseReferencialConfig):
 class BaseReferenceConfigProperty(BaseReferencialConfig):
     title: Optional[str] = None
     value_type: Optional[str] = None
-    format: Optional[str] = None  # For OpenAPI v3
+    format: Optional[ApiDocValueFormat] = None  # For OpenAPI v3
     default: Optional[str] = None  # For OpenAPI v3 request part
     enums: List[str] = field(default_factory=list)
     ref: Optional[str] = None
