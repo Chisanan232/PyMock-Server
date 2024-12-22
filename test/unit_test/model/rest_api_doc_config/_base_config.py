@@ -77,22 +77,22 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
             # # # General data
             # For object strategy
             (
-                # 1
+                # 0
                 {"type": "integer"},
                 {"name": "", "required": True, "type": "int"},
             ),
             (
-                # 2
+                # 1
                 {"type": "number"},
                 {"name": "", "required": True, "type": "int"},
             ),
             (
-                # 3
+                # 2
                 {"type": "boolean"},
                 {"name": "", "required": True, "type": "bool"},
             ),
             (
-                # 4
+                # 3
                 {"type": "array", "items": {"type": "integer"}},
                 {
                     "name": "",
@@ -102,7 +102,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 5
+                # 4
                 {"type": "array", "items": {"$ref": "#/components/schemas/FooResponse"}},
                 {
                     "name": "",
@@ -125,13 +125,13 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 6
+                # 5
                 {"type": "file"},
                 {"name": "", "required": True, "type": "file"},
             ),
             # For object strategy with format
             (
-                # 1
+                # 6
                 {"type": "integer", "format": "int64"},
                 {
                     "name": "",
@@ -144,7 +144,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 2
+                # 7
                 {"type": "string", "enum": ["TYPE_1", "TYPE_2"]},
                 {
                     "name": "",
@@ -154,7 +154,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 3
+                # 8
                 {"type": "string", "format": "uri"},
                 {
                     "name": "",
@@ -169,7 +169,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
             ),
             # # Special data
             (
-                # 7
+                # 9
                 {
                     "type": "object",
                     "additionalProperties": {
@@ -184,7 +184,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 8
+                # 10
                 {
                     "type": "object",
                     "additionalProperties": {
@@ -207,7 +207,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 9
+                # 11
                 {
                     "type": "object",
                     "additionalProperties": {
@@ -235,7 +235,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 10
+                # 12
                 {
                     "type": "object",
                     "additionalProperties": {
@@ -314,7 +314,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 11
+                # 13
                 {
                     "$ref": "#/components/schemas/NestedFooResponse",
                 },
