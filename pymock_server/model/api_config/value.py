@@ -107,7 +107,7 @@ class ValueFormat(Enum):
         elif self is ValueFormat.UUID:
             return RandomUUID.generate()
         elif self is ValueFormat.URI:
-            # TODO: It should has setting to configure URI schema
+            # TODO: It should has setting to configure URI scheme
             return RandomURI.generate(scheme=URIScheme.HTTPS)
         elif self is ValueFormat.URL:
             return RandomURI.generate(scheme=URIScheme.HTTPS)
@@ -149,7 +149,7 @@ class ValueFormat(Enum):
         elif self is ValueFormat.UUID:
             return r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
         elif self is ValueFormat.URI:
-            # TODO: It should has setting to configure URI schema
+            # TODO: It should has setting to configure URI scheme
             return URIScheme.HTTPS.generate_value_regex()
         elif self is ValueFormat.URL:
             return URIScheme.HTTPS.generate_value_regex()

@@ -22,7 +22,7 @@ class URIScheme(Enum):
             for schema in URIScheme:
                 if schema.value.lower() == str(v).lower():
                     return schema
-            raise ValueError(f"Cannot find the URI schema '{v}'.")
+            raise ValueError(f"Cannot find the URI scheme '{v}'.")
 
     def generate_value_regex(self) -> str:
         if self is URIScheme.HTTP:

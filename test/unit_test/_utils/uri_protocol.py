@@ -11,7 +11,7 @@ _Test_Data.extend(uri_enum)
 _Test_Data.extend(uri_enum_value)
 
 
-class TestURISchema:
+class TestURIScheme:
     @pytest.mark.parametrize(("value", "expected"), _Test_Data)
     def test_to_enum(self, value: Union[str, URIScheme], expected: URIScheme) -> None:
         assert URIScheme.to_enum(value) is expected
