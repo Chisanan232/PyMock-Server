@@ -127,10 +127,10 @@ class RandomIP(BaseRandomGenerator):
 class RandomURI(BaseRandomGenerator):
     @classmethod
     def generate(cls, scheme: URIScheme = URIScheme.HTTPS) -> str:
-        return cls._generate_uri_by_schema(scheme)
+        return cls._generate_uri_by_scheme(scheme)
 
     @classmethod
-    def _generate_uri_by_schema(cls, scheme: URIScheme) -> str:
+    def _generate_uri_by_scheme(cls, scheme: URIScheme) -> str:
         if scheme in (URIScheme.HTTP, URIScheme.HTTPS):
             # ex: http://www.ietf.org/rfc/rfc2396.txt
             authority = cls._generate_domain(prefix="www", suffix=["com", "org"])
