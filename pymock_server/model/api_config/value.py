@@ -108,9 +108,9 @@ class ValueFormat(Enum):
             return RandomUUID.generate()
         elif self is ValueFormat.URI:
             # TODO: It should has setting to configure URI schema
-            return RandomURI.generate(schema=URIScheme.HTTPS)
+            return RandomURI.generate(scheme=URIScheme.HTTPS)
         elif self is ValueFormat.URL:
-            return RandomURI.generate(schema=URIScheme.HTTPS)
+            return RandomURI.generate(scheme=URIScheme.HTTPS)
         elif self is ValueFormat.IPv4:
             return RandomIP.generate(IPVersion.IPv4)
         elif self is ValueFormat.IPv6:

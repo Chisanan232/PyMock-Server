@@ -126,57 +126,57 @@ class RandomIP(BaseRandomGenerator):
 
 class RandomURI(BaseRandomGenerator):
     @classmethod
-    def generate(cls, schema: URIScheme = URIScheme.HTTPS) -> str:
-        return cls._generate_uri_by_schema(schema)
+    def generate(cls, scheme: URIScheme = URIScheme.HTTPS) -> str:
+        return cls._generate_uri_by_schema(scheme)
 
     @classmethod
-    def _generate_uri_by_schema(cls, schema: URIScheme) -> str:
-        if schema in (URIScheme.HTTP, URIScheme.HTTPS):
+    def _generate_uri_by_schema(cls, scheme: URIScheme) -> str:
+        if scheme in (URIScheme.HTTP, URIScheme.HTTPS):
             # ex: http://www.ietf.org/rfc/rfc2396.txt
             authority = cls._generate_domain(prefix="www", suffix=["com", "org"])
             query = cls._generate_query(use_equal=True)
             fragment = RandomString.generate()
-            return f"{schema.value}://{authority}?{query}#{fragment}"
-        elif schema is URIScheme.File:
+            return f"{scheme.value}://{authority}?{query}#{fragment}"
+        elif scheme is URIScheme.File:
             # ex: file://username/wow/Download/test.txt
             path = cls._generate_file_path(only_file=False)
-            return f"{schema.value}://{path}"
-        elif schema is URIScheme.FTP:
+            return f"{scheme.value}://{path}"
+        elif scheme is URIScheme.FTP:
             # ex: ftp://ftp.is.co.za/rfc/rfc1808.txt
             authority = cls._generate_domain(
                 prefix="ftp", body_size=ValueSize(min=3, max=4), body_ele_size=ValueSize(min=2, max=3)
             )
             path = cls._generate_file_path(only_file=True)
-            return f"{schema.value}://{authority}/{path}"
-        elif schema is URIScheme.Mail_To:
+            return f"{scheme.value}://{authority}/{path}"
+        elif scheme is URIScheme.Mail_To:
             # ex: mailto:John.Doe@example.com
-            return f"{schema.value}://{RandomEMail.generate()}"
-        elif schema is URIScheme.LDAP:
+            return f"{scheme.value}://{RandomEMail.generate()}"
+        elif scheme is URIScheme.LDAP:
             # ex: ldap://[2001:db8::7]/c=GB?objectClass?one
             authority = cls._generate_domain(prefix="ldap")
             path = "c=GB"
             query = cls._generate_query(use_equal=False)
-            return f"{schema.value}://{authority}/{path}?{query}"
-        elif schema is URIScheme.NEWS:
+            return f"{scheme.value}://{authority}/{path}?{query}"
+        elif scheme is URIScheme.NEWS:
             # ex: news:comp.infosystems.www.servers.unix
             path = cls._generate_domain(prefix="www", suffix=["com"], reverse=True)
-            return f"{schema.value}://{path}.servers.unix"
-        elif schema is URIScheme.TEL:
+            return f"{scheme.value}://{path}.servers.unix"
+        elif scheme is URIScheme.TEL:
             # ex: tel:+1-816-555-1212
             path = cls._generate_phone_number()
-            return f"{schema.value}:{path}"
-        elif schema is URIScheme.TELNET:
+            return f"{scheme.value}:{path}"
+        elif scheme is URIScheme.TELNET:
             # ex: telnet://192.0.2.16:80/
             ip_address = cls._generate_ip_address(version=IPVersion.IPv4)
             port = RandomInteger.generate(value_range=ValueSize(min=10, max=10000))
             authority = f"{ip_address}:{port}"
-            return f"{schema.value}://{authority}/"
-        elif schema is URIScheme.URN:
+            return f"{scheme.value}://{authority}/"
+        elif scheme is URIScheme.URN:
             # ex: urn:oasis:names:specification:docbook:dtd:xml:4.1.2
             path = cls._generate_urn()
-            return f"{schema.value}:{path}"
+            return f"{scheme.value}:{path}"
         else:
-            raise ValueError(f"Not support generate the URI with schema *{schema}*.")
+            raise ValueError(f"Not support generate the URI with scheme *{scheme}*.")
 
     @classmethod
     def _generate_domain(

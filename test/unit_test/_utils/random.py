@@ -117,7 +117,7 @@ class TestRandomURI(BaseRandomGeneratorTestSuite):
 
     def test_generate_with_invalid_schema(self, generator: RandomURI):
         with pytest.raises(ValueError):
-            generator.generate(schema="invalid URI schema")
+            generator.generate(scheme="invalid URI schema")
 
 
 class TestRandomIP(BaseRandomGeneratorTestSuite):
