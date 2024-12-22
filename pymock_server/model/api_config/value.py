@@ -18,7 +18,7 @@ from pymock_server._utils.random import (
     RandomUUID,
     ValueSize,
 )
-from pymock_server._utils.uri_protocol import IPVersion, URISchema
+from pymock_server._utils.uri_protocol import IPVersion, URIScheme
 
 Default_Value_Size = ValueSize(max=10, min=1)
 Default_Digit_Range = DigitRange(integer=128, decimal=128)
@@ -108,9 +108,9 @@ class ValueFormat(Enum):
             return RandomUUID.generate()
         elif self is ValueFormat.URI:
             # TODO: It should has setting to configure URI schema
-            return RandomURI.generate(schema=URISchema.HTTPS)
+            return RandomURI.generate(schema=URIScheme.HTTPS)
         elif self is ValueFormat.URL:
-            return RandomURI.generate(schema=URISchema.HTTPS)
+            return RandomURI.generate(schema=URIScheme.HTTPS)
         elif self is ValueFormat.IPv4:
             return RandomIP.generate(IPVersion.IPv4)
         elif self is ValueFormat.IPv6:
@@ -150,9 +150,9 @@ class ValueFormat(Enum):
             return r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
         elif self is ValueFormat.URI:
             # TODO: It should has setting to configure URI schema
-            return URISchema.HTTPS.generate_value_regex()
+            return URIScheme.HTTPS.generate_value_regex()
         elif self is ValueFormat.URL:
-            return URISchema.HTTPS.generate_value_regex()
+            return URIScheme.HTTPS.generate_value_regex()
         elif self is ValueFormat.IPv4:
             return r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"
         elif self is ValueFormat.IPv6:
