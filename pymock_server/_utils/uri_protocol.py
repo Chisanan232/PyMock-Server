@@ -46,7 +46,7 @@ class URIScheme(Enum):
         elif self is URIScheme.URN:
             return r"urn:(\w{1,24}|:){1,7}"
         else:
-            raise ValueError(f"Not support generate the URI with schema *{self}*.")
+            raise ValueError(f"Not support generate the URI with scheme *{self}*.")
 
 
 class IPVersion(Enum):
