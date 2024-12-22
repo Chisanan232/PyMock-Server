@@ -129,6 +129,44 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 {"type": "file"},
                 {"name": "", "required": True, "type": "file"},
             ),
+            # For object strategy with format
+            (
+                # 1
+                {"type": "integer", "format": "int64"},
+                {
+                    "name": "",
+                    "required": True,
+                    "type": "int",
+                    "value_format": {
+                        "strategy": "by_data_type",
+                        "size": {"max": 9223372036854775807, "min": -9223372036854775808},
+                    },
+                },
+            ),
+            (
+                # 2
+                {"type": "string", "enum": ["TYPE_1", "TYPE_2"]},
+                {
+                    "name": "",
+                    "required": True,
+                    "type": "str",
+                    "value_format": {"strategy": "from_enums", "enums": ["TYPE_1", "TYPE_2"]},
+                },
+            ),
+            (
+                # 3
+                {"type": "string", "format": "uri"},
+                {
+                    "name": "",
+                    "required": True,
+                    "type": "str",
+                    "value_format": {
+                        "strategy": "customize",
+                        "customize": "uri_value",
+                        "variables": [{"name": "uri_value", "value_format": "uri"}],
+                    },
+                },
+            ),
             # # Special data
             (
                 # 7
