@@ -45,6 +45,15 @@ _Common_Schemas: Dict[str, Dict] = {
             },
             "title": "EnumsFormatResponse",
         },
+        # For URI format string value
+        "UriFormatResponse": {
+            "type": "object",
+            "required": [_COLUMN_NAME],
+            "properties": {
+                _COLUMN_NAME: {"type": "integer", "format": "uri"},
+            },
+            "title": "UriFormatResponse",
+        },
         # For array value with format element
         "FormatElementArrayResponse": {
             "type": "object",
@@ -64,6 +73,7 @@ class ApiDocConfigToPyMockAPIConfigAtHTTPResponseValueFormatTestSuite(metaclass=
         [
             ({"$ref": "#/components/schemas/Int64FormatResponse"}, FormatStrategy.BY_DATA_TYPE, False),
             ({"$ref": "#/components/schemas/EnumsFormatResponse"}, FormatStrategy.FROM_ENUMS, False),
+            ({"$ref": "#/components/schemas/UriFormatResponse"}, FormatStrategy.CUSTOMIZE, False),
             ({"$ref": "#/components/schemas/FormatElementArrayResponse"}, FormatStrategy.BY_DATA_TYPE, True),
         ],
     )
