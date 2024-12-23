@@ -6,6 +6,7 @@ from typing import Any, Dict
 import pytest
 
 from pymock_server.model import OpenAPIVersion
+from pymock_server.model.api_config.value import FormatStrategy
 from pymock_server.model.rest_api_doc_config._base import set_openapi_version
 from pymock_server.model.rest_api_doc_config.base_config import (
     _BaseAPIConfigWithMethod,
@@ -23,34 +24,35 @@ from pymock_server.model.rest_api_doc_config.content_type import ContentType
 logger = logging.getLogger(__name__)
 
 
+_COLUMN_NAME: str = "value"
 _Common_Schemas: Dict[str, Dict] = {
     "schemas": {
         # For int64 format value
         "Int64FormatResponse": {
             "type": "object",
-            "required": ["value"],
+            "required": [_COLUMN_NAME],
             "properties": {
-                "value": {"type": "integer", "format": "int64"},
+                _COLUMN_NAME: {"type": "integer", "format": "int64"},
             },
-            "title": "FooResponse",
+            "title": "Int64FormatResponse",
         },
         # For string value with enums
         "EnumsFormatResponse": {
             "type": "object",
-            "required": ["value"],
+            "required": [_COLUMN_NAME],
             "properties": {
-                "value": {"type": "string", "enum": ["TYPE_1", "TYPE_2"]},
+                _COLUMN_NAME: {"type": "string", "enum": ["TYPE_1", "TYPE_2"]},
             },
-            "title": "FooResponse",
+            "title": "EnumsFormatResponse",
         },
         # For array value with format element
         "FormatElementArrayResponse": {
             "type": "object",
-            "required": ["value"],
+            "required": [_COLUMN_NAME],
             "properties": {
-                "value": {"type": "array", "items": {"type": "integer", "format": "int64"}},
+                _COLUMN_NAME: {"type": "array", "items": {"type": "integer", "format": "int64"}},
             },
-            "title": "FooResponse",
+            "title": "FormatElementArrayResponse",
         },
     },
 }
@@ -58,15 +60,15 @@ _Common_Schemas: Dict[str, Dict] = {
 
 class ApiDocConfigToPyMockAPIConfigAtHTTPResponseValueFormatTestSuite(metaclass=ABCMeta):
     @pytest.mark.parametrize(
-        ("api_doc_config", "format_in_array"),
+        ("api_doc_config", "format_strategy", "format_in_array"),
         [
-            ({"$ref": "#/components/schemas/Int64FormatResponse"}, False),
-            ({"$ref": "#/components/schemas/EnumsFormatResponse"}, False),
-            ({"$ref": "#/components/schemas/FormatElementArrayResponse"}, True),
+            ({"$ref": "#/components/schemas/Int64FormatResponse"}, FormatStrategy.BY_DATA_TYPE, False),
+            ({"$ref": "#/components/schemas/EnumsFormatResponse"}, FormatStrategy.FROM_ENUMS, False),
+            ({"$ref": "#/components/schemas/FormatElementArrayResponse"}, FormatStrategy.BY_DATA_TYPE, True),
         ],
     )
     def test_convert_api_doc_config_to_adapter_to_pymock_config(
-        self, api_doc_config: Dict[str, Any], format_in_array: bool
+        self, api_doc_config: Dict[str, Any], format_strategy: FormatStrategy, format_in_array: bool
     ):
         """
         Test goal: value converting workflow at specific column *value_format*
@@ -84,10 +86,22 @@ class ApiDocConfigToPyMockAPIConfigAtHTTPResponseValueFormatTestSuite(metaclass=
         # should
         one_resp_configs = response_configs[0]
         if format_in_array:
+            assert one_resp_configs.name == _COLUMN_NAME
+            assert one_resp_configs.required is True
+            assert one_resp_configs.value_type is not None
             assert one_resp_configs.items
-            assert one_resp_configs.items[0].value_format is not None
+            one_response_item_config = one_resp_configs.items[0]
+            assert not one_response_item_config.name
+            assert one_response_item_config.required is not None
+            assert one_response_item_config.value_type is not None
+            assert one_response_item_config.value_format is not None
+            assert one_response_item_config.value_format.strategy is format_strategy
         else:
+            assert one_resp_configs.name == _COLUMN_NAME
+            assert one_resp_configs.required is True
+            assert one_resp_configs.value_type is not None
             assert one_resp_configs.value_format is not None
+            assert one_resp_configs.value_format.strategy is format_strategy
 
     @property
     @abstractmethod
