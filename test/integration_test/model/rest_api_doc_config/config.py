@@ -67,7 +67,7 @@ _Common_Schemas: Dict[str, Dict] = {
 }
 
 
-class ApiDocConfigToPyMockAPIConfigAtHTTPResponseValueFormatTestSuite(metaclass=ABCMeta):
+class ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite(metaclass=ABCMeta):
     @pytest.mark.parametrize(
         ("api_doc_config", "format_strategy", "format_in_array"),
         [
@@ -123,7 +123,7 @@ class ApiDocConfigToPyMockAPIConfigAtHTTPResponseValueFormatTestSuite(metaclass=
         pass
 
 
-class TestAPIConfigWithMethodV2(ApiDocConfigToPyMockAPIConfigAtHTTPResponseValueFormatTestSuite):
+class TestAPIConfigWithMethodV2(ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite):
 
     @property
     def _api_doc_version(self) -> OpenAPIVersion:
@@ -137,7 +137,7 @@ class TestAPIConfigWithMethodV2(ApiDocConfigToPyMockAPIConfigAtHTTPResponseValue
         )
 
 
-class TestAPIConfigWithMethodV3(ApiDocConfigToPyMockAPIConfigAtHTTPResponseValueFormatTestSuite):
+class TestAPIConfigWithMethodV3(ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite):
 
     @property
     def _api_doc_version(self) -> OpenAPIVersion:
