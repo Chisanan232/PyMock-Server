@@ -26,22 +26,22 @@ Default_Digit_Range = DigitRange(integer=128, decimal=128)
 
 class ValueFormat(Enum):
     # general format
-    String: str = "str"
-    Integer: str = "int"
-    BigDecimal: str = "big_decimal"
-    Boolean: str = "bool"
-    Date: str = "date"
-    DateTime: str = "date-time"
-    Enum: str = "enum"
+    String = "str"
+    Integer = "int"
+    BigDecimal = "big_decimal"
+    Boolean = "bool"
+    Date = "date"
+    DateTime = "date-time"
+    Enum = "enum"
 
     # specific format
-    EMail: str = "email"
-    UUID: str = "uuid"
-    URI: str = "uri"
-    URL: str = "url"
-    # Hostname: str = "hostname"
-    IPv4: str = "ipv4"
-    IPv6: str = "ipv6"
+    EMail = "email"
+    UUID = "uuid"
+    URI = "uri"
+    URL = "url"
+    # Hostname = "hostname"
+    IPv4 = "ipv4"
+    IPv6 = "ipv6"
 
     @property
     def _nothin_need_to_check(self) -> List["ValueFormat"]:
@@ -187,10 +187,10 @@ class ValueFormat(Enum):
 
 
 class FormatStrategy(Enum):
-    BY_DATA_TYPE: str = "by_data_type"
-    FROM_ENUMS: str = "from_enums"
-    CUSTOMIZE: str = "customize"
-    FROM_TEMPLATE: str = "from_template"
+    BY_DATA_TYPE = "by_data_type"
+    FROM_ENUMS = "from_enums"
+    CUSTOMIZE = "customize"
+    FROM_TEMPLATE = "from_template"
 
     def to_value_format(self, data_type: Union[type, str]) -> ValueFormat:
         if self in [FormatStrategy.CUSTOMIZE, FormatStrategy.FROM_TEMPLATE]:

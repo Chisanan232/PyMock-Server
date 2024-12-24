@@ -30,21 +30,21 @@ def ensure_type_is_python_type(t: str) -> str:
 
 class ApiDocValueFormat(Enum):
     # general value
-    Date: str = "date"
-    DateTime: str = "date-time"
-    Int32: str = "int32"
-    Int64: str = "int64"
-    Float: str = "float"
-    Double: str = "double"
+    Date = "date"
+    DateTime = "date-time"
+    Int32 = "int32"
+    Int64 = "int64"
+    Float = "float"
+    Double = "double"
 
     # specific value
-    EMail: str = "email"
-    UUID: str = "uuid"
-    URI: str = "uri"
-    URL: str = "url"
-    # Hostname: str = "hostname"
-    IPv4: str = "ipv4"
-    IPv6: str = "ipv6"
+    EMail = "email"
+    UUID = "uuid"
+    URI = "uri"
+    URL = "url"
+    # Hostname = "hostname"
+    IPv4 = "ipv4"
+    IPv6 = "ipv6"
 
     @staticmethod
     def to_enum(v: Union[str, "ApiDocValueFormat"]) -> "ApiDocValueFormat":

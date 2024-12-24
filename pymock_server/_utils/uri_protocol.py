@@ -3,16 +3,16 @@ from typing import Union
 
 
 class URIScheme(Enum):
-    HTTP: str = "http"
-    HTTPS: str = "https"
-    File: str = "file"
-    FTP: str = "ftp"
-    Mail_To: str = "mailto"
-    LDAP: str = "ldap"
-    NEWS: str = "news"
-    TEL: str = "tel"
-    TELNET: str = "telnet"
-    URN: str = "urn"
+    HTTP = "http"
+    HTTPS = "https"
+    File = "file"
+    FTP = "ftp"
+    Mail_To = "mailto"
+    LDAP = "ldap"
+    NEWS = "news"
+    TEL = "tel"
+    TELNET = "telnet"
+    URN = "urn"
 
     @staticmethod
     def to_enum(v: Union[str, "URIScheme"]):
@@ -50,5 +50,5 @@ class URIScheme(Enum):
 
 
 class IPVersion(Enum):
-    IPv4: str = "ipv4"
-    IPv6: str = "ipv6"
+    IPv4 = "ipv4"
+    IPv6 = "ipv6"

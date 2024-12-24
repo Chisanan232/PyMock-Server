@@ -4,8 +4,8 @@ from typing import Union
 
 
 class OpenAPIVersion(Enum):
-    V2: str = "OpenAPI V2"
-    V3: str = "OpenAPI V3"
+    V2 = "OpenAPI V2"
+    V3 = "OpenAPI V3"
 
     @staticmethod
     def to_enum(v: Union[str, "OpenAPIVersion"]) -> "OpenAPIVersion":
