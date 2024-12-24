@@ -77,22 +77,22 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
             # # # General data
             # For object strategy
             (
-                # 1
+                # 0
                 {"type": "integer"},
                 {"name": "", "required": True, "type": "int"},
             ),
             (
-                # 2
+                # 1
                 {"type": "number"},
                 {"name": "", "required": True, "type": "int"},
             ),
             (
-                # 3
+                # 2
                 {"type": "boolean"},
                 {"name": "", "required": True, "type": "bool"},
             ),
             (
-                # 4
+                # 3
                 {"type": "array", "items": {"type": "integer"}},
                 {
                     "name": "",
@@ -102,7 +102,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 5
+                # 4
                 {"type": "array", "items": {"$ref": "#/components/schemas/FooResponse"}},
                 {
                     "name": "",
@@ -125,13 +125,51 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 6
+                # 5
                 {"type": "file"},
                 {"name": "", "required": True, "type": "file"},
             ),
-            # # Special data
+            # For object strategy with format
+            (
+                # 6
+                {"type": "integer", "format": "int64"},
+                {
+                    "name": "",
+                    "required": True,
+                    "type": "int",
+                    "value_format": {
+                        "strategy": "by_data_type",
+                        "size": {"max": 9223372036854775807, "min": -9223372036854775808},
+                    },
+                },
+            ),
             (
                 # 7
+                {"type": "string", "enum": ["TYPE_1", "TYPE_2"]},
+                {
+                    "name": "",
+                    "required": True,
+                    "type": "str",
+                    "value_format": {"strategy": "from_enums", "enums": ["TYPE_1", "TYPE_2"]},
+                },
+            ),
+            (
+                # 8
+                {"type": "string", "format": "uri"},
+                {
+                    "name": "",
+                    "required": True,
+                    "type": "str",
+                    "value_format": {
+                        "strategy": "customize",
+                        "customize": "uri_value",
+                        "variables": [{"name": "uri_value", "value_format": "uri"}],
+                    },
+                },
+            ),
+            # # Special data
+            (
+                # 9
                 {
                     "type": "object",
                     "additionalProperties": {
@@ -146,7 +184,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 8
+                # 10
                 {
                     "type": "object",
                     "additionalProperties": {
@@ -169,7 +207,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 9
+                # 11
                 {
                     "type": "object",
                     "additionalProperties": {
@@ -197,7 +235,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 10
+                # 12
                 {
                     "type": "object",
                     "additionalProperties": {
@@ -276,7 +314,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                 },
             ),
             (
-                # 11
+                # 13
                 {
                     "$ref": "#/components/schemas/NestedFooResponse",
                 },
