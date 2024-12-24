@@ -8,13 +8,13 @@ from typing import AnyStr, Callable, List, Tuple, Union
 
 class TestCaseDirPath(Enum):
 
-    GET_TEST: str = "get_test"
-    CHECK_TEST: str = "check_test"
-    ADD_TEST: str = "add_test"
-    PULL_TEST: str = "pull_test"
-    DIVIDE_TEST_LOAD: str = "divide_test_load"
-    DIVIDE_TEST_PULL: str = "divide_test_pull"
-    DESERIALIZE_OPENAPI_CONFIG_TEST: str = "deserialize_openapi_config_test"
+    GET_TEST = "get_test"
+    CHECK_TEST = "check_test"
+    ADD_TEST = "add_test"
+    PULL_TEST = "pull_test"
+    DIVIDE_TEST_LOAD = "divide_test_load"
+    DIVIDE_TEST_PULL = "divide_test_pull"
+    DESERIALIZE_OPENAPI_CONFIG_TEST = "deserialize_openapi_config_test"
 
     def generate_path_with_base_prefix_path(self, path: tuple, current_file: str = "") -> tuple:
         return (

@@ -3,14 +3,14 @@ from typing import List, Union
 
 
 class SubCommandLine(Enum):
-    Base: str = "subcommand"
-    RestServer: str = "rest-server"
-    Run: str = "run"
-    Add: str = "add"
-    Check: str = "check"
-    Get: str = "get"
-    Sample: str = "sample"
-    Pull: str = "pull"
+    Base = "subcommand"
+    RestServer = "rest-server"
+    Run = "run"
+    Add = "add"
+    Check = "check"
+    Get = "get"
+    Sample = "sample"
+    Pull = "pull"
 
     @staticmethod
     def to_enum(v: Union[str, "SubCommandLine"]) -> "SubCommandLine":
@@ -29,5 +29,5 @@ class SubCommandLine(Enum):
 
 
 class SubCommandSection(Enum):
-    Base: str = "subcommands"
-    ApiServer: str = "API server subcommands"
+    Base = "subcommands"
+    ApiServer = "API server subcommands"

@@ -3,9 +3,9 @@ from typing import Callable, Dict, Optional
 
 
 class ConfigLoadingOrderKey(Enum):
-    APIs: str = "apis"
-    APPLY: str = "apply"
-    FILE: str = "file"
+    APIs = "apis"
+    APPLY = "apply"
+    FILE = "file"
 
 
 """
@@ -37,9 +37,9 @@ def set_loading_function(data_model_key: str, **kwargs) -> None:
 
 
 class ConfigLoadingOrder(Enum):
-    APIs: str = ConfigLoadingOrderKey.APIs.value
-    APPLY: str = ConfigLoadingOrderKey.APPLY.value
-    FILE: str = ConfigLoadingOrderKey.FILE.value
+    APIs = ConfigLoadingOrderKey.APIs.value
+    APPLY = ConfigLoadingOrderKey.APPLY.value
+    FILE = ConfigLoadingOrderKey.FILE.value
 
     def get_loading_function(self, data_modal_key: str) -> Callable:
         return ConfigLoadingFunction[data_modal_key][self.value]
