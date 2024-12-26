@@ -118,6 +118,94 @@ class _BaseTestSuite(metaclass=ABCMeta):
                     items=None,
                 ),
             ),
+            (
+                _adapter_config(
+                    name="array_param",
+                    required=True,
+                    value_type="list",
+                    format=None,
+                    items=[
+                        _adapter_config(
+                            required=True,
+                            value_type="str",
+                            format=FormatAdapter(formatter=ApiDocValueFormat.DateTime),
+                        ),
+                    ],
+                ),
+                ExpectModelProps(
+                    name="array_param",
+                    required=True,
+                    value_type="list",
+                    format=None,
+                    items=[
+                        ExpectModelProps(
+                            name="",
+                            required=True,
+                            value_type="str",
+                            format=Format(
+                                strategy=FormatStrategy.CUSTOMIZE,
+                                customize="datetime_value",
+                                variables=[Variable(name="datetime_value", value_format=ValueFormat.DateTime)],
+                            ),
+                            items=None,
+                        ),
+                    ],
+                ),
+            ),
+            (
+                _adapter_config(
+                    name="array_param",
+                    required=True,
+                    value_type="list",
+                    format=None,
+                    items=[
+                        _adapter_config(
+                            name="id",
+                            required=True,
+                            value_type="str",
+                            format=FormatAdapter(formatter=ApiDocValueFormat.Int64),
+                        ),
+                        _adapter_config(
+                            name="date",
+                            required=True,
+                            value_type="str",
+                            format=FormatAdapter(formatter=ApiDocValueFormat.DateTime),
+                        ),
+                    ],
+                ),
+                ExpectModelProps(
+                    name="array_param",
+                    required=True,
+                    value_type="list",
+                    format=None,
+                    items=[
+                        ExpectModelProps(
+                            name="id",
+                            required=True,
+                            value_type="str",
+                            format=Format(
+                                strategy=FormatStrategy.BY_DATA_TYPE,
+                                size=Size(
+                                    max_value=9223372036854775807,
+                                    min_value=-9223372036854775808,
+                                ),
+                            ),
+                            items=None,
+                        ),
+                        ExpectModelProps(
+                            name="date",
+                            required=True,
+                            value_type="str",
+                            format=Format(
+                                strategy=FormatStrategy.CUSTOMIZE,
+                                customize="datetime_value",
+                                variables=[Variable(name="datetime_value", value_format=ValueFormat.DateTime)],
+                            ),
+                            items=None,
+                        ),
+                    ],
+                ),
+            ),
         ],
     )
     def test_convert_flow(
@@ -128,16 +216,21 @@ class _BaseTestSuite(metaclass=ABCMeta):
         serialized_data = adapter_model.serialize()
         pymock_model_has_data = pymock_model.deserialize(serialized_data)
 
-        assert pymock_model_has_data is not None
-        assert pymock_model_has_data.name == expect.name
-        assert pymock_model_has_data.required == expect.required
-        assert pymock_model_has_data.value_type == expect.value_type
-        assert pymock_model_has_data.value_format == expect.format
+        self._verify_data_model_props(pymock_model=pymock_model_has_data, expect=expect)
+
+    def _verify_data_model_props(self, pymock_model: BaseProperty, expect: ExpectModelProps) -> None:
+        assert pymock_model is not None
+        if expect.name:
+            assert pymock_model.name == expect.name
+        assert pymock_model.required == expect.required
+        assert pymock_model.value_type == expect.value_type
+        assert pymock_model.value_format == expect.format
         if expect.items:
-            assert pymock_model_has_data.items
-            assert len(pymock_model_has_data.items) == len(expect.items)
+            assert pymock_model.items
+            assert len(pymock_model.items) == len(expect.items)
             # check details of items
-            assert True
+            for pm, e in zip(pymock_model.items, expect.items):
+                self._verify_data_model_props(pymock_model=pm, expect=e)
 
 
 class TestRequestParameterAdapter(_BaseTestSuite):
