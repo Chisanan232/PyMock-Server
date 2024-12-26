@@ -1,0 +1,21 @@
+url: '/test-url'
+tag: pytest-mocked-api
+http:
+  request:
+    method: 'GET'
+    parameters:
+      - name: 'arg1'
+        required: true
+        type: str
+  response:
+    strategy: object
+    properties:
+      - name: responseCode
+        required: true
+        type: str
+        format:
+          strategy: customize
+          customize: uri_value
+          variables:
+            - name: uri_value
+              value_format: uri
