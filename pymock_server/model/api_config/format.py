@@ -328,8 +328,7 @@ class _HasFormatPropConfig(_BaseConfig, _Checkable, ABC):
 
     @_Config._ensure_process_with_not_empty_value
     def deserialize(self, data: Dict[str, Any]) -> Optional["_HasFormatPropConfig"]:
-        # FIXME: the adapter model's serialization is using property *value_format*. This is an issue needs to fix.
-        col_format = data.get("format", None) or data.get("value_format", None)
+        col_format = data.get("format", None)
         if col_format is not None:
             col_format = Format().deserialize(col_format)
         self.value_format = col_format
