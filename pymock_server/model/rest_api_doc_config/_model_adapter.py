@@ -139,7 +139,9 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
     def _convert_items(self) -> List["RequestParameterAdapter"]:
         items: List["RequestParameterAdapter"] = []
         for item in self.items or []:
-            assert isinstance(item, RequestParameterAdapter)
+            assert isinstance(item, (dict, RequestParameterAdapter))
+            if isinstance(item, dict):
+                item = RequestParameterAdapter(**item)
             items.append(item)
         return items
 
