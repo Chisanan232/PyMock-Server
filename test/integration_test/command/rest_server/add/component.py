@@ -1,4 +1,5 @@
 import pathlib
+import shutil
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
@@ -322,8 +323,12 @@ class TestSubCmdAddComponent:
         under_test_dir = pathlib.Path(under_test_api_config_dir)
         # under_test_dir = "v3_openapi" if "v3" in under_test_api_config else "v2_openapi"
         # ut_dir = pathlib.Path(test_scenario_dir, "under_test", under_test_dir)
-        if not under_test_dir.exists():
-            under_test_dir.mkdir(parents=True)
+        ut_dir = pathlib.Path(under_test_dir, "under_test")
+        if not ut_dir.exists():
+            ut_dir.mkdir(parents=True)
+        else:
+            shutil.rmtree(ut_dir)
+            ut_dir.mkdir(parents=True)
         ut_config_path = str(pathlib.Path(under_test_dir, "api.yaml"))
         cmd_args = SubcmdAddArguments(
             subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),
