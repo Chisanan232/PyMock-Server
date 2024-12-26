@@ -105,6 +105,9 @@ class PropertyDetailAdapter(BaseRefPropertyDetailAdapter):
     items: Optional[List["PropertyDetailAdapter"]] = None  # type: ignore[assignment]
     is_empty: Optional[bool] = None
 
+    def _instantiate_obj(self, **kwargs) -> "PropertyDetailAdapter":
+        return PropertyDetailAdapter(**kwargs)
+
     def serialize(self) -> dict:
         data = super().serialize()
         data["is_empty"] = self.is_empty
@@ -131,19 +134,12 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
     default: Optional[Any] = None
 
     def __post_init__(self) -> None:
-        if self.items is not None:
-            self.items = self._convert_items()
+        super().__post_init__()
         if self.value_type:
             self.value_type = self._convert_value_type()
 
-    def _convert_items(self) -> List["RequestParameterAdapter"]:
-        items: List["RequestParameterAdapter"] = []
-        for item in self.items or []:
-            assert isinstance(item, (dict, RequestParameterAdapter))
-            if isinstance(item, dict):
-                item = RequestParameterAdapter(**item)
-            items.append(item)
-        return items
+    def _instantiate_obj(self, **kwargs) -> "RequestParameterAdapter":
+        return RequestParameterAdapter(**kwargs)
 
     def _convert_value_type(self) -> str:
         assert self.value_type
