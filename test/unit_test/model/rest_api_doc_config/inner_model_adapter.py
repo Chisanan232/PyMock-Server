@@ -6,6 +6,7 @@ from typing import List, Optional, Type, Union
 import pytest
 
 from pymock_server.model import APIParameter
+from pymock_server.model.api_config import ResponseProperty
 from pymock_server.model.api_config.apis import ResponseStrategy
 from pymock_server.model.api_config.apis._property import BaseProperty
 from pymock_server.model.api_config.format import Format
@@ -243,6 +244,27 @@ class TestRequestParameterAdapter(_BaseTestSuite):
         return APIParameter()
 
 
+class TestPropertyDetailAdapter(_BaseTestSuite):
+
+    @pytest.mark.parametrize(
+        ("strategy", "expected_type"),
+        [
+            (ResponseStrategy.OBJECT, PropertyDetailAdapter),
+        ],
+    )
+    def test_generate_empty_response(self, strategy: ResponseStrategy, expected_type: Union[type, Type]):
+        empty_resp = PropertyDetailAdapter.generate_empty_response()
+        assert isinstance(empty_resp, expected_type)
+
+    @pytest.fixture(scope="function")
+    def adapter_model_obj(self) -> Type[PropertyDetailAdapter]:
+        return PropertyDetailAdapter
+
+    @pytest.fixture(scope="function")
+    def pymock_model(self) -> ResponseProperty:
+        return ResponseProperty()
+
+
 class TestFormatAdapter:
     @pytest.fixture(scope="function")
     def sut(self) -> FormatAdapter:
@@ -341,16 +363,3 @@ class TestFormatAdapter:
 
             else:
                 raise NotImplementedError
-
-
-class TestPropertyDetailAdapter:
-
-    @pytest.mark.parametrize(
-        ("strategy", "expected_type"),
-        [
-            (ResponseStrategy.OBJECT, PropertyDetailAdapter),
-        ],
-    )
-    def test_generate_empty_response(self, strategy: ResponseStrategy, expected_type: Union[type, Type]):
-        empty_resp = PropertyDetailAdapter.generate_empty_response()
-        assert isinstance(empty_resp, expected_type)
