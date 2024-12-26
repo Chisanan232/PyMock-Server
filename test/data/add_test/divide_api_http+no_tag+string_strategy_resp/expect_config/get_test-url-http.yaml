@@ -4,6 +4,14 @@ request:
     - name: 'arg1'
       required: true
       type: str
+    - name: 'value_type'
+      required: false
+      type: str
+      format:
+        strategy: from_enums
+        enums:
+          - TYPE_1
+          - TYPE_2
 response:
   strategy: string
   value: This is foo.

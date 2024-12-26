@@ -449,6 +449,8 @@ class MockAPI(_GeneralTemplatableConfig, _Checkable):
             ap_data_obj_fields = list(ap.__dataclass_fields__.keys())
             ap_data_obj_fields.pop(ap_data_obj_fields.index("value_type"))
             ap_data_obj_fields.append("type")
+            ap_data_obj_fields.pop(ap_data_obj_fields.index("value_format"))
+            ap_data_obj_fields.append("format")
             if False in list(map(lambda p: p in ap_data_obj_fields, param.keys())):
                 raise ValueError("The data format of API parameter is incorrect.")
             return ap.deserialize(param)

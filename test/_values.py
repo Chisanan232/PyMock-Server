@@ -708,7 +708,15 @@ _Test_FastAPI_App_Type: str = "fastapi"
 # Test subcommand *add* options
 _Test_SubCommand_Add: str = "add"
 _Test_Response_Strategy: ResponseStrategy = ResponseStrategy.STRING
-_Dummy_Add_Arg_Parameter: List[dict] = [{"name": "arg1", "required": True, "type": "str"}]
+_Dummy_Add_Arg_Parameter: List[dict] = [
+    {"name": "arg1", "required": True, "type": "str"},
+    {
+        "name": "value_type",
+        "required": False,
+        "type": "str",
+        "format": {"strategy": "from_enums", "enums": ["TYPE_1", "TYPE_2"]},
+    },
+]
 
 
 # Test subcommand *add* options
