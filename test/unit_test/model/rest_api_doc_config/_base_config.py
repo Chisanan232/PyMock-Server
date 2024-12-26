@@ -121,7 +121,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                             "name": "id",
                             "required": True,
                             "type": "int",
-                            "value_format": {
+                            "format": {
                                 "strategy": "by_data_type",
                                 "size": {"max": 9223372036854775807, "min": -9223372036854775808},
                             },
@@ -145,7 +145,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                     "name": "",
                     "required": True,
                     "type": "int",
-                    "value_format": {
+                    "format": {
                         "strategy": "by_data_type",
                         "size": {"max": 9223372036854775807, "min": -9223372036854775808},
                     },
@@ -158,7 +158,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                     "name": "",
                     "required": True,
                     "type": "str",
-                    "value_format": {"strategy": "from_enums", "enums": ["TYPE_1", "TYPE_2"]},
+                    "format": {"strategy": "from_enums", "enums": ["TYPE_1", "TYPE_2"]},
                 },
             ),
             (
@@ -168,7 +168,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                     "name": "",
                     "required": True,
                     "type": "str",
-                    "value_format": {
+                    "format": {
                         "strategy": "customize",
                         "customize": "uri_value",
                         "variables": [{"name": "uri_value", "value_format": "uri"}],
@@ -209,7 +209,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                             "name": "",
                             "required": True,
                             "type": "str",
-                            "value_format": {"strategy": "from_enums", "enums": ["TYPE_1", "TYPE_2"]},
+                            "format": {"strategy": "from_enums", "enums": ["TYPE_1", "TYPE_2"]},
                         },
                     ],
                 },
@@ -231,7 +231,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                             "name": "id",
                             "required": True,
                             "type": "int",
-                            "value_format": {
+                            "format": {
                                 "strategy": "by_data_type",
                                 "size": {"max": 9223372036854775807, "min": -9223372036854775808},
                             },
@@ -259,7 +259,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                             "name": "id",
                             "required": True,
                             "type": "int",
-                            "value_format": {
+                            "format": {
                                 "strategy": "by_data_type",
                                 "size": {"max": 9223372036854775807, "min": -9223372036854775808},
                             },
@@ -274,7 +274,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                                     "name": "id",
                                     "required": True,
                                     "type": "int",
-                                    "value_format": {
+                                    "format": {
                                         "strategy": "by_data_type",
                                         "size": {"max": 9223372036854775807, "min": -9223372036854775808},
                                     },
@@ -284,7 +284,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                                     "name": "url",
                                     "required": True,
                                     "type": "str",
-                                    "value_format": {
+                                    "format": {
                                         "strategy": "customize",
                                         "customize": "uri_value",
                                         "variables": [{"name": "uri_value", "value_format": "uri"}],
@@ -331,7 +331,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                         "name": "id",
                         "required": True,
                         "type": "int",
-                        "value_format": {
+                        "format": {
                             "strategy": "by_data_type",
                             "size": {"max": 9223372036854775807, "min": -9223372036854775808},
                         },
@@ -346,7 +346,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                                 "name": "id",
                                 "required": True,
                                 "type": "int",
-                                "value_format": {
+                                "format": {
                                     "strategy": "by_data_type",
                                     "size": {"max": 9223372036854775807, "min": -9223372036854775808},
                                 },
@@ -356,7 +356,7 @@ class BaseAPIDocConfigTestSuite(metaclass=ABCMeta):
                                 "name": "url",
                                 "required": True,
                                 "type": "str",
-                                "value_format": {
+                                "format": {
                                     "strategy": "customize",
                                     "customize": "uri_value",
                                     "variables": [{"name": "uri_value", "value_format": "uri"}],
