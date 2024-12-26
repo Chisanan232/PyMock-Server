@@ -1,14 +1,153 @@
+import logging
+from abc import ABCMeta, abstractmethod
+from collections import namedtuple
 from typing import List, Optional, Type, Union
 
 import pytest
 
+from pymock_server.model import APIParameter
 from pymock_server.model.api_config.apis import ResponseStrategy
+from pymock_server.model.api_config.apis._property import BaseProperty
+from pymock_server.model.api_config.format import Format
 from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
+from pymock_server.model.api_config.variable import Size, Variable
+from pymock_server.model.rest_api_doc_config._base_model_adapter import (
+    BasePropertyDetailAdapter,
+)
 from pymock_server.model.rest_api_doc_config._js_handlers import ApiDocValueFormat
 from pymock_server.model.rest_api_doc_config._model_adapter import (
     FormatAdapter,
     PropertyDetailAdapter,
+    RequestParameterAdapter,
 )
+
+logger = logging.getLogger(__name__)
+
+
+def _adapter_config(
+    name: str,
+    required: bool,
+    value_type: str,
+    format: Optional[FormatAdapter] = None,
+    items: Optional[List[dict]] = None,
+) -> dict:
+    return {
+        "name": name,
+        "required": required,
+        "value_type": value_type,
+        "format": format,
+        "items": items,
+    }
+
+
+ExpectModelProps = namedtuple("ExpectModelProps", ("name", "required", "value_type", "format", "items"))
+
+
+class _BaseTestSuite(metaclass=ABCMeta):
+    @abstractmethod
+    @pytest.fixture(scope="function")
+    def adapter_model_obj(self) -> Type[BasePropertyDetailAdapter]:
+        pass
+
+    @abstractmethod
+    @pytest.fixture(scope="function")
+    def pymock_model(self) -> BaseProperty:
+        pass
+
+    @pytest.mark.parametrize(
+        ("under_test_data", "expect"),
+        [
+            (
+                _adapter_config(name="param", required=True, value_type="str"),
+                ExpectModelProps(name="param", required=True, value_type="str", format=None, items=None),
+            ),
+            (
+                _adapter_config(name="param", required=False, value_type="int"),
+                ExpectModelProps(name="param", required=False, value_type="int", format=None, items=None),
+            ),
+            (
+                _adapter_config(name="param", required=False, value_type="list"),
+                ExpectModelProps(name="param", required=False, value_type="list", format=None, items=None),
+            ),
+            (
+                _adapter_config(
+                    name="param",
+                    required=True,
+                    value_type="str",
+                    format=FormatAdapter(formatter=ApiDocValueFormat.Int32),
+                ),
+                ExpectModelProps(
+                    name="param",
+                    required=True,
+                    value_type="str",
+                    format=Format(
+                        strategy=FormatStrategy.BY_DATA_TYPE,
+                        size=Size(max_value=9223372036854775807, min_value=-9223372036854775808),
+                    ),
+                    items=None,
+                ),
+            ),
+            (
+                _adapter_config(
+                    name="param", required=True, value_type="str", format=FormatAdapter(enum=["TYPE_1", "TYPE_2"])
+                ),
+                ExpectModelProps(
+                    name="param",
+                    required=True,
+                    value_type="str",
+                    format=Format(strategy=FormatStrategy.FROM_ENUMS, enums=["TYPE_1", "TYPE_2"]),
+                    items=None,
+                ),
+            ),
+            (
+                _adapter_config(
+                    name="param",
+                    required=True,
+                    value_type="str",
+                    format=FormatAdapter(formatter=ApiDocValueFormat.DateTime),
+                ),
+                ExpectModelProps(
+                    name="param",
+                    required=True,
+                    value_type="str",
+                    format=Format(
+                        strategy=FormatStrategy.CUSTOMIZE,
+                        customize="datetime_value",
+                        variables=[Variable(name="datetime_value", value_format=ValueFormat.DateTime)],
+                    ),
+                    items=None,
+                ),
+            ),
+        ],
+    )
+    def test_convert_flow(
+        self, adapter_model_obj, pymock_model: BaseProperty, under_test_data: dict, expect: ExpectModelProps
+    ):
+        adapter_model = adapter_model_obj(**under_test_data)
+
+        serialized_data = adapter_model.serialize()
+        pymock_model_has_data = pymock_model.deserialize(serialized_data)
+
+        assert pymock_model_has_data is not None
+        assert pymock_model_has_data.name == expect.name
+        assert pymock_model_has_data.required == expect.required
+        assert pymock_model_has_data.value_type == expect.value_type
+        assert pymock_model_has_data.value_format == expect.format
+        if expect.items:
+            assert pymock_model_has_data.items
+            assert len(pymock_model_has_data.items) == len(expect.items)
+            # check details of items
+            assert True
+
+
+class TestRequestParameterAdapter(_BaseTestSuite):
+    @pytest.fixture(scope="function")
+    def adapter_model_obj(self) -> Type[RequestParameterAdapter]:
+        return RequestParameterAdapter
+
+    @pytest.fixture(scope="function")
+    def pymock_model(self) -> APIParameter:
+        return APIParameter()
 
 
 class TestFormatAdapter:
