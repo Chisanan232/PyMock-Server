@@ -1,14 +1,53 @@
+import logging
 from typing import List, Optional, Type, Union
 
 import pytest
 
+from pymock_server.model import APIParameter
+from pymock_server.model.api_config import ResponseProperty
 from pymock_server.model.api_config.apis import ResponseStrategy
 from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
 from pymock_server.model.rest_api_doc_config._js_handlers import ApiDocValueFormat
 from pymock_server.model.rest_api_doc_config._model_adapter import (
     FormatAdapter,
     PropertyDetailAdapter,
+    RequestParameterAdapter,
 )
+
+from ._base_config import _BasePropertyDetailAdapterTestSuite
+
+logger = logging.getLogger(__name__)
+
+
+class TestRequestParameterAdapter(_BasePropertyDetailAdapterTestSuite):
+    @pytest.fixture(scope="function")
+    def adapter_model_obj(self) -> Type[RequestParameterAdapter]:
+        return RequestParameterAdapter
+
+    @pytest.fixture(scope="function")
+    def pymock_model(self) -> APIParameter:
+        return APIParameter()
+
+
+class TestPropertyDetailAdapter(_BasePropertyDetailAdapterTestSuite):
+
+    @pytest.mark.parametrize(
+        ("strategy", "expected_type"),
+        [
+            (ResponseStrategy.OBJECT, PropertyDetailAdapter),
+        ],
+    )
+    def test_generate_empty_response(self, strategy: ResponseStrategy, expected_type: Union[type, Type]):
+        empty_resp = PropertyDetailAdapter.generate_empty_response()
+        assert isinstance(empty_resp, expected_type)
+
+    @pytest.fixture(scope="function")
+    def adapter_model_obj(self) -> Type[PropertyDetailAdapter]:
+        return PropertyDetailAdapter
+
+    @pytest.fixture(scope="function")
+    def pymock_model(self) -> ResponseProperty:
+        return ResponseProperty()
 
 
 class TestFormatAdapter:
@@ -109,16 +148,3 @@ class TestFormatAdapter:
 
             else:
                 raise NotImplementedError
-
-
-class TestPropertyDetailAdapter:
-
-    @pytest.mark.parametrize(
-        ("strategy", "expected_type"),
-        [
-            (ResponseStrategy.OBJECT, PropertyDetailAdapter),
-        ],
-    )
-    def test_generate_empty_response(self, strategy: ResponseStrategy, expected_type: Union[type, Type]):
-        empty_resp = PropertyDetailAdapter.generate_empty_response()
-        assert isinstance(empty_resp, expected_type)

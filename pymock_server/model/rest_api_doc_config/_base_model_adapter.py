@@ -35,6 +35,23 @@ class BasePropertyDetailAdapter(metaclass=ABCMeta):
     format: Optional[BaseFormatModelAdapter] = None
     items: Optional[List["BasePropertyDetailAdapter"]] = None
 
+    def __post_init__(self) -> None:
+        if self.items is not None:
+            self.items = self._convert_items()
+
+    def _convert_items(self) -> List["BasePropertyDetailAdapter"]:
+        items: List["BasePropertyDetailAdapter"] = []
+        for item in self.items or []:
+            assert isinstance(item, (dict, BasePropertyDetailAdapter))
+            if isinstance(item, dict):
+                item = self._instantiate_obj(**item)
+            items.append(item)
+        return items
+
+    @abstractmethod
+    def _instantiate_obj(self, **kwargs) -> "BasePropertyDetailAdapter":
+        pass
+
     def serialize(self) -> dict:
         _format = self.format.to_pymock_api_config() if self.format else None
         _format_params = _format.serialize() if _format else None
