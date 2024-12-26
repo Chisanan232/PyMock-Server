@@ -26,11 +26,9 @@ class SubCmdAddComponent(BaseSubCmdComponent):
         if not args.api_info_is_complete():
             logger.error("❌  API info is not enough to add new API.")
             sys.exit(1)
-        # yaml: YAML = YAML()
         api_config = self._get_api_config(args)
         api_config = self._generate_api_config(api_config, args)
         self._saving_config_component.serialize_and_save(cmd_args=args, api_config=api_config)
-        # yaml.write(path=args.config_path, config=api_config.serialize())  # type: ignore[arg-type]
 
     def _get_api_config(self, args: SubcmdAddArguments) -> APIConfig:
         if os.path.exists(args.config_path):

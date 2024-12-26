@@ -13,5 +13,14 @@ request:
           - TYPE_1
           - TYPE_2
 response:
-  strategy: string
-  value: This is foo.
+  strategy: object
+  properties:
+    - name: responseCode
+      required: true
+      type: str
+      format:
+        strategy: customize
+        customize: uri_value
+        variables:
+          - name: uri_value
+            value_format: uri

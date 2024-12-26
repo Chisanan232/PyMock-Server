@@ -21,3 +21,9 @@ http:
       - name: responseCode
         required: true
         type: str
+        format:
+          strategy: customize
+          customize: uri_value
+          variables:
+            - name: uri_value
+              value_format: uri

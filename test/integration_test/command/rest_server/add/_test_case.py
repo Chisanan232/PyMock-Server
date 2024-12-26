@@ -56,7 +56,7 @@ class AddMockAPIAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
         def generate_dir_paths_callback(folder_path: str) -> tuple:
             nonlocal test_cmd_opt_arg
             divide_arg = cls._divide_chk(folder_path)
-            resp_args = cls._resp_chk(folder_path)
+            resp_args = cls._resp_chk(folder_path, "has_format" in folder_path)
             test_cmd_opt_arg.update(divide_arg)
             test_cmd_opt_arg.update(resp_args)
             expected_yaml_config = _get_path(scenario_folder=folder_path, yaml_file_naming="expect_config/api.yaml")
@@ -117,13 +117,13 @@ class AddMockAPIAsDividingConfigTestCaseFactory(BaseTestCaseFactory):
         return cmd_divide_arg
 
     @classmethod
-    def _resp_chk(cls, test_scenario_dir: str):
+    def _resp_chk(cls, test_scenario_dir: str, has_format: bool):
         resp_arg = {}
 
         if "string_strategy_resp" in test_scenario_dir:
             strategy, resp_setting = _generate_response_for_add(ResponseStrategy.STRING)
         elif "object_strategy_resp" in test_scenario_dir:
-            strategy, resp_setting = _generate_response_for_add(ResponseStrategy.OBJECT)
+            strategy, resp_setting = _generate_response_for_add(ResponseStrategy.OBJECT, has_format)
         else:
             raise ValueError("Not support this test criteria. Please check it.")
 

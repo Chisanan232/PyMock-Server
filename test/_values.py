@@ -708,18 +708,31 @@ _Test_FastAPI_App_Type: str = "fastapi"
 # Test subcommand *add* options
 _Test_SubCommand_Add: str = "add"
 _Test_Response_Strategy: ResponseStrategy = ResponseStrategy.STRING
-_Dummy_Add_Arg_Parameter: List[dict] = [{"name": "arg1", "required": True, "type": "str"}]
+_Dummy_Add_Arg_Parameter: List[dict] = [
+    {"name": "arg1", "required": True, "type": "str"},
+    {
+        "name": "value_type",
+        "required": False,
+        "type": "str",
+        "format": {"strategy": "from_enums", "enums": ["TYPE_1", "TYPE_2"]},
+    },
+]
 
 
 # Test subcommand *add* options
-def _generate_response_for_add(strategy: ResponseStrategy) -> Tuple[ResponseStrategy, List[Union[str, dict]]]:
+def _generate_response_for_add(
+    strategy: ResponseStrategy, has_format: bool = False
+) -> Tuple[ResponseStrategy, List[Union[str, dict]]]:
     _strategy: ResponseStrategy = strategy
     if strategy is ResponseStrategy.STRING:
         _values: List[str] = ["This is foo."]
     elif strategy is ResponseStrategy.FILE:
         _values: List[str] = ["./example-response.json"]  # type: ignore[no-redef]
     elif strategy is ResponseStrategy.OBJECT:
-        _values: List[dict] = [{"name": "responseCode", "required": True, "type": "str"}]  # type: ignore[no-redef]
+        if has_format:
+            _values: List[dict] = [{"name": "responseCode", "required": True, "type": "str", "format": {"strategy": "customize", "customize": "uri_value", "variables": [{"name": "uri_value", "value_format": "uri"}]}}]  # type: ignore[no-redef]
+        else:
+            _values: List[dict] = [{"name": "responseCode", "required": True, "type": "str"}]  # type: ignore[no-redef]
     else:
         raise ValueError
     return _strategy, _values  # type: ignore[return-value]
