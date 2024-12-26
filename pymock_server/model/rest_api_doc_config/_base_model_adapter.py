@@ -59,7 +59,7 @@ class BasePropertyDetailAdapter(metaclass=ABCMeta):
             "name": self.name,
             "required": self.required,
             "type": self.value_type,
-            "value_format": _format_params,
+            "format": _format_params,
             "items": [item.serialize() for item in self.items] if self.items else None,
         }
         return self._clear_empty_values(data)
