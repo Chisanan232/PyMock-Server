@@ -44,7 +44,7 @@ def _adapter_config(
 ExpectModelProps = namedtuple("ExpectModelProps", ("name", "required", "value_type", "format", "items"))
 
 
-class _BaseTestSuite(metaclass=ABCMeta):
+class _BasePropertyDetailAdapterTestSuite(metaclass=ABCMeta):
     @abstractmethod
     @pytest.fixture(scope="function")
     def adapter_model_obj(self) -> Type[BasePropertyDetailAdapter]:
@@ -234,7 +234,7 @@ class _BaseTestSuite(metaclass=ABCMeta):
                 self._verify_data_model_props(pymock_model=pm, expect=e)
 
 
-class TestRequestParameterAdapter(_BaseTestSuite):
+class TestRequestParameterAdapter(_BasePropertyDetailAdapterTestSuite):
     @pytest.fixture(scope="function")
     def adapter_model_obj(self) -> Type[RequestParameterAdapter]:
         return RequestParameterAdapter
@@ -244,7 +244,7 @@ class TestRequestParameterAdapter(_BaseTestSuite):
         return APIParameter()
 
 
-class TestPropertyDetailAdapter(_BaseTestSuite):
+class TestPropertyDetailAdapter(_BasePropertyDetailAdapterTestSuite):
 
     @pytest.mark.parametrize(
         ("strategy", "expected_type"),
