@@ -25,9 +25,9 @@ logger = logging.getLogger(__name__)
 
 
 def _adapter_config(
-    name: str,
     required: bool,
     value_type: str,
+    name: Optional[str] = None,
     format: Optional[FormatAdapter] = None,
     items: Optional[List[dict]] = None,
 ) -> dict:
