@@ -712,14 +712,19 @@ _Dummy_Add_Arg_Parameter: List[dict] = [{"name": "arg1", "required": True, "type
 
 
 # Test subcommand *add* options
-def _generate_response_for_add(strategy: ResponseStrategy) -> Tuple[ResponseStrategy, List[Union[str, dict]]]:
+def _generate_response_for_add(
+    strategy: ResponseStrategy, has_format: bool = False
+) -> Tuple[ResponseStrategy, List[Union[str, dict]]]:
     _strategy: ResponseStrategy = strategy
     if strategy is ResponseStrategy.STRING:
         _values: List[str] = ["This is foo."]
     elif strategy is ResponseStrategy.FILE:
         _values: List[str] = ["./example-response.json"]  # type: ignore[no-redef]
     elif strategy is ResponseStrategy.OBJECT:
-        _values: List[dict] = [{"name": "responseCode", "required": True, "type": "str"}]  # type: ignore[no-redef]
+        if has_format:
+            _values: List[dict] = [{"name": "responseCode", "required": True, "type": "str", "format": {"strategy": "customize", "customize": "uri_value", "variables": [{"name": "uri_value", "value_format": "uri"}]}}]  # type: ignore[no-redef]
+        else:
+            _values: List[dict] = [{"name": "responseCode", "required": True, "type": "str"}]  # type: ignore[no-redef]
     else:
         raise ValueError
     return _strategy, _values  # type: ignore[return-value]
