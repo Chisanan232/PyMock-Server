@@ -10,7 +10,10 @@ def test_get_sample_by_valid_type(st: SampleType):
     base_config_number: int = 1
     sample_data = get_sample_by_type(st)
     if st is SampleType.ALL:
-        assert len(sample_data["mocked_apis"].keys()) == 3 + base_config_number
+        assert (
+            len(sample_data["mocked_apis"].keys())
+            == len(list(filter(lambda t: t is not SampleType.ALL, SampleType))) + base_config_number
+        )
         all_sample_types = list(filter(lambda t: t is not SampleType.ALL, SampleType))
         for sample_type in all_sample_types:
             assert sample_type.value in sample_data["mocked_apis"].keys()
