@@ -31,6 +31,7 @@ class MockAPICommandParser:
         self._parser = None
 
         self._command_options: List["CommandOption"] = make_options()
+        self._subcommand_info: Optional[SysArg] = None
 
     @property
     def parser(self) -> argparse.ArgumentParser:
@@ -38,7 +39,12 @@ class MockAPICommandParser:
 
     @property
     def subcommand(self) -> Optional[SysArg]:
-        return SysArg.parse(sys.argv) if self.is_running_subcmd else None
+        if self.is_running_subcmd:
+            if self._subcommand_info is None:
+                self._subcommand_info = SysArg.parse(sys.argv)
+            return self._subcommand_info
+        else:
+            return None
 
     @property
     def is_running_subcmd(self) -> bool:
