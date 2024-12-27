@@ -45,7 +45,7 @@ class NotSupportAPIDocumentVersion(ValueError):
 
 class NotFoundCommandLine(ValueError):
     def __init__(self, subcmd: str):
-        self._subcmd = subcmd
+        self.subcmd = subcmd
 
     def __str__(self):
-        return f"Cannot map anyone subcommand line with value '{self._subcmd}'."
+        return f"Cannot map anyone subcommand line with value '{self.subcmd}'."

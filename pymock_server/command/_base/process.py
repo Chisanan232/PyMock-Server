@@ -1,4 +1,5 @@
 import copy
+import sys
 from argparse import ArgumentParser, Namespace
 from typing import List, Optional, Tuple, Type
 
@@ -8,6 +9,7 @@ from pymock_server.log import init_logger_config
 from pymock_server.model import ParserArguments, deserialize_args
 from pymock_server.model.subcmd_common import SysArg
 
+from ...exceptions import NotFoundCommandLine
 from .component import BaseSubCmdComponent
 
 _COMMAND_CHAIN: List[Type["CommandProcessor"]] = []
@@ -71,11 +73,17 @@ class CommandProcessor:
         raise NotImplementedError
 
     def distribute(self, cmd_index: int = 0) -> "CommandProcessor":
-        if self._is_responsible(subcmd=self.mock_api_parser.subcommand):
-            return self
+        try:
+            parser_subcommand = self.mock_api_parser.subcommand
+        except NotFoundCommandLine as err:
+            print(f"❌ Command line not found: '{err.subcmd}'. Please refer to details usage by using '--help'.")
+            sys.exit(1)
         else:
-            self._current_index = cmd_index
-            return self._next.distribute(cmd_index=self._current_index)
+            if self._is_responsible(subcmd=parser_subcommand):
+                return self
+            else:
+                self._current_index = cmd_index
+                return self._next.distribute(cmd_index=self._current_index)
 
     def process(self, parser: ArgumentParser, args: ParserArguments, cmd_index: int = 0) -> None:
         self.distribute(cmd_index=cmd_index)._run(parser=parser, args=args)
