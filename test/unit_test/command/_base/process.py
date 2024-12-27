@@ -26,6 +26,12 @@ class BaseCommandProcessorTestSpec(metaclass=ABCMeta):
     def entry_point_under_test(self) -> Callable:
         return run_command_chain
 
+    def test_distribute_with_invalid_cmd(self, cmd_ps: BaseCommandProcessor):
+        with patch.object(sys, "argv", ["rest-server", "invalid"]):
+            with pytest.raises(SystemExit) as exc_info:
+                cmd_ps.distribute()
+            assert exc_info.value.code == 1
+
     def test_with_command_processor(self, object_under_test: Callable, **kwargs):
         with patch.object(sys, "argv", self._given_command_line()):
             kwargs["cmd_ps"] = object_under_test

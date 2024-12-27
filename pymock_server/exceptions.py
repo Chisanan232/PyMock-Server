@@ -41,3 +41,11 @@ class NotSupportAPIDocumentVersion(ValueError):
 
     def __str__(self):
         return f"Currently, it doesn't support processing the configuration of API document version {self._version}."
+
+
+class NotFoundCommandLine(ValueError):
+    def __init__(self, subcmd: str):
+        self.subcmd = subcmd
+
+    def __str__(self):
+        return f"Cannot map anyone subcommand line with value '{self.subcmd}'."

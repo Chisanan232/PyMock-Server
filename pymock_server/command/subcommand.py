@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import List, Union
 
+from pymock_server.exceptions import NotFoundCommandLine
+
 
 class SubCommandLine(Enum):
     Base = "subcommand"
@@ -19,7 +21,7 @@ class SubCommandLine(Enum):
         for subcmd in SubCommandLine:
             if subcmd.value.lower() == v.lower():
                 return subcmd
-        raise ValueError(f"Cannot map anyone subcommand line with value '{v}'.")
+        raise NotFoundCommandLine(v)
 
     @staticmethod
     def major_cli() -> List["SubCommandLine"]:
