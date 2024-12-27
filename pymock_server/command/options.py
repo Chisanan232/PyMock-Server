@@ -14,11 +14,13 @@ briefly, It has below major features:
 
 import argparse
 import logging
+from importlib.metadata import PackageNotFoundError, version
 from typing import Any, List
 
 from pymock_server.__pkg_info__ import __version__
 from pymock_server.model.subcmd_common import SubCommandAttr
 
+from .._utils.importing import SUPPORT_SGI_SERVER, SUPPORT_WEB_FRAMEWORK
 from ._base import BaseAutoLoad
 from ._base.options import (
     CommandLineOptions,
@@ -93,10 +95,34 @@ class Version(BaseCmdOption):
 
     @property
     def _version_output(self) -> str:
-        return "%(prog)s (version " + __version__ + ")\n"
+
+        def _get_version(py_pkg: str) -> str:
+            try:
+                return version(py_pkg)
+            except PackageNotFoundError:
+                return ""
+
+        def _generate_version_info(support_py_pkg: List[str]) -> str:
+            _version_info = ""
+            for py_pkg in support_py_pkg:
+                py_pkg_ver = _get_version(py_pkg)
+                if py_pkg_ver is not None:
+                    _version_info += f"{py_pkg} (version: {py_pkg_ver})\n"
+            return _version_info
+
+        web_server_ver_info = _generate_version_info(support_py_pkg=SUPPORT_WEB_FRAMEWORK)
+        sgi_ver_info = _generate_version_info(support_py_pkg=SUPPORT_SGI_SERVER)
+
+        return (
+            f"########## PyMock-Server: ##########\n"
+            f"%(prog)s (version {__version__})\n\n"
+            f"############ Web server: ############\n"
+            f"{web_server_ver_info}\n"
+            f"##### Server gateway interface: #####\n"
+            f"{sgi_ver_info}"
+        )
 
     def add_option(self, parser: argparse.ArgumentParser) -> None:
-        # TODO: Should get relation tools or library's version, e.g., flask, gunicorn, etc.
         cmd_option_args = {
             "dest": self.name,
             "help": self.help_description,
