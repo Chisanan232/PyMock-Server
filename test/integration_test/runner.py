@@ -1,10 +1,12 @@
 import re
 import sys
 from abc import ABCMeta, abstractmethod
+from typing import List
 from unittest.mock import patch
 
 import pytest
 
+from pymock_server._utils.importing import SUPPORT_SGI_SERVER, SUPPORT_WEB_FRAMEWORK
 from pymock_server.command.subcommand import SubCommandLine
 from pymock_server.runner import CommandRunner
 
@@ -83,10 +85,17 @@ class TestVersion(CommandFunctionTestSpec):
         return "--version"
 
     def verify_running_output(self, cmd_running_result: str) -> None:
+        assert "PyMock-Server" in cmd_running_result
+        assert "Web server" in cmd_running_result
+        assert "Server gateway interface" in cmd_running_result
         software_version_format = r".{0,32}([0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4}).{0,8}"
-        self._should_contains_chars_in_result(
-            cmd_running_result, re.escape("pymock-server") + software_version_format, translate=False
-        )
+        all_py_pkg: List[str] = []
+        all_py_pkg.extend(SUPPORT_WEB_FRAMEWORK)
+        all_py_pkg.extend(SUPPORT_SGI_SERVER)
+        for py_pkg in all_py_pkg:
+            self._should_contains_chars_in_result(
+                cmd_running_result, re.escape(py_pkg) + software_version_format, translate=False
+            )
 
 
 class TestSubCmdRestServer(CommandFunctionTestSpec):
