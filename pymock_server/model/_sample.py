@@ -117,10 +117,12 @@ class SampleType(Enum):
 
 Mocked_APIs: dict = {
     "base": {"url": "/test/v1"},
-    SampleType.RESPONSE_AS_STR.value: Str_Resp_API,
-    SampleType.RESPONSE_AS_JSON.value: Json_Resp_API,
-    SampleType.RESPONSE_WITH_FILE.value: File_Content_Resp_Value,
-    SampleType.RESPONSE_AS_OBJECT.value: Object_Content_Resp_Value,
+    "apis": {
+        SampleType.RESPONSE_AS_STR.value: Str_Resp_API,
+        SampleType.RESPONSE_AS_JSON.value: Json_Resp_API,
+        SampleType.RESPONSE_WITH_FILE.value: File_Content_Resp_Value,
+        SampleType.RESPONSE_AS_OBJECT.value: Object_Content_Resp_Value,
+    },
 }
 
 Sample_Config_Value: dict = {
@@ -185,6 +187,8 @@ class sample_config:
             "description": "This is a sample config for the usage demonstration.",
             "mocked_apis": {
                 "base": {"url": "/test/v1"},
-                name: response,
+                "apis": {
+                    name: response,
+                },
             },
         }
