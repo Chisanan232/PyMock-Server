@@ -208,7 +208,7 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
             response_data_prop = self._adapter_factory.generate_property_details(
                 name="",
                 required=_Default_Required.general,
-                value_type=v_type,
+                value_type=data.value_type,
                 # TODO: Set the *format* property correctly
                 format=None,
                 items=[],
@@ -285,12 +285,12 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                     )
 
         def _handle_other_types_value_with_object_strategy(
-            data: Union[BaseReferenceConfigProperty, BaseReferenceConfig], v_type: str
+            data: Union[BaseReferenceConfigProperty, BaseReferenceConfig]
         ) -> BaseRefPropertyDetailAdapter:
             return self._adapter_factory.generate_property_details(
                 name="",
                 required=_Default_Required.general,
-                value_type=v_type,
+                value_type=data.value_type,
                 format=(
                     self._adapter_factory.generate_value_format(
                         formatter=data.format,
@@ -303,22 +303,22 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
             )
 
         def _handle_each_data_types_response_with_object_strategy(
-            data: Union[BaseReferenceConfigProperty, BaseReferenceConfig], v_type: str
+            data: Union[BaseReferenceConfigProperty, BaseReferenceConfig],
         ) -> Union[BaseRefPropertyDetailAdapter, List[BaseRefPropertyDetailAdapter]]:
-            if locate(v_type) == list:
+            if locate(data.value_type) == list:  # type: ignore[arg-type]
                 assert isinstance(data, BaseReferenceConfigProperty)
                 return _handle_list_type_value_with_object_strategy(data)
-            elif locate(v_type) == dict:
+            elif locate(data.value_type) == dict:  # type: ignore[arg-type]
                 return _handle_object_type_value_with_object_strategy(data)
             else:
-                return _handle_other_types_value_with_object_strategy(data, v_type)
+                return _handle_other_types_value_with_object_strategy(data)
 
         if not resp_prop_data.value_type:
             assert not isinstance(resp_prop_data, BaseReferenceConfig)
             assert resp_prop_data.has_ref()
-            return _handle_each_data_types_response_with_object_strategy(resp_prop_data, "dict")
-        v_type = resp_prop_data.value_type
-        return _handle_each_data_types_response_with_object_strategy(resp_prop_data, v_type)
+            resp_prop_data.value_type = "dict"
+            return _handle_each_data_types_response_with_object_strategy(resp_prop_data)
+        return _handle_each_data_types_response_with_object_strategy(resp_prop_data)
 
 
 @dataclass
