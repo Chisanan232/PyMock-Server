@@ -285,12 +285,12 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                     )
 
         def _handle_other_types_value_with_object_strategy(
-            data: Union[BaseReferenceConfigProperty, BaseReferenceConfig], v_type: str
+            data: Union[BaseReferenceConfigProperty, BaseReferenceConfig]
         ) -> BaseRefPropertyDetailAdapter:
             return self._adapter_factory.generate_property_details(
                 name="",
                 required=_Default_Required.general,
-                value_type=v_type,
+                value_type=data.value_type,
                 format=(
                     self._adapter_factory.generate_value_format(
                         formatter=data.format,
@@ -311,7 +311,7 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
             elif locate(data.value_type) == dict:  # type: ignore[arg-type]
                 return _handle_object_type_value_with_object_strategy(data)
             else:
-                return _handle_other_types_value_with_object_strategy(data, data.value_type)  # type: ignore[arg-type]
+                return _handle_other_types_value_with_object_strategy(data)
 
         if not resp_prop_data.value_type:
             assert not isinstance(resp_prop_data, BaseReferenceConfig)
