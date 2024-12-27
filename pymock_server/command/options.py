@@ -90,7 +90,10 @@ class Version(BaseCmdOption):
     help_description: str = "The version info of PyMock-Server."
     default_value: Any = argparse.SUPPRESS
     action: str = "version"
-    _version_output: str = "%(prog)s (version " + __version__ + ")\n"
+
+    @property
+    def _version_output(self) -> str:
+        return "%(prog)s (version " + __version__ + ")\n"
 
     def add_option(self, parser: argparse.ArgumentParser) -> None:
         # TODO: Should get relation tools or library's version, e.g., flask, gunicorn, etc.
