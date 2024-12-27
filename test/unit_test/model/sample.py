@@ -8,19 +8,16 @@ from pymock_server.model._sample import SampleType, get_sample_by_type
 
 @pytest.mark.parametrize("st", SampleType)
 def test_get_sample_by_valid_type(st: SampleType):
-    base_config_number: int = 1
     sample_data = get_sample_by_type(st)
+    mocked_apis_config = sample_data["mocked_apis"]["apis"]
     if st is SampleType.ALL:
-        assert (
-            len(sample_data["mocked_apis"].keys())
-            == len(list(filter(lambda t: t is not SampleType.ALL, SampleType))) + base_config_number
-        )
+        assert len(mocked_apis_config.keys()) == len(list(filter(lambda t: t is not SampleType.ALL, SampleType)))
         all_sample_types = list(filter(lambda t: t is not SampleType.ALL, SampleType))
         for sample_type in all_sample_types:
-            assert sample_type.value in sample_data["mocked_apis"].keys()
+            assert sample_type.value in mocked_apis_config.keys()
     else:
-        assert len(sample_data["mocked_apis"].keys()) == 1 + base_config_number
-        assert st.value in sample_data["mocked_apis"].keys()
+        assert len(mocked_apis_config.keys()) == 1
+        assert st.value in mocked_apis_config.keys()
 
 
 @pytest.mark.parametrize("invalid_st", ["invalid_type"])
