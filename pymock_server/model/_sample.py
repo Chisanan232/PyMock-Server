@@ -3,7 +3,21 @@ from enum import Enum
 Str_Resp_API: dict = {
     "url": "/test-str-resp",
     "http": {
-        "request": {"method": "GET", "parameters": [{"param1": "val1", "required": True, "type": "str"}]},
+        "request": {
+            "method": "GET",
+            "parameters": [
+                {"name": "param1", "required": True, "type": "str"},
+                {
+                    "name": "id",
+                    "required": True,
+                    "type": "str",
+                    "format": {
+                        "strategy": "by_data_type",
+                        "size": {"max": 9223372036854775807, "min": -9223372036854775808},
+                    },
+                },
+            ],
+        },
         "response": {"strategy": "string", "value": "This is sample API as string value."},
     },
 }
@@ -11,7 +25,7 @@ Str_Resp_API: dict = {
 Json_Resp_API: dict = {
     "url": "/test-json-resp",
     "http": {
-        "request": {"method": "GET", "parameters": [{"param1": "val1", "required": True, "type": "str"}]},
+        "request": {"method": "GET", "parameters": [{"name": "param1", "required": True, "type": "str"}]},
         "response": {
             "strategy": "string",
             "value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is sample API as JSON format '
@@ -23,7 +37,18 @@ Json_Resp_API: dict = {
 File_Content_Resp_Value: dict = {
     "url": "/test-file-content-resp",
     "http": {
-        "request": {"method": "GET", "parameters": [{"param1": "val1", "required": True, "type": "str"}]},
+        "request": {
+            "method": "GET",
+            "parameters": [
+                {"name": "param1", "required": True, "type": "str"},
+                {
+                    "name": "fooType",
+                    "required": True,
+                    "type": "str",
+                    "format": {"strategy": "from_enums", "enums": ["ENUM1", "ENUM2"]},
+                },
+            ],
+        },
         "response": {"strategy": "file", "value": "youtube.json"},
     },
 }
@@ -37,7 +62,22 @@ File_Content: dict = {
 Object_Content_Resp_Value: dict = {
     "url": "/test-object-resp",
     "http": {
-        "request": {"method": "GET", "parameters": [{"param1": "val1", "required": True, "type": "str"}]},
+        "request": {
+            "method": "GET",
+            "parameters": [
+                {"name": "param1", "required": True, "type": "str"},
+                {
+                    "name": "date",
+                    "required": True,
+                    "type": "str",
+                    "format": {
+                        "strategy": "customize",
+                        "customize": "datetime_value",
+                        "variables": [{"name": "datetime_value", "value_format": "date-time"}],
+                    },
+                },
+            ],
+        },
         "response": {
             "strategy": "object",
             "properties": [
@@ -48,7 +88,15 @@ Object_Content_Resp_Value: dict = {
                     "required": True,
                     "type": "list",
                     "items": [
-                        {"name": "id", "required": True, "type": "int"},
+                        {
+                            "name": "id",
+                            "required": True,
+                            "type": "int",
+                            "format": {
+                                "strategy": "by_data_type",
+                                "size": {"max": 9223372036854775807, "min": -9223372036854775808},
+                            },
+                        },
                         {"name": "name", "required": True, "type": "str"},
                         {"name": "value1", "required": True, "type": "str"},
                     ],
