@@ -11,8 +11,8 @@
   <a href="https://github.com/Chisanan232/PyMock-Server/releases">
     <img src="https://img.shields.io/github/release/Chisanan232/PyMock-Server.svg?label=Release&logo=github" alt="GitHub release version">
   </a>
-  <a href="https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci-cd.yml">
-    <img src="https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci-cd.yml/badge.svg" alt="CI/CD status">
+  <a href="https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci.yaml">
+    <img src="https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci.yaml/badge.svg" alt="CI/CD status">
   </a>
   <a href="https://codecov.io/gh/Chisanan232/PyMock-Server">
     <img src="https://codecov.io/gh/Chisanan232/PyMock-Server/graph/badge.svg?token=r5HJxg9KhN" alt="Test coverage">
