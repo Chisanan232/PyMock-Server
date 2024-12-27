@@ -3,25 +3,29 @@ from enum import Enum
 Str_Resp_API: dict = {
     "url": "/test-str-resp",
     "http": {
-        "request": {"method": "GET", "parameters": [{"param1": "val1"}]},
-        "response": {"value": "This is sample API as string value."},
+        "request": {"method": "GET", "parameters": [{"param1": "val1", "required": True, "type": "str"}]},
+        "response": {"strategy": "string", "value": "This is sample API as string value."},
     },
 }
 
 Json_Resp_API: dict = {
     "url": "/test-json-resp",
     "http": {
-        "request": {"method": "GET", "parameters": [{"param1": "val1"}]},
+        "request": {"method": "GET", "parameters": [{"param1": "val1", "required": True, "type": "str"}]},
         "response": {
+            "strategy": "string",
             "value": '{ "responseCode": "200", "errorMessage": "OK", "content": "This is sample API as JSON format '
-            'value." }'
+            'value." }',
         },
     },
 }
 
 File_Content_Resp_Value: dict = {
     "url": "/test-file-content-resp",
-    "http": {"request": {"method": "GET", "parameters": [{"param1": "val1"}]}, "response": {"value": "youtube.json"}},
+    "http": {
+        "request": {"method": "GET", "parameters": [{"param1": "val1", "required": True, "type": "str"}]},
+        "response": {"strategy": "file", "value": "youtube.json"},
+    },
 }
 
 File_Content: dict = {
