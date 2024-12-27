@@ -11,6 +11,7 @@ import pytest
 
 from pymock_server._utils.file.operation import YAML
 from pymock_server.model._sample import Mocked_APIs, Sample_Config_Value
+from pymock_server.model.api_config.apis import ResponseStrategy
 
 # isort: off
 from test._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
@@ -151,12 +152,22 @@ class TestShowSampleConfiguration(SubCmdRestServerTestSuite):
         return "sample -p"
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
-        for api_name, api_config in Mocked_APIs.items():
+        for api_name, api_config in Mocked_APIs["apis"].items():
             self._should_contains_chars_in_result(cmd_running_result, api_name)
             self._should_contains_chars_in_result(cmd_running_result, api_config["url"])
             if api_name != "base":
                 self._should_contains_chars_in_result(cmd_running_result, api_config["http"]["request"]["method"])
-                self._should_contains_chars_in_result(cmd_running_result, str(api_config["http"]["response"]["value"]))
+                api_response_config = api_config["http"]["response"]
+                resp_value = api_response_config.get("value", None)
+                if resp_value:
+                    assert api_response_config["strategy"] in (
+                        ResponseStrategy.STRING.value,
+                        ResponseStrategy.FILE.value,
+                    )
+                    self._should_contains_chars_in_result(cmd_running_result, str(resp_value))
+                else:
+                    assert api_response_config["strategy"] == ResponseStrategy.OBJECT.value
+                    assert api_response_config["properties"]
 
 
 class TestGenerateSampleConfiguration(SubCmdRestServerTestSuite):
