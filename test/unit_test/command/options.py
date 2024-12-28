@@ -1,11 +1,13 @@
 import argparse
 import re
-from typing import Optional
-from unittest.mock import MagicMock, Mock, patch
+from importlib.metadata import PackageNotFoundError
+from typing import List, Optional
+from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
 
-from pymock_server.command.options import BaseCmdOption, make_options
+from pymock_server._utils.importing import SUPPORT_SGI_SERVER, SUPPORT_WEB_FRAMEWORK
+from pymock_server.command.options import BaseCmdOption, Version, make_options
 
 
 def test_make_options():
@@ -137,3 +139,25 @@ class TestCommandOption:
         with pytest.raises(expected_error):
             help_desc = option.help_description_content
         assert help_desc is None
+
+
+class TestVersion:
+    @pytest.fixture(scope="function")
+    def option(self) -> Version:
+        return Version()
+
+    @patch("pymock_server.command.options.version", side_effect=PackageNotFoundError())
+    def test_version_with_some_lib_not_exist(self, mock_version_fun: Mock, option: Version):
+        version_info_output = option._version_output
+
+        assert "PyMock-Server" in version_info_output
+        assert "Web server" in version_info_output
+        assert "Server gateway interface" in version_info_output
+        assert "%(prog)s" in version_info_output
+
+        all_py_pkg: List[str] = []
+        all_py_pkg.extend(SUPPORT_WEB_FRAMEWORK)
+        all_py_pkg.extend(SUPPORT_SGI_SERVER)
+        mock_version_fun.assert_has_calls([call(py_pkg) for py_pkg in all_py_pkg])
+        for py_pkg in all_py_pkg:
+            assert py_pkg not in version_info_output
