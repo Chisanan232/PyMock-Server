@@ -26,6 +26,7 @@ class MockAPICommandParser:
             "prog": self._prog,
             "usage": self._usage,
             "description": self._description,
+            "formatter_class": argparse.RawTextHelpFormatter,
         }
 
         self._parser = None

@@ -1,7 +1,10 @@
 """*Handle importing*"""
 
 import re
-from typing import Callable, Optional
+from typing import Callable, List, Optional
+
+SUPPORT_WEB_FRAMEWORK: List[str] = ["flask", "fastapi"]
+SUPPORT_SGI_SERVER: List[str] = ["gunicorn", "uvicorn"]
 
 
 class import_web_lib:
