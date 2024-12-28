@@ -38,7 +38,7 @@ jobs:
         shell: bash
 
       - name: Merge PR if it doesn't be merged
-        if: ${{ env.PR_NUMBER != '' && env.PR_NUMBER != '0' }}
+        if: ${{ env.PR_NUMBER != '' && env.PR_NUMBER != '0' && env.PR_NUMBER != 0 }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh pr merge $PR_NUMBER --merge
