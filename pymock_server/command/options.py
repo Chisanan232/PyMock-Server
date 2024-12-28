@@ -106,7 +106,7 @@ class Version(BaseCmdOption):
             _version_info = ""
             for py_pkg in support_py_pkg:
                 py_pkg_ver = _get_version(py_pkg)
-                if py_pkg_ver is not None:
+                if py_pkg_ver:
                     _version_info += f"{py_pkg} (version: {py_pkg_ver})\n"
             return _version_info
 
