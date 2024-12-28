@@ -18,7 +18,7 @@
     N/A.
 
 
-[//]: # (What's the scope in project it would affect with your modify? The format could refer to previous one section.)
+[//]: # (What's the scope in project it would affect with your modify? For example, would it affect CI workflow? Or any feature usage?)
 ## _Effecting Scope_
 
 * N/A.
