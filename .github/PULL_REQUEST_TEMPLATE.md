@@ -1,5 +1,5 @@
 [//]: # (The target why you modify something.)
-### _Target_
+## _Target_
 
 [//]: # (The summary what you did or your target.)
 * ### Task summary:
@@ -19,12 +19,12 @@
 
 
 [//]: # (What's the scope in project it would affect with your modify? The format could refer to previous one section.)
-### _Effecting Scope_
+## _Effecting Scope_
 
 * N/A.
 
 
 [//]: # (the brief of major changes what your modify ...)
-### _Description_
+## _Description_
 
 * N/A.
