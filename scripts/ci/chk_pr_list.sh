@@ -10,7 +10,7 @@ then
     echo "PR has been merged. Stop this CI workflow."
     # Save the value to environment variable in GitHub Action
 #    echo "PR_EXIST=$pr_exist" >> $GITHUB_OUTPUT
-    exit 1
+    exit 0
 else
     pr_number="$(echo "$pr_info" | cut -d ' ' -f 1 | tr -d -c 0-9)"
     # Save the value to environment variable in GitHub Action
