@@ -89,7 +89,7 @@ class TestVersion(CommandFunctionTestSpec):
         assert "Web server" in cmd_running_result
         assert "Server gateway interface" in cmd_running_result
         software_version_format = r".{0,32}([0-9]{1,4}.[0-9]{1,4}.[0-9]{1,4}).{0,8}"
-        all_py_pkg: List[str] = []
+        all_py_pkg: List[str] = ["pymock-server"]
         all_py_pkg.extend(SUPPORT_WEB_FRAMEWORK)
         all_py_pkg.extend(SUPPORT_SGI_SERVER)
         for py_pkg in all_py_pkg:
