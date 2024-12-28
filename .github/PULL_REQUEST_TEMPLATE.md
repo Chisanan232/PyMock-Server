@@ -1,6 +1,12 @@
 ### _Target_
 
-* The target why you modify something.
+* ### Task summary:
+
+    The target why you modify something.
+
+* ### Key point change (optional):
+
+    The key changes like demonstration, as-is & to-be, etc. for reviewers could be faster understand what it changes
 
 
 ### _Effecting Scope_
