@@ -1,37 +1,30 @@
-#### Pre-Checking
+[//]: # (The target why you modify something.)
+## _Target_
 
-‼️Please must read this section and check by yourself.
-⚠️Do NOT modify this section if it doesn't have any necessary reason.
+[//]: # (The summary what you did or your target.)
+* ### Task summary:
 
-Please verify the PR header should be satisfied below format: 
-    
-    [commit topic] (commit scope) <commit summary>
+    N/A.
 
-* commit topic: The major topic of your modify. It could have multiple topics, e.g., [Breaking Change + Test].
-* commit scope: The scope in project of modify. It could have multiple scopes, e.g., (config + test).
-* commit summary: Summary of the commits. It should be clear that the target, the KEY POINT why you modify it or what you resolve, etc.
+[//]: # (The task ID in ClickUp [project: https://app.clickup.com/9018752317/v/f/90183126979/90182605225] which maps this change.)
+* ### Task tickets:
 
-Please refer to [GCR (Git Commit Rules) of PyMock-Server](../../.gitcommitrules) to get more detail about it.
+    * Task ID: N/A.
+    * Relative task IDs: N/A.
 
-<hr>
+[//]: # (The key changes like demonstration, as-is & to-be, etc. for reviewers could be faster understand what it changes)
+* ### Key point change (optional):
 
-### _Target_
-
-* The target why you modify something.
+    N/A.
 
 
-### _Modify Code Scope_
+[//]: # (What's the scope in project it would affect with your modify? For example, would it affect CI workflow? Or any feature usage? Please list all the items which may be affected.)
+## _Effecting Scope_
 
-* The more details of project scope which be modified, e.g., (refer to below 2 example items)
-* Which sub-packages or modules or objects or functions, etc., in **source code**.
-* Which sub-packages or modules or objects or functions, etc., in **test**.
-
-
-### _Effecting Scope_
-
-* What's the scope in project it would affect with your modify? The format could refer to previous one section.
+* N/A.
 
 
-### _Description_
+[//]: # (The brief of major changes what your modify. Please list it.)
+## _Description_
 
-* the summary of your modify ...
+* N/A.
