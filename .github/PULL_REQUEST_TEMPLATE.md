@@ -18,13 +18,13 @@
     N/A.
 
 
-[//]: # (What's the scope in project it would affect with your modify? For example, would it affect CI workflow? Or any feature usage?)
+[//]: # (What's the scope in project it would affect with your modify? For example, would it affect CI workflow? Or any feature usage? Please list all the items which may be affected.)
 ## _Effecting Scope_
 
 * N/A.
 
 
-[//]: # (the brief of major changes what your modify ...)
+[//]: # (The brief of major changes what your modify. Please list it.)
 ## _Description_
 
 * N/A.
