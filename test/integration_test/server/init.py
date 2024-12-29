@@ -32,7 +32,7 @@ class TestLoadApp:
             ("fastapi", fastapi.FastAPI),
         ],
     )
-    def test_by_flask(self, load_app: LOAD_APP_TYPE, web_lib: str, expected):
+    def test_by_web_framework(self, load_app: LOAD_APP_TYPE, web_lib: str, expected):
         getattr(load_app, f"by_{web_lib}")()
         assert isinstance(getattr(mock_server, f"{web_lib}_app"), expected)
 
@@ -44,7 +44,7 @@ class TestLoadApp:
             ("FastAPI", fastapi.FastAPI),
         ],
     )
-    def test_by_flask_when_cannot_import(self, web_lib: str, expected):
+    def test_by_web_framework_when_cannot_import(self, web_lib: str, expected):
         with patch.object(
             getattr(mock_server, f"{web_lib}Server"), "setup", side_effect=RuntimeError("Import error for PyTest")
         ) as mock_web_server:
