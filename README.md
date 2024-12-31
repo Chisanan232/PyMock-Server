@@ -9,7 +9,7 @@
 [![documentation](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml/badge.svg)](https://chisanan232.github.io/PyMock-Server/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Python tool to mock API easily and humanly without any coding.
+A Python tool to mock API server easily and humanly without any coding.
 
 > [!NOTE]
 > It names **_PyMock-API_** before version **0.2.0**.
