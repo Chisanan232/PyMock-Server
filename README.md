@@ -38,7 +38,7 @@ etc. So the Python versions it supports also be affected by them, e.g., **_Flask
 
 ## Quickly Start
 
-Here section would lead you quickly start to set up your first one application by **_PyMock-Server_** for mocking APIs easily.
+Here section would lead you quickly start to set up your first one application by **_PyMock-Server_** for mocking API server easily.
 
 In basically, it has 3 steps: install the package, configure settings about the APIs for mocking and run command.
 
@@ -114,7 +114,19 @@ And you could test the API by ``curl``:
 
 ## Documentation
 
-Currently, it won't have documentation. But it would have soon.
+The [documentation](https://chisanan232.github.io/PyMock-Server/) contains more details, demonstrations and anything you need about **_PyMock-Server_**.
+
+* [Getting start](https://chisanan232.github.io/PyMock-Server/getting-started/version-requirements/) helps you start to prepare environment, install dependencies and configure the detail settings with explanation in detail.
+    * What [requirement](https://chisanan232.github.io/PyMock-Server/getting-started/version-requirements/) I need to prepare?
+    * How can I [install](https://chisanan232.github.io/PyMock-Server/getting-started/installation/) it?
+    * How to [configure the details of API](https://chisanan232.github.io/PyMock-Server/getting-started/configure-your-api/)?
+    * I have configuration right now. How can I [set up a mock server](https://chisanan232.github.io/PyMock-Server/getting-started/setup-web-server/)?
+* Want to learn more how to use it?
+    * What exactly feature it can use by [command lines](https://chisanan232.github.io/PyMock-Server/command-line-usage/)?
+    * Want to know more [magic settings](https://chisanan232.github.io/PyMock-Server/configure-references/config-basic-info/) to mock API?
+* I face something [issue](https://chisanan232.github.io/PyMock-Server/development/contributing/reporting-a-bug/) it cannot work finely!
+* I want to [wish a feature or something change](https://chisanan232.github.io/PyMock-Server/development/contributing/requesting-a-feature/).
+* If you're interested in **_PyMock-Server_** and have any ideas want to design it, even implement it, it's very welcome to [contribute](https://chisanan232.github.io/PyMock-Server/development/contributing/developing/) **_PyMock-Server_**!
 
 
 ## Coding style and following rules
