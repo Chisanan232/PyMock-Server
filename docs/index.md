@@ -33,7 +33,7 @@
 </p>
 
 <p align="center">
-  <em>PyMock-Server</em> is a Python tool to mock API easily and humanly without any coding.
+  <em>PyMock-Server</em> is a Python tool to mock API server easily and humanly without any coding.
 </p>
 
 ## What things it wants to resolve?
