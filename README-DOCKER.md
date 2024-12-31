@@ -1,6 +1,6 @@
 # PyMock-Server
 
-[**_PyMock-Server_**] is a tool for mocking APIs easily and quickly by configuration only.
+[**_PyMock-Server_**] is a tool for mocking API server easily and quickly by configuration only.
 
 [**_PyMock-Server**]: https://github.com/Chisanan232/PyMock-Server/tree/master
 
