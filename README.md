@@ -127,6 +127,7 @@ The [documentation](https://chisanan232.github.io/PyMock-Server/) contains more 
 * I face something [issue](https://chisanan232.github.io/PyMock-Server/development/contributing/reporting-a-bug/) it cannot work finely!
 * I want to [wish a feature or something change](https://chisanan232.github.io/PyMock-Server/development/contributing/requesting-a-feature/).
 * If you're interested in **_PyMock-Server_** and have any ideas want to design it, even implement it, it's very welcome to [contribute](https://chisanan232.github.io/PyMock-Server/development/contributing/developing/) **_PyMock-Server_**!
+* About the [release notes](https://chisanan232.github.io/PyMock-Server/release_note/).
 
 
 ## Coding style and following rules
