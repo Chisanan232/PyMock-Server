@@ -149,13 +149,13 @@ We should activate the command line feature by 2 ways: **run the directory of so
 === "Out of Poetry shell"
     
     ```console
-    poetry run ./pymock_api --help
+    poetry run ./pymock_server --help
     ```
 
 === "Within Poetry shell"
     
     ```console
-    ./pymock_api --help
+    ./pymock_server --help
     ```
 
 ### run command line

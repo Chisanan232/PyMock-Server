@@ -143,14 +143,21 @@ nav:
   - Development:
     - development/index.md
     - How it works: development/how-it-works.md
-    - Software architecture: development/software-architecture.md
+    - Software technical details:
+      - development/software-technical-details/index.md
+      - Program entry point: development/software-technical-details/program_entry_point.md
+      - Command line - subcommand line & options: development/software-technical-details/command_line_options.md
+      - Command line - processor: development/software-technical-details/command_line_processor.md
+      - Functional - file operation: development/software-technical-details/file_operation.md
+      - Subcommand - *rest-server run*: development/software-technical-details/subcmd_run_core.md
     - Contributing :
       - development/contributing/index.md
-      - Join in developing:
-        - Developing: development/contributing/developing.md
-        - Testing: development/contributing/testing.md
       - Reporting a bug: development/contributing/reporting-a-bug.md
       - Requesting a feature or change: development/contributing/requesting-a-feature.md
+      - Join in developing:
+        - development/contributing/join_in_developing/index.md
+        - Developing: development/contributing/join_in_developing/developing.md
+        - Testing: development/contributing/join_in_developing/testing.md
   - Release notes:
     - release_note/index.md
     - Version 0.X.X: release_note/version_0xx.md
