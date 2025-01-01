@@ -8,7 +8,7 @@ All codes belong to here section, they all are responsible for **what thing woul
 
 ![software architecture - command line processor]
 
-[software architecture - command line processor]: ../../images/development/cmd_ps_software_architecture.drawio.png
+[software architecture - command line processor]: ../../_images/development/cmd_ps_software_architecture.drawio.png
 
 * It has 4 base classes:
     * ``MetaCommand``
@@ -51,7 +51,7 @@ truly core logic of the sub-command line with its options.
 
 ![sequence diagram - auto register by meta class]
 
-[sequence diagram - auto register by meta class]: ../../images/development/meta-class_auto-register_sequence_diagram.drawio.png
+[sequence diagram - auto register by meta class]: ../../_images/development/meta-class_auto-register_sequence_diagram.drawio.png
 
 From above sequence diagram, it does auto-registration when initialize an object. It won't do something to iterate all objects
 and save them to list type object, it automates all things when you add one or more new subclasses which is responsible for new

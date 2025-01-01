@@ -9,7 +9,7 @@ This is the core feature of **_PyMock-Server_**. It does 2 things:
 
 ![software architecture - web server with sgi server]
 
-[software architecture - web server with sgi server]: ../../images/development/server_software_architecture.drawio.png
+[software architecture - web server with sgi server]: ../../_images/development/server_software_architecture.drawio.png
 
 * The sub-command line processor ``SubCmdRun`` would use function ``setup_wsgi`` or ``setup_asgi`` to run the web application.
 * All the way to run web application by factory pattern in **_PyMock-Server_**.

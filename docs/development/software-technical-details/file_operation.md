@@ -6,7 +6,7 @@ Here focus on a small part --- a feature of one specific option ``--config`` und
 
 ![software architecture - operation with file]
 
-[software architecture - operation with file]: ../../images/development/file_operatrions_software_architecture.drawio.png
+[software architecture - operation with file]: ../../_images/development/file_operatrions_software_architecture.drawio.png
 
 * Object ``MockHTTPServer`` uses function ``load_config`` to get all detail settings.
 * Data object ``APIConfig`` provides function to read and deserialize the configuration file content.

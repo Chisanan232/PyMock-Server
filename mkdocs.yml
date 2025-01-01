@@ -156,6 +156,7 @@ nav:
       - Requesting a feature or change: development/contributing/requesting-a-feature.md
       - Join in developing:
         - development/contributing/join_in_developing/index.md
+        - Development workflow: development/contributing/join_in_developing/development_workflow.md
         - Developing: development/contributing/join_in_developing/developing.md
         - Testing: development/contributing/join_in_developing/testing.md
   - Release notes:

@@ -7,7 +7,7 @@ The entry point of **_PyMock-Server_** command line tool. Its actually entry poi
 
 ![software architecture - command runner]
 
-[software architecture - command runner]: ../../images/development/cmd_runner_software_architecture.drawio.png
+[software architecture - command runner]: ../../_images/development/cmd_runner_software_architecture.drawio.png
 
 * About the function which would be run as entry point ``run``, it's a running logic of object ``CommandRunner``.
 * Object ``CommandRunner`` would keep instance of ``ArgumentParser`` and ``CommandProcessor`` to parse command line and run
@@ -24,7 +24,7 @@ and functions.
 
 ![sequence diagram - command runner]
 
-[sequence diagram - command runner]: ../../images/development/cmd_runner_sequence_diagram.drawio.png
+[sequence diagram - command runner]: ../../_images/development/cmd_runner_sequence_diagram.drawio.png
 
 From the sequence diagram, you could observe that function ``dispatch_command_processor`` would keep getting the correct
 instances of ``CommandProcessor`` to run current command line.
@@ -36,7 +36,7 @@ diagram to explain that:
 
 ![activity sequence diagram - command runner]
 
-[activity sequence diagram - command runner]: ../../images/development/cmd_runner_activity_sequence_diagram.drawio.png
+[activity sequence diagram - command runner]: ../../_images/development/cmd_runner_activity_sequence_diagram.drawio.png
 
 In short, function ``dispatch_command_processor`` would iterate all instances of ``CommandProcessor`` to find the one which
 is responsible for current command line.
