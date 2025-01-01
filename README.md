@@ -1,15 +1,38 @@
-# PyMock-Server
+<h1 align="center">
+  PyMock-Server
+</h1>
 
-[![PyPI](https://img.shields.io/pypi/v/PyMock-Server?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white)](https://pypi.org/project/PyMock-Server)
-[![Release](https://img.shields.io/github/release/Chisanan232/PyMock-Server.svg?label=Release&logo=github)](https://github.com/Chisanan232/PyMock-Server/releases)
-[![CI](https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/Chisanan232/PyMock-Server/graph/badge.svg?token=r5HJxg9KhN)](https://codecov.io/gh/Chisanan232/PyMock-Server)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Chisanan232/PyMock-Server/master.svg)](https://results.pre-commit.ci/latest/github/Chisanan232/PyMock-Server/master)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyMock-Server&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-Server)
-[![documentation](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml/badge.svg)](https://chisanan232.github.io/PyMock-Server/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  <a href="https://pypi.org/project/PyMock-Server">
+    <img src="https://img.shields.io/pypi/v/PyMock-Server?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white" alt="PyPI package version">
+  </a>
+  <a href="https://github.com/Chisanan232/PyMock-Server/releases">
+    <img src="https://img.shields.io/github/release/Chisanan232/PyMock-Server.svg?label=Release&logo=github" alt="GitHub release version">
+  </a>
+  <a href="https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci.yaml">
+    <img src="https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci.yaml/badge.svg" alt="CI/CD status">
+  </a>
+  <a href="https://codecov.io/gh/Chisanan232/PyMock-Server">
+    <img src="https://codecov.io/gh/Chisanan232/PyMock-Server/graph/badge.svg?token=r5HJxg9KhN" alt="Test coverage">
+  </a>
+  <a href="https://results.pre-commit.ci/latest/github/Chisanan232/PyMock-Server/master">
+    <img src="https://results.pre-commit.ci/badge/github/Chisanan232/PyMock-Server/master.svg" alt="Pre-Commit building state">
+  </a>
+  <a href="https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-Server">
+    <img src="https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyMock-Server&metric=alert_status" alt="Code quality level">
+  </a>
+  <a href="https://chisanan232.github.io/PyMock-Server/">
+    <img src="https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml/badge.svg" alt="documentation CI status">
+  </a>
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="Software license">
+  </a>
 
-A Python tool to mock API server easily and humanly without any coding.
+</p>
+
+<p align="center">
+  <em>PyMock-Server</em> is a Python tool to mock API server easily and humanly without any coding.
+</p>
 
 > [!NOTE]
 > It names **_PyMock-API_** before version **0.2.0**.
