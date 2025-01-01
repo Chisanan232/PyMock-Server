@@ -155,8 +155,9 @@ nav:
       - Reporting a bug: development/contributing/reporting-a-bug.md
       - Requesting a feature or change: development/contributing/requesting-a-feature.md
       - Join in developing:
-        - Developing: development/contributing/developing.md
-        - Testing: development/contributing/testing.md
+        - development/contributing/join_in_developing/index.md
+        - Developing: development/contributing/join_in_developing/developing.md
+        - Testing: development/contributing/join_in_developing/testing.md
   - Release notes:
     - release_note/index.md
     - Version 0.X.X: release_note/version_0xx.md
