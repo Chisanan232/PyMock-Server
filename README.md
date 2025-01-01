@@ -133,7 +133,7 @@ And you could test the API by ``curl``:
 "This is Google home API."%
 ```
 
-![demonstration](docs/_images/demonstration_pymock-api_cli.gif)
+![demonstration](docs/_images/demonstration_pymock-server_cli.gif)
 
 ## Documentation
 
