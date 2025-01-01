@@ -124,9 +124,10 @@ The [documentation](https://chisanan232.github.io/PyMock-Server/) contains more 
 * Want to learn more how to use it?
     * What exactly feature it can use by [command lines](https://chisanan232.github.io/PyMock-Server/command-line-usage/)?
     * Want to know more [magic settings](https://chisanan232.github.io/PyMock-Server/configure-references/config-basic-info/) to mock API?
-* I face something [issue](https://chisanan232.github.io/PyMock-Server/development/contributing/reporting-a-bug/) it cannot work finely!
-* I want to [wish a feature or something change](https://chisanan232.github.io/PyMock-Server/development/contributing/requesting-a-feature/).
-* If you're interested in **_PyMock-Server_** and have any ideas want to design it, even implement it, it's very welcome to [contribute](https://chisanan232.github.io/PyMock-Server/development/contributing/join_in_developing/) **_PyMock-Server_**!
+* Want to contribute to this project?
+    * I face something [issue](https://chisanan232.github.io/PyMock-Server/development/contributing/reporting-a-bug/) it cannot work finely!
+    * I want to [wish a feature or something change](https://chisanan232.github.io/PyMock-Server/development/contributing/requesting-a-feature/).
+    * If you're interested in **_PyMock-Server_** and have any ideas want to design it, even implement it, it's very welcome to [contribute](https://chisanan232.github.io/PyMock-Server/development/contributing/join_in_developing/) **_PyMock-Server_**!
 * About the [release notes](https://chisanan232.github.io/PyMock-Server/release_note/).
 
 
