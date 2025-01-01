@@ -9,11 +9,11 @@ In **_PyMock-Server_** realm, it can divide to several sections to parse its sof
     * Runner of command line
 
 * Command line
-    * Entire command lines options ``--config``
-    * Entire command lines
-    * Entire command line subcommand line
+    * Entire command line - subcommand lines & options
+    * Entire command line processors
 
 * Features of command line
+    * Functional - options ``--config``
     * The sub-command line ``rest-server run``
 
 Above all are some parts which have value or more complex to explain their details to developers.
