@@ -145,9 +145,9 @@ nav:
     - How it works: development/how-it-works.md
     - Software technical details:
       - development/software-technical-details/index.md
-      - Program entry point: development/software-technical-details/program_entry_point.md
-      - Command line - subcommand line & options: development/software-technical-details/command_line_options.md
-      - Command line - processor: development/software-technical-details/command_line_processor.md
+      - CLI - Program entry point: development/software-technical-details/program_entry_point.md
+      - CLI - subcommand line & options: development/software-technical-details/command_line_options.md
+      - CLI - processor: development/software-technical-details/command_line_processor.md
       - Functional - file operation: development/software-technical-details/file_operation.md
       - Subcommand - *rest-server run*: development/software-technical-details/subcmd_run_core.md
     - Contributing :
@@ -156,6 +156,8 @@ nav:
       - Requesting a feature or change: development/contributing/requesting-a-feature.md
       - Join in developing:
         - development/contributing/join_in_developing/index.md
+        - Development workflow: development/contributing/join_in_developing/development_workflow.md
+        - CI workflow: development/contributing/join_in_developing/ci_workflow.md
         - Developing: development/contributing/join_in_developing/developing.md
         - Testing: development/contributing/join_in_developing/testing.md
   - Release notes:

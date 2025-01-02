@@ -9,7 +9,7 @@ All codes belong to here section, they all are responsible for **defining the co
 
 ![software architecture - command line options]
 
-[software architecture - command line options]: ../../images/development/cmd_options_software_architecture.drawio.png
+[software architecture - command line options]: ../../_images/development/contributing/software_technical_details/cmd_options_software_architecture.drawio.png
 
 The software architecture here feature apply is mostly same as previous one section [Command line processors](#uml_1).
 
