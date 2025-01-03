@@ -6,9 +6,7 @@ All codes belong to here section, they all are responsible for **what thing woul
 
 ## UML
 
-![software architecture - command line processor]
-
-[software architecture - command line processor]: ../../_images/development/contributing/software_technical_details/cmd_ps_software_architecture.drawio.png
+<iframe frameborder="0" style="width:100%;height:600px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=p-yRdhPX9lBvFNy9WcaI#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 * It has 4 base classes:
     * ``MetaCommand``
@@ -49,9 +47,7 @@ truly core logic of the sub-command line with its options.
 
 * Sequence diagram
 
-![sequence diagram - auto register by meta class]
-
-[sequence diagram - auto register by meta class]: ../../_images/development/contributing/software_technical_details/meta-class_auto-register_sequence_diagram.drawio.png
+<iframe frameborder="0" style="width:100%;height:400px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=y4nP58FJjcgKiph7c4k3#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 From above sequence diagram, it does auto-registration when initialize an object. It won't do something to iterate all objects
 and save them to list type object, it automates all things when you add one or more new subclasses which is responsible for new

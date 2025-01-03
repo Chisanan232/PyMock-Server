@@ -7,9 +7,7 @@ This is the core feature of **_PyMock-Server_**. It does 2 things:
 
 ## UML
 
-![software architecture - web server with sgi server]
-
-[software architecture - web server with sgi server]: ../../_images/development/contributing/software_technical_details/server_software_architecture.drawio.png
+<iframe frameborder="0" style="width:100%;height:550px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=kRRTpLGKS1xiXI8G4MX6#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 * The sub-command line processor ``SubCmdRun`` would use function ``setup_wsgi`` or ``setup_asgi`` to run the web application.
 * All the way to run web application by factory pattern in **_PyMock-Server_**.

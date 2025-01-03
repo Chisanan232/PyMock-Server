@@ -2,9 +2,7 @@
 
 This is the entire workflow of this project development. Following flow chart is the entire workflow:
 
-![join in developing - development workflow]
-
-[join in developing - development workflow]: ../../../_images/development/contributing/join_in_developing/development.png
+<iframe frameborder="0" style="width:100%;height:550px;" src="https://excalidraw.com/#json=_iKIL5Rdd-6yDJLfYW1m0,_4HB019xsMsbnz84wclx2w"></iframe>
 
 About the project management details, please refer to [here](https://app.clickup.com/9018752317/v/f/90183126979/90182605225).
 
