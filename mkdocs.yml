@@ -146,8 +146,8 @@ nav:
     - Software technical details:
       - development/software-technical-details/index.md
       - CLI - Program entry point: development/software-technical-details/program_entry_point.md
-      - CLI - subcommand line & options: development/software-technical-details/command_line_options.md
       - CLI - processor: development/software-technical-details/command_line_processor.md
+      - CLI - subcommand line & options: development/software-technical-details/command_line_options.md
       - Functional - file operation: development/software-technical-details/file_operation.md
       - Subcommand - *rest-server run*: development/software-technical-details/subcmd_run_core.md
     - Contributing :
