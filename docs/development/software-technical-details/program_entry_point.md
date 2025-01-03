@@ -20,9 +20,7 @@ and functions.
 
 * Sequence diagram
 
-![sequence diagram - command runner]
-
-[sequence diagram - command runner]: ../../_images/development/contributing/software_technical_details/cmd_runner_sequence_diagram.drawio.png
+<iframe frameborder="0" style="width:100%;height:350px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=xViBYGax6CRM-3lJNWmd#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 From the sequence diagram, you could observe that function ``dispatch_command_processor`` would keep getting the correct
 instances of ``CommandProcessor`` to run current command line.
