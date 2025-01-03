@@ -7,9 +7,7 @@ All codes belong to here section, they all are responsible for **defining the co
 
 ## UML
 
-![software architecture - command line options]
-
-[software architecture - command line options]: ../../_images/development/contributing/software_technical_details/cmd_options_software_architecture.drawio.png
+<iframe frameborder="0" style="width:100%;height:800px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=b7Q_UegN4KtkyAv_nRkj#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 The software architecture here feature apply is mostly same as previous one section [Command line processors](#uml_1).
 
