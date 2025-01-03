@@ -5,9 +5,7 @@ The entry point of **_PyMock-Server_** command line tool. Its actually entry poi
 
 ## UML
 
-![software architecture - command runner]
-
-[software architecture - command runner]: ../../_images/development/contributing/software_technical_details/cmd_runner_software_architecture.drawio.png
+<iframe frameborder="0" style="width:100%;height:573px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=MX22taNxn-K2Fd3PBEBv#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 * About the function which would be run as entry point ``run``, it's a running logic of object ``CommandRunner``.
 * Object ``CommandRunner`` would keep instance of ``ArgumentParser`` and ``CommandProcessor`` to parse command line and run
