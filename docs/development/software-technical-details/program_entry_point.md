@@ -30,9 +30,7 @@ diagram to explain that:
 
 * Activity sequence diagram for getting ``CommandProcessor``
 
-![activity sequence diagram - command runner]
-
-[activity sequence diagram - command runner]: ../../_images/development/contributing/software_technical_details/cmd_runner_activity_sequence_diagram.drawio.png
+<iframe frameborder="0" style="width:70%;height:700px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=OGFfPSg3NHsL9dp7TJ5e#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 In short, function ``dispatch_command_processor`` would iterate all instances of ``CommandProcessor`` to find the one which
 is responsible for current command line.
