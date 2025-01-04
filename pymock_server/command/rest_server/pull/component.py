@@ -8,7 +8,7 @@ from pymock_server._utils.api_client import URLLibHTTPClient
 from pymock_server.command._base.component import BaseSubCmdComponent
 from pymock_server.command._common.component import SavingConfigComponent
 from pymock_server.model import BaseAPIDocumentConfig, deserialize_api_doc_config
-from pymock_server.model.cmd_args import SubcmdPullArguments
+from pymock_server.model.command.rest_server.cmd_args import SubcmdPullArguments
 
 logger = logging.getLogger(__name__)
 

@@ -8,12 +8,7 @@ from argparse import Namespace
 from typing import Optional
 
 from pymock_server.exceptions import NotSupportAPIDocumentVersion
-
-from .api_config import APIConfig, MockAPIs
-from .api_config.apis import HTTP, APIParameter, HTTPRequest, HTTPResponse, MockAPI
-from .api_config.base import BaseConfig
-from .api_config.template import TemplateConfig
-from .cmd_args import (
+from pymock_server.model.command.rest_server.cmd_args import (
     DeserializeParsedArgs,
     ParserArguments,
     SubcmdAddArguments,
@@ -23,6 +18,11 @@ from .cmd_args import (
     SubcmdRunArguments,
     SubcmdSampleArguments,
 )
+
+from .api_config import APIConfig, MockAPIs
+from .api_config.apis import HTTP, APIParameter, HTTPRequest, HTTPResponse, MockAPI
+from .api_config.base import BaseConfig
+from .api_config.template import TemplateConfig
 from .rest_api_doc_config.config import (
     BaseAPIDocumentConfig,
     OpenAPIDocumentConfig,

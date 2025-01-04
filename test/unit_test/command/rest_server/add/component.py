@@ -9,7 +9,7 @@ from pymock_server.command._common.component import SavingConfigComponent
 from pymock_server.command.rest_server.add.component import SubCmdAddComponent
 from pymock_server.model import generate_empty_config
 from pymock_server.model.api_config.apis import ResponseStrategy
-from pymock_server.model.cmd_args import SubcmdAddArguments
+from pymock_server.model.command.rest_server.cmd_args import SubcmdAddArguments
 from pymock_server.model.subcmd_common import SysArg
 
 # isort: off

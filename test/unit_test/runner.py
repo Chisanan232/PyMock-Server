@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_server.model.cmd_args import ParserArguments
+from pymock_server.model.command.rest_server.cmd_args import ParserArguments
 from pymock_server.model.subcmd_common import SysArg
 from pymock_server.runner import CommandRunner, run
 

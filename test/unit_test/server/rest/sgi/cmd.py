@@ -1,12 +1,11 @@
 import re
 from abc import ABCMeta, abstractmethod
-from test._values import _Bind_Host_And_Port, _Log_Level, _Test_Config, _Workers_Amount
 from typing import Generic, Optional, Type, TypeVar
 from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_server.model.cmd_args import SubcmdRunArguments
+from pymock_server.model.command.rest_server.cmd_args import SubcmdRunArguments
 from pymock_server.model.subcmd_common import SysArg
 from pymock_server.server.rest.sgi._model import Command, CommandOptions
 from pymock_server.server.rest.sgi.cmd import ASGIServer, BaseSGIServer, WSGIServer

@@ -8,7 +8,7 @@ import pytest
 
 from pymock_server._utils.file import Format
 from pymock_server.model._sample import SampleType
-from pymock_server.model.cmd_args import (
+from pymock_server.model.command.rest_server.cmd_args import (
     DeserializeParsedArgs,
     SubcmdAddArguments,
     SubcmdCheckArguments,
