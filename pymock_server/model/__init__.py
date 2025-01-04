@@ -4,7 +4,6 @@ content ...
 """
 
 import pathlib
-from argparse import Namespace
 from typing import Optional
 
 from pymock_server.exceptions import NotSupportAPIDocumentVersion
@@ -23,6 +22,7 @@ from .api_config import APIConfig, MockAPIs
 from .api_config.apis import HTTP, APIParameter, HTTPRequest, HTTPResponse, MockAPI
 from .api_config.base import BaseConfig
 from .api_config.template import TemplateConfig
+from .command.rest_server import RestServerCliArgsDeserialization
 from .rest_api_doc_config.config import (
     BaseAPIDocumentConfig,
     OpenAPIDocumentConfig,
@@ -33,83 +33,7 @@ from .rest_api_doc_config.version import OpenAPIVersion
 
 
 class deserialize_args:
-    @classmethod
-    def subcmd_run(cls, args: Namespace) -> SubcmdRunArguments:
-        """Deserialize the object *argparse.Namespace* to *ParserArguments*.
-
-        Args:
-            args (Namespace): The arguments which be parsed from current command line.
-
-        Returns:
-            A *ParserArguments* type object.
-
-        """
-        return DeserializeParsedArgs.subcommand_run(args)
-
-    @classmethod
-    def subcmd_add(cls, args: Namespace) -> SubcmdAddArguments:
-        """Deserialize the object *argparse.Namespace* to *ParserArguments*.
-
-        Args:
-            args (Namespace): The arguments which be parsed from current command line.
-
-        Returns:
-            A *ParserArguments* type object.
-
-        """
-        return DeserializeParsedArgs.subcommand_add(args)
-
-    @classmethod
-    def subcmd_check(cls, args: Namespace) -> SubcmdCheckArguments:
-        """Deserialize the object *argparse.Namespace* to *ParserArguments*.
-
-        Args:
-            args (Namespace): The arguments which be parsed from current command line.
-
-        Returns:
-            A *ParserArguments* type object.
-
-        """
-        return DeserializeParsedArgs.subcommand_check(args)
-
-    @classmethod
-    def subcmd_get(cls, args: Namespace) -> SubcmdGetArguments:
-        """Deserialize the object *argparse.Namespace* to *ParserArguments*.
-
-        Args:
-            args (Namespace): The arguments which be parsed from current command line.
-
-        Returns:
-            A *ParserArguments* type object.
-
-        """
-        return DeserializeParsedArgs.subcommand_get(args)
-
-    @classmethod
-    def subcmd_sample(cls, args: Namespace) -> SubcmdSampleArguments:
-        """Deserialize the object *argparse.Namespace* to *ParserArguments*.
-
-        Args:
-            args (Namespace): The arguments which be parsed from current command line.
-
-        Returns:
-            A *ParserArguments* type object.
-
-        """
-        return DeserializeParsedArgs.subcommand_sample(args)
-
-    @classmethod
-    def subcmd_pull(cls, args: Namespace) -> SubcmdPullArguments:
-        """Deserialize the object *argparse.Namespace* to *ParserArguments*.
-
-        Args:
-            args (Namespace): The arguments which be parsed from current command line.
-
-        Returns:
-            A *ParserArguments* type object.
-
-        """
-        return DeserializeParsedArgs.subcommand_pull(args)
+    cli_rest_server: RestServerCliArgsDeserialization = RestServerCliArgsDeserialization()
 
 
 def deserialize_api_doc_config(data: dict) -> BaseAPIDocumentConfig:

@@ -19,4 +19,4 @@ class SubCmdAdd(BaseCommandProcessor):
         return SubCmdAddComponent()
 
     def _parse_process(self, args: Namespace) -> SubcmdAddArguments:
-        return deserialize_args.subcmd_add(args)
+        return deserialize_args.cli_rest_server.subcmd_add(args)

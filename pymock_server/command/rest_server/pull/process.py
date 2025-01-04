@@ -19,4 +19,4 @@ class SubCmdPull(BaseCommandProcessor):
         return SubCmdPullComponent()
 
     def _parse_process(self, args: Namespace) -> SubcmdPullArguments:
-        return deserialize_args.subcmd_pull(args)
+        return deserialize_args.cli_rest_server.subcmd_pull(args)

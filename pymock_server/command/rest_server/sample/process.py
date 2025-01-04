@@ -24,7 +24,7 @@ class SubCmdSample(BaseCommandProcessor):
 
     def _parse_process(self, args: Namespace) -> SubcmdSampleArguments:
         try:
-            return deserialize_args.subcmd_sample(args)
+            return deserialize_args.cli_rest_server.subcmd_sample(args)
         except KeyError:
             logger.error(f"❌  Invalid value of option *--sample-config-type*: {args.sample_config_type}.")
             sys.exit(1)

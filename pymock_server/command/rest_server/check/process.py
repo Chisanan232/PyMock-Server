@@ -19,4 +19,4 @@ class SubCmdCheck(BaseCommandProcessor):
         return SubCmdCheckComponent()
 
     def _parse_process(self, args: Namespace) -> SubcmdCheckArguments:
-        return deserialize_args.subcmd_check(args)
+        return deserialize_args.cli_rest_server.subcmd_check(args)

@@ -48,7 +48,7 @@ def test_deserialize_subcommand_run_args(mock_parser_arguments: Mock):
         "log_level": _Log_Level.value,
     }
     namespace = Namespace(**namespace_args)
-    deserialize_args.subcmd_run(namespace)
+    deserialize_args.cli_rest_server.subcmd_run(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
@@ -61,7 +61,7 @@ def test_deserialize_subcommand_add_args(mock_parser_arguments: Mock):
         "file_path": _Sample_File_Path,
     }
     namespace = Namespace(**namespace_args)
-    deserialize_args.subcmd_add(namespace)
+    deserialize_args.cli_rest_server.subcmd_add(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
@@ -72,7 +72,7 @@ def test_deserialize_subcommand_check_args(mock_parser_arguments: Mock):
         "config_path": _Test_Config,
     }
     namespace = Namespace(**namespace_args)
-    deserialize_args.subcmd_check(namespace)
+    deserialize_args.cli_rest_server.subcmd_check(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
@@ -87,7 +87,7 @@ def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
         "check_api_parameters": True,
     }
     namespace = Namespace(**namespace_args)
-    deserialize_args.subcmd_get(namespace)
+    deserialize_args.cli_rest_server.subcmd_get(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
@@ -100,7 +100,7 @@ def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
         "config_path": _Test_Config,
     }
     namespace = Namespace(**namespace_args)
-    deserialize_args.subcmd_pull(namespace)
+    deserialize_args.cli_rest_server.subcmd_pull(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
 
 

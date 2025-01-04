@@ -19,4 +19,4 @@ class SubCmdGet(BaseCommandProcessor):
         return SubCmdGetComponent()
 
     def _parse_process(self, args: Namespace) -> SubcmdGetArguments:
-        return deserialize_args.subcmd_get(args)
+        return deserialize_args.cli_rest_server.subcmd_get(args)

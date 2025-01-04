@@ -19,4 +19,4 @@ class SubCmdRun(BaseCommandProcessor):
         return SubCmdRunComponent()
 
     def _parse_process(self, args: Namespace) -> SubcmdRunArguments:
-        return deserialize_args.subcmd_run(args)
+        return deserialize_args.cli_rest_server.subcmd_run(args)
