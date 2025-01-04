@@ -5,7 +5,7 @@ import pytest
 
 from pymock_server._utils.file.operation import YAML
 from pymock_server.command.rest_server.sample.component import SubCmdSampleComponent
-from pymock_server.model._sample import SampleType
+from pymock_server.model.command.rest_server._sample import SampleType
 from pymock_server.model.command.rest_server.cmd_args import SubcmdSampleArguments
 from pymock_server.model.subcmd_common import SysArg
 

@@ -22,7 +22,7 @@ from pymock_server._utils import YAML
 from pymock_server.command.rest_server.sample.process import SubCmdSample
 from pymock_server.command.subcommand import SubCommandLine
 from pymock_server.model import SubcmdSampleArguments
-from pymock_server.model._sample import SampleType
+from pymock_server.model.command.rest_server._sample import SampleType
 from pymock_server.model.subcmd_common import SysArg
 
 

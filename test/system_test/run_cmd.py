@@ -10,8 +10,11 @@ from typing import Optional
 import pytest
 
 from pymock_server._utils.file.operation import YAML
-from pymock_server.model._sample import Mocked_APIs, Sample_Config_Value
 from pymock_server.model.api_config.apis import ResponseStrategy
+from pymock_server.model.command.rest_server._sample import (
+    Mocked_APIs,
+    Sample_Config_Value,
+)
 
 # isort: off
 from test._file_utils import MockAPI_Config_Yaml_Path, yaml_factory
