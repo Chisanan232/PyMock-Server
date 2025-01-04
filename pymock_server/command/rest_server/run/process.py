@@ -1,5 +1,4 @@
-from argparse import ArgumentParser
-from typing import List, Optional
+from argparse import Namespace
 
 from pymock_server.command._base.process import BaseCommandProcessor
 from pymock_server.command.subcommand import SubCommandLine
@@ -19,5 +18,5 @@ class SubCmdRun(BaseCommandProcessor):
     def _subcmd_component(self) -> SubCmdRunComponent:
         return SubCmdRunComponent()
 
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdRunArguments:
-        return deserialize_args.subcmd_run(self._parse_cmd_arguments(parser, cmd_args))
+    def _parse_process(self, args: Namespace) -> SubcmdRunArguments:
+        return deserialize_args.subcmd_run(args)

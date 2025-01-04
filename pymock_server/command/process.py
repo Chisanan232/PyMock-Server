@@ -1,4 +1,4 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from typing import List, Optional
 
 from pymock_server.model import ParserArguments
@@ -53,5 +53,5 @@ class NoSubCmd(BaseCommandProcessor):
     def _subcmd_component(self) -> NoSubCmdComponent:
         return NoSubCmdComponent()
 
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> ParserArguments:
-        return self._parse_cmd_arguments(parser, cmd_args)
+    def _parse_process(self, args: Namespace) -> Namespace:
+        return args

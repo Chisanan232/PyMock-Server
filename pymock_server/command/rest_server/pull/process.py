@@ -1,5 +1,4 @@
-from argparse import ArgumentParser
-from typing import List, Optional
+from argparse import Namespace
 
 from pymock_server.command._base.process import BaseCommandProcessor
 from pymock_server.command.subcommand import SubCommandLine
@@ -19,5 +18,5 @@ class SubCmdPull(BaseCommandProcessor):
     def _subcmd_component(self) -> SubCmdPullComponent:
         return SubCmdPullComponent()
 
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdPullArguments:
-        return deserialize_args.subcmd_pull(self._parse_cmd_arguments(parser, cmd_args))
+    def _parse_process(self, args: Namespace) -> SubcmdPullArguments:
+        return deserialize_args.subcmd_pull(args)

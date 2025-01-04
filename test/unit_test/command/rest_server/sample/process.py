@@ -153,10 +153,7 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
     def test__parse_process_with_invalid_type(self, cmd_ps: SubCmdSample):
         cmd_arg_namespace = self._given_cmd_args_namespace()
         cmd_arg_namespace.sample_config_type = "invalid_type"
-        parser = Mock()
         cmd_args = Mock()
-        with patch.object(cmd_ps, "_parse_cmd_arguments", return_value=cmd_arg_namespace) as mock_parse_cmd_arguments:
-            with pytest.raises(SystemExit) as exc_info:
-                cmd_ps._parse_process(parser, cmd_args)
-            mock_parse_cmd_arguments.assert_called_once_with(parser, cmd_args)
-            assert str(exc_info.value) == "1"
+        with pytest.raises(SystemExit) as exc_info:
+            cmd_ps._parse_process(cmd_args)
+        assert str(exc_info.value) == "1"
