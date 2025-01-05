@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 
 from pymock_server.command.rest_server.run.component import SubCmdRunComponent
-from pymock_server.model.cmd_args import SubcmdRunArguments
+from pymock_server.model.command.rest_server.cmd_args import SubcmdRunArguments
 from pymock_server.model.subcmd_common import SysArg
 
 # isort: off

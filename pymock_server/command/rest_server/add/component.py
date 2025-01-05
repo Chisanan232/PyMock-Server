@@ -7,7 +7,7 @@ from pymock_server.command._base.component import BaseSubCmdComponent
 from pymock_server.command._common.component import SavingConfigComponent
 from pymock_server.model import APIConfig, MockAPI, generate_empty_config, load_config
 from pymock_server.model.api_config.apis.response_strategy import ResponseStrategy
-from pymock_server.model.cmd_args import SubcmdAddArguments
+from pymock_server.model.command.rest_server.cmd_args import SubcmdAddArguments
 
 logger = logging.getLogger(__name__)
 

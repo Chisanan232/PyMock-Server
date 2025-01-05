@@ -10,7 +10,7 @@ from typing import Dict, Optional, cast
 from pymock_server._utils.file import Format
 from pymock_server.command._base.component import BaseSubCmdComponent
 from pymock_server.model import MockAPI, load_config
-from pymock_server.model.cmd_args import SubcmdGetArguments
+from pymock_server.model.command.rest_server.cmd_args import SubcmdGetArguments
 
 logger = logging.getLogger(__name__)
 

@@ -5,7 +5,9 @@ from typing import Any, Dict, Optional
 from pymock_server._utils import YAML
 from pymock_server.model.api_config import APIConfig
 from pymock_server.model.api_config.template._divide import DivideStrategy
-from pymock_server.model.cmd_args import _BaseSubCmdArgumentsSavingConfig
+from pymock_server.model.command.rest_server.cmd_args import (
+    _BaseSubCmdArgumentsSavingConfig,
+)
 
 logger = logging.getLogger(__name__)
 
