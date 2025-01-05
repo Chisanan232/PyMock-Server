@@ -83,7 +83,7 @@ class BaseSubCommand(CommandOption):
     )
 
 
-BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (CommandOption,), {})
+BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (BaseSubCommand,), {})
 
 
 class Version(BaseCmdOption):
