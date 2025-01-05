@@ -23,7 +23,7 @@ from pymock_server.command.rest_server.get.component import (
     _BaseDisplayFormat,
 )
 from pymock_server.model import MockAPI
-from pymock_server.model.cmd_args import SubcmdGetArguments
+from pymock_server.model.command.rest_server.cmd_args import SubcmdGetArguments
 from pymock_server.model.subcmd_common import SysArg
 
 # isort: off

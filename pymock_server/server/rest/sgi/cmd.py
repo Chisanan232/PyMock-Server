@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from pymock_server.model.cmd_args import SubcmdRunArguments
+from pymock_server.model.command.rest_server.cmd_args import SubcmdRunArguments
 
 from ._model import Command, CommandOptions
 from .cmdoption import ASGICmdOption, BaseCommandOption, WSGICmdOption

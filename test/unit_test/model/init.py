@@ -7,8 +7,12 @@ import pytest
 from pymock_server.exceptions import NotSupportAPIDocumentVersion
 from pymock_server.model import (
     BaseAPIDocumentConfig,
-    DeserializeParsedArgs,
     OpenAPIDocumentConfig,
+    SubcmdAddArguments,
+    SubcmdCheckArguments,
+    SubcmdGetArguments,
+    SubcmdPullArguments,
+    SubcmdRunArguments,
     SwaggerAPIDocumentConfig,
     deserialize_api_doc_config,
     deserialize_args,
@@ -37,7 +41,7 @@ from test._values import (
 # isort: on
 
 
-@patch.object(DeserializeParsedArgs, "subcommand_run")
+@patch.object(SubcmdRunArguments, "deserialize")
 def test_deserialize_subcommand_run_args(mock_parser_arguments: Mock):
     namespace_args = {
         "subcommand": _Test_SubCommand_Run,
@@ -48,11 +52,11 @@ def test_deserialize_subcommand_run_args(mock_parser_arguments: Mock):
         "log_level": _Log_Level.value,
     }
     namespace = Namespace(**namespace_args)
-    deserialize_args.subcmd_run(namespace)
+    deserialize_args.cli_rest_server.subcmd_run(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
-@patch.object(DeserializeParsedArgs, "subcommand_add")
+@patch.object(SubcmdAddArguments, "deserialize")
 def test_deserialize_subcommand_add_args(mock_parser_arguments: Mock):
     namespace_args = {
         "subcommand": _Test_SubCommand_Add,
@@ -61,22 +65,22 @@ def test_deserialize_subcommand_add_args(mock_parser_arguments: Mock):
         "file_path": _Sample_File_Path,
     }
     namespace = Namespace(**namespace_args)
-    deserialize_args.subcmd_add(namespace)
+    deserialize_args.cli_rest_server.subcmd_add(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
-@patch.object(DeserializeParsedArgs, "subcommand_check")
+@patch.object(SubcmdCheckArguments, "deserialize")
 def test_deserialize_subcommand_check_args(mock_parser_arguments: Mock):
     namespace_args = {
         "subcommand": _Test_SubCommand_Check,
         "config_path": _Test_Config,
     }
     namespace = Namespace(**namespace_args)
-    deserialize_args.subcmd_check(namespace)
+    deserialize_args.cli_rest_server.subcmd_check(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
-@patch.object(DeserializeParsedArgs, "subcommand_get")
+@patch.object(SubcmdGetArguments, "deserialize")
 def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
     namespace_args = {
         "subcommand": _Test_SubCommand_Get,
@@ -87,12 +91,12 @@ def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
         "check_api_parameters": True,
     }
     namespace = Namespace(**namespace_args)
-    deserialize_args.subcmd_get(namespace)
+    deserialize_args.cli_rest_server.subcmd_get(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
-@patch.object(DeserializeParsedArgs, "subcommand_pull")
-def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
+@patch.object(SubcmdPullArguments, "deserialize")
+def test_deserialize_subcommand_pull_args(mock_parser_arguments: Mock):
     namespace_args = {
         "subcommand": _Test_SubCommand_Pull,
         "source": _API_Doc_Source,
@@ -100,7 +104,7 @@ def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
         "config_path": _Test_Config,
     }
     namespace = Namespace(**namespace_args)
-    deserialize_args.subcmd_pull(namespace)
+    deserialize_args.cli_rest_server.subcmd_pull(namespace)
     mock_parser_arguments.assert_called_once_with(namespace)
 
 

@@ -21,6 +21,7 @@ from pymock_server.model.subcmd_common import SysArg
 from pymock_server.server import Command, CommandOptions, WSGIServer
 
 # isort: off
+from test._dummy import DummyParserArguments
 from test._values import (
     SubCommand,
     _Bind_Host_And_Port,
@@ -109,7 +110,7 @@ class TestSubCmdProcessChain:
         cmd_processor._is_responsible = MagicMock(return_value=chk_result)
         cmd_processor._run = MagicMock()
 
-        arg = ParserArguments(subparser_structure=_Fake_SubCmd_Obj)
+        arg = DummyParserArguments(subparser_structure=_Fake_SubCmd_Obj)
         cmd_parser = Mock()
         cmd_processor.process(parser=cmd_parser, args=arg)
 
@@ -156,7 +157,7 @@ class TestNoSubCmd(BaseCommandProcessorTestSpec):
             command.run.assert_not_called()
 
     def _given_parser_args(self) -> ParserArguments:
-        return ParserArguments(
+        return DummyParserArguments(
             subparser_structure=SysArg.parse([]),
         )
 

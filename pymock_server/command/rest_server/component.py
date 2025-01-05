@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 from pymock_server.command._base.component import BaseSubCmdComponent
 from pymock_server.command.subcommand import SubCommandLine
-from pymock_server.model.cmd_args import ParserArguments
+from pymock_server.model.command.rest_server.cmd_args import ParserArguments
 
 
 class SubCmdRestServerComponent(BaseSubCmdComponent):

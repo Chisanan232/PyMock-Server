@@ -1,7 +1,6 @@
 import logging
 import sys
-from argparse import ArgumentParser
-from typing import List, Optional
+from argparse import Namespace
 
 from pymock_server.command._base.process import BaseCommandProcessor
 from pymock_server.command.subcommand import SubCommandLine
@@ -23,10 +22,9 @@ class SubCmdSample(BaseCommandProcessor):
     def _subcmd_component(self) -> SubCmdSampleComponent:
         return SubCmdSampleComponent()
 
-    def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdSampleArguments:
-        cmd_options = self._parse_cmd_arguments(parser, cmd_args)
+    def _parse_process(self, args: Namespace) -> SubcmdSampleArguments:
         try:
-            return deserialize_args.subcmd_sample(cmd_options)
+            return deserialize_args.cli_rest_server.subcmd_sample(args)
         except KeyError:
-            logger.error(f"❌  Invalid value of option *--sample-config-type*: {cmd_options.sample_config_type}.")
+            logger.error(f"❌  Invalid value of option *--sample-config-type*: {args.sample_config_type}.")
             sys.exit(1)
