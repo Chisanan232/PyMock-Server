@@ -1,7 +1,6 @@
 from argparse import Namespace
 
 from .cmd_args import (
-    DeserializeParsedArgs,
     ParserArguments,
     SubcmdAddArguments,
     SubcmdCheckArguments,

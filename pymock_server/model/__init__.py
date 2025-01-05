@@ -8,7 +8,6 @@ from typing import Optional
 
 from pymock_server.exceptions import NotSupportAPIDocumentVersion
 from pymock_server.model.command.rest_server.cmd_args import (
-    DeserializeParsedArgs,
     ParserArguments,
     SubcmdAddArguments,
     SubcmdCheckArguments,
