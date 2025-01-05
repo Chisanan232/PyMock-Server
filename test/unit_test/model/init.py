@@ -7,8 +7,12 @@ import pytest
 from pymock_server.exceptions import NotSupportAPIDocumentVersion
 from pymock_server.model import (
     BaseAPIDocumentConfig,
-    DeserializeParsedArgs,
     OpenAPIDocumentConfig,
+    SubcmdAddArguments,
+    SubcmdCheckArguments,
+    SubcmdGetArguments,
+    SubcmdPullArguments,
+    SubcmdRunArguments,
     SwaggerAPIDocumentConfig,
     deserialize_api_doc_config,
     deserialize_args,
@@ -37,7 +41,7 @@ from test._values import (
 # isort: on
 
 
-@patch.object(DeserializeParsedArgs, "subcommand_run")
+@patch.object(SubcmdRunArguments, "deserialize")
 def test_deserialize_subcommand_run_args(mock_parser_arguments: Mock):
     namespace_args = {
         "subcommand": _Test_SubCommand_Run,
@@ -52,7 +56,7 @@ def test_deserialize_subcommand_run_args(mock_parser_arguments: Mock):
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
-@patch.object(DeserializeParsedArgs, "subcommand_add")
+@patch.object(SubcmdAddArguments, "deserialize")
 def test_deserialize_subcommand_add_args(mock_parser_arguments: Mock):
     namespace_args = {
         "subcommand": _Test_SubCommand_Add,
@@ -65,7 +69,7 @@ def test_deserialize_subcommand_add_args(mock_parser_arguments: Mock):
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
-@patch.object(DeserializeParsedArgs, "subcommand_check")
+@patch.object(SubcmdCheckArguments, "deserialize")
 def test_deserialize_subcommand_check_args(mock_parser_arguments: Mock):
     namespace_args = {
         "subcommand": _Test_SubCommand_Check,
@@ -76,7 +80,7 @@ def test_deserialize_subcommand_check_args(mock_parser_arguments: Mock):
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
-@patch.object(DeserializeParsedArgs, "subcommand_get")
+@patch.object(SubcmdGetArguments, "deserialize")
 def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
     namespace_args = {
         "subcommand": _Test_SubCommand_Get,
@@ -91,8 +95,8 @@ def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
     mock_parser_arguments.assert_called_once_with(namespace)
 
 
-@patch.object(DeserializeParsedArgs, "subcommand_pull")
-def test_deserialize_subcommand_get_args(mock_parser_arguments: Mock):
+@patch.object(SubcmdPullArguments, "deserialize")
+def test_deserialize_subcommand_pull_args(mock_parser_arguments: Mock):
     namespace_args = {
         "subcommand": _Test_SubCommand_Pull,
         "source": _API_Doc_Source,

@@ -25,7 +25,7 @@ class RestServerCliArgsDeserialization:
             A *ParserArguments* type object.
 
         """
-        return DeserializeParsedArgs.subcommand_run(args)
+        return SubcmdRunArguments.deserialize(args)
 
     @classmethod
     def subcmd_add(cls, args: Namespace) -> SubcmdAddArguments:
@@ -38,7 +38,7 @@ class RestServerCliArgsDeserialization:
             A *ParserArguments* type object.
 
         """
-        return DeserializeParsedArgs.subcommand_add(args)
+        return SubcmdAddArguments.deserialize(args)
 
     @classmethod
     def subcmd_check(cls, args: Namespace) -> SubcmdCheckArguments:
@@ -51,7 +51,7 @@ class RestServerCliArgsDeserialization:
             A *ParserArguments* type object.
 
         """
-        return DeserializeParsedArgs.subcommand_check(args)
+        return SubcmdCheckArguments.deserialize(args)
 
     @classmethod
     def subcmd_get(cls, args: Namespace) -> SubcmdGetArguments:
@@ -64,7 +64,7 @@ class RestServerCliArgsDeserialization:
             A *ParserArguments* type object.
 
         """
-        return DeserializeParsedArgs.subcommand_get(args)
+        return SubcmdGetArguments.deserialize(args)
 
     @classmethod
     def subcmd_sample(cls, args: Namespace) -> SubcmdSampleArguments:
@@ -77,7 +77,7 @@ class RestServerCliArgsDeserialization:
             A *ParserArguments* type object.
 
         """
-        return DeserializeParsedArgs.subcommand_sample(args)
+        return SubcmdSampleArguments.deserialize(args)
 
     @classmethod
     def subcmd_pull(cls, args: Namespace) -> SubcmdPullArguments:
@@ -90,4 +90,4 @@ class RestServerCliArgsDeserialization:
             A *ParserArguments* type object.
 
         """
-        return DeserializeParsedArgs.subcommand_pull(args)
+        return SubcmdPullArguments.deserialize(args)
