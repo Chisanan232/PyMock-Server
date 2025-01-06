@@ -58,6 +58,11 @@ theme:
   icon:
     logo: logo
 
+# Plugins
+plugins:
+  - mkdocstrings:
+      default_handler: python
+
 # Extensions
 markdown_extensions:
   - abbr
@@ -146,6 +151,7 @@ nav:
     - Software technical details:
       - development/software-technical-details/index.md
       - CLI - Program entry point: development/software-technical-details/program_entry_point.md
+      - CLI - command line: development/software-technical-details/command_line.md
       - CLI - processor: development/software-technical-details/command_line_processor.md
       - CLI - subcommand line & options: development/software-technical-details/command_line_options.md
       - Functional - file operation: development/software-technical-details/file_operation.md
