@@ -62,6 +62,9 @@ all = [
 [project.urls]
 Homepage = "https://github.com/Chisanan232/PyMock-Server"
 Documentation = "https://chisanan232.github.io/PyMock-Server/"
+Repository = "https://github.com/Chisanan232/PyMock-Server"
+Changelog = "https://chisanan232.github.io/PyMock-Server/release_note/"
+"Project Management" = "https://app.clickup.com/9018752317/v/f/90183126979/90182605225"
 
 [project.scripts]
 mock = "pymock_server.runner:run"
