@@ -2,14 +2,15 @@
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry]
+[project]
 name = "PyMock-Server"
 version = "0.2.0"
 description = "🕸🤖👺 A Python tool to mock server, e.g., API server, easily and humanly without any coding."
-authors = ["Liu, Bryant <chi10211201@cycu.org.tw>"]
-license = "MIT"
+authors = [
+    {name = "Liu, Bryant", email = "chi10211201@cycu.org.tw"}
+]
+license = {text = "MIT"}
 readme = "README.md"
-packages = [{include = "pymock_server"}]
 keywords = ["mock", "API", "mock server", "mock API server", "web", "server"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -30,18 +31,39 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
-homepage = "https://github.com/Chisanan232/PyMock-Server"
-documentation = "https://chisanan232.github.io/PyMock-Server/"
+requires-python = "^3.8"
+dependencies = [
+    "PyYAML (>=6.0)",
+]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-PyYAML = {version = "^6.0", extras = ["mini", "all"]}
-# Extra dependency of web framework *Flask* with WSGI server *Gunicorn*
-Flask = {version = "^3.0.2", extras = ["flask", "all"]}
-gunicorn = {version = ">=21.2,<24.0", extras = ["flask", "all"]}
-# Extra dependency of web framework *FastAPI* with ASGI server *Uvicorn*
-fastapi = {version = ">=0.110,<0.116", extras = ["fastapi", "all"]}
-uvicorn = {version = ">=0.29,<0.34", extras = ["fastapi", "all"]}
+[project.optional-dependencies]
+mini = [
+    "PyYAML (>=6.0)",
+]
+fastapi = [
+    "PyYAML (>=6.0)",
+    "fastapi (>=0.110,<0.116)",
+    "uvicorn (>=0.29,<0.34)",
+]
+flask = [
+    "PyYAML (>=6.0)",
+    "Flask (>=3.0.2)",
+    "gunicorn (>=21.2,<24.0)",
+]
+all = [
+    "PyYAML (>=6.0)",
+    "fastapi (>=0.110,<0.116)",
+    "uvicorn (>=0.29,<0.34)",
+    "Flask (>=3.0.2)",
+    "gunicorn (>=21.2,<24.0)",
+]
+
+[project.urls]
+Homepage = "https://github.com/Chisanan232/PyMock-Server"
+Documentation = "https://chisanan232.github.io/PyMock-Server/"
+
+[project.scripts]
+mock = "pymock_server.runner:run"
 
 [tool.poetry.group.dev.dependencies]
 # Dependency for test
@@ -73,6 +95,3 @@ mkdocs-material = "^9.5.49"
 mkdocs-autorefs = "^1.0.1"
 mkdocstrings = ">=0.24.1,<0.27.0"
 mkdocstrings-python = "^1.9.0"
-
-[tool.poetry.scripts]
-mock = "pymock_server.runner:run"
