@@ -48,7 +48,7 @@ jobs:
       debug_mode: true
 
 
-  deploy_documentation:
+  deploy_docker:
     needs: check_version_info
     if: ${{ needs.check_version_info.outputs.python_release_version == 'Official-Release' }}
     runs-on: ubuntu-latest
