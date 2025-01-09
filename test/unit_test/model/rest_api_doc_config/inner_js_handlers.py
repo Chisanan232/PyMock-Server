@@ -54,9 +54,7 @@ class TestApiDocValueFormat:
             ("IPv6", ApiDocValueFormat.IPv6),
         ],
     )
-    def test_to_enum(
-        self, under_test_value: Union[str, ApiDocValueFormat.Int32], expected_value: ApiDocValueFormat.Int32
-    ):
+    def test_to_enum(self, under_test_value: Union[str, ApiDocValueFormat], expected_value: ApiDocValueFormat):
         assert ApiDocValueFormat.to_enum(under_test_value) is expected_value
 
     def test_to_enum_with_invalid_value(self):
