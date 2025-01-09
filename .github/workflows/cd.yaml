@@ -12,7 +12,7 @@ on:
 jobs:
   build_git-tag_and_create_github-release:
 #    name: Build git tag and GitHub release if it needs
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_build_git-tag_and_create_github-release.yaml@v6.1
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_build_git-tag_and_create_github-release.yaml@v7
     secrets:
       github_auth_token: ${{ secrets.GITHUB_TOKEN }}
     with:
@@ -24,7 +24,7 @@ jobs:
   push_python_pkg_to_pypi:
 #    name: Check about it could work finely by installing the Python package with setup.py file
     needs: build_git-tag_and_create_github-release
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_push_pypi.yaml@v6.1
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_push_pypi.yaml@v7
     with:
       build-type: poetry
       release-type: ${{ needs.build_git-tag_and_create_github-release.outputs.python_release_version }}
