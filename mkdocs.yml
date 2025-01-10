@@ -61,7 +61,15 @@ theme:
 # Plugins
 plugins:
   - mkdocstrings:
-      default_handler: python
+      handlers:
+        python:
+          options:
+            docstring_style: sphinx
+            docstring_section_style: spacy
+            docstring_options:
+              ignore_init_summary: true
+            merge_init_into_class: true
+            relative_crossrefs: true
 
 # Extensions
 markdown_extensions:
