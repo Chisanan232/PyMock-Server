@@ -8,6 +8,8 @@ All codes belong to here section, they all are responsible for **what thing woul
 
 <iframe frameborder="0" style="width:100%;height:600px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=p-yRdhPX9lBvFNy9WcaI#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
+The software architecture here feature apply is mostly same as previous one section [Command line](./command_line.md#uml).
+
 * It has 4 base classes:
     * ``MetaCommand`` [source code](https://github.com/Chisanan232/PyMock-Server/blob/master/pymock_server/command/_base/process.py#L39-L52)
 
@@ -35,23 +37,10 @@ to do if user run the command includes returning which component they should use
 * All subclasses, i.e., ``NoSubCmdComponent``, ``SubCmdRunComponent``, etc., extend ``BaseSubCmdComponent`` and implement the
 truly core logic of the sub-command line with its options.
 
-??? note "The great idea about **auto-register** refer to source code of project **_Gunicorn_**"
-
-    About the powerful design **auto-register** which has beautiful extension, it
-    refers to the module _config_ implementation of open source project **_Gunicorn_**.
-    Please refer to [its source code] if you have interesting in it.
-
-    [its source code]: https://github.com/benoitc/gunicorn/blob/master/gunicorn/config.py
-
 ## Workflow
 
-* Sequence diagram
-
-<iframe frameborder="0" style="width:100%;height:400px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=y4nP58FJjcgKiph7c4k3#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
-
-From above sequence diagram, it does auto-registration when initialize an object. It won't do something to iterate all objects
-and save them to list type object, it automates all things when you add one or more new subclasses which is responsible for new
-sub-command line.
+Because the software architecture of here section is mostly same with [Command line](./command_line.md#command-line), its
+workflow also could refer to its [workflow](./command_line.md#workflow).
 
 ## Extension
 
@@ -59,52 +48,45 @@ Here would demonstrate how to add one new sub-command processor in this software
 
 You'll have 3 things need to do:
 
-* Command line argument
+### Command line argument
 
 New sub-command line must have options. So you need to define which sub-command line options it has.
 
 ```python
-# In module pymock_server.model.cmd_args
+# In module pymock_server.model.command.rest_server.cmd_args
 
 @dataclass(frozen=True)
 class SubcmdNewProcessArguments(ParserArguments):
     arg_1: str
-```
-
-* Deserialization
-
-After defining new sub-command line's options, you should define how to deserialize it:
-
-```python
-# In module pymock_server.model.cmd_args
-
-class DeserializeParsedArgs:
-  
-    # ... some code
 
     @classmethod
-    def subcommand_new_process(cls, args: Namespace) -> SubcmdNewProcessArguments:
+    def deserialize(cls, args: Namespace) -> "SubcmdNewProcessArguments":
+        """
+        This is abstract method which you must to implement it about converting
+        *Namespace* object into the specific data model
+        """
         return SubcmdNewProcessArguments(
-            subparser_name=args.subcommand,
+            subparser_structure=ParserArguments.parse_subparser_cmd(args),
             arg_1=args.arg_1,
         )
 ```
 
-And also defining the utility function at module **_\_\_init\_\__**:
+If it's the subcommand line under command line ``mock rest-server``, and also defining the utility function at module
+**_\_\_init\_\__**:
 
 ```python
-# In module pymock_server.model.__init__
+# In module pymock_server.model.command.rest_server.__init__
 
-class deserialize_args:
+class RestServerCliArgsDeserialization:
   
     # ... some code
 
     @classmethod
     def subcmd_new_process(cls, args: Namespace) -> SubcmdNewProcessArguments:
-        return DeserializeParsedArgs.subcommand_new_process(args)
+        return SubcmdNewProcessArguments.deserialize(args)
 ```
 
-* SubCommand process
+### Command line process
 
 Now, it has sub-command line option data object and deserialization, we could implement what thing it should do.
 
@@ -112,6 +94,38 @@ Here, we have 2 choices to implement:
 
 1. Override the function ``_run`` directly.
 2. Add new class extends class ``BaseSubCmdComponent`` and implement property ``_subcmd_component``.
+
+!!! note "A existed subcommand line or new subcommand line?"
+
+    In **_PyMock-Server_** project modules file structure, each subcommand line
+    has their own sub-package and also has 3 necessary modules in the sub-package:
+    **_option_**, **_process_** and **_component_**.
+
+    * **_option_**
+
+        This module focus on what options it would have of the specific subcommand
+        line.
+
+    * **_process_**
+
+        This module controls how it should parse the subcommand line arguments and
+        what component it should use to handle the core logic of running the subcommand
+        line.
+
+    * **_component_**
+
+        This module is the core implementation about what thing it would do when user
+        runs the subcommand line with specific arguments.
+
+    So if you would add new subcommand line. Please remember its modules structure must
+    follows above rules and implement their own logic.
+
+    If it's subcommand line of another specific subcommand line, please remember implement
+    the base modules about above modules and let the new subcommand line extend the base
+    models. 
+
+    In this demonstration, you would need to add a new sub-package ``new_subcmd`` under
+    sub-package ``pymock_server.command``.
 
 Let's demonstrate all way to implement to you and explain their difference.
 
@@ -131,9 +145,7 @@ Let's demonstrate all way to implement to you and explain their difference.
           complex so that developers be more harder to manage or maintain it.
     
     ```python
-    # In module pymock_api.command.process
-    
-    # ... some code
+    # In module pymock_api.command.new_subcmd.process
     
     class SubCmdNewProcess(BaseCommandProcessor):
         def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdNewProcessArguments:
@@ -144,7 +156,7 @@ Let's demonstrate all way to implement to you and explain their difference.
             print(f"This is new sub-command line and get option *arg_1*: {args.arg_1}.")
     ```
 
-  2. Add new class extends class ``BaseSubCmdComponent`` and implement property ``_subcmd_component``.
+  2. Add new class extends class ``BaseSubCmdComponent`` and implement property ``_subcmd_component``. (this is also the recommended way to extend)
     
     Implement and manage the core logic in component layer. And the **_command.process_** module only needs to know which component
     object is responsible of this feature.
@@ -164,8 +176,6 @@ Let's demonstrate all way to implement to you and explain their difference.
 
     ```python
     # In module pymock_api.command.new_subcmd.component
-      
-    # ... some code
     
     class SubCmdNewProcessComponent(BaseSubCmdComponent):
         def process(self, args: SubcmdNewProcessArguments) -> None:
@@ -176,17 +186,15 @@ Let's demonstrate all way to implement to you and explain their difference.
     Remember that it needs to let command line processor know which component object it should use to run the sub-command line core logic:
 
     ```python
-    # In module pymock_api.command.process
-    
-    # ... some code
+    # In module pymock_api.command.new_subcmd.process
     
     class SubCmdNewProcess(BaseCommandProcessor):
         @property
         def _subcmd_component(self) -> SubCmdRunComponent:
             return SubCmdNewProcessComponent()
     
-        def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdNewProcessArguments:
-            return deserialize_args.subcmd_new_process(self._parse_cmd_arguments(parser, cmd_args))
+        def _parse_process(self, args: Namespace) -> SubcmdNewProcessArguments:
+            return deserialize_args.subcmd_new_process(args)
     ```
 
 We finish all things if we want to extend one new sub-command line! Let's try to run it:

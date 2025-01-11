@@ -7,37 +7,11 @@ All codes belong to here section, they all are responsible for **defining the co
 
 ## UML
 
-<iframe frameborder="0" style="width:100%;height:800px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=b7Q_UegN4KtkyAv_nRkj#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
-
-The software architecture here feature apply is mostly same as previous one section [Command line processors](#uml_1).
-
-* It has 3 base classes:
-    * ``MetaCommandOption``
-
-        It's a metaclass for instantiating base class. It would auto-register objects which extends the base class be instantiated
-        from this metaclass to list type data ``COMMAND_OPTIONS``. If it is sub-command, it also saves sub-command line string to
-        list type data ``SUBCOMMAND``.
-
-    * ``CommandOption`` (includes all subclasses of ``BaseSubCommand``)
-
-        It defines all attributes and functions for subclass to reuse or override to implement customize logic.
-
-    * ``BaseCmdOption``, ``BaseSubCmdRunOption``, etc.
-
-        This is the base class which should be extended by all subclasses. This object be instantiated by metaclass ``MetaCommandOption``
-        and general object ``CommandOption``.
-
-* Every sub-command has their own base class. For example, sub-command line ``run`` with ``BaseSubCmdRunOption``, ``config``
-with ``BaseSubCmdConfigOption`` and so on.
-* The list be used by function ``get_all_subcommands`` is variable ``SUBCOMMAND``.
-* The list be used by function ``make_options`` is variable ``COMMAND_OPTIONS``.
-* All subclasses, i.e., ``Version`` extends ``BaseCmdOption``, ``WebAppType`` extends ``BaseSubCmdRunOption``, ``ConfigPath``
-extends ``BaseSubCmdConfigOption``, etc., means the specific options under the sub-command line.
+About the software architecture of this feature is already be introduced. Please refer to section [Command line - UML](./command_line.md#uml).
 
 ## Workflow
 
-Because the software architecture of here section is mostly same with [Command line processors](#command-line-processors), its
-workflow also could refer to its [workflow](#workflow_1).
+About the software workflow details of this feature is already be introduced. Please refer to section [Command line - Workflow](./command_line.md#workflow).
 
 ## Extension
 
@@ -45,38 +19,42 @@ Here would demonstrate how to extend or add new sub-command feature.
 
 You'll have 4 things:
 
-* Add new attribute of data object **SubCommand**
+### Add new attribute of enum object **SubCommandLine**
 
-Object ``SubCommand`` is the standard for **_PyMock-Server_** to recognize which sub-command it has. So let's add one new sub-command
-line here:
+Enum object ``SubCommandLine`` is the standard for **_PyMock-Server_** to recognize which sub-command it has. So let's add 
+one new sub-command line here:
 
 ```python hl_lines="9"
-# In module pymock_server.command.options
+# In module pymock_server.command.subcommand
 
-@dataclass
-class SubCommand:
-    Base: str = "subcommand"
-    Run: str = "run"
-    Config: str = "config"
-    Check: str = "check"
+class SubCommandLine(Enum):
+
+    # other enum ...
+
     NewProcess: str = "new-ps"
 ```
 
-* Implement new class about subcommand ``new-ps``
+### Implement new class about subcommand ``new-ps``
 
 Add new class extends base class ``BaseSubCommand`` and set value at attribute ``sub_parser``.
 
 ```python
-# In module pymock_server.command.options
+# In module pymock_server.command.new_subcmd.options
 
 class SubCommandNewProcessOption(BaseSubCommand):
+    sub_cmd: SubCommandAttr = SubCommandAttr(
+        title=SubCommandSection.Base,
+        dest=SubCommandLine.Base,
+        description="",
+        help="",
+    )
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommand.NewProcess,
         help="New subcommand for demonstration,",
     )
 ```
 
-* Instantiate class with metaclass for subcommand ``new-ps``
+### Instantiate class with metaclass for subcommand ``new-ps``
 
 Instantiate a base class for adding options.
 
@@ -88,7 +66,7 @@ BaseSubCmdNewProcessOption: type = MetaCommandOption("BaseSubCmdNewProcessOption
 
 It would auto-register this sub-command line into ``SUBCOMMAND``. We have sub-command line ``new-ps``, let's add its options.
 
-* Extend the subcommand object to add its option(s)
+### Extend the subcommand object to add its option(s)
 
 Add new command option with extending ``BaseSubCmdNewProcessOption`` and set needed attributes in it:
 
