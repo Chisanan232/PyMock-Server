@@ -8,6 +8,8 @@ Here records all the CI workflows of this project runs.
 
 ## Pre-Commit CI
 
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Chisanan232/PyMock-Server/master.svg)](https://results.pre-commit.ci/latest/github/Chisanan232/PyMock-Server/master)
+
 * CI state
 
     Here's the state of [workflow](https://results.pre-commit.ci/latest/github/Chisanan232/PyMock-Server/master).
@@ -21,6 +23,8 @@ Here records all the CI workflows of this project runs.
     Doing some checking of Python code and YAML format configuration.
 
 ## PR Bot CI
+
+[![Bot PR](https://github.com/Chisanan232/PyMock-Server/actions/workflows/bot-pr.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/bot-pr.yaml)
 
 * CI state
 
@@ -42,6 +46,8 @@ Here records all the CI workflows of this project runs.
     the chores.
 
 ## Source code by PR bot CI
+
+[![Bot CI](https://github.com/Chisanan232/PyMock-Server/actions/workflows/bot-ci.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/bot-ci.yaml)
 
 * CI state
 
@@ -67,6 +73,11 @@ Here records all the CI workflows of this project runs.
 [pr bot ci]: ../../../_images/development/contributing/join_in_developing/bot_pr_ci.png
 
 ## Source code CI
+
+[![CI](https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci.yaml)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyMock-Server&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-Server)
+[![codecov](https://codecov.io/gh/Chisanan232/PyMock-Server/graph/badge.svg?token=r5HJxg9KhN)](https://codecov.io/gh/Chisanan232/PyMock-Server)
 
 * CI state
 
@@ -99,6 +110,8 @@ Here records all the CI workflows of this project runs.
 
 ## CD
 
+[![CD](https://github.com/Chisanan232/PyMock-Server/actions/workflows/cd.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/cd.yaml)
+
 * CI state
 
     Here's the state of [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/cd.yaml).
@@ -120,6 +133,8 @@ Here records all the CI workflows of this project runs.
 
 ## Docker CI
 
+[![docker](https://github.com/Chisanan232/PyMock-Server/actions/workflows/docker.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/docker.yaml)
+
 * CI state
 
     Here's the state of [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/docker.yaml).
@@ -135,6 +150,8 @@ Here records all the CI workflows of this project runs.
 [DockerHub]: https://hub.docker.com/repository/docker/chisanan232/pymock-server/general
 
 ## Documentation CI
+
+[![documentation](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml)
 
 * CI state
 
