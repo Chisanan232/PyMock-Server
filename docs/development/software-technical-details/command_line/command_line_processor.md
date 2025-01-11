@@ -97,28 +97,7 @@ Here, we have 2 choices to implement:
 
 !!! note "A existed subcommand line or new subcommand line?"
 
-    In **_PyMock-Server_** project modules file structure, each subcommand line
-    has their own sub-package and also has 3 necessary modules in the sub-package:
-    **_option_**, **_process_** and **_component_**.
-
-    * **_option_**
-
-        This module focus on what options it would have of the specific subcommand
-        line.
-
-    * **_process_**
-
-        This module controls how it should parse the subcommand line arguments and
-        what component it should use to handle the core logic of running the subcommand
-        line.
-
-    * **_component_**
-
-        This module is the core implementation about what thing it would do when user
-        runs the subcommand line with specific arguments.
-
-    So if you would add new subcommand line. Please remember its modules structure must
-    follows above rules and implement their own logic.
+    Please don't forget the module structure be mentioned in [index page](./index.md)
 
     If it's subcommand line of another specific subcommand line, please remember implement
     the base modules about above modules and let the new subcommand line extend the base
