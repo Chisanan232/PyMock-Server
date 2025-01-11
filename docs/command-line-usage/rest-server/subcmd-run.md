@@ -47,7 +47,7 @@ Set the host to bind with the web server.
 
 It receives a value about the host address which should includes IP address and port. Its default value is ``0.0.0.0:9672``.
 
-!!! note "Why the default port is **9672**?"
+!!! question "Why the default port is **9672**?"
 
     The port number could be divides into 2 parts: **96** and **72**. These 2 number mean an important thing in history:
     In **1996**, the NBA G.O.A.T Michael Jordan leaded the Chicago Bulls team won **72** games and won the NBA champion
