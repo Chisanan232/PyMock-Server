@@ -160,10 +160,10 @@ nav:
       - development/software-technical-details/index.md
       - About command line:
         - development/software-technical-details/command_line/index.md
-        - CLI - Program entry point: development/software-technical-details/command_line/program_entry_point.md
-        - CLI - command line: development/software-technical-details/command_line/command_line.md
-        - CLI - processor: development/software-technical-details/command_line/command_line_processor.md
-        - CLI - subcommand line & options: development/software-technical-details/command_line/command_line_options.md
+        - Program entry point: development/software-technical-details/command_line/program_entry_point.md
+        - Command line: development/software-technical-details/command_line/command_line.md
+        - Processor: development/software-technical-details/command_line/command_line_processor.md
+        - Subcommand line & options: development/software-technical-details/command_line/command_line_options.md
       - Utility functional:
         - development/software-technical-details/util_functional/index.md
         - Functional - file operation: development/software-technical-details/util_functional/file_operation.md
