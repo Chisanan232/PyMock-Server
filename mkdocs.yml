@@ -1,5 +1,5 @@
 site_name: PyMock-Server
-#site_url: https://bryantliu.github.io/pymock-server/
+site_url: https://pymock-server.doc.com/
 site_author: Bryant Liu
 site_description: >-
   Mock your API server, e.g., HTTP API server, by YAML configuration and set up an application in minutes
@@ -70,6 +70,10 @@ plugins:
               ignore_init_summary: true
             merge_init_into_class: true
             relative_crossrefs: true
+
+extra:
+  version:
+    provider: mike
 
 # Extensions
 markdown_extensions:
