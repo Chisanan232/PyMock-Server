@@ -17,7 +17,7 @@ About a whole command line structure, we can divide it as multiple parts to desc
     * Base data model about subcommand line **_SubCommandXXXOption_** for its options
     * Command line options of the subcommand line **_SubCommandXXXOption_**
 
-!!! note "What is different between **Pure value** and **Object for truly function**?"
+!!! question "What is different between **Pure value** and **Object for truly function**?"
 
     * **Pure value**
 

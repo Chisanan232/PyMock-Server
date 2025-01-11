@@ -95,7 +95,7 @@ Here, we have 2 choices to implement:
 1. Override the function ``_run`` directly.
 2. Add new class extends class ``BaseSubCmdComponent`` and implement property ``_subcmd_component``.
 
-!!! note "A existed subcommand line or new subcommand line?"
+!!! tip "A existed subcommand line or new subcommand line?"
 
     Please don't forget the module structure be mentioned in [index page](./index.md)
 

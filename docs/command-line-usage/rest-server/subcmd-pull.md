@@ -4,7 +4,7 @@ If it has already had API documentation, e.g., OpenAPI format (aka Swagger API),
 ``pull`` feature to fetch it as **_PyMock-Server_** format configuration and set up HTTP server for mocking API easily and 
 quickly.
 
-??? note "Why we need sub-command line ``pull``?"
+??? question "Why we need sub-command line ``pull``?"
 
     Let's consider one scenario, the system has already provide service for a while 
     and it has so many APIs which have already be used awhile. However, you want to 
