@@ -167,7 +167,9 @@ nav:
       - Utility functional:
         - development/software-technical-details/util_functional/index.md
         - Functional - file operation: development/software-technical-details/util_functional/file_operation.md
-      - Subcommand - *rest-server run*: development/software-technical-details/subcmd_run_core.md
+      - Rest-Server functional:
+        - development/software-technical-details/rest-server_functional/index.md
+        - Subcommand - *rest-server run*: development/software-technical-details/rest-server_functional/subcmd_run_core.md
     - Contributing :
       - development/contributing/index.md
       - Reporting a bug: development/contributing/reporting-a-bug.md
