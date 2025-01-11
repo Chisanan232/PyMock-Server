@@ -50,7 +50,7 @@ class SubCommandSection(Enum):
 
 ![command line section]
 
-[command line section]: ../../../_images/development/contributing/software_technical_details/cli_section_mock_help.png
+[command line section]: ../../../_images/development/software_technical_details/cli_section_mock_help.png
 
 #### Command line value in **_SubCommandLine_**
 
@@ -72,7 +72,7 @@ class SubCommandLine(Enum):
 
 ![command line]
 
-[command line]: ../../../_images/development/contributing/software_technical_details/cli_line_mock_help.png
+[command line]: ../../../_images/development/software_technical_details/cli_line_mock_help.png
 
 ### Object for truly function
 
@@ -98,7 +98,7 @@ class BaseMajorCommandFoo(CommandOption):
 
 ![major command line]
 
-[major command line]: ../../../_images/development/contributing/software_technical_details/cli_line_mock_help.png
+[major command line]: ../../../_images/development/software_technical_details/cli_line_mock_help.png
 
 #### Subcommand command line **_SubCommandXXXOption_**
 
@@ -130,7 +130,7 @@ BaseSubCmdBooOption: type = MetaCommandOption("BaseSubCmdBooOption", (SubCommand
 
 ![subcommand lines]
 
-[subcommand lines]: ../../../_images/development/contributing/software_technical_details/cli_line_mock_rest-server_help.png
+[subcommand lines]: ../../../_images/development/software_technical_details/cli_line_mock_rest-server_help.png
 
 #### Options of subcommand command line **_SubCommandXXXOption_**
 
@@ -154,7 +154,7 @@ class CmdOption(BaseSubCmdBooOption):
 
 ![subcommand line option]
 
-[subcommand line option]: ../../../_images/development/contributing/software_technical_details/cli_option_mock_rest-server_run_help.png
+[subcommand line option]: ../../../_images/development/software_technical_details/cli_option_mock_rest-server_run_help.png
 
 ## UML
 
