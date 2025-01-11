@@ -7,11 +7,11 @@ All codes belong to here section, they all are responsible for **defining the co
 
 ## UML
 
-About the software architecture of this feature is already be introduced. Please refer to section [Command line - UML](./command_line.md#uml).
+About the software architecture of this feature is already be introduced. Please refer to section [Command line - UML](command_line.mdml).
 
 ## Workflow
 
-About the software workflow details of this feature is already be introduced. Please refer to section [Command line - Workflow](./command_line.md#workflow).
+About the software workflow details of this feature is already be introduced. Please refer to section [Command line - Workflow](command_line.mdorkflow).
 
 ## Extension
 

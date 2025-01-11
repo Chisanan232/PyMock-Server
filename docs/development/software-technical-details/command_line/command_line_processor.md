@@ -8,7 +8,7 @@ All codes belong to here section, they all are responsible for **what thing woul
 
 <iframe frameborder="0" style="width:100%;height:600px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=p-yRdhPX9lBvFNy9WcaI#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
-The software architecture here feature apply is mostly same as previous one section [Command line](./command_line.md#uml).
+The software architecture here feature apply is mostly same as previous one section [Command line](command_line.mdml).
 
 * It has 4 base classes:
     * ``MetaCommand`` [source code](https://github.com/Chisanan232/PyMock-Server/blob/master/pymock_server/command/_base/process.py#L39-L52)
@@ -39,8 +39,8 @@ truly core logic of the sub-command line with its options.
 
 ## Workflow
 
-Because the software architecture of here section is mostly same with [Command line](./command_line.md#command-line), its
-workflow also could refer to its [workflow](./command_line.md#workflow).
+Because the software architecture of here section is mostly same with [Command line](command_line.mdommand-line), its
+workflow also could refer to its [workflow](command_line.mdorkflow).
 
 ## Extension
 
