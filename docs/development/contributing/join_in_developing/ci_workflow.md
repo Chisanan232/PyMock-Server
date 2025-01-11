@@ -62,6 +62,10 @@ Here records all the CI workflows of this project runs.
     This CI workflow won't upload test coverage report and also won't trigger
     SonarQube scan of code quality.
 
+![pr bot ci]
+
+[pr bot ci]: ../../../_images/development/contributing/join_in_developing/bot_pr_ci.png
+
 ## Source code CI
 
 * CI state
@@ -89,6 +93,10 @@ Here records all the CI workflows of this project runs.
 [SonarQube]: https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-Server
 [pre-commit CI]: https://results.pre-commit.ci/run/github/604187293/1735723133.6DCBop-ERCWYNuC-gaGlyA
 
+![source code ci]
+
+[source code ci]: ../../../_images/development/contributing/join_in_developing/source_code_ci.png
+
 ## CD
 
 * CI state
@@ -105,6 +113,10 @@ Here records all the CI workflows of this project runs.
     Python package and push it to [PyPI] service.
 
 [PyPI]: https://pypi.org/project/PyMock-Server/
+
+![cd]
+
+[cd]: ../../../_images/development/contributing/join_in_developing/cd.png
 
 ## Docker CI
 
