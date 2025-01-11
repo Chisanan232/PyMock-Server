@@ -164,7 +164,9 @@ nav:
         - CLI - command line: development/software-technical-details/command_line/command_line.md
         - CLI - processor: development/software-technical-details/command_line/command_line_processor.md
         - CLI - subcommand line & options: development/software-technical-details/command_line/command_line_options.md
-      - Functional - file operation: development/software-technical-details/file_operation.md
+      - Utility functional:
+        - development/software-technical-details/util_functional/index.md
+        - Functional - file operation: development/software-technical-details/util_functional/file_operation.md
       - Subcommand - *rest-server run*: development/software-technical-details/subcmd_run_core.md
     - Contributing :
       - development/contributing/index.md
