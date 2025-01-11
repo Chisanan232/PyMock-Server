@@ -115,7 +115,7 @@ git clone https://github.com/Chisanan232/PyMock-Server.git ./pymock-server -b <g
 
     It apply Trunk-base developmenet at **_PyMock-Server_** project and its trunk branch is **_master_**.:
 
-    ![demonstration](../images/project_process_stages.png)
+    ![demonstration](../_images/project_process_stages.png)
     
     * develop
         * Git branch: _develop/**_
