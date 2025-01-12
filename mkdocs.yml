@@ -71,6 +71,7 @@ plugins:
             merge_init_into_class: true
             relative_crossrefs: true
 
+# Versioning documentation
 extra:
   version:
     provider: mike
