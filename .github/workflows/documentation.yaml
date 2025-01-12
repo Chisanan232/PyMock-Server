@@ -3,14 +3,13 @@ name: documentation
 on:
   push:
     branches:
-#      - "develop/**"    # For testing
+      - "develop/**"    # For testing
       - "master"
     paths:
       - ".github/workflows/documentation.yaml"
       - "docs/**"
       - "**.*.md"
       - "mkdocs.yml"
-  pull_request:
 
 env:
   DOCKER_ACCOUNT: chisanan232
