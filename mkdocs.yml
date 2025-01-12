@@ -70,6 +70,14 @@ plugins:
               ignore_init_summary: true
             merge_init_into_class: true
             relative_crossrefs: true
+  - mike:
+      alias_type: symlink
+      redirect_template: null
+      deploy_prefix: ''
+      canonical_version: null
+      version_selector: true
+      css_dir: css
+      javascript_dir: js
 
 # Versioning documentation
 extra:
