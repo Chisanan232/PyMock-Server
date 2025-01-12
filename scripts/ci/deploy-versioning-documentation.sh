@@ -95,6 +95,7 @@ push_new_version_to_document_server() {
         echo "👨‍💻 This is debug mode, doesn't really deploy the new version to document."
         echo "👨‍💻 Under running command line: poetry run mike deploy --push --update-aliases $New_Release_Version latest"
     else
+        poetry run mike deploy --push --update-aliases "$New_Release_Version"
         poetry run mike deploy --push --update-aliases "$New_Release_Version" latest
     fi
 
