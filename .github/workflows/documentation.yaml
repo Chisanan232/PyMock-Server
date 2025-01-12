@@ -10,6 +10,7 @@ on:
       - "docs/**"
       - "**.*.md"
       - "mkdocs.yml"
+  pull_request:
 
 env:
   DOCKER_ACCOUNT: chisanan232
