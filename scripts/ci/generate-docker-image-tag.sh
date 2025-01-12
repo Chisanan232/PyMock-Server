@@ -18,7 +18,7 @@
 #####################################################################################################################
 
 show_help() {
-    echo "Shell script usage: bash ./scripts/ci/generate-software-version.sh [OPTION] [VALUE]"
+    echo "Shell script usage: bash ./scripts/ci/generate-docker-image-tag.sh [OPTION] [VALUE]"
     echo " "
     echo "This is a shell script for generating tag by software version which be recorded in package info module (__pkg_info__) from Python package for building Docker image."
     echo " "
