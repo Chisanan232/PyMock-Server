@@ -75,6 +75,8 @@ plugins:
 extra:
   version:
     provider: mike
+    default: latest
+    alias: true
 
 # Extensions
 markdown_extensions:
