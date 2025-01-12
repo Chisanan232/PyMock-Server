@@ -7,6 +7,7 @@ on:
       - "master"
     paths:
       - ".github/workflows/documentation.yaml"
+      - "scripts/ci/deploy-versioning-documentation.sh"
       - "docs/**"
       - "**.*.md"
       - "mkdocs.yml"
