@@ -75,6 +75,7 @@ done
 
 set_git_config() {
     git config --global user.name github-actions[bot]
+    git config --global user.email chi10211201@cycu.org.tw
 }
 
 declare New_Release_Version
