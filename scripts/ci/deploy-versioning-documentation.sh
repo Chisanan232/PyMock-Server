@@ -73,6 +73,10 @@ do
      esac
 done
 
+set_git_config() {
+    git config --global user.name github-actions[bot]
+}
+
 declare New_Release_Version
 generate_version_info() {
     New_Release_Version=$(bash ./scripts/ci/generate-software-version.sh -r "$Input_Arg_Release_Type" -p "$Input_Arg_Python_Pkg_Name" -v "$Input_Arg_Software_Version_Format" -d "$Running_Mode")
@@ -104,6 +108,7 @@ push_new_version_to_document_server() {
 # The process what the shell script want to do truly start here
 echo "👷  Start to push new version documentation ..."
 
+set_git_config
 generate_version_info
 push_new_version_to_document_server
 set_default_version_as_latest
