@@ -73,6 +73,11 @@ do
      esac
 done
 
+sync_code() {
+    # note: https://github.com/jimporter/mike?tab=readme-ov-file#deploying-via-ci
+    git fetch origin gh-pages --depth=1
+}
+
 set_git_config() {
     git config --global user.name github-actions[bot]
     git config --global user.email chi10211201@cycu.org.tw
@@ -111,6 +116,7 @@ push_new_version_to_document_server() {
 # The process what the shell script want to do truly start here
 echo "👷  Start to push new version documentation ..."
 
+sync_code
 set_git_config
 generate_version_info
 push_new_version_to_document_server
