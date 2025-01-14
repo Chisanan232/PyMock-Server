@@ -7,24 +7,47 @@ on:
       - "master"
     paths:
       - ".github/workflows/documentation.yaml"
+      - "scripts/ci/**documentation**.sh"
       - "docs/**"
       - "**.*.md"
       - "mkdocs.yml"
+
+env:
+  DOCKER_ACCOUNT: chisanan232
+  DOCKER_IMAGE_NAME: pymock-server
+#  DOCKER_IMAGE_NAME: test    # For testing
+  RELEASE_TYPE: python-package
+  PYTHON_PACKAGE_NAME: pymock_server
+  SOFTWARE_VERSION_FORMAT: general-3
+  RUNNING_MODE: dry-run
 
 permissions:
   contents: write
 
 jobs:
+  check_version_info:
+#    name: Check the package version info to make sure whether it should release Docker image or not.
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_build_git-tag_and_create_github-release.yaml@v7
+    secrets:
+      github_auth_token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      project_type: python-package
+      project_name: pymock_server
+      software_version_format: general-3
+      debug_mode: true
+
   deploy_documentation:
+    needs: check_version_info
+    if: ${{ needs.check_version_info.outputs.python_release_version == 'Official-Release' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Python 3.10
+      - name: Install Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install Python dependencies about Poetry
         run: |
@@ -37,9 +60,24 @@ jobs:
           poetry --version
           poetry install --with docs
 
+      # build and commit documentation with versioning
       - name: Deploy documentation
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          poetry run mkdocs gh-deploy --force
+          echo "Documentation tool version info:"
+          poetry run mkdocs --version
+          poetry run mike --version
+          bash ./scripts/ci/deploy-versioning-documentation.sh \
+               -r '${{ env.RELEASE_TYPE }}' \
+               -p '${{ env.PYTHON_PACKAGE_NAME }}' \
+               -v '${{ env.SOFTWARE_VERSION_FORMAT }}' \
+#               -d '${{ env.RUNNING_MODE }}'
+
+      # general build and deploy documentation to GitHub Page
+      - name: Deploy documentation
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          poetry run mkdocs gh-deploy --force --ignore-version
           poetry run mkdocs --version
