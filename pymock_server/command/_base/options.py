@@ -85,6 +85,26 @@ SUBCOMMAND_PARSER: List[SubCmdParser] = []
 
 
 class CommandOption:
+    """
+    TODO: finish this docstring
+
+    :param sub_cmd: test content ...
+    :type sub_cmd: SubCommandAttr
+
+    :param in_sub_cmd:
+    :param sub_parser:
+
+    :param cli_option:
+    :type cli_option: str
+
+    :param name:
+    :param help_description:
+    :param option_value_type:
+    :param default_value:
+    :param action:
+    :param _options:
+    """
+
     sub_cmd: Optional[SubCommandAttr] = None
     in_sub_cmd: SubCommandLine = SubCommandLine.Base
     sub_parser: Optional[SubParserAttr] = None
