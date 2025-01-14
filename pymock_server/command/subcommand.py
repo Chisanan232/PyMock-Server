@@ -13,6 +13,8 @@ class SubCommandLine(Enum):
     Get = "get"
     Sample = "sample"
     Pull = "pull"
+    Foo = "foo"
+    Boo = "boo"
 
     @staticmethod
     def to_enum(v: Union[str, "SubCommandLine"]) -> "SubCommandLine":
@@ -33,3 +35,4 @@ class SubCommandLine(Enum):
 class SubCommandSection(Enum):
     Base = "subcommands"
     ApiServer = "API server subcommands"
+    Foo = "Foo command line"

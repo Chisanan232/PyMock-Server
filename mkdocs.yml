@@ -1,5 +1,5 @@
 site_name: PyMock-Server
-#site_url: https://bryantliu.github.io/pymock-server/
+site_url: https://chisanan232.github.io/PyMock-Server/
 site_author: Bryant Liu
 site_description: >-
   Mock your API server, e.g., HTTP API server, by YAML configuration and set up an application in minutes
@@ -58,6 +58,34 @@ theme:
   icon:
     logo: logo
 
+# Plugins
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: sphinx
+            docstring_section_style: spacy
+            docstring_options:
+              ignore_init_summary: true
+            merge_init_into_class: true
+            relative_crossrefs: true
+  - mike:
+      alias_type: symlink
+      redirect_template: null
+      deploy_prefix: ''
+      canonical_version: null
+      version_selector: true
+      css_dir: css
+      javascript_dir: js
+
+# Versioning documentation
+extra:
+  version:
+    provider: mike
+    default: latest
+    alias: true
+
 # Extensions
 markdown_extensions:
   - abbr
@@ -75,8 +103,8 @@ markdown_extensions:
   - pymdownx.caret
   - pymdownx.details
   - pymdownx.emoji:
-      emoji_generator: !!python/name:materialx.emoji.to_svg
-      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -145,11 +173,18 @@ nav:
     - How it works: development/how-it-works.md
     - Software technical details:
       - development/software-technical-details/index.md
-      - CLI - Program entry point: development/software-technical-details/program_entry_point.md
-      - CLI - subcommand line & options: development/software-technical-details/command_line_options.md
-      - CLI - processor: development/software-technical-details/command_line_processor.md
-      - Functional - file operation: development/software-technical-details/file_operation.md
-      - Subcommand - *rest-server run*: development/software-technical-details/subcmd_run_core.md
+      - About command line:
+        - development/software-technical-details/command_line/index.md
+        - Program entry point: development/software-technical-details/command_line/program_entry_point.md
+        - Command line: development/software-technical-details/command_line/command_line.md
+        - Processor: development/software-technical-details/command_line/command_line_processor.md
+        - Subcommand line & options: development/software-technical-details/command_line/command_line_options.md
+      - Utility functional:
+        - development/software-technical-details/util_functional/index.md
+        - Functional - file operation: development/software-technical-details/util_functional/file_operation.md
+      - Rest-Server functional:
+        - development/software-technical-details/rest-server_functional/index.md
+        - Subcommand - *rest-server run*: development/software-technical-details/rest-server_functional/subcmd_run_core.md
     - Contributing :
       - development/contributing/index.md
       - Reporting a bug: development/contributing/reporting-a-bug.md

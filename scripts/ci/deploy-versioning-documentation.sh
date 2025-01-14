@@ -18,7 +18,7 @@
 #####################################################################################################################
 
 show_help() {
-    echo "Shell script usage: bash ./scripts/ci/generate-docker-image-tag.sh [OPTION] [VALUE]"
+    echo "Shell script usage: bash ./scripts/ci/generate-software-version.sh [OPTION] [VALUE]"
     echo " "
     echo "This is a shell script for generating tag by software version which be recorded in package info module (__pkg_info__) from Python package for building Docker image."
     echo " "
@@ -73,5 +73,53 @@ do
      esac
 done
 
-New_Release_Version=$(bash ./scripts/ci/generate-software-version.sh -r "$Input_Arg_Release_Type" -p "$Input_Arg_Python_Pkg_Name" -v "$Input_Arg_Software_Version_Format" -d "$Running_Mode")
-echo "v$New_Release_Version"
+sync_code() {
+    # note: https://github.com/jimporter/mike?tab=readme-ov-file#deploying-via-ci
+    git fetch origin gh-pages --depth=1
+}
+
+set_git_config() {
+    git config --global user.name github-actions[bot]
+    git config --global user.email chi10211201@cycu.org.tw
+}
+
+declare New_Release_Version
+generate_version_info() {
+    New_Release_Version=$(bash ./scripts/ci/generate-software-version.sh -r "$Input_Arg_Release_Type" -p "$Input_Arg_Python_Pkg_Name" -v "$Input_Arg_Software_Version_Format" -d "$Running_Mode")
+    echo "🐍 Software version: $New_Release_Version"
+}
+
+set_default_version_as_latest() {
+    if [ "$Running_Mode" == "dry-run" ] || [ "$Running_Mode" == "debug" ]; then
+        echo "👨‍💻 This is debug mode, doesn't really set the default version to document."
+        echo "👨‍💻 Under running command line: poetry run mike set-default --push latest"
+    else
+#        poetry run mike set-default --message "[bot] Set default version as *latest* for documentation." --push latest
+        poetry run mike set-default --push latest
+    fi
+
+    echo "🍻 Set the documentation content default version as 'latest' successfully!"
+}
+
+push_new_version_to_document_server() {
+    if [ "$Running_Mode" == "dry-run" ] || [ "$Running_Mode" == "debug" ]; then
+        echo "👨‍💻 This is debug mode, doesn't really deploy the new version to document."
+        echo "👨‍💻 Under running command line: poetry run mike deploy --push --update-aliases $New_Release_Version latest"
+    else
+#        poetry run mike deploy --message "[bot] Deploy a new version documentation." --push --update-aliases "$New_Release_Version" latest
+        poetry run mike deploy --push --update-aliases "$New_Release_Version" latest
+    fi
+
+    echo "🍻 Push new version documentation successfully!"
+}
+
+# The process what the shell script want to do truly start here
+echo "👷  Start to push new version documentation ..."
+
+sync_code
+set_git_config
+generate_version_info
+push_new_version_to_document_server
+set_default_version_as_latest
+
+echo "👷  Deploy new version documentation successfully!"
