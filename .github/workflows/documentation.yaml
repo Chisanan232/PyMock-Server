@@ -3,11 +3,11 @@ name: documentation
 on:
   push:
     branches:
-      - "develop/**"    # For testing
+#      - "develop/**"    # For testing
       - "master"
     paths:
       - ".github/workflows/documentation.yaml"
-      - "scripts/ci/deploy-versioning-documentation.sh"
+      - "scripts/ci/**documentation**.sh"
       - "docs/**"
       - "**.*.md"
       - "mkdocs.yml"
