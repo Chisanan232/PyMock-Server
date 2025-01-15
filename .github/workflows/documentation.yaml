@@ -79,5 +79,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          poetry run mkdocs gh-deploy --force --ignore-version
+          poetry run mkdocs gh-deploy --clean --force --ignore-version
           poetry run mkdocs --version
