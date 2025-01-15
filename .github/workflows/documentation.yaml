@@ -61,7 +61,7 @@ jobs:
           poetry install --with docs
 
       # build and commit documentation with versioning
-      - name: Deploy documentation
+      - name: Build versioning documentation
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
