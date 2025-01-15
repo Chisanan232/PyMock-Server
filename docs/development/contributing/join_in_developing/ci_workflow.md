@@ -156,7 +156,10 @@ Here records all the CI workflows of this project runs.
 
 * CI state
 
-    Here's the state of [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml).
+    Here's the state of workflows.
+
+    * Build versioning documentation: [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml)
+    * Deploy versioning content: [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/pages/pages-build-deployment)
 
 * Trigger points
 
