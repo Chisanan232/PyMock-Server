@@ -1,5 +1,3 @@
-# Home
-
 <h1 align="center">
   PyMock-Server
 </h1>
