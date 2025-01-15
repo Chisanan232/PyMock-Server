@@ -152,10 +152,14 @@ Here records all the CI workflows of this project runs.
 ## Documentation CI
 
 [![documentation](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml)
+[![pages-build-deployment](https://github.com/Chisanan232/PyMock-Server/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/pages/pages-build-deployment)
 
 * CI state
 
-    Here's the state of [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml).
+    Here's the state of workflows.
+
+    * Build versioning documentation: [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml)
+    * Deploy versioning content: [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/pages/pages-build-deployment)
 
 * Trigger points
 
@@ -163,7 +167,8 @@ Here records all the CI workflows of this project runs.
 
 * Target doing
 
-    It would deploy the [documentation] into [GitHub pages] by ``mkdoc``.
+    It would build versioning content and commit it into git branch ``gh-pages`` to trigger another CI workflow. And
+    the GitHub Pages CI workflow would deploy the [documentation] into [GitHub pages].
 
 [documentation]: https://github.com/Chisanan232/PyMock-Server/tree/master/docs
 [GitHub pages]: https://chisanan232.github.io/PyMock-Server/
