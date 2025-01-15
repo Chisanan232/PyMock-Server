@@ -61,7 +61,7 @@ jobs:
           poetry install --with docs
 
       # build and commit documentation with versioning
-      - name: Deploy documentation
+      - name: Build versioning documentation
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
@@ -74,10 +74,10 @@ jobs:
                -v '${{ env.SOFTWARE_VERSION_FORMAT }}' \
 #               -d '${{ env.RUNNING_MODE }}'
 
-      # general build and deploy documentation to GitHub Page
-      - name: Deploy documentation
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          poetry run mkdocs gh-deploy --force --ignore-version
-          poetry run mkdocs --version
+#      # general build and deploy documentation to GitHub Page
+#      - name: Deploy documentation
+#        env:
+#          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+#        run: |
+#          poetry run mkdocs gh-deploy --clean --force --ignore-version
+#          poetry run mkdocs --version
