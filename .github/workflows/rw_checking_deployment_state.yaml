@@ -39,6 +39,13 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install PyMock-Server from PyPI
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install -U pip
+          pip3 install -U pymock_server
+          pip3 list
+
       - name: Install Python dependencies about Poetry
         id: checking_version_update_state
         run: |
