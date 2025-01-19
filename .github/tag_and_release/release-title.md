@@ -1,1 +1,1 @@
-v0.2.0 - Support parsing version 2 and version 3 OpenAPI documentation <0001f9f9>🍻
+v0.3.0 - A makeover of **_PyMock-Server_** 🧬 🍻
