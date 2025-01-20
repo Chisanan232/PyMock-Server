@@ -6,11 +6,17 @@ on:
       - "develop/**"    # For testing
       - "master"
     paths:
+#     Documentation
+#     Doc - CI workflow
       - ".github/workflows/documentation.yaml"
       - "scripts/ci/**documentation**.sh"
+#     Doc - Content
       - "docs/**"
       - "**.*.md"
+#     Doc - MkDoc config
       - "mkdocs.yml"
+#     Python source code package info
+      - "**/__pkg_info__.py"
 
 env:
   DOCKER_ACCOUNT: chisanan232
