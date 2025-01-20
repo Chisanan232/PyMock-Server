@@ -13,7 +13,7 @@ copyright: Copyright &copy; 2023 - 2025 Bryant Liu
 
 theme:
   name: material
-#  custom_dir: material/.overrides
+  custom_dir: ./docs/_overrides
   features:
     - announce.dismiss
     - content.action.edit
