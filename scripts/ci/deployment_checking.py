@@ -5,7 +5,7 @@ from importlib.metadata import PackageNotFoundError, version
 def get_lib_ver() -> str:
     try:
         return version("pymock_api")
-        # return version("pymock_server")
+        # return version("pymock_server")    # TODO: please modify to use this package name after release done
     except PackageNotFoundError:
         # Doesn't have the Python package
         return "0"
