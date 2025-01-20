@@ -57,6 +57,7 @@ jobs:
           poetry run mike --version
           bash ./scripts/ci/deploy-latest-version-documentation.sh
 
+
   check_version-state:
 #    name: Check the version update state
     uses: ./.github/workflows/rw_checking_deployment_state.yaml
