@@ -3,10 +3,10 @@
 #####################################################################################################################
 #
 # Target:
-# Automate to get the software version of Python package.
+# Automate to get the stable software version of Python package and deploy its mapping content in documentation.
 #
 # Description:
-# Use the version regex to get the software version of Python package, and output it.
+# Use the version regex to get the software version of Python package, and use it as version info to deploy the stable version documentation.
 #
 # Allowable options:
 #  -r [Release type]              Release type of project. Different release type it would get different version format. [options: python-package]

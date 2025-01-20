@@ -3,10 +3,10 @@
 #####################################################################################################################
 #
 # Target:
-# Automate to get the software version of Python package.
+# Automate to deploy the latest version content of documentation.
 #
 # Description:
-# Use the version regex to get the software version of Python package, and output it.
+# It doesn't care about project version. It will use the latest version content to deploy in documentation.
 #
 # Allowable options:
 #  -d [Run mode]                  Running mode. Set 'dry-run' or 'debug' to let it only show log message without exactly working. [options: general, dry-run, debug]

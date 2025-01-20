@@ -3,10 +3,10 @@
 #####################################################################################################################
 #
 # Target:
-# Automate to get the software version of Python package.
+# Automate to get the software version of Python package and generate as the specific format for Docker image tag.
 #
 # Description:
-# Use the version regex to get the software version of Python package, and output it.
+# Use the version regex to get the software version of Python package, and output, re-generate docker version info from it.
 #
 # Allowable options:
 #  -r [Release type]              Release type of project. Different release type it would get different version format. [options: python-package]
