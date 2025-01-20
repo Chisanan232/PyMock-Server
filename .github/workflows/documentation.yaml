@@ -56,7 +56,6 @@ jobs:
           poetry run mkdocs --version
           poetry run mike --version
           bash ./scripts/ci/deploy-latest-version-documentation.sh
-#          bash ./scripts/ci/deploy-latest-version-documentation.sh -d '${{ env.RUNNING_MODE }}'
 
   check_version-state:
 #    name: Check the version update state

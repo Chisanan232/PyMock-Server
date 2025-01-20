@@ -14,43 +14,8 @@
 #
 #####################################################################################################################
 
-show_help() {
-    echo "Shell script usage: bash ./scripts/ci/generate-software-version.sh [OPTION] [VALUE]"
-    echo " "
-    echo "This is a shell script for generating tag by software version which be recorded in package info module (__pkg_info__) from Python package for building Docker image."
-    echo " "
-    echo "options:"
-    echo "  -h [Argument]                  Show this help. You could set a specific argument naming to show the option usage. Empty or 'all' would show all arguments usage. [options: r, p, v, d]"
-}
-
-# Show help if no arguments provided
-if [ $# -eq 0 ]; then
-    show_help
-    exit 1
-fi
-
-# Handle arguments
-if [ $# -gt 0 ]; then
-    case "$1" in
-        -h|--help)    # Help for display all usage of each arguments
-            show_help
-            exit 0
-            ;;
-    esac
-fi
-
-while getopts "r:p:v:d:?" argv
-do
-     case $argv in
-         "d")    # Dry run
-           Running_Mode=$OPTARG
-           ;;
-         ?)
-           echo "Invalid command line argument. Please use option *h* to get more details of argument usage."
-           exit
-           ;;
-     esac
-done
+Running_Mode="false"
+#Running_Mode="dry-run"    # dry run for testing
 
 sync_code() {
     # note: https://github.com/jimporter/mike?tab=readme-ov-file#deploying-via-ci
