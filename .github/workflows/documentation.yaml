@@ -106,7 +106,7 @@ jobs:
           echo "Documentation tool version info:"
           poetry run mkdocs --version
           poetry run mike --version
-          bash ./scripts/ci/deploy-versioning-documentation.sh \
+          bash ./scripts/ci/deploy-stable-version-documentation.sh \
                -r '${{ env.RELEASE_TYPE }}' \
                -p '${{ env.PYTHON_PACKAGE_NAME }}' \
                -v '${{ env.SOFTWARE_VERSION_FORMAT }}' \
