@@ -25,10 +25,41 @@ permissions:
   contents: write
 
 jobs:
+  deploy_latest_documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies about Poetry
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install -U pip
+          pip install -U poetry
+
+      - name: Build Python runtime environment and dependencies by Poetry
+        run: |
+          poetry --version
+          poetry install --with docs
+
+      # build and commit documentation with versioning
+      - name: Build versioning documentation
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          echo "Documentation tool version info:"
+          poetry run mkdocs --version
+          poetry run mike --version
+          poetry run mike deploy --push latest
+
   check_version-state:
 #    name: Check the version update state
     uses: ./.github/workflows/rw_checking_deployment_state.yaml
-
 
   check_version_info:
 #    name: Check the package version info to make sure whether it should release Docker image or not.
