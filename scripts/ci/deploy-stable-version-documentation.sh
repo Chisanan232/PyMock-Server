@@ -91,7 +91,7 @@ generate_version_info() {
 
 declare Stable_Release_Version_Alias_Name="stable"
 
-set_default_version_as_latest() {
+set_default_version_as_stable() {
     if [ "$Running_Mode" == "dry-run" ] || [ "$Running_Mode" == "debug" ]; then
         echo "👨‍💻 This is debug mode, doesn't really set the default version to document."
         echo "👨‍💻 Under running command line: poetry run mike set-default --push latest"
@@ -122,6 +122,6 @@ sync_code
 set_git_config
 generate_version_info
 push_new_version_to_document_server
-set_default_version_as_latest
+set_default_version_as_stable
 
 echo "👷  Deploy new version documentation successfully!"
