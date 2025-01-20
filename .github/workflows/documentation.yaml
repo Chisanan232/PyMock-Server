@@ -55,7 +55,8 @@ jobs:
           echo "Documentation tool version info:"
           poetry run mkdocs --version
           poetry run mike --version
-          poetry run mike deploy --push latest
+          bash ./scripts/ci/deploy-latest-version-documentation.sh \
+#               -d '${{ env.RUNNING_MODE }}'
 
   check_version-state:
 #    name: Check the version update state
