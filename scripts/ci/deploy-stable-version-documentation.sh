@@ -96,11 +96,11 @@ set_default_version_as_stable() {
         echo "👨‍💻 This is debug mode, doesn't really set the default version to document."
         echo "👨‍💻 Under running command line: poetry run mike set-default --push $Stable_Release_Version_Alias_Name"
     else
-#        poetry run mike set-default --message "[bot] Set default version as *latest* for documentation." --push latest
+#        poetry run mike set-default --message "[bot] Set default version as *$Stable_Release_Version_Alias_Name* for documentation." --push $Stable_Release_Version_Alias_Name
         poetry run mike set-default --push $Stable_Release_Version_Alias_Name
     fi
 
-    echo "🍻 Set the documentation content default version as 'latest' successfully!"
+    echo "🍻 Set the documentation content default version as '$Stable_Release_Version_Alias_Name' successfully!"
 }
 
 push_new_version_to_document_server() {
@@ -108,7 +108,7 @@ push_new_version_to_document_server() {
         echo "👨‍💻 This is debug mode, doesn't really deploy the new version to document."
         echo "👨‍💻 Under running command line: poetry run mike deploy --push --update-aliases $New_Release_Version $Stable_Release_Version_Alias_Name"
     else
-#        poetry run mike deploy --message "[bot] Deploy a new version documentation." --push --update-aliases "$New_Release_Version" latest
+#        poetry run mike deploy --message "[bot] Deploy a new version documentation." --push --update-aliases "$New_Release_Version" $Stable_Release_Version_Alias_Name
         poetry run mike deploy --push --update-aliases "$New_Release_Version" $Stable_Release_Version_Alias_Name
     fi
 
