@@ -83,7 +83,7 @@ extra:
   # Versioning documentation
   version:
     provider: mike
-    default: latest
+    default: stable
     alias: true
   # Documentation analytics
   analytics:
