@@ -31,7 +31,7 @@ Currently, it only supports following data types: ``str``, ``int``, ``bool``, ``
 If ``items[*].type`` is collection like ``list`` or ``dict``, it must set this property for its details of element. And
 it is totally same as **item element**.
 
-!!! note "Usage notes"
+!!! example "Usage notes"
 
     * *list* of one specific type elements
 
