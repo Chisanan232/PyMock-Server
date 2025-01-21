@@ -185,6 +185,7 @@ nav:
           - Common:
             - configure-references/mocked-apis/apis/http/common/index.md
             - Item element: configure-references/mocked-apis/apis/http/common/item_element.md
+            - Value format: configure-references/mocked-apis/apis/http/common/value_format.md
   - Development:
     - development/index.md
     - How it works: development/how-it-works.md
