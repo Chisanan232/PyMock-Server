@@ -175,6 +175,9 @@ nav:
           - Loading setting: configure-references/mocked-apis/template/file/load.md
           - Values setting: configure-references/mocked-apis/template/file/config_path_values.md
           - Apply setting: configure-references/mocked-apis/template/file/apply.md
+        - Common configuration:
+          - configure-references/mocked-apis/template/common_config/index.md
+          - Format setting: configure-references/mocked-apis/template/common_config/format.md
       - Base:
         - configure-references/mocked-apis/base/index.md
       - API:
