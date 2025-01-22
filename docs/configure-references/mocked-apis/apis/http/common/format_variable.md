@@ -1,6 +1,6 @@
 # Variablilize value format
 
-## ``format.variables``: value format settings as variables
+## ``format.variables``
 
 Setting the value format with some specific settings which be configured as variables.
 

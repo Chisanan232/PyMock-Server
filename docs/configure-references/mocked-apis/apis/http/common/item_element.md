@@ -1,6 +1,6 @@
 # Item element
 
-## ``items``: items element settings
+## ``items``
 
 All the element of list type value follows these attributes to configure.
 
