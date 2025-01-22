@@ -38,7 +38,7 @@ Here records all the CI workflows of this project runs.
 
     It would wait for 20 minutes and merge the approved PR with tag ``dependencies`` if it still doesn't be merged yet. 
 
-!!! note "Why we need this CI workflow?"
+!!! question "Why we need this CI workflow?"
 
     Sometimes, it would have multiple PRs about upgrading dependencies in the
     same time. But before merge later new PR, it needs to wait to do git rebase 
@@ -118,7 +118,7 @@ Here records all the CI workflows of this project runs.
 
 * Trigger points
 
-    Only occur any change in the source code module ``__pkg_info__``.
+    Only occur version info change in the source code module ``__pkg_info__``.
 
 * Target doing
 
@@ -130,6 +130,26 @@ Here records all the CI workflows of this project runs.
 ![cd]
 
 [cd]: ../../../_images/development/contributing/join_in_developing/cd.png
+
+!!! question "How to trigger the deployment workflow exactly?"
+
+    In the Python projects which be builded by [Chisanan232], it
+    must have a module about the Python package info. And it has
+    software version info ``__version__``. It has only one way to
+    trigger the deployment workflow: update the version info.
+
+    In package info [source code]:
+
+    ```python
+    ... # other code
+
+    __version__ = "0.2.0"    # update this version info to trigger the CD workflow
+
+    ... # other code
+    ```
+
+[Chisanan232]: https://github.com/Chisanan232
+[source code]: https://github.com/Chisanan232/PyMock-Server/blob/master/pymock_server/__pkg_info__.py#L17
 
 ## Docker CI
 
@@ -163,12 +183,44 @@ Here records all the CI workflows of this project runs.
 
 * Trigger points
 
-    All relative files about documentation includes CI workflow, document content, etc.
+    * For **latest** version: 
+
+        All relative files about documentation includes CI workflow, document content, etc.
+
+    * For **latest stable** version: 
+
+        Same as CI workflow [CD](#cd).
 
 * Target doing
 
     It would build versioning content and commit it into git branch ``gh-pages`` to trigger another CI workflow. And
     the GitHub Pages CI workflow would deploy the [documentation] into [GitHub pages].
 
+    It has 2 different workflows for different versions:
+
+    * For deployment **latest** version document: 
+    
+        About any files which relative documentation be updated, it would deploy the content to documentation. So the
+        content of this version would always be the latest.
+    
+    * For deployment **latest stable** version document: 
+    
+        Only when software version be updated in package info module would trigger the after-process of this workflow,
+        it would try to get the software version as the version to deploy the content to specific version of documentation.
+
 [documentation]: https://github.com/Chisanan232/PyMock-Server/tree/master/docs
 [GitHub pages]: https://chisanan232.github.io/PyMock-Server/
+
+![documentation cd]
+
+[documentation cd]: ../../../_images/development/contributing/join_in_developing/documentation_cd_workflow.png
+
+
+!!! tip "After version info change, it would trigger these CI/CD workflows"
+
+    When occur version info change, it would trigger following
+    CI/CD workflows:
+
+    * [Source code deployment](#cd)
+    * [Docker image deployment](#docker-ci)
+    * [Stable version documentation deployment](#documentation-ci)
