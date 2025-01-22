@@ -170,5 +170,21 @@ Here records all the CI workflows of this project runs.
     It would build versioning content and commit it into git branch ``gh-pages`` to trigger another CI workflow. And
     the GitHub Pages CI workflow would deploy the [documentation] into [GitHub pages].
 
+    It has 2 different workflows for different versions:
+
+    * For deployment **latest** version document: 
+    
+        About any files which relative documentation be updated, it would deploy the content to documentation. So the
+        content of this version would always be the latest.
+    
+    * For deployment **latest stable** version document: 
+    
+        Only when software version be updated in package info module would trigger the after-process of this workflow,
+        it would try to get the software version as the version to deploy the content to specific version of documentation.
+
 [documentation]: https://github.com/Chisanan232/PyMock-Server/tree/master/docs
 [GitHub pages]: https://chisanan232.github.io/PyMock-Server/
+
+![documentation cd]
+
+[documentation cd]: ../../../_images/development/contributing/join_in_developing/documentation_cd_workflow.png
