@@ -83,7 +83,7 @@ Here are some demonstration about randomly generate value with different configu
 
     ```yaml
     format:
-      strategy: from_template
+      strategy: customize
       customize: var_num
     ```
 
