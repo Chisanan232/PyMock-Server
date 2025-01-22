@@ -1,21 +1,21 @@
 # Item element
 
-``items element settings``
+## ``items``
 
 All the element of list type value follows these attributes to configure.
 
 
-## ``items[*].name``
+### ``items[*].name``
 
 The naming of item's value.
 
 
-## ``items[*].required``
+### ``items[*].required``
 
 Whether item's value is required to response or not.
 
 
-## ``items[*].type``
+### ``items[*].type``
 
 The data type of item's value. Please use [Python built-in types](https://docs.python.org/3/library/stdtypes.html) to set this option.
 
@@ -26,12 +26,12 @@ Currently, it only supports following data types: ``str``, ``int``, ``bool``, ``
     If the type is collection, remember to set the option ``items[*].items`` for the detail settings of element in the collection.
 
 
-## ``items[*].items``
+### ``items[*].items``
 
 If ``items[*].type`` is collection like ``list`` or ``dict``, it must set this property for its details of element. And
 it is totally same as **item element**.
 
-!!! note "Usage notes"
+!!! example "Usage notes"
 
     * *list* of one specific type elements
 
