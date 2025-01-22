@@ -170,9 +170,11 @@ nav:
       - configure-references/mocked-apis/index.md
       - Template:
         - configure-references/mocked-apis/template/index.md
-        - Loading setting: configure-references/mocked-apis/template/load.md
-        - Values setting: configure-references/mocked-apis/template/config_path_values.md
-        - Apply setting: configure-references/mocked-apis/template/apply.md
+        - File setting:
+          - configure-references/mocked-apis/template/file/index.md
+          - Loading setting: configure-references/mocked-apis/template/file/load.md
+          - Values setting: configure-references/mocked-apis/template/file/config_path_values.md
+          - Apply setting: configure-references/mocked-apis/template/file/apply.md
       - Base:
         - configure-references/mocked-apis/base/index.md
       - API:
