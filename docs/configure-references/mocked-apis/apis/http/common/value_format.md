@@ -178,7 +178,7 @@ About the usage guide, please refer to this [example](#__tabbed_1_4).
         And you could clear the format setting of each columns they need in the
         specific API configuration as following:
     
-        ```yaml hl_lines="3"
+        ```yaml hl_lines="2-3"
         format:
           strategy: customize
           customize: amt_val USD
@@ -220,10 +220,10 @@ About the usage guide, please refer to this [example](#__tabbed_1_4).
         And you could modify the format setting of each columns they need in the
         specific APIs configuration as following:
     
-        ```yaml hl_lines="3"
+        ```yaml hl_lines="2-3"
         format:
           strategy: from_template
-          customize: usd_fee_value USD
+          use_name: usd_fee_value
         ```
         
         - [X] Configure ``format`` setting to limit the value
