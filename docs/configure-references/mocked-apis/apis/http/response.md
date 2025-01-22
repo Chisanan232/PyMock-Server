@@ -73,11 +73,9 @@ The data type of value. Please use Pythonic way to set this option.
 
 #### ``properties[*].format``
 
-The data format.
+Set the value format to generate data in response.
 
-!!! warning "Not support current but coming soon"
-
-    Currently, it just let you set this option. But it doesn't have essentially function to work.
+About the setting details, please refer to [here](./common/value_format.md).
 
 
 #### ``properties[*].is_empty``

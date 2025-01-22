@@ -98,6 +98,8 @@ you need.
 A regular expression of parameter value API should accept. It would respond 400 error if the parameter value format is not
 satisfied.
 
+About the setting details, please refer to [here](./common/value_format.md).
+
 
 ### ``parameters[*].items``
 
