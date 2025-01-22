@@ -7,8 +7,9 @@ Setting the value format with some specific settings which be configured as vari
 
 ### ``format.variables[*].name``
 
-The naming of the format setting. For outside setting, it would use the value of this property to identify which format
-setting it should use to generate the random value. So in a format variable array, this value must be unique.
+The naming of the format variable setting. For outside setting, it would use the value of this property to identify
+which format variable setting it should use to generate the random value. So in a format variable array, this value must
+be unique.
 
 
 ### ``format.variables[*].value_format``
