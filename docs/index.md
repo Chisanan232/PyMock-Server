@@ -21,7 +21,7 @@
   <a href="https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-Server">
     <img src="https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyMock-Server&metric=alert_status" alt="Code quality level">
   </a>
-  <a href="https://chisanan232.github.io/PyMock-Server/">
+  <a href="https://chisanan232.github.io/PyMock-Server/stable/">
     <img src="https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml/badge.svg" alt="documentation CI status">
   </a>
   <a href="https://opensource.org/licenses/MIT">
@@ -29,6 +29,8 @@
   </a>
 
 </p>
+
+<img align="center" src="./_images/pymock-server_demonstration.gif" alt="pymock-server demonstration" />
 
 <p align="center">
   <em>PyMock-Server</em> is a Python tool to mock API server easily and humanly without any coding.

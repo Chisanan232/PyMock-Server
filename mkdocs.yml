@@ -1,3 +1,4 @@
+# Project information
 site_name: PyMock-Server
 site_url: https://chisanan232.github.io/PyMock-Server/
 site_author: Bryant Liu
@@ -9,11 +10,11 @@ repo_name: Chisanan232/PyMock-Server
 repo_url: https://github.com/Chisanan232/PyMock-Server
 
 # Copyright
-copyright: Copyright &copy; 2023 - 2023 Bryant Liu
+copyright: Copyright &copy; 2023 - 2025 Bryant Liu
 
 theme:
   name: material
-#  custom_dir: material/.overrides
+  custom_dir: ./docs/_overrides
   features:
     - announce.dismiss
     - content.action.edit
@@ -79,12 +80,30 @@ plugins:
       css_dir: css
       javascript_dir: js
 
-# Versioning documentation
+# Additional configuration
 extra:
+  # Versioning documentation
   version:
     provider: mike
-    default: latest
+    default: stable
     alias: true
+  # Documentation analytics
+  analytics:
+    provider: google
+    property: G-G1YK8C9EE4
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: This page was helpful
+          data: 1
+          note: >-
+            Thanks for your feedback!
+        - icon: material/emoticon-sad-outline
+          name: This page could be improved
+          data: 0
+          note: >-
+            Thanks for your feedback!
 
 # Extensions
 markdown_extensions:
@@ -153,9 +172,14 @@ nav:
       - configure-references/mocked-apis/index.md
       - Template:
         - configure-references/mocked-apis/template/index.md
-        - Loading setting: configure-references/mocked-apis/template/load.md
-        - Values setting: configure-references/mocked-apis/template/config_path_values.md
-        - Apply setting: configure-references/mocked-apis/template/apply.md
+        - File setting:
+          - configure-references/mocked-apis/template/file/index.md
+          - Loading setting: configure-references/mocked-apis/template/file/load.md
+          - Values setting: configure-references/mocked-apis/template/file/config_path_values.md
+          - Apply setting: configure-references/mocked-apis/template/file/apply.md
+        - Common configuration:
+          - configure-references/mocked-apis/template/common_config/index.md
+          - Format setting: configure-references/mocked-apis/template/common_config/format.md
       - Base:
         - configure-references/mocked-apis/base/index.md
       - API:
@@ -168,6 +192,8 @@ nav:
           - Common:
             - configure-references/mocked-apis/apis/http/common/index.md
             - Item element: configure-references/mocked-apis/apis/http/common/item_element.md
+            - Value format: configure-references/mocked-apis/apis/http/common/value_format.md
+            - Value format variable: configure-references/mocked-apis/apis/http/common/format_variable.md
   - Development:
     - development/index.md
     - How it works: development/how-it-works.md

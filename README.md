@@ -21,7 +21,7 @@
   <a href="https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-Server">
     <img src="https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyMock-Server&metric=alert_status" alt="Code quality level">
   </a>
-  <a href="https://chisanan232.github.io/PyMock-Server/">
+  <a href="https://chisanan232.github.io/PyMock-Server/stable/">
     <img src="https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml/badge.svg" alt="documentation CI status">
   </a>
   <a href="https://opensource.org/licenses/MIT">
@@ -29,6 +29,8 @@
   </a>
 
 </p>
+
+<img align="center" src="./docs/_images/pymock-server_demonstration.gif" alt="pymock-server demonstration" />
 
 <p align="center">
   <em>PyMock-Server</em> is a Python tool to mock API server easily and humanly without any coding.
@@ -106,14 +108,14 @@ The configuration format of **_PyMock-Server_** to use is **YAML**. So let's wri
 
 ```yaml
 mocked_apis:
-  google_home:
-    url: '/google'
+  foo:
+    url: '/foo'
     http:
       request:
         method: 'GET'
       response:
         strategy: string
-        value: 'This is Google home API.'
+        value: 'This is Foo API.'
 ```
 
 ### Run command to set up application
@@ -129,29 +131,29 @@ You would see some log messages in terminal and that is the log of web server by
 And you could test the API by ``curl``:
 
 ```console
->>> curl http://127.0.0.1:9672/google
-"This is Google home API."%
+>>> curl http://127.0.0.1:9672/foo
+"This is Foo home API."%
 ```
 
 ![demonstration](docs/_images/demonstration_pymock-server_cli.gif)
 
 ## Documentation
 
-The [documentation](https://chisanan232.github.io/PyMock-Server/) contains more details, demonstrations and anything you need about **_PyMock-Server_**.
+The [documentation](https://chisanan232.github.io/PyMock-Server/stable/) contains more details, demonstrations and anything you need about **_PyMock-Server_**.
 
-* [Getting start](https://chisanan232.github.io/PyMock-Server/getting-started/version-requirements/) helps you start to prepare environment, install dependencies and configure the detail settings with explanation in detail.
-    * What [requirement](https://chisanan232.github.io/PyMock-Server/getting-started/version-requirements/) I need to prepare?
-    * How can I [install](https://chisanan232.github.io/PyMock-Server/getting-started/installation/) it?
-    * How to [configure the details of API](https://chisanan232.github.io/PyMock-Server/getting-started/configure-your-api/)?
-    * I have configuration right now. How can I [set up a mock server](https://chisanan232.github.io/PyMock-Server/getting-started/setup-web-server/)?
+* [Getting start](https://chisanan232.github.io/PyMock-Server/stable/getting-started/version-requirements/) helps you start to prepare environment, install dependencies and configure the detail settings with explanation in detail.
+    * What [requirement](https://chisanan232.github.io/PyMock-Server/stable/getting-started/version-requirements/) I need to prepare?
+    * How can I [install](https://chisanan232.github.io/PyMock-Server/stable/getting-started/installation/) it?
+    * How to [configure the details of API](https://chisanan232.github.io/PyMock-Server/stable/getting-started/configure-your-api/)?
+    * I have configuration right now. How can I [set up a mock server](https://chisanan232.github.io/PyMock-Server/stable/getting-started/setup-web-server/)?
 * Want to learn more how to use it?
-    * What exactly feature it can use by [command lines](https://chisanan232.github.io/PyMock-Server/command-line-usage/)?
-    * Want to know more [magic settings](https://chisanan232.github.io/PyMock-Server/configure-references/config-basic-info/) to mock API?
+    * What exactly feature it can use by [command lines](https://chisanan232.github.io/PyMock-Server/stable/command-line-usage/)?
+    * Want to know more [magic settings](https://chisanan232.github.io/PyMock-Server/stable/configure-references/config-basic-info/) to mock API?
 * Want to contribute to this project?
-    * I face something [issue](https://chisanan232.github.io/PyMock-Server/development/contributing/reporting-a-bug/) it cannot work finely!
-    * I want to [wish a feature or something change](https://chisanan232.github.io/PyMock-Server/development/contributing/requesting-a-feature/).
-    * If you're interested in **_PyMock-Server_** and have any ideas want to design it, even implement it, it's very welcome to [contribute](https://chisanan232.github.io/PyMock-Server/development/contributing/join_in_developing/) **_PyMock-Server_**!
-* About the [release notes](https://chisanan232.github.io/PyMock-Server/release_note/).
+    * I face something [issue](https://chisanan232.github.io/PyMock-Server/stable/development/contributing/reporting-a-bug/) it cannot work finely!
+    * I want to [wish a feature or something change](https://chisanan232.github.io/PyMock-Server/stable/development/contributing/requesting-a-feature/).
+    * If you're interested in **_PyMock-Server_** and have any ideas want to design it, even implement it, it's very welcome to [contribute](https://chisanan232.github.io/PyMock-Server/stable/development/contributing/join_in_developing/) **_PyMock-Server_**!
+* About the [release notes](https://chisanan232.github.io/PyMock-Server/latest/release_note/).
 
 
 ## Coding style and following rules

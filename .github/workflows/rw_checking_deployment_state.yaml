@@ -43,8 +43,9 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip3 install -U pip
-          pip3 install -U pymock_server
+          pip3 install -U pymock_api
           pip3 list
+#          pip3 install -U pymock_server    # TODO: Should modify back to *pymock_server* after first release done
 
       - name: Install Python dependencies about Poetry
         id: checking_version_update_state

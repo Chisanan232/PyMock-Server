@@ -94,8 +94,8 @@ its value is ``info``.
 * Have some great idea? Share with us and [request new feature or change].
 * Want to know [entire knowledge of tool **_PyMock-Server_**].
 
-[Getting started to configure your APIs]: https://chisanan232.github.io/PyMock-Server/getting-started/configure-your-api/
-[More details]: https://chisanan232.github.io/PyMock-Server/configure-references/mocked-apis/
+[Getting started to configure your APIs]: https://chisanan232.github.io/PyMock-Server/stable/getting-started/configure-your-api/
+[More details]: https://chisanan232.github.io/PyMock-Server/stable/configure-references/mocked-apis/
 [Report a bug]: https://github.com/Chisanan232/PyMock-Server/issues/new?assignees=&labels=&projects=&template=reporting-a-bug.yaml
 [request new feature or change]: https://github.com/Chisanan232/PyMock-Server/issues/new?assignees=&labels=&projects=&template=request-a-feature-or-change.yaml
-[entire knowledge of tool **_PyMock-Server**]: https://chisanan232.github.io/PyMock-Server/
+[entire knowledge of tool **_PyMock-Server**]: https://chisanan232.github.io/PyMock-Server/stable/

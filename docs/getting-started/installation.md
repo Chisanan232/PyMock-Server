@@ -19,20 +19,25 @@ pip install "pymock-server[<web framework>]"
 
 The dependencies which are necessary to install decreases greatly.
 
-!!! note "What the option _web framework_ we could use?"
+!!! tip "What the options _web framework_ we could use?"
 
-    **_PyMock-Server_** uses the Python web framework to implement the API feature. It means that it would also depend 
-    on other Python package which for web development. Currrently, it supports 2 frameworks of all popular Python web 
-    framerworks --- [**_Flask_**] and [**_FastAPI_**]. So the options value we could use are: ``mini``, ``flask`` or 
-    ``fastapi``.
+    **_PyMock-Server_** uses the Python web framework to implement
+    the API feature. It means that it would also depend on other
+    Python package which for web development. Currrently, it supports
+    2 frameworks of all popular Python web framerworks --- [**_Flask_**]
+    and [**_FastAPI_**]. So the options value we could use are: ``mini``,
+    ``flask`` or ``fastapi``.
     
-    * ``mini``
-
-        It would install the minimum level depdendency of Python package. It also means it won't install both of web 
-        frameworks **_Flask_** or **_FastAPI_**.
-
-  [**_Flask_**]: https://flask.palletsprojects.com/en/2.3.x/
-  [**_FastAPI_**]: https://fastapi.tiangolo.com
+    | Strategy name | Purpose                                                                                                                                |
+    |:--------------|:---------------------------------------------------------------------------------------------------------------------------------------|
+    | `mini`        | Install the minimum level dependency of Python package. It means it won't install both of web frameworks **_Flask_** or **_FastAPI_**. |
+    | `flask`       | Install the dependencies includes [**_Flask_**] and [**_Gunicorn_**].                                                                  |
+    | `fastapi`     | Install the dependencies includes [**_FastAPI_**] and [**_Uvicorn_**].                                                                 |
+    
+    [**_Flask_**]: https://flask.palletsprojects.com/en/2.3.x/
+    [**_Gunicorn_**]: https://docs.gunicorn.org/
+    [**_FastAPI_**]: https://fastapi.tiangolo.com
+    [**_Uvicorn_**]: https://www.uvicorn.org/
 
 
 ## With poetry <small>recommended for Python developer</small> { #with-poetry data-toc-label="with poetry" }
@@ -42,52 +47,58 @@ this package.
 
 [**Poetry**]: https://python-poetry.org/docs/
 
-<details markdown="1">
-<summary>So what is Poetry ...?</summary>
+??? question "So what is Poetry ...?"
+    
+    If you still miss your direction about how to manage your Python
+    project, you must try to use **_Poetry_** to do it. Poetry is a
+    tool for managing your Python project includes the deeply complex
+    relations of Python dependencies.
+    
+    Let's quickly demonstrate the general usage of Poetry to you.
+    
+    If you want to add a new dependency, in the other words, install
+    a new Python package, it doesn't use ``pip``, use ``poetry`` to
+    add it.
+    
+    ```console
+    poetry add <Python package>
+    ```
+    
+    How easy it is! Isn't it? It's also easy for removing dependency:
+    
+    ```console
+    poetry remove <Python package>
+    ```
+    
+    So what's the difference between **_Poetry_** and **_pip_**? The
+    major difference is **_Poetry_** could be greatly better to manage
+    your dependencies! Let's consider a scenario. If a package A which
+    depends on pacakge B, it would also install package B when it installs
+    pacakge A. However, about removing this package, it's a trouble when
+    you use **_pip_** because **_pip_** won't remove package B when you
+    remove package A! You need to manually remove package B if you want
+    to remove them clearly. If your project is huge, it's also a big
+    problem of managing your project's dependencies. And the poetry is
+    a great solution to resolve this issue. Poetry even sorts out the
+    dependencies relations as a tree diagram and illustrate it as following:
+    
+    ```console
+    >>> poetry show --tree --without=dev
+    fastapi 0.95.2 FastAPI framework, high performance, easy to learn, fast to code, ready for production
+    ├── email-validator >=1.1.1
+    │   ├── dnspython >=2.0.0
+    │   └── idna >=2.0.0
+    ├── httpx >=0.23.0
+    │   ├── certifi *
+    │   ├── httpcore >=0.15.0,<0.18.0
+    │   │   ├── anyio >=3.0,<5.0
+    │   │   │   ├── idna >=2.8
+    ...
+    ```
+    
+    How clear it is! So Poetry is a very powerful tool for manage your
+    Python project.
 
-If you still miss your direction about how to manage your Python project, you must try to use **_Poetry_** to do it. Poetry
-is a tool for managing your Python project includes the deeply complex relations of Python dependencies.
-
-Let's quickly demonstrate the general usage of Poetry to you.
-
-If you want to add a new dependency, in the other words, install a new Python package, it doesn't use ``pip``, use ``poetry``
-to add it.
-
-```console
-poetry add <Python package>
-```
-
-How easy it is! Isn't it? It's also easy for removing dependency:
-
-```console
-poetry remove <Python package>
-```
-
-So what's the difference between **_Poetry_** and **_pip_**? The major difference is **_Poetry_** could be greatly better
-to manage your dependencies! Let's consider a scenario. If a package A which depends on pacakge B, it would also install
-package B when it installs pacakge A. However, about removing this package, it's a trouble when you use **_pip_** because
-**_pip_** won't remove package B when you remove package A! You need to manually remove package B if you want to remove
-them clearly. If your project is huge, it's also a big problem of managing your project's dependencies. And the poetry is
-a great solution to resolve this issue. Poetry even sorts out the dependencies relations as a tree diagram and illustrate
-it as following:
-
-```console
->>> poetry show --tree --without=dev
-fastapi 0.95.2 FastAPI framework, high performance, easy to learn, fast to code, ready for production
-├── email-validator >=1.1.1
-│   ├── dnspython >=2.0.0
-│   └── idna >=2.0.0
-├── httpx >=0.23.0
-│   ├── certifi *
-│   ├── httpcore >=0.15.0,<0.18.0
-│   │   ├── anyio >=3.0,<5.0
-│   │   │   ├── idna >=2.8
-...
-```
-
-How clear it is! So Poetry is a very powerful tool for manage your Python project.
-
-</details>
 
 The installing command is little different with ``pip`` but be similar:
 
@@ -135,8 +146,10 @@ pip install -e pymock-server
 
 ## With _Docker_ <small>for general usage without Python runtime environment</small> { #with-docker data-toc-label="with Docker" }
 
-If your runtime environment has not installed Python and you won't use Python temporarily, you also could use **Docker** to
+If your runtime environment has not installed Python and you won't use Python temporarily, you also could use [**Docker**] to
 enjoy **_PyMock-Server_**.
+
+[**Docker**]: https://hub.docker.com/repository/docker/chisanan232/pymock-server/general
 
 Download **_PyMock-Server_** official image as below:
 

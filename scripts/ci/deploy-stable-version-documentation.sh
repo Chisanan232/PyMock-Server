@@ -3,10 +3,10 @@
 #####################################################################################################################
 #
 # Target:
-# Automate to get the software version of Python package.
+# Automate to get the stable software version of Python package and deploy its mapping content in documentation.
 #
 # Description:
-# Use the version regex to get the software version of Python package, and output it.
+# Use the version regex to get the software version of Python package, and use it as version info to deploy the stable version documentation.
 #
 # Allowable options:
 #  -r [Release type]              Release type of project. Different release type it would get different version format. [options: python-package]
@@ -89,25 +89,27 @@ generate_version_info() {
     echo "🐍 Software version: $New_Release_Version"
 }
 
-set_default_version_as_latest() {
+declare Stable_Release_Version_Alias_Name="stable"
+
+set_default_version_as_stable() {
     if [ "$Running_Mode" == "dry-run" ] || [ "$Running_Mode" == "debug" ]; then
         echo "👨‍💻 This is debug mode, doesn't really set the default version to document."
-        echo "👨‍💻 Under running command line: poetry run mike set-default --push latest"
+        echo "👨‍💻 Under running command line: poetry run mike set-default --push $Stable_Release_Version_Alias_Name"
     else
-#        poetry run mike set-default --message "[bot] Set default version as *latest* for documentation." --push latest
-        poetry run mike set-default --push latest
+#        poetry run mike set-default --message "[bot] Set default version as *$Stable_Release_Version_Alias_Name* for documentation." --push $Stable_Release_Version_Alias_Name
+        poetry run mike set-default --push $Stable_Release_Version_Alias_Name
     fi
 
-    echo "🍻 Set the documentation content default version as 'latest' successfully!"
+    echo "🍻 Set the documentation content default version as '$Stable_Release_Version_Alias_Name' successfully!"
 }
 
 push_new_version_to_document_server() {
     if [ "$Running_Mode" == "dry-run" ] || [ "$Running_Mode" == "debug" ]; then
         echo "👨‍💻 This is debug mode, doesn't really deploy the new version to document."
-        echo "👨‍💻 Under running command line: poetry run mike deploy --push --update-aliases $New_Release_Version latest"
+        echo "👨‍💻 Under running command line: poetry run mike deploy --push --update-aliases $New_Release_Version $Stable_Release_Version_Alias_Name"
     else
-#        poetry run mike deploy --message "[bot] Deploy a new version documentation." --push --update-aliases "$New_Release_Version" latest
-        poetry run mike deploy --push --update-aliases "$New_Release_Version" latest
+#        poetry run mike deploy --message "[bot] Deploy a new version documentation." --push --update-aliases "$New_Release_Version" $Stable_Release_Version_Alias_Name
+        poetry run mike deploy --push --update-aliases "$New_Release_Version" $Stable_Release_Version_Alias_Name
     fi
 
     echo "🍻 Push new version documentation successfully!"
@@ -120,6 +122,6 @@ sync_code
 set_git_config
 generate_version_info
 push_new_version_to_document_server
-set_default_version_as_latest
+set_default_version_as_stable
 
 echo "👷  Deploy new version documentation successfully!"
