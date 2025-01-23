@@ -209,7 +209,7 @@ Here records all the CI workflows of this project runs.
         it would try to get the software version as the version to deploy the content to specific version of documentation.
 
 [documentation]: https://github.com/Chisanan232/PyMock-Server/tree/master/docs
-[GitHub pages]: https://chisanan232.github.io/PyMock-Server/
+[GitHub pages]: https://chisanan232.github.io/PyMock-Server/stable/
 
 ![documentation cd]
 
