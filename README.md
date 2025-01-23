@@ -30,6 +30,8 @@
 
 </p>
 
+<img align="center" src="./docs/_images/pymock-server_demonstration.gif" alt="pymock-server demonstration" />
+
 <p align="center">
   <em>PyMock-Server</em> is a Python tool to mock API server easily and humanly without any coding.
 </p>
@@ -106,14 +108,14 @@ The configuration format of **_PyMock-Server_** to use is **YAML**. So let's wri
 
 ```yaml
 mocked_apis:
-  google_home:
-    url: '/google'
+  foo:
+    url: '/foo'
     http:
       request:
         method: 'GET'
       response:
         strategy: string
-        value: 'This is Google home API.'
+        value: 'This is Foo API.'
 ```
 
 ### Run command to set up application
@@ -129,8 +131,8 @@ You would see some log messages in terminal and that is the log of web server by
 And you could test the API by ``curl``:
 
 ```console
->>> curl http://127.0.0.1:9672/google
-"This is Google home API."%
+>>> curl http://127.0.0.1:9672/foo
+"This is Foo home API."%
 ```
 
 ![demonstration](docs/_images/demonstration_pymock-server_cli.gif)

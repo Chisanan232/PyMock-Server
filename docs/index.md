@@ -30,6 +30,8 @@
 
 </p>
 
+<img align="center" src="./_images/pymock-server_demonstration.gif" alt="pymock-server demonstration" />
+
 <p align="center">
   <em>PyMock-Server</em> is a Python tool to mock API server easily and humanly without any coding.
 </p>
