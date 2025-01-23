@@ -14,7 +14,7 @@
 __title__ = "PyMock-Server"
 __description__ = "🕸🤖👺 A Python tool to mock server, e.g., API server, easily and humanly without any coding."
 __url__ = "https://chisanan232.github.io/PyMock-Server/stable/"
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __author__ = "Liu, Bryant"
 __author_email__ = "chi10211201@cycu.org.tw"
 __license__ = "MIT"
