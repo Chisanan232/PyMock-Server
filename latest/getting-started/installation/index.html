@@ -2715,42 +2715,66 @@ which be managed in <a href="https://pypi.org/"><strong>PyPI</strong></a> platfo
 <div class="language-console highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="go">pip install &quot;pymock-server[&lt;web framework&gt;]&quot;</span>
 </span></code></pre></div>
 <p>The dependencies which are necessary to install decreases greatly.</p>
-<div class="admonition note">
-<p class="admonition-title">What the option <em>web framework</em> we could use?</p>
-<p><strong><em>PyMock-Server</em></strong> uses the Python web framework to implement the API feature. It means that it would also depend 
-on other Python package which for web development. Currrently, it supports 2 frameworks of all popular Python web 
-framerworks --- <a href="https://flask.palletsprojects.com/en/2.3.x/"><strong><em>Flask</em></strong></a> and <a href="https://fastapi.tiangolo.com"><strong><em>FastAPI</em></strong></a>. So the options value we could use are: <code>mini</code>, <code>flask</code> or 
-<code>fastapi</code>.</p>
-<ul>
-<li>
-<p><code>mini</code></p>
-<p>It would install the minimum level depdendency of Python package. It also means it won't install both of web 
-frameworks <strong><em>Flask</em></strong> or <strong><em>FastAPI</em></strong>.</p>
-</li>
-</ul>
+<div class="admonition tip">
+<p class="admonition-title">What the options <em>web framework</em> we could use?</p>
+<p><strong><em>PyMock-Server</em></strong> uses the Python web framework to implement
+the API feature. It means that it would also depend on other
+Python package which for web development. Currrently, it supports
+2 frameworks of all popular Python web framerworks --- <a href="https://flask.palletsprojects.com/en/2.3.x/"><strong><em>Flask</em></strong></a>
+and <a href="https://fastapi.tiangolo.com"><strong><em>FastAPI</em></strong></a>. So the options value we could use are: <code>mini</code>,
+<code>flask</code> or <code>fastapi</code>.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Strategy name</th>
+<th style="text-align: left;">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>mini</code></td>
+<td style="text-align: left;">Install the minimum level dependency of Python package. It means it won't install both of web frameworks <strong><em>Flask</em></strong> or <strong><em>FastAPI</em></strong>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>flask</code></td>
+<td style="text-align: left;">Install the dependencies includes <a href="https://flask.palletsprojects.com/en/2.3.x/"><strong><em>Flask</em></strong></a> and <a href="https://docs.gunicorn.org/"><strong><em>Gunicorn</em></strong></a>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fastapi</code></td>
+<td style="text-align: left;">Install the dependencies includes <a href="https://fastapi.tiangolo.com"><strong><em>FastAPI</em></strong></a> and <a href="https://www.uvicorn.org/"><strong><em>Uvicorn</em></strong></a>.</td>
+</tr>
+</tbody>
+</table>
 </div>
 <h2 id="with-poetry">With poetry <small>recommended for Python developer</small><a class="headerlink" href="#with-poetry" title="Permanent link">&para;</a></h2>
 <p>If you're familiar with Python, it strongly recommends that use <a href="https://python-poetry.org/docs/"><strong>Poetry</strong></a> to manage your Python project includes installing
 this package.</p>
-<details>
+<details class="question">
 <summary>So what is Poetry ...?</summary>
-<p>If you still miss your direction about how to manage your Python project, you must try to use <strong><em>Poetry</em></strong> to do it. Poetry
-is a tool for managing your Python project includes the deeply complex relations of Python dependencies.</p>
+<p>If you still miss your direction about how to manage your Python
+project, you must try to use <strong><em>Poetry</em></strong> to do it. Poetry is a
+tool for managing your Python project includes the deeply complex
+relations of Python dependencies.</p>
 <p>Let's quickly demonstrate the general usage of Poetry to you.</p>
-<p>If you want to add a new dependency, in the other words, install a new Python package, it doesn't use <code>pip</code>, use <code>poetry</code>
-to add it.</p>
+<p>If you want to add a new dependency, in the other words, install
+a new Python package, it doesn't use <code>pip</code>, use <code>poetry</code> to
+add it.</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="go">poetry add &lt;Python package&gt;</span>
 </span></code></pre></div>
 <p>How easy it is! Isn't it? It's also easy for removing dependency:</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="go">poetry remove &lt;Python package&gt;</span>
 </span></code></pre></div>
-<p>So what's the difference between <strong><em>Poetry</em></strong> and <strong><em>pip</em></strong>? The major difference is <strong><em>Poetry</em></strong> could be greatly better
-to manage your dependencies! Let's consider a scenario. If a package A which depends on pacakge B, it would also install
-package B when it installs pacakge A. However, about removing this package, it's a trouble when you use <strong><em>pip</em></strong> because
-<strong><em>pip</em></strong> won't remove package B when you remove package A! You need to manually remove package B if you want to remove
-them clearly. If your project is huge, it's also a big problem of managing your project's dependencies. And the poetry is
-a great solution to resolve this issue. Poetry even sorts out the dependencies relations as a tree diagram and illustrate
-it as following:</p>
+<p>So what's the difference between <strong><em>Poetry</em></strong> and <strong><em>pip</em></strong>? The
+major difference is <strong><em>Poetry</em></strong> could be greatly better to manage
+your dependencies! Let's consider a scenario. If a package A which
+depends on pacakge B, it would also install package B when it installs
+pacakge A. However, about removing this package, it's a trouble when
+you use <strong><em>pip</em></strong> because <strong><em>pip</em></strong> won't remove package B when you
+remove package A! You need to manually remove package B if you want
+to remove them clearly. If your project is huge, it's also a big
+problem of managing your project's dependencies. And the poetry is
+a great solution to resolve this issue. Poetry even sorts out the
+dependencies relations as a tree diagram and illustrate it as following:</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="go">&gt;&gt;&gt; poetry show --tree --without=dev</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="go">fastapi 0.95.2 FastAPI framework, high performance, easy to learn, fast to code, ready for production</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="go">├── email-validator &gt;=1.1.1</span>
@@ -2763,7 +2787,8 @@ it as following:</p>
 </span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="go">│   │   │   ├── idna &gt;=2.8</span>
 </span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="go">...</span>
 </span></code></pre></div>
-<p>How clear it is! So Poetry is a very powerful tool for manage your Python project.</p>
+<p>How clear it is! So Poetry is a very powerful tool for manage your
+Python project.</p>
 </details>
 <p>The installing command is little different with <code>pip</code> but be similar:</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="go">poetry add pymock-server</span>
@@ -2799,7 +2824,7 @@ it also be same as the code in PyPI.</li>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="go">pip install -e pymock-server</span>
 </span></code></pre></div>
 <h2 id="with-docker">With <em>Docker</em> <small>for general usage without Python runtime environment</small><a class="headerlink" href="#with-docker" title="Permanent link">&para;</a></h2>
-<p>If your runtime environment has not installed Python and you won't use Python temporarily, you also could use <strong>Docker</strong> to
+<p>If your runtime environment has not installed Python and you won't use Python temporarily, you also could use <a href="https://hub.docker.com/repository/docker/chisanan232/pymock-server/general"><strong>Docker</strong></a> to
 enjoy <strong><em>PyMock-Server</em></strong>.</p>
 <p>Download <strong><em>PyMock-Server</em></strong> official image as below:</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="go">docker pull pymock-server:v0.1.0</span>
