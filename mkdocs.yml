@@ -104,6 +104,14 @@ extra:
           data: 0
           note: >-
             Thanks for your feedback!
+  # Social info
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Chisanan232
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/repository/docker/chisanan232/pymock-server
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/pymock-server/
 
 # Extensions
 markdown_extensions:
