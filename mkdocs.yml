@@ -157,7 +157,7 @@ markdown_extensions:
 
 # Page tree
 nav:
-  - index.md
+  - PyMock-Server: index.md
   - Getting started:
     - Version requirements: getting-started/version-requirements.md
     - Installation: getting-started/installation.md
