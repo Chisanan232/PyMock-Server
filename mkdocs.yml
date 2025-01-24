@@ -61,6 +61,7 @@ theme:
 
 # Plugins
 plugins:
+  # Doc as Code
   - mkdocstrings:
       handlers:
         python:
@@ -71,6 +72,7 @@ plugins:
               ignore_init_summary: true
             merge_init_into_class: true
             relative_crossrefs: true
+  # Versioning documentation
   - mike:
       alias_type: symlink
       redirect_template: null
@@ -79,8 +81,10 @@ plugins:
       version_selector: true
       css_dir: css
       javascript_dir: js
+  # Documentation modification info - create & update time
   - git-revision-date-localized:
       enable_creation_date: true
+  # Documentation modification info - contributor
   - git-committers:
       repository: Chisanan232/PyMock-Server
       branch: master
