@@ -61,6 +61,7 @@ theme:
 
 # Plugins
 plugins:
+  # Doc as Code
   - mkdocstrings:
       handlers:
         python:
@@ -71,6 +72,7 @@ plugins:
               ignore_init_summary: true
             merge_init_into_class: true
             relative_crossrefs: true
+  # Versioning documentation
   - mike:
       alias_type: symlink
       redirect_template: null
@@ -79,6 +81,13 @@ plugins:
       version_selector: true
       css_dir: css
       javascript_dir: js
+  # Documentation modification info - create & update time
+  - git-revision-date-localized:
+      enable_creation_date: true
+  # Documentation modification info - contributor
+  - git-committers:
+      repository: Chisanan232/PyMock-Server
+      branch: master
 
 # Additional configuration
 extra:
@@ -104,6 +113,14 @@ extra:
           data: 0
           note: >-
             Thanks for your feedback!
+  # Social info
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Chisanan232
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/repository/docker/chisanan232/pymock-server
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/pymock-server/
 
 # Extensions
 markdown_extensions:
@@ -149,7 +166,7 @@ markdown_extensions:
 
 # Page tree
 nav:
-  - index.md
+  - PyMock-Server: index.md
   - Getting started:
     - Version requirements: getting-started/version-requirements.md
     - Installation: getting-started/installation.md
