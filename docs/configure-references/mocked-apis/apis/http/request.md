@@ -67,6 +67,14 @@ Then you could use the parameter ``arg1`` of API ``/foo-home``.
 This is a boolean type value. If it's ``true``, web server would respond 400 error if the request misses the argument. Nor
 it would ignore it.
 
+!!! tip "If insisting on requesting without required parameter ..."
+
+    If you set a request parameter as required and you insisting
+    on requesting without it, server would reutnr a 400 response
+    with invalid message:
+
+    ![miss required param](../../../../_images/configure-references/requesting_when_missing_param.png)
+
 
 #### ``parameters[*].default``
 
