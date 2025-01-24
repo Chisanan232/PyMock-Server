@@ -81,6 +81,9 @@ plugins:
       javascript_dir: js
   - git-revision-date-localized:
       enable_creation_date: true
+  - git-committers:
+      repository: Chisanan232/PyMock-Server
+      branch: master
 
 # Additional configuration
 extra:
