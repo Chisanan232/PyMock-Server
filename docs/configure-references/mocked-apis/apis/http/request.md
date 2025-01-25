@@ -91,14 +91,17 @@ you need.
 
 !!! note "What data type you should use?"
 
-    As the description mention, the data type should be vallid for Python realm. Here provides some data type to help you
+    As the description mention, the data type should be vallid
+    for Python realm. Here provides some data type to help you
     configure your API parameters.
     
-    * Text type value: ```str```
-    * Integer type value: ```int```
-    * Boolean type value: ```bool```
-    * Some object of list type value: ```list```
-    * Key-value map type value: ```dict```
+    | Data type | Purpose                        |
+    |:----------|:-------------------------------|
+    | `str`     | Text type value                |
+    | `int`     | Integer type value             |
+    | `bool`    | Boolean type value             |
+    | `list`    | Some object of list type value |
+    | `dict`    | Key-value map type value       |
 
 
 #### ``parameters[*].format``
