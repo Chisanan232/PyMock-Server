@@ -103,6 +103,25 @@ you need.
     | `list`    | Some object of list type value |
     | `dict`    | Key-value map type value       |
 
+!!! tip "If insisting on requesting with invalid type parameter ..."
+
+    If you set a request parameter as one specific data type and
+    you insisting on requesting with invalid type of it, server
+    would reutnr a 4XX response with invalid message:
+
+    === "Response in Flask"
+
+        In Flask server, it would response a 400 error.
+    
+        ![miss required param](../../../../_images/configure-references/requesting_when_invalid_type_param_in_flask.png)
+    
+    === "Response in FastAPI"
+
+        In FastAPI server, it would got failure at the property of
+        request parameter data model and response a 422 error.
+    
+        ![miss required param](../../../../_images/configure-references/requesting_when_invalid_type_param_in_fastapi.png)
+
 
 #### ``parameters[*].format``
 
