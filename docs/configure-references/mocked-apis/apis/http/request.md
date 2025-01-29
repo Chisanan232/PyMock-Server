@@ -67,6 +67,14 @@ Then you could use the parameter ``arg1`` of API ``/foo-home``.
 This is a boolean type value. If it's ``true``, web server would respond 400 error if the request misses the argument. Nor
 it would ignore it.
 
+!!! tip "If insisting on requesting without required parameter ..."
+
+    If you set a request parameter as required and you insisting
+    on requesting without it, server would reutnr a 400 response
+    with invalid message:
+
+    ![miss required param](../../../../_images/configure-references/requesting_when_missing_param.png)
+
 
 #### ``parameters[*].default``
 
@@ -83,14 +91,36 @@ you need.
 
 !!! note "What data type you should use?"
 
-    As the description mention, the data type should be vallid for Python realm. Here provides some data type to help you
+    As the description mention, the data type should be vallid
+    for Python realm. Here provides some data type to help you
     configure your API parameters.
     
-    * Text type value: ```str```
-    * Integer type value: ```int```
-    * Boolean type value: ```bool```
-    * Some object of list type value: ```list```
-    * Key-value map type value: ```dict```
+    | Data type | Purpose                        |
+    |:----------|:-------------------------------|
+    | `str`     | Text type value                |
+    | `int`     | Integer type value             |
+    | `bool`    | Boolean type value             |
+    | `list`    | Some object of list type value |
+    | `dict`    | Key-value map type value       |
+
+!!! tip "If insisting on requesting with invalid type parameter ..."
+
+    If you set a request parameter as one specific data type and
+    you insisting on requesting with invalid type of it, server
+    would reutnr a 4XX response with invalid message:
+
+    === "Response in Flask"
+
+        In Flask server, it would response a 400 error.
+    
+        ![miss required param](../../../../_images/configure-references/requesting_when_invalid_type_param_in_flask.png)
+    
+    === "Response in FastAPI"
+
+        In FastAPI server, it would got failure at the property of
+        request parameter data model and response a 422 error.
+    
+        ![miss required param](../../../../_images/configure-references/requesting_when_invalid_type_param_in_fastapi.png)
 
 
 #### ``parameters[*].format``
@@ -99,6 +129,28 @@ A regular expression of parameter value API should accept. It would respond 400 
 satisfied.
 
 About the setting details, please refer to [here](./common/value_format.md).
+
+!!! tip "If insisting on requesting as invalid format value at the parameter ..."
+
+    If you set a request parameter as one specific value format
+    and you insisting on requesting with invalid format of its
+    value, server would reutnr a 4XX response with invalid message.
+
+    Let's demonstrate the invalid format value in request parameter
+    with format strategy `FROM_ENUMS`:
+
+    === "Response in Flask"
+
+        In Flask server, it would response a 400 error.
+    
+        ![miss required param](../../../../_images/configure-references/requesting_when_invalid_format_param_in_flask.png)
+    
+    === "Response in FastAPI"
+
+        In FastAPI server, it would got failure at the property of
+        request parameter data model and response a 400 error.
+    
+        ![miss required param](../../../../_images/configure-references/requesting_when_invalid_format_param_in_fastapi.png)
 
 
 #### ``parameters[*].items``
