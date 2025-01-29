@@ -130,6 +130,28 @@ satisfied.
 
 About the setting details, please refer to [here](./common/value_format.md).
 
+!!! tip "If insisting on requesting as invalid format value at the parameter ..."
+
+    If you set a request parameter as one specific value format
+    and you insisting on requesting with invalid format of its
+    value, server would reutnr a 4XX response with invalid message.
+
+    Let's demonstrate the invalid format value in request parameter
+    with format strategy `FROM_ENUMS`:
+
+    === "Response in Flask"
+
+        In Flask server, it would response a 400 error.
+    
+        ![miss required param](../../../../_images/configure-references/requesting_when_invalid_format_param_in_flask.png)
+    
+    === "Response in FastAPI"
+
+        In FastAPI server, it would got failure at the property of
+        request parameter data model and response a 400 error.
+    
+        ![miss required param](../../../../_images/configure-references/requesting_when_invalid_format_param_in_fastapi.png)
+
 
 #### ``parameters[*].items``
 
