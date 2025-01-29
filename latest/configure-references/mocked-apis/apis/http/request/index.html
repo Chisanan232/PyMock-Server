@@ -2860,6 +2860,13 @@
 <h4 id="parametersrequired"><code>parameters[*].required</code><a class="headerlink" href="#parametersrequired" title="Permanent link">&para;</a></h4>
 <p>This is a boolean type value. If it's <code>true</code>, web server would respond 400 error if the request misses the argument. Nor
 it would ignore it.</p>
+<div class="admonition tip">
+<p class="admonition-title">If insisting on requesting without required parameter ...</p>
+<p>If you set a request parameter as required and you insisting
+on requesting without it, server would reutnr a 400 response
+with invalid message:</p>
+<p><img alt="miss required param" src="../../../../../_images/configure-references/requesting_when_missing_param.png" /></p>
+</div>
 <h4 id="parametersdefault"><code>parameters[*].default</code><a class="headerlink" href="#parametersdefault" title="Permanent link">&para;</a></h4>
 <p>The default value of parameter. If the parameter in request is empty or <code>None</code> value, it would use this value to process.</p>
 <h4 id="parameterstype"><code>parameters[*].type</code><a class="headerlink" href="#parameterstype" title="Permanent link">&para;</a></h4>
@@ -2869,20 +2876,84 @@ string type value as <code>str</code>, integer type value as <code>int</code>, e
 you need.</p>
 <div class="admonition note">
 <p class="admonition-title">What data type you should use?</p>
-<p>As the description mention, the data type should be vallid for Python realm. Here provides some data type to help you
+<p>As the description mention, the data type should be vallid
+for Python realm. Here provides some data type to help you
 configure your API parameters.</p>
-<ul>
-<li>Text type value: <code>str</code></li>
-<li>Integer type value: <code>int</code></li>
-<li>Boolean type value: <code>bool</code></li>
-<li>Some object of list type value: <code>list</code></li>
-<li>Key-value map type value: <code>dict</code></li>
-</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Data type</th>
+<th style="text-align: left;">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>str</code></td>
+<td style="text-align: left;">Text type value</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>int</code></td>
+<td style="text-align: left;">Integer type value</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>bool</code></td>
+<td style="text-align: left;">Boolean type value</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>list</code></td>
+<td style="text-align: left;">Some object of list type value</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>dict</code></td>
+<td style="text-align: left;">Key-value map type value</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">If insisting on requesting with invalid type parameter ...</p>
+<p>If you set a request parameter as one specific data type and
+you insisting on requesting with invalid type of it, server
+would reutnr a 4XX response with invalid message:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Response in Flask</label><label for="__tabbed_3_2">Response in FastAPI</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>In Flask server, it would response a 400 error.</p>
+<p><img alt="miss required param" src="../../../../../_images/configure-references/requesting_when_invalid_type_param_in_flask.png" /></p>
+</div>
+<div class="tabbed-block">
+<p>In FastAPI server, it would got failure at the property of
+request parameter data model and response a 422 error.</p>
+<p><img alt="miss required param" src="../../../../../_images/configure-references/requesting_when_invalid_type_param_in_fastapi.png" /></p>
+</div>
+</div>
+</div>
 </div>
 <h4 id="parametersformat"><code>parameters[*].format</code><a class="headerlink" href="#parametersformat" title="Permanent link">&para;</a></h4>
 <p>A regular expression of parameter value API should accept. It would respond 400 error if the parameter value format is not
 satisfied.</p>
 <p>About the setting details, please refer to <a href="../common/value_format/">here</a>.</p>
+<div class="admonition tip">
+<p class="admonition-title">If insisting on requesting as invalid format value at the parameter ...</p>
+<p>If you set a request parameter as one specific value format
+and you insisting on requesting with invalid format of its
+value, server would reutnr a 4XX response with invalid message.</p>
+<p>Let's demonstrate the invalid format value in request parameter
+with format strategy <code>FROM_ENUMS</code>:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Response in Flask</label><label for="__tabbed_4_2">Response in FastAPI</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>In Flask server, it would response a 400 error.</p>
+<p><img alt="miss required param" src="../../../../_images/configure-references/requesting_when_invalid_format_param_in_flask.png" /></p>
+</div>
+<div class="tabbed-block">
+<p>In FastAPI server, it would got failure at the property of
+request parameter data model and response a 400 error.</p>
+<p><img alt="miss required param" src="../../../../_images/configure-references/requesting_when_invalid_format_param_in_fastapi.png" /></p>
+</div>
+</div>
+</div>
+</div>
 <h4 id="parametersitems"><code>parameters[*].items</code><a class="headerlink" href="#parametersitems" title="Permanent link">&para;</a></h4>
 <p>If the data type of parameter value is list type, it should use this key to configure its element details. The element detail 
 follow <a href="/configure-references/mocked-apis/apis/http/common/item_element">item element settings</a>.</p>
@@ -2908,7 +2979,7 @@ follow <a href="/configure-references/mocked-apis/apis/http/common/item_element"
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 24, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 29, 2025</span>
   </span>
 
     
@@ -2918,7 +2989,7 @@ follow <a href="/configure-references/mocked-apis/apis/http/common/item_element"
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 24, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 29, 2025</span>
   </span>
 
     
