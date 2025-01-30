@@ -72,7 +72,7 @@ jobs:
 #    name: Check the package version info to make sure whether it should release Docker image or not.
     needs: check_version-state
     if: ${{ needs.check_version-state.outputs.version_update_state == 'VERSION UPDATE' }}
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_build_git-tag_and_create_github-release.yaml@v7
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_build_git-tag_and_create_github-release.yaml@v7.1
     secrets:
       github_auth_token: ${{ secrets.GITHUB_TOKEN }}
     with:
