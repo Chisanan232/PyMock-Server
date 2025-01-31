@@ -3,8 +3,8 @@
 </h1>
 
 <p align="center">
-  <a href="https://pypi.org/project/pymock-server">
-    <img src="https://img.shields.io/pypi/v/pymock-server?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white" alt="PyPI package version">
+  <a href="https://pypi.org/project/fake-api-server">
+    <img src="https://img.shields.io/pypi/v/fake-api-server?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white" alt="PyPI package version">
   </a>
   <a href="https://github.com/Chisanan232/PyMock-Server/releases">
     <img src="https://img.shields.io/github/release/Chisanan232/PyMock-Server.svg?label=Release&logo=github" alt="GitHub release version">
@@ -58,7 +58,7 @@ The code base of **_PyMock-Server_** to set up an application still depends on t
 etc. So the Python versions it supports also be affected by them, e.g., **_Flask_** only supports Python version 3.8 up currently. So
 **_PyMock-Server_** also only supports version Python 3.8 up.
 
-[![Supported Versions](https://img.shields.io/pypi/pyversions/PyMock-Server.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/PyMock-Server)
+[![Supported Versions](https://img.shields.io/pypi/pyversions/fake-api-server.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/fake-api-server)
 
 
 ## Quickly Start
@@ -168,8 +168,8 @@ The [documentation](https://chisanan232.github.io/PyMock-Server/stable/) contain
 
 **_PyMock-Server_** still a young open source which keep growing. Here's its download state:
 
-[![Downloads](https://pepy.tech/badge/PyMock-Server)](https://pepy.tech/project/PyMock-Server)
-[![Downloads](https://pepy.tech/badge/PyMock-Server/month)](https://pepy.tech/project/PyMock-Server)
+[![Downloads](https://pepy.tech/badge/fake-api-server)](https://pepy.tech/project/fake-api-server)
+[![Downloads](https://pepy.tech/badge/fake-api-server/month)](https://pepy.tech/project/fake-api-server)
 
 
 ## License
