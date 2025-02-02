@@ -1,6 +1,6 @@
 # ``rest-server run`` - web server
 
-This is the core feature of **_PyMock-Server_**. It does 2 things:
+This is the core feature of **_PyFake-API-Server_**. It does 2 things:
 
 * Set up web application with the API from the detail settings of configuration.
 * Run the web application by SGI server.
@@ -10,7 +10,7 @@ This is the core feature of **_PyMock-Server_**. It does 2 things:
 <iframe frameborder="0" style="width:100%;height:550px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=kRRTpLGKS1xiXI8G4MX6#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 * The sub-command line processor ``SubCmdRun`` would use function ``setup_wsgi`` or ``setup_asgi`` to run the web application.
-* All the way to run web application by factory pattern in **_PyMock-Server_**.
+* All the way to run web application by factory pattern in **_PyFake-API-Server_**.
 * The functions as factory callee to set up web application is ``create_flask_app`` and ``create_fastapi_app``.
 * Functions ``create_flask_app`` or ``create_fastapi_app`` would use adapter ``MockHTTPServer`` to set up all APIs as Python
 code with Python web framework **_Flask_** or **_FastAPI_**.
@@ -35,7 +35,7 @@ They mean you should extend all below classes to implement:
     * ``BaseSGIServer``
     * ``BaseCommandOption``
 
-Don't forget it also needs to import the Python web framework into **_PyMock-Server_** to let it could generate Python code about
+Don't forget it also needs to import the Python web framework into **_PyFake-API-Server_** to let it could generate Python code about
 APIs with configuration.
 
 * Import web library
@@ -68,8 +68,8 @@ class import_web_lib:
 
 * ``BaseAppServer``
 
-Extend the web application feature about how PyMock-Server should set up it? How to initial the web application by the customized
-Python web framework? How to add new API by the customized web framework?
+Extend the web application feature about how **_PyFake-API-Server_** should set up it? How to initial the web application
+by the customized Python web framework? How to add new API by the customized web framework?
 
 ```python
 # In module pymock_server.server.application

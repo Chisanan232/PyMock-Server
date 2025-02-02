@@ -1,12 +1,12 @@
 # Development
 
-This section for the developers who are curious or interesting of the detail implementation, design, etc. of **_PyMock-Server_**.
+This section for the developers who are curious or interesting of the detail implementation, design, etc. of **_PyFake-API-Server_**.
 
 The major points it would tell you are:
 
 * How it works exactly?
 
-    It would tell you the running principle of **_PyMock-Server_**. So here includes some workflow of entire program and a
+    It would tell you the running principle of **_PyFake-API-Server_**. So here includes some workflow of entire program and a
 little implementation.
 
 * What the software architecture it is designed and implemented?

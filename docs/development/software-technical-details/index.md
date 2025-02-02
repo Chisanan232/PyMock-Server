@@ -3,7 +3,7 @@
 Software architecture is very important in a production because it's relative the flexibility and extensibility of the production.
 So it must have some designs applies to core functions codes.
 
-In **_PyMock-Server_** realm, it can divide to several sections to parse its software architecture:
+In **_PyFake-API-Server_** realm, it can divide to several sections to parse its software architecture:
 
 * About command line
     * entry point of command line

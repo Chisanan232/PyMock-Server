@@ -5,7 +5,7 @@ Here is the detail information about software development includes software arch
 It focuses on command line itself, doesn't care other parts like the process or component of the specific command line.
 So all the demonstrations in this section would use the minimum level to implement for the parts.
 
-About command line software architecture (also means modules file structure) in **_PyMock-Server_** project, each subcommand
+About command line software architecture (also means modules file structure) in **_PyFake-API-Server_** project, each subcommand
 line has their own sub-package and also has 3 necessary modules in the sub-package: **_option_**, **_process_** and **_component_**.
 
 * **_option_**

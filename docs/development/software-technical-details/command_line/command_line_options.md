@@ -21,7 +21,7 @@ You'll have 4 things:
 
 ### Add new attribute of enum object **SubCommandLine**
 
-Enum object ``SubCommandLine`` is the standard for **_PyMock-Server_** to recognize which sub-command it has. So let's add 
+Enum object ``SubCommandLine`` is the standard for **_PyFake-API-Server_** to recognize which sub-command it has. So let's add 
 one new sub-command line here:
 
 ```python hl_lines="9"
@@ -98,7 +98,7 @@ class SubCmdNewProcess(BaseCommandProcessor):
     # ... some code
 ```
 
-Now, let's try to run the **_PyMock-Server_** with new sub-command:
+Now, let's try to run the **_PyFake-API-Server_** with new sub-command:
 
 ```console
 >>> mock new-ps --arg-1 test_value

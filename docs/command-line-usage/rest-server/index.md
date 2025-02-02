@@ -36,4 +36,4 @@ Display the valid example configuration.
 
 ## subcommand [``pull``](./subcmd-pull.md)
 
-Pull the API documentation detail setting from document host or document configuration as PyMock-Server configuration.
+Pull the API documentation detail setting from document host or document configuration as PyFake-API-Server configuration.

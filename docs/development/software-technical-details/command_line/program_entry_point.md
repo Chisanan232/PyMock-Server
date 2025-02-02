@@ -1,6 +1,6 @@
 # Program entry point - command line runner
 
-The entry point of **_PyMock-Server_** command line tool. Its actually entry point is calling the function ``run`` in module
+The entry point of **_PyFake-API-Server_** command line tool. Its actually entry point is calling the function ``run`` in module
 ``pymock_api.runner``.
 
 ## UML
