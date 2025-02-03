@@ -1,13 +1,13 @@
 # Project information
-site_name: PyMock-Server
-site_url: https://chisanan232.github.io/PyMock-Server/
+site_name: PyFake-API-Server
+site_url: https://chisanan232.github.io/pyfake-api-server/
 site_author: Bryant Liu
 site_description: >-
-  Mock your API server, e.g., HTTP API server, by YAML configuration and set up an application in minutes
+  Fake your API server, e.g., HTTP API server, by YAML configuration and set up an application in minutes
 
 # Repository
-repo_name: Chisanan232/PyMock-Server
-repo_url: https://github.com/Chisanan232/PyMock-Server
+repo_name: Chisanan232/PyFake-API-Server
+repo_url: https://github.com/Chisanan232/PyFake-API-Server
 
 # Copyright
 copyright: Copyright &copy; 2023 - 2025 Bryant Liu
@@ -86,7 +86,7 @@ plugins:
       enable_creation_date: true
   # Documentation modification info - contributor
   - git-committers:
-      repository: Chisanan232/PyMock-Server
+      repository: Chisanan232/PyFake-API-Server
       branch: master
 
 # Additional configuration
@@ -118,9 +118,9 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/Chisanan232
     - icon: fontawesome/brands/docker
-      link: https://hub.docker.com/repository/docker/chisanan232/pymock-server
+      link: https://hub.docker.com/repository/docker/chisanan232/pyfake-api-server
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/pymock-server/
+      link: https://pypi.org/project/fake-api-server/
 
 # Extensions
 markdown_extensions:
@@ -166,7 +166,7 @@ markdown_extensions:
 
 # Page tree
 nav:
-  - PyMock-Server: index.md
+  - PyFake-API-Server: index.md
   - Getting started:
     - Version requirements: getting-started/version-requirements.md
     - Installation: getting-started/installation.md

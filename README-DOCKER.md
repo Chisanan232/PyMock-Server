@@ -1,6 +1,6 @@
 # PyFake-API-Server
 
-[**_PyFake-API-Server_**](https://github.com/Chisanan232/PyFake-API-Server) is a tool for mocking API server easily and quickly by configuration only.
+[**_PyFake-API-Server_**](https://github.com/Chisanan232/PyFake-API-Server) is a tool for faking API server easily and quickly by configuration only.
 
 [**_PyFake-API-Server**]: https://github.com/Chisanan232/PyFake-API-Server/tree/master
 

@@ -16,7 +16,7 @@ It receives a value about the configuration file path and its default value is `
 
 ## ``--show-detail`` or ``-s``
 
-Get the configuration details if activate this command line option. Nor **_PyMock-Server_** would only tell you the setting 
+Get the configuration details if activate this command line option. Nor **_PyFake-API-Server_** would only tell you the setting 
 with the API exists without any info.
 
 It doesn't accept any value.

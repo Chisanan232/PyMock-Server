@@ -9,7 +9,7 @@ Doing something operations about configuration or its content.
 
 ## ``--print-sample`` or ``-p``
 
-Show the sample configuration which could be used directly by **_PyMock-Server_**.
+Show the sample configuration which could be used directly by **_PyFake-API-Server_**.
 
 It doesn't accept any value.
 

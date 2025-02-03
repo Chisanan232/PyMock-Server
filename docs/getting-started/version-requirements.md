@@ -1,14 +1,14 @@
 # Getting started
 
-Actually, **_PyMock-Server_** is a Python package which provides command line tool. So it still needs to install a Python
+Actually, **_PyFake-API-Server_** is a Python package which provides command line tool. So it still needs to install a Python
 package to activate the command line feature.
 
 
 ## Version requirements
 
-**_PyMock-Server_** only supports _Python 3.8 and newer_ version.
+**_PyFake-API-Server_** only supports _Python 3.8 and newer_ version.
 
-**_PyMock-Server_** is a Python package which base on some giants to design and develop. It's obvious at the option ``--app-type``
+**_PyFake-API-Server_** is a Python package which base on some giants to design and develop. It's obvious at the option ``--app-type``
 which acceptable values are ``flask`` or ``fastapi``. In the other words, the code base depends on these 2 web framework
 to implement. And also be limited by these 2 Python package's versions.
 
@@ -28,7 +28,7 @@ It's very short and clear:
 
 [Here](https://fastapi.tiangolo.com/lo/#requirements) is the reference about Python version it recommends.
 
-That's the reason why **_PyMock-Server_** supports Python 3.8 and newer. It needs to support both of these Python web frameworks.
+That's the reason why **_PyFake-API-Server_** supports Python 3.8 and newer. It needs to support both of these Python web frameworks.
 
 
 ## Control version
