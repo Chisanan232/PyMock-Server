@@ -75,7 +75,7 @@ jobs:
         test-path: ${{fromJson(inputs.all_test_items_paths)}}
       fail-fast: false    # Fix issue in GitHub Action: FailFast: cancelling since parallel instance has failed
 
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_poetry_run_test.yaml@v7
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_poetry_run_test.yaml@v7.2
     with:
       runtime_os: ${{ matrix.os }}
       python_version: ${{ matrix.python-version }}
