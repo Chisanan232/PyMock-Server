@@ -3,8 +3,8 @@
 </h1>
 
 <p align="center">
-  <a href="https://pypi.org/project/pymock-server">
-    <img src="https://img.shields.io/pypi/v/pymock-server?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white" alt="PyPI package version">
+  <a href="https://pypi.org/project/fake-api-server">
+    <img src="https://img.shields.io/pypi/v/fake-api-server?color=%23099cec&amp;label=PyPI&amp;logo=pypi&amp;logoColor=white" alt="PyPI package version">
   </a>
   <a href="https://github.com/Chisanan232/PyFake-API-Server/releases">
     <img src="https://img.shields.io/github/release/Chisanan232/PyFake-API-Server.svg?label=Release&logo=github" alt="GitHub release version">

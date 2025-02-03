@@ -6,7 +6,7 @@ is managed by **Poetry**.
 
 ## Requirements for development
 
-[![Supported Versions](https://img.shields.io/pypi/pyversions/PyMock-Server.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/PyMock-Server)
+[![Supported Versions](https://img.shields.io/pypi/pyversions/fake-api-server.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/fake-api-server)
 
 **_PyMock-Server_** require Python version 3.8 up. Please make sure the Python version in your runtime environment.
 

@@ -3,7 +3,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [project]
-name = "pymock-server"
+name = "fake-api-server"
 version = "0.3.0"
 description = "🕸🤖👺 A Python tool to mock server, e.g., API server, easily and humanly without any coding."
 authors = [
@@ -35,6 +35,11 @@ classifiers = [
 requires-python = ">=3.8"
 dependencies = [
     "PyYAML (>=6.0)",
+]
+
+[tool.poetry]
+packages = [
+    { include = "pymock_server/" },
 ]
 
 [project.optional-dependencies]
