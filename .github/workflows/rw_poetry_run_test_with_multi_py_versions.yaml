@@ -2,7 +2,7 @@
 #
 # Workflow Description:
 #     Use Poetry to run testing by specific type with all test items via PyTest and generate its testing
-#     coverage report (it would save reports by 'actions/upload-artifact@v3').
+#     coverage report (it would save reports by 'actions/upload-artifact').
 #
 # Workflow input parameters:
 #     * test_type: The testing type. In generally, it only has 2 options: 'unit-test' and 'integration-test'.
