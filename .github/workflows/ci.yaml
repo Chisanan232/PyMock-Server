@@ -145,6 +145,6 @@ jobs:
     uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_pre-building_test.yaml@v7.2
     with:
       build-type: poetry
-      python_package_name: pyfake-api-server
+      python_package_name: fake-api-server
       test_shell_in_python: from pymock_server.model import APIConfig
       test_shell: mock --help
