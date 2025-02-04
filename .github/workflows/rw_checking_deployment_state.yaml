@@ -1,0 +1,55 @@
+#################################################################################################################################
+#
+# Workflow Description:
+#     Check the version info to judge whether it should activate to deploy or not.
+#
+# Workflow input parameters:
+#     * N/A
+#
+# Workflow running output:
+#     * version_update_state: the checking result for judging deployment.
+#         * VERSION UPDATE: Version info has been changed. It would activate to run deployment process.
+#         * NO VERSION UPDATE: Version info doesn't change. It won't do anything.
+#
+#     * Upload-Artifact:
+#         * N/A
+#
+#################################################################################################################################
+
+name: Check the version update state
+
+on:
+  workflow_call:
+    outputs:
+      version_update_state:
+        description: "The version update state."
+        value: ${{ jobs.run_test_items.outputs.version_update_state }}
+
+jobs:
+  run_test_items:
+    runs-on: ubuntu-latest
+    outputs:
+      version_update_state: ${{ steps.checking_version_update_state.outputs.version_update_state }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyMock-Server from PyPI
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install -U pip
+          pip3 install -U pymock_api
+          pip3 list
+#          pip3 install -U pymock_server    # TODO: Should modify back to *pymock_server* after first release done
+
+      - name: Install Python dependencies about Poetry
+        id: checking_version_update_state
+        run: |
+          version_update_state=$(python3 ./scripts/ci/deployment_checking.py)
+          echo "🧾 Python project version update state: $version_update_state"
+          echo "version_update_state=$(echo $version_update_state)" >> $GITHUB_OUTPUT

@@ -4,7 +4,7 @@ If your configuration be ready to mock, it's time to set up a web server to mock
 
 ## Run by CLI
 
-It's very easy to set up and run the web server by **_PyMock-Server_**. With default setting, namely using default value ``auto``
+It's very easy to set up and run the web server by **_PyFake-API-Server_**. With default setting, namely using default value ``auto``
 of option ``--app-type``, it would automatically detect which the Python web framework it can use in the current runtime
 environment. Therefore, the running server log message would be different with different Python web framework.
 
@@ -77,7 +77,7 @@ Let's give you a sample command line to set up mock server by **Docker**:
                -v <configuration root directory>:/mit-pymock-server/<configuration root directory> \
                -e CONFIG_PATH=<configuration path>
                -p 9672:9672 \
-               pymock-server:v0.1.0
+               fake-api-server:v0.1.0
 ```
 
 ??? tip "Hint: Still being confused about the configuration path setting? Let's demonstrate some usage scenarios to you."
@@ -103,7 +103,7 @@ Let's give you a sample command line to set up mock server by **Docker**:
     >>> docker run --name mock-server \
                    -v /User/foo/mock-api-demo:/mit-pymock-server \
                    -p 9672:9672 \
-                   pymock-server:v0.1.0
+                   fake-api-server:v0.1.0
     ```
     
     You can mount the all files in folder ``/User/foo/mock-api-demo`` into folder
@@ -136,7 +136,7 @@ Let's give you a sample command line to set up mock server by **Docker**:
                    -v /User/foo/mock-api-demo:/mit-pymock-server \
                    -e CONFIG_PATH=./folder1/beta-api.yaml
                    -p 9672:9672 \
-                   pymock-server:v0.1.0
+                   fake-api-server:v0.1.0
     ```
     
     The mount setting is the same as previous scenario so the file tree also be the
@@ -144,11 +144,11 @@ Let's give you a sample command line to set up mock server by **Docker**:
     So we just need to give it a relative path in working directory. Therefore, the
     value would be ``./folder1/beta-api.yaml``.
 
-!!! note "What the detail usage of **_PyMock-Server_** by **Docker**?"
+!!! note "What the detail usage of **_PyFake-API-Server_** by **Docker**?"
 
-    Please refer to [PyMock-Server's image overview in Docker hub] to get more details.
+    Please refer to [PyFake-API-Server's image overview in Docker hub] to get more details.
 
-    [PyMock-Server's image overview in Docker hub]: https://hub.docker.com/r/chisanan232/pymock-server
+    [PyFake-API-Server's image overview in Docker hub]: https://hub.docker.com/r/chisanan232/pyfake-api-server
 
 Great! Now the web server for mocking your API has done, and it would start to provide this service for other projects or
 services.

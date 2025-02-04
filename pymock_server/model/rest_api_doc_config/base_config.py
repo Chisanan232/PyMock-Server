@@ -222,7 +222,7 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
             return response_data_prop
 
         def _handle_object_type_value_with_object_strategy(
-            data: Union[BaseReferenceConfigProperty, BaseReferenceConfig]
+            data: Union[BaseReferenceConfigProperty, BaseReferenceConfig],
         ) -> Union[BaseRefPropertyDetailAdapter, List[BaseRefPropertyDetailAdapter]]:
             data_title = data.title
             if data_title:
@@ -285,7 +285,7 @@ class BaseAPIDocConfig(metaclass=ABCMeta):
                     )
 
         def _handle_other_types_value_with_object_strategy(
-            data: Union[BaseReferenceConfigProperty, BaseReferenceConfig]
+            data: Union[BaseReferenceConfigProperty, BaseReferenceConfig],
         ) -> BaseRefPropertyDetailAdapter:
             return self._adapter_factory.generate_property_details(
                 name="",

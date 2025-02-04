@@ -10,7 +10,7 @@ running the web server would be different if the web library is different so tha
 
 ## ``--config`` or ``-c`` <config-file-path\>
 
-Set the configuration file path. **_PyMock-Server_** would use the settings to configure the APIs.
+Set the configuration file path. **_PyFake-API-Server_** would use the settings to configure the APIs.
 
 It receives a value about the configuration file path and its default value is ``api.yaml``.
 
@@ -47,12 +47,12 @@ Set the host to bind with the web server.
 
 It receives a value about the host address which should includes IP address and port. Its default value is ``0.0.0.0:9672``.
 
-!!! note "Why the default port is **9672**?"
+!!! question "Why the default port is **9672**?"
 
     The port number could be divides into 2 parts: **96** and **72**. These 2 number mean an important thing in history:
     In **1996**, the NBA G.O.A.T Michael Jordan leaded the Chicago Bulls team won **72** games and won the NBA champion
     in that season finally. He has keeped making history and has so many unbelievable records in NBA history. Therefore,
-    **_PyMock-Server_** uses the port number **9672** to remember the things this legend made.
+    **_PyFake-API-Server_** uses the port number **9672** to remember the things this legend made.
 
 
 ## ``--workers`` or ``-w`` <workers\>

@@ -1,19 +1,20 @@
-site_name: PyMock-Server
-#site_url: https://bryantliu.github.io/pymock-server/
+# Project information
+site_name: PyFake-API-Server
+site_url: https://chisanan232.github.io/pyfake-api-server/
 site_author: Bryant Liu
 site_description: >-
-  Mock your API server, e.g., HTTP API server, by YAML configuration and set up an application in minutes
+  Fake your API server, e.g., HTTP API server, by YAML configuration and set up an application in minutes
 
 # Repository
-repo_name: Chisanan232/PyMock-Server
-repo_url: https://github.com/Chisanan232/PyMock-Server
+repo_name: Chisanan232/PyFake-API-Server
+repo_url: https://github.com/Chisanan232/PyFake-API-Server
 
 # Copyright
-copyright: Copyright &copy; 2023 - 2023 Bryant Liu
+copyright: Copyright &copy; 2023 - 2025 Bryant Liu
 
 theme:
   name: material
-#  custom_dir: material/.overrides
+  custom_dir: ./docs/_overrides
   features:
     - announce.dismiss
     - content.action.edit
@@ -58,6 +59,69 @@ theme:
   icon:
     logo: logo
 
+# Plugins
+plugins:
+  # Doc as Code
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: sphinx
+            docstring_section_style: spacy
+            docstring_options:
+              ignore_init_summary: true
+            merge_init_into_class: true
+            relative_crossrefs: true
+  # Versioning documentation
+  - mike:
+      alias_type: symlink
+      redirect_template: null
+      deploy_prefix: ''
+      canonical_version: null
+      version_selector: true
+      css_dir: css
+      javascript_dir: js
+  # Documentation modification info - create & update time
+  - git-revision-date-localized:
+      enable_creation_date: true
+  # Documentation modification info - contributor
+  - git-committers:
+      repository: Chisanan232/PyFake-API-Server
+      branch: master
+
+# Additional configuration
+extra:
+  # Versioning documentation
+  version:
+    provider: mike
+    default: stable
+    alias: true
+  # Documentation analytics
+  analytics:
+    provider: google
+    property: G-G1YK8C9EE4
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: This page was helpful
+          data: 1
+          note: >-
+            Thanks for your feedback!
+        - icon: material/emoticon-sad-outline
+          name: This page could be improved
+          data: 0
+          note: >-
+            Thanks for your feedback!
+  # Social info
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Chisanan232
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/repository/docker/chisanan232/pyfake-api-server
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/fake-api-server/
+
 # Extensions
 markdown_extensions:
   - abbr
@@ -75,8 +139,8 @@ markdown_extensions:
   - pymdownx.caret
   - pymdownx.details
   - pymdownx.emoji:
-      emoji_generator: !!python/name:materialx.emoji.to_svg
-      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -102,7 +166,7 @@ markdown_extensions:
 
 # Page tree
 nav:
-  - Home: index.md
+  - PyFake-API-Server: index.md
   - Getting started:
     - Version requirements: getting-started/version-requirements.md
     - Installation: getting-started/installation.md
@@ -125,9 +189,14 @@ nav:
       - configure-references/mocked-apis/index.md
       - Template:
         - configure-references/mocked-apis/template/index.md
-        - Loading setting: configure-references/mocked-apis/template/load.md
-        - Values setting: configure-references/mocked-apis/template/config_path_values.md
-        - Apply setting: configure-references/mocked-apis/template/apply.md
+        - File setting:
+          - configure-references/mocked-apis/template/file/index.md
+          - Loading setting: configure-references/mocked-apis/template/file/load.md
+          - Values setting: configure-references/mocked-apis/template/file/config_path_values.md
+          - Apply setting: configure-references/mocked-apis/template/file/apply.md
+        - Common configuration:
+          - configure-references/mocked-apis/template/common_config/index.md
+          - Format setting: configure-references/mocked-apis/template/common_config/format.md
       - Base:
         - configure-references/mocked-apis/base/index.md
       - API:
@@ -140,16 +209,25 @@ nav:
           - Common:
             - configure-references/mocked-apis/apis/http/common/index.md
             - Item element: configure-references/mocked-apis/apis/http/common/item_element.md
+            - Value format: configure-references/mocked-apis/apis/http/common/value_format.md
+            - Value format variable: configure-references/mocked-apis/apis/http/common/format_variable.md
   - Development:
     - development/index.md
     - How it works: development/how-it-works.md
     - Software technical details:
       - development/software-technical-details/index.md
-      - CLI - Program entry point: development/software-technical-details/program_entry_point.md
-      - CLI - subcommand line & options: development/software-technical-details/command_line_options.md
-      - CLI - processor: development/software-technical-details/command_line_processor.md
-      - Functional - file operation: development/software-technical-details/file_operation.md
-      - Subcommand - *rest-server run*: development/software-technical-details/subcmd_run_core.md
+      - About command line:
+        - development/software-technical-details/command_line/index.md
+        - Program entry point: development/software-technical-details/command_line/program_entry_point.md
+        - Command line: development/software-technical-details/command_line/command_line.md
+        - Processor: development/software-technical-details/command_line/command_line_processor.md
+        - Subcommand line & options: development/software-technical-details/command_line/command_line_options.md
+      - Utility functional:
+        - development/software-technical-details/util_functional/index.md
+        - Functional - file operation: development/software-technical-details/util_functional/file_operation.md
+      - Rest-Server functional:
+        - development/software-technical-details/rest-server_functional/index.md
+        - Subcommand - *rest-server run*: development/software-technical-details/rest-server_functional/subcmd_run_core.md
     - Contributing :
       - development/contributing/index.md
       - Reporting a bug: development/contributing/reporting-a-bug.md

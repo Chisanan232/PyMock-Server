@@ -7,7 +7,7 @@ This configuration section is the major function because here settings would dec
 Manage the API detail settings. The elements in it would be key-value map format. The key means the common feature or API
 name. The value means the detail settings of the common feature or API name.
 
-So what is the common feature? **_PyMock-Server_** provides some feature to let developers could to more convenience and clear
+So what is the common feature? **_PyFake-API-Server_** provides some feature to let developers could to more convenience and clear
 of configuring mocked API. Following are the common features it provides currently:
 
 * [Basic information](#mocked_apisbase)

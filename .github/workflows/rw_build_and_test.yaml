@@ -6,21 +6,21 @@ on:
 jobs:
   prep_unit-test:
 #    name: Prepare all unit test items
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_get_tests.yaml@v7
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_get_tests.yaml@v7.2
     with:
       shell_arg: test/unit_test/
 
 
   prep_integration-test:
 #    name: Prepare all integration test items
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_get_tests.yaml@v7
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_get_tests.yaml@v7.2
     with:
       shell_arg: test/integration_test/
 
 
   prep_system-test:
 #    name: Prepare all system test items
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_get_tests.yaml@v7
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_get_tests.yaml@v7.2
     with:
       shell_arg: test/system_test/
 
@@ -56,7 +56,7 @@ jobs:
 #    name: For unit test, organize and generate the testing report and upload it to Codecov
     if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
     needs: run_unit-test
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_organize_test_cov_reports.yaml@v7
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_organize_test_cov_reports.yaml@v7.2
     with:
       test_type: unit-test
 
@@ -65,7 +65,7 @@ jobs:
 #    name: For unit test, organize and generate the testing report and upload it to Codecov
     if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
     needs: run_integration-test
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_organize_test_cov_reports.yaml@v7
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_organize_test_cov_reports.yaml@v7.2
     with:
       test_type: integration-test
 
@@ -74,7 +74,7 @@ jobs:
 #    name: For unit test, organize and generate the testing report and upload it to Codecov
     if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
     needs: run_system-test
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_organize_test_cov_reports.yaml@v7
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_organize_test_cov_reports.yaml@v7.2
     with:
       test_type: system-test
 
@@ -83,6 +83,6 @@ jobs:
 #    name: Organize and generate the testing report and upload it to Codecov
     if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref_name == 'master') }}
     needs: [run_unit-test, run_integration-test, run_system-test]
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_organize_test_cov_reports.yaml@v7
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_organize_test_cov_reports.yaml@v7.2
     with:
       test_type: all-test

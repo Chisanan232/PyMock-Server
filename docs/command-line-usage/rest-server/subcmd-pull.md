@@ -1,15 +1,15 @@
 # Subcommand ``pull`` usage
 
 If it has already had API documentation, e.g., OpenAPI format (aka Swagger API), provides the API details, you could use
-``pull`` feature to fetch it as **_PyMock-Server_** format configuration and set up HTTP server for mocking API easily and 
+``pull`` feature to fetch it as **_PyFake-API-Server_** format configuration and set up HTTP server for mocking API easily and 
 quickly.
 
-??? note "Why we need sub-command line ``pull``?"
+??? question "Why we need sub-command line ``pull``?"
 
     Let's consider one scenario, the system has already provide service for a while 
     and it has so many APIs which have already be used awhile. However, you want to 
     import this tool for Font-End site development, but it's too hard to configure 
-    all existing APIs into **_PyMock-Server_** configuration. At this time, ``pull`` 
+    all existing APIs into **_PyFake-API-Server_** configuration. At this time, ``pull`` 
     feature could give you a hand to handle it easily and quickly.
 
 
@@ -21,7 +21,7 @@ quickly.
 ## ``--source`` or ``-s`` <API document URL\>
 
 Set the source that is the endpoint of OpenAPI document it would try to get the API documentation configuration and 
-convert it as **_PyMock-Server_** format configuration.
+convert it as **_PyFake-API-Server_** format configuration.
 
 It receives a string value about the host address or URL path.
 
@@ -29,7 +29,7 @@ It receives a string value about the host address or URL path.
 ## ``--source-file`` or ``-f`` <API document configuration file\>
 
 Set the source file that is the specific file it would try to get the API documentation configuration and convert it 
-as **_PyMock-Server_** format configuration.
+as **_PyFake-API-Server_** format configuration.
 
 It receives a string value about the configuration file path.
 
@@ -44,7 +44,7 @@ It receives a string value about the base URL path.
 ## ``--config-path`` or ``-c`` <config file path\>
 
 The file path for saving configuration which be fetched and be deserialized from the API documentation configuration to 
-**_PyMock-Server_** format.
+**_PyFake-API-Server_** format.
 
 It receives a string value about the configuration file path.
 
