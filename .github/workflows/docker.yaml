@@ -19,7 +19,7 @@ on:
     branches:
       - "master"
     paths:
-      - "pymock_server/__pkg_info__.py"
+      - "fake_api_server/__pkg_info__.py"
 #      Only activate below setting for developing, testing or troubleshooting
 #      - ".github/workflows/docker.yaml"
 
@@ -28,7 +28,7 @@ env:
   DOCKER_IMAGE_NAME: pymock-server
 #  DOCKER_IMAGE_NAME: test    # For testing
   RELEASE_TYPE: python-package
-  PYTHON_PACKAGE_NAME: pymock_server
+  PYTHON_PACKAGE_NAME: fake_api_server
   SOFTWARE_VERSION_FORMAT: general-3
 #  RUNNING_MODE: dry-run
 
@@ -50,7 +50,7 @@ jobs:
       github_auth_token: ${{ secrets.GITHUB_TOKEN }}
     with:
       project_type: python-package
-      project_name: pymock_server
+      project_name: fake_api_server
       software_version_format: general-3
       debug_mode: true
 

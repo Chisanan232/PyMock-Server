@@ -2,12 +2,12 @@ from typing import List
 
 import pytest
 
-from pymock_server.model.api_config import (
+from fake_api_server.model.api_config import (
     APIConfig,
     TemplatableConfigLoadable,
     _BaseTemplateConfigLoader,
 )
-from pymock_server.model.api_config.template._load.process import TemplateConfigOpts
+from fake_api_server.model.api_config.template._load.process import TemplateConfigOpts
 
 # isort: off
 from test.unit_test.model.api_config.template._test_case import (

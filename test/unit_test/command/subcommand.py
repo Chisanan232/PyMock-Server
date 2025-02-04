@@ -3,7 +3,7 @@ from typing import Any, List, Type, Union
 
 import pytest
 
-from pymock_server.command.subcommand import SubCommandLine
+from fake_api_server.command.subcommand import SubCommandLine
 
 # isort: off
 from test.unit_test.model._enums import EnumTestSuite

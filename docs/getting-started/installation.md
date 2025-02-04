@@ -119,7 +119,7 @@ It should add one more dependency **_PyFake-API-Server_** in your configuration 
 If you want to use the latest features of **_PyFake-API-Server_**, you could use ``git`` to clone the project's source code first.
 
 ```console
-git clone https://github.com/Chisanan232/PyFake-API-Server.git ./pymock-server -b <git branch>
+git clone https://github.com/Chisanan232/PyFake-API-Server.git ./fake_api_server -b <git branch>
 ```
 
 !!! note "The dividing rule of git branch"

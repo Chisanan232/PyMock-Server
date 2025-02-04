@@ -5,11 +5,11 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_server._utils.file import Format
-from pymock_server.command.rest_server.get.process import SubCmdGet
-from pymock_server.command.subcommand import SubCommandLine
-from pymock_server.model import SubcmdGetArguments
-from pymock_server.model.subcmd_common import SysArg
+from fake_api_server._utils.file import Format
+from fake_api_server.command.rest_server.get.process import SubCmdGet
+from fake_api_server.command.subcommand import SubCommandLine
+from fake_api_server.model import SubcmdGetArguments
+from fake_api_server.model.subcmd_common import SysArg
 
 # isort: off
 

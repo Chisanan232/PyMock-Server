@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_server.server.rest.sgi._model import Command, CommandOptions
+from fake_api_server.server.rest.sgi._model import Command, CommandOptions
 
 # isort: off
 from test._values import (

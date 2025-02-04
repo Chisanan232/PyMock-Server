@@ -1,8 +1,8 @@
 from argparse import Namespace
 
-from pymock_server.command.subcommand import SubCommandLine
-from pymock_server.model import ParserArguments
-from pymock_server.model.subcmd_common import SysArg
+from fake_api_server.command.subcommand import SubCommandLine
+from fake_api_server.model import ParserArguments
+from fake_api_server.model.subcmd_common import SysArg
 
 
 class DummyParserArguments(ParserArguments):
