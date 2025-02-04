@@ -2775,7 +2775,7 @@
 <h3 id="add-new-attribute-of-enum-object-subcommandline">Add new attribute of enum object <strong>SubCommandLine</strong><a class="headerlink" href="#add-new-attribute-of-enum-object-subcommandline" title="Permanent link">&para;</a></h3>
 <p>Enum object <code>SubCommandLine</code> is the standard for <strong><em>PyFake-API-Server</em></strong> to recognize which sub-command it has. So let's add 
 one new sub-command line here:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># In module pymock_server.command.subcommand</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># In module fake_api_server.command.subcommand</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">class</span> <span class="nc">SubCommandLine</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
@@ -2785,7 +2785,7 @@ one new sub-command line here:</p>
 </span></code></pre></div>
 <h3 id="implement-new-class-about-subcommand-new-ps">Implement new class about subcommand <code>new-ps</code><a class="headerlink" href="#implement-new-class-about-subcommand-new-ps" title="Permanent link">&para;</a></h3>
 <p>Add new class extends base class <code>BaseSubCommand</code> and set value at attribute <code>sub_parser</code>.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># In module pymock_server.command.new_subcmd.options</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># In module fake_api_server.command.new_subcmd.options</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">class</span> <span class="nc">SubCommandNewProcessOption</span><span class="p">(</span><span class="n">BaseSubCommand</span><span class="p">):</span>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">sub_cmd</span><span class="p">:</span> <span class="n">SubCommandAttr</span> <span class="o">=</span> <span class="n">SubCommandAttr</span><span class="p">(</span>
@@ -2801,14 +2801,14 @@ one new sub-command line here:</p>
 </span></code></pre></div>
 <h3 id="instantiate-class-with-metaclass-for-subcommand-new-ps">Instantiate class with metaclass for subcommand <code>new-ps</code><a class="headerlink" href="#instantiate-class-with-metaclass-for-subcommand-new-ps" title="Permanent link">&para;</a></h3>
 <p>Instantiate a base class for adding options.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># In module pymock_server.command.options</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># In module fake_api_server.command.options</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">BaseSubCmdNewProcessOption</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">MetaCommandOption</span><span class="p">(</span><span class="s2">&quot;BaseSubCmdNewProcessOption&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">SubCommandNewProcessOption</span><span class="p">,),</span> <span class="p">{})</span>
 </span></code></pre></div>
 <p>It would auto-register this sub-command line into <code>SUBCOMMAND</code>. We have sub-command line <code>new-ps</code>, let's add its options.</p>
 <h3 id="extend-the-subcommand-object-to-add-its-options">Extend the subcommand object to add its option(s)<a class="headerlink" href="#extend-the-subcommand-object-to-add-its-options" title="Permanent link">&para;</a></h3>
 <p>Add new command option with extending <code>BaseSubCmdNewProcessOption</code> and set needed attributes in it:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># In module pymock_server.command.options</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># In module fake_api_server.command.options</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">class</span> <span class="nc">Arg_1</span><span class="p">(</span><span class="n">BaseSubCmdNewProcessOption</span><span class="p">):</span>
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
@@ -2823,7 +2823,7 @@ one new sub-command line here:</p>
 </ul>
 <p>Finally, don't forget to let command line process know which sub-command line is its responsibility by overriding the class
 attribute <code>responsible_subcommand</code>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># In module pymock_server.command.process</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># In module fake_api_server.command.process</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># ... some code</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
@@ -2859,7 +2859,7 @@ attribute <code>responsible_subcommand</code>:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 3, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 4, 2025</span>
   </span>
 
     
@@ -2869,7 +2869,7 @@ attribute <code>responsible_subcommand</code>:</p>
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 3, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 4, 2025</span>
   </span>
 
     

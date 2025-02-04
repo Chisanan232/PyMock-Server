@@ -2737,22 +2737,22 @@
 <p>It has 4 base classes:</p>
 <ul>
 <li>
-<p><code>MetaCommand</code> <a href="https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/command/_base/process.py#L39-L52">source code</a></p>
+<p><code>MetaCommand</code> <a href="https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/_base/process.py#L39-L52">source code</a></p>
 <p>It's a metaclass for instantiating base class. It would auto-register objects which extends the base class be instantiated
 from this metaclass to list type protected variable <code>_COMMAND_CHAIN</code>.</p>
 </li>
 <li>
-<p><code>CommandProcessor</code> <a href="https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/command/_base/process.py#L55-L112">source code</a></p>
+<p><code>CommandProcessor</code> <a href="https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/_base/process.py#L55-L112">source code</a></p>
 <p>It defines all attributes and functions for subclass to reuse or override to implement customize logic.</p>
 </li>
 <li>
-<p><code>BaseSubCmdComponent</code> <a href="https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/command/_base/process.py#L115">source code</a></p>
+<p><code>BaseSubCmdComponent</code> <a href="https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/_base/process.py#L115">source code</a></p>
 <p>This is the base class should be extended by all subclasses which is the core running logic implementation of one specific
 sub-command line. And it also needs to be the return value of property <code>_subcmd_component</code> of each subclass which extends
 base class <code>CommandProcessor</code>.</p>
 </li>
 <li>
-<p><code>BaseCommandProcessor</code> <a href="https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/command/_base/process.py#L115">source code</a></p>
+<p><code>BaseCommandProcessor</code> <a href="https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/_base/process.py#L115">source code</a></p>
 <p>This is the base class which should be extended by all subclasses. This object be instantiated by metaclass <code>MetaCommand</code>
 and general object <code>CommandProcessor</code>.</p>
 </li>
@@ -2774,7 +2774,7 @@ workflow also could refer to its <a href="command_line.mdorkflow">workflow</a>.<
 <p>You'll have 3 things need to do:</p>
 <h3 id="command-line-argument">Command line argument<a class="headerlink" href="#command-line-argument" title="Permanent link">&para;</a></h3>
 <p>New sub-command line must have options. So you need to define which sub-command line options it has.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># In module pymock_server.model.command.rest_server.cmd_args</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># In module fake_api_server.model.command.rest_server.cmd_args</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">class</span> <span class="nc">SubcmdNewProcessArguments</span><span class="p">(</span><span class="n">ParserArguments</span><span class="p">):</span>
@@ -2793,7 +2793,7 @@ workflow also could refer to its <a href="command_line.mdorkflow">workflow</a>.<
 </span></code></pre></div>
 <p>If it's the subcommand line under command line <code>mock rest-server</code>, and also defining the utility function at module
 <strong><em>__init__</em></strong>:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># In module pymock_server.model.command.rest_server.__init__</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># In module fake_api_server.model.command.rest_server.__init__</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">class</span> <span class="nc">RestServerCliArgsDeserialization</span><span class="p">:</span>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
@@ -2817,7 +2817,7 @@ workflow also could refer to its <a href="command_line.mdorkflow">workflow</a>.<
 the base modules about above modules and let the new subcommand line extend the base
 models. </p>
 <p>In this demonstration, you would need to add a new sub-package <code>new_subcmd</code> under
-sub-package <code>pymock_server.command</code>.</p>
+sub-package <code>fake_api_server.command</code>.</p>
 </div>
 <p>Let's demonstrate all way to implement to you and explain their difference.</p>
 <ol>
@@ -2841,7 +2841,7 @@ words, we also could override it directly without implement anything in componen
 </ul>
 </li>
 </ul>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># In module pymock_api.command.new_subcmd.process</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># In module fake_api_server.command.new_subcmd.process</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">class</span> <span class="nc">SubCmdNewProcess</span><span class="p">(</span><span class="n">BaseCommandProcessor</span><span class="p">):</span>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">def</span> <span class="nf">_parse_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">:</span> <span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">cmd_args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubcmdNewProcessArguments</span><span class="p">:</span>
@@ -2874,7 +2874,7 @@ object is responsible of this feature.</p>
 </li>
 </ul>
 <p>Implement the core logic in component layer:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># In module pymock_api.command.new_subcmd.component</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># In module fake_api_server.command.new_subcmd.component</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">class</span> <span class="nc">SubCmdNewProcessComponent</span><span class="p">(</span><span class="n">BaseSubCmdComponent</span><span class="p">):</span>
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">SubcmdNewProcessArguments</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -2882,7 +2882,7 @@ object is responsible of this feature.</p>
 </span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;This is new sub-command line and get option *arg_1*: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">arg_1</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 </span></code></pre></div>
 <p>Remember that it needs to let command line processor know which component object it should use to run the sub-command line core logic:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># In module pymock_api.command.new_subcmd.process</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># In module fake_api_server.command.new_subcmd.process</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">class</span> <span class="nc">SubCmdNewProcess</span><span class="p">(</span><span class="n">BaseCommandProcessor</span><span class="p">):</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="nd">@property</span>
@@ -2922,7 +2922,7 @@ next section would tell you how to add new sub-command line and its options in t
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 3, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 4, 2025</span>
   </span>
 
     
@@ -2932,7 +2932,7 @@ next section would tell you how to add new sub-command line and its options in t
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 3, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 4, 2025</span>
   </span>
 
     

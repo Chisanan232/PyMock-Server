@@ -2688,7 +2688,7 @@ environment. Therefore, the running server log message would be different with d
 <li>
 <p><code>-v</code></p>
 <p>Mount the configuration of mocked APIs into container. By Docker's rule, you need to use absolute path here. For the
-target path it would mount to, it must be in directory <code>/mit-pymock-server/</code> because where is the command line works 
+target path it would mount to, it must be in directory <code>/mit-fake-api-server/</code> because where is the command line works 
 at.</p>
 </li>
 <li>
@@ -2698,7 +2698,7 @@ at.</p>
 <li>
 <p>CONFIG_PATH</p>
 <p>The configuration path. By default, it would try to use file <code>api.yaml</code> in the root directory where it works at.
-In the other words, it would try to find the file <code>/mit-pymock-server/api.yaml</code> in Docker container in default.</p>
+In the other words, it would try to find the file <code>/mit-fake-api-server/api.yaml</code> in Docker container in default.</p>
 </li>
 <li>
 <p>WEB_FRAMEWORK</p>
@@ -2721,7 +2721,7 @@ In the other words, it would try to find the file <code>/mit-pymock-server/api.y
 </ul>
 <p>Let's give you a sample command line to set up mock server by <strong>Docker</strong>:</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="go">&gt;&gt;&gt; docker run --name mock-server \</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="go">               -v &lt;configuration root directory&gt;:/mit-pymock-server/&lt;configuration root directory&gt; \</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="go">               -v &lt;configuration root directory&gt;:/mit-fake-api-server/&lt;configuration root directory&gt; \</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="go">               -e CONFIG_PATH=&lt;configuration path&gt;</span>
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="go">               -p 9672:9672 \</span>
 </span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="go">               fake-api-server:v0.1.0</span>
@@ -2743,15 +2743,15 @@ In the other words, it would try to find the file <code>/mit-pymock-server/api.y
 </ul>
 <p>Your command line would be like below:</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="go">&gt;&gt;&gt; docker run --name mock-server \</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="go">               -v /User/foo/mock-api-demo:/mit-pymock-server \</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="go">               -v /User/foo/mock-api-demo:/mit-fake-api-server \</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="go">               -p 9672:9672 \</span>
 </span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="go">               fake-api-server:v0.1.0</span>
 </span></code></pre></div>
 <p>You can mount the all files in folder <code>/User/foo/mock-api-demo</code> into folder
-<code>/mit-pymock-server</code> of container. And the file tree in container would be as
+<code>/mit-fake-api-server</code> of container. And the file tree in container would be as
 below:</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="go">container root directory (/)</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="go">├── mit-pymock-server</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="go">├── mit-fake-api-server</span>
 </span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="go">│   ├── file1</span>
 </span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="go">│   ├── file2</span>
 </span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="go">│   ├── api.yaml</span>
@@ -2760,22 +2760,22 @@ below:</p>
 </span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="go">|       ├── file4</span>
 </span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="go">│       └── beta-api.yaml</span>
 </span></code></pre></div>
-<p>Do you remember the command line working directory is <code>mit-pymock-server</code> and
+<p>Do you remember the command line working directory is <code>mit-fake-api-server</code> and
 the default value is <code>api.yaml</code> of environment <code>CONFIG_PATH</code>? And it exactly
-has a file at path <code>mit-pymock-server/api.yaml</code> so it would set up server successfully!</p>
+has a file at path <code>mit-fake-api-server/api.yaml</code> so it would set up server successfully!</p>
 <ul>
 <li><strong>Scenario 2: Use the configuration <code>beta-api.yaml</code></strong></li>
 </ul>
 <p>If you try to set up server by configuration <code>beta-api.yaml</code>, your command
 line would be like below:</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="go">&gt;&gt;&gt; docker run --name mock-server \</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="go">               -v /User/foo/mock-api-demo:/mit-pymock-server \</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="go">               -v /User/foo/mock-api-demo:/mit-fake-api-server \</span>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="go">               -e CONFIG_PATH=./folder1/beta-api.yaml</span>
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="go">               -p 9672:9672 \</span>
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="go">               fake-api-server:v0.1.0</span>
 </span></code></pre></div>
 <p>The mount setting is the same as previous scenario so the file tree also be the
-same as previous one. And the command line working directory is <code>mit-pymock-server</code>.
+same as previous one. And the command line working directory is <code>mit-fake-api-server</code>.
 So we just need to give it a relative path in working directory. Therefore, the
 value would be <code>./folder1/beta-api.yaml</code>.</p>
 </details>
@@ -2807,7 +2807,7 @@ services.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 3, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 4, 2025</span>
   </span>
 
     
@@ -2817,7 +2817,7 @@ services.</p>
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 3, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 4, 2025</span>
   </span>
 
     
