@@ -206,7 +206,7 @@ And this command line would run the SGI server command as following:
     gunicorn --bind <IP address>:<Port> \
              --workers <workers> \
              --log-level <log-level> \
-             'pymock_api.server:create_flask_app()'
+             'fake_api_server.server:create_flask_app()'
     ```
 
 === "If you're FastAPI, run by Uvicorn"
@@ -217,7 +217,7 @@ And this command line would run the SGI server command as following:
             --port <Port> \
             --workers <workers> \
             --log-level <log-level> \
-            'pymock_api.server:create_fastapi_app'
+            'fake_api_server.server:create_fastapi_app'
     ```
 
 Therefore, you don't worry and care about which SGI server you should use and how to use the command.

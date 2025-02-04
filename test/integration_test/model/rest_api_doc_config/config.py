@@ -5,21 +5,21 @@ from typing import Any, Dict
 
 import pytest
 
-from pymock_server.model import OpenAPIVersion
-from pymock_server.model.api_config.value import FormatStrategy
-from pymock_server.model.rest_api_doc_config._base import set_openapi_version
-from pymock_server.model.rest_api_doc_config.base_config import (
+from fake_api_server.model import OpenAPIVersion
+from fake_api_server.model.api_config.value import FormatStrategy
+from fake_api_server.model.rest_api_doc_config._base import set_openapi_version
+from fake_api_server.model.rest_api_doc_config.base_config import (
     _BaseAPIConfigWithMethod,
     set_component_definition,
 )
-from pymock_server.model.rest_api_doc_config.config import (
+from fake_api_server.model.rest_api_doc_config.config import (
     APIConfigWithMethodV2,
     APIConfigWithMethodV3,
     HttpConfigV2,
     HttpConfigV3,
     ReferenceConfigProperty,
 )
-from pymock_server.model.rest_api_doc_config.content_type import ContentType
+from fake_api_server.model.rest_api_doc_config.content_type import ContentType
 
 logger = logging.getLogger(__name__)
 

@@ -4,13 +4,13 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from pymock_server import APIConfig
-from pymock_server.command._common.component import SavingConfigComponent
-from pymock_server.command.rest_server.add.component import SubCmdAddComponent
-from pymock_server.model import generate_empty_config
-from pymock_server.model.api_config.apis import ResponseStrategy
-from pymock_server.model.command.rest_server.cmd_args import SubcmdAddArguments
-from pymock_server.model.subcmd_common import SysArg
+from fake_api_server import APIConfig
+from fake_api_server.command._common.component import SavingConfigComponent
+from fake_api_server.command.rest_server.add.component import SubCmdAddComponent
+from fake_api_server.model import generate_empty_config
+from fake_api_server.model.api_config.apis import ResponseStrategy
+from fake_api_server.model.command.rest_server.cmd_args import SubcmdAddArguments
+from fake_api_server.model.subcmd_common import SysArg
 
 # isort: off
 from test._values import (
@@ -76,10 +76,10 @@ class TestSubCmdAddComponent:
         self, file_exist: bool, load_config_result: Optional[APIConfig], component: SubCmdAddComponent
     ):
         with patch(
-            "pymock_server.command.rest_server.add.component.load_config", return_value=load_config_result
+            "fake_api_server.command.rest_server.add.component.load_config", return_value=load_config_result
         ) as mock_load_config:
             with patch(
-                "pymock_server.command.rest_server.add.component.generate_empty_config"
+                "fake_api_server.command.rest_server.add.component.generate_empty_config"
             ) as mock_generate_empty_config:
                 with patch("os.path.exists", return_value=file_exist) as mock_path_exist:
                     args = SubcmdAddArguments(
@@ -146,7 +146,7 @@ class TestSubCmdAddComponent:
         component._saving_config_component = FakeSavingConfigComponent
         FakeSavingConfigComponent.serialize_and_save = MagicMock()
 
-        # with patch("pymock_server.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent):
+        # with patch("fake_api_server.command.add.component.SavingConfigComponent", return_value=FakeSavingConfigComponent):
         with patch("os.path.exists", return_value=False) as mock_path_exist:
             args = SubcmdAddArguments(
                 subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Add]),

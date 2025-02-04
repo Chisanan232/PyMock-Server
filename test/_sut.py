@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pymock_server.runner import CommandRunner
+from fake_api_server.runner import CommandRunner
 
 CMD_RUNNER: Optional[CommandRunner] = None
 

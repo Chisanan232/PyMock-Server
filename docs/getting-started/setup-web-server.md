@@ -42,7 +42,7 @@ Although Docker is easy, but we should be careful to use it with options. It has
 * ``-v``
 
     Mount the configuration of mocked APIs into container. By Docker's rule, you need to use absolute path here. For the
-    target path it would mount to, it must be in directory ``/mit-pymock-server/`` because where is the command line works 
+    target path it would mount to, it must be in directory ``/mit-fake-api-server/`` because where is the command line works 
     at.
 
 * ``-e``
@@ -52,7 +52,7 @@ Although Docker is easy, but we should be careful to use it with options. It has
     * CONFIG_PATH
 
         The configuration path. By default, it would try to use file ``api.yaml`` in the root directory where it works at.
-        In the other words, it would try to find the file ``/mit-pymock-server/api.yaml`` in Docker container in default.
+        In the other words, it would try to find the file ``/mit-fake-api-server/api.yaml`` in Docker container in default.
     
     * WEB_FRAMEWORK
 
@@ -74,7 +74,7 @@ Let's give you a sample command line to set up mock server by **Docker**:
 
 ```console
 >>> docker run --name mock-server \
-               -v <configuration root directory>:/mit-pymock-server/<configuration root directory> \
+               -v <configuration root directory>:/mit-fake-api-server/<configuration root directory> \
                -e CONFIG_PATH=<configuration path>
                -p 9672:9672 \
                fake-api-server:v0.1.0
@@ -101,18 +101,18 @@ Let's give you a sample command line to set up mock server by **Docker**:
     
     ```console
     >>> docker run --name mock-server \
-                   -v /User/foo/mock-api-demo:/mit-pymock-server \
+                   -v /User/foo/mock-api-demo:/mit-fake-api-server \
                    -p 9672:9672 \
                    fake-api-server:v0.1.0
     ```
     
     You can mount the all files in folder ``/User/foo/mock-api-demo`` into folder
-    ``/mit-pymock-server`` of container. And the file tree in container would be as
+    ``/mit-fake-api-server`` of container. And the file tree in container would be as
     below:
     
     ```console
     container root directory (/)
-    ├── mit-pymock-server
+    ├── mit-fake-api-server
     │   ├── file1
     │   ├── file2
     │   ├── api.yaml
@@ -122,9 +122,9 @@ Let's give you a sample command line to set up mock server by **Docker**:
     │       └── beta-api.yaml
     ```
     
-    Do you remember the command line working directory is ``mit-pymock-server`` and
+    Do you remember the command line working directory is ``mit-fake-api-server`` and
     the default value is ``api.yaml`` of environment ``CONFIG_PATH``? And it exactly
-    has a file at path ``mit-pymock-server/api.yaml`` so it would set up server successfully!
+    has a file at path ``mit-fake-api-server/api.yaml`` so it would set up server successfully!
 
     * **Scenario 2: Use the configuration ``beta-api.yaml``**
 
@@ -133,14 +133,14 @@ Let's give you a sample command line to set up mock server by **Docker**:
     
     ```console
     >>> docker run --name mock-server \
-                   -v /User/foo/mock-api-demo:/mit-pymock-server \
+                   -v /User/foo/mock-api-demo:/mit-fake-api-server \
                    -e CONFIG_PATH=./folder1/beta-api.yaml
                    -p 9672:9672 \
                    fake-api-server:v0.1.0
     ```
     
     The mount setting is the same as previous scenario so the file tree also be the
-    same as previous one. And the command line working directory is ``mit-pymock-server``.
+    same as previous one. And the command line working directory is ``mit-fake-api-server``.
     So we just need to give it a relative path in working directory. Therefore, the
     value would be ``./folder1/beta-api.yaml``.
 

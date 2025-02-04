@@ -5,14 +5,14 @@ from importlib.metadata import PackageNotFoundError, version
 def get_lib_ver() -> str:
     try:
         return version("pymock_api")
-        # return version("pymock_server")    # TODO: please modify to use this package name after release done
+        # return version("fake_api_server")    # TODO: please modify to use this package name after release done
     except PackageNotFoundError:
         # Doesn't have the Python package
         return "0"
 
 
 _RELEASE_TYPE: str = "python-package"
-_LIB_NAME: str = "pymock_server"
+_LIB_NAME: str = "fake_api_server"
 _SOFTWARE_VERSION_FORMAT: str = "general-3"
 # NOTE: If you're developing or testing something, you could turn this *dry run mode* as *true*
 _DRY_RUN_MODE: str = "false"

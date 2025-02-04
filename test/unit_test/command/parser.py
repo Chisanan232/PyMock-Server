@@ -3,8 +3,8 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from pymock_server.command._parser import MockAPICommandParser
-from pymock_server.exceptions import NotFoundCommandLine
+from fake_api_server.command._parser import MockAPICommandParser
+from fake_api_server.exceptions import NotFoundCommandLine
 
 
 class TestMockAPICommandParser:

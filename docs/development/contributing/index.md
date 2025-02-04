@@ -1,11 +1,11 @@
 # Contributing
 
-It's welcome to join **_PyMock-Server_** development and let it be better and better! Here section would tell you something
+It's welcome to join **_PyFake-API-Server_** development and let it be better and better! Here section would tell you something
 which may be helpful in developing, troubleshooting, etc.
 
 * Developing
 
-    What things you should do if you want to develop **_PyMock-Server_**. In honestly, it's just a suggestion, you also could
+    What things you should do if you want to develop **_PyFake-API-Server_**. In honestly, it's just a suggestion, you also could
 develop by the way you feel great or be convenience if you already have experience at developing with Python. But, if you're
 new in Python, I believe it would be very helpful to you.
 
@@ -16,7 +16,7 @@ at having great tests to deeply raising the quality and reliable of test for sou
 
 * Reporting a bug
 
-    If you find any problem or something wrong of **_PyMock-Server_**, it's great to report it to us to fix it and provide
+    If you find any problem or something wrong of **_PyFake-API-Server_**, it's great to report it to us to fix it and provide
 better tool to everyone.
 
 * Requesting a feature or change

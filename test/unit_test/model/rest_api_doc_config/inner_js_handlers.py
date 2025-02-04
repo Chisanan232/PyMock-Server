@@ -2,8 +2,8 @@ from typing import Union
 
 import pytest
 
-from pymock_server.model.api_config.value import ValueFormat
-from pymock_server.model.rest_api_doc_config._js_handlers import (
+from fake_api_server.model.api_config.value import ValueFormat
+from fake_api_server.model.rest_api_doc_config._js_handlers import (
     ApiDocValueFormat,
     convert_js_type,
 )

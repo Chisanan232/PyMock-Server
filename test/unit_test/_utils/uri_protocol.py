@@ -2,7 +2,7 @@ from typing import List, Tuple, Union
 
 import pytest
 
-from pymock_server._utils.uri_protocol import URIScheme
+from fake_api_server._utils.uri_protocol import URIScheme
 
 _Test_Data: List[Tuple[Union[str, URIScheme], str]] = []
 uri_enum = [(uri, uri) for uri in URIScheme]

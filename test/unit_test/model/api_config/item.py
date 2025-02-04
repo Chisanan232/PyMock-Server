@@ -3,8 +3,8 @@ from typing import Any, Type
 
 import pytest
 
-from pymock_server.model.api_config import IteratorItem
-from pymock_server.model.api_config._base import _HasItemsPropConfig
+from fake_api_server.model.api_config import IteratorItem
+from fake_api_server.model.api_config._base import _HasItemsPropConfig
 
 # isort: off
 from test._values import (

@@ -6,9 +6,9 @@ from unittest.mock import patch
 
 import pytest
 
-from pymock_server._utils.importing import SUPPORT_SGI_SERVER, SUPPORT_WEB_FRAMEWORK
-from pymock_server.command.subcommand import SubCommandLine
-from pymock_server.runner import CommandRunner
+from fake_api_server._utils.importing import SUPPORT_SGI_SERVER, SUPPORT_WEB_FRAMEWORK
+from fake_api_server.command.subcommand import SubCommandLine
+from fake_api_server.runner import CommandRunner
 
 # isort: off
 from test._sut import get_runner

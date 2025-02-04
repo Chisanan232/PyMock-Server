@@ -12,13 +12,13 @@ try:
 except ImportError:
     from yaml import Dumper, Loader  # type: ignore
 
-from pymock_server.command._base.process import BaseCommandProcessor
-from pymock_server.command.options import get_all_subcommands
-from pymock_server.command.process import NoSubCmd, make_command_chain
-from pymock_server.command.subcommand import SubCommandLine
-from pymock_server.model import ParserArguments, SubcmdRunArguments
-from pymock_server.model.subcmd_common import SysArg
-from pymock_server.server import Command, CommandOptions, WSGIServer
+from fake_api_server.command._base.process import BaseCommandProcessor
+from fake_api_server.command.options import get_all_subcommands
+from fake_api_server.command.process import NoSubCmd, make_command_chain
+from fake_api_server.command.subcommand import SubCommandLine
+from fake_api_server.model import ParserArguments, SubcmdRunArguments
+from fake_api_server.model.subcmd_common import SysArg
+from fake_api_server.server import Command, CommandOptions, WSGIServer
 
 # isort: off
 from test._dummy import DummyParserArguments
@@ -198,6 +198,6 @@ def test_make_command_chain_if_duplicated_subcmd():
     assert re.search(r"subcommand.{1,64}has been used", str(exc_info.value), re.IGNORECASE)
 
     # Remove the invalid object for test could run finely.
-    from pymock_server.command._base.process import CommandProcessChain
+    from fake_api_server.command._base.process import CommandProcessChain
 
     CommandProcessChain.pop(-1)

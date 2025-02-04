@@ -25,7 +25,7 @@ Enum object ``SubCommandLine`` is the standard for **_PyFake-API-Server_** to re
 one new sub-command line here:
 
 ```python hl_lines="9"
-# In module pymock_server.command.subcommand
+# In module fake_api_server.command.subcommand
 
 class SubCommandLine(Enum):
 
@@ -39,7 +39,7 @@ class SubCommandLine(Enum):
 Add new class extends base class ``BaseSubCommand`` and set value at attribute ``sub_parser``.
 
 ```python
-# In module pymock_server.command.new_subcmd.options
+# In module fake_api_server.command.new_subcmd.options
 
 class SubCommandNewProcessOption(BaseSubCommand):
     sub_cmd: SubCommandAttr = SubCommandAttr(
@@ -59,7 +59,7 @@ class SubCommandNewProcessOption(BaseSubCommand):
 Instantiate a base class for adding options.
 
 ```python
-# In module pymock_server.command.options
+# In module fake_api_server.command.options
 
 BaseSubCmdNewProcessOption: type = MetaCommandOption("BaseSubCmdNewProcessOption", (SubCommandNewProcessOption,), {})
 ```
@@ -71,7 +71,7 @@ It would auto-register this sub-command line into ``SUBCOMMAND``. We have sub-co
 Add new command option with extending ``BaseSubCmdNewProcessOption`` and set needed attributes in it:
 
 ```python
-# In module pymock_server.command.options
+# In module fake_api_server.command.options
 
 class Arg_1(BaseSubCmdNewProcessOption):
 
@@ -88,7 +88,7 @@ Finally, don't forget to let command line process know which sub-command line is
 attribute ``responsible_subcommand``:
 
 ```python hl_lines="6"
-# In module pymock_server.command.process
+# In module fake_api_server.command.process
 
 # ... some code
 

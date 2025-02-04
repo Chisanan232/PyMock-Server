@@ -6,7 +6,7 @@ import fastapi
 import flask
 import pytest
 
-from pymock_server._utils.importing import ensure_importing, import_web_lib
+from fake_api_server._utils.importing import ensure_importing, import_web_lib
 
 
 def fake_function() -> str:

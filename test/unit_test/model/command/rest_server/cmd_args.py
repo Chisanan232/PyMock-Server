@@ -7,9 +7,9 @@ from typing import Type
 
 import pytest
 
-from pymock_server._utils.file import Format
-from pymock_server.model.command.rest_server._sample import SampleType
-from pymock_server.model.command.rest_server.cmd_args import (
+from fake_api_server._utils.file import Format
+from fake_api_server.model.command.rest_server._sample import SampleType
+from fake_api_server.model.command.rest_server.cmd_args import (
     SubcmdAddArguments,
     SubcmdCheckArguments,
     SubcmdGetArguments,
@@ -18,7 +18,7 @@ from pymock_server.model.command.rest_server.cmd_args import (
     SubcmdSampleArguments,
     ParserArguments,
 )
-from pymock_server.model.subcmd_common import SysArg
+from fake_api_server.model.subcmd_common import SysArg
 
 # isort: off
 from test._values import (

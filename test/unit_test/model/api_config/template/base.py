@@ -4,8 +4,8 @@ from typing import TypeVar
 
 import pytest
 
-from pymock_server import APIConfig
-from pymock_server.model import (
+from fake_api_server import APIConfig
+from fake_api_server.model import (
     HTTP,
     APIParameter,
     HTTPRequest,
@@ -13,8 +13,8 @@ from pymock_server.model import (
     MockAPI,
     TemplateConfig,
 )
-from pymock_server.model.api_config import ResponseProperty
-from pymock_server.model.api_config.template import _BaseTemplateAccessable
+from fake_api_server.model.api_config import ResponseProperty
+from fake_api_server.model.api_config.template import _BaseTemplateAccessable
 
 # isort: off
 from test._values import _Mock_Template_Setting, _Test_Config_Value

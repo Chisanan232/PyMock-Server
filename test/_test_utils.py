@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Union
 
-from pymock_server._utils.random import ValueSize
+from fake_api_server._utils.random import ValueSize
 
 
 class Verify:

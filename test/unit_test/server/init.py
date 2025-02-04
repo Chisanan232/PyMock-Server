@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-import pymock_server.server as mock_server
+import fake_api_server.server as mock_server
 
 # isort: off
 from test._values import _Test_Config
@@ -20,8 +20,8 @@ class TestLoadApp:
     def load_app(self) -> Type[mock_server.load_app]:
         return mock_server.load_app
 
-    @patch("pymock_server.server.MockHTTPServer", return_value=mock_server_obj)
-    @patch("pymock_server.server.FlaskServer", return_value=mock_flask_server)
+    @patch("fake_api_server.server.MockHTTPServer", return_value=mock_server_obj)
+    @patch("fake_api_server.server.FlaskServer", return_value=mock_flask_server)
     @patch("os.environ.get", return_value=_Test_Config)
     def test_by_flask(
         self,
@@ -37,8 +37,8 @@ class TestLoadApp:
             config_path=_Test_Config, app_server=mock_flask_server, auto_setup=True
         )
 
-    @patch("pymock_server.server.MockHTTPServer", return_value=mock_server_obj)
-    @patch("pymock_server.server.FastAPIServer", return_value=mock_fastapi_server)
+    @patch("fake_api_server.server.MockHTTPServer", return_value=mock_server_obj)
+    @patch("fake_api_server.server.FastAPIServer", return_value=mock_fastapi_server)
     @patch("os.environ.get", return_value=_Test_Config)
     def test_by_flask(
         self,
@@ -60,7 +60,7 @@ class TestLoadApp:
         mock_get_os_env.assert_called_once_with("MockAPI_Config", "api.yaml")
         assert path == _Test_Config
 
-    @patch("pymock_server.server.MockHTTPServer", return_value=mock_server_obj)
+    @patch("fake_api_server.server.MockHTTPServer", return_value=mock_server_obj)
     def test_initial_mock_server(self, mock_http_server: Mock, load_app: Type[mock_server.load_app]):
         server = load_app._initial_mock_server(config_path=_Test_Config, app_server=mock_flask_server)
         mock_http_server.assert_called_once_with(

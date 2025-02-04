@@ -4,9 +4,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_server import APIConfig
-from pymock_server.model import BaseConfig, MockAPI, MockAPIs
-from pymock_server.model.api_config import TemplateConfig
+from fake_api_server import APIConfig
+from fake_api_server.model import BaseConfig, MockAPI, MockAPIs
+from fake_api_server.model.api_config import TemplateConfig
 
 # isort: off
 from test._values import (
@@ -143,7 +143,7 @@ class TestAPIConfig(CheckableTestSuite):
     def test_is_work(self, sut_with_nothing: APIConfig, test_data_path: str, criteria: bool):
         super().test_is_work(sut_with_nothing, test_data_path, criteria)
 
-    @patch("pymock_server._utils.file.operation.YAML.read", return_value=_TestConfig.API_Config)
+    @patch("fake_api_server._utils.file.operation.YAML.read", return_value=_TestConfig.API_Config)
     def test_from_yaml_file(self, mock_read_yaml: Mock, sut: APIConfig):
         config = sut.from_yaml(path="test-api.yaml")
         mock_read_yaml.assert_called_once_with("test-api.yaml")
@@ -154,7 +154,7 @@ class TestAPIConfig(CheckableTestSuite):
         expected_data = self._clean_prop_with_empty_value(_TestConfig.Mock_APIs)
         assert clean_api_config == expected_data
 
-    @patch("pymock_server._utils.file.operation.YAML.write", return_value=None)
+    @patch("fake_api_server._utils.file.operation.YAML.write", return_value=None)
     def test_to_yaml_file(self, mock_write_yaml: Mock, sut: APIConfig):
         sut.to_yaml(path=_Test_Config)
         mock_write_yaml.assert_called_once_with(path=_Test_Config, config=sut.serialize())

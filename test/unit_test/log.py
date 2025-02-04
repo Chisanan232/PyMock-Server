@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from pymock_server.log import (
+from fake_api_server.log import (
     DEBUG_LEVEL_LOG_DATETIME_FORMAT,
     DEBUG_LEVEL_LOG_FORMAT,
     init_logger_config,

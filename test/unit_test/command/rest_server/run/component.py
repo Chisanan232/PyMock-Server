@@ -3,9 +3,9 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from pymock_server.command.rest_server.run.component import SubCmdRunComponent
-from pymock_server.model.command.rest_server.cmd_args import SubcmdRunArguments
-from pymock_server.model.subcmd_common import SysArg
+from fake_api_server.command.rest_server.run.component import SubCmdRunComponent
+from fake_api_server.model.command.rest_server.cmd_args import SubcmdRunArguments
+from fake_api_server.model.subcmd_common import SysArg
 
 # isort: off
 from test._values import (
@@ -25,7 +25,7 @@ class TestSubCmdRunComponent:
     def component(self) -> SubCmdRunComponent:
         return SubCmdRunComponent()
 
-    @patch("pymock_server.command.rest_server.run.component.import_web_lib.auto_ready", return_value=None)
+    @patch("fake_api_server.command.rest_server.run.component.import_web_lib.auto_ready", return_value=None)
     def test_auto_with_nonexist_lib(self, mock_auto_ready: Mock, component: SubCmdRunComponent):
         with pytest.raises(RuntimeError) as exc_info:
             component._initial_server_gateway(lib=_Test_Auto_Type)

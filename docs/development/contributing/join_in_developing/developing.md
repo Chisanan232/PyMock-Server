@@ -149,13 +149,13 @@ We should activate the command line feature by 2 ways: **run the directory of so
 === "Out of Poetry shell"
     
     ```console
-    poetry run ./pymock_server --help
+    poetry run ./fake_api_server --help
     ```
 
 === "Within Poetry shell"
     
     ```console
-    ./pymock_server --help
+    ./fake_api_server --help
     ```
 
 ### run command line
@@ -182,4 +182,4 @@ Run the command line directly to be closer in usage as a developers:
     poetry shell
     ```
 
-Congratulation! Right now you could start to do anything what you want to do of **_PyMock-Server_** project!
+Congratulation! Right now you could start to do anything what you want to do of **_PyFake-API-Server_** project!
