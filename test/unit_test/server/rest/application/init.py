@@ -11,7 +11,7 @@ from flask import Flask
 from flask import Request as FlaskRequest
 from flask import Response as FlaskResponse
 
-from pymock_server.server.rest.application import (
+from fake_api_server.server.rest.application import (
     BaseAppServer,
     FastAPIServer,
     FlaskServer,

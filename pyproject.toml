@@ -39,7 +39,7 @@ dependencies = [
 
 [tool.poetry]
 packages = [
-    { include = "pymock_server/" },
+    { include = "fake_api_server/" },
 ]
 
 [project.optional-dependencies]
@@ -72,7 +72,7 @@ Changelog = "https://chisanan232.github.io/PyMock-Server/latest/release_note/"
 "Project Management" = "https://app.clickup.com/9018752317/v/f/90183126979/90182605225"
 
 [project.scripts]
-mock = "pymock_server.runner:run"
+mock = "fake_api_server.runner:run"
 
 [tool.poetry.group.dev.dependencies]
 # Dependency for test

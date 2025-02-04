@@ -20,11 +20,11 @@ from test.unit_test.command._base.process import BaseCommandProcessorTestSpec
 
 # isort: on
 
-from pymock_server.command.rest_server.run.process import SubCmdRun
-from pymock_server.command.subcommand import SubCommandLine
-from pymock_server.model import SubcmdRunArguments
-from pymock_server.model.subcmd_common import SysArg
-from pymock_server.server import ASGIServer, Command, CommandOptions, WSGIServer
+from fake_api_server.command.rest_server.run.process import SubCmdRun
+from fake_api_server.command.subcommand import SubCommandLine
+from fake_api_server.model import SubcmdRunArguments
+from fake_api_server.model.subcmd_common import SysArg
+from fake_api_server.server import ASGIServer, Command, CommandOptions, WSGIServer
 
 
 class TestSubCmdRun(BaseCommandProcessorTestSpec):

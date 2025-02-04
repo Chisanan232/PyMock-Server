@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pymock_server.command._base.process import BaseCommandProcessor
-from pymock_server.command.process import run_command_chain
-from pymock_server.model import ParserArguments
-from pymock_server.model.subcmd_common import SysArg
+from fake_api_server.command._base.process import BaseCommandProcessor
+from fake_api_server.command.process import run_command_chain
+from fake_api_server.model import ParserArguments
+from fake_api_server.model.subcmd_common import SysArg
 
 
 class BaseCommandProcessorTestSpec(metaclass=ABCMeta):

@@ -18,12 +18,12 @@ from test.unit_test.command._base.process import BaseCommandProcessorTestSpec
 
 # isort: on
 
-from pymock_server._utils import YAML
-from pymock_server.command.rest_server.sample.process import SubCmdSample
-from pymock_server.command.subcommand import SubCommandLine
-from pymock_server.model import SubcmdSampleArguments
-from pymock_server.model.command.rest_server._sample import SampleType
-from pymock_server.model.subcmd_common import SysArg
+from fake_api_server._utils import YAML
+from fake_api_server.command.rest_server.sample.process import SubCmdSample
+from fake_api_server.command.subcommand import SubCommandLine
+from fake_api_server.model import SubcmdSampleArguments
+from fake_api_server.model.command.rest_server._sample import SampleType
+from fake_api_server.model.subcmd_common import SysArg
 
 
 class FakeYAML(YAML):
@@ -88,13 +88,14 @@ class TestSubCmdSample(BaseCommandProcessorTestSpec):
 
         with patch.object(sys, "argv", self._given_command_line()):
             with patch(
-                "pymock_server.command.rest_server.sample.component.logger", autospec=True, side_effect=logging
+                "fake_api_server.command.rest_server.sample.component.logger", autospec=True, side_effect=logging
             ) as mock_logging:
                 with patch(
-                    "pymock_server.command.rest_server.sample.component.get_sample_by_type", return_value=sample_config
+                    "fake_api_server.command.rest_server.sample.component.get_sample_by_type",
+                    return_value=sample_config,
                 ) as mock_get_sample_by_type:
                     with patch(
-                        "pymock_server.command.rest_server.sample.component.YAML", return_value=FakeYAML
+                        "fake_api_server.command.rest_server.sample.component.YAML", return_value=FakeYAML
                     ) as mock_instantiate_writer:
                         cmd_ps(cmd_parser, mock_parser_arg)
 

@@ -43,7 +43,7 @@ APIs with configuration.
 2 Things you need to implement: importing the web framework and check importing the web framework.
 
 ```python
-# In module pymock_server._utils.importing
+# In module fake_api_server._utils.importing
 
 class import_web_lib:
 
@@ -72,7 +72,7 @@ Extend the web application feature about how **_PyFake-API-Server_** should set 
 by the customized Python web framework? How to add new API by the customized web framework?
 
 ```python
-# In module pymock_server.server.application
+# In module fake_api_server.server.application
 
 class FooWebLibrary(BaseAppServer):
     def setup(self) -> "foo_web_lib.Foo":
@@ -93,7 +93,7 @@ Implement how to run web application by your own customized Python web framework
 with options.
 
 ```python
-# In module pymock_server.server.sgi.cmd
+# In module fake_api_server.server.sgi.cmd
 
 class FooSGIServer(BaseSGIServer):
     def _init_cmd_option(self) -> BaseCommandOption:
@@ -109,7 +109,7 @@ class FooSGIServer(BaseSGIServer):
 Previous one implement the command line entry point, here implement each options how to set it.
 
 ```python
-# In module pymock_server.server.sgi.cmdoption
+# In module fake_api_server.server.sgi.cmdoption
 
 class FooWebSGIServerCmdOption(BaseCommandOption):
     def bind(self, address: Optional[str] = None, host: Optional[str] = None, port: Optional[str] = None) -> str:
@@ -134,10 +134,10 @@ class FooWebSGIServerCmdOption(BaseCommandOption):
 
 Now, we have done the core implementation, then we just leave some utility functions which we need to add.
 
-* Utility function in module ``pymock_api.server.sgi.__init__``
+* Utility function in module ``fake_api_server.server.sgi.__init__``
 
 ```python hl_lines="10"
-# In module pymock_server.server.sgi.__init__
+# In module fake_api_server.server.sgi.__init__
 
 class setup_server_gateway:
     # Some code ...
@@ -154,10 +154,10 @@ class setup_server_gateway:
 Please take a look at the code line 10, it's the key line to let SGI server to catch which factory function it should use to
 generate the web application. Here usage should base on which way should use by your own customized Python web framework.
 
-* Utility function in module ``pymock_api.server.__init__``
+* Utility function in module ``fake_api_server.server.__init__``
 
 ```python
-# In module pymock_server.server.__init__
+# In module fake_api_server.server.__init__
 
 # Some code ...
 
@@ -192,13 +192,13 @@ The global variable ``foo_app`` is the variable which web application instance w
 the factory function to generate web application. Function ``setup_foosgi`` is the one which runs the web application which be
 set up by your own customized Python web framework.
 
-* Add option value in one specific function in module ``pymock_api.command.process``
+* Add option value in one specific function in module ``fake_api_server.command.process``
 
 Finally, we need to add a new value to let option ``--app-type`` could recognize and dispatch it to set up and run the web
 application by your own customized Python web framework.
 
 ```python hl_lines="19-20"
-# In module pymock_server.command.process
+# In module fake_api_server.command.process
 
 # Some code ...
 

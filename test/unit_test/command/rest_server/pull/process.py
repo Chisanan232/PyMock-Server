@@ -29,12 +29,14 @@ from test._values import (
 )
 from test.unit_test.command._base.process import BaseCommandProcessorTestSpec
 
-from pymock_server._utils import YAML
-from pymock_server.command.rest_server.pull.process import SubCmdPull
-from pymock_server.command.subcommand import SubCommandLine
-from pymock_server.model import SubcmdPullArguments, deserialize_api_doc_config
-from pymock_server.model.rest_api_doc_config.base_config import set_component_definition
-from pymock_server.model.subcmd_common import SysArg
+from fake_api_server._utils import YAML
+from fake_api_server.command.rest_server.pull.process import SubCmdPull
+from fake_api_server.command.subcommand import SubCommandLine
+from fake_api_server.model import SubcmdPullArguments, deserialize_api_doc_config
+from fake_api_server.model.rest_api_doc_config.base_config import (
+    set_component_definition,
+)
+from fake_api_server.model.subcmd_common import SysArg
 
 from ._test_case import SubCmdPullTestCaseFactory
 
@@ -113,10 +115,10 @@ class TestSubCmdPull(BaseCommandProcessorTestSpec):
         set_component_definition(swagger_json_data.get("definitions", {}))
         with patch("sys.argv", self._given_command_line()):
             with patch(
-                "pymock_server.command._common.component.YAML", return_value=FakeYAML
+                "fake_api_server.command._common.component.YAML", return_value=FakeYAML
             ) as mock_instantiate_writer:
                 with patch(
-                    "pymock_server.command.rest_server.pull.component.URLLibHTTPClient.request",
+                    "fake_api_server.command.rest_server.pull.component.URLLibHTTPClient.request",
                     return_value=swagger_json_data,
                 ) as mock_swagger_request:
                     # Run target function

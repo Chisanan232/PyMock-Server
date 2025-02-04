@@ -3,8 +3,8 @@ from typing import Any, List, Optional
 
 import pytest
 
-from pymock_server._utils.random import ValueSize
-from pymock_server.model.api_config.variable import Digit, Size, Variable
+from fake_api_server._utils.random import ValueSize
+from fake_api_server.model.api_config.variable import Digit, Size, Variable
 
 # isort: off
 from test._values import (

@@ -2,8 +2,8 @@ import re
 
 import pytest
 
-from pymock_server.model import generate_empty_config
-from pymock_server.model.command.rest_server._sample import (
+from fake_api_server.model import generate_empty_config
+from fake_api_server.model.command.rest_server._sample import (
     SampleType,
     get_sample_by_type,
 )

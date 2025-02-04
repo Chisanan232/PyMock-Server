@@ -8,11 +8,11 @@ Here records all the CI workflows of this project runs.
 
 ## Pre-Commit CI
 
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Chisanan232/PyMock-Server/master.svg)](https://results.pre-commit.ci/latest/github/Chisanan232/PyMock-Server/master)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Chisanan232/PyFake-API-Server/master.svg)](https://results.pre-commit.ci/latest/github/Chisanan232/PyFake-API-Server/master)
 
 * CI state
 
-    Here's the state of [workflow](https://results.pre-commit.ci/latest/github/Chisanan232/PyMock-Server/master).
+    Here's the state of [workflow](https://results.pre-commit.ci/latest/github/Chisanan232/PyFake-API-Server/master).
 
 * Trigger points
 
@@ -24,11 +24,11 @@ Here records all the CI workflows of this project runs.
 
 ## PR Bot CI
 
-[![Bot PR](https://github.com/Chisanan232/PyMock-Server/actions/workflows/bot-pr.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/bot-pr.yaml)
+[![Bot PR](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/bot-pr.yaml/badge.svg)](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/bot-pr.yaml)
 
 * CI state
 
-    Here's the state of [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/bot-pr.yaml).
+    Here's the state of [workflow](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/bot-pr.yaml).
 
 * Trigger points
 
@@ -47,11 +47,11 @@ Here records all the CI workflows of this project runs.
 
 ## Source code by PR bot CI
 
-[![Bot CI](https://github.com/Chisanan232/PyMock-Server/actions/workflows/bot-ci.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/bot-ci.yaml)
+[![Bot CI](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/bot-ci.yaml/badge.svg)](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/bot-ci.yaml)
 
 * CI state
 
-    Here's the state of [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/bot-ci.yaml).
+    Here's the state of [workflow](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/bot-ci.yaml).
 
 * Trigger points
 
@@ -74,14 +74,14 @@ Here records all the CI workflows of this project runs.
 
 ## Source code CI
 
-[![CI](https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci.yaml)
+[![CI](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/ci.yaml/badge.svg)](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/ci.yaml)
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyMock-Server&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-Server)
-[![codecov](https://codecov.io/gh/Chisanan232/PyMock-Server/graph/badge.svg?token=r5HJxg9KhN)](https://codecov.io/gh/Chisanan232/PyMock-Server)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyFake-API-Server&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Chisanan232_PyFake-API-Server)
+[![codecov](https://codecov.io/gh/Chisanan232/PyFake-API-Server/graph/badge.svg?token=r5HJxg9KhN)](https://codecov.io/gh/Chisanan232/PyFake-API-Server)
 
 * CI state
 
-    Here's the state of [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/ci.yaml).
+    Here's the state of [workflow](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/ci.yaml).
 
 * Trigger points
 
@@ -95,13 +95,13 @@ Here records all the CI workflows of this project runs.
     coding style (this would also be checked in [pre-commit CI]), security or something details about code quality. And 
     finally, it would try to test to run the command line ``mock`` to ensure it should work finely.
 
-[tests]: https://github.com/Chisanan232/PyMock-Server/tree/master/test
-[unit test]: https://github.com/Chisanan232/PyMock-Server/tree/master/test/unit_test
-[integration test]: https://github.com/Chisanan232/PyMock-Server/tree/master/test/integration_test
-[system test]: https://github.com/Chisanan232/PyMock-Server/tree/master/test/system_test
+[tests]: https://github.com/Chisanan232/PyFake-API-Server/tree/master/test
+[unit test]: https://github.com/Chisanan232/PyFake-API-Server/tree/master/test/unit_test
+[integration test]: https://github.com/Chisanan232/PyFake-API-Server/tree/master/test/integration_test
+[system test]: https://github.com/Chisanan232/PyFake-API-Server/tree/master/test/system_test
 
-[test coverage reports]: https://app.codecov.io/gh/Chisanan232/PyMock-Server
-[SonarQube]: https://sonarcloud.io/summary/new_code?id=Chisanan232_PyMock-Server
+[test coverage reports]: https://app.codecov.io/gh/Chisanan232/PyFake-API-Server
+[SonarQube]: https://sonarcloud.io/summary/new_code?id=Chisanan232_PyFake-API-Server
 [pre-commit CI]: https://results.pre-commit.ci/run/github/604187293/1735723133.6DCBop-ERCWYNuC-gaGlyA
 
 ![source code ci]
@@ -110,11 +110,11 @@ Here records all the CI workflows of this project runs.
 
 ## CD
 
-[![CD](https://github.com/Chisanan232/PyMock-Server/actions/workflows/cd.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/cd.yaml)
+[![CD](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/cd.yaml/badge.svg)](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/cd.yaml)
 
 * CI state
 
-    Here's the state of [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/cd.yaml).
+    Here's the state of [workflow](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/cd.yaml).
 
 * Trigger points
 
@@ -125,7 +125,7 @@ Here records all the CI workflows of this project runs.
     It would create new git tag and git release info. After tag and release building, it would build the source code as 
     Python package and push it to [PyPI] service.
 
-[PyPI]: https://pypi.org/project/PyMock-Server/
+[PyPI]: https://pypi.org/project/PyFake-API-Server/
 
 ![cd]
 
@@ -149,15 +149,15 @@ Here records all the CI workflows of this project runs.
     ```
 
 [Chisanan232]: https://github.com/Chisanan232
-[source code]: https://github.com/Chisanan232/PyMock-Server/blob/master/pymock_server/__pkg_info__.py#L17
+[source code]: https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/__pkg_info__.py#L17
 
 ## Docker CI
 
-[![docker](https://github.com/Chisanan232/PyMock-Server/actions/workflows/docker.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/docker.yaml)
+[![docker](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/docker.yaml/badge.svg)](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/docker.yaml)
 
 * CI state
 
-    Here's the state of [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/docker.yaml).
+    Here's the state of [workflow](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/docker.yaml).
 
 * Trigger points
 
@@ -167,19 +167,19 @@ Here records all the CI workflows of this project runs.
 
     It would build the Docker image and push it to [DockerHub].
 
-[DockerHub]: https://hub.docker.com/repository/docker/chisanan232/pymock-server/general
+[DockerHub]: https://hub.docker.com/repository/docker/chisanan232/pyfake-api-server/general
 
 ## Documentation CI
 
-[![documentation](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml)
-[![pages-build-deployment](https://github.com/Chisanan232/PyMock-Server/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/Chisanan232/PyMock-Server/actions/workflows/pages/pages-build-deployment)
+[![documentation](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/documentation.yaml/badge.svg)](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/documentation.yaml)
+[![pages-build-deployment](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/pages/pages-build-deployment)
 
 * CI state
 
     Here's the state of workflows.
 
-    * Build versioning documentation: [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/documentation.yaml)
-    * Deploy versioning content: [workflow](https://github.com/Chisanan232/PyMock-Server/actions/workflows/pages/pages-build-deployment)
+    * Build versioning documentation: [workflow](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/documentation.yaml)
+    * Deploy versioning content: [workflow](https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/pages/pages-build-deployment)
 
 * Trigger points
 
@@ -208,8 +208,8 @@ Here records all the CI workflows of this project runs.
         Only when software version be updated in package info module would trigger the after-process of this workflow,
         it would try to get the software version as the version to deploy the content to specific version of documentation.
 
-[documentation]: https://github.com/Chisanan232/PyMock-Server/tree/master/docs
-[GitHub pages]: https://chisanan232.github.io/PyMock-Server/stable/
+[documentation]: https://github.com/Chisanan232/PyFake-API-Server/tree/master/docs
+[GitHub pages]: https://chisanan232.github.io/pyfake-api-server/stable/
 
 ![documentation cd]
 

@@ -5,17 +5,17 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from pymock_server.command.rest_server.check.component import (
+from fake_api_server.command.rest_server.check.component import (
     SubCmdCheckComponent,
     SwaggerDiffChecking,
     ValidityChecking,
 )
-from pymock_server.model import (
+from fake_api_server.model import (
     SubcmdCheckArguments,
     deserialize_api_doc_config,
     load_config,
 )
-from pymock_server.model.subcmd_common import SysArg
+from fake_api_server.model.subcmd_common import SysArg
 
 # isort: off
 from test._values import (
@@ -75,7 +75,7 @@ class TestSubCmdCheckComponent:
         stop_if_fail: bool,
     ):
         mock_parser_arg = self._given_parser_args(swagger_doc_url=_Swagger_API_Document_URL, stop_if_fail=stop_if_fail)
-        with patch("pymock_server.command.rest_server.check.component.load_config") as mock_load_config:
+        with patch("fake_api_server.command.rest_server.check.component.load_config") as mock_load_config:
             mock_load_config.return_value = load_config(dummy_yaml_path)
             with patch.object(SwaggerDiffChecking, "_get_swagger_config") as mock_get_swagger_config:
                 with open(api_resp_path, "r", encoding="utf-8") as file_stream:
@@ -100,7 +100,7 @@ class TestSubCmdCheckComponent:
         mock_parser_arg = self._given_parser_args(swagger_doc_url=_Swagger_API_Document_URL, stop_if_fail=stop_if_fail)
         MagicMock()
         with patch(
-            "pymock_server.command.rest_server.check.component.load_config", side_effect=mock_exception
+            "fake_api_server.command.rest_server.check.component.load_config", side_effect=mock_exception
         ) as mock_load_config:
             with pytest.raises(Exception):
                 subcmd.process(parser=Mock(), args=mock_parser_arg)
@@ -159,7 +159,7 @@ class TestSwaggerDiffChecking:
     @pytest.mark.parametrize("swagger_config_response", SWAGGER_DIFF_CHECKER_TEST_CASE)
     def test__get_swagger_config(self, swagger_config_response: str, checking: SwaggerDiffChecking):
         with patch(
-            "pymock_server.command.rest_server.check.component.URLLibHTTPClient.request"
+            "fake_api_server.command.rest_server.check.component.URLLibHTTPClient.request"
         ) as mock_api_client_request:
             with open(swagger_config_response, "r", encoding="utf-8") as file_stream:
                 mock_api_client_request.return_value = json.loads(file_stream.read())

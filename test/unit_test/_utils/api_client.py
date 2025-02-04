@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 from urllib3 import HTTPResponse, PoolManager
 
-from pymock_server._utils.api_client import BaseAPIClient, URLLibHTTPClient
+from fake_api_server._utils.api_client import BaseAPIClient, URLLibHTTPClient
 
 from ._test_case import APIClientRequestTestCaseFactory
 

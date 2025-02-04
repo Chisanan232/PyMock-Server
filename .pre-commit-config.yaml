@@ -51,7 +51,7 @@ repos:
   rev: v1.14.1
   hooks:
     - id: mypy
-      package: pymock_server,test
+      package: fake_api_server,test
       exclude: ^test/unit_test.{1,64}.py
       args:
 #        - --strict

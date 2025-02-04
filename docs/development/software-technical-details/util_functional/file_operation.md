@@ -20,7 +20,7 @@ If you want to use other file formatter, e.g., JSON, you could extend the base c
 to implement needed features.
 
 ```python
-# In module pymock_server.command.options
+# In module fake_api_server.command.options
 
 # ... some code
 
@@ -39,7 +39,7 @@ Because currently it won't have option in command line to control which way it s
 file, so we need to manually modify the code to use it.
 
 ```python hl_lines="10"
-# In module pymock_server.model.api_config
+# In module fake_api_server.model.api_config
 
 class APIConfig(_Config):
     """*The entire configuration*"""

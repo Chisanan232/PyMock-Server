@@ -45,7 +45,7 @@ jobs:
           pip3 install -U pip
           pip3 install -U pymock_api
           pip3 list
-#          pip3 install -U pymock_server    # TODO: Should modify back to *pymock_server* after first release done
+#          pip3 install -U fake_api_server    # TODO: Should modify back to *fake_api_server* after first release done
 
       - name: Install Python dependencies about Poetry
         id: checking_version_update_state

@@ -34,7 +34,7 @@ About a whole command line structure, we can divide it as multiple parts to desc
 
 #### Command line section value in **_SubCommandSection_**
 
-[source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/command/subcommand.py#L33-L35)
+[source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/subcommand.py#L33-L35)
 
 This is the section title of subcommand line usage. Each new subcommand line should define this value for brief of
 subcommand line operations.
@@ -54,7 +54,7 @@ class SubCommandSection(Enum):
 
 #### Command line value in **_SubCommandLine_**
 
-[source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/command/subcommand.py#L7-L30)
+[source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/subcommand.py#L7-L30)
 
 This is the command line self string value what it is.
 
@@ -78,7 +78,7 @@ class SubCommandLine(Enum):
 
 #### Major command line **_BaseSubCommandXXX_**
 
-[example source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/command/options.py#L77-L86)
+[example source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/options.py#L77-L86)
 
 This is the top implementation layer of command line data models. **_PyFake-API-Server_** command line tool is a nested
 command line structure. And this layer is the top layer means the first layer command line.
@@ -102,7 +102,7 @@ class BaseMajorCommandFoo(CommandOption):
 
 #### Subcommand command line **_SubCommandXXXOption_**
 
-[example source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/command/rest_server/run/options.py#L9-L17)
+[example source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/rest_server/run/options.py#L9-L17)
 
 Previous one is the top layer, this layer is the layers which are under second layer.
 
@@ -134,13 +134,13 @@ BaseSubCmdBooOption: type = MetaCommandOption("BaseSubCmdBooOption", (SubCommand
 
 #### Options of subcommand command line **_SubCommandXXXOption_**
 
-[example source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/command/rest_server/run/options.py#L20-L63)
+[example source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/rest_server/run/options.py#L20-L63)
 
 This is the truly command line options. Any command line option properties, i.e., option name, help description of
 option, etc., would be set here.
 
 [//]: # (TODO: Support API reference like below)
-[//]: # (::: pymock_server.command._base.options.CommandOption)
+[//]: # (::: fake_api_server.command._base.options.CommandOption)
 
 ```python
 # code usage of a command line option
@@ -161,17 +161,17 @@ class CmdOption(BaseSubCmdBooOption):
 <iframe frameborder="0" style="width:100%;height:800px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=b7Q_UegN4KtkyAv_nRkj#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 * It has 3 base classes:
-    * ``MetaCommandOption`` [source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/command/_base/options.py#L53-L81)
+    * ``MetaCommandOption`` [source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/_base/options.py#L53-L81)
 
         It's a metaclass for instantiating base class. It would auto-register objects which extends the base class be instantiated
         from this metaclass to list type data ``COMMAND_OPTIONS``. If it is sub-command, it also saves sub-command line string to
         list type data ``SUBCOMMAND``.
 
-    * ``CommandOption`` (includes all subclasses of ``BaseSubCommand``) [source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/command/_base/options.py#L87-L240)
+    * ``CommandOption`` (includes all subclasses of ``BaseSubCommand``) [source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/_base/options.py#L87-L240)
 
         It defines all attributes and functions for subclass to reuse or override to implement customize logic.
 
-    * [``BaseCmdOption``](https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/command/options.py#L77-L86), [``BaseSubCommandRestServer``](https://github.com/Chisanan232/PyFake-API-Server/blob/master/pymock_server/command/rest_server/option.py#L6-L13), etc.
+    * [``BaseCmdOption``](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/options.py#L77-L86), [``BaseSubCommandRestServer``](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_erver/command/rest_server/option.py#L6-L13), etc.
 
         This is the base class which should be extended by all subclasses. This object be instantiated by metaclass ``MetaCommandOption``
         and general object ``CommandOption``.

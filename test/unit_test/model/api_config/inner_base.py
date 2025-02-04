@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from pymock_server.model.api_config import _Checkable, _Config
+from fake_api_server.model.api_config import _Checkable, _Config
 
 
 @pytest.mark.parametrize(

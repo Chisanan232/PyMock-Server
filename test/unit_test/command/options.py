@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
 
-from pymock_server._utils.importing import SUPPORT_SGI_SERVER, SUPPORT_WEB_FRAMEWORK
-from pymock_server.command.options import BaseCmdOption, Version, make_options
+from fake_api_server._utils.importing import SUPPORT_SGI_SERVER, SUPPORT_WEB_FRAMEWORK
+from fake_api_server.command.options import BaseCmdOption, Version, make_options
 
 
 def test_make_options():
@@ -42,7 +42,7 @@ class TestCommandOption:
         assert re.search(r"\*cli_option\* cannot be None or empty value", str(exc_info), re.IGNORECASE)
 
         # Remove the invalid option object of the list to let test could be run finely.
-        from pymock_server.command._base.options import CommandLineOptions
+        from fake_api_server.command._base.options import CommandLineOptions
 
         CommandLineOptions.pop(-1)
 
@@ -146,7 +146,7 @@ class TestVersion:
     def option(self) -> Version:
         return Version()
 
-    @patch("pymock_server.command.options.version", side_effect=PackageNotFoundError())
+    @patch("fake_api_server.command.options.version", side_effect=PackageNotFoundError())
     def test_version_with_some_lib_not_exist(self, mock_version_fun: Mock, option: Version):
         version_info_output = option._version_output
 

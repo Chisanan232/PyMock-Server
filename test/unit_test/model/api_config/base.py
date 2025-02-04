@@ -1,6 +1,6 @@
 import pytest
 
-from pymock_server.model.api_config import BaseConfig
+from fake_api_server.model.api_config import BaseConfig
 
 # isort: off
 from test._values import _Base_URL, _TestConfig

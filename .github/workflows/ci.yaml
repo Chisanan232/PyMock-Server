@@ -146,5 +146,5 @@ jobs:
     with:
       build-type: poetry
       python_package_name: fake-api-server
-      test_shell_in_python: from pymock_server.model import APIConfig
+      test_shell_in_python: from fake_api_server.model import APIConfig
       test_shell: mock --help

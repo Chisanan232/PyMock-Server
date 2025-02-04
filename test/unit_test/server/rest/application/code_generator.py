@@ -6,9 +6,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_server.model import MockAPI
-from pymock_server.model.api_config.apis import HTTP, APIParameter
-from pymock_server.server.rest.application.code_generator import (
+from fake_api_server.model import MockAPI
+from fake_api_server.model.api_config.apis import HTTP, APIParameter
+from fake_api_server.server.rest.application.code_generator import (
     BaseWebServerCodeGenerator,
     FastAPICodeGenerator,
     FlaskCodeGenerator,

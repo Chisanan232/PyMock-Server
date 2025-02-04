@@ -2,7 +2,7 @@ import pathlib
 from collections import namedtuple
 from typing import List, Tuple
 
-from pymock_server.model.api_config.apis import ResponseStrategy
+from fake_api_server.model.api_config.apis import ResponseStrategy
 
 # isort: off
 from test._base_test_case import BaseTestCaseFactory, TestCaseDirPath

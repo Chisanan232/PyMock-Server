@@ -6,11 +6,11 @@ from typing import List, Optional, Type, Union
 
 import pytest
 
-from pymock_server.model.api_config.apis._property import BaseProperty
-from pymock_server.model.api_config.format import Format
-from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
-from pymock_server.model.api_config.variable import Size, Variable
-from pymock_server.model.rest_api_doc_config._js_handlers import ApiDocValueFormat
+from fake_api_server.model.api_config.apis._property import BaseProperty
+from fake_api_server.model.api_config.format import Format
+from fake_api_server.model.api_config.value import FormatStrategy, ValueFormat
+from fake_api_server.model.api_config.variable import Size, Variable
+from fake_api_server.model.rest_api_doc_config._js_handlers import ApiDocValueFormat
 
 # isort: off
 
@@ -18,28 +18,28 @@ from ._test_case import DeserializeV2OpenAPIConfigTestCaseFactory
 
 # isort: on
 
-from pymock_server.model import OpenAPIVersion
-from pymock_server.model.api_config import _Config
-from pymock_server.model.rest_api_doc_config._base import (
+from fake_api_server.model import OpenAPIVersion
+from fake_api_server.model.api_config import _Config
+from fake_api_server.model.rest_api_doc_config._base import (
     Transferable,
     set_openapi_version,
 )
-from pymock_server.model.rest_api_doc_config._base_model_adapter import (
+from fake_api_server.model.rest_api_doc_config._base_model_adapter import (
     BasePropertyDetailAdapter,
     BaseRequestParameterAdapter,
 )
-from pymock_server.model.rest_api_doc_config._model_adapter import (
+from fake_api_server.model.rest_api_doc_config._model_adapter import (
     FormatAdapter,
     PropertyDetailAdapter,
     ResponsePropertyAdapter,
 )
-from pymock_server.model.rest_api_doc_config.base_config import (
+from fake_api_server.model.rest_api_doc_config.base_config import (
     BaseAPIDocConfig,
     BaseReferencialConfig,
     _BaseAPIConfigWithMethod,
     set_component_definition,
 )
-from pymock_server.model.rest_api_doc_config.config import (
+from fake_api_server.model.rest_api_doc_config.config import (
     HttpConfigV2,
     ReferenceConfigProperty,
 )

@@ -6,7 +6,7 @@ from typing import List, Type
 
 import pytest
 
-from pymock_server._utils.random import (
+from fake_api_server._utils.random import (
     BaseRandomGenerator,
     RandomBigDecimal,
     RandomBoolean,
@@ -20,7 +20,7 @@ from pymock_server._utils.random import (
     RandomURI,
     RandomUUID,
 )
-from pymock_server._utils.uri_protocol import IPVersion, URIScheme
+from fake_api_server._utils.uri_protocol import IPVersion, URIScheme
 
 logger = logging.getLogger(__name__)
 

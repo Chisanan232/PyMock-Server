@@ -3,12 +3,12 @@ from typing import List, Optional, Type, Union
 
 import pytest
 
-from pymock_server.model import APIParameter
-from pymock_server.model.api_config import ResponseProperty
-from pymock_server.model.api_config.apis import ResponseStrategy
-from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
-from pymock_server.model.rest_api_doc_config._js_handlers import ApiDocValueFormat
-from pymock_server.model.rest_api_doc_config._model_adapter import (
+from fake_api_server.model import APIParameter
+from fake_api_server.model.api_config import ResponseProperty
+from fake_api_server.model.api_config.apis import ResponseStrategy
+from fake_api_server.model.api_config.value import FormatStrategy, ValueFormat
+from fake_api_server.model.rest_api_doc_config._js_handlers import ApiDocValueFormat
+from fake_api_server.model.rest_api_doc_config._model_adapter import (
     FormatAdapter,
     PropertyDetailAdapter,
     RequestParameterAdapter,

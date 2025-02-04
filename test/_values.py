@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple, Union
 from unittest.mock import Mock
 
-from pymock_server.model.api_config.apis import ResponseStrategy
+from fake_api_server.model.api_config.apis import ResponseStrategy
 
 
 class APIConfigValue:

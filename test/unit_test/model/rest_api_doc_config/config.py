@@ -9,32 +9,32 @@ try:
     from http import HTTPMethod, HTTPStatus
 except ImportError:
     from http import HTTPStatus
-    from pymock_server.model.http import HTTPMethod
+    from fake_api_server.model.http import HTTPMethod
 
-from pymock_server.exceptions import CannotParsingAPIDocumentVersion
-from pymock_server.model import MockAPI, OpenAPIVersion
-from pymock_server.model.api_config import APIConfig as PyMockEntireAPIConfig
-from pymock_server.model.rest_api_doc_config._base import (
+from fake_api_server.exceptions import CannotParsingAPIDocumentVersion
+from fake_api_server.model import MockAPI, OpenAPIVersion
+from fake_api_server.model.api_config import APIConfig as PyMockEntireAPIConfig
+from fake_api_server.model.rest_api_doc_config._base import (
     Transferable,
     get_openapi_version,
     set_openapi_version,
 )
-from pymock_server.model.rest_api_doc_config._model_adapter import (
+from fake_api_server.model.rest_api_doc_config._model_adapter import (
     APIAdapter,
     PropertyDetailAdapter,
     RequestParameterAdapter,
     ResponsePropertyAdapter,
 )
-from pymock_server.model.rest_api_doc_config.base_config import (
+from fake_api_server.model.rest_api_doc_config.base_config import (
     BaseReferenceConfigProperty,
     BaseReferencialConfig,
     _BaseAPIConfigWithMethod,
     set_component_definition,
 )
-from pymock_server.model.rest_api_doc_config.config import (
+from fake_api_server.model.rest_api_doc_config.config import (
     APIConfig as APIDocOneAPIConfig,
 )
-from pymock_server.model.rest_api_doc_config.config import (
+from fake_api_server.model.rest_api_doc_config.config import (
     APIConfigWithMethodV2,
     APIConfigWithMethodV3,
     HttpConfigV2,
@@ -47,7 +47,7 @@ from pymock_server.model.rest_api_doc_config.config import (
     SwaggerAPIDocumentConfig,
     get_api_doc_version,
 )
-from pymock_server.model.rest_api_doc_config.content_type import ContentType
+from fake_api_server.model.rest_api_doc_config.content_type import ContentType
 
 # isort: off
 

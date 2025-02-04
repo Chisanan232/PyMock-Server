@@ -3,7 +3,7 @@ from typing import List, Tuple
 
 import pytest
 
-from pymock_server.server.rest.sgi.cmdoption import (
+from fake_api_server.server.rest.sgi.cmdoption import (
     ASGICmdOption,
     BaseCommandOption,
     WSGICmdOption,

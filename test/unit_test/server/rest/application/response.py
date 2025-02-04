@@ -7,13 +7,15 @@ from unittest.mock import Mock, mock_open, patch
 
 import pytest
 
-from pymock_server.exceptions import FileFormatNotSupport
-from pymock_server.model.api_config import IteratorItem, ResponseProperty
-from pymock_server.model.api_config.apis import HTTPResponse, ResponseStrategy
-from pymock_server.model.api_config.format import Format
-from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
-from pymock_server.model.api_config.variable import Size, Variable
-from pymock_server.server.rest.application.response import HTTPResponse as _HTTPResponse
+from fake_api_server.exceptions import FileFormatNotSupport
+from fake_api_server.model.api_config import IteratorItem, ResponseProperty
+from fake_api_server.model.api_config.apis import HTTPResponse, ResponseStrategy
+from fake_api_server.model.api_config.format import Format
+from fake_api_server.model.api_config.value import FormatStrategy, ValueFormat
+from fake_api_server.model.api_config.variable import Size, Variable
+from fake_api_server.server.rest.application.response import (
+    HTTPResponse as _HTTPResponse,
+)
 
 # isort: off
 from test._values import (
