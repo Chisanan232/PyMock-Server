@@ -25,7 +25,7 @@ on:
 
 env:
   DOCKER_ACCOUNT: chisanan232
-  DOCKER_IMAGE_NAME: pymock-server
+  DOCKER_IMAGE_NAME: pyfake-api-server
 #  DOCKER_IMAGE_NAME: test    # For testing
   RELEASE_TYPE: python-package
   PYTHON_PACKAGE_NAME: fake_api_server
