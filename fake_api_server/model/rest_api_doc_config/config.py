@@ -10,8 +10,9 @@ except ImportError:
     from fake_api_server.model.http import HTTPMethod  # type: ignore[assignment]
 
 from fake_api_server.exceptions import CannotParsingAPIDocumentVersion
-from fake_api_server.model.api_config import APIConfig as PyFake_APIConfig
-from fake_api_server.model.api_config import BaseConfig, MockAPIs
+from fake_api_server.model.api_config import BaseConfig
+from fake_api_server.model.api_config import FakeAPIConfig as PyFake_APIConfig
+from fake_api_server.model.api_config import MockAPIs
 
 from ._base import (
     BaseOpenAPIDataModel,

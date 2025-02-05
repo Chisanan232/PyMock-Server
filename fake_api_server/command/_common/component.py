@@ -3,7 +3,7 @@ import pathlib
 from typing import Any, Dict, Optional
 
 from fake_api_server._utils import YAML
-from fake_api_server.model.api_config import APIConfig
+from fake_api_server.model.api_config import FakeAPIConfig
 from fake_api_server.model.api_config.template._divide import DivideStrategy
 from fake_api_server.model.command.rest_server.cmd_args import (
     _BaseSubCmdArgumentsSavingConfig,
@@ -17,12 +17,12 @@ class SavingConfigComponent:
     def __init__(self):
         self._file = YAML()
 
-    def serialize_and_save(self, cmd_args: _BaseSubCmdArgumentsSavingConfig, api_config: APIConfig) -> None:
+    def serialize_and_save(self, cmd_args: _BaseSubCmdArgumentsSavingConfig, api_config: FakeAPIConfig) -> None:
         serialized_api_config = self.serialize_api_config_with_cmd_args(cmd_args=cmd_args, api_config=api_config)
         self.save_api_config(cmd_args, serialized_api_config)
 
     def serialize_api_config_with_cmd_args(
-        self, cmd_args: _BaseSubCmdArgumentsSavingConfig, api_config: APIConfig
+        self, cmd_args: _BaseSubCmdArgumentsSavingConfig, api_config: FakeAPIConfig
     ) -> Optional[Dict[str, Any]]:
         api_config.is_pull = True
 

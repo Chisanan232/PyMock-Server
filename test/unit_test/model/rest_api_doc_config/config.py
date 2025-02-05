@@ -13,7 +13,7 @@ except ImportError:
 
 from fake_api_server.exceptions import CannotParsingAPIDocumentVersion
 from fake_api_server.model import MockAPI, OpenAPIVersion
-from fake_api_server.model.api_config import APIConfig as PyFake_EntireAPIConfig
+from fake_api_server.model.api_config import FakeAPIConfig as PyFake_EntireAPIConfig
 from fake_api_server.model.rest_api_doc_config._base import (
     Transferable,
     get_openapi_version,

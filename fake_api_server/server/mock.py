@@ -5,7 +5,7 @@ This module provides objects for mocking APIs as a web application with differen
 
 from typing import Any, Optional
 
-from fake_api_server.model import APIConfig, MockAPIs, load_config
+from fake_api_server.model import FakeAPIConfig, MockAPIs, load_config
 
 from .rest.application import BaseAppServer, FlaskServer
 
@@ -37,7 +37,7 @@ class MockHTTPServer:
         if not config_path:
             config_path = "api.yaml"
         self._config_path = config_path
-        self._api_config: Optional[APIConfig] = load_config(path=self._config_path)
+        self._api_config: Optional[FakeAPIConfig] = load_config(path=self._config_path)
 
         if app_server and not isinstance(app_server, BaseAppServer):
             raise TypeError(
