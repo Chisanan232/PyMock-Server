@@ -38,11 +38,7 @@ RUN pip install -U poetry
 RUN poetry --version
 
 # # Copy needed files and directory to container
-COPY ./README.md /mit-pyfake-api-server/
-COPY ./pyproject.toml /mit-pyfake-api-server/
-COPY ./poetry.lock /mit-pyfake-api-server/
-COPY fake_api_server/ /mit-pyfake-api-server/fake_api_server/
-COPY ./scripts/docker/ /mit-pyfake-api-server/scripts/docker/
+COPY . /mit-pyfake-api-server/
 
 # # Expose the port to outside to provide service
 EXPOSE 9672
