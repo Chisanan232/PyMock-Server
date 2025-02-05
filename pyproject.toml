@@ -80,8 +80,9 @@ Changelog = "https://chisanan232.github.io/PyMock-Server/latest/release_note/"
 [project.scripts]
 mock = "fake_api_server.runner:run"
 
-[tool.poetry.group.dev]
-optional = true
+# TODO: Let the dependencies for development to be optional
+#[tool.poetry.group.dev]
+#optional = true
 
 [tool.poetry.group.dev.dependencies]
 # Dependency for test

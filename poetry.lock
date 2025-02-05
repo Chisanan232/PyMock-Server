@@ -2791,4 +2791,4 @@ mini = ["PyYAML"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.8,<3.13"
-content-hash = "66b9a996ce3fc09b1a5ca3f33d50dd91cd860c2b1f182b38f5a565df515b1ba8"
+content-hash = "05b2daa04a7581589e977ae8d8372ad26cb0d7cd322399a0af2e812ad160e303"
