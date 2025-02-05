@@ -21,7 +21,7 @@
   <a href="https://sonarcloud.io/summary/new_code?id=Chisanan232_PyFake-API-Server">
     <img src="https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyFake-API-Server&metric=alert_status" alt="Code quality level">
   </a>
-  <a href="https://chisanan232.github.io/pyfake-api-server/stable/">
+  <a href="https://chisanan232.github.io/PyFake-API-Server/stable/">
     <img src="https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/documentation.yaml/badge.svg" alt="documentation CI status">
   </a>
   <a href="https://opensource.org/licenses/MIT">
