@@ -2653,7 +2653,7 @@
 
 
 <h1 id="set-up-web-server">Set up web server<a class="headerlink" href="#set-up-web-server" title="Permanent link">&para;</a></h1>
-<p>If your configuration be ready to mock, it's time to set up a web server to mock them and provides this service to outside!</p>
+<p>If your configuration be ready to fake, it's time to set up a web server to fake them and provides this service to outside!</p>
 <h2 id="run-by-cli">Run by CLI<a class="headerlink" href="#run-by-cli" title="Permanent link">&para;</a></h2>
 <p>It's very easy to set up and run the web server by <strong><em>PyFake-API-Server</em></strong>. With default setting, namely using default value <code>auto</code>
 of option <code>--app-type</code>, it would automatically detect which the Python web framework it can use in the current runtime
@@ -2687,7 +2687,7 @@ environment. Therefore, the running server log message would be different with d
 <ul>
 <li>
 <p><code>-v</code></p>
-<p>Mount the configuration of mocked APIs into container. By Docker's rule, you need to use absolute path here. For the
+<p>Mount the configuration of fake APIs into container. By Docker's rule, you need to use absolute path here. For the
 target path it would mount to, it must be in directory <code>/mit-fake-api-server/</code> because where is the command line works 
 at.</p>
 </li>
@@ -2716,11 +2716,11 @@ In the other words, it would try to find the file <code>/mit-fake-api-server/api
 </li>
 <li>
 <p><code>-p</code></p>
-<p>It needs to export the port number <code>9672</code> of web server so that it can provide the service to mock APIs for outside.</p>
+<p>It needs to export the port number <code>9672</code> of web server so that it can provide the service to fake APIs for outside.</p>
 </li>
 </ul>
-<p>Let's give you a sample command line to set up mock server by <strong>Docker</strong>:</p>
-<div class="language-console highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="go">&gt;&gt;&gt; docker run --name mock-server \</span>
+<p>Let's give you a sample command line to set up fake server by <strong>Docker</strong>:</p>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="go">&gt;&gt;&gt; docker run --name fake-server \</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="go">               -v &lt;configuration root directory&gt;:/mit-fake-api-server/&lt;configuration root directory&gt; \</span>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="go">               -e CONFIG_PATH=&lt;configuration path&gt;</span>
 </span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="go">               -p 9672:9672 \</span>
@@ -2729,7 +2729,7 @@ In the other words, it would try to find the file <code>/mit-fake-api-server/api
 <details class="tip">
 <summary>Hint: Still being confused about the configuration path setting? Let's demonstrate some usage scenarios to you.</summary>
 <p>Assume that we have below files tree:</p>
-<div class="language-console highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="go">local root directory (/User/foo/mock-api-demo)</span>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="go">local root directory (/User/foo/fake-api-demo)</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="go">├── file1</span>
 </span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="go">├── file2</span>
 </span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="go">├── api.yaml</span>
@@ -2742,12 +2742,12 @@ In the other words, it would try to find the file <code>/mit-fake-api-server/api
 <li><strong>Scenario 1: Use the configuration <code>api.yaml</code></strong></li>
 </ul>
 <p>Your command line would be like below:</p>
-<div class="language-console highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="go">&gt;&gt;&gt; docker run --name mock-server \</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="go">               -v /User/foo/mock-api-demo:/mit-fake-api-server \</span>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="go">&gt;&gt;&gt; docker run --name fake-server \</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="go">               -v /User/foo/fake-api-demo:/mit-fake-api-server \</span>
 </span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="go">               -p 9672:9672 \</span>
 </span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="go">               fake-api-server:v0.1.0</span>
 </span></code></pre></div>
-<p>You can mount the all files in folder <code>/User/foo/mock-api-demo</code> into folder
+<p>You can mount the all files in folder <code>/User/foo/fake-api-demo</code> into folder
 <code>/mit-fake-api-server</code> of container. And the file tree in container would be as
 below:</p>
 <div class="language-console highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="go">container root directory (/)</span>
@@ -2768,8 +2768,8 @@ has a file at path <code>mit-fake-api-server/api.yaml</code> so it would set up 
 </ul>
 <p>If you try to set up server by configuration <code>beta-api.yaml</code>, your command
 line would be like below:</p>
-<div class="language-console highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="go">&gt;&gt;&gt; docker run --name mock-server \</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="go">               -v /User/foo/mock-api-demo:/mit-fake-api-server \</span>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="go">&gt;&gt;&gt; docker run --name fake-server \</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="go">               -v /User/foo/fake-api-demo:/mit-fake-api-server \</span>
 </span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="go">               -e CONFIG_PATH=./folder1/beta-api.yaml</span>
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="go">               -p 9672:9672 \</span>
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="go">               fake-api-server:v0.1.0</span>
@@ -2783,7 +2783,7 @@ value would be <code>./folder1/beta-api.yaml</code>.</p>
 <p class="admonition-title">What the detail usage of <strong><em>PyFake-API-Server</em></strong> by <strong>Docker</strong>?</p>
 <p>Please refer to <a href="https://hub.docker.com/r/chisanan232/pyfake-api-server">PyFake-API-Server's image overview in Docker hub</a> to get more details.</p>
 </div>
-<p>Great! Now the web server for mocking your API has done, and it would start to provide this service for other projects or
+<p>Great! Now the web server for faking your API has done, and it would start to provide this service for other projects or
 services.</p>
 
 
