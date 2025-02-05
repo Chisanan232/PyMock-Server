@@ -86,7 +86,7 @@ class TestFormatAdapter:
         sut.enum = enum
 
         # when
-        pyfake_config = sut.to_pymock_api_config()
+        pyfake_config = sut.to_pyfake_api_config()
 
         # should
         if expected_strategy is None:

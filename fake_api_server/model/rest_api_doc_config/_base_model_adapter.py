@@ -22,11 +22,11 @@ class BaseFormatModelAdapter:
         return self.formatter is None and not self.enum
 
     @abstractmethod
-    def to_pymock_api_config(self) -> Optional[PyFakeFormat]:
+    def to_pyfake_api_config(self) -> Optional[PyFakeFormat]:
         pass
 
 
-# The tmp data model for final result to convert as PyMock-Server
+# The tmp data model for final result to convert as PyFake-API-Server
 @dataclass
 class BasePropertyDetailAdapter(metaclass=ABCMeta):
     name: str = field(default_factory=str)
@@ -53,7 +53,7 @@ class BasePropertyDetailAdapter(metaclass=ABCMeta):
         pass
 
     def serialize(self) -> dict:
-        _format = self.format.to_pymock_api_config() if self.format else None
+        _format = self.format.to_pyfake_api_config() if self.format else None
         _format_params = _format.serialize() if _format else None
         data = {
             "name": self.name,
@@ -76,7 +76,7 @@ class BasePropertyDetailAdapter(metaclass=ABCMeta):
         pass
 
 
-# The data models for final result which would be converted as the data models of PyMock-Server configuration
+# The data models for final result which would be converted as the data models of PyFake-API-Server configuration
 @dataclass
 class BaseRequestParameterAdapter(BasePropertyDetailAdapter, ABC):
     items: Optional[List["BaseRequestParameterAdapter"]] = None  # type: ignore[assignment]

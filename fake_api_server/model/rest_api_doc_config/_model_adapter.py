@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class FormatAdapter(BaseFormatModelAdapter):
 
-    def to_pymock_api_config(self) -> Optional[PyMockFormat]:
+    def to_pyfake_api_config(self) -> Optional[PyMockFormat]:
 
         def _configure_customize(customize: str, value_format: ValueFormat) -> Tuple[str, List[Variable]]:
             cust = customize
@@ -175,7 +175,7 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
                 name=item_data.name,
                 required=item_data.required,
                 value_type=item_data.value_type,
-                value_format=item_data.format.to_pymock_api_config() if self.format else None,  # type: ignore[union-attr]
+                value_format=item_data.format.to_pyfake_api_config() if self.format else None,  # type: ignore[union-attr]
                 items=[to_items(i) for i in (item_data.items or [])],
             )
 
@@ -184,7 +184,7 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
             required=self.required,
             value_type=self.value_type,
             default=self.default,
-            value_format=self.format.to_pymock_api_config() if self.format else None,
+            value_format=self.format.to_pyfake_api_config() if self.format else None,
             items=[to_items(i) for i in (self.items or [])],
         )
 
