@@ -67,7 +67,7 @@ _Common_Schemas: Dict[str, Dict] = {
 }
 
 
-class ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite(metaclass=ABCMeta):
+class ConvertApiDocConfigToPyFakeConfigAtHTTPResponseTestSuite(metaclass=ABCMeta):
     @pytest.mark.parametrize(
         ("api_doc_config", "format_strategy", "format_in_array"),
         [
@@ -82,7 +82,7 @@ class ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite(metaclass=ABCM
     ):
         """
         Test goal: value converting workflow at specific column *value_format*
-        API document config -> adapter -> PyMock-Server config
+        API document config -> adapter -> PyFake-API-Server config
         """
         # given
         set_openapi_version(self._api_doc_version)
@@ -123,7 +123,7 @@ class ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite(metaclass=ABCM
         pass
 
 
-class TestAPIConfigWithMethodV2(ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite):
+class TestAPIConfigWithMethodV2(ConvertApiDocConfigToPyFakeConfigAtHTTPResponseTestSuite):
 
     @property
     def _api_doc_version(self) -> OpenAPIVersion:
@@ -137,7 +137,7 @@ class TestAPIConfigWithMethodV2(ConvertApiDocConfigToPyMockAPIConfigAtHTTPRespon
         )
 
 
-class TestAPIConfigWithMethodV3(ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite):
+class TestAPIConfigWithMethodV3(ConvertApiDocConfigToPyFakeConfigAtHTTPResponseTestSuite):
 
     @property
     def _api_doc_version(self) -> OpenAPIVersion:
