@@ -158,7 +158,7 @@ class CmdOption(BaseSubCmdBooOption):
 
 ## UML
 
-<iframe frameborder="0" style="width:100%;height:800px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=b7Q_UegN4KtkyAv_nRkj#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
+<iframe frameborder="0" style="width:100%;height:800px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyFake-API-Server.drawio&page-id=b7Q_UegN4KtkyAv_nRkj#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 * It has 3 base classes:
     * ``MetaCommandOption`` [source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/_base/options.py#L53-L81)
@@ -195,7 +195,7 @@ extends ``BaseSubCmdConfigOption``, etc., means the specific options under the s
 
 * Sequence diagram
 
-<iframe frameborder="0" style="width:100%;height:400px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=y4nP58FJjcgKiph7c4k3#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
+<iframe frameborder="0" style="width:100%;height:400px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyFake-API-Server.drawio&page-id=y4nP58FJjcgKiph7c4k3#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 From above sequence diagram, it does auto-registration when initialize an object. It won't do something to iterate all objects
 and save them to list type object, it automates all things when you add one or more new subclasses which is responsible for new
