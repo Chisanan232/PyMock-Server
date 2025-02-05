@@ -30,7 +30,7 @@
 
 </p>
 
-<img align="center" src="./docs/_images/pyfake-api-server_demonstration.gif" alt="pyfake-api-server demonstration" />
+<img align="center" src="https://raw.githubusercontent.com/Chisanan232/PyFake-API-Server/refs/heads/master/docs/_images/pyfake-api-server_demonstration.gif" alt="pyfake-api-server demonstration" />
 
 <p align="center">
   <em>PyFake-API-Server</em> is a Python tool to fake API server easily and humanly without any coding.
