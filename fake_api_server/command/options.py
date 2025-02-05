@@ -89,7 +89,7 @@ BaseCmdOption: type = MetaCommandOption("BaseCmdOption", (BaseSubCommand,), {})
 class Version(BaseCmdOption):
     cli_option: str = "-v, --version"
     name: str = "version"
-    help_description: str = "The version info of PyMock-Server."
+    help_description: str = "The version info of PyFake-API-Server."
     default_value: Any = argparse.SUPPRESS
     action: str = "version"
 
@@ -114,11 +114,11 @@ class Version(BaseCmdOption):
         sgi_ver_info = _generate_version_info(support_py_pkg=SUPPORT_SGI_SERVER)
 
         return (
-            f"########## PyMock-Server: ##########\n"
+            f"######## PyFake-API-Server: #########\n"
             f"%(prog)s (version {__version__})\n\n"
             f"############ Web server: ############\n"
             f"{web_server_ver_info}\n"
-            f"##### Server gateway interface: #####\n"
+            f"#### Server gateway interface: ######\n"
             f"{sgi_ver_info}"
         )
 

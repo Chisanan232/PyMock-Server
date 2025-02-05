@@ -12,7 +12,7 @@ from fake_api_server.model.subcmd_common import SysArg
 
 @dataclass(frozen=True)
 class ParserArguments(metaclass=ABCMeta):
-    """*The data object for the arguments from parsing the command line of PyMock-Server program*"""
+    """*The data object for the arguments from parsing the command line of PyFake-API-Server program*"""
 
     subparser_structure: SysArg
 

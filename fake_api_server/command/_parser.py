@@ -16,7 +16,7 @@ class FakeAPIServerCommandParser:
     """
 
     def __init__(self):
-        self._prog = "pymock-server"
+        self._prog = "pyfake-api-server"
         self._usage = "mock" if self.is_running_subcmd else "mock [SUBCOMMAND] [OPTIONS]"
         self._description = """
         A Python tool for faking APIs by set up an application easily. PyFake-API-Server bases on Python framework to

@@ -234,7 +234,7 @@ class APIAdapter(BaseAPIAdapter):
             values = []
         else:
             values = self.response.data
-        logger.debug(f"The values for converting to PyMock-Server format response config: {values}")
+        logger.debug(f"The values for converting to PyFake-API-Server format response config: {values}")
         resp_props_values = [p.to_pyfake_api_config() for p in values] if values else values
         mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=resp_props_values)
         return mock_api

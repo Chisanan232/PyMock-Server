@@ -72,7 +72,7 @@ class WSGIServer(BaseSGIServer):
 
     .. note: Example usage of WSGI tool *gunicorn*
 
-        PyMock-Server would generate the command line as string value which is valid to run as following:
+        PyFake-API-Server would generate the command line as string value which is valid to run as following:
 
         .. code-block: shell
 
@@ -95,7 +95,7 @@ class ASGIServer(BaseSGIServer):
 
     .. note: Example usage of WSGI tool *gunicorn*
 
-        PyMock-Server would generate the command line as string value which is valid to run as following:
+        PyFake-API-Server would generate the command line as string value which is valid to run as following:
 
         .. code-block: shell
 
