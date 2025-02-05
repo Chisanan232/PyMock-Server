@@ -3,9 +3,9 @@ from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, List, Optional, Union
 
-from fake_api_server.model import APIParameter as PyMockRequestProperty
-from fake_api_server.model.api_config import ResponseProperty as PyMockResponseProperty
-from fake_api_server.model.api_config.format import Format as PyMockFormat
+from fake_api_server.model import APIParameter as PyFakeRequestProperty
+from fake_api_server.model.api_config import ResponseProperty as PyFakeResponseProperty
+from fake_api_server.model.api_config.format import Format as PyFakeFormat
 
 from ._base import Transferable
 from ._js_handlers import ApiDocValueFormat
@@ -22,7 +22,7 @@ class BaseFormatModelAdapter:
         return self.formatter is None and not self.enum
 
     @abstractmethod
-    def to_pymock_api_config(self) -> Optional[PyMockFormat]:
+    def to_pymock_api_config(self) -> Optional[PyFakeFormat]:
         pass
 
 
@@ -72,7 +72,7 @@ class BasePropertyDetailAdapter(metaclass=ABCMeta):
         return new_data
 
     @abstractmethod
-    def to_pymock_api_config(self) -> Union[PyMockRequestProperty, PyMockResponseProperty]:
+    def to_pymock_api_config(self) -> Union[PyFakeRequestProperty, PyFakeResponseProperty]:
         pass
 
 
@@ -120,7 +120,7 @@ class BaseResponsePropertyAdapter(metaclass=ABCMeta):
         pass
 
 
-# The tmp data model for final result to convert as PyMock-Server
+# The tmp data model for final result to convert as PyFake-API-Server
 @dataclass
 class BaseAPIAdapter(Transferable, ABC):
     path: str = field(default_factory=str)
