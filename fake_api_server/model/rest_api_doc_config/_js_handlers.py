@@ -55,7 +55,7 @@ class ApiDocValueFormat(Enum):
                 return formatter
         raise ValueError(f"Cannot map anyone format with value '{v}'.")
 
-    def to_pymock_value_format(self) -> ValueFormat:
+    def to_value_format(self) -> ValueFormat:
         if self is ApiDocValueFormat.Date:
             return ValueFormat.Date
         elif self is ApiDocValueFormat.DateTime:

@@ -51,7 +51,7 @@ class FormatAdapter(BaseFormatModelAdapter):
             _customize: str = ""
             _variables: List[Variable] = []
 
-            formatter = self.formatter.to_pymock_value_format()
+            formatter = self.formatter.to_value_format()
             if formatter is ValueFormat.Integer:
                 _strategy = FormatStrategy.BY_DATA_TYPE
                 # TODO: It should have setting to configure this setting
