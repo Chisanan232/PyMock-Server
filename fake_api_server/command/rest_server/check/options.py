@@ -9,7 +9,7 @@ from fake_api_server.model.subcmd_common import SubParserAttr
 class SubCommandCheckOption(BaseSubCommandRestServer):
     sub_parser: SubParserAttr = SubParserAttr(
         name=SubCommandLine.Check,
-        help="Check the validity of *PyMock-API* configuration.",
+        help="Check the validity of *PyFake-API-Server* configuration.",
     )
 
 

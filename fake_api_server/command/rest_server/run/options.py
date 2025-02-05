@@ -37,7 +37,7 @@ class WebAppType(BaseSubCmdRunOption):
 class Config(BaseSubCmdRunOption):
     cli_option: str = "-c, --config"
     name: str = "config"
-    help_description: str = "The configuration of tool PyMock-API."
+    help_description: str = "The configuration of tool PyFake-API-Server."
     default_value: str = "api.yaml"
 
 

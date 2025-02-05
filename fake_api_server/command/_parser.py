@@ -9,18 +9,18 @@ from .options import get_all_subcommands, make_options
 
 
 class FakeAPIServerCommandParser:
-    """*The parser of PyMock-API command line*
+    """*The parser of PyFake-API-Server command line*
 
-    Handling the command line about options includes what options PyMock-API could use and what values of entry command
-    line.
+    Handling the command line about options includes what options PyFake-API-Server could use and what values of entry
+    command line.
     """
 
     def __init__(self):
         self._prog = "pymock-server"
         self._usage = "mock" if self.is_running_subcmd else "mock [SUBCOMMAND] [OPTIONS]"
         self._description = """
-        A Python tool for mocking APIs by set up an application easily. PyMock-API bases on Python framework to set
-        up application, i.e., for REST API, you could select using *flask* to set up application to mock APIs.
+        A Python tool for faking APIs by set up an application easily. PyFake-API-Server bases on Python framework to
+        set up application, i.e., for REST API, you could select using *flask* to set up application to fake APIs.
         """
         self._parser_args: Dict[str, Any] = {
             "prog": self._prog,

@@ -1,4 +1,4 @@
-"""*The data model in PyMock-Server*
+"""*The data model in PyFake-API-Server*
 
 content ...
 """
