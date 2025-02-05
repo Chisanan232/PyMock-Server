@@ -52,7 +52,7 @@ def _given_command_option() -> CommandOptions:
 
 
 def _given_command(app_type: str) -> Command:
-    mock_parser_arg = SubcmdRunArguments(
+    fake_parser_arg = SubcmdRunArguments(
         subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Run]),
         app_type=app_type,
         config=_Test_Config,
@@ -60,8 +60,8 @@ def _given_command(app_type: str) -> Command:
         workers=_Workers_Amount.value,
         log_level=_Log_Level.value,
     )
-    mock_cmd_option_obj = _given_command_option()
-    return Command(entry_point="SGI tool command", app=mock_parser_arg.app_type, options=mock_cmd_option_obj)
+    fake_cmd_option_obj = _given_command_option()
+    return Command(entry_point="SGI tool command", app=fake_parser_arg.app_type, options=fake_cmd_option_obj)
 
 
 class FakeCommandProcess(BaseCommandProcessor):

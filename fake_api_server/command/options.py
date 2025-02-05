@@ -1,12 +1,12 @@
-"""*The command attributes of PyMock-Server*
+"""*The command attributes of PyFake-API-Server*
 
-This module processes the features about command to let *PyMock-Server* could be used and run through command line. In
-briefly, It has below major features:
+This module processes the features about command to let *PyFake-API-Server* could be used and run through command line.
+In briefly, It has below major features:
 
-* Parser of *PyMock-Server* command line
+* Parser of *PyFake-API-Server* command line
   Handling parsing the arguments of command line.
 
-* Options of *PyMock-Server* command
+* Options of *PyFake-API-Server* command
   Handling all the details of command options, i.e., what the option format should be used in command line, the help
   description of what this option does, etc.
 
@@ -60,13 +60,13 @@ def make_options() -> List["CommandOption"]:
         list: A list object of **CommandOption** objects.
 
     """
-    mock_api_cmd_options: List["CommandOption"] = []
+    fake_api_server_cmd_options: List["CommandOption"] = []
     for option_cls in CommandLineOptions.get():
         option = option_cls()
         if not option.cli_option:
             raise ValueError(f"The object {option.__class__}'s attribute *cli_option* cannot be None or empty value.")
-        mock_api_cmd_options.append(option.copy())
-    return mock_api_cmd_options
+        fake_api_server_cmd_options.append(option.copy())
+    return fake_api_server_cmd_options
 
 
 """
