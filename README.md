@@ -135,7 +135,7 @@ And you could test the API by ``curl``:
 "This is Foo home API."%
 ```
 
-![demonstration](docs/_images/demonstration_pymock-server_cli.gif)
+![demonstration](docs/_images/demonstration_pyfake-api-server_cli.gif)
 
 ## Documentation
 
