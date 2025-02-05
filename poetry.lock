@@ -1134,7 +1134,6 @@ description = "An MkDocs plugin to create a list of contributors on the page. Th
 optional = false
 python-versions = "<4,>=3.8"
 groups = ["docs"]
-markers = "python_version < \"4\""
 files = [
     {file = "mkdocs_git_committers_plugin_2-2.4.1-py3-none-any.whl", hash = "sha256:ec9c1d81445606c471337d1c4a1782c643b7377077b545279dc18b86b7362c6d"},
     {file = "mkdocs_git_committers_plugin_2-2.4.1.tar.gz", hash = "sha256:ea1f80a79cedc42289e0b8e973276df04fb94f56e0ae3efc5385fb28547cf5cb"},
@@ -2791,5 +2790,5 @@ mini = ["PyYAML"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.8"
-content-hash = "43e470b8abee3baa541de3a5e26615ac5d1d2ce76fa25528f7153d660ea59022"
+python-versions = ">=3.8,<3.13"
+content-hash = "05b2daa04a7581589e977ae8d8372ad26cb0d7cd322399a0af2e812ad160e303"
