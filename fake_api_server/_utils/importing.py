@@ -74,7 +74,7 @@ def ensure_importing(import_callback: Callable, import_err_callback: Optional[Ca
                     import_err_callback(e)
                 module = str(e).split(" ")[-1]
                 raise RuntimeError(
-                    f"Cannot load mocked application because current Python runtime environment cannot import {module}."
+                    f"Cannot load fake application because current Python runtime environment cannot import {module}."
                 ) from e
             else:
                 return function(*args, **kwargs)
