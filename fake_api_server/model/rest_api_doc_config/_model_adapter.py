@@ -124,7 +124,7 @@ class PropertyDetailAdapter(BaseRefPropertyDetailAdapter):
             items=[],
         )
 
-    def to_pymock_api_config(self) -> PyMockResponseProperty:
+    def to_pyfake_api_config(self) -> PyMockResponseProperty:
         return PyMockResponseProperty().deserialize(self.serialize())
 
 
@@ -168,7 +168,7 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
             items=items,
         )
 
-    def to_pymock_api_config(self) -> PyMockRequestProperty:
+    def to_pyfake_api_config(self) -> PyMockRequestProperty:
 
         def to_items(item_data: BaseRequestParameterAdapter) -> IteratorItem:
             return IteratorItem(
@@ -226,7 +226,7 @@ class APIAdapter(BaseAPIAdapter):
         # Handle request config
         mock_api.set_request(
             method=self.http_method.upper(),
-            parameters=list(map(lambda p: p.to_pymock_api_config(), self.parameters)),
+            parameters=list(map(lambda p: p.to_pyfake_api_config(), self.parameters)),
         )
 
         # Handle response config
@@ -235,6 +235,6 @@ class APIAdapter(BaseAPIAdapter):
         else:
             values = self.response.data
         logger.debug(f"The values for converting to PyMock-Server format response config: {values}")
-        resp_props_values = [p.to_pymock_api_config() for p in values] if values else values
+        resp_props_values = [p.to_pyfake_api_config() for p in values] if values else values
         mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=resp_props_values)
         return mock_api

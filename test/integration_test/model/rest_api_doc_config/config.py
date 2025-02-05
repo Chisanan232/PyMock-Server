@@ -91,7 +91,7 @@ class ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite(metaclass=ABCM
 
         # when
         response_config_adapter = api_doc_http_config.to_responses_adapter()
-        response_configs = [ra.to_pymock_api_config() for ra in response_config_adapter.data]
+        response_configs = [ra.to_pyfake_api_config() for ra in response_config_adapter.data]
 
         # should
         one_resp_configs = response_configs[0]

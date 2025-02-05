@@ -72,7 +72,7 @@ class BasePropertyDetailAdapter(metaclass=ABCMeta):
         return new_data
 
     @abstractmethod
-    def to_pymock_api_config(self) -> Union[PyFakeRequestProperty, PyFakeResponseProperty]:
+    def to_pyfake_api_config(self) -> Union[PyFakeRequestProperty, PyFakeResponseProperty]:
         pass
 
 
