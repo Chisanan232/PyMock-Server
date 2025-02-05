@@ -4,7 +4,7 @@ Here focus on a small part --- a feature of one specific option ``--config`` und
 
 ## UML
 
-<iframe frameborder="0" style="width:100%;height:780px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=UBu_mQ72ApCV_EWYisV4#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
+<iframe frameborder="0" style="width:100%;height:780px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyFake-API-Server.drawio&page-id=UBu_mQ72ApCV_EWYisV4#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 * Object ``MockHTTPServer`` uses function ``load_config`` to get all detail settings.
 * Data object ``APIConfig`` provides function to read and deserialize the configuration file content.

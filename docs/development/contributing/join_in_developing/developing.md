@@ -1,6 +1,6 @@
 # Developing
 
-Here are some guidelines for developing open source project **_PyMock-Server_**. It's very easy to start because **_PyMock-Server_**
+Here are some guidelines for developing open source project **_PyFake-API-Server_**. It's very easy to start because **_PyFake-API-Server_**
 is managed by **Poetry**.
 
 
@@ -8,11 +8,11 @@ is managed by **Poetry**.
 
 [![Supported Versions](https://img.shields.io/pypi/pyversions/fake-api-server.svg?logo=python&logoColor=FBE072)](https://pypi.org/project/fake-api-server)
 
-**_PyMock-Server_** require Python version 3.8 up. Please make sure the Python version in your runtime environment.
+**_PyFake-API-Server_** require Python version 3.8 up. Please make sure the Python version in your runtime environment.
 
 ???+ tip "Recommended: Use the latest Python version to develop"
 
-    **_PyMock-Server_** only support Python version 3.8 +. If you're user, please make sure you're Python
+    **_PyFake-API-Server_** only support Python version 3.8 +. If you're user, please make sure you're Python
     version should be newer than version 3.8. However, for developers, it strongly suggests you should
     upgrade your runtime environment Python to the latest version. We should not take too much time to
     develop with older version and the responsibility of the test running with older versions belong to
@@ -144,7 +144,7 @@ We should activate the command line feature by 2 ways: **run the directory of so
 
 ### run the directory of source code
 
-**_PyMock-Server_** has entry point for package. So it could run the folder of source code directly.
+**_PyFake-API-Server_** has entry point for package. So it could run the folder of source code directly.
 
 === "Out of Poetry shell"
     
