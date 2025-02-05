@@ -78,7 +78,7 @@ class _BaseTemplateConfigLoader:
     def _deserialize_template_config(self, path: str) -> Optional[_Config]:
         # Read YAML config
         yaml_config = self._configuration.read(path)
-        # Deserialize YAML config content as PyMock data model
+        # Deserialize YAML config content as PyFake-API-Server data model
         config = self._template_config_opts._deserialize_as_template_config
         config.base_file_path = str(pathlib.Path(path).parent)
         config.config_path = pathlib.Path(path).name

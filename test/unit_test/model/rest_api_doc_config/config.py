@@ -13,7 +13,7 @@ except ImportError:
 
 from fake_api_server.exceptions import CannotParsingAPIDocumentVersion
 from fake_api_server.model import MockAPI, OpenAPIVersion
-from fake_api_server.model.api_config import APIConfig as PyMockEntireAPIConfig
+from fake_api_server.model.api_config import APIConfig as PyFake_EntireAPIConfig
 from fake_api_server.model.rest_api_doc_config._base import (
     Transferable,
     get_openapi_version,
@@ -619,7 +619,7 @@ class TestSwaggerAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
 
         data_model.paths = {"/test/v1/foo-home": apis}
 
-    def _verify_api_config_model(self, under_test: PyMockEntireAPIConfig, data_from: OpenAPIDocumentConfig) -> None:
+    def _verify_api_config_model(self, under_test: PyFake_EntireAPIConfig, data_from: OpenAPIDocumentConfig) -> None:
         assert len(under_test.apis.apis.keys()) == len(data_from.paths)
         for api_path, api_details in under_test.apis.apis.items():
             logger.debug(f"api_path: {api_path}")
@@ -756,7 +756,7 @@ class TestOpenAPIDocumentConfig(_OpenAPIDocumentDataModelTestSuite):
 
         data_model.paths = {"/test/v1/foo-home": apis}
 
-    def _verify_api_config_model(self, under_test: PyMockEntireAPIConfig, data_from: OpenAPIDocumentConfig) -> None:
+    def _verify_api_config_model(self, under_test: PyFake_EntireAPIConfig, data_from: OpenAPIDocumentConfig) -> None:
         assert len(under_test.apis.apis.keys()) == len(data_from.paths)
         for api_path, api_details in under_test.apis.apis.items():
             logger.debug(f"api_path: {api_path}")

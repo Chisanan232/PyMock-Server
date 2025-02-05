@@ -3,9 +3,9 @@ from abc import ABC, ABCMeta, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, List, Optional, Union
 
-from fake_api_server.model import APIParameter as PyFakeRequestProperty
-from fake_api_server.model.api_config import ResponseProperty as PyFakeResponseProperty
-from fake_api_server.model.api_config.format import Format as PyFakeFormat
+from fake_api_server.model import APIParameter as PyFake_RequestProperty
+from fake_api_server.model.api_config import ResponseProperty as PyFake_ResponseProperty
+from fake_api_server.model.api_config.format import Format as PyFake_Format
 
 from ._base import Transferable
 from ._js_handlers import ApiDocValueFormat
@@ -22,7 +22,7 @@ class BaseFormatModelAdapter:
         return self.formatter is None and not self.enum
 
     @abstractmethod
-    def to_pyfake_api_config(self) -> Optional[PyFakeFormat]:
+    def to_pyfake_api_config(self) -> Optional[PyFake_Format]:
         pass
 
 
@@ -72,7 +72,7 @@ class BasePropertyDetailAdapter(metaclass=ABCMeta):
         return new_data
 
     @abstractmethod
-    def to_pyfake_api_config(self) -> Union[PyFakeRequestProperty, PyFakeResponseProperty]:
+    def to_pyfake_api_config(self) -> Union[PyFake_RequestProperty, PyFake_ResponseProperty]:
         pass
 
 

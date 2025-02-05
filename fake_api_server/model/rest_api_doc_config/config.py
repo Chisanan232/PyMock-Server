@@ -10,7 +10,7 @@ except ImportError:
     from fake_api_server.model.http import HTTPMethod  # type: ignore[assignment]
 
 from fake_api_server.exceptions import CannotParsingAPIDocumentVersion
-from fake_api_server.model.api_config import APIConfig as PyMockAPI_APIConfig
+from fake_api_server.model.api_config import APIConfig as PyFake_APIConfig
 from fake_api_server.model.api_config import BaseConfig, MockAPIs
 
 from ._base import (
@@ -543,8 +543,8 @@ class BaseAPIDocumentConfig(Transferable):
     def _set_common_objects(self, data: Dict) -> None:
         pass
 
-    def to_api_config(self, base_url: str = "") -> PyMockAPI_APIConfig:  # type: ignore[override]
-        api_config = PyMockAPI_APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=base_url), apis={}))
+    def to_api_config(self, base_url: str = "") -> PyFake_APIConfig:  # type: ignore[override]
+        api_config = PyFake_APIConfig(name="", description="", apis=MockAPIs(base=BaseConfig(url=base_url), apis={}))
         assert api_config.apis is not None and api_config.apis.apis == {}
         for path, openapi_doc_api in self.paths.items():
             path = self._align_url_format(path)
