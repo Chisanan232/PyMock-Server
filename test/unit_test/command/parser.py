@@ -3,25 +3,25 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from fake_api_server.command._parser import MockAPICommandParser
+from fake_api_server.command._parser import FakeAPIServerCommandParser
 from fake_api_server.exceptions import NotFoundCommandLine
 
 
-class TestMockAPICommandParser:
+class TestFakeAPIServerCommandParser:
     @pytest.fixture(scope="function")
-    def parser(self) -> MockAPICommandParser:
-        return MockAPICommandParser()
+    def parser(self) -> FakeAPIServerCommandParser:
+        return FakeAPIServerCommandParser()
 
     @patch("argparse.ArgumentParser")
-    def test_parse_when_not_have_parser(self, mock_argparser_obj: Mock, parser: MockAPICommandParser):
-        mock_argparser_obj.add_argument = MagicMock()
+    def test_parse_when_not_have_parser(self, fake_argparser_obj: Mock, parser: FakeAPIServerCommandParser):
+        fake_argparser_obj.add_argument = MagicMock()
 
-        mock_api_parser = parser.parse()
+        fake_api_server_parser = parser.parse()
 
-        assert mock_api_parser is parser.parser
-        mock_argparser_obj.assert_called_once()
+        assert fake_api_server_parser is parser.parser
+        fake_argparser_obj.assert_called_once()
 
-    def test_prop_subcommand(self, parser: MockAPICommandParser):
+    def test_prop_subcommand(self, parser: FakeAPIServerCommandParser):
         with patch("sys.argv", ["rest-server", "invalid"]):
             with pytest.raises(NotFoundCommandLine) as exc_info:
                 parser.subcommand

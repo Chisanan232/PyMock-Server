@@ -56,9 +56,9 @@ class BaseCommandProcessorTestSpec(metaclass=ABCMeta):
 
         api_parser = MagicMock()
         api_parser.subcommand = self._given_subcmd()
-        cmd_ps.mock_api_parser = api_parser
+        cmd_ps.fake_api_server_parser = api_parser
 
-        arguments = cmd_ps.parse(parser=cmd_ps.mock_api_parser.parse(), cmd_args=None)
+        arguments = cmd_ps.parse(parser=cmd_ps.fake_api_server_parser.parse(), cmd_args=None)
 
         assert isinstance(arguments, self._expected_argument_type())
 

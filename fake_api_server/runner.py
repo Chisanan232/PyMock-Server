@@ -22,7 +22,7 @@ except ImportError:
 class CommandRunner:
     def __init__(self):
         self._cmd_processor = self._dispatch()
-        self.cmd_parser: ArgumentParser = self._cmd_processor.mock_api_parser.parse()
+        self.cmd_parser: ArgumentParser = self._cmd_processor.fake_api_server_parser.parse()
 
     def run(self, cmd_args: ParserArguments) -> None:
         self._cmd_processor.process(parser=self.cmd_parser, args=cmd_args)

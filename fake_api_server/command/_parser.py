@@ -8,7 +8,7 @@ from fake_api_server.model.subcmd_common import SysArg
 from .options import get_all_subcommands, make_options
 
 
-class MockAPICommandParser:
+class FakeAPIServerCommandParser:
     """*The parser of PyMock-API command line*
 
     Handling the command line about options includes what options PyMock-API could use and what values of entry command
