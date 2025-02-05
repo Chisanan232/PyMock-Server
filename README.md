@@ -21,7 +21,7 @@
   <a href="https://sonarcloud.io/summary/new_code?id=Chisanan232_PyFake-API-Server">
     <img src="https://sonarcloud.io/api/project_badges/measure?project=Chisanan232_PyFake-API-Server&metric=alert_status" alt="Code quality level">
   </a>
-  <a href="https://chisanan232.github.io/PyMock-Server/stable/">
+  <a href="https://chisanan232.github.io/PyFake-API-Server/stable/">
     <img src="https://github.com/Chisanan232/PyFake-API-Server/actions/workflows/documentation.yaml/badge.svg" alt="documentation CI status">
   </a>
   <a href="https://opensource.org/licenses/MIT">
@@ -139,21 +139,21 @@ And you could test the API by ``curl``:
 
 ## Documentation
 
-The [documentation](https://chisanan232.github.io/PyMock-Server/stable/) contains more details, demonstrations and anything you need about **_PyMock-Server_**.
+The [documentation](https://chisanan232.github.io/PyFake-API-Server/stable/) contains more details, demonstrations and anything you need about **_PyFake-API-Server_**.
 
-* [Getting start](https://chisanan232.github.io/PyMock-Server/stable/getting-started/version-requirements/) helps you start to prepare environment, install dependencies and configure the detail settings with explanation in detail.
-    * What [requirement](https://chisanan232.github.io/PyMock-Server/stable/getting-started/version-requirements/) I need to prepare?
-    * How can I [install](https://chisanan232.github.io/PyMock-Server/stable/getting-started/installation/) it?
-    * How to [configure the details of API](https://chisanan232.github.io/PyMock-Server/stable/getting-started/configure-your-api/)?
-    * I have configuration right now. How can I [set up a mock server](https://chisanan232.github.io/PyMock-Server/stable/getting-started/setup-web-server/)?
+* [Getting start](https://chisanan232.github.io/PyFake-API-Server/stable/getting-started/version-requirements/) helps you start to prepare environment, install dependencies and configure the detail settings with explanation in detail.
+    * What [requirement](https://chisanan232.github.io/PyFake-API-Server/stable/getting-started/version-requirements/) I need to prepare?
+    * How can I [install](https://chisanan232.github.io/PyFake-API-Server/stable/getting-started/installation/) it?
+    * How to [configure the details of API](https://chisanan232.github.io/PyFake-API-Server/stable/getting-started/configure-your-api/)?
+    * I have configuration right now. How can I [set up a mock server](https://chisanan232.github.io/PyFake-API-Server/stable/getting-started/setup-web-server/)?
 * Want to learn more how to use it?
-    * What exactly feature it can use by [command lines](https://chisanan232.github.io/PyMock-Server/stable/command-line-usage/)?
-    * Want to know more [magic settings](https://chisanan232.github.io/PyMock-Server/stable/configure-references/config-basic-info/) to mock API?
+    * What exactly feature it can use by [command lines](https://chisanan232.github.io/PyFake-API-Server/stable/command-line-usage/)?
+    * Want to know more [magic settings](https://chisanan232.github.io/PyFake-API-Server/stable/configure-references/config-basic-info/) to mock API?
 * Want to contribute to this project?
-    * I face something [issue](https://chisanan232.github.io/PyMock-Server/stable/development/contributing/reporting-a-bug/) it cannot work finely!
-    * I want to [wish a feature or something change](https://chisanan232.github.io/PyMock-Server/stable/development/contributing/requesting-a-feature/).
-    * If you're interested in **_PyMock-Server_** and have any ideas want to design it, even implement it, it's very welcome to [contribute](https://chisanan232.github.io/PyMock-Server/stable/development/contributing/join_in_developing/) **_PyMock-Server_**!
-* About the [release notes](https://chisanan232.github.io/PyMock-Server/latest/release_note/).
+    * I face something [issue](https://chisanan232.github.io/PyFake-API-Server/stable/development/contributing/reporting-a-bug/) it cannot work finely!
+    * I want to [wish a feature or something change](https://chisanan232.github.io/PyFake-API-Server/stable/development/contributing/requesting-a-feature/).
+    * If you're interested in **_PyFake-API-Server_** and have any ideas want to design it, even implement it, it's very welcome to [contribute](https://chisanan232.github.io/PyFake-API-Server/stable/development/contributing/join_in_developing/) **_PyFake-API-Server_**!
+* About the [release notes](https://chisanan232.github.io/PyFake-API-Server/latest/release_note/).
 
 
 ## Coding style and following rules
