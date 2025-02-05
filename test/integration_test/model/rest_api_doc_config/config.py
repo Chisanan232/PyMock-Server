@@ -77,7 +77,7 @@ class ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite(metaclass=ABCM
             ({"$ref": "#/components/schemas/FormatElementArrayResponse"}, FormatStrategy.BY_DATA_TYPE, True),
         ],
     )
-    def test_convert_api_doc_config_to_adapter_to_pymock_config(
+    def test_convert_api_doc_config_to_adapter_to_pyfake_config(
         self, api_doc_config: Dict[str, Any], format_strategy: FormatStrategy, format_in_array: bool
     ):
         """
