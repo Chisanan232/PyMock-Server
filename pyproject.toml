@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "fake-api-server"
-version = "0.3.0"
+version = "0.2.0"
 description = "🕸🤖👺 A Python tool to fake API server, e.g., RESTful API server, easily and humanly without any coding."
 authors = [
     { name = "Liu, Bryant", email = "chi10211201@cycu.org.tw" }
@@ -73,6 +73,9 @@ Changelog = "https://chisanan232.github.io/PyMock-Server/latest/release_note/"
 
 [project.scripts]
 mock = "fake_api_server.runner:run"
+
+[tool.poetry.group.dev]
+optional = true
 
 [tool.poetry.group.dev.dependencies]
 # Dependency for test
