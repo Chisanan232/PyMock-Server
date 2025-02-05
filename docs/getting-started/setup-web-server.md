@@ -1,6 +1,6 @@
 # Set up web server
 
-If your configuration be ready to mock, it's time to set up a web server to mock them and provides this service to outside!
+If your configuration be ready to fake, it's time to set up a web server to fake them and provides this service to outside!
 
 ## Run by CLI
 
@@ -41,7 +41,7 @@ Although Docker is easy, but we should be careful to use it with options. It has
 
 * ``-v``
 
-    Mount the configuration of mocked APIs into container. By Docker's rule, you need to use absolute path here. For the
+    Mount the configuration of fake APIs into container. By Docker's rule, you need to use absolute path here. For the
     target path it would mount to, it must be in directory ``/mit-fake-api-server/`` because where is the command line works 
     at.
 
@@ -68,12 +68,12 @@ Although Docker is easy, but we should be careful to use it with options. It has
 
 * ``-p``
 
-    It needs to export the port number ``9672`` of web server so that it can provide the service to mock APIs for outside.
+    It needs to export the port number ``9672`` of web server so that it can provide the service to fake APIs for outside.
 
-Let's give you a sample command line to set up mock server by **Docker**:
+Let's give you a sample command line to set up fake server by **Docker**:
 
 ```console
->>> docker run --name mock-server \
+>>> docker run --name fake-server \
                -v <configuration root directory>:/mit-fake-api-server/<configuration root directory> \
                -e CONFIG_PATH=<configuration path>
                -p 9672:9672 \
@@ -85,7 +85,7 @@ Let's give you a sample command line to set up mock server by **Docker**:
     Assume that we have below files tree:
     
     ```console
-    local root directory (/User/foo/mock-api-demo)
+    local root directory (/User/foo/fake-api-demo)
     ├── file1
     ├── file2
     ├── api.yaml
@@ -100,13 +100,13 @@ Let's give you a sample command line to set up mock server by **Docker**:
     Your command line would be like below:
     
     ```console
-    >>> docker run --name mock-server \
-                   -v /User/foo/mock-api-demo:/mit-fake-api-server \
+    >>> docker run --name fake-server \
+                   -v /User/foo/fake-api-demo:/mit-fake-api-server \
                    -p 9672:9672 \
                    fake-api-server:v0.1.0
     ```
     
-    You can mount the all files in folder ``/User/foo/mock-api-demo`` into folder
+    You can mount the all files in folder ``/User/foo/fake-api-demo`` into folder
     ``/mit-fake-api-server`` of container. And the file tree in container would be as
     below:
     
@@ -132,8 +132,8 @@ Let's give you a sample command line to set up mock server by **Docker**:
     line would be like below:
     
     ```console
-    >>> docker run --name mock-server \
-                   -v /User/foo/mock-api-demo:/mit-fake-api-server \
+    >>> docker run --name fake-server \
+                   -v /User/foo/fake-api-demo:/mit-fake-api-server \
                    -e CONFIG_PATH=./folder1/beta-api.yaml
                    -p 9672:9672 \
                    fake-api-server:v0.1.0
@@ -150,5 +150,5 @@ Let's give you a sample command line to set up mock server by **Docker**:
 
     [PyFake-API-Server's image overview in Docker hub]: https://hub.docker.com/r/chisanan232/pyfake-api-server
 
-Great! Now the web server for mocking your API has done, and it would start to provide this service for other projects or
+Great! Now the web server for faking your API has done, and it would start to provide this service for other projects or
 services.
