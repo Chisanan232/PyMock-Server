@@ -52,8 +52,7 @@ You'll have 3 things need to do:
 
 New sub-command line must have options. So you need to define which sub-command line options it has.
 
-```python
-# In module fake_api_server.model.command.rest_server.cmd_args
+```python title="fake_api_server.model.command.rest_server.cmd_args" linenums="1"
 
 @dataclass(frozen=True)
 class SubcmdNewProcessArguments(ParserArguments):
@@ -74,8 +73,7 @@ class SubcmdNewProcessArguments(ParserArguments):
 If it's the subcommand line under command line ``fake rest-server``, and also defining the utility function at module
 **_\_\_init\_\__**:
 
-```python
-# In module fake_api_server.model.command.rest_server.__init__
+```python title="fake_api_server.model.command.rest_server.__init__" linenums="1"
 
 class RestServerCliArgsDeserialization:
   
@@ -123,8 +121,7 @@ Let's demonstrate all way to implement to you and explain their difference.
         * For the complex logic or large-scale feature, implement by this way would let the code in this module to be dirty and
           complex so that developers be more harder to manage or maintain it.
     
-    ```python
-    # In module fake_api_server.command.new_subcmd.process
+    ```python title="fake_api_server.command.new_subcmd.process" linenums="1"
     
     class SubCmdNewProcess(BaseCommandProcessor):
         def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdNewProcessArguments:
@@ -153,8 +150,7 @@ Let's demonstrate all way to implement to you and explain their difference.
     
     Implement the core logic in component layer:
 
-    ```python
-    # In module fake_api_server.command.new_subcmd.component
+    ```python title="fake_api_server.command.new_subcmd.component" linenums="1"
     
     class SubCmdNewProcessComponent(BaseSubCmdComponent):
         def process(self, args: SubcmdNewProcessArguments) -> None:
@@ -164,8 +160,7 @@ Let's demonstrate all way to implement to you and explain their difference.
     
     Remember that it needs to let command line processor know which component object it should use to run the sub-command line core logic:
 
-    ```python
-    # In module fake_api_server.command.new_subcmd.process
+    ```python title="fake_api_server.command.new_subcmd.process" linenums="1"
     
     class SubCmdNewProcess(BaseCommandProcessor):
         @property

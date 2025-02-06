@@ -135,8 +135,6 @@ And you could test the API by ``curl``:
 "This is Foo home API."%
 ```
 
-![demonstration](docs/_images/demonstration_pyfake-api-server_cli.gif)
-
 ## Documentation
 
 The [documentation](https://chisanan232.github.io/PyFake-API-Server/stable/) contains more details, demonstrations and anything you need about **_PyFake-API-Server_**.

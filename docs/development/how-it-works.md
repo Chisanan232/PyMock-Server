@@ -21,7 +21,7 @@ For example, above steps with different Python web framework would be below (sta
 
     1. Mock API quickly by returned value directly as Python code
     
-        ```python
+        ```python linenums="1"
         from flask import Flask
     
         app: Flask = Flask(__name__)
@@ -49,7 +49,7 @@ For example, above steps with different Python web framework would be below (sta
 
     1. Mock API quickly by returned value directly as Python code
     
-        ```python
+        ```python linenums="1"
         from fastapi import FastAPI
          
         app: FastAPI = FastAPI()
@@ -149,7 +149,7 @@ mocked_apis:
 
 === "Python code by Flask"
     
-     ```python hl_lines="7-9"
+     ```python linenums="1" hl_lines="7-9"
      from flask import Flask
  
      app: Flask = Flask(__name__)
@@ -165,7 +165,7 @@ mocked_apis:
 
 === "Python code by FastAPI"
     
-     ```python hl_lines="7-9"
+     ```python linenums="1" hl_lines="7-9"
      from fastapi import FastAPI
       
      app: FastAPI = FastAPI()

@@ -19,8 +19,7 @@ Here demonstrate how to extend this feature to parse other file formatter.
 If you want to use other file formatter, e.g., JSON, you could extend the base class of file operation _``BaseFileOperation``
 to implement needed features.
 
-```python
-# In module fake_api_server.command.options
+```python title="fake_api_server._utils.file.operation" linenums="1"
 
 # ... some code
 
@@ -38,17 +37,23 @@ class JSON(_BaseFileOperation):
 Because currently it won't have option in command line to control which way it should use to serialize or deserialize configuration
 file, so we need to manually modify the code to use it.
 
-```python hl_lines="10"
-# In module fake_api_server.model.api_config
+```python title="fake_api_server.model.api_config.__init__" linenums="1" hl_lines="14"
+from fake_api_server._utils.file.operation import JSON
+    
+# ... some code ...
 
-class APIConfig(_Config):
+class FakeAPIConfig(_Config, _Checkable):
     """*The entire configuration*"""
 
     _name: str = ""
     _description: str = ""
     _apis: Optional[MockAPIs]
+    
+    # ... some code ...
 
     _configuration: _BaseFileOperation = JSON()
+    
+    # ... some code ...
 
     def __init__(self, name: str = "", description: str = "", apis: Optional[MockAPIs] = None):
         self._name = name

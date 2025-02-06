@@ -42,8 +42,7 @@ APIs with configuration.
 
 2 Things you need to implement: importing the web framework and check importing the web framework.
 
-```python
-# In module fake_api_server._utils.importing
+```python title="fake_api_server._utils.importing" linenums="1"
 
 class import_web_lib:
 
@@ -71,8 +70,7 @@ class import_web_lib:
 Extend the web application feature about how **_PyFake-API-Server_** should set up it? How to initial the web application
 by the customized Python web framework? How to add new API by the customized web framework?
 
-```python
-# In module fake_api_server.server.application
+```python title="fake_api_server.server.rest.application.__init__" linenums="1"
 
 class FooWebLibrary(BaseAppServer):
     def setup(self) -> "foo_web_lib.Foo":
@@ -92,8 +90,7 @@ class FooWebLibrary(BaseAppServer):
 Implement how to run web application by your own customized Python web framework. In exactly, it just generates a command line
 with options.
 
-```python
-# In module fake_api_server.server.sgi.cmd
+```python title="fake_api_server.server.rest.sgi.cmd" linenums="1"
 
 class FooSGIServer(BaseSGIServer):
     def _init_cmd_option(self) -> BaseCommandOption:
@@ -108,8 +105,7 @@ class FooSGIServer(BaseSGIServer):
 
 Previous one implement the command line entry point, here implement each options how to set it.
 
-```python
-# In module fake_api_server.server.sgi.cmdoption
+```python title="fake_api_server.server.rest.sgi.cmdoption" linenums="1"
 
 class FooWebSGIServerCmdOption(BaseCommandOption):
     def bind(self, address: Optional[str] = None, host: Optional[str] = None, port: Optional[str] = None) -> str:
@@ -136,8 +132,7 @@ Now, we have done the core implementation, then we just leave some utility funct
 
 * Utility function in module ``fake_api_server.server.sgi.__init__``
 
-```python hl_lines="10"
-# In module fake_api_server.server.sgi.__init__
+```python title="fake_api_server.server.rest.sgi.__init__" linenums="1" hl_lines="8"
 
 class setup_server_gateway:
     # Some code ...
@@ -156,8 +151,7 @@ generate the web application. Here usage should base on which way should use by 
 
 * Utility function in module ``fake_api_server.server.__init__``
 
-```python
-# In module fake_api_server.server.__init__
+```python title="fake_api_server.server.__init__" linenums="1"
 
 # Some code ...
 
@@ -197,12 +191,11 @@ set up by your own customized Python web framework.
 Finally, we need to add a new value to let option ``--app-type`` could recognize and dispatch it to set up and run the web
 application by your own customized Python web framework.
 
-```python hl_lines="19-20"
-# In module fake_api_server.command.process
+```python title="fake_api_server.command.rest_server.run.component" linenums="1" hl_lines="17-18"
 
 # Some code ...
 
-class SubCmdRun(BaseCommandProcessor):
+class SubCmdRunComponent(BaseSubCmdComponent):
     
     # Some code ...
 
