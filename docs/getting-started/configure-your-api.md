@@ -32,7 +32,7 @@ mocked_apis:
 
 Before start to configure, let's give a usage scenario: 
 
-> Mock an API which accepts GET method without any parameter, and it would return string value ``This is Foo home API.``.
+> Fake an API which accepts GET method without any parameter, and it would return string value ``This is Foo home API.``.
 > We could sort out the requirement as 3 conditions as below:
 > 
 > * URL path: /foo
@@ -129,7 +129,7 @@ If you're meticulous in configuring and developing, **_PyFake-API-Server_** also
 configuration validation:
 
 ```console
-mock rest-server check -p <configuration path>
+fake rest-server check -p <configuration path>
 ```
 
 It would check everywhere of configuration and make sure your configuration is valid for running.

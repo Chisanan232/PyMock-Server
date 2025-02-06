@@ -4,7 +4,7 @@ Currently, it doesn't have any options could use of command line ``mock`` withou
 is useful is ``--version`` for checking current version info in your runtime environment.
 
 ```console
->>> mock <option>
+>>> fake <option>
 ```
 
 
@@ -14,9 +14,9 @@ Show to details about version info in current runtime environment. The version i
 framework, server gateway interface) version info.
 
 ```shell
->>> mock --version
-########## PyMock-Server: ##########
-pymock-server (version 0.2.0)
+>>> fake --version
+########## PyFake-API-Server: ##########
+pyfake-api-server (version 0.2.0)
 
 ############ Web server: ############
 flask (version: 3.0.3)

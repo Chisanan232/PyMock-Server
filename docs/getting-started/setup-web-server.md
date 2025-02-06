@@ -11,7 +11,7 @@ environment. Therefore, the running server log message would be different with d
 === "Flask"
 
     ``` sh
-    >>> mock rest-server run -p <configuration path>
+    >>> fake rest-server run -p <configuration path>
     [2023-06-06 21:55:53 +0800] [78900] [INFO] Starting gunicorn 20.1.0
     [2023-06-06 21:55:53 +0800] [78900] [INFO] Listening at: http://127.0.0.1:9672 (78900)
     [2023-06-06 21:55:53 +0800] [78900] [INFO] Using worker: sync
@@ -21,7 +21,7 @@ environment. Therefore, the running server log message would be different with d
 === "FastAPI"
 
     ``` sh
-    >>> mock rest-server run -p <configuration path>
+    >>> fake rest-server run -p <configuration path>
     INFO:     Started server process [78594]
     INFO:     Waiting for application startup.
     INFO:     Application startup complete.

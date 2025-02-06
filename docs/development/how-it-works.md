@@ -102,7 +102,7 @@ In short, **_PyFake-API-Server_** to let your job about mocking API to be easier
 2. Run the web server
     
     ```console
-    >>> mock-api
+    >>> fake rest-server run
     ```
 
 
@@ -193,9 +193,9 @@ that we won't do anything about telling it where my application path as a string
 So the **_PyFake-API-Server_** command line you should use is very simple and easy.
 
 ```console
-mock-api --bind <IP address>:<Port> \
-         --workers <workers> \
-         --log-level <log-level>
+fake rest-server run --bind <IP address>:<Port> \
+                     --workers <workers> \
+                     --log-level <log-level>
 ```
 
 And this command line would run the SGI server command as following:

@@ -91,7 +91,7 @@ Then it would only install the lowest Python dependencies you need.
 After you done above step, please make sure the command line tool feature should work finely by below command:
 
 ```console
->>> mock --help
+>>> fake --help
 ```
 
 > **Note**

@@ -176,7 +176,7 @@ docker images fake-api-server
 No matter which way to install **_PyFake-API-Server_**, it must verify whether the command line tool is ready for working or not.
 
 ```console
-mock --help
+fake --help
 ```
 
 If it outputs some usage info about the command ``mock``, congratulation! You could start to enjoy easily and quickly

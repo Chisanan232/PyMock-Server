@@ -4,7 +4,7 @@ If you try to mock HTTP server which through REST API to communicate between cli
 ``rest-server`` must can help you to do that easily and quickly.
 
 ```console
->>> mock rest-server <option>
+>>> fake rest-server <option>
 ```
 
 This subcommand line doesn't have any options but have multiple subcommand lines for processing different operation.

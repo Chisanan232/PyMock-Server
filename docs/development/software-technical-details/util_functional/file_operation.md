@@ -58,5 +58,5 @@ class APIConfig(_Config):
 Finally, we could use JSON type file as our configuration formatter.
 
 ```console
->>> mock -c ./api.json
+>>> fake rest-server run -c ./api.json
 ```

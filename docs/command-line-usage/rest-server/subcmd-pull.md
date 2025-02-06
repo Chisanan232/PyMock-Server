@@ -14,7 +14,7 @@ quickly.
 
 
 ```console
->>> mock rest-server pull <option>
+>>> fake rest-server pull <option>
 ```
 
 
