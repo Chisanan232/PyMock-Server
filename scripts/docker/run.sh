@@ -59,4 +59,4 @@ echo "⚙️ Final command line arguments: $Command_Line_Options"
 
 # Run web server for mocking APIs
 echo "+++++++++++++ 🍻 Start to run server +++++++++++++"
-mock-api run $Command_Line_Options
+fake rest-server run $Command_Line_Options
