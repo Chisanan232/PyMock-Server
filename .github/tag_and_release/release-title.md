@@ -1,1 +1,1 @@
-v0.3.0 - A makeover of **_PyMock-Server_** 🧬 🍻
+v0.4.0 - A makeover of PyFake-API-Server 🧬 🍻
