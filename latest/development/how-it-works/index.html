@@ -2787,7 +2787,7 @@ it because it would automatically detect it.</li>
 </li>
 <li>
 <p>Run the web server</p>
-<div class="language-console highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="go">&gt;&gt;&gt; mock-api</span>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="go">&gt;&gt;&gt; fake rest-server run</span>
 </span></code></pre></div>
 </li>
 </ol>
@@ -2862,9 +2862,9 @@ You just need to maintain the configuration only.</p>
 <p><strong><em>PyFake-API-Server</em></strong> uses factory mode to create and set up application, and the factory function has been annotated in it so
 that we won't do anything about telling it where my application path as a string value.</p>
 <p>So the <strong><em>PyFake-API-Server</em></strong> command line you should use is very simple and easy.</p>
-<div class="language-console highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="go">mock-api --bind &lt;IP address&gt;:&lt;Port&gt; \</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="go">         --workers &lt;workers&gt; \</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="go">         --log-level &lt;log-level&gt;</span>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="go">fake rest-server run --bind &lt;IP address&gt;:&lt;Port&gt; \</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="go">                     --workers &lt;workers&gt; \</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="go">                     --log-level &lt;log-level&gt;</span>
 </span></code></pre></div>
 <p>And this command line would run the SGI server command as following:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">If you're Flask, run by Gunicorn</label><label for="__tabbed_3_2">If you're FastAPI, run by Uvicorn</label></div>

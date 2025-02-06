@@ -2791,7 +2791,7 @@ workflow also could refer to its <a href="command_line.mdorkflow">workflow</a>.<
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>            <span class="n">arg_1</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">arg_1</span><span class="p">,</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>        <span class="p">)</span>
 </span></code></pre></div>
-<p>If it's the subcommand line under command line <code>mock rest-server</code>, and also defining the utility function at module
+<p>If it's the subcommand line under command line <code>fake rest-server</code>, and also defining the utility function at module
 <strong><em>__init__</em></strong>:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># In module fake_api_server.model.command.rest_server.__init__</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
@@ -2895,7 +2895,7 @@ object is responsible of this feature.</p>
 </li>
 </ol>
 <p>We finish all things if we want to extend one new sub-command line! Let's try to run it:</p>
-<div class="language-console highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="go">&gt;&gt;&gt; mock new-ps --arg-1 test_value</span>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="go">&gt;&gt;&gt; fake new-ps --arg-1 test_value</span>
 </span></code></pre></div>
 <p>Unfortunately, you would get an error finally. Why? What you miss? Do you remember all the code in this software architecture
 only process the logic it should run by the current command line? But, how does it parse the command line and its options? So

@@ -2708,7 +2708,7 @@ file, so we need to manually modify the code to use it.</p>
 </span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="c1"># ... some code</span>
 </span></code></pre></div>
 <p>Finally, we could use JSON type file as our configuration formatter.</p>
-<div class="language-console highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="go">&gt;&gt;&gt; mock -c ./api.json</span>
+<div class="language-console highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="go">&gt;&gt;&gt; fake rest-server run -c ./api.json</span>
 </span></code></pre></div>
 
 
