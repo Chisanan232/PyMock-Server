@@ -19,7 +19,7 @@ on:
     branches:
       - "master"
     paths:
-      - "fake_api_server/__pkg_info__.py"
+      - "**/__pkg_info__.py"
 #      Only activate below setting for developing, testing or troubleshooting
 #      - ".github/workflows/docker.yaml"
 
