@@ -78,7 +78,7 @@ Changelog = "https://chisanan232.github.io/PyMock-Server/latest/release_note/"
 "Project Management" = "https://app.clickup.com/9018752317/v/f/90183126979/90182605225"
 
 [project.scripts]
-mock = "fake_api_server.runner:run"
+fake = "fake_api_server.runner:run"
 
 # TODO: Let the dependencies for development to be optional
 #[tool.poetry.group.dev]
