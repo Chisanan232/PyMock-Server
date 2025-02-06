@@ -17,7 +17,7 @@ class FakeAPIServerCommandParser:
 
     def __init__(self):
         self._prog = "pyfake-api-server"
-        self._usage = "fake" if self.is_running_subcmd else "fake [SUBCOMMAND] [OPTIONS]"
+        self._usage = "fake" if self.is_running_subcmd else "fake [<API server>] [subcommand] [options]"
         self._description = """
         A Python tool for faking APIs by set up an application easily. PyFake-API-Server bases on Python framework to
         set up application, i.e., for REST API, you could select using *flask* to set up application to fake APIs.

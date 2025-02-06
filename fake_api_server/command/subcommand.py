@@ -33,6 +33,7 @@ class SubCommandLine(Enum):
 
 
 class SubCommandSection(Enum):
-    Base = "subcommands"
+    # Base = "subcommands"
+    Base = "API servers"
     ApiServer = "API server subcommands"
     Foo = "Foo command line"
