@@ -101,7 +101,7 @@ class SubCmdNewProcess(BaseCommandProcessor):
 Now, let's try to run the **_PyFake-API-Server_** with new sub-command:
 
 ```console
->>> mock new-ps --arg-1 test_value
+>>> fake new-ps --arg-1 test_value
 This is new sub-command line and get option *arg_1*: test_value
 ```
 

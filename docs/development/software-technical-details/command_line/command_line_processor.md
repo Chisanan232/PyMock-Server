@@ -71,7 +71,7 @@ class SubcmdNewProcessArguments(ParserArguments):
         )
 ```
 
-If it's the subcommand line under command line ``mock rest-server``, and also defining the utility function at module
+If it's the subcommand line under command line ``fake rest-server``, and also defining the utility function at module
 **_\_\_init\_\__**:
 
 ```python
@@ -179,7 +179,7 @@ Let's demonstrate all way to implement to you and explain their difference.
 We finish all things if we want to extend one new sub-command line! Let's try to run it:
 
 ```console
->>> mock new-ps --arg-1 test_value
+>>> fake new-ps --arg-1 test_value
 ```
 
 Unfortunately, you would get an error finally. Why? What you miss? Do you remember all the code in this software architecture

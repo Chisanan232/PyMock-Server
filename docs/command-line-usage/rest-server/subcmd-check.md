@@ -3,7 +3,7 @@
 Check the validity of configuration content.
 
 ```console
->>> mock rest-server check <option>
+>>> fake rest-server check <option>
 ```
 
 
