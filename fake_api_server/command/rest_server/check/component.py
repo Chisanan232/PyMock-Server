@@ -8,8 +8,8 @@ from typing import Any, Optional
 from fake_api_server._utils.api_client import URLLibHTTPClient
 from fake_api_server.command._base.component import BaseSubCmdComponent
 from fake_api_server.model import (
-    APIConfig,
     BaseAPIDocumentConfig,
+    FakeAPIConfig,
     SubcmdCheckArguments,
     deserialize_api_doc_config,
     load_config,
@@ -33,7 +33,7 @@ class SubCmdCheckComponent(BaseSubCmdComponent):
 
     def process(self, parser: ArgumentParser, args: SubcmdCheckArguments) -> None:  # type: ignore[override]
         try:
-            api_config: Optional[APIConfig] = load_config(path=args.config_path)
+            api_config: Optional[FakeAPIConfig] = load_config(path=args.config_path)
         except ValueError as e:
             if re.search(r"is not a valid " + re.escape(ResponseStrategy.__name__), str(e), re.IGNORECASE):
                 invalid_strategy = str(e).split("'")[1]
@@ -47,7 +47,7 @@ class SubCmdCheckComponent(BaseSubCmdComponent):
 
 
 class _BaseCheckingFactory(metaclass=ABCMeta):
-    def validity(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
+    def validity(self, args: SubcmdCheckArguments, api_config: Optional[FakeAPIConfig]) -> FakeAPIConfig:
         return self.validity_checking.run(args=args, api_config=api_config)
 
     @property
@@ -55,7 +55,7 @@ class _BaseCheckingFactory(metaclass=ABCMeta):
     def validity_checking(self) -> "ValidityChecking":
         pass
 
-    def diff_with_swagger(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> None:
+    def diff_with_swagger(self, args: SubcmdCheckArguments, api_config: Optional[FakeAPIConfig]) -> None:
         self.diff_with_swagger_checking.run(args=args, api_config=api_config)
 
     @property
@@ -80,14 +80,14 @@ class _BaseChecking(metaclass=ABCMeta):
         self._stop_if_fail: Optional[bool] = None
         self._config_is_wrong: bool = False
 
-    def run(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
+    def run(self, args: SubcmdCheckArguments, api_config: Optional[FakeAPIConfig]) -> FakeAPIConfig:
         api_config = self.check(args, api_config)
         self.run_finally(args)
         assert api_config
         return api_config
 
     @abstractmethod
-    def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
+    def check(self, args: SubcmdCheckArguments, api_config: Optional[FakeAPIConfig]) -> FakeAPIConfig:
         pass
 
     @abstractmethod
@@ -96,7 +96,7 @@ class _BaseChecking(metaclass=ABCMeta):
 
 
 class ValidityChecking(_BaseChecking):
-    def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
+    def check(self, args: SubcmdCheckArguments, api_config: Optional[FakeAPIConfig]) -> FakeAPIConfig:
         # # Check whether it has anything in configuration or not
         self._stop_if_fail = args.stop_if_fail
         if not self._setting_should_not_be_none(
@@ -151,7 +151,7 @@ class SwaggerDiffChecking(_BaseChecking):
         super().__init__()
         self._api_client = URLLibHTTPClient()
 
-    def check(self, args: SubcmdCheckArguments, api_config: Optional[APIConfig]) -> APIConfig:
+    def check(self, args: SubcmdCheckArguments, api_config: Optional[FakeAPIConfig]) -> FakeAPIConfig:
         assert api_config
         mocked_apis_config = api_config.apis
         base_info = mocked_apis_config.base  # type: ignore[union-attr]

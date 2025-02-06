@@ -359,7 +359,7 @@ class MockAPIs(_OperatingTemplatableConfig, _Checkable):
         return aggregated_apis
 
 
-class APIConfig(_Config, _Checkable):
+class FakeAPIConfig(_Config, _Checkable):
     """*The entire configuration*"""
 
     _absolute_key: str = ""
@@ -385,7 +385,7 @@ class APIConfig(_Config, _Checkable):
     def __len__(self):
         return len(self._apis) if self._apis else 0
 
-    def _compare(self, other: "APIConfig") -> bool:
+    def _compare(self, other: "FakeAPIConfig") -> bool:
         return self.name == other.name and self.description == other.description and self.apis == other.apis
 
     @property
@@ -469,7 +469,7 @@ class APIConfig(_Config, _Checkable):
     def base_file_path(self, p: str) -> None:
         self._base_file_path = p
 
-    def serialize(self, data: Optional["APIConfig"] = None) -> Optional[Dict[str, Any]]:
+    def serialize(self, data: Optional["FakeAPIConfig"] = None) -> Optional[Dict[str, Any]]:
         name = (data.name if data else None) or self.name
         description = (data.description if data else None) or self.description
         apis = (data.apis if data else None) or self.apis
@@ -487,7 +487,7 @@ class APIConfig(_Config, _Checkable):
         }
 
     @_Config._ensure_process_with_not_empty_value
-    def deserialize(self, data: Dict[str, Any]) -> Optional["APIConfig"]:
+    def deserialize(self, data: Dict[str, Any]) -> Optional["FakeAPIConfig"]:
         """Convert data to **APIConfig** type object.
 
         The data structure should be like following:
@@ -579,7 +579,7 @@ class APIConfig(_Config, _Checkable):
         self.apis.stop_if_fail = self.stop_if_fail
         return self.apis.is_work()
 
-    def from_yaml(self, path: str, is_pull: bool = False) -> Optional["APIConfig"]:
+    def from_yaml(self, path: str, is_pull: bool = False) -> Optional["FakeAPIConfig"]:
         self.is_pull = is_pull
         return self.deserialize(data=self._config_operation.read(path))
 

@@ -3,7 +3,7 @@ import sys
 from argparse import ArgumentParser, Namespace
 from typing import List, Optional, Tuple, Type
 
-from fake_api_server.command._parser import MockAPICommandParser
+from fake_api_server.command._parser import FakeAPIServerCommandParser
 from fake_api_server.command.subcommand import SubCommandLine
 from fake_api_server.log import init_logger_config
 from fake_api_server.model import ParserArguments, deserialize_args
@@ -37,7 +37,7 @@ class CommandProcessChain:
 
 
 class MetaCommand(type):
-    """*The metaclass for options of PyMock-API command*
+    """*The metaclass for options of PyFake-API-Server command*
 
     content ...
     """
@@ -57,7 +57,7 @@ class CommandProcessor:
     deserialize_args: deserialize_args = deserialize_args()
 
     def __init__(self):
-        self.mock_api_parser = MockAPICommandParser()
+        self.fake_api_server_parser = FakeAPIServerCommandParser()
         self._current_index = 0
 
     @property
@@ -74,7 +74,7 @@ class CommandProcessor:
 
     def distribute(self, cmd_index: int = 0) -> "CommandProcessor":
         try:
-            parser_subcommand = self.mock_api_parser.subcommand
+            parser_subcommand = self.fake_api_server_parser.subcommand
         except NotFoundCommandLine as err:
             print(f"❌ Command line not found: '{err.subcmd}'. Please refer to details usage by using '--help'.")
             sys.exit(1)

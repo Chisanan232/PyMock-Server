@@ -150,7 +150,7 @@ class TestVersion:
     def test_version_with_some_lib_not_exist(self, mock_version_fun: Mock, option: Version):
         version_info_output = option._version_output
 
-        assert "PyMock-Server" in version_info_output
+        assert "PyFake-API-Server" in version_info_output
         assert "Web server" in version_info_output
         assert "Server gateway interface" in version_info_output
         assert "%(prog)s" in version_info_output

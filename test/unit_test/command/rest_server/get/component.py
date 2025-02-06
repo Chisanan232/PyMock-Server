@@ -12,7 +12,7 @@ except ImportError:
 
 import pytest
 
-from fake_api_server import APIConfig
+from fake_api_server import FakeAPIConfig
 from fake_api_server._utils.file import Format
 from fake_api_server.command.rest_server.get.component import (
     APIInfoDisplayChain,
@@ -53,7 +53,7 @@ class TestSubCmdGetComponent:
         component: SubCmdGetComponent,
     ):
         with patch("fake_api_server.command.rest_server.get.component.load_config") as mock_load_config:
-            mock_load_config.return_value = APIConfig().deserialize(data=_TestConfig.API_Config)
+            mock_load_config.return_value = FakeAPIConfig().deserialize(data=_TestConfig.API_Config)
             with patch.object(expected_object, "display") as mock_formatter_display:
                 with pytest.raises(SystemExit) as exc_info:
                     subcmd_get_args = SubcmdGetArguments(
@@ -71,7 +71,7 @@ class TestSubCmdGetComponent:
 
     def test_component_with_invalid_format(self, component: SubCmdGetComponent):
         with patch("fake_api_server.command.rest_server.get.component.load_config") as mock_load_config:
-            mock_load_config.return_value = APIConfig().deserialize(data=_TestConfig.API_Config)
+            mock_load_config.return_value = FakeAPIConfig().deserialize(data=_TestConfig.API_Config)
             with pytest.raises(SystemExit) as exc_info:
                 subcmd_get_args = SubcmdGetArguments(
                     subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),
@@ -92,7 +92,7 @@ class TestSubCmdGetComponent:
                 "description": "",
                 "mocked_apis": {},
             }
-            mock_load_config.return_value = APIConfig().deserialize(data=no_mocked_apis_config)
+            mock_load_config.return_value = FakeAPIConfig().deserialize(data=no_mocked_apis_config)
             with pytest.raises(SystemExit) as exc_info:
                 subcmd_get_args = SubcmdGetArguments(
                     subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Get]),

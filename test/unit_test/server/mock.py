@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from fake_api_server import APIConfig
+from fake_api_server import FakeAPIConfig
 from fake_api_server.model import MockAPI, MockAPIs
 from fake_api_server.server.mock import MockHTTPServer
 from fake_api_server.server.rest.application import (
@@ -19,7 +19,7 @@ from test._values import _Test_Config
 
 # isort: on
 
-mock_api_config = Mock(APIConfig(name=Mock(), description=Mock(), apis=Mock(MockAPIs(base=Mock(), apis=Mock()))))
+mock_api_config = Mock(FakeAPIConfig(name=Mock(), description=Mock(), apis=Mock(MockAPIs(base=Mock(), apis=Mock()))))
 
 
 class FakeWebServer(BaseAppServer):
@@ -154,7 +154,7 @@ class TestMockHTTPServer:
 
         # Mock functions and objects
         mock_api_config = Mock(
-            APIConfig(name=Mock(), description=Mock(), apis=Mock(MockAPIs(base=Mock(), apis=Mock())))
+            FakeAPIConfig(name=Mock(), description=Mock(), apis=Mock(MockAPIs(base=Mock(), apis=Mock())))
         )
         # Note: About patch to the function in __init__ module of sub-package
         # pylint: disable=line-too-long

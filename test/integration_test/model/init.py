@@ -3,7 +3,7 @@ from typing import Dict
 
 import pytest
 
-from fake_api_server import APIConfig
+from fake_api_server import FakeAPIConfig
 from fake_api_server.model import deserialize_api_doc_config, load_config
 
 # isort: off
@@ -34,7 +34,7 @@ class TestInitFunctions:
         loaded_data = load_config(path=MockAPI_Config_Yaml_Path)
 
         # Verify result
-        assert isinstance(loaded_data, APIConfig) and len(loaded_data) != 0, ""
+        assert isinstance(loaded_data, FakeAPIConfig) and len(loaded_data) != 0, ""
         return "./file_not_exist.yaml"
 
     @run_test.with_file(yaml_factory)

@@ -51,7 +51,7 @@ _ClsNamingFormat.tail = "Option"
 
 
 class MetaCommandOption(type):
-    """*The metaclass for options of PyMock-API command*
+    """*The metaclass for options of PyFake-API-Server command*
 
     content ...
     """

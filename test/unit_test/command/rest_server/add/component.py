@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from fake_api_server import APIConfig
+from fake_api_server import FakeAPIConfig
 from fake_api_server.command._common.component import SavingConfigComponent
 from fake_api_server.command.rest_server.add.component import SubCmdAddComponent
 from fake_api_server.model import generate_empty_config
@@ -73,7 +73,7 @@ class TestSubCmdAddComponent:
         ],
     )
     def test_get_api_config(
-        self, file_exist: bool, load_config_result: Optional[APIConfig], component: SubCmdAddComponent
+        self, file_exist: bool, load_config_result: Optional[FakeAPIConfig], component: SubCmdAddComponent
     ):
         with patch(
             "fake_api_server.command.rest_server.add.component.load_config", return_value=load_config_result

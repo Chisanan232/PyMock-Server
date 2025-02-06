@@ -5,7 +5,12 @@ from argparse import ArgumentParser
 
 from fake_api_server.command._base.component import BaseSubCmdComponent
 from fake_api_server.command._common.component import SavingConfigComponent
-from fake_api_server.model import APIConfig, MockAPI, generate_empty_config, load_config
+from fake_api_server.model import (
+    FakeAPIConfig,
+    MockAPI,
+    generate_empty_config,
+    load_config,
+)
 from fake_api_server.model.api_config.apis.response_strategy import ResponseStrategy
 from fake_api_server.model.command.rest_server.cmd_args import SubcmdAddArguments
 
@@ -30,7 +35,7 @@ class SubCmdAddComponent(BaseSubCmdComponent):
         api_config = self._generate_api_config(api_config, args)
         self._saving_config_component.serialize_and_save(cmd_args=args, api_config=api_config)
 
-    def _get_api_config(self, args: SubcmdAddArguments) -> APIConfig:
+    def _get_api_config(self, args: SubcmdAddArguments) -> FakeAPIConfig:
         if os.path.exists(args.config_path):
             api_config = load_config(args.config_path)
             if not api_config:
@@ -39,7 +44,7 @@ class SubCmdAddComponent(BaseSubCmdComponent):
             api_config = generate_empty_config()
         return api_config
 
-    def _generate_api_config(self, api_config: APIConfig, args: SubcmdAddArguments) -> APIConfig:
+    def _generate_api_config(self, api_config: FakeAPIConfig, args: SubcmdAddArguments) -> FakeAPIConfig:
         assert api_config.apis is not None
         # Set *base*
         if args.base_url:

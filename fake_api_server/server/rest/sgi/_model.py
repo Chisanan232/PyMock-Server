@@ -31,7 +31,7 @@ class CommandOptions:
 
 @dataclass
 class Command:
-    """*The data object for command line which would be used finally in *PyMock-Server**"""
+    """*The data object for command line which would be used finally in *PyFake-API-Server**"""
 
     entry_point: str
     options: CommandOptions

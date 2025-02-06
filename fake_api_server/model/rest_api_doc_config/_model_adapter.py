@@ -6,13 +6,13 @@ from typing import Any, List, Optional, Tuple
 from fake_api_server.model import MockAPI
 from fake_api_server.model.api_config import IteratorItem
 from fake_api_server.model.api_config.apis.request import (
-    APIParameter as PyMockRequestProperty,
+    APIParameter as PyFake_RequestProperty,
 )
 from fake_api_server.model.api_config.apis.response import (
-    ResponseProperty as PyMockResponseProperty,
+    ResponseProperty as PyFake_ResponseProperty,
 )
 from fake_api_server.model.api_config.apis.response_strategy import ResponseStrategy
-from fake_api_server.model.api_config.format import Format as PyMockFormat
+from fake_api_server.model.api_config.format import Format as PyFake_Format
 
 from ..api_config.value import FormatStrategy, ValueFormat
 from ..api_config.variable import Digit, Size, Variable
@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class FormatAdapter(BaseFormatModelAdapter):
 
-    def to_pymock_api_config(self) -> Optional[PyMockFormat]:
+    def to_pyfake_api_config(self) -> Optional[PyFake_Format]:
 
         def _configure_customize(customize: str, value_format: ValueFormat) -> Tuple[str, List[Variable]]:
             cust = customize
@@ -40,7 +40,7 @@ class FormatAdapter(BaseFormatModelAdapter):
             return cust, var
 
         if self.enum:
-            return PyMockFormat(
+            return PyFake_Format(
                 strategy=FormatStrategy.FROM_ENUMS,
                 enums=self.enum,
             )
@@ -51,7 +51,7 @@ class FormatAdapter(BaseFormatModelAdapter):
             _customize: str = ""
             _variables: List[Variable] = []
 
-            formatter = self.formatter.to_pymock_value_format()
+            formatter = self.formatter.to_value_format()
             if formatter is ValueFormat.Integer:
                 _strategy = FormatStrategy.BY_DATA_TYPE
                 # TODO: It should have setting to configure this setting
@@ -87,7 +87,7 @@ class FormatAdapter(BaseFormatModelAdapter):
             else:
                 raise NotImplementedError
 
-            return PyMockFormat(
+            return PyFake_Format(
                 strategy=_strategy,
                 # general setting
                 digit=_digit,
@@ -124,8 +124,8 @@ class PropertyDetailAdapter(BaseRefPropertyDetailAdapter):
             items=[],
         )
 
-    def to_pymock_api_config(self) -> PyMockResponseProperty:
-        return PyMockResponseProperty().deserialize(self.serialize())
+    def to_pyfake_api_config(self) -> PyFake_ResponseProperty:
+        return PyFake_ResponseProperty().deserialize(self.serialize())
 
 
 @dataclass
@@ -168,23 +168,23 @@ class RequestParameterAdapter(BaseRequestParameterAdapter):
             items=items,
         )
 
-    def to_pymock_api_config(self) -> PyMockRequestProperty:
+    def to_pyfake_api_config(self) -> PyFake_RequestProperty:
 
         def to_items(item_data: BaseRequestParameterAdapter) -> IteratorItem:
             return IteratorItem(
                 name=item_data.name,
                 required=item_data.required,
                 value_type=item_data.value_type,
-                value_format=item_data.format.to_pymock_api_config() if self.format else None,  # type: ignore[union-attr]
+                value_format=item_data.format.to_pyfake_api_config() if self.format else None,  # type: ignore[union-attr]
                 items=[to_items(i) for i in (item_data.items or [])],
             )
 
-        return PyMockRequestProperty(
+        return PyFake_RequestProperty(
             name=self.name,
             required=self.required,
             value_type=self.value_type,
             default=self.default,
-            value_format=self.format.to_pymock_api_config() if self.format else None,
+            value_format=self.format.to_pyfake_api_config() if self.format else None,
             items=[to_items(i) for i in (self.items or [])],
         )
 
@@ -226,7 +226,7 @@ class APIAdapter(BaseAPIAdapter):
         # Handle request config
         mock_api.set_request(
             method=self.http_method.upper(),
-            parameters=list(map(lambda p: p.to_pymock_api_config(), self.parameters)),
+            parameters=list(map(lambda p: p.to_pyfake_api_config(), self.parameters)),
         )
 
         # Handle response config
@@ -234,7 +234,7 @@ class APIAdapter(BaseAPIAdapter):
             values = []
         else:
             values = self.response.data
-        logger.debug(f"The values for converting to PyMock-Server format response config: {values}")
-        resp_props_values = [p.to_pymock_api_config() for p in values] if values else values
+        logger.debug(f"The values for converting to PyFake-API-Server format response config: {values}")
+        resp_props_values = [p.to_pyfake_api_config() for p in values] if values else values
         mock_api.set_response(strategy=ResponseStrategy.OBJECT, iterable_value=resp_props_values)
         return mock_api

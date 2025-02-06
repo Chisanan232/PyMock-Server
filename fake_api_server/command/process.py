@@ -36,14 +36,14 @@ def run_command_chain(parser: ArgumentParser, args: ParserArguments) -> None:
 
 def make_command_chain() -> List["CommandProcessor"]:
     existed_subcmd: List[Optional[SysArg]] = []
-    mock_api_cmd: List["CommandProcessor"] = []
+    fake_api_server_cmd: List["CommandProcessor"] = []
     for cmd_cls in CommandProcessChain.get():
         cmd = cmd_cls()
         if cmd.responsible_subcommand in existed_subcmd:
             raise ValueError(f"The subcommand *{cmd.responsible_subcommand}* has been used. Please use other naming.")
         existed_subcmd.append(getattr(cmd, "responsible_subcommand"))
-        mock_api_cmd.append(cmd.copy())
-    return mock_api_cmd
+        fake_api_server_cmd.append(cmd.copy())
+    return fake_api_server_cmd
 
 
 class NoSubCmd(BaseCommandProcessor):
