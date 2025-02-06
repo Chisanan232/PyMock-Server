@@ -24,8 +24,7 @@ You'll have 4 things:
 Enum object ``SubCommandLine`` is the standard for **_PyFake-API-Server_** to recognize which sub-command it has. So let's add 
 one new sub-command line here:
 
-```python linenums="1" hl_lines="9"
-# In module fake_api_server.command.subcommand
+```python title="fake_api_server.command.subcommand" linenums="1" hl_lines="9"
 
 class SubCommandLine(Enum):
 
@@ -38,8 +37,7 @@ class SubCommandLine(Enum):
 
 Add new class extends base class ``BaseSubCommand`` and set value at attribute ``sub_parser``.
 
-```python linenums="1"
-# In module fake_api_server.command.new_subcmd.options
+```python title="fake_api_server.command.new_subcmd.options" linenums="1"
 
 class SubCommandNewProcessOption(BaseSubCommand):
     sub_cmd: SubCommandAttr = SubCommandAttr(
@@ -58,8 +56,7 @@ class SubCommandNewProcessOption(BaseSubCommand):
 
 Instantiate a base class for adding options.
 
-```python linenums="1"
-# In module fake_api_server.command.options
+```python title="fake_api_server.command.options" linenums="1"
 
 BaseSubCmdNewProcessOption: type = MetaCommandOption("BaseSubCmdNewProcessOption", (SubCommandNewProcessOption,), {})
 ```
@@ -70,8 +67,7 @@ It would auto-register this sub-command line into ``SUBCOMMAND``. We have sub-co
 
 Add new command option with extending ``BaseSubCmdNewProcessOption`` and set needed attributes in it:
 
-```python linenums="1"
-# In module fake_api_server.command.options
+```python title="fake_api_server.command.options" linenums="1"
 
 class Arg_1(BaseSubCmdNewProcessOption):
 
@@ -87,8 +83,7 @@ class Arg_1(BaseSubCmdNewProcessOption):
 Finally, don't forget to let command line process know which sub-command line is its responsibility by overriding the class
 attribute ``responsible_subcommand``:
 
-```python linenums="1" hl_lines="6"
-# In module fake_api_server.command.process
+```python title="fake_api_server.command.process" linenums="1" hl_lines="6"
 
 # ... some code
 
