@@ -2879,44 +2879,66 @@ one <strong>Pure value</strong>.</p>
 <p><a href="https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/subcommand.py#L33-L35">source code</a></p>
 <p>This is the section title of subcommand line usage. Each new subcommand line should define this value for brief of
 subcommand line operations.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># code usage of a command line option</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="k">class</span> <span class="nc">SubCommandSection</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">Base</span> <span class="o">=</span> <span class="s2">&quot;subcommands&quot;</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">ApiServer</span> <span class="o">=</span> <span class="s2">&quot;API server subcommands&quot;</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">Foo</span> <span class="o">=</span> <span class="s2">&quot;Foo command line&quot;</span>
-</span></code></pre></div>
-<p><img alt="command line section" src="../../../_images/development/software_technical_details/cli_section_mock_help.png" /></p>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">fake_api_server.command.subcommand</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
+<span class="normal"><a href="#__codelineno-0-2">2</a></span>
+<span class="normal"><a href="#__codelineno-0-3">3</a></span>
+<span class="normal"><a href="#__codelineno-0-4">4</a></span>
+<span class="normal"><a href="#__codelineno-0-5">5</a></span>
+<span class="normal"><a href="#__codelineno-0-6">6</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1"># code usage of a command line option</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="k">class</span> <span class="nc">SubCommandSection</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4"></a>    <span class="n">Base</span> <span class="o">=</span> <span class="s2">&quot;API servers&quot;</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5"></a>    <span class="n">ApiServer</span> <span class="o">=</span> <span class="s2">&quot;API server subcommands&quot;</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6"></a>    <span class="n">Foo</span> <span class="o">=</span> <span class="s2">&quot;Foo command line&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+<p><img alt="command line section" src="../../../../_images/development/software_technical_details/cli_section_mock_help.png" /></p>
 <h4 id="command-line-value-in-subcommandline">Command line value in <strong><em>SubCommandLine</em></strong><a class="headerlink" href="#command-line-value-in-subcommandline" title="Permanent link">&para;</a></h4>
 <p><a href="https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/subcommand.py#L7-L30">source code</a></p>
 <p>This is the command line self string value what it is.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># code usage of a command line option</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">class</span> <span class="nc">SubCommandLine</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">Base</span> <span class="o">=</span> <span class="s2">&quot;subcommand&quot;</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="c1"># some code here ...</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">Foo</span> <span class="o">=</span> <span class="s2">&quot;foo&quot;</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">Boo</span> <span class="o">=</span> <span class="s2">&quot;boo&quot;</span>
-</span></code></pre></div>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">fake_api_server.command.subcommand</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span>
+<span class="normal"><a href="#__codelineno-1-2">2</a></span>
+<span class="normal"><a href="#__codelineno-1-3">3</a></span>
+<span class="normal"><a href="#__codelineno-1-4">4</a></span>
+<span class="normal"><a href="#__codelineno-1-5">5</a></span>
+<span class="normal"><a href="#__codelineno-1-6">6</a></span>
+<span class="normal"><a href="#__codelineno-1-7">7</a></span>
+<span class="normal"><a href="#__codelineno-1-8">8</a></span>
+<span class="normal"><a href="#__codelineno-1-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="c1"># code usage of a command line option</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="k">class</span> <span class="nc">SubCommandLine</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4"></a>    <span class="n">Base</span> <span class="o">=</span> <span class="s2">&quot;subcommand&quot;</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6"></a>    <span class="c1"># some code here ...</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7"></a>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8"></a>    <span class="n">Foo</span> <span class="o">=</span> <span class="s2">&quot;foo&quot;</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9"></a>    <span class="n">Boo</span> <span class="o">=</span> <span class="s2">&quot;boo&quot;</span>
+</span></code></pre></div></td></tr></table></div>
 <p><img alt="command line" src="../../../../_images/development/software_technical_details/cli_line_mock_help.png" /></p>
 <h3 id="object-for-truly-function">Object for truly function<a class="headerlink" href="#object-for-truly-function" title="Permanent link">&para;</a></h3>
 <h4 id="major-command-line-basesubcommandxxx">Major command line <strong><em>BaseSubCommandXXX</em></strong><a class="headerlink" href="#major-command-line-basesubcommandxxx" title="Permanent link">&para;</a></h4>
 <p><a href="https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/options.py#L77-L86">example source code</a></p>
 <p>This is the top implementation layer of command line data models. <strong><em>PyFake-API-Server</em></strong> command line tool is a nested
 command line structure. And this layer is the top layer means the first layer command line.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># code usage of a command line option</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">class</span> <span class="nc">BaseMajorCommandFoo</span><span class="p">(</span><span class="n">CommandOption</span><span class="p">):</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">sub_cmd</span><span class="p">:</span> <span class="n">SubCommandAttr</span> <span class="o">=</span> <span class="n">SubCommandAttr</span><span class="p">(</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="n">title</span><span class="o">=</span><span class="n">SubCommandSection</span><span class="o">.</span><span class="n">Foo</span><span class="p">,</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        <span class="n">dest</span><span class="o">=</span><span class="n">SubCommandLine</span><span class="o">.</span><span class="n">Foo</span><span class="p">,</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Some operations for foo.&quot;</span><span class="p">,</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Demonstrate for foo.&quot;</span><span class="p">,</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="p">)</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">in_sub_cmd</span> <span class="o">=</span> <span class="n">SubCommandLine</span><span class="o">.</span><span class="n">Foo</span>
-</span></code></pre></div>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">fake_api_server.command.foo.option</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-2-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-2-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-2-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-2-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-2-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-2-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-2-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-2-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-2-10">10</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="c1"># code usage of a command line option</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="k">class</span> <span class="nc">BaseMajorCommandFoo</span><span class="p">(</span><span class="n">CommandOption</span><span class="p">):</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4"></a>    <span class="n">sub_cmd</span><span class="p">:</span> <span class="n">SubCommandAttr</span> <span class="o">=</span> <span class="n">SubCommandAttr</span><span class="p">(</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5"></a>        <span class="n">title</span><span class="o">=</span><span class="n">SubCommandSection</span><span class="o">.</span><span class="n">Foo</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6"></a>        <span class="n">dest</span><span class="o">=</span><span class="n">SubCommandLine</span><span class="o">.</span><span class="n">Foo</span><span class="p">,</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7"></a>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Some operations for foo.&quot;</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8"></a>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Demonstrate for foo.&quot;</span><span class="p">,</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9"></a>    <span class="p">)</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10"></a>    <span class="n">in_sub_cmd</span> <span class="o">=</span> <span class="n">SubCommandLine</span><span class="o">.</span><span class="n">Foo</span>
+</span></code></pre></div></td></tr></table></div>
 <p><img alt="major command line" src="../../../../_images/development/software_technical_details/cli_line_mock_help.png" /></p>
 <h4 id="subcommand-command-line-subcommandxxxoption">Subcommand command line <strong><em>SubCommandXXXOption</em></strong><a class="headerlink" href="#subcommand-command-line-subcommandxxxoption" title="Permanent link">&para;</a></h4>
 <p><a href="https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/rest_server/run/options.py#L9-L17">example source code</a></p>
@@ -2928,31 +2950,47 @@ data model, which means it would only runs under one specific command line. So
 please take care what command line it should use to extend its features.</p>
 <p>Below demonstration is extend feature under the parent command line <code>foo</code>.</p>
 </div>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># code usage of a command line option</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">class</span> <span class="nc">SubCommandBooOption</span><span class="p">(</span><span class="n">BaseMajorCommandFoo</span><span class="p">):</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">sub_parser</span><span class="p">:</span> <span class="n">SubParserAttr</span> <span class="o">=</span> <span class="n">SubParserAttr</span><span class="p">(</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="n">name</span><span class="o">=</span><span class="n">SubCommandLine</span><span class="o">.</span><span class="n">Boo</span><span class="p">,</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Set up a boo CLI for foo.&quot;</span><span class="p">,</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="p">)</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">option_value_type</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="n">BaseSubCmdBooOption</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">MetaCommandOption</span><span class="p">(</span><span class="s2">&quot;BaseSubCmdBooOption&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">SubCommandBooOption</span><span class="p">,),</span> <span class="p">{})</span>
-</span></code></pre></div>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">fake_api_server.command.foo.boo.option</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-3-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-3-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-3-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-3-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-3-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-3-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-3-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-3-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-3-10">10</a></span>
+<span class="normal"><a href="#__codelineno-3-11">11</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="c1"># code usage of a command line option</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3"></a><span class="k">class</span> <span class="nc">SubCommandBooOption</span><span class="p">(</span><span class="n">BaseMajorCommandFoo</span><span class="p">):</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4"></a>    <span class="n">sub_parser</span><span class="p">:</span> <span class="n">SubParserAttr</span> <span class="o">=</span> <span class="n">SubParserAttr</span><span class="p">(</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5"></a>        <span class="n">name</span><span class="o">=</span><span class="n">SubCommandLine</span><span class="o">.</span><span class="n">Boo</span><span class="p">,</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6"></a>        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Set up a boo CLI for foo.&quot;</span><span class="p">,</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7"></a>    <span class="p">)</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8"></a>    <span class="n">option_value_type</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">str</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9"></a>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10"></a>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11"></a><span class="n">BaseSubCmdBooOption</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">MetaCommandOption</span><span class="p">(</span><span class="s2">&quot;BaseSubCmdBooOption&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">SubCommandBooOption</span><span class="p">,),</span> <span class="p">{})</span>
+</span></code></pre></div></td></tr></table></div>
 <p><img alt="subcommand lines" src="../../../../_images/development/software_technical_details/cli_line_mock_rest-server_help.png" /></p>
 <h4 id="options-of-subcommand-command-line-subcommandxxxoption">Options of subcommand command line <strong><em>SubCommandXXXOption</em></strong><a class="headerlink" href="#options-of-subcommand-command-line-subcommandxxxoption" title="Permanent link">&para;</a></h4>
 <p><a href="https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/rest_server/run/options.py#L20-L63">example source code</a></p>
 <p>This is the truly command line options. Any command line option properties, i.e., option name, help description of
 option, etc., would be set here.</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># code usage of a command line option</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">class</span> <span class="nc">CmdOption</span><span class="p">(</span><span class="n">BaseSubCmdBooOption</span><span class="p">):</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">cli_option</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;-o, --option&quot;</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;option&quot;</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">help_description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;The sample command line option setting.&quot;</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">default_value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;test value&quot;</span>
-</span></code></pre></div>
+<div class="language-python highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">fake_api_server.command.foo.boo.option</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span>
+<span class="normal"><a href="#__codelineno-4-2">2</a></span>
+<span class="normal"><a href="#__codelineno-4-3">3</a></span>
+<span class="normal"><a href="#__codelineno-4-4">4</a></span>
+<span class="normal"><a href="#__codelineno-4-5">5</a></span>
+<span class="normal"><a href="#__codelineno-4-6">6</a></span>
+<span class="normal"><a href="#__codelineno-4-7">7</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="c1"># code usage of a command line option</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2"></a>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3"></a><span class="k">class</span> <span class="nc">CmdOption</span><span class="p">(</span><span class="n">BaseSubCmdBooOption</span><span class="p">):</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4"></a>    <span class="n">cli_option</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;-o, --option&quot;</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;option&quot;</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6"></a>    <span class="n">help_description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;The sample command line option setting.&quot;</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7"></a>    <span class="n">default_value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;test value&quot;</span>
+</span></code></pre></div></td></tr></table></div>
 <p><img alt="subcommand line option" src="../../../../_images/development/software_technical_details/cli_option_mock_rest-server_run_help.png" /></p>
 <h2 id="uml">UML<a class="headerlink" href="#uml" title="Permanent link">&para;</a></h2>
 <iframe frameborder="0" style="width:100%;height:800px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyFake-API-Server.drawio&page-id=b7Q_UegN4KtkyAv_nRkj#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
