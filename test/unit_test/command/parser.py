@@ -13,13 +13,13 @@ class TestFakeAPIServerCommandParser:
         return FakeAPIServerCommandParser()
 
     @patch("argparse.ArgumentParser")
-    def test_parse_when_not_have_parser(self, fake_argparser_obj: Mock, parser: FakeAPIServerCommandParser):
-        fake_argparser_obj.add_argument = MagicMock()
+    def test_parse_when_not_have_parser(self, mock_argparser_obj: Mock, parser: FakeAPIServerCommandParser):
+        mock_argparser_obj.add_argument = MagicMock()
 
         fake_api_server_parser = parser.parse()
 
         assert fake_api_server_parser is parser.parser
-        fake_argparser_obj.assert_called_once()
+        mock_argparser_obj.assert_called_once()
 
     def test_prop_subcommand(self, parser: FakeAPIServerCommandParser):
         with patch("sys.argv", ["rest-server", "invalid"]):
