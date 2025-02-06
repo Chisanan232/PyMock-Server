@@ -19,7 +19,7 @@ Here demonstrate how to extend this feature to parse other file formatter.
 If you want to use other file formatter, e.g., JSON, you could extend the base class of file operation _``BaseFileOperation``
 to implement needed features.
 
-```python
+```python linenums="1"
 # In module fake_api_server.command.options
 
 # ... some code
@@ -38,7 +38,7 @@ class JSON(_BaseFileOperation):
 Because currently it won't have option in command line to control which way it should use to serialize or deserialize configuration
 file, so we need to manually modify the code to use it.
 
-```python hl_lines="10"
+```python linenums="1" hl_lines="10"
 # In module fake_api_server.model.api_config
 
 class APIConfig(_Config):

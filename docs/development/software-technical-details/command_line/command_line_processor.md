@@ -52,7 +52,7 @@ You'll have 3 things need to do:
 
 New sub-command line must have options. So you need to define which sub-command line options it has.
 
-```python
+```python linenums="1"
 # In module fake_api_server.model.command.rest_server.cmd_args
 
 @dataclass(frozen=True)
@@ -74,7 +74,7 @@ class SubcmdNewProcessArguments(ParserArguments):
 If it's the subcommand line under command line ``fake rest-server``, and also defining the utility function at module
 **_\_\_init\_\__**:
 
-```python
+```python linenums="1"
 # In module fake_api_server.model.command.rest_server.__init__
 
 class RestServerCliArgsDeserialization:
@@ -123,7 +123,7 @@ Let's demonstrate all way to implement to you and explain their difference.
         * For the complex logic or large-scale feature, implement by this way would let the code in this module to be dirty and
           complex so that developers be more harder to manage or maintain it.
     
-    ```python
+    ```python linenums="1"
     # In module fake_api_server.command.new_subcmd.process
     
     class SubCmdNewProcess(BaseCommandProcessor):
@@ -153,7 +153,7 @@ Let's demonstrate all way to implement to you and explain their difference.
     
     Implement the core logic in component layer:
 
-    ```python
+    ```python linenums="1"
     # In module fake_api_server.command.new_subcmd.component
     
     class SubCmdNewProcessComponent(BaseSubCmdComponent):
@@ -164,7 +164,7 @@ Let's demonstrate all way to implement to you and explain their difference.
     
     Remember that it needs to let command line processor know which component object it should use to run the sub-command line core logic:
 
-    ```python
+    ```python linenums="1"
     # In module fake_api_server.command.new_subcmd.process
     
     class SubCmdNewProcess(BaseCommandProcessor):

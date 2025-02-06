@@ -39,7 +39,7 @@ About a whole command line structure, we can divide it as multiple parts to desc
 This is the section title of subcommand line usage. Each new subcommand line should define this value for brief of
 subcommand line operations.
 
-```python
+```python linenums="1"
 # code usage of a command line option
 
 class SubCommandSection(Enum):
@@ -58,7 +58,7 @@ class SubCommandSection(Enum):
 
 This is the command line self string value what it is.
 
-```python
+```python linenums="1"
 # code usage of a command line option
 
 class SubCommandLine(Enum):
@@ -83,7 +83,7 @@ class SubCommandLine(Enum):
 This is the top implementation layer of command line data models. **_PyFake-API-Server_** command line tool is a nested
 command line structure. And this layer is the top layer means the first layer command line.
 
-```python
+```python linenums="1"
 # code usage of a command line option
 
 class BaseMajorCommandFoo(CommandOption):
@@ -114,7 +114,7 @@ Previous one is the top layer, this layer is the layers which are under second l
 
     Below demonstration is extend feature under the parent command line ``foo``.
 
-```python
+```python linenums="1"
 # code usage of a command line option
 
 class SubCommandBooOption(BaseMajorCommandFoo):
@@ -142,7 +142,7 @@ option, etc., would be set here.
 [//]: # (TODO: Support API reference like below)
 [//]: # (::: fake_api_server.command._base.options.CommandOption)
 
-```python
+```python linenums="1"
 # code usage of a command line option
 
 class CmdOption(BaseSubCmdBooOption):
