@@ -59,7 +59,7 @@ class TestCmdMock(CommandFunctionTestSpec):
         self.verify_running_output(" ".join(output))
 
     def verify_running_output(self, cmd_running_result: str) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "mock [SUBCOMMAND] [OPTIONS]")
+        self._should_contains_chars_in_result(cmd_running_result, "fake [SUBCOMMAND] [OPTIONS]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "-v, --version")
         self._should_contains_chars_in_result(cmd_running_result, "subcommands:")
@@ -72,7 +72,7 @@ class TestHelp(CommandFunctionTestSpec):
         return "--help"
 
     def verify_running_output(self, cmd_running_result: str) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "mock [SUBCOMMAND] [OPTIONS]")
+        self._should_contains_chars_in_result(cmd_running_result, "fake [SUBCOMMAND] [OPTIONS]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "-v, --version")
         self._should_contains_chars_in_result(cmd_running_result, "subcommands:")
@@ -112,7 +112,7 @@ class TestSubCmdRestServer(CommandFunctionTestSpec):
         self.verify_running_output(" ".join(output))
 
     def verify_running_output(self, cmd_running_result: str) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "mock [SUBCOMMAND] [OPTIONS]")
+        self._should_contains_chars_in_result(cmd_running_result, "fake [SUBCOMMAND] [OPTIONS]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "API server subcommands:")
         self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.Pull.value)
@@ -129,7 +129,7 @@ class TestSubCmdRestServerHelp(CommandFunctionTestSpec):
         return "rest-server --help"
 
     def verify_running_output(self, cmd_running_result: str) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "mock [SUBCOMMAND] [OPTIONS]")
+        self._should_contains_chars_in_result(cmd_running_result, "fake [SUBCOMMAND] [OPTIONS]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "API server subcommands:")
         self._should_contains_chars_in_result(cmd_running_result, SubCommandLine.Pull.value)
