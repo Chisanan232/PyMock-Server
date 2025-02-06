@@ -2,8 +2,8 @@ from typing import Union
 
 import pytest
 
-from pymock_server.model.api_config.value import ValueFormat
-from pymock_server.model.rest_api_doc_config._js_handlers import (
+from fake_api_server.model.api_config.value import ValueFormat
+from fake_api_server.model.rest_api_doc_config._js_handlers import (
     ApiDocValueFormat,
     convert_js_type,
 )
@@ -62,7 +62,7 @@ class TestApiDocValueFormat:
             ApiDocValueFormat.to_enum("invalid value")
 
     @pytest.mark.parametrize(
-        ("api_doc_format", "pymock_format"),
+        ("api_doc_format", "expect_value_format"),
         [
             (ApiDocValueFormat.Date, ValueFormat.Date),
             (ApiDocValueFormat.DateTime, ValueFormat.DateTime),
@@ -78,5 +78,5 @@ class TestApiDocValueFormat:
             (ApiDocValueFormat.IPv6, ValueFormat.IPv6),
         ],
     )
-    def test_to_pymock_value_format(self, api_doc_format: ApiDocValueFormat, pymock_format: ValueFormat):
-        assert api_doc_format.to_pymock_value_format() is pymock_format
+    def test_to_value_format(self, api_doc_format: ApiDocValueFormat, expect_value_format: ValueFormat):
+        assert api_doc_format.to_value_format() is expect_value_format

@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 
-from pymock_server.model.api_config.template import TemplateConfig
+from fake_api_server.model.api_config.template import TemplateConfig
 
 # isort: off
 from test._values import _Mock_Template_Config_Activate, _Mock_Template_Setting

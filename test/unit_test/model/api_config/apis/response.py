@@ -4,9 +4,9 @@ from typing import Any, Type
 
 import pytest
 
-from pymock_server.model.api_config import ResponseProperty, _Config
-from pymock_server.model.api_config._base import _HasItemsPropConfig
-from pymock_server.model.api_config.apis import HTTPResponse, ResponseStrategy
+from fake_api_server.model.api_config import ResponseProperty, _Config
+from fake_api_server.model.api_config._base import _HasItemsPropConfig
+from fake_api_server.model.api_config.apis import HTTPResponse, ResponseStrategy
 
 # isort: off
 from test._values import (

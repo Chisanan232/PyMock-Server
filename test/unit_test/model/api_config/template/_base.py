@@ -1,6 +1,6 @@
 from abc import ABC
 
-from pymock_server.model.api_config import _BaseTemplatableConfig
+from fake_api_server.model.api_config import _BaseTemplatableConfig
 
 # isort: off
 from test._values import _Mock_Templatable_Setting

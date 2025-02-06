@@ -1,6 +1,6 @@
 # Configure your APIs
 
-It configures the detail settings of **_PyMock-Server_** by YAML syntax, and must have either a ``.yml`` or ``.yaml`` file
+It configures the detail settings of **_PyFake-API-Server_** by YAML syntax, and must have either a ``.yml`` or ``.yaml`` file
 extension. If you're new to YAML and want to learn more, see "[Learn YAML in Y minutes.]"
 
 [Learn YAML in Y minutes.]: https://learnxinyminutes.com/docs/yaml/
@@ -32,7 +32,7 @@ mocked_apis:
 
 Before start to configure, let's give a usage scenario: 
 
-> Mock an API which accepts GET method without any parameter, and it would return string value ``This is Foo home API.``.
+> Fake an API which accepts GET method without any parameter, and it would return string value ``This is Foo home API.``.
 > We could sort out the requirement as 3 conditions as below:
 > 
 > * URL path: /foo
@@ -125,11 +125,11 @@ service!
 
 ## Check configuration validation
 
-If you're meticulous in configuring and developing, **_PyMock-Server_** also provide a command line to help you check your
+If you're meticulous in configuring and developing, **_PyFake-API-Server_** also provide a command line to help you check your
 configuration validation:
 
 ```console
-mock rest-server check -p <configuration path>
+fake rest-server check -p <configuration path>
 ```
 
 It would check everywhere of configuration and make sure your configuration is valid for running.

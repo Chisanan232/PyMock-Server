@@ -1,6 +1,6 @@
 # Common config
 
-In **_PyMock-Server_**, it keeps improving how to configure a clean, simple and readable configuration. One of ways is
+In **_PyFake-API-Server_**, it keeps improving how to configure a clean, simple and readable configuration. One of ways is
 reusing the settings. And this section targets recording the common settings which would be reused for all APIs setting
 if they need in entire configuration.
 

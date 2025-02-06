@@ -6,11 +6,11 @@ from typing import List, Optional, Type, Union
 
 import pytest
 
-from pymock_server.model.api_config.apis._property import BaseProperty
-from pymock_server.model.api_config.format import Format
-from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
-from pymock_server.model.api_config.variable import Size, Variable
-from pymock_server.model.rest_api_doc_config._js_handlers import ApiDocValueFormat
+from fake_api_server.model.api_config.apis._property import BaseProperty
+from fake_api_server.model.api_config.format import Format
+from fake_api_server.model.api_config.value import FormatStrategy, ValueFormat
+from fake_api_server.model.api_config.variable import Size, Variable
+from fake_api_server.model.rest_api_doc_config._js_handlers import ApiDocValueFormat
 
 # isort: off
 
@@ -18,28 +18,28 @@ from ._test_case import DeserializeV2OpenAPIConfigTestCaseFactory
 
 # isort: on
 
-from pymock_server.model import OpenAPIVersion
-from pymock_server.model.api_config import _Config
-from pymock_server.model.rest_api_doc_config._base import (
+from fake_api_server.model import OpenAPIVersion
+from fake_api_server.model.api_config import _Config
+from fake_api_server.model.rest_api_doc_config._base import (
     Transferable,
     set_openapi_version,
 )
-from pymock_server.model.rest_api_doc_config._base_model_adapter import (
+from fake_api_server.model.rest_api_doc_config._base_model_adapter import (
     BasePropertyDetailAdapter,
     BaseRequestParameterAdapter,
 )
-from pymock_server.model.rest_api_doc_config._model_adapter import (
+from fake_api_server.model.rest_api_doc_config._model_adapter import (
     FormatAdapter,
     PropertyDetailAdapter,
     ResponsePropertyAdapter,
 )
-from pymock_server.model.rest_api_doc_config.base_config import (
+from fake_api_server.model.rest_api_doc_config.base_config import (
     BaseAPIDocConfig,
     BaseReferencialConfig,
     _BaseAPIConfigWithMethod,
     set_component_definition,
 )
-from pymock_server.model.rest_api_doc_config.config import (
+from fake_api_server.model.rest_api_doc_config.config import (
     HttpConfigV2,
     ReferenceConfigProperty,
 )
@@ -783,7 +783,7 @@ class _BasePropertyDetailAdapterTestSuite(metaclass=ABCMeta):
 
     @abstractmethod
     @pytest.fixture(scope="function")
-    def pymock_model(self) -> BaseProperty:
+    def pyfake_model(self) -> BaseProperty:
         pass
 
     @pytest.mark.parametrize(
@@ -941,25 +941,25 @@ class _BasePropertyDetailAdapterTestSuite(metaclass=ABCMeta):
         ],
     )
     def test_convert_flow(
-        self, adapter_model_obj, pymock_model: BaseProperty, under_test_data: dict, expect: ExpectModelProps
+        self, adapter_model_obj, pyfake_model: BaseProperty, under_test_data: dict, expect: ExpectModelProps
     ):
         adapter_model = adapter_model_obj(**under_test_data)
 
         serialized_data = adapter_model.serialize()
-        pymock_model_has_data = pymock_model.deserialize(serialized_data)
+        pyfake_model_has_data = pyfake_model.deserialize(serialized_data)
 
-        self._verify_data_model_props(pymock_model=pymock_model_has_data, expect=expect)
+        self._verify_data_model_props(pyfake_model=pyfake_model_has_data, expect=expect)
 
-    def _verify_data_model_props(self, pymock_model: BaseProperty, expect: ExpectModelProps) -> None:
-        assert pymock_model is not None
+    def _verify_data_model_props(self, pyfake_model: BaseProperty, expect: ExpectModelProps) -> None:
+        assert pyfake_model is not None
         if expect.name:
-            assert pymock_model.name == expect.name
-        assert pymock_model.required == expect.required
-        assert pymock_model.value_type == expect.value_type
-        assert pymock_model.value_format == expect.format
+            assert pyfake_model.name == expect.name
+        assert pyfake_model.required == expect.required
+        assert pyfake_model.value_type == expect.value_type
+        assert pyfake_model.value_format == expect.format
         if expect.items:
-            assert pymock_model.items
-            assert len(pymock_model.items) == len(expect.items)
+            assert pyfake_model.items
+            assert len(pyfake_model.items) == len(expect.items)
             # check details of items
-            for pm, e in zip(pymock_model.items, expect.items):
-                self._verify_data_model_props(pymock_model=pm, expect=e)
+            for pm, e in zip(pyfake_model.items, expect.items):
+                self._verify_data_model_props(pyfake_model=pm, expect=e)

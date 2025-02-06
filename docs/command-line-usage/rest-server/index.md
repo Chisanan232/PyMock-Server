@@ -4,7 +4,7 @@ If you try to mock HTTP server which through REST API to communicate between cli
 ``rest-server`` must can help you to do that easily and quickly.
 
 ```console
->>> mock rest-server <option>
+>>> fake rest-server <option>
 ```
 
 This subcommand line doesn't have any options but have multiple subcommand lines for processing different operation.
@@ -36,4 +36,4 @@ Display the valid example configuration.
 
 ## subcommand [``pull``](./subcmd-pull.md)
 
-Pull the API documentation detail setting from document host or document configuration as PyMock-Server configuration.
+Pull the API documentation detail setting from document host or document configuration as PyFake-API-Server configuration.

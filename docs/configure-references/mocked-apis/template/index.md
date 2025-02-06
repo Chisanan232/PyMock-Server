@@ -4,7 +4,7 @@ This configuration section could let your configuration be more clear and organi
 
 For configuration, it let you could divide the configuration to be more readable. Even though only one file need to
 maintain, it may have very heavy content in file. When you face the problem, that's the time to use organizing feature
-of **_PyMock-Server_**.
+of **_PyFake-API-Server_**.
 
 === "Before organizing"
 
@@ -106,7 +106,7 @@ Please refer to [here](./file/index.md) to get more details.
 
 ### ``common_config``
 
-Reusing common settings in **_PyMock-Server_** configuration.[^1]
+Reusing common settings in **_PyFake-API-Server_** configuration.[^1]
 
   [^1]:
     Currently, it only supports reusing feature at property [format], but it

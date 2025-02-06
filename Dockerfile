@@ -21,7 +21,7 @@
 # Example running docker command line:
 # >>> docker build ./ -t <image name>:<image tag>
 # >>> docker run --name <container name> \
-#                -v <API configuration root directory>:/mit-pymock-server/<API configuration root directory> \
+#                -v <API configuration root directory>:/mit-pyfake-api-server/<API configuration root directory> \
 #                -e CONFIG_PATH=<API configuration path>
 #                -p 9672:9672 \
 #                <image name>:<image tag>
@@ -30,7 +30,7 @@
 
 FROM python:3.10
 
-WORKDIR mit-pymock-server/
+WORKDIR mit-pyfake-api-server/
 
 # # Prepare the runtime environment for Python
 RUN pip install -U pip
@@ -38,11 +38,7 @@ RUN pip install -U poetry
 RUN poetry --version
 
 # # Copy needed files and directory to container
-COPY ./README.md /mit-pymock-server/
-COPY ./pyproject.toml /mit-pymock-server/
-COPY ./poetry.lock /mit-pymock-server/
-COPY ./pymock_server/ /mit-pymock-server/pymock_server/
-COPY ./scripts/docker/ /mit-pymock-server/scripts/docker/
+COPY . /mit-pyfake-api-server/
 
 # # Expose the port to outside to provide service
 EXPOSE 9672

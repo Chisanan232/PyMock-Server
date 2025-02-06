@@ -3,7 +3,7 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from pymock_server._utils.file.operation import JSON, YAML, _BaseFileOperation
+from fake_api_server._utils.file.operation import JSON, YAML, _BaseFileOperation
 
 
 class _FileOptTestSpec(metaclass=ABCMeta):
@@ -49,7 +49,7 @@ class TestYAML(_FileOptTestSpec):
 
     @property
     def _load_function_path(self) -> str:
-        return "pymock_server._utils.file.operation.load"
+        return "fake_api_server._utils.file.operation.load"
 
 
 class TestJSON(_FileOptTestSpec):
@@ -63,4 +63,4 @@ class TestJSON(_FileOptTestSpec):
 
     @property
     def _load_function_path(self) -> str:
-        return "pymock_server._utils.file.operation.json.loads"
+        return "fake_api_server._utils.file.operation.json.loads"

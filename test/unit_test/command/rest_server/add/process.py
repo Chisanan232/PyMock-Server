@@ -19,12 +19,12 @@ from test.unit_test.command._base.process import BaseCommandProcessorTestSpec
 
 # isort: on
 
-from pymock_server.command._common.component import SavingConfigComponent
-from pymock_server.command.rest_server.add.process import SubCmdAdd
-from pymock_server.command.subcommand import SubCommandLine
-from pymock_server.model import SubcmdAddArguments
-from pymock_server.model.api_config.apis import ResponseStrategy
-from pymock_server.model.subcmd_common import SysArg
+from fake_api_server.command._common.component import SavingConfigComponent
+from fake_api_server.command.rest_server.add.process import SubCmdAdd
+from fake_api_server.command.subcommand import SubCommandLine
+from fake_api_server.model import SubcmdAddArguments
+from fake_api_server.model.api_config.apis import ResponseStrategy
+from fake_api_server.model.subcmd_common import SysArg
 
 
 class FakeSavingConfigComponent(SavingConfigComponent):
@@ -142,7 +142,7 @@ class TestSubCmdAdd(BaseCommandProcessorTestSpec):
 
         with patch.object(sys, "argv", self._given_command_line()):
             with patch(
-                "pymock_server.command.rest_server.add.component.SavingConfigComponent",
+                "fake_api_server.command.rest_server.add.component.SavingConfigComponent",
                 return_value=FakeSavingConfigComponent,
             ) as mock_saving_config_component:
                 cmd_ps(cmd_parser, mock_parser_arg)

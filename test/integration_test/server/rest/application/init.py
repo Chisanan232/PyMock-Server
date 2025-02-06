@@ -9,15 +9,17 @@ from fastapi.testclient import TestClient as FastAPITestClient
 from flask.app import Response as FlaskResponse
 from httpx import Response as FastAPIResponse
 
-from pymock_server import APIConfig
-from pymock_server.model import MockAPI, load_config
-from pymock_server.model.api_config.apis import APIParameter
-from pymock_server.server.rest.application import (
+from fake_api_server import FakeAPIConfig
+from fake_api_server.model import MockAPI, load_config
+from fake_api_server.model.api_config.apis import APIParameter
+from fake_api_server.server.rest.application import (
     BaseAppServer,
     FastAPIServer,
     FlaskServer,
 )
-from pymock_server.server.rest.application.response import HTTPResponse as _HTTPResponse
+from fake_api_server.server.rest.application.response import (
+    HTTPResponse as _HTTPResponse,
+)
 
 # isort: off
 from test._file_utils import MockAPI_Config_Yaml_Path, file, yaml_factory
@@ -60,7 +62,7 @@ class MockHTTPServerTestSpec:
         pass
 
     @pytest.fixture(scope="class", autouse=True)
-    def api_config(self) -> APIConfig:  # type: ignore
+    def api_config(self) -> FakeAPIConfig:  # type: ignore
         # Ensure that it doesn't have file
         self.config_file.delete()
         # Create the target file before run test
@@ -76,7 +78,7 @@ class MockHTTPServerTestSpec:
 
     @pytest.fixture(scope="class")
     def mock_server_app(
-        self, server_app_type: BaseAppServer, api_config: APIConfig
+        self, server_app_type: BaseAppServer, api_config: FakeAPIConfig
     ) -> Union[flask.Flask, fastapi.FastAPI]:
         assert api_config.apis
         server_app_type.create_api(mocked_apis=api_config.apis)
@@ -137,7 +139,7 @@ class MockHTTPServerTestSpec:
         http_method: str,
         payload: dict,
         client: Union["flask.testing.FlaskClient", FastAPITestClient],
-        api_config: APIConfig,
+        api_config: FakeAPIConfig,
     ):
         assert api_config.apis and api_config.apis.apis and api_config.apis.base
         one_api_configs = api_config.apis.get_all_api_config_by_url(url, base=api_config.apis.base)

@@ -4,8 +4,8 @@ from typing import Any, List, Optional, Type, Union
 
 import pytest
 
-from pymock_server._utils.random import DigitRange, ValueSize
-from pymock_server.model.api_config.value import FormatStrategy, ValueFormat
+from fake_api_server._utils.random import DigitRange, ValueSize
+from fake_api_server.model.api_config.value import FormatStrategy, ValueFormat
 
 # isort: off
 from test._test_utils import Verify

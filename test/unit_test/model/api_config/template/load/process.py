@@ -2,12 +2,12 @@ from typing import List
 
 import pytest
 
-from pymock_server.model.api_config import (
-    APIConfig,
+from fake_api_server.model.api_config import (
+    FakeAPIConfig,
     TemplatableConfigLoadable,
     _BaseTemplateConfigLoader,
 )
-from pymock_server.model.api_config.template._load.process import TemplateConfigOpts
+from fake_api_server.model.api_config.template._load.process import TemplateConfigOpts
 
 # isort: off
 from test.unit_test.model.api_config.template._test_case import (
@@ -21,12 +21,12 @@ _Test_Data: List[str] = test_case_factory.get_test_case()
 
 
 @pytest.fixture(scope="function")
-def api_config() -> APIConfig:
-    return APIConfig()
+def api_config() -> FakeAPIConfig:
+    return FakeAPIConfig()
 
 
 @pytest.mark.parametrize("api_config_yaml_path", _Test_Data)
-def test_loader_independent(api_config: APIConfig, api_config_yaml_path: str):
+def test_loader_independent(api_config: FakeAPIConfig, api_config_yaml_path: str):
 
     def get_template_config_opts_id(_data_modal: TemplatableConfigLoadable) -> int:
         assert hasattr(_data_modal, "_template_config_loader")

@@ -1,16 +1,16 @@
 # ``rest-server run`` - web server
 
-This is the core feature of **_PyMock-Server_**. It does 2 things:
+This is the core feature of **_PyFake-API-Server_**. It does 2 things:
 
 * Set up web application with the API from the detail settings of configuration.
 * Run the web application by SGI server.
 
 ## UML
 
-<iframe frameborder="0" style="width:100%;height:550px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=kRRTpLGKS1xiXI8G4MX6#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
+<iframe frameborder="0" style="width:100%;height:550px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyFake-API-Server.drawio&page-id=kRRTpLGKS1xiXI8G4MX6#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 * The sub-command line processor ``SubCmdRun`` would use function ``setup_wsgi`` or ``setup_asgi`` to run the web application.
-* All the way to run web application by factory pattern in **_PyMock-Server_**.
+* All the way to run web application by factory pattern in **_PyFake-API-Server_**.
 * The functions as factory callee to set up web application is ``create_flask_app`` and ``create_fastapi_app``.
 * Functions ``create_flask_app`` or ``create_fastapi_app`` would use adapter ``MockHTTPServer`` to set up all APIs as Python
 code with Python web framework **_Flask_** or **_FastAPI_**.
@@ -35,15 +35,14 @@ They mean you should extend all below classes to implement:
     * ``BaseSGIServer``
     * ``BaseCommandOption``
 
-Don't forget it also needs to import the Python web framework into **_PyMock-Server_** to let it could generate Python code about
+Don't forget it also needs to import the Python web framework into **_PyFake-API-Server_** to let it could generate Python code about
 APIs with configuration.
 
 * Import web library
 
 2 Things you need to implement: importing the web framework and check importing the web framework.
 
-```python
-# In module pymock_server._utils.importing
+```python title="fake_api_server._utils.importing" linenums="1"
 
 class import_web_lib:
 
@@ -68,11 +67,10 @@ class import_web_lib:
 
 * ``BaseAppServer``
 
-Extend the web application feature about how PyMock-Server should set up it? How to initial the web application by the customized
-Python web framework? How to add new API by the customized web framework?
+Extend the web application feature about how **_PyFake-API-Server_** should set up it? How to initial the web application
+by the customized Python web framework? How to add new API by the customized web framework?
 
-```python
-# In module pymock_server.server.application
+```python title="fake_api_server.server.rest.application.__init__" linenums="1"
 
 class FooWebLibrary(BaseAppServer):
     def setup(self) -> "foo_web_lib.Foo":
@@ -92,8 +90,7 @@ class FooWebLibrary(BaseAppServer):
 Implement how to run web application by your own customized Python web framework. In exactly, it just generates a command line
 with options.
 
-```python
-# In module pymock_server.server.sgi.cmd
+```python title="fake_api_server.server.rest.sgi.cmd" linenums="1"
 
 class FooSGIServer(BaseSGIServer):
     def _init_cmd_option(self) -> BaseCommandOption:
@@ -108,8 +105,7 @@ class FooSGIServer(BaseSGIServer):
 
 Previous one implement the command line entry point, here implement each options how to set it.
 
-```python
-# In module pymock_server.server.sgi.cmdoption
+```python title="fake_api_server.server.rest.sgi.cmdoption" linenums="1"
 
 class FooWebSGIServerCmdOption(BaseCommandOption):
     def bind(self, address: Optional[str] = None, host: Optional[str] = None, port: Optional[str] = None) -> str:
@@ -134,10 +130,9 @@ class FooWebSGIServerCmdOption(BaseCommandOption):
 
 Now, we have done the core implementation, then we just leave some utility functions which we need to add.
 
-* Utility function in module ``pymock_api.server.sgi.__init__``
+* Utility function in module ``fake_api_server.server.sgi.__init__``
 
-```python hl_lines="10"
-# In module pymock_server.server.sgi.__init__
+```python title="fake_api_server.server.rest.sgi.__init__" linenums="1" hl_lines="8"
 
 class setup_server_gateway:
     # Some code ...
@@ -154,10 +149,9 @@ class setup_server_gateway:
 Please take a look at the code line 10, it's the key line to let SGI server to catch which factory function it should use to
 generate the web application. Here usage should base on which way should use by your own customized Python web framework.
 
-* Utility function in module ``pymock_api.server.__init__``
+* Utility function in module ``fake_api_server.server.__init__``
 
-```python
-# In module pymock_server.server.__init__
+```python title="fake_api_server.server.__init__" linenums="1"
 
 # Some code ...
 
@@ -192,17 +186,16 @@ The global variable ``foo_app`` is the variable which web application instance w
 the factory function to generate web application. Function ``setup_foosgi`` is the one which runs the web application which be
 set up by your own customized Python web framework.
 
-* Add option value in one specific function in module ``pymock_api.command.process``
+* Add option value in one specific function in module ``fake_api_server.command.process``
 
 Finally, we need to add a new value to let option ``--app-type`` could recognize and dispatch it to set up and run the web
 application by your own customized Python web framework.
 
-```python hl_lines="19-20"
-# In module pymock_server.command.process
+```python title="fake_api_server.command.rest_server.run.component" linenums="1" hl_lines="17-18"
 
 # Some code ...
 
-class SubCmdRun(BaseCommandProcessor):
+class SubCmdRunComponent(BaseSubCmdComponent):
     
     # Some code ...
 
@@ -227,7 +220,7 @@ class SubCmdRun(BaseCommandProcessor):
 All things you need to do is done! Let's try to run the command line to test its feature:
 
 ```console
->>> mock --app-type foo
+>>> fake rest-server run --app-type foo
 ```
 
 If you could keep observing the log message which be generated by web application as you expect, congratulation you extend the

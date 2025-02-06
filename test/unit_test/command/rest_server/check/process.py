@@ -15,10 +15,10 @@ from test.unit_test.command._base.process import BaseCommandProcessorTestSpec
 
 # isort: on
 
-from pymock_server.command.rest_server.check.process import SubCmdCheck
-from pymock_server.command.subcommand import SubCommandLine
-from pymock_server.model import SubcmdCheckArguments
-from pymock_server.model.subcmd_common import SysArg
+from fake_api_server.command.rest_server.check.process import SubCmdCheck
+from fake_api_server.command.subcommand import SubCommandLine
+from fake_api_server.model import SubcmdCheckArguments
+from fake_api_server.model.subcmd_common import SysArg
 
 YAML_PATHS_WITH_EX_CODE: List[tuple] = []
 

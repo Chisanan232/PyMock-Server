@@ -3,8 +3,8 @@ from typing import Type
 
 import pytest
 
-from pymock_server.model.api_config import _Config
-from pymock_server.model.api_config.template.file import TemplateConfigPathSetting
+from fake_api_server.model.api_config import _Config
+from fake_api_server.model.api_config.template.file import TemplateConfigPathSetting
 
 from .._base import ConfigTestSpec
 

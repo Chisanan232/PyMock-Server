@@ -4,9 +4,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from pymock_server import APIConfig
-from pymock_server.model import BaseConfig, MockAPI, MockAPIs
-from pymock_server.model.api_config import TemplateConfig
+from fake_api_server import FakeAPIConfig
+from fake_api_server.model import BaseConfig, MockAPI, MockAPIs
+from fake_api_server.model.api_config import TemplateConfig
 
 # isort: off
 from test._values import (
@@ -53,37 +53,39 @@ def add_mock_apis_test_data(test_scenario: tuple) -> None:
     _MockAPIs_Test_Data.append(test_scenario)
 
 
-class TestAPIConfig(CheckableTestSuite):
+class TestFakeAPIConfig(CheckableTestSuite):
     test_data_dir = "entire_api"
     set_checking_test_data(
         test_data_dir, reset_callback=reset_api_config_test_data, opt_globals_callback=add_api_config_test_data
     )
 
     @pytest.fixture(scope="function")
-    def sut(self) -> APIConfig:
-        return APIConfig(name=_Config_Name, description=_Config_Description, apis=self._Mock_Model.mock_apis)
+    def sut(self) -> FakeAPIConfig:
+        return FakeAPIConfig(name=_Config_Name, description=_Config_Description, apis=self._Mock_Model.mock_apis)
 
     @pytest.fixture(scope="function")
-    def sut_with_nothing(self) -> APIConfig:
-        return APIConfig()
+    def sut_with_nothing(self) -> FakeAPIConfig:
+        return FakeAPIConfig()
 
-    def test___len___with_value(self, sut: APIConfig):
+    def test___len___with_value(self, sut: FakeAPIConfig):
         sut.apis = _TestConfig.Mock_APIs
         assert len(sut) == len(
             list(filter(lambda k: k not in ["base", "template"], _TestConfig.Mock_APIs.keys()))
         ), "The size of *APIConfig* data object should be same as *MockAPIs* data object."
 
     def test___len___with_non_value(self):
-        assert len(APIConfig()) == 0, "The size of *APIConfig* data object should be '0' if property *apis* is None."
+        assert (
+            len(FakeAPIConfig()) == 0
+        ), "The size of *APIConfig* data object should be '0' if property *apis* is None."
 
-    def test_has_apis_with_value(self, sut: APIConfig):
+    def test_has_apis_with_value(self, sut: FakeAPIConfig):
         sut.apis = _TestConfig.Mock_APIs
         assert sut.has_apis() is True, "It should be 'True' if its property *apis* has value."
 
     def test_has_apis_with_no_value(self):
-        assert APIConfig().has_apis() is False, "It should be 'False' if its property *apis* is None."
+        assert FakeAPIConfig().has_apis() is False, "It should be 'False' if its property *apis* is None."
 
-    def test_value_attributes(self, sut: APIConfig):
+    def test_value_attributes(self, sut: FakeAPIConfig):
         assert sut.name == _Config_Name, _assertion_msg
         assert sut.description == _Config_Description, _assertion_msg
         assert sut.apis.base.url == _TestConfig.API_Config.get("mocked_apis").get("base").get("url"), _assertion_msg
@@ -105,7 +107,7 @@ class TestAPIConfig(CheckableTestSuite):
         mock_deserialize: Mock,
         setting_val: Union[dict, BaseConfig],
         should_call_deserialize: bool,
-        sut_with_nothing: APIConfig,
+        sut_with_nothing: FakeAPIConfig,
     ):
         # Run target function
         sut_with_nothing.apis = setting_val
@@ -118,7 +120,7 @@ class TestAPIConfig(CheckableTestSuite):
             assert sut_with_nothing.apis == (setting_val if setting_val else None)
 
     @patch.object(MockAPIs, "deserialize", return_value=MOCK_RETURN_VALUE)
-    def test_prop_apis_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: APIConfig):
+    def test_prop_apis_with_invalid_obj(self, mock_deserialize: Mock, sut_with_nothing: FakeAPIConfig):
         with pytest.raises(TypeError) as exc_info:
             sut_with_nothing.apis = "Invalid object"
         mock_deserialize.assert_not_called()
@@ -127,8 +129,8 @@ class TestAPIConfig(CheckableTestSuite):
     def _expected_serialize_value(self) -> dict:
         return _TestConfig.API_Config
 
-    def _expected_deserialize_value(self, obj: APIConfig) -> None:
-        assert isinstance(obj, APIConfig)
+    def _expected_deserialize_value(self, obj: FakeAPIConfig) -> None:
+        assert isinstance(obj, FakeAPIConfig)
         assert obj.name == _Config_Name
         assert obj.description == _Config_Description
         assert obj.apis.base.url == _TestConfig.API_Config.get("mocked_apis").get("base").get("url")
@@ -140,22 +142,22 @@ class TestAPIConfig(CheckableTestSuite):
         ("test_data_path", "criteria"),
         _APIConfig_Test_Data,
     )
-    def test_is_work(self, sut_with_nothing: APIConfig, test_data_path: str, criteria: bool):
+    def test_is_work(self, sut_with_nothing: FakeAPIConfig, test_data_path: str, criteria: bool):
         super().test_is_work(sut_with_nothing, test_data_path, criteria)
 
-    @patch("pymock_server._utils.file.operation.YAML.read", return_value=_TestConfig.API_Config)
-    def test_from_yaml_file(self, mock_read_yaml: Mock, sut: APIConfig):
+    @patch("fake_api_server._utils.file.operation.YAML.read", return_value=_TestConfig.API_Config)
+    def test_from_yaml_file(self, mock_read_yaml: Mock, sut: FakeAPIConfig):
         config = sut.from_yaml(path="test-api.yaml")
         mock_read_yaml.assert_called_once_with("test-api.yaml")
-        assert isinstance(config, APIConfig)
+        assert isinstance(config, FakeAPIConfig)
         assert config.name == _Config_Name
         assert config.description == _Config_Description
         clean_api_config = self._clean_prop_with_empty_value(config.apis.serialize())
         expected_data = self._clean_prop_with_empty_value(_TestConfig.Mock_APIs)
         assert clean_api_config == expected_data
 
-    @patch("pymock_server._utils.file.operation.YAML.write", return_value=None)
-    def test_to_yaml_file(self, mock_write_yaml: Mock, sut: APIConfig):
+    @patch("fake_api_server._utils.file.operation.YAML.write", return_value=None)
+    def test_to_yaml_file(self, mock_write_yaml: Mock, sut: FakeAPIConfig):
         sut.to_yaml(path=_Test_Config)
         mock_write_yaml.assert_called_once_with(path=_Test_Config, config=sut.serialize())
 

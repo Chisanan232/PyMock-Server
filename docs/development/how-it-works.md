@@ -1,6 +1,6 @@
 # How it works
 
-**_PyMock-Server_** would base on the settings of configuration to set up the web server to mock APIs without any code. But,
+**_PyFake-API-Server_** would base on the settings of configuration to set up the web server to mock APIs without any code. But,
 how it exactly works? How it works of generating APIs which code base with the customized settings and Python web framework?
 
 Please consider one thing, the spec has been defined and be ready for developing, you need to develop a web server and
@@ -21,7 +21,7 @@ For example, above steps with different Python web framework would be below (sta
 
     1. Mock API quickly by returned value directly as Python code
     
-        ```python
+        ```python linenums="1"
         from flask import Flask
     
         app: Flask = Flask(__name__)
@@ -49,7 +49,7 @@ For example, above steps with different Python web framework would be below (sta
 
     1. Mock API quickly by returned value directly as Python code
     
-        ```python
+        ```python linenums="1"
         from fastapi import FastAPI
          
         app: FastAPI = FastAPI()
@@ -73,17 +73,17 @@ For example, above steps with different Python web framework would be below (sta
         >>> uvicorn --host 127.0.0.1 --port 8080 'app:app'
         ```
 
-For being convenience to manage includes maintaining or extending the API for mocking, **_PyMock-Server_** target to resolve
+For being convenience to manage includes maintaining or extending the API for mocking, **_PyFake-API-Server_** target to resolve
 this issue by automating the processes and configuring detail settings as ``.yaml`` file. The above workflows would be
 replaced and below are the details:
 
-1. Step 1 would be controlled by option ``--app-type`` under subcommand ``run``. You even could run **_PyMock-Server_** without
+1. Step 1 would be controlled by option ``--app-type`` under subcommand ``run``. You even could run **_PyFake-API-Server_** without
 it because it would automatically detect it.
 2. Step 2, the API settings would be managed in a ``.yaml`` file. Don't write code, just configure with YAML.
 3. All things in step 3 would be simplified as one command line.
 4. Same, but they also could clearly get the API info by the configuration.
 
-In short, **_PyMock-Server_** to let your job about mocking API to be easier and more manageable.
+In short, **_PyFake-API-Server_** to let your job about mocking API to be easier and more manageable.
 
 1. Set the API for mocking as ``.yaml`` file and be named as ``api.yaml``
    
@@ -102,7 +102,7 @@ In short, **_PyMock-Server_** to let your job about mocking API to be easier and
 2. Run the web server
     
     ```console
-    >>> mock-api
+    >>> fake rest-server run
     ```
 
 
@@ -110,7 +110,7 @@ In short, **_PyMock-Server_** to let your job about mocking API to be easier and
 
 Let's virtualize the workflow of processing an HTTP request from application site to web server:
 
-<iframe frameborder="0" style="width:100%;height:503px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-API.drawio&page-id=Y9nzx86wo_nkAufvYjAq#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
+<iframe frameborder="0" style="width:100%;height:503px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyFake-API-API.drawio&page-id=Y9nzx86wo_nkAufvYjAq#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 As you can see, the HTTP request would be sent from application by API. And it would be processed and return something by
 web server. The web server is the core component which you implement API by Python code. But wait a minute, it has another
@@ -120,7 +120,7 @@ server implementation and ``uvicorn`` is one of ASGI (Asynchronous server gatewa
 could help your web server to be more efficiency of processing the HTTP requests. So your web server would be behind of SGI
 server in flow.
 
-**_PyMock-Server_** automates the process about write Python code to implement the API what data it should return and what SGI
+**_PyFake-API-Server_** automates the process about write Python code to implement the API what data it should return and what SGI
 server you should use to set up and run your web server. And which web framework and SGI server you should use all could be
 controlled by option ``--app-type``.
 
@@ -149,7 +149,7 @@ mocked_apis:
 
 === "Python code by Flask"
     
-     ```python hl_lines="7-9"
+     ```python linenums="1" hl_lines="7-9"
      from flask import Flask
  
      app: Flask = Flask(__name__)
@@ -165,7 +165,7 @@ mocked_apis:
 
 === "Python code by FastAPI"
     
-     ```python hl_lines="7-9"
+     ```python linenums="1" hl_lines="7-9"
      from fastapi import FastAPI
       
      app: FastAPI = FastAPI()
@@ -187,15 +187,15 @@ You just need to maintain the configuration only.
 
 Except the API development by Python code, it also automates the command line running.
 
-**_PyMock-Server_** uses factory mode to create and set up application, and the factory function has been annotated in it so
+**_PyFake-API-Server_** uses factory mode to create and set up application, and the factory function has been annotated in it so
 that we won't do anything about telling it where my application path as a string value.
 
-So the **_PyMock-Server_** command line you should use is very simple and easy.
+So the **_PyFake-API-Server_** command line you should use is very simple and easy.
 
 ```console
-mock-api --bind <IP address>:<Port> \
-         --workers <workers> \
-         --log-level <log-level>
+fake rest-server run --bind <IP address>:<Port> \
+                     --workers <workers> \
+                     --log-level <log-level>
 ```
 
 And this command line would run the SGI server command as following:
@@ -206,7 +206,7 @@ And this command line would run the SGI server command as following:
     gunicorn --bind <IP address>:<Port> \
              --workers <workers> \
              --log-level <log-level> \
-             'pymock_api.server:create_flask_app()'
+             'fake_api_server.server:create_flask_app()'
     ```
 
 === "If you're FastAPI, run by Uvicorn"
@@ -217,9 +217,9 @@ And this command line would run the SGI server command as following:
             --port <Port> \
             --workers <workers> \
             --log-level <log-level> \
-            'pymock_api.server:create_fastapi_app'
+            'fake_api_server.server:create_fastapi_app'
     ```
 
 Therefore, you don't worry and care about which SGI server you should use and how to use the command.
 
-That's mostly all the running principle of **_PyMock-Server_**.
+That's mostly all the running principle of **_PyFake-API-Server_**.

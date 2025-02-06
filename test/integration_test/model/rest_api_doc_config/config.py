@@ -5,21 +5,21 @@ from typing import Any, Dict
 
 import pytest
 
-from pymock_server.model import OpenAPIVersion
-from pymock_server.model.api_config.value import FormatStrategy
-from pymock_server.model.rest_api_doc_config._base import set_openapi_version
-from pymock_server.model.rest_api_doc_config.base_config import (
+from fake_api_server.model import OpenAPIVersion
+from fake_api_server.model.api_config.value import FormatStrategy
+from fake_api_server.model.rest_api_doc_config._base import set_openapi_version
+from fake_api_server.model.rest_api_doc_config.base_config import (
     _BaseAPIConfigWithMethod,
     set_component_definition,
 )
-from pymock_server.model.rest_api_doc_config.config import (
+from fake_api_server.model.rest_api_doc_config.config import (
     APIConfigWithMethodV2,
     APIConfigWithMethodV3,
     HttpConfigV2,
     HttpConfigV3,
     ReferenceConfigProperty,
 )
-from pymock_server.model.rest_api_doc_config.content_type import ContentType
+from fake_api_server.model.rest_api_doc_config.content_type import ContentType
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ _Common_Schemas: Dict[str, Dict] = {
 }
 
 
-class ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite(metaclass=ABCMeta):
+class ConvertApiDocConfigToPyFakeConfigAtHTTPResponseTestSuite(metaclass=ABCMeta):
     @pytest.mark.parametrize(
         ("api_doc_config", "format_strategy", "format_in_array"),
         [
@@ -77,12 +77,12 @@ class ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite(metaclass=ABCM
             ({"$ref": "#/components/schemas/FormatElementArrayResponse"}, FormatStrategy.BY_DATA_TYPE, True),
         ],
     )
-    def test_convert_api_doc_config_to_adapter_to_pymock_config(
+    def test_convert_api_doc_config_to_adapter_to_pyfake_config(
         self, api_doc_config: Dict[str, Any], format_strategy: FormatStrategy, format_in_array: bool
     ):
         """
         Test goal: value converting workflow at specific column *value_format*
-        API document config -> adapter -> PyMock-Server config
+        API document config -> adapter -> PyFake-API-Server config
         """
         # given
         set_openapi_version(self._api_doc_version)
@@ -91,7 +91,7 @@ class ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite(metaclass=ABCM
 
         # when
         response_config_adapter = api_doc_http_config.to_responses_adapter()
-        response_configs = [ra.to_pymock_api_config() for ra in response_config_adapter.data]
+        response_configs = [ra.to_pyfake_api_config() for ra in response_config_adapter.data]
 
         # should
         one_resp_configs = response_configs[0]
@@ -123,7 +123,7 @@ class ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite(metaclass=ABCM
         pass
 
 
-class TestAPIConfigWithMethodV2(ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite):
+class TestAPIConfigWithMethodV2(ConvertApiDocConfigToPyFakeConfigAtHTTPResponseTestSuite):
 
     @property
     def _api_doc_version(self) -> OpenAPIVersion:
@@ -137,7 +137,7 @@ class TestAPIConfigWithMethodV2(ConvertApiDocConfigToPyMockAPIConfigAtHTTPRespon
         )
 
 
-class TestAPIConfigWithMethodV3(ConvertApiDocConfigToPyMockAPIConfigAtHTTPResponseTestSuite):
+class TestAPIConfigWithMethodV3(ConvertApiDocConfigToPyFakeConfigAtHTTPResponseTestSuite):
 
     @property
     def _api_doc_version(self) -> OpenAPIVersion:

@@ -10,7 +10,7 @@ The value format setting.
 The strategy how it should use to generate value with specific format way. It would set the value format as
 `BY_DATA_TYPE` in default.
 
-The following format strategies are provided by **_PyMock-Server_**:
+The following format strategies are provided by **_PyFake-API-Server_**:
 
 | Strategy name   | Purpose                                                                                 |
 |:----------------|:----------------------------------------------------------------------------------------|
@@ -69,7 +69,7 @@ Activate to use this property with strategy `CUSTOMIZE`.
 !!! tip "Usually be used with property ``format.variables`` or ``template.common_config.format``"
 
     About using property ``format.variables``, it must need to run with
-    format setting variables. In **_PyMock-Server_** configuration, the
+    format setting variables. In **_PyFake-API-Server_** configuration, the
     format setting variables would only be set and get from 2 places:
     at property ``format.variables`` or in section ``template.common_config.format``.
     

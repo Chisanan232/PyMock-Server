@@ -3,9 +3,9 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [project]
-name = "pymock-server"
-version = "0.3.0"
-description = "🕸🤖👺 A Python tool to mock server, e.g., API server, easily and humanly without any coding."
+name = "fake-api-server"
+version = "0.2.0"
+description = "🕸🤖👺 A Python tool to fake API server, e.g., RESTful API server, easily and humanly without any coding."
 authors = [
     { name = "Liu, Bryant", email = "chi10211201@cycu.org.tw" }
 ]
@@ -32,9 +32,20 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.8,<3.13"
 dependencies = [
     "PyYAML (>=6.0)",
+]
+
+[tool.poetry]
+name = "fake-api-server"
+version = "0.2.0"
+description = "🕸🤖👺 A Python tool to fake API server, e.g., RESTful API server, easily and humanly without any coding."
+authors = [
+    "Liu, Bryant <chi10211201@cycu.org.tw>",
+]
+packages = [
+    { include = "fake_api_server/" },
 ]
 
 [project.optional-dependencies]
@@ -67,7 +78,11 @@ Changelog = "https://chisanan232.github.io/PyMock-Server/latest/release_note/"
 "Project Management" = "https://app.clickup.com/9018752317/v/f/90183126979/90182605225"
 
 [project.scripts]
-mock = "pymock_server.runner:run"
+fake = "fake_api_server.runner:run"
+
+# TODO: Let the dependencies for development to be optional
+#[tool.poetry.group.dev]
+#optional = true
 
 [tool.poetry.group.dev.dependencies]
 # Dependency for test

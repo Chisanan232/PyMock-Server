@@ -17,7 +17,7 @@ from test._file_utils import (
 from test._spec import run_test
 from test._values import _Test_Config_Value
 
-from pymock_server._utils.file.operation import JSON, YAML, _BaseFileOperation
+from fake_api_server._utils.file.operation import JSON, YAML, _BaseFileOperation
 
 
 class _BaseTestSuite(metaclass=ABCMeta):

@@ -23,7 +23,7 @@ env:
   DOCKER_IMAGE_NAME: pymock-server
 #  DOCKER_IMAGE_NAME: test    # For testing
   RELEASE_TYPE: python-package
-  PYTHON_PACKAGE_NAME: pymock_server
+  PYTHON_PACKAGE_NAME: fake_api_server
   SOFTWARE_VERSION_FORMAT: general-3
   RUNNING_MODE: dry-run
 
@@ -72,12 +72,12 @@ jobs:
 #    name: Check the package version info to make sure whether it should release Docker image or not.
     needs: check_version-state
     if: ${{ needs.check_version-state.outputs.version_update_state == 'VERSION UPDATE' }}
-    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_build_git-tag_and_create_github-release.yaml@v7
+    uses: Chisanan232/GitHub-Action_Reusable_Workflows-Python/.github/workflows/rw_build_git-tag_and_create_github-release.yaml@v7.2
     secrets:
       github_auth_token: ${{ secrets.GITHUB_TOKEN }}
     with:
       project_type: python-package
-      project_name: pymock_server
+      project_name: fake_api_server
       software_version_format: general-3
       debug_mode: true
 

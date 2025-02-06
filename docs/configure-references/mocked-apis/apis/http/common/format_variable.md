@@ -16,7 +16,7 @@ be unique.
 
 The format type how it should generate the random value.
 
-The following format types are provided by **_PyMock-Server_**:
+The following format types are provided by **_PyFake-API-Server_**:
 
 | Strategy name | Purpose                                                     | Example result                       |
 |:--------------|:------------------------------------------------------------|--------------------------------------|

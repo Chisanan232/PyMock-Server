@@ -4,8 +4,8 @@ from typing import TypeVar
 
 import pytest
 
-from pymock_server import APIConfig
-from pymock_server.model import (
+from fake_api_server import FakeAPIConfig
+from fake_api_server.model import (
     HTTP,
     APIParameter,
     HTTPRequest,
@@ -13,8 +13,8 @@ from pymock_server.model import (
     MockAPI,
     TemplateConfig,
 )
-from pymock_server.model.api_config import ResponseProperty
-from pymock_server.model.api_config.template import _BaseTemplateAccessable
+from fake_api_server.model.api_config import ResponseProperty
+from fake_api_server.model.api_config.template import _BaseTemplateAccessable
 
 # isort: off
 from test._values import _Mock_Template_Setting, _Test_Config_Value
@@ -27,13 +27,13 @@ _BaseTemplateAccessableType = TypeVar("_BaseTemplateAccessableType", bound=_Base
 class BaseAccessTemplateConfigTestSuite(metaclass=ABCMeta):
 
     @pytest.fixture(scope="module")
-    def entire_mock_api_config(self) -> APIConfig:
-        return APIConfig().deserialize(_Test_Config_Value)
+    def entire_mock_api_config(self) -> FakeAPIConfig:
+        return FakeAPIConfig().deserialize(_Test_Config_Value)
 
-    def test_template_config_access(self, entire_mock_api_config: APIConfig):
+    def test_template_config_access(self, entire_mock_api_config: FakeAPIConfig):
         assert self.under_test_config(entire_mock_api_config) == self.expect_template_config
 
-    def test_template_config_not_same_after_modify(self, entire_mock_api_config: APIConfig):
+    def test_template_config_not_same_after_modify(self, entire_mock_api_config: FakeAPIConfig):
         template_config = copy.copy(self.expect_template_config)
         template_config.common_config.format.variables = []
         assert self.under_test_config(entire_mock_api_config) != template_config
@@ -43,13 +43,13 @@ class BaseAccessTemplateConfigTestSuite(metaclass=ABCMeta):
         return TemplateConfig().deserialize(_Mock_Template_Setting)
 
     @abstractmethod
-    def under_test_config(self, entire_mock_api_config: APIConfig) -> TemplateConfig:
+    def under_test_config(self, entire_mock_api_config: FakeAPIConfig) -> TemplateConfig:
         pass
 
 
 class TestAPIConfigAccessTemplateConfig(BaseAccessTemplateConfigTestSuite):
 
-    def under_test_config(self, entire_mock_api_config: APIConfig) -> TemplateConfig:
+    def under_test_config(self, entire_mock_api_config: FakeAPIConfig) -> TemplateConfig:
         return entire_mock_api_config.apis.template
 
 
@@ -59,18 +59,18 @@ class TestMockAPIAccessTemplateConfig(BaseAccessTemplateConfigTestSuite):
     def _under_test_api_key(self) -> str:
         return "google_home"
 
-    def get_template_accessable_config(self, entire_mock_api_config: APIConfig) -> MockAPI:
+    def get_template_accessable_config(self, entire_mock_api_config: FakeAPIConfig) -> MockAPI:
         one_mock_api = entire_mock_api_config.apis.apis[self._under_test_api_key]
         assert isinstance(one_mock_api, MockAPI)
         return one_mock_api
 
-    def under_test_config(self, entire_mock_api_config: APIConfig) -> TemplateConfig:
+    def under_test_config(self, entire_mock_api_config: FakeAPIConfig) -> TemplateConfig:
         return self.get_template_accessable_config(entire_mock_api_config)._current_template
 
 
 class TestHTTPAccessTemplateConfig(TestMockAPIAccessTemplateConfig):
 
-    def get_template_accessable_config(self, entire_mock_api_config: APIConfig) -> HTTP:
+    def get_template_accessable_config(self, entire_mock_api_config: FakeAPIConfig) -> HTTP:
         one_mock_api: MockAPI = super().get_template_accessable_config(entire_mock_api_config)
         assert one_mock_api.http
         assert isinstance(one_mock_api.http, HTTP)
@@ -79,7 +79,7 @@ class TestHTTPAccessTemplateConfig(TestMockAPIAccessTemplateConfig):
 
 class TestHTTPRequestAccessTemplateConfig(TestHTTPAccessTemplateConfig):
 
-    def get_template_accessable_config(self, entire_mock_api_config: APIConfig) -> HTTPRequest:
+    def get_template_accessable_config(self, entire_mock_api_config: FakeAPIConfig) -> HTTPRequest:
         one_mock_api_http: HTTP = super().get_template_accessable_config(entire_mock_api_config)
         assert one_mock_api_http.request
         assert isinstance(one_mock_api_http.request, HTTPRequest)
@@ -88,7 +88,7 @@ class TestHTTPRequestAccessTemplateConfig(TestHTTPAccessTemplateConfig):
 
 class TestHTTPRequestAPIParameterAccessTemplateConfig(TestHTTPRequestAccessTemplateConfig):
 
-    def get_template_accessable_config(self, entire_mock_api_config: APIConfig) -> APIParameter:
+    def get_template_accessable_config(self, entire_mock_api_config: FakeAPIConfig) -> APIParameter:
         one_mock_api_http_req: HTTPRequest = super().get_template_accessable_config(entire_mock_api_config)
         assert one_mock_api_http_req.parameters
         assert isinstance(one_mock_api_http_req.parameters[0], APIParameter)
@@ -97,7 +97,7 @@ class TestHTTPRequestAPIParameterAccessTemplateConfig(TestHTTPRequestAccessTempl
 
 class TestHTTPResponseAccessTemplateConfig(TestHTTPAccessTemplateConfig):
 
-    def get_template_accessable_config(self, entire_mock_api_config: APIConfig) -> HTTPResponse:
+    def get_template_accessable_config(self, entire_mock_api_config: FakeAPIConfig) -> HTTPResponse:
         one_mock_api_http: HTTP = super().get_template_accessable_config(entire_mock_api_config)
         assert one_mock_api_http.response
         assert isinstance(one_mock_api_http.response, HTTPResponse)
@@ -109,7 +109,7 @@ class TestHTTPResponsePropertyAccessTemplateConfig(TestHTTPResponseAccessTemplat
     def _under_test_api_key(self) -> str:
         return "foo-object"
 
-    def get_template_accessable_config(self, entire_mock_api_config: APIConfig) -> ResponseProperty:
+    def get_template_accessable_config(self, entire_mock_api_config: FakeAPIConfig) -> ResponseProperty:
         one_mock_api_http_resp: HTTPResponse = super().get_template_accessable_config(entire_mock_api_config)
         assert one_mock_api_http_resp.properties
         assert isinstance(one_mock_api_http_resp.properties[0], ResponseProperty)

@@ -6,27 +6,27 @@ All codes belong to here section, they all are responsible for **what thing woul
 
 ## UML
 
-<iframe frameborder="0" style="width:100%;height:600px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyMock-Server.drawio&page-id=p-yRdhPX9lBvFNy9WcaI#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
+<iframe frameborder="0" style="width:100%;height:600px;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&title=PyFake-API-Server.drawio&page-id=p-yRdhPX9lBvFNy9WcaI#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1hq5q_Eaa8O48HgSEO8stAbWoS4HnwxEm%26export%3Ddownload"></iframe>
 
 The software architecture here feature apply is mostly same as previous one section [Command line](command_line.mdml).
 
 * It has 4 base classes:
-    * ``MetaCommand`` [source code](https://github.com/Chisanan232/PyMock-Server/blob/master/pymock_server/command/_base/process.py#L39-L52)
+    * ``MetaCommand`` [source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/_base/process.py#L39-L52)
 
         It's a metaclass for instantiating base class. It would auto-register objects which extends the base class be instantiated
         from this metaclass to list type protected variable ``_COMMAND_CHAIN``.
 
-    * ``CommandProcessor`` [source code](https://github.com/Chisanan232/PyMock-Server/blob/master/pymock_server/command/_base/process.py#L55-L112)
+    * ``CommandProcessor`` [source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/_base/process.py#L55-L112)
 
         It defines all attributes and functions for subclass to reuse or override to implement customize logic.
 
-    * ``BaseSubCmdComponent`` [source code](https://github.com/Chisanan232/PyMock-Server/blob/master/pymock_server/command/_base/process.py#L115)
+    * ``BaseSubCmdComponent`` [source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/_base/process.py#L115)
 
         This is the base class should be extended by all subclasses which is the core running logic implementation of one specific
         sub-command line. And it also needs to be the return value of property ``_subcmd_component`` of each subclass which extends
         base class ``CommandProcessor``.
 
-    * ``BaseCommandProcessor`` [source code](https://github.com/Chisanan232/PyMock-Server/blob/master/pymock_server/command/_base/process.py#L115)
+    * ``BaseCommandProcessor`` [source code](https://github.com/Chisanan232/PyFake-API-Server/blob/master/fake_api_server/command/_base/process.py#L115)
 
         This is the base class which should be extended by all subclasses. This object be instantiated by metaclass ``MetaCommand``
         and general object ``CommandProcessor``.
@@ -52,8 +52,7 @@ You'll have 3 things need to do:
 
 New sub-command line must have options. So you need to define which sub-command line options it has.
 
-```python
-# In module pymock_server.model.command.rest_server.cmd_args
+```python title="fake_api_server.model.command.rest_server.cmd_args" linenums="1"
 
 @dataclass(frozen=True)
 class SubcmdNewProcessArguments(ParserArguments):
@@ -71,11 +70,10 @@ class SubcmdNewProcessArguments(ParserArguments):
         )
 ```
 
-If it's the subcommand line under command line ``mock rest-server``, and also defining the utility function at module
+If it's the subcommand line under command line ``fake rest-server``, and also defining the utility function at module
 **_\_\_init\_\__**:
 
-```python
-# In module pymock_server.model.command.rest_server.__init__
+```python title="fake_api_server.model.command.rest_server.__init__" linenums="1"
 
 class RestServerCliArgsDeserialization:
   
@@ -104,7 +102,7 @@ Here, we have 2 choices to implement:
     models. 
 
     In this demonstration, you would need to add a new sub-package ``new_subcmd`` under
-    sub-package ``pymock_server.command``.
+    sub-package ``fake_api_server.command``.
 
 Let's demonstrate all way to implement to you and explain their difference.
 
@@ -123,8 +121,7 @@ Let's demonstrate all way to implement to you and explain their difference.
         * For the complex logic or large-scale feature, implement by this way would let the code in this module to be dirty and
           complex so that developers be more harder to manage or maintain it.
     
-    ```python
-    # In module pymock_api.command.new_subcmd.process
+    ```python title="fake_api_server.command.new_subcmd.process" linenums="1"
     
     class SubCmdNewProcess(BaseCommandProcessor):
         def _parse_process(self, parser: ArgumentParser, cmd_args: Optional[List[str]] = None) -> SubcmdNewProcessArguments:
@@ -153,8 +150,7 @@ Let's demonstrate all way to implement to you and explain their difference.
     
     Implement the core logic in component layer:
 
-    ```python
-    # In module pymock_api.command.new_subcmd.component
+    ```python title="fake_api_server.command.new_subcmd.component" linenums="1"
     
     class SubCmdNewProcessComponent(BaseSubCmdComponent):
         def process(self, args: SubcmdNewProcessArguments) -> None:
@@ -164,8 +160,7 @@ Let's demonstrate all way to implement to you and explain their difference.
     
     Remember that it needs to let command line processor know which component object it should use to run the sub-command line core logic:
 
-    ```python
-    # In module pymock_api.command.new_subcmd.process
+    ```python title="fake_api_server.command.new_subcmd.process" linenums="1"
     
     class SubCmdNewProcess(BaseCommandProcessor):
         @property
@@ -179,7 +174,7 @@ Let's demonstrate all way to implement to you and explain their difference.
 We finish all things if we want to extend one new sub-command line! Let's try to run it:
 
 ```console
->>> mock new-ps --arg-1 test_value
+>>> fake new-ps --arg-1 test_value
 ```
 
 Unfortunately, you would get an error finally. Why? What you miss? Do you remember all the code in this software architecture

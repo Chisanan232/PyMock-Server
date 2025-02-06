@@ -3,11 +3,11 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from pymock_server._utils.file.operation import YAML
-from pymock_server.command.rest_server.sample.component import SubCmdSampleComponent
-from pymock_server.model.command.rest_server._sample import SampleType
-from pymock_server.model.command.rest_server.cmd_args import SubcmdSampleArguments
-from pymock_server.model.subcmd_common import SysArg
+from fake_api_server._utils.file.operation import YAML
+from fake_api_server.command.rest_server.sample.component import SubCmdSampleComponent
+from fake_api_server.model.command.rest_server._sample import SampleType
+from fake_api_server.model.command.rest_server.cmd_args import SubcmdSampleArguments
+from fake_api_server.model.subcmd_common import SysArg
 
 # isort: off
 from test._values import SubCommand
@@ -39,10 +39,10 @@ class TestSubCmdSampleComponent:
 
         # Run target function to test
         with patch(
-            "pymock_server.command.rest_server.sample.component.YAML", return_value=FakeYAML
+            "fake_api_server.command.rest_server.sample.component.YAML", return_value=FakeYAML
         ) as mock_instantiate_writer:
             with patch(
-                "pymock_server.command.rest_server.sample.component.get_sample_by_type", return_value=FakeYAML
+                "fake_api_server.command.rest_server.sample.component.get_sample_by_type", return_value=FakeYAML
             ) as mock_get_sample_by_type:
                 with pytest.raises(AssertionError) as exc_info:
                     component.process(parser=Mock(), args=invalid_args)

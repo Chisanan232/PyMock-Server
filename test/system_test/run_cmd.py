@@ -9,9 +9,9 @@ from typing import Optional
 
 import pytest
 
-from pymock_server._utils.file.operation import YAML
-from pymock_server.model.api_config.apis import ResponseStrategy
-from pymock_server.model.command.rest_server._sample import (
+from fake_api_server._utils.file.operation import YAML
+from fake_api_server.model.api_config.apis import ResponseStrategy
+from fake_api_server.model.command.rest_server._sample import (
     Mocked_APIs,
     Sample_Config_Value,
 )
@@ -33,7 +33,7 @@ from test._values import (
 
 
 class CommandTestSpec(metaclass=ABCMeta):
-    Server_Running_Entry_Point: str = "pymock_server/runner.py"
+    Server_Running_Entry_Point: str = "fake_api_server/runner.py"
     Terminate_Command_Running_When_Sniff_IP_Info: bool = True
 
     @property
@@ -105,7 +105,7 @@ class TestSubCmdRestServerWithoutAnyCmdArgs(SubCmdRestServerTestSuite):
         self._should_contains_chars_in_result(
             cmd_running_result, "warn: please operate on this command with one more subcommand line you need"
         )
-        self._should_contains_chars_in_result(cmd_running_result, "mock rest-server [-h]")
+        self._should_contains_chars_in_result(cmd_running_result, "fake rest-server [-h]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "API server subcommands:")
         self._should_contains_chars_in_result(cmd_running_result, SubCommand.Pull)
@@ -124,7 +124,7 @@ class TestSubCommandRun(SubCmdRestServerTestSuite):
         return "run --help"
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "mock rest-server run [-h]")
+        self._should_contains_chars_in_result(cmd_running_result, "fake rest-server run [-h]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "--app-type APP_TYPE")
         self._should_contains_chars_in_result(cmd_running_result, "-c CONFIG, --config CONFIG")

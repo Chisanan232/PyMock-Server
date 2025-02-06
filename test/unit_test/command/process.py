@@ -12,13 +12,13 @@ try:
 except ImportError:
     from yaml import Dumper, Loader  # type: ignore
 
-from pymock_server.command._base.process import BaseCommandProcessor
-from pymock_server.command.options import get_all_subcommands
-from pymock_server.command.process import NoSubCmd, make_command_chain
-from pymock_server.command.subcommand import SubCommandLine
-from pymock_server.model import ParserArguments, SubcmdRunArguments
-from pymock_server.model.subcmd_common import SysArg
-from pymock_server.server import Command, CommandOptions, WSGIServer
+from fake_api_server.command._base.process import BaseCommandProcessor
+from fake_api_server.command.options import get_all_subcommands
+from fake_api_server.command.process import NoSubCmd, make_command_chain
+from fake_api_server.command.subcommand import SubCommandLine
+from fake_api_server.model import ParserArguments, SubcmdRunArguments
+from fake_api_server.model.subcmd_common import SysArg
+from fake_api_server.server import Command, CommandOptions, WSGIServer
 
 # isort: off
 from test._dummy import DummyParserArguments
@@ -52,7 +52,7 @@ def _given_command_option() -> CommandOptions:
 
 
 def _given_command(app_type: str) -> Command:
-    mock_parser_arg = SubcmdRunArguments(
+    fake_parser_arg = SubcmdRunArguments(
         subparser_structure=SysArg.parse([SubCommand.RestServer, SubCommand.Run]),
         app_type=app_type,
         config=_Test_Config,
@@ -60,8 +60,8 @@ def _given_command(app_type: str) -> Command:
         workers=_Workers_Amount.value,
         log_level=_Log_Level.value,
     )
-    mock_cmd_option_obj = _given_command_option()
-    return Command(entry_point="SGI tool command", app=mock_parser_arg.app_type, options=mock_cmd_option_obj)
+    fake_cmd_option_obj = _given_command_option()
+    return Command(entry_point="SGI tool command", app=fake_parser_arg.app_type, options=fake_cmd_option_obj)
 
 
 class FakeCommandProcess(BaseCommandProcessor):
@@ -198,6 +198,6 @@ def test_make_command_chain_if_duplicated_subcmd():
     assert re.search(r"subcommand.{1,64}has been used", str(exc_info.value), re.IGNORECASE)
 
     # Remove the invalid object for test could run finely.
-    from pymock_server.command._base.process import CommandProcessChain
+    from fake_api_server.command._base.process import CommandProcessChain
 
     CommandProcessChain.pop(-1)
