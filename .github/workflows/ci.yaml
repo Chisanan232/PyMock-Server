@@ -16,7 +16,7 @@ on:
 #     For documentation
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/workflows/documentation.yaml"
-      - ".cache/**"
+      - ".cache/**/*.json"
       - "docs/**"
       - "**/*.md"
       - "mkdocs.yml"
@@ -48,7 +48,7 @@ on:
 #     For documentation
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/workflows/documentation.yaml"
-      - ".cache/**"
+      - ".cache/**/*.json"
       - "docs/**"
       - "**/*.md"
       - "mkdocs.yml"
