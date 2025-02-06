@@ -105,7 +105,7 @@ class TestSubCmdRestServerWithoutAnyCmdArgs(SubCmdRestServerTestSuite):
         self._should_contains_chars_in_result(
             cmd_running_result, "warn: please operate on this command with one more subcommand line you need"
         )
-        self._should_contains_chars_in_result(cmd_running_result, "mock rest-server [-h]")
+        self._should_contains_chars_in_result(cmd_running_result, "fake rest-server [-h]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "API server subcommands:")
         self._should_contains_chars_in_result(cmd_running_result, SubCommand.Pull)
@@ -124,7 +124,7 @@ class TestSubCommandRun(SubCmdRestServerTestSuite):
         return "run --help"
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "mock rest-server run [-h]")
+        self._should_contains_chars_in_result(cmd_running_result, "fake rest-server run [-h]")
         self._should_contains_chars_in_result(cmd_running_result, "-h, --help")
         self._should_contains_chars_in_result(cmd_running_result, "--app-type APP_TYPE")
         self._should_contains_chars_in_result(cmd_running_result, "-c CONFIG, --config CONFIG")
