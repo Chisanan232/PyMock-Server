@@ -1,8 +1,8 @@
 ### 🎉 New feature
 
 1. Support new properties for customizing the values in request or response.
-   1. ``Format``: setting the format of value how it should be in request or return in response.
-   2. ``Variable``: for reusable usage in formatting value.
+   1. ``format``: setting the format of value how it should be in request or return in response.
+   2. ``variables``: for reusable usage in formatting value.
    3. ``size``: setting the value size. If it's ``str`` type, this is the length limitation; if it's ``int`` or other numeric type value, this is the value limitation.
    4. ``digit``: setting the decimal policy.
 2. Support setting the format properties in template section.
@@ -26,9 +26,10 @@
 
 ### 🍀 Improvement
 
-1. Improve the CD workflows which would only br triggered by updating version info.
-2. Let the error message to be more clear and readable for incorrect usage.
-3. Let the version info to be more readable and detail.
+1. Rename the Python package and project again as **_PyFake-API-Server_** to avoid similar project naming issue in PyPI
+2. Improve the CD workflows which would only br triggered by updating version info.
+3. Let the error message to be more clear and readable for incorrect usage.
+4. Let the version info to be more readable and detail.
 
 
 ### 📑 Docs
@@ -42,3 +43,9 @@
 1. Upgrade the Python dependencies.
 2. Upgrade pre-commit dependencies.
 3. Upgrade the CI reusable workflows.
+   1. Upgrade SonarQube and update its configuration
+   2. Update the usage because upgrading the artifact actions
+
+### 🚮Deprecate
+
+1. Deprecate and remove version 0.3.0 because it has multiple issue, and it cannot upload same version file to PyPI.
