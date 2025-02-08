@@ -123,7 +123,7 @@ mocked_apis:
 Now, both of the command line tool and configuration have been already. So let's try to run the command to set up application!
 
 ```console
->>> mock rest-server run -c <your configuration path>
+>>> fake rest-server run -c <your configuration path>
 ```
 
 You would see some log messages in terminal and that is the log of web server by one specific Python web framework.
