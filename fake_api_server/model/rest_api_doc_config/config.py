@@ -120,9 +120,7 @@ class RequestParameter(_BaseRequestParameter):
             raise ValueError(
                 f"There are some invalid data type item in the property *items*. Current *items*: {self.items}"
             )
-        return [
-            RequestParameter().deserialize(i) if isinstance(i, dict) else i for i in (self.items or [])  # type: ignore[arg-type]
-        ]
+        return [RequestParameter().deserialize(i) if isinstance(i, dict) else i for i in (self.items or [])]
 
     def deserialize(self, data: dict) -> "RequestParameter":
         self.name = data.get("name", "")
