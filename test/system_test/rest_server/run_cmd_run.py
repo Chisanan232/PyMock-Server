@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import re
 import subprocess
@@ -154,7 +153,7 @@ class RunFakeServerAsDaemonTestSpec(RunFakeServerTestSpec, ABC):
     def _do_finally(self) -> None:
         with open(_Access_Log_File.value, "r") as file:
             content = file.read()
-            logging.debug(f"Server access log: {content}")
+            print(f"[DEBUG] Server access log: {content}")
         os.remove(_Access_Log_File.value)
         super()._do_finally()
 
