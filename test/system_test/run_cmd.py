@@ -322,7 +322,7 @@ class TestRunFakeServerWithAuto(BaseFakeServerByFastAPITestSuite):
         super()._verify_running_output(cmd_running_result)
 
 
-class _BaseRunFakeServerByDaemonTestSuite(RunFakeServerTestSpec, ABC):
+class _BaseRunFakeServerWithFlaskByDaemonTestSuite(BaseFakeServerByFlaskTestSuite, ABC):
     Wait_Time_Before_Verify: int = 2
 
     def _do_finally(self) -> None:
@@ -330,9 +330,10 @@ class _BaseRunFakeServerByDaemonTestSuite(RunFakeServerTestSpec, ABC):
             content = file.read()
             logging.debug(f"Server access log: {content}")
         os.remove(_Access_Log_File.value)
+        super()._do_finally()
 
 
-class TestRunFakeServerWithFlaskByDaemon(_BaseRunFakeServerByDaemonTestSuite):
+class TestRunFakeServerWithFlaskByDaemon(_BaseRunFakeServerWithFlaskByDaemonTestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
@@ -344,19 +345,8 @@ class TestRunFakeServerWithFlaskByDaemon(_BaseRunFakeServerByDaemonTestSuite):
             log_file_content = file.read()
         super()._verify_running_output(log_file_content)
 
-    def _do_finally(self) -> None:
-        subprocess.run("pkill -f gunicorn", shell=True)
-        super()._do_finally()
 
-    def _check_server_running_access_log(self, cmd_running_result: str, contains: bool) -> None:
-        check_callback: Callable[[str, str], None] = (
-            self._should_contains_chars_in_result if contains else self._should_not_contains_chars_in_result
-        )
-        check_callback(cmd_running_result, "Starting gunicorn")
-        check_callback(cmd_running_result, f"Listening at: http://{_Bind_Host_And_Port.value}")
-
-
-class TestRunFakeServerWithFastAPIByDaemon(_BaseRunFakeServerByDaemonTestSuite):
+class TestRunFakeServerWithFastAPIByDaemon(_BaseRunFakeServerWithFlaskByDaemonTestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
@@ -382,7 +372,7 @@ class TestRunFakeServerWithFastAPIByDaemon(_BaseRunFakeServerByDaemonTestSuite):
         check_callback(cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}")
 
 
-class TestRunFakeServerWithAutoByDaemon(_BaseRunFakeServerByDaemonTestSuite):
+class TestRunFakeServerWithAutoByDaemon(_BaseRunFakeServerWithFlaskByDaemonTestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type auto --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
