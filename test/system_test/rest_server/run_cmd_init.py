@@ -1,4 +1,4 @@
-from ._base import SubCmdRestServerTestSuite
+from test.system_test._base import SubCmdRestServerTestSuite
 
 # isort: off
 from test._values import (

@@ -5,9 +5,8 @@ import re
 import subprocess
 from abc import ABC, abstractmethod
 from pathlib import Path
+from test.system_test._base import SubCmdRestServerTestSuite
 from typing import Callable
-
-from ._base import SubCmdRestServerTestSuite
 
 # isort: off
 from test._file_utils import MockAPI_Config_Yaml_Path
