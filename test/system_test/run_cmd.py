@@ -266,17 +266,9 @@ class RunFakeServerTestSpec(SubCmdRestServerTestSuite, ABC):
         assert re.search(re.escape(expected_resp_content), resp_content, re.IGNORECASE)
 
 
-class TestRunFakeServerWithFlask(RunFakeServerTestSpec):
-    @property
-    def options(self) -> str:
-        return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
-
+class BaseFakeServerByFlaskTestSuite(RunFakeServerTestSpec, ABC):
     def _do_finally(self) -> None:
         subprocess.run("pkill -f gunicorn", shell=True)
-
-    def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._check_server_running_access_log(cmd_running_result, contains=True)
-        super()._verify_running_output(cmd_running_result)
 
     def _check_server_running_access_log(self, cmd_running_result: str, contains: bool) -> None:
         check_callback: Callable[[str, str], None] = (
@@ -286,17 +278,9 @@ class TestRunFakeServerWithFlask(RunFakeServerTestSpec):
         check_callback(cmd_running_result, f"Listening at: http://{_Bind_Host_And_Port.value}")
 
 
-class TestRunFakeServerWithFastAPI(RunFakeServerTestSpec):
-    @property
-    def options(self) -> str:
-        return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
-
+class BaseFakeServerByFastAPITestSuite(RunFakeServerTestSpec, ABC):
     def _do_finally(self) -> None:
         subprocess.run("pkill -f uvicorn", shell=True)
-
-    def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._check_server_running_access_log(cmd_running_result, contains=True)
-        super()._verify_running_output(cmd_running_result)
 
     def _check_server_running_access_log(self, cmd_running_result: str, contains: bool) -> None:
         check_callback: Callable[[str, str], None] = (
@@ -308,21 +292,33 @@ class TestRunFakeServerWithFastAPI(RunFakeServerTestSpec):
         check_callback(cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}")
 
 
-class TestRunFakeServerWithAuto(RunFakeServerTestSpec):
+class TestRunFakeServerWithFlask(BaseFakeServerByFlaskTestSuite):
+    @property
+    def options(self) -> str:
+        return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
+
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._check_server_running_access_log(cmd_running_result, contains=True)
+        super()._verify_running_output(cmd_running_result)
+
+
+class TestRunFakeServerWithFastAPI(BaseFakeServerByFastAPITestSuite):
+    @property
+    def options(self) -> str:
+        return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
+
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._check_server_running_access_log(cmd_running_result, contains=True)
+        super()._verify_running_output(cmd_running_result)
+
+
+class TestRunFakeServerWithAuto(BaseFakeServerByFastAPITestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type auto --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
 
-    def _do_finally(self) -> None:
-        subprocess.run("pkill -f uvicorn", shell=True)
-
     def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "Started server process")
-        self._should_contains_chars_in_result(cmd_running_result, "Waiting for application startup")
-        self._should_contains_chars_in_result(cmd_running_result, "Application startup complete")
-        self._should_contains_chars_in_result(
-            cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}"
-        )
+        self._check_server_running_access_log(cmd_running_result, contains=True)
         super()._verify_running_output(cmd_running_result)
 
 
