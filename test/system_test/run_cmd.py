@@ -204,7 +204,7 @@ class TestGenerateSampleConfiguration(SubCmdRestServerTestSuite):
         assert config_data == Sample_Config_Value
 
 
-class RunMockApplicationTestSpec(SubCmdRestServerTestSuite, ABC):
+class RunFakeServerTestSpec(SubCmdRestServerTestSuite, ABC):
     def _verify_running_output(self, cmd_running_result: str) -> None:
         self._verify_apis()
 
@@ -253,7 +253,7 @@ class RunMockApplicationTestSpec(SubCmdRestServerTestSuite, ABC):
         assert re.search(re.escape(expected_resp_content), resp_content, re.IGNORECASE)
 
 
-class TestRunMockApplicationWithFlask(RunMockApplicationTestSpec):
+class TestRunFakeServerWithFlask(RunFakeServerTestSpec):
     @property
     def options(self) -> str:
         return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
@@ -267,7 +267,7 @@ class TestRunMockApplicationWithFlask(RunMockApplicationTestSpec):
         super()._verify_running_output(cmd_running_result)
 
 
-class TestRunMockApplicationWithFastAPI(RunMockApplicationTestSpec):
+class TestRunFakeServerWithFastAPI(RunFakeServerTestSpec):
     @property
     def options(self) -> str:
         return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
@@ -285,7 +285,7 @@ class TestRunMockApplicationWithFastAPI(RunMockApplicationTestSpec):
         super()._verify_running_output(cmd_running_result)
 
 
-class TestRunMockApplicationWithAuto(RunMockApplicationTestSpec):
+class TestRunFakeServerWithAuto(RunFakeServerTestSpec):
     @property
     def options(self) -> str:
         return f"run --app-type auto --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
