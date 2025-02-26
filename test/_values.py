@@ -698,7 +698,7 @@ _Bind_Host_And_Port: _Cmd_Option = _Cmd_Option(option_name="--bind", value="127.
 _Workers_Amount: _Cmd_Option = _Cmd_Option(option_name="--workers", value=3)
 _Log_Level: _Cmd_Option = _Cmd_Option(option_name="--log-level", value="info")
 _Daemon: _Cmd_Option = _Cmd_Option(option_name="--daemon", value=False)
-_Access_Log_File: _Cmd_Option = _Cmd_Option(option_name="--access-log-file", value="pytest-fake-api-server.log")
+_Access_Log_File: _Cmd_Option = _Cmd_Option(option_name="--access-log-file", value="./pytest-fake-api-server.log")
 
 # Test command line options
 _Test_SubCommand_Run: str = "run"
