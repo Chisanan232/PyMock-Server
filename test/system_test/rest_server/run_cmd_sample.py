@@ -11,7 +11,7 @@ from fake_api_server.model.command.rest_server._sample import (
 )
 
 # isort: off
-from test.system_test._base import SubCmdRestServerTestSuite
+from test.system_test.rest_server._base import SubCmdRestServerTestSuite
 
 # isort: on
 

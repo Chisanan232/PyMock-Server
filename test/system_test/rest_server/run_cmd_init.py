@@ -1,9 +1,8 @@
-from test.system_test._base import SubCmdRestServerTestSuite
-
 # isort: off
 from test._values import (
     SubCommand,
 )
+from test.system_test.rest_server._base import SubCmdRestServerTestSuite
 
 # isort: on
 

@@ -5,7 +5,6 @@ import re
 import subprocess
 from abc import ABC, abstractmethod
 from pathlib import Path
-from test.system_test._base import SubCmdRestServerTestSuite
 from typing import Callable
 
 # isort: off
@@ -18,6 +17,7 @@ from test._values import (
     _YouTube_Home_Value,
     _Access_Log_File,
 )
+from test.system_test.rest_server._base import SubCmdRestServerTestSuite
 
 # isort: on
 

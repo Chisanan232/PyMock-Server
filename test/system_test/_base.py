@@ -3,7 +3,7 @@ import subprocess
 import sys
 import threading
 import time
-from abc import ABC, ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 # isort: off
 from test._file_utils import yaml_factory
@@ -75,10 +75,3 @@ class CommandTestSpec(metaclass=ABCMeta):
             assert not re.search(re.escape(expected_char), target, re.IGNORECASE)
         else:
             assert not re.search(expected_char, target, re.IGNORECASE)
-
-
-class SubCmdRestServerTestSuite(CommandTestSpec, ABC):
-
-    @property
-    def command_line(self) -> str:
-        return f"python3 {self.Server_Running_Entry_Point} rest-server {self.options}"
