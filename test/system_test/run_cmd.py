@@ -265,6 +265,10 @@ class RunFakeServerTestSpec(SubCmdRestServerTestSuite, ABC):
         resp_content = json.loads(resp.decode("utf-8"))["content"] if resp_is_json_format else resp.decode("utf-8")
         assert re.search(re.escape(expected_resp_content), resp_content, re.IGNORECASE)
 
+    @abstractmethod
+    def _check_server_running_access_log(self, cmd_running_result: str, contains: bool) -> None:
+        pass
+
 
 class BaseFakeServerByFlaskTestSuite(RunFakeServerTestSpec, ABC):
     def _do_finally(self) -> None:
@@ -332,6 +336,13 @@ class _BaseRunFakeServerWithFlaskByDaemonTestSuite(BaseFakeServerByFlaskTestSuit
         os.remove(_Access_Log_File.value)
         super()._do_finally()
 
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._check_server_running_access_log(cmd_running_result, contains=False)
+        assert Path(_Access_Log_File.value).exists()
+        with open(_Access_Log_File.value, "r") as file:
+            log_file_content = file.read()
+        super()._verify_running_output(log_file_content)
+
 
 class _BaseRunFakeServerWithFastAPIByDaemonTestSuite(BaseFakeServerByFastAPITestSuite, ABC):
     Wait_Time_Before_Verify: int = 2
@@ -343,18 +354,18 @@ class _BaseRunFakeServerWithFastAPIByDaemonTestSuite(BaseFakeServerByFastAPITest
         os.remove(_Access_Log_File.value)
         super()._do_finally()
 
-
-class TestRunFakeServerWithFlaskByDaemon(_BaseRunFakeServerWithFlaskByDaemonTestSuite):
-    @property
-    def options(self) -> str:
-        return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
-
     def _verify_running_output(self, cmd_running_result: str) -> None:
         self._check_server_running_access_log(cmd_running_result, contains=False)
         assert Path(_Access_Log_File.value).exists()
         with open(_Access_Log_File.value, "r") as file:
             log_file_content = file.read()
         super()._verify_running_output(log_file_content)
+
+
+class TestRunFakeServerWithFlaskByDaemon(_BaseRunFakeServerWithFlaskByDaemonTestSuite):
+    @property
+    def options(self) -> str:
+        return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
 
 
 class TestRunFakeServerWithFastAPIByDaemon(_BaseRunFakeServerWithFastAPIByDaemonTestSuite):
@@ -362,22 +373,8 @@ class TestRunFakeServerWithFastAPIByDaemon(_BaseRunFakeServerWithFastAPIByDaemon
     def options(self) -> str:
         return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
 
-    def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._check_server_running_access_log(cmd_running_result, contains=False)
-        assert Path(_Access_Log_File.value).exists()
-        with open(_Access_Log_File.value, "r") as file:
-            log_file_content = file.read()
-        super()._verify_running_output(log_file_content)
-
 
 class TestRunFakeServerWithAutoByDaemon(_BaseRunFakeServerWithFastAPIByDaemonTestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type auto --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
-
-    def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._check_server_running_access_log(cmd_running_result, contains=False)
-        assert Path(_Access_Log_File.value).exists()
-        with open(_Access_Log_File.value, "r") as file:
-            log_file_content = file.read()
-        super()._verify_running_output(log_file_content)
