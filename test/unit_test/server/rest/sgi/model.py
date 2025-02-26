@@ -78,6 +78,10 @@ class TestCommand:
         expected_cmd = TestCommand.expected_cmd_line(command)
         assert command.line == expected_cmd
 
+    def test_daemonize_line(self, command: Command):
+        expected_cmd = TestCommand.expected_cmd_line(command)
+        assert command.line == expected_cmd
+
     @patch("subprocess.run")
     def test_run(self, mock_subprocess_run: Mock, command: Command):
         expected_cmd = TestCommand.expected_cmd_line(command)
@@ -87,4 +91,8 @@ class TestCommand:
     @classmethod
     def expected_cmd_line(cls, command: Command) -> str:
         host_and_port, workers, log_level = _get_cmd_options()
-        return " ".join([command.entry_point, host_and_port, workers, log_level, command.app_path])
+        entire_command_line = [command.entry_point, host_and_port, workers, log_level, command.app_path]
+        if command.options.daemon:
+            entire_command_line.insert(0, "nohup")
+            entire_command_line.append(f"&> {command.options.access_log_file} &")
+        return " ".join(entire_command_line)
