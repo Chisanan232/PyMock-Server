@@ -1,11 +1,14 @@
 import json
+import logging
 import os
 import re
 import subprocess
 import sys
 import threading
+import time
 from abc import ABC, ABCMeta, abstractmethod
-from typing import Optional
+from pathlib import Path
+from typing import Callable, Optional
 
 import pytest
 
@@ -27,6 +30,7 @@ from test._values import (
     _Google_Home_Value,
     _Test_Home,
     _YouTube_Home_Value,
+    _Access_Log_File,
 )
 
 # isort: on
@@ -35,6 +39,7 @@ from test._values import (
 class CommandTestSpec(metaclass=ABCMeta):
     Server_Running_Entry_Point: str = "fake_api_server/runner.py"
     Terminate_Command_Running_When_Sniff_IP_Info: bool = True
+    Wait_Time_Before_Verify: int = 0
 
     @property
     def command_line(self) -> str:
@@ -50,6 +55,7 @@ class CommandTestSpec(metaclass=ABCMeta):
         try:
             with Capturing() as mock_server_output:
                 self._run_as_thread(target=self._run_command_line)
+            time.sleep(self.Wait_Time_Before_Verify)
             self._verify_running_output(" ".join(mock_server_output).replace("\n", "").replace("  ", ""))
         finally:
             self._do_finally()
@@ -85,6 +91,13 @@ class CommandTestSpec(metaclass=ABCMeta):
             assert re.search(re.escape(expected_char), target, re.IGNORECASE)
         else:
             assert re.search(expected_char, target, re.IGNORECASE)
+
+    @classmethod
+    def _should_not_contains_chars_in_result(cls, target: str, expected_char, translate: bool = True) -> None:
+        if translate:
+            assert not re.search(re.escape(expected_char), target, re.IGNORECASE)
+        else:
+            assert not re.search(expected_char, target, re.IGNORECASE)
 
 
 class SubCmdRestServerTestSuite(CommandTestSpec, ABC):
@@ -262,9 +275,15 @@ class TestRunFakeServerWithFlask(RunFakeServerTestSpec):
         subprocess.run("pkill -f gunicorn", shell=True)
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "Starting gunicorn")
-        self._should_contains_chars_in_result(cmd_running_result, f"Listening at: http://{_Bind_Host_And_Port.value}")
+        self._check_server_running_access_log(cmd_running_result, contains=True)
         super()._verify_running_output(cmd_running_result)
+
+    def _check_server_running_access_log(self, cmd_running_result: str, contains: bool) -> None:
+        check_callback: Callable[[str, str], None] = (
+            self._should_contains_chars_in_result if contains else self._should_not_contains_chars_in_result
+        )
+        check_callback(cmd_running_result, "Starting gunicorn")
+        check_callback(cmd_running_result, f"Listening at: http://{_Bind_Host_And_Port.value}")
 
 
 class TestRunFakeServerWithFastAPI(RunFakeServerTestSpec):
@@ -276,13 +295,17 @@ class TestRunFakeServerWithFastAPI(RunFakeServerTestSpec):
         subprocess.run("pkill -f uvicorn", shell=True)
 
     def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._should_contains_chars_in_result(cmd_running_result, "Started server process")
-        self._should_contains_chars_in_result(cmd_running_result, "Waiting for application startup")
-        self._should_contains_chars_in_result(cmd_running_result, "Application startup complete")
-        self._should_contains_chars_in_result(
-            cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}"
-        )
+        self._check_server_running_access_log(cmd_running_result, contains=True)
         super()._verify_running_output(cmd_running_result)
+
+    def _check_server_running_access_log(self, cmd_running_result: str, contains: bool) -> None:
+        check_callback: Callable[[str, str], None] = (
+            self._should_contains_chars_in_result if contains else self._should_not_contains_chars_in_result
+        )
+        check_callback(cmd_running_result, "Started server process")
+        check_callback(cmd_running_result, "Waiting for application startup")
+        check_callback(cmd_running_result, "Application startup complete")
+        check_callback(cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}")
 
 
 class TestRunFakeServerWithAuto(RunFakeServerTestSpec):
@@ -301,3 +324,89 @@ class TestRunFakeServerWithAuto(RunFakeServerTestSpec):
             cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}"
         )
         super()._verify_running_output(cmd_running_result)
+
+
+class _BaseRunFakeServerByDaemonTestSuite(RunFakeServerTestSpec, ABC):
+    Wait_Time_Before_Verify: int = 2
+
+    def _do_finally(self) -> None:
+        with open(_Access_Log_File.value, "r") as file:
+            content = file.read()
+            logging.debug(f"Server access log: {content}")
+        os.remove(_Access_Log_File.value)
+
+
+class TestRunFakeServerWithFlaskByDaemon(_BaseRunFakeServerByDaemonTestSuite):
+    @property
+    def options(self) -> str:
+        return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
+
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._check_server_running_access_log(cmd_running_result, contains=False)
+        assert Path(_Access_Log_File.value).exists()
+        with open(_Access_Log_File.value, "r") as file:
+            log_file_content = file.read()
+        super()._verify_running_output(log_file_content)
+
+    def _do_finally(self) -> None:
+        subprocess.run("pkill -f gunicorn", shell=True)
+        super()._do_finally()
+
+    def _check_server_running_access_log(self, cmd_running_result: str, contains: bool) -> None:
+        check_callback: Callable[[str, str], None] = (
+            self._should_contains_chars_in_result if contains else self._should_not_contains_chars_in_result
+        )
+        check_callback(cmd_running_result, "Starting gunicorn")
+        check_callback(cmd_running_result, f"Listening at: http://{_Bind_Host_And_Port.value}")
+
+
+class TestRunFakeServerWithFastAPIByDaemon(_BaseRunFakeServerByDaemonTestSuite):
+    @property
+    def options(self) -> str:
+        return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
+
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._check_server_running_access_log(cmd_running_result, contains=False)
+        assert Path(_Access_Log_File.value).exists()
+        with open(_Access_Log_File.value, "r") as file:
+            log_file_content = file.read()
+        super()._verify_running_output(log_file_content)
+
+    def _do_finally(self) -> None:
+        subprocess.run("pkill -f uvicorn", shell=True)
+        super()._do_finally()
+
+    def _check_server_running_access_log(self, cmd_running_result: str, contains: bool) -> None:
+        check_callback: Callable[[str, str], None] = (
+            self._should_contains_chars_in_result if contains else self._should_not_contains_chars_in_result
+        )
+        check_callback(cmd_running_result, "Started server process")
+        check_callback(cmd_running_result, "Waiting for application startup")
+        check_callback(cmd_running_result, "Application startup complete")
+        check_callback(cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}")
+
+
+class TestRunFakeServerWithAutoByDaemon(_BaseRunFakeServerByDaemonTestSuite):
+    @property
+    def options(self) -> str:
+        return f"run --app-type auto --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
+
+    def _verify_running_output(self, cmd_running_result: str) -> None:
+        self._check_server_running_access_log(cmd_running_result, contains=False)
+        assert Path(_Access_Log_File.value).exists()
+        with open(_Access_Log_File.value, "r") as file:
+            log_file_content = file.read()
+        super()._verify_running_output(log_file_content)
+
+    def _do_finally(self) -> None:
+        subprocess.run("pkill -f uvicorn", shell=True)
+        super()._do_finally()
+
+    def _check_server_running_access_log(self, cmd_running_result: str, contains: bool) -> None:
+        check_callback: Callable[[str, str], None] = (
+            self._should_contains_chars_in_result if contains else self._should_not_contains_chars_in_result
+        )
+        check_callback(cmd_running_result, "Started server process")
+        check_callback(cmd_running_result, "Waiting for application startup")
+        check_callback(cmd_running_result, "Application startup complete")
+        check_callback(cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}")
