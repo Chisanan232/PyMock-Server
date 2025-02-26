@@ -93,7 +93,7 @@ class RunFakeServerTestSpec(SubCmdRestServerTestSuite, ABC):
         pass
 
 
-class BaseFakeServerByFlaskTestSuite(RunFakeServerTestSpec, ABC):
+class FlaskTestSuite(RunFakeServerTestSpec, ABC):
     def _do_finally(self) -> None:
         subprocess.run("pkill -f gunicorn", shell=True)
 
@@ -105,7 +105,7 @@ class BaseFakeServerByFlaskTestSuite(RunFakeServerTestSpec, ABC):
         check_callback(cmd_running_result, f"Listening at: http://{_Bind_Host_And_Port.value}")
 
 
-class BaseFakeServerByFastAPITestSuite(RunFakeServerTestSpec, ABC):
+class FastAPITestSuite(RunFakeServerTestSpec, ABC):
     def _do_finally(self) -> None:
         subprocess.run("pkill -f uvicorn", shell=True)
 
@@ -119,7 +119,7 @@ class BaseFakeServerByFastAPITestSuite(RunFakeServerTestSpec, ABC):
         check_callback(cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}")
 
 
-class TestRunFakeServerWithFlask(BaseFakeServerByFlaskTestSuite):
+class TestWithFlask(FlaskTestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
@@ -129,7 +129,7 @@ class TestRunFakeServerWithFlask(BaseFakeServerByFlaskTestSuite):
         super()._verify_running_output(cmd_running_result)
 
 
-class TestRunFakeServerWithFastAPI(BaseFakeServerByFastAPITestSuite):
+class TestWithFastAPI(FastAPITestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
@@ -139,7 +139,7 @@ class TestRunFakeServerWithFastAPI(BaseFakeServerByFastAPITestSuite):
         super()._verify_running_output(cmd_running_result)
 
 
-class TestRunFakeServerWithAuto(BaseFakeServerByFastAPITestSuite):
+class TestWithAuto(FastAPITestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type auto --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path}"
@@ -149,7 +149,7 @@ class TestRunFakeServerWithAuto(BaseFakeServerByFastAPITestSuite):
         super()._verify_running_output(cmd_running_result)
 
 
-class _BaseRunFakeServerWithFlaskByDaemonTestSuite(BaseFakeServerByFlaskTestSuite, ABC):
+class _BaseFlaskAsDaemonTestSuite(FlaskTestSuite, ABC):
     Wait_Time_Before_Verify: int = 2
 
     def _do_finally(self) -> None:
@@ -167,7 +167,7 @@ class _BaseRunFakeServerWithFlaskByDaemonTestSuite(BaseFakeServerByFlaskTestSuit
         super()._verify_running_output(log_file_content)
 
 
-class _BaseRunFakeServerWithFastAPIByDaemonTestSuite(BaseFakeServerByFastAPITestSuite, ABC):
+class _BaseFastAPIAsDaemonTestSuite(FastAPITestSuite, ABC):
     Wait_Time_Before_Verify: int = 2
 
     def _do_finally(self) -> None:
@@ -185,19 +185,19 @@ class _BaseRunFakeServerWithFastAPIByDaemonTestSuite(BaseFakeServerByFastAPITest
         super()._verify_running_output(log_file_content)
 
 
-class TestRunFakeServerWithFlaskByDaemon(_BaseRunFakeServerWithFlaskByDaemonTestSuite):
+class TestWithFlaskAsDaemon(_BaseFlaskAsDaemonTestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
 
 
-class TestRunFakeServerWithFastAPIByDaemon(_BaseRunFakeServerWithFastAPIByDaemonTestSuite):
+class TestWithFastAPIAsDaemon(_BaseFastAPIAsDaemonTestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
 
 
-class TestRunFakeServerWithAutoByDaemon(_BaseRunFakeServerWithFastAPIByDaemonTestSuite):
+class TestWithAutoAsDaemon(_BaseFastAPIAsDaemonTestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type auto --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
