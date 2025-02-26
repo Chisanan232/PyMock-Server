@@ -10,9 +10,8 @@ from fake_api_server.model.command.rest_server._sample import (
     Sample_Config_Value,
 )
 
-from ._base import SubCmdRestServerTestSuite
-
 # isort: off
+from ._base import SubCmdRestServerTestSuite
 
 # isort: on
 
