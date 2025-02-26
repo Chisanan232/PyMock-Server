@@ -15,6 +15,8 @@ from test._values import (
     _Test_Config,
     _Test_FastAPI_App_Type,
     _Workers_Amount,
+    _Daemon,
+    _Access_Log_File,
 )
 from test.unit_test.command._base.process import BaseCommandProcessorTestSpec
 
@@ -108,6 +110,8 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
             bind=_Bind_Host_And_Port.value,
             workers=_Workers_Amount.value,
             log_level=_Log_Level.value,
+            daemon=_Daemon.value,
+            access_log_file=_Access_Log_File.value,
         )
 
     def _given_command(self, app_type: str) -> Command:
@@ -116,7 +120,13 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
         return Command(entry_point="SGI tool command", app=mock_parser_arg.app_type, options=mock_cmd_option_obj)
 
     def _given_command_option(self) -> CommandOptions:
-        return CommandOptions(bind=_Bind_Host_And_Port.value, workers=_Workers_Amount.value, log_level=_Log_Level.value)
+        return CommandOptions(
+            bind=_Bind_Host_And_Port.value,
+            workers=_Workers_Amount.value,
+            log_level=_Log_Level.value,
+            daemon=_Daemon.value,
+            access_log_file=_Access_Log_File.value,
+        )
 
     def _given_cmd_args_namespace(self) -> Namespace:
         args_namespace = Namespace()
@@ -127,6 +137,8 @@ class TestSubCmdRun(BaseCommandProcessorTestSpec):
         args_namespace.bind = _Bind_Host_And_Port.value
         args_namespace.workers = _Workers_Amount.value
         args_namespace.log_level = _Log_Level.value
+        args_namespace.daemon = _Daemon.value
+        args_namespace.access_log_file = _Access_Log_File.value
         return args_namespace
 
     def _given_subcmd(self) -> Optional[SysArg]:

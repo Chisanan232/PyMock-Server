@@ -11,6 +11,8 @@ from test._values import (
     _Log_Level,
     _Test_Entry_Point,
     _Workers_Amount,
+    _Access_Log_File,
+    _Daemon,
 )
 
 # isort: on
@@ -31,7 +33,13 @@ class TestCommandOptions:
     @pytest.fixture(scope="function")
     def command_options(self) -> CommandOptions:
         host_and_port, workers, log_level = _get_cmd_options()
-        return CommandOptions(bind=host_and_port, workers=workers, log_level=log_level)
+        return CommandOptions(
+            bind=host_and_port,
+            workers=workers,
+            log_level=log_level,
+            daemon=_Daemon.value,
+            access_log_file=_Access_Log_File.value,
+        )
 
     def test_str(self, command_options: CommandOptions):
         options = str(command_options)
@@ -57,7 +65,13 @@ class TestCommand:
         return Command(
             entry_point=_Test_Entry_Point,
             app="application instance path",
-            options=CommandOptions(bind=host_and_port, workers=workers, log_level=log_level),
+            options=CommandOptions(
+                bind=host_and_port,
+                workers=workers,
+                log_level=log_level,
+                daemon=_Daemon.value,
+                access_log_file=_Access_Log_File.value,
+            ),
         )
 
     def test_line(self, command: Command):
