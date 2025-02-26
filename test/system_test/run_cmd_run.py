@@ -149,7 +149,7 @@ class TestWithAuto(FastAPITestSuite):
         super()._verify_running_output(cmd_running_result)
 
 
-class _BaseFlaskAsDaemonTestSuite(FlaskTestSuite, ABC):
+class RunFakeServerAsDaemonTestSpec(RunFakeServerTestSpec, ABC):
     Wait_Time_Before_Verify: int = 2
 
     def _do_finally(self) -> None:
@@ -167,37 +167,19 @@ class _BaseFlaskAsDaemonTestSuite(FlaskTestSuite, ABC):
         super()._verify_running_output(log_file_content)
 
 
-class _BaseFastAPIAsDaemonTestSuite(FastAPITestSuite, ABC):
-    Wait_Time_Before_Verify: int = 2
-
-    def _do_finally(self) -> None:
-        with open(_Access_Log_File.value, "r") as file:
-            content = file.read()
-            logging.debug(f"Server access log: {content}")
-        os.remove(_Access_Log_File.value)
-        super()._do_finally()
-
-    def _verify_running_output(self, cmd_running_result: str) -> None:
-        self._check_server_running_access_log(cmd_running_result, contains=False)
-        assert Path(_Access_Log_File.value).exists()
-        with open(_Access_Log_File.value, "r") as file:
-            log_file_content = file.read()
-        super()._verify_running_output(log_file_content)
-
-
-class TestWithFlaskAsDaemon(_BaseFlaskAsDaemonTestSuite):
+class TestWithFlaskAsDaemon(RunFakeServerAsDaemonTestSpec, FlaskTestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type flask --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
 
 
-class TestWithFastAPIAsDaemon(_BaseFastAPIAsDaemonTestSuite):
+class TestWithFastAPIAsDaemon(RunFakeServerAsDaemonTestSpec, FastAPITestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
 
 
-class TestWithAutoAsDaemon(_BaseFastAPIAsDaemonTestSuite):
+class TestWithAutoAsDaemon(RunFakeServerAsDaemonTestSpec, FastAPITestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type auto --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
