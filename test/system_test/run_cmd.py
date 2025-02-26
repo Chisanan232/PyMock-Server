@@ -333,6 +333,17 @@ class _BaseRunFakeServerWithFlaskByDaemonTestSuite(BaseFakeServerByFlaskTestSuit
         super()._do_finally()
 
 
+class _BaseRunFakeServerWithFastAPIByDaemonTestSuite(BaseFakeServerByFastAPITestSuite, ABC):
+    Wait_Time_Before_Verify: int = 2
+
+    def _do_finally(self) -> None:
+        with open(_Access_Log_File.value, "r") as file:
+            content = file.read()
+            logging.debug(f"Server access log: {content}")
+        os.remove(_Access_Log_File.value)
+        super()._do_finally()
+
+
 class TestRunFakeServerWithFlaskByDaemon(_BaseRunFakeServerWithFlaskByDaemonTestSuite):
     @property
     def options(self) -> str:
@@ -346,7 +357,7 @@ class TestRunFakeServerWithFlaskByDaemon(_BaseRunFakeServerWithFlaskByDaemonTest
         super()._verify_running_output(log_file_content)
 
 
-class TestRunFakeServerWithFastAPIByDaemon(_BaseRunFakeServerWithFlaskByDaemonTestSuite):
+class TestRunFakeServerWithFastAPIByDaemon(_BaseRunFakeServerWithFastAPIByDaemonTestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type fastapi --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
@@ -358,21 +369,8 @@ class TestRunFakeServerWithFastAPIByDaemon(_BaseRunFakeServerWithFlaskByDaemonTe
             log_file_content = file.read()
         super()._verify_running_output(log_file_content)
 
-    def _do_finally(self) -> None:
-        subprocess.run("pkill -f uvicorn", shell=True)
-        super()._do_finally()
 
-    def _check_server_running_access_log(self, cmd_running_result: str, contains: bool) -> None:
-        check_callback: Callable[[str, str], None] = (
-            self._should_contains_chars_in_result if contains else self._should_not_contains_chars_in_result
-        )
-        check_callback(cmd_running_result, "Started server process")
-        check_callback(cmd_running_result, "Waiting for application startup")
-        check_callback(cmd_running_result, "Application startup complete")
-        check_callback(cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}")
-
-
-class TestRunFakeServerWithAutoByDaemon(_BaseRunFakeServerWithFlaskByDaemonTestSuite):
+class TestRunFakeServerWithAutoByDaemon(_BaseRunFakeServerWithFastAPIByDaemonTestSuite):
     @property
     def options(self) -> str:
         return f"run --app-type auto --bind {_Bind_Host_And_Port.value} --config {MockAPI_Config_Yaml_Path} --access-log-file {_Access_Log_File.value} --daemon"
@@ -383,16 +381,3 @@ class TestRunFakeServerWithAutoByDaemon(_BaseRunFakeServerWithFlaskByDaemonTestS
         with open(_Access_Log_File.value, "r") as file:
             log_file_content = file.read()
         super()._verify_running_output(log_file_content)
-
-    def _do_finally(self) -> None:
-        subprocess.run("pkill -f uvicorn", shell=True)
-        super()._do_finally()
-
-    def _check_server_running_access_log(self, cmd_running_result: str, contains: bool) -> None:
-        check_callback: Callable[[str, str], None] = (
-            self._should_contains_chars_in_result if contains else self._should_not_contains_chars_in_result
-        )
-        check_callback(cmd_running_result, "Started server process")
-        check_callback(cmd_running_result, "Waiting for application startup")
-        check_callback(cmd_running_result, "Application startup complete")
-        check_callback(cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}")
