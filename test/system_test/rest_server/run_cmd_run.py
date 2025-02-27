@@ -86,9 +86,7 @@ class RunFakeServerTestSpec(SubCmdRestServerTestSuite, ABC):
             stdout=subprocess.PIPE,
         )
         assert curl_google_ps.stdout
-        readlines = curl_google_ps.stdout.readlines()
-        print(f"[DEBUG] readlines: {readlines}")
-        resp = readlines[0]
+        resp = curl_google_ps.stdout.readlines()[0]
         resp_content = json.loads(resp.decode("utf-8"))["content"] if resp_is_json_format else resp.decode("utf-8")
         assert re.search(re.escape(expected_resp_content), resp_content, re.IGNORECASE)
 
