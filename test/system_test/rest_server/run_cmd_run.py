@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import platform
 import re
@@ -20,6 +21,8 @@ from test._values import (
 from test.system_test.rest_server._base import SubCmdRestServerTestSuite
 
 # isort: on
+
+logger = logging.getLogger(__name__)
 
 
 class TestSubCommandRun(SubCmdRestServerTestSuite):
@@ -159,7 +162,7 @@ class RunFakeServerAsDaemonTestSpec(RunFakeServerTestSpec, ABC):
     def _do_finally(self) -> None:
         with open(_Access_Log_File.value, "r") as file:
             content = file.read()
-            print(f"[DEBUG] Server access log: {content}")
+            logger.debug(f"Server access log: {content}")
         os.remove(_Access_Log_File.value)
         super()._do_finally()
 
