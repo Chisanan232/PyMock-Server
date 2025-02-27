@@ -67,5 +67,5 @@ class Command:
         # runs.
         # CI refer: https://github.com/Chisanan232/PyFake-API-Server/actions/runs/13561351806
         command_line = self.line
-        logger.debug(f"Command line for set up application by SGI tool: {command_line}")
+        logger.info(f"Command line for set up application by SGI tool: {command_line}")
         subprocess.run(command_line, shell=True)
