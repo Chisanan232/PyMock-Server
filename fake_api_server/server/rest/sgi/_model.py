@@ -46,7 +46,6 @@ class Command:
         command_line = [self.entry_point, str(self.options), self.app_path]
         if self.options.daemon:
             self._daemonize(command_line)
-        # logger.debug(f"command_line: {command_line}")
         return " ".join(command_line)
 
     def _daemonize(self, command_line: List[str]) -> None:
@@ -64,5 +63,8 @@ class Command:
             None.
 
         """
-        logger.info(f"Command line for set up application by SGI tool: {self.line}")
+        # NOTE: wired bug. The server instance access log will print in command line output streaming even use *nohup*
+        # runs.
+        # CI refer: https://github.com/Chisanan232/PyFake-API-Server/actions/runs/13561351806
+        print(f"Command line for set up application by SGI tool: {self.line}")
         subprocess.run(self.line, shell=True)
