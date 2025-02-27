@@ -71,7 +71,6 @@ class CommandTestSpec(metaclass=ABCMeta):
 
     @classmethod
     def _should_not_contains_chars_in_result(cls, target: str, expected_char, translate: bool = True) -> None:
-        print(f"[DEBUG] in _should_not_contains_chars_in_result target: {target}")
         if translate:
             assert not re.search(re.escape(expected_char), target, re.IGNORECASE)
         else:
