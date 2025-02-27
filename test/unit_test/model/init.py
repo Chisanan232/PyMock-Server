@@ -36,6 +36,8 @@ from test._values import (
     _Test_SubCommand_Pull,
     _Test_SubCommand_Run,
     _Workers_Amount,
+    _Daemon,
+    _Access_Log_File,
 )
 
 # isort: on
@@ -50,6 +52,8 @@ def test_deserialize_subcommand_run_args(mock_parser_arguments: Mock):
         "bind": _Bind_Host_And_Port.value,
         "workers": _Workers_Amount.value,
         "log_level": _Log_Level.value,
+        "daemon": _Daemon.value,
+        "access_log_file": _Access_Log_File.value,
     }
     namespace = Namespace(**namespace_args)
     deserialize_args.cli_rest_server.subcmd_run(namespace)

@@ -48,6 +48,8 @@ class SubcmdRunArguments(ParserArguments):
     bind: str
     workers: int
     log_level: str
+    daemon: bool
+    access_log_file: str
 
     @classmethod
     def deserialize(cls, args: Namespace) -> "SubcmdRunArguments":
@@ -58,6 +60,8 @@ class SubcmdRunArguments(ParserArguments):
             bind=args.bind,
             workers=args.workers,
             log_level=args.log_level,
+            daemon=args.daemon,
+            access_log_file=args.access_log_file,
         )
 
 
