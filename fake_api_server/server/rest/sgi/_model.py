@@ -64,5 +64,5 @@ class Command:
             None.
 
         """
-        logger.debug(f"Command line for set up application by SGI tool: {self.line}")
+        print(f"Command line for set up application by SGI tool: {self.line}")
         subprocess.run(self.line, shell=True)
