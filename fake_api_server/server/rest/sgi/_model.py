@@ -51,7 +51,7 @@ class Command:
 
     def _daemonize(self, command_line: List[str]) -> None:
         command_line.insert(0, "nohup")
-        command_line.append(f"&> {self.options.access_log_file} &")
+        command_line.append(f"> {self.options.access_log_file} &")
 
     @property
     def app_path(self) -> str:
