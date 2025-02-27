@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import platform
 import re
 import subprocess
 from abc import ABC, abstractmethod
@@ -152,10 +151,7 @@ class TestWithAuto(FastAPITestSuite):
 
 
 class RunFakeServerAsDaemonTestSpec(RunFakeServerTestSpec, ABC):
-    if platform.system() == "Linux":
-        Wait_Time_Before_Verify: int = 5
-    else:
-        Wait_Time_Before_Verify: int = 2  # type: ignore[no-redef]
+    Wait_Time_Before_Verify: int = 2
 
     def _do_finally(self) -> None:
         with open(_Access_Log_File.value, "r") as file:
