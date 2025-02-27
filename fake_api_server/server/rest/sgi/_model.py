@@ -44,6 +44,7 @@ class Command:
     def line(self) -> str:
         """:obj:`str`: Properties with only getter for a string value of command line with options."""
         command_line = [self.entry_point, str(self.options), self.app_path]
+        print(f"[DEBUG] self.options.daemon: {self.options.daemon}")
         if self.options.daemon:
             self._daemonize(command_line)
         return " ".join(command_line)
