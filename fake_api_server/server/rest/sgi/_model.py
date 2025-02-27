@@ -46,7 +46,7 @@ class Command:
         command_line = [self.entry_point, str(self.options), self.app_path]
         if self.options.daemon:
             self._daemonize(command_line)
-        logger.debug(f"command_line: {command_line}")
+        # logger.debug(f"command_line: {command_line}")
         return " ".join(command_line)
 
     def _daemonize(self, command_line: List[str]) -> None:
