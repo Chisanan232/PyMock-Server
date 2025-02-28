@@ -44,8 +44,7 @@ class Command:
     def line(self) -> str:
         """:obj:`str`: Properties with only getter for a string value of command line with options."""
         command_line = [self.entry_point, str(self.options), self.app_path]
-        print(f"[DEBUG] self.options.daemon: {self.options.daemon}")
-        if self.options.daemon:
+        if self.options.daemon is True:
             self._daemonize(command_line)
         return " ".join(command_line)
 
@@ -68,5 +67,5 @@ class Command:
         # runs.
         # CI refer: https://github.com/Chisanan232/PyFake-API-Server/actions/runs/13561351806
         command_line = self.line
-        logger.info(f"Command line for set up application by SGI tool: {command_line}")
+        print(f"Command line for set up application by SGI tool: {command_line}")
         subprocess.run(command_line, shell=True)
