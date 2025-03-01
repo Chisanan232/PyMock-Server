@@ -13,6 +13,8 @@ class CommandOptions:
     bind: str
     workers: str
     log_level: str
+    daemon: bool
+    access_log_file: str
 
     def __str__(self):
         """Combine all command line options as one line which be concatenated by a one space string value `' '`.
@@ -41,7 +43,14 @@ class Command:
     @property
     def line(self) -> str:
         """:obj:`str`: Properties with only getter for a string value of command line with options."""
-        return " ".join([self.entry_point, str(self.options), self.app_path])
+        command_line = [self.entry_point, str(self.options), self.app_path]
+        if self.options.daemon is True:
+            self._daemonize(command_line)
+        return " ".join(command_line)
+
+    def _daemonize(self, command_line: List[str]) -> None:
+        command_line.insert(0, "nohup")
+        command_line.append(f"> {self.options.access_log_file} 2>&1 &")
 
     @property
     def app_path(self) -> str:
@@ -54,5 +63,6 @@ class Command:
             None.
 
         """
-        logger.debug(f"Command line for set up application by SGI tool: {self.line}")
-        subprocess.run(self.line, shell=True)
+        command_line = self.line
+        logger.debug(f"Command line for set up application by SGI tool: {command_line}")
+        subprocess.run(command_line, shell=True)
