@@ -170,6 +170,7 @@ class RunFakeServerAsDaemonTestSpec(RunFakeServerTestSpec, ABC):
         assert Path(_Access_Log_File.value).exists()
         with open(_Access_Log_File.value, "r") as file:
             log_file_content = file.read()
+        self._check_server_running_access_log(log_file_content, contains=True)
         super()._verify_running_output(log_file_content)
 
 
