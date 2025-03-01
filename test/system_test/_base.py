@@ -27,18 +27,6 @@ class CommandTestSpec(metaclass=ABCMeta):
     def options(self) -> str:
         pass
 
-    # @pytest.mark.skipif(
-    #     (
-    #         platform.system() == "Linux"
-    #         and sys.version_info >= (3, 12)
-    #         or (
-    #             platform.system() == "Darwin"
-    #             and float((platform.mac_ver() or (15,))[0]) >= 13.0
-    #             and sys.version_info >= (3, 13)
-    #         )
-    #     ),
-    #     reason="Wired bug about cannot run the program in background by *nohup* correctly.",
-    # )
     @run_test.with_file(yaml_factory)
     def test_command(self) -> None:
         try:
@@ -76,7 +64,6 @@ class CommandTestSpec(metaclass=ABCMeta):
 
     @classmethod
     def _should_contains_chars_in_result(cls, target: str, expected_char, translate: bool = True) -> None:
-        # print(f"[DEBUG _should_contains_chars_in_result] target: {target}")
         if translate:
             assert re.search(re.escape(expected_char), target, re.IGNORECASE)
         else:
@@ -84,7 +71,6 @@ class CommandTestSpec(metaclass=ABCMeta):
 
     @classmethod
     def _should_not_contains_chars_in_result(cls, target: str, expected_char, translate: bool = True) -> None:
-        # print(f"[DEBUG _should_not_contains_chars_in_result] target: {target}")
         if translate:
             assert not re.search(re.escape(expected_char), target, re.IGNORECASE)
         else:
