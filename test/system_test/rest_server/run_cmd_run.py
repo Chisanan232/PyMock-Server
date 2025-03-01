@@ -98,9 +98,6 @@ class RunFakeServerTestSpec(SubCmdRestServerTestSuite, ABC):
 
 
 class FlaskTestSuite(RunFakeServerTestSpec, ABC):
-    def _do_finally(self) -> None:
-        subprocess.run("pkill -f gunicorn", shell=True)
-
     def _check_server_running_access_log(self, cmd_running_result: str, contains: bool) -> None:
         check_callback: Callable[[str, str], None] = (
             self._should_contains_chars_in_result if contains else self._should_not_contains_chars_in_result
@@ -108,11 +105,11 @@ class FlaskTestSuite(RunFakeServerTestSpec, ABC):
         check_callback(cmd_running_result, "Starting gunicorn")
         check_callback(cmd_running_result, f"Listening at: http://{_Bind_Host_And_Port.value}")
 
+    def _do_finally(self) -> None:
+        subprocess.run("pkill -f gunicorn", shell=True)
+
 
 class FastAPITestSuite(RunFakeServerTestSpec, ABC):
-    def _do_finally(self) -> None:
-        subprocess.run("pkill -f uvicorn", shell=True)
-
     def _check_server_running_access_log(self, cmd_running_result: str, contains: bool) -> None:
         check_callback: Callable[[str, str], None] = (
             self._should_contains_chars_in_result if contains else self._should_not_contains_chars_in_result
@@ -121,6 +118,9 @@ class FastAPITestSuite(RunFakeServerTestSpec, ABC):
         check_callback(cmd_running_result, "Waiting for application startup")
         check_callback(cmd_running_result, "Application startup complete")
         check_callback(cmd_running_result, f"Uvicorn running on http://{_Bind_Host_And_Port.value}")
+
+    def _do_finally(self) -> None:
+        subprocess.run("pkill -f uvicorn", shell=True)
 
 
 class TestWithFlask(FlaskTestSuite):
@@ -156,13 +156,6 @@ class TestWithAuto(FastAPITestSuite):
 class RunFakeServerAsDaemonTestSpec(RunFakeServerTestSpec, ABC):
     Wait_Time_Before_Verify: int = 2
 
-    def _do_finally(self) -> None:
-        with open(_Access_Log_File.value, "r") as file:
-            content = file.read()
-            logger.debug(f"Server access log: {content}")
-        os.remove(_Access_Log_File.value)
-        super()._do_finally()
-
     def _verify_running_output(self, cmd_running_result: str) -> None:
         self._check_server_running_access_log(cmd_running_result, contains=False)
         assert Path(_Access_Log_File.value).exists()
@@ -170,6 +163,13 @@ class RunFakeServerAsDaemonTestSpec(RunFakeServerTestSpec, ABC):
             log_file_content = file.read()
         self._check_server_running_access_log(log_file_content, contains=True)
         super()._verify_running_output(log_file_content)
+
+    def _do_finally(self) -> None:
+        with open(_Access_Log_File.value, "r") as file:
+            content = file.read()
+            logger.debug(f"Server access log: {content}")
+        os.remove(_Access_Log_File.value)
+        super()._do_finally()
 
 
 class TestWithFlaskAsDaemon(RunFakeServerAsDaemonTestSpec, FlaskTestSuite):
