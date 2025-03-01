@@ -1,9 +1,12 @@
+import platform
 import re
 import subprocess
 import sys
 import threading
 import time
 from abc import ABCMeta, abstractmethod
+
+import pytest
 
 # isort: off
 from test._file_utils import yaml_factory
@@ -27,6 +30,14 @@ class CommandTestSpec(metaclass=ABCMeta):
     def options(self) -> str:
         pass
 
+    @pytest.mark.skipif(
+        (
+            platform.system() == "Linux"
+            and sys.version_info >= (3, 12)
+            or (platform.system() == "Darwin" and sys.version_info >= (3, 13))
+        ),
+        reason="Wired bug about cannot run the program in background by *nohup* correctly.",
+    )
     @run_test.with_file(yaml_factory)
     def test_command(self) -> None:
         try:
