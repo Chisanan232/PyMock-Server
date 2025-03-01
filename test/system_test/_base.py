@@ -34,7 +34,11 @@ class CommandTestSpec(metaclass=ABCMeta):
         (
             platform.system() == "Linux"
             and sys.version_info >= (3, 12)
-            or (platform.system() == "Darwin" and sys.version_info >= (3, 13))
+            or (
+                platform.system() == "Darwin"
+                and int((platform.mac_ver() or (15,))[0]) == 13
+                and sys.version_info >= (3, 13)
+            )
         ),
         reason="Wired bug about cannot run the program in background by *nohup* correctly.",
     )
