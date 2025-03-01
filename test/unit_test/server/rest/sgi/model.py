@@ -94,5 +94,5 @@ class TestCommand:
         entire_command_line = [command.entry_point, host_and_port, workers, log_level, command.app_path]
         if command.options.daemon:
             entire_command_line.insert(0, "nohup")
-            entire_command_line.append(f"> {command.options.access_log_file} &")
+            entire_command_line.append(f"> {command.options.access_log_file} 2>&1 &")
         return " ".join(entire_command_line)
