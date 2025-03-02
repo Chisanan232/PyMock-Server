@@ -1,1 +1,1 @@
-v0.4.0 - A makeover of PyFake-API-Server 🧬 🍻
+v0.4.1 - Support run fake server in background 🍻
