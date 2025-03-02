@@ -24,8 +24,6 @@
 
 name: Run test items via PyTest
 
-# TODO: Run Python package test via Poetry.
-
 on:
   workflow_call:
     inputs:
