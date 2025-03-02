@@ -15,6 +15,8 @@ from test._values import (
     _Test_Auto_Type,
     _Test_Config,
     _Workers_Amount,
+    _Daemon,
+    _Access_Log_File,
 )
 
 # isort: on
@@ -46,6 +48,8 @@ class TestSubCmdRunComponent:
             bind=_Bind_Host_And_Port.value,
             workers=_Workers_Amount.value,
             log_level=_Log_Level.value,
+            daemon=_Daemon.value,
+            access_log_file=_Access_Log_File.value,
         )
 
         # Run target function to test

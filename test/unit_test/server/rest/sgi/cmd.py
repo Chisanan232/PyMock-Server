@@ -22,6 +22,8 @@ from test._values import (
     _Log_Level,
     _Test_Config,
     _Workers_Amount,
+    _Daemon,
+    _Access_Log_File,
 )
 
 # isort: on
@@ -38,9 +40,15 @@ mock_parser_arg_obj = SubcmdRunArguments(
     bind=_Bind_Host_And_Port.value,
     workers=_Workers_Amount.value,
     log_level=_Log_Level.value,
+    daemon=_Daemon.value,
+    access_log_file=_Access_Log_File.value,
 )
 mock_cmd_option_obj = CommandOptions(
-    bind=_Bind_Host_And_Port.value, workers=_Workers_Amount.value, log_level=_Log_Level.value
+    bind=_Bind_Host_And_Port.value,
+    workers=_Workers_Amount.value,
+    log_level=_Log_Level.value,
+    daemon=_Daemon.value,
+    access_log_file=_Access_Log_File.value,
 )
 mock_cmd_obj = Command(entry_point="SGI tool command", app=app_path, options=mock_cmd_option_obj)
 
@@ -80,6 +88,8 @@ class BaseSGIServerTestSpec(metaclass=ABCMeta):
             bind=sgi_cmd.options.bind(address=mock_parser_arg_obj.bind),
             workers=sgi_cmd.options.workers(w=mock_parser_arg_obj.workers),
             log_level=sgi_cmd.options.log_level(level=mock_parser_arg_obj.log_level),
+            daemon=mock_parser_arg_obj.daemon,
+            access_log_file=mock_parser_arg_obj.access_log_file,
         )
         assert isinstance(command, Command)
 
