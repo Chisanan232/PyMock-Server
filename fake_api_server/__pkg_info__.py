@@ -14,7 +14,7 @@
 __title__ = "PyFake-API-Server"
 __description__ = "🕸🤖👺 A Python tool to fake server, e.g., RESTful API server, easily and humanly without any coding."
 __url__ = "https://chisanan232.github.io/PyFake-API-Server/stable/"
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __author__ = "Liu, Bryant"
 __author_email__ = "chi10211201@cycu.org.tw"
 __license__ = "MIT"
