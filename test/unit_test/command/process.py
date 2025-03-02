@@ -28,6 +28,8 @@ from test._values import (
     _Log_Level,
     _Test_Config,
     _Workers_Amount,
+    _Daemon,
+    _Access_Log_File,
 )
 from test.unit_test.command._base.process import BaseCommandProcessorTestSpec
 
@@ -48,7 +50,13 @@ _Fake_Amt: int = 1
 
 
 def _given_command_option() -> CommandOptions:
-    return CommandOptions(bind=_Bind_Host_And_Port.value, workers=_Workers_Amount.value, log_level=_Log_Level.value)
+    return CommandOptions(
+        bind=_Bind_Host_And_Port.value,
+        workers=_Workers_Amount.value,
+        log_level=_Log_Level.value,
+        daemon=_Daemon.value,
+        access_log_file=_Access_Log_File.value,
+    )
 
 
 def _given_command(app_type: str) -> Command:
@@ -59,6 +67,8 @@ def _given_command(app_type: str) -> Command:
         bind=_Bind_Host_And_Port.value,
         workers=_Workers_Amount.value,
         log_level=_Log_Level.value,
+        daemon=_Daemon.value,
+        access_log_file=_Access_Log_File.value,
     )
     fake_cmd_option_obj = _given_command_option()
     return Command(entry_point="SGI tool command", app=fake_parser_arg.app_type, options=fake_cmd_option_obj)

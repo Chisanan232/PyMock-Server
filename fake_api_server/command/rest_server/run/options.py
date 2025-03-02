@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fake_api_server.command._base.options import MetaCommandOption
 from fake_api_server.command.rest_server.option import BaseSubCommandRestServer
@@ -61,3 +61,19 @@ class LegLevel(BaseSubCmdRunOption):
     help_description: str = "The log level."
     default_value: str = "info"
     _options: List[str] = ["critical", "error", "warning", "info", "debug", "trace"]
+
+
+class DaemonizeProcess(BaseSubCmdRunOption):
+    cli_option: str = "-D, --daemon"
+    name: str = "daemon"
+    help_description: str = "Daemonize the process runs API server instance."
+    action: str = "store_true"
+    default_value: bool = False
+    option_value_type: Optional[type] = None
+
+
+class AccessLogFile(BaseSubCmdRunOption):
+    cli_option: str = "--access-log-file"
+    name: str = "access_log_file"
+    help_description: str = "The file which program would use to write the access log to for record."
+    default_value: str = "fake-api-server.log"
