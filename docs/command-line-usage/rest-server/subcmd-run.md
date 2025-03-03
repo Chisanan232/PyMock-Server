@@ -67,3 +67,18 @@ It receives a value about the amount of workers and its default value is ``1``.
 Set the log level of web server what info it should export.
 
 It receives a value about the log level and its default value is ``info``.
+
+
+## ``--daemon`` or ``-D``
+
+Daemonize the fake server process to run it in background.
+
+It doesn't accept any value and default is ``False``. It's ``True`` if set this option.
+
+
+## ``--access-log-file`` <log file path\>
+
+Set the file path which program will write the fake server access log to. This option would be truly activated when the
+option ``--daemon`` also be used.
+
+It receives a value about the log file path which program will write the log messages to. Its default value is ``fake-api-server.log``.
