@@ -9,6 +9,7 @@ on:
 #     Documentation
 #     Doc - CI workflow
       - ".github/workflows/documentation.yaml"
+      - ".github/workflows/rw_pages-build-deployment.yaml"
       - "scripts/ci/**documentation**.sh"
 #     Doc - Content
       - "docs/**"
