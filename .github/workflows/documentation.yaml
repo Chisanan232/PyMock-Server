@@ -63,6 +63,8 @@ jobs:
           poetry run mike --version
           bash ./scripts/ci/deploy-latest-version-documentation.sh
 
+      - name: GitHub Pages build and deploy
+        uses: ./.github/workflows/rw_pages-build-deployment.yaml
 
   check_version-state:
 #    name: Check the version update state
@@ -126,3 +128,6 @@ jobs:
 #        run: |
 #          poetry run mkdocs gh-deploy --clean --force --ignore-version
 #          poetry run mkdocs --version
+
+      - name: GitHub Pages build and deploy
+        uses: ./.github/workflows/rw_pages-build-deployment.yaml
