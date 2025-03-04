@@ -1,64 +1,64 @@
-#name: pages-build-deployment
-#
-#on:
-#  workflow_call:
-#
-#permissions:
-#  contents: write
-#  id-token: write
-#  pages: write
-#
-#jobs:
-#  build:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v4
-#        with:
-#          ref: gh-pages
-#          submodules: recursive
-#          ssh-strict: true
-#          ssh-user: git
-#          persist-credentials: true
-#          clean: true
-#          sparse-checkout-cone-mode: true
-#          fetch-depth: 0
-#          fetch-tags: false
-#          show-progress: true
-#          lfs: false
-#          set-safe-directory: true
-#
-#      - name: Upload artifact
-#        uses: actions/upload-pages-artifact@v3
-#        with:
-#          path: .
-#          name: github-pages
-#          retention-days: 1
-#
-#  report-build-status:
-#    name: Report build status.
-#    needs: build
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Build Docker image with tag
-#        run: |
-#          gh api -X POST "repos/$GITHUB_REPOSITORY/pages/telemetry" \
-#          -F github_run_id="$GITHUB_RUN_ID" \
-#          -F conclusion="$CONCLUSION"
-#        env:
-#          GH_TOKEN: ${{ github.token }}
-#          CONCLUSION: success
-#
-#  deploy:
-#    name: Deploy to GitHub Pages.
-#    needs: build
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/deploy-pages@v4
-#        with:
-#          timeout: 600000
-#          error_count: 10
-#          reporting_interval: 5000
-#          artifact_name: github-pages
-#          preview: false
+name: pages-build-deployment
+
+on:
+  workflow_call:
+
+permissions:
+  contents: write
+  id-token: write
+  pages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          submodules: recursive
+          ssh-strict: true
+          ssh-user: git
+          persist-credentials: true
+          clean: true
+          sparse-checkout-cone-mode: true
+          fetch-depth: 0
+          fetch-tags: false
+          show-progress: true
+          lfs: false
+          set-safe-directory: true
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+          name: github-pages
+          retention-days: 1
+
+  report-build-status:
+    name: Report build status.
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Docker image with tag
+        run: |
+          gh api -X POST "repos/$GITHUB_REPOSITORY/pages/telemetry" \
+          -F github_run_id="$GITHUB_RUN_ID" \
+          -F conclusion="$CONCLUSION"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CONCLUSION: success
+
+  deploy:
+    name: Deploy to GitHub Pages.
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 600000
+          error_count: 10
+          reporting_interval: 5000
+          artifact_name: github-pages
+          preview: false
