@@ -29,6 +29,8 @@ env:
 
 permissions:
   contents: write
+  id-token: write
+  pages: write
 
 jobs:
   deploy_latest_documentation:
@@ -36,6 +38,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Python 3.12
         uses: actions/setup-python@v5
@@ -63,7 +67,6 @@ jobs:
           poetry run mike --version
           bash ./scripts/ci/deploy-latest-version-documentation.sh
 
-
   check_version-state:
 #    name: Check the version update state
     uses: ./.github/workflows/rw_checking_deployment_state.yaml
@@ -88,6 +91,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Python 3.12
         uses: actions/setup-python@v5

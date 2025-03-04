@@ -83,7 +83,17 @@ plugins:
       javascript_dir: js
   # Documentation modification info - create & update time
   - git-revision-date-localized:
+      type: timeago
+#      custom_format: "%d. %B %Y"
+      timezone: Asia/Taipei
+#      locale: en
+      fallback_to_build_date: false
       enable_creation_date: true
+#      exclude:
+#          - index.md
+      enable_git_follow: true
+      enabled: true
+      strict: true
   # Documentation modification info - contributor
   - git-committers:
       repository: Chisanan232/PyFake-API-Server
