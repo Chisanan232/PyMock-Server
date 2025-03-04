@@ -5,10 +5,9 @@
    2. ``--access-log-file``: redirect the fake server access log to the specific file.
 
 
-[//]: # (### 🪲 Bug Fix)
+### 🪲 Bug Fix
 
-[//]: # ()
-[//]: # (1. content ...)
+1. Fix the issue about it cannot get the correct versioning info in documentation.
 
 
 [//]: # (### ♻️ Refactor)
@@ -28,17 +27,18 @@
 1. Update the content for new command line options.
 
 
-[//]: # (### 🤖 Upgrade dependencies)
+### 🤖 Upgrade dependencies
 
-[//]: # ()
 [//]: # (1. Upgrade the Python dependencies.)
 
-[//]: # (2. Upgrade pre-commit dependencies.)
+1. Upgrade pre-commit dependencies.
 
 [//]: # (3. Upgrade the CI reusable workflows.)
 
+[//]: # ()
 [//]: # (   1. Upgrade SonarQube and update its configuration)
 
+[//]: # ()
 [//]: # (   2. Update the usage because upgrading the artifact actions)
 
 [//]: # (### 🚮Deprecate)

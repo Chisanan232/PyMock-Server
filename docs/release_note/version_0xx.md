@@ -9,9 +9,19 @@
    2. ``--access-log-file``: redirect the fake server access log to the specific file.
 
 
+### 🪲 Bug Fix
+
+1. Fix the issue about it cannot get the correct versioning info in documentation.
+
+
 ### 📑 Docs
 
 1. Update the content for new command line options.
+
+
+### 🤖 Upgrade dependencies
+
+1. Upgrade pre-commit dependencies.
 
 
 ## 0.4.0 (0.3.0)
