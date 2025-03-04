@@ -82,3 +82,5 @@ Set the file path which program will write the fake server access log to. This o
 option ``--daemon`` also be used.
 
 It receives a value about the log file path which program will write the log messages to. Its default value is ``fake-api-server.log``.
+
+this is testing message.
