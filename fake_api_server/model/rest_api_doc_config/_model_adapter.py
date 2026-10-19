@@ -62,28 +62,28 @@ class FormatAdapter(BaseFormatModelAdapter):
                 _digit = Digit(integer=100, decimal=50)
             elif formatter is ValueFormat.Date:
                 _strategy = FormatStrategy.CUSTOMIZE
-                (_customize, _variables) = _configure_customize("date_value", ValueFormat.Date)
+                _customize, _variables = _configure_customize("date_value", ValueFormat.Date)
             elif formatter is ValueFormat.DateTime:
                 _strategy = FormatStrategy.CUSTOMIZE
-                (_customize, _variables) = _configure_customize("datetime_value", ValueFormat.DateTime)
+                _customize, _variables = _configure_customize("datetime_value", ValueFormat.DateTime)
             elif formatter is ValueFormat.EMail:
                 _strategy = FormatStrategy.CUSTOMIZE
-                (_customize, _variables) = _configure_customize("email_value", ValueFormat.EMail)
+                _customize, _variables = _configure_customize("email_value", ValueFormat.EMail)
             elif formatter is ValueFormat.UUID:
                 _strategy = FormatStrategy.CUSTOMIZE
-                (_customize, _variables) = _configure_customize("uuid_value", ValueFormat.UUID)
+                _customize, _variables = _configure_customize("uuid_value", ValueFormat.UUID)
             elif formatter is ValueFormat.URI:
                 _strategy = FormatStrategy.CUSTOMIZE
-                (_customize, _variables) = _configure_customize("uri_value", ValueFormat.URI)
+                _customize, _variables = _configure_customize("uri_value", ValueFormat.URI)
             elif formatter is ValueFormat.URL:
                 _strategy = FormatStrategy.CUSTOMIZE
-                (_customize, _variables) = _configure_customize("url_value", ValueFormat.URL)
+                _customize, _variables = _configure_customize("url_value", ValueFormat.URL)
             elif formatter is ValueFormat.IPv4:
                 _strategy = FormatStrategy.CUSTOMIZE
-                (_customize, _variables) = _configure_customize("ipv4_value", ValueFormat.IPv4)
+                _customize, _variables = _configure_customize("ipv4_value", ValueFormat.IPv4)
             elif formatter is ValueFormat.IPv6:
                 _strategy = FormatStrategy.CUSTOMIZE
-                (_customize, _variables) = _configure_customize("ipv6_value", ValueFormat.IPv6)
+                _customize, _variables = _configure_customize("ipv6_value", ValueFormat.IPv6)
             else:
                 raise NotImplementedError
 
